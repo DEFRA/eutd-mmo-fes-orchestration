@@ -1,0 +1,29 @@
+{
+    "speciesFaoCode": "AGN",
+    "preservationStates": [
+        {
+            "preservationStateCode": "FRE",
+            "presentationCodes": [
+                "BMS",
+                "FIL",
+                "FIS",
+                "GUT",
+                "LVR",
+                "ROE",
+                "TNG",
+                "WHL"
+            ]
+        },
+        {
+            "preservationStateCode": "FRO",
+            "presentationCodes": [
+                "BMS",
+                "FIL",
+                "FIS",
+                "GUT",
+                "ROE",
+                "WHL"
+            ]
+        }
+    ]
+}

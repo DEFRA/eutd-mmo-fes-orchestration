@@ -1,0 +1,5 @@
+node_modules
+dist
+coverage
+mock_data
+test

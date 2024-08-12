@@ -1,0 +1,110 @@
+import { CatchCertificate, CatchCertModel, DocumentStatuses } from '../persistence/schema/catchCert';
+import { ProcessingStatement, ProcessingStatementModel } from '../persistence/schema/processingStatement';
+import { StorageDocument, StorageDocumentModel } from '../persistence/schema/storageDoc';
+import { getDraftCache } from '../persistence/services/catchCert';
+import DocumentNumberService from '../services/documentNumber.service';
+import ServiceNames from './interfaces/service.name.enum';
+
+import logger from '../logger';
+
+export const validateDocumentOwnership = async (userId: string, documentId: string, statuses: DocumentStatuses[], contactId: string): Promise<CatchCertificate | ProcessingStatement | StorageDocument> => {
+
+  if (!userId && !contactId) {
+    return undefined;
+  }
+
+  if (!documentId) {
+    return undefined;
+  }
+
+  const documentNumber = documentId.toUpperCase();
+
+  let document: CatchCertificate | ProcessingStatement | StorageDocument = await ownerConfirmedInCache(documentNumber, userId, statuses, contactId);
+
+  if (document) logger.debug(`[VALIDATE-DOCUMENT-OWNERSHIP][OWNER-CONFIRMED-IN-CACHE][${documentNumber}]`);
+
+  if (!document) {
+    document = await getOwnerFromMongo(documentNumber, statuses, userId, contactId);
+
+    logger.debug(`[VALIDATE-DOCUMENT-OWNERSHIP][OWNER-CONFIRMED-FROM-MONGO][${documentNumber}]`);
+  }
+
+  return document;
+};
+
+export const ownerConfirmedInCache = async (documentNumber: string, userPrincipal: string, statuses: DocumentStatuses[], contactId: string): Promise<CatchCertificate> => {
+  const service = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
+
+  if (service !== ServiceNames.CC) {
+    return undefined;
+  }
+
+  const draft = (statuses.includes(DocumentStatuses.Draft))
+    ? await getDraftCache(userPrincipal, contactId, documentNumber) as CatchCertificate
+    : undefined;
+
+  return draft === null ? undefined : draft;
+}
+
+export const getOwnerFromMongo = async (documentNumber: string, statuses: DocumentStatuses[], userPrincipal: string, contactId: string): Promise<CatchCertificate | ProcessingStatement | StorageDocument> => {
+  const service = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
+
+  let model;
+  let document: CatchCertificate | ProcessingStatement | StorageDocument;
+
+  switch (service) {
+    case ServiceNames.CC: model = CatchCertModel; break;
+    case ServiceNames.PS: model = ProcessingStatementModel; break;
+    case ServiceNames.SD: model = StorageDocumentModel; break;
+  }
+
+  if (model) {
+    const query = {
+      documentNumber: documentNumber,
+      status: {$in: statuses}
+    };
+
+    logger.debug(`[GET-OWNER-FROM-MONGO][DOCUMENT][${documentNumber}][QUERY][${JSON.stringify(query)}]`);
+
+    document = await model.findOne(query);
+
+    if (!document) {
+      return null;
+    }
+
+    logger.debug(`[VALIDATE-DOCUMENT-OWNERSHIP][DOCUMENT][${JSON.stringify(document)}]`);
+  }
+
+  return validateDocumentOwner(document, userPrincipal, contactId) ? document : undefined;
+}
+
+export const validateDocumentOwner = (
+  document: CatchCertificate | ProcessingStatement | StorageDocument,
+  userPrincipal: string,
+  contactId: string
+): boolean => {
+  if(!document) {
+    return false;
+  }
+
+  if (userPrincipal && contactId) {
+    return (
+      document.createdBy === userPrincipal ||
+      document.contactId === contactId ||
+      document.exportData?.exporterDetails?.contactId === contactId
+    );
+  }
+
+  if (!userPrincipal && contactId) {
+    return (
+      document.contactId === contactId ||
+      document.exportData?.exporterDetails?.contactId === contactId
+    );
+  }
+
+  if (userPrincipal && !contactId) {
+    return document.createdBy === userPrincipal;
+  }
+
+  return false;
+};

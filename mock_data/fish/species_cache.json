@@ -1,0 +1,88 @@
+{
+  "46f552fa-cbc9-43eb-a10b-f2396cf2e355": [
+    {
+      "faoCode": "ALB",
+      "faoName": "Albacore",
+      "matchedField": "faoName",
+      "matchedValue": "Albacore"
+    },
+    {
+      "faoCode": "BBS",
+      "faoName": "Black scorpionfish",
+      "matchedField": "faoName",
+      "matchedValue": "Black scorpionfish"
+    },
+    {
+      "faoCode": "COL",
+      "faoName": "Sardinia coral",
+      "matchedField": "faoName",
+      "matchedValue": "Sardinia coral"
+    },
+    {
+      "faoCode": "LFO",
+      "faoName": "Brain root coral",
+      "matchedField": "faoName",
+      "matchedValue": "Brain root coral"
+    },
+    {
+      "faoCode": "RSE",
+      "faoName": "Red scorpionfish",
+      "matchedField": "faoName",
+      "matchedValue": "Red scorpionfish"
+    },
+    {
+      "faoCode": "BER",
+      "faoName": "",
+      "matchedField": "commonName",
+      "matchedValue": "Scorpionfish"
+    },
+    {
+      "faoCode": "CMM",
+      "faoName": "Manila clam",
+      "matchedField": "scientificName",
+      "matchedValue": "Corbicula manilensis"
+    },
+    {
+      "faoCode": "DOL",
+      "faoName": "Common dolphinfish",
+      "matchedField": "scientificName",
+      "matchedValue": "Coryphaena hippurus"
+    },
+    {
+      "faoCode": "LIO",
+      "faoName": "Velvet swimcrab",
+      "matchedField": "scientificName",
+      "matchedValue": "Necora puber"
+    },
+    {
+      "faoCode": "RJF",
+      "faoName": "Shagreen Ray",
+      "matchedField": "scientificName",
+      "matchedValue": "Leucoraja fullonica (previously Raja)"
+    },
+    {
+      "faoCode": "RJI",
+      "faoName": "Sandy Ray",
+      "matchedField": "scientificName",
+      "matchedValue": "Leucoraja circularis (previously Raja)"
+    },
+    {
+      "faoCode": "RJN",
+      "faoName": "Cuckoo Ray",
+      "matchedField": "scientificName",
+      "matchedValue": "Leucoraja naevus (previously Raja)"
+    },
+    {
+      "faoCode": "RNG",
+      "faoName": "Roundnose grenadier",
+      "matchedField": "scientificName",
+      "matchedValue": "Coryphaenoides rupestris"
+    },
+    {
+      "faoCode": "TJX",
+      "faoName": "Atlantic thornyhead",
+      "matchedField": "scientificName",
+      "matchedValue": "Trachyscorpia cristulata"
+    }
+  ]
+}
