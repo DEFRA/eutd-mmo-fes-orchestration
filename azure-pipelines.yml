@@ -15,14 +15,14 @@ resources:
   repositories:
     - repository: CentralAdoPipelineTemplates
       # endpoint: defradev
-      name: DEFRA-EUX-MMO/mmo-central-ado-pipeline-templates
+      name: DEFRA-MMO-FES/mmo-fes-central-ado-pipeline-templates
       type: git
       ref: main
 
 stages:
 - stage: BuildAppAndCodeCoverage
   pool:
-    vmImage: 'ubuntu-latest'
+    name: DEFRA-COMMON-ubuntu2204-SSV3
   jobs:
   - job: TestCodeCoverage
     steps:
@@ -104,7 +104,7 @@ stages:
     dependsOn: BuildAndArtifactAppImage
     condition: and(succeeded(), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
     pool:
-      name: DEFRA-EUX-MMO
+      name: DEFRA-COMMON-ubuntu2204-SSV3
     steps:
     - task: DownloadPipelineArtifact@2
       displayName: Download Docker image
@@ -120,17 +120,17 @@ stages:
         script: |
           docker load --input $(Pipeline.Workspace)/docker-image.tar
 
-    - task: Docker@2
-      displayName: 'Push an image to SND MMO ACR'
-      inputs:
-        containerRegistry: SNDMMOFESACR002_ADOSERVICECONNECTION
-        repository: 'mmo-cc-orchestration-svc'
-        command: push
-        tags: |
-          $(Build.SourceVersion)
-        addPipelineData: false
+    # - task: Docker@2
+    #   displayName: 'Push an image to SND MMO ACR'
+    #   inputs:
+    #     containerRegistry: SNDMMOFESACR002_ADOSERVICECONNECTION
+    #     repository: 'mmo-cc-orchestration-svc'
+    #     command: push
+    #     tags: |
+    #       $(Build.SourceVersion)
+    #     addPipelineData: false
 
-# Central mmo-central-ado-pipeline-templates reference
+# Central mmo-fes-central-ado-pipeline-templates reference
 - template: /includes/sonar-integration-template.yml@CentralAdoPipelineTemplates 
 
 - stage: DeployWebApp
@@ -144,6 +144,6 @@ stages:
     - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy'
       inputs:
-        azureSubscription: AZR-SND-MMO
+        azureSubscription: AZR-MMO-SND1 #service connection name
         appName: mmo-orchestration-service-snd
         imageName: sndmmofesacr002.azurecr.io/mmo-cc-orchestration-svc:$(Build.SourceVersion)

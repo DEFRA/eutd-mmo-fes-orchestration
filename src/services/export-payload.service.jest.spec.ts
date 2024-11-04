@@ -1766,6 +1766,8 @@ describe('createExportCerticate', () => {
   let mockIsOfflineValidation;
   let mockRefreshParallel;
   let mockRefreshSerial;
+  let mockRefresh;
+  let mockGetLandingsRefreshData;
   let mockUpdateCertificateStatus;
   let mockSaveErrors;
   let mockSaveSystemErrors;
@@ -1781,8 +1783,8 @@ describe('createExportCerticate', () => {
     const mockGetConvservation = jest.spyOn(CatchCertService, 'getConservation');
     const mockCompleteDraft = jest.spyOn(CatchCertService, 'completeDraft');
 
-    const mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
-    const mockRefresh = jest.spyOn(VesselLandingsRefresher, 'refresh');
+    mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
+    mockRefresh = jest.spyOn(VesselLandingsRefresher, 'refresh');
 
     mockIsOfflineValidation = jest.spyOn(applicationConfig, 'isOfflineValidation');
     mockRefreshParallel = jest.spyOn(ExportPayloadService, 'performParallelRefresh');
@@ -2633,6 +2635,10 @@ describe('getLandingsToRefresh', () => {
 
   afterEach(() => {
     mockGetLandingsRefreshData.mockReset();
+  })
+
+  afterAll(() => {
+    mockGetLandingsRefreshData.mockRestore();
   })
 
   it('will return an empty array if there are no products landed', () => {

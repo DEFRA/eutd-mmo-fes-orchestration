@@ -29,7 +29,6 @@ jest.mock('ioredis', () => {
 describe("redis", () => {
 
   const mockRedis = new Redis(getRedisOptions())
-
   const mockGet = jest.spyOn(mockRedis, 'get')
   const mockSet = jest.spyOn(mockRedis, 'set')
   const mockDel = jest.spyOn(mockRedis, 'del')
@@ -39,9 +38,9 @@ describe("redis", () => {
   const CONTACT_ID = 'contactBob';
 
   beforeEach(() => {
-    
     storage = new RedisStorage(mockRedis);
     mockDel.mockResolvedValue(0)
+    mockGet.mockResolvedValue(JSON.stringify({test: 'test'}))
   });
 
   afterEach(() => {
