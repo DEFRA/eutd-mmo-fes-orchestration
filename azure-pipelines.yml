@@ -22,7 +22,7 @@ resources:
 stages:
 - stage: BuildAppAndCodeCoverage
   pool:
-    name: DEFRA-COMMON-ubuntu2204-SSV5
+    vmImage: 'ubuntu-latest'
   jobs:
   - job: TestCodeCoverage
     steps:
