@@ -12,7 +12,13 @@ ENV NODE_ENV production
 # This installs the exact versions of the packages
 #   listed in package-lock.json, and does not update either the package-lock.json
 #   or the package.json file.
-COPY --chown=node:node .npmrc package*.json ./
+USER root
+RUN mkdir /app && chown node:node /app
+USER node
+
+COPY --chown=node:node .npmrc package*.json /app/
+WORKDIR /app
+
 RUN npm ci --legacy-peer-deps
 
 # Using the development image (which has NODE_ENV=development) we will install
@@ -29,7 +35,12 @@ RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.9/community' >> /etc/apk/repos
 RUN apk add --no-cache mongodb yaml-cpp=0.6.2-r2
 USER node
 ENV MONGOMS_SYSTEM_BINARY=/usr/bin/mongod
-COPY --chown=node:node . .
+USER root
+RUN mkdir /app && chown node:node /app
+USER node
+
+COPY --chown=node:node . /app
+WORKDIR /app
 RUN npm ci --legacy-peer-deps
 CMD ["npm", "run", "test:ci"]
 
@@ -42,14 +53,14 @@ FROM defradigital/node:$DEFRA_BASE_IMAGE_TAG as production
 
 # Copy in the files that we built using the tools in the development stage. The final production stage will have the built files,
 #   but none of the tools required to build those files. This reduces the attack surface, and also the size of the final production image
-COPY --from=base --chown=node:node /home/node/node_modules/ node_modules/
-COPY --from=development --chown=node:node /home/node/dist/ dist/
-COPY --chown=node:node mock_data/ mock_data/
+COPY --from=base --chown=node:node /app/node_modules/ /app/node_modules/
+COPY --from=development --chown=node:node /app/dist/ /app/dist/
+COPY --chown=node:node mock_data/ /app/mock_data/
 RUN echo $GIT_HASH > githash
 
 # Again, be explict about the permissions we want for this stage
 USER node
-WORKDIR /home/node
+WORKDIR /app
 
 # Set the port that is going to be exposed later on in the Dockerfile as well.
 ARG PORT=5500
