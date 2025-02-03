@@ -120,31 +120,7 @@ export default class FishService {
     }
 
     if (speciesToUpdate) {
-      if (
-        payloadCopy.state &&
-        payloadCopy.presentation &&
-        payloadCopy.user_id
-      ) {
-        if (!mustHaveKeys(speciesToUpdate, ["species", "user_id", "id"])) {
-          throw new Error(
-            "The species is in an inconsistent state for the second call"
-          );
-        }
-        speciesToUpdate.state = payload.state;
-        speciesToUpdate.stateLabel = payload.stateLabel;
-        speciesToUpdate.presentation = payload.presentation;
-        speciesToUpdate.presentationLabel = payload.presentationLabel;
-      } else if (payload.species && payload.user_id) {
-        speciesToUpdate.species = payload.species;
-        speciesToUpdate.speciesCode = payload.speciesCode;
-        speciesToUpdate.scientificName = payload.scientificName;
-      } else if (payload.commodity_code && payload.user_id) {
-        speciesToUpdate.commodity_code = payload.commodity_code;
-        speciesToUpdate.commodity_code_description =
-          payload.commodity_code_description;
-      } else {
-        throw new Error("I am not sure what is going on!");
-      }
+      FishService.addSpeciesToUpdateData(payloadCopy, speciesToUpdate, payload);
 
       await CatchCertService.upsertSpecies(userPrincipal, data, documentNumber, contactId);
 
@@ -155,6 +131,38 @@ export default class FishService {
       await CatchCertService.upsertSpecies(userPrincipal, data, documentNumber, contactId);
 
       return payloadCopy;
+    }
+  }
+
+  static readonly addSpeciesToUpdateData = (
+    payloadCopy: FrontEndSpecies.Product,
+    speciesToUpdate: FrontEndSpecies.Product,
+    payload: FrontEndSpecies.Product
+  ) => {
+    if (
+      payloadCopy.state &&
+      payloadCopy.presentation &&
+      payloadCopy.user_id
+    ) {
+      if (!mustHaveKeys(speciesToUpdate, ["species", "user_id", "id"])) {
+        throw new Error(
+          "The species is in an inconsistent state for the second call"
+        );
+      }
+      speciesToUpdate.state = payload.state;
+      speciesToUpdate.stateLabel = payload.stateLabel;
+      speciesToUpdate.presentation = payload.presentation;
+      speciesToUpdate.presentationLabel = payload.presentationLabel;
+    } else if (payload.species && payload.user_id) {
+      speciesToUpdate.species = payload.species;
+      speciesToUpdate.speciesCode = payload.speciesCode;
+      speciesToUpdate.scientificName = payload.scientificName;
+    } else if (payload.commodity_code && payload.user_id) {
+      speciesToUpdate.commodity_code = payload.commodity_code;
+      speciesToUpdate.commodity_code_description =
+        payload.commodity_code_description;
+    } else {
+      throw new Error("I am not sure what is going on!");
     }
   }
 

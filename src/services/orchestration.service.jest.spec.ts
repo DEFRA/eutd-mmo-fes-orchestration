@@ -19,8 +19,7 @@ import { ExporterDetails } from '../persistence/schema/common';
 import { toFrontEndStorageDocumentExportData } from '../persistence/schema/storageDoc';
 import * as moment from 'moment';
 import { MAX_COMMODITY_CODE_LENGTH, MIN_COMMODITY_CODE_LENGTH } from '../../src/services/constants';
-
-const pdfService = require("mmo-ecc-pdf-svc");
+import * as pdfService from 'mmo-ecc-pdf-svc';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -1643,5 +1642,116 @@ describe('getFromMongo', () => {
     expect(mockAddTotalWeightLandedProcessingStatement).toHaveBeenCalledWith('GBR-34424-234234-234234', 'Bob', 'contactBob', sessionSampleExportDataWithCatches.exportData.catches);
     expect(result).toStrictEqual(toFrontEndProcessingStatementExportData(sessionSampleExportDataWithCatches.exportData as any));
   })
+});
+
+describe('get verifiy remaining methods', () => {
+  it('should call isPositiveWholeNumber', async () => {
+    const result = Service.isPositiveWholeNumber(10);
+    expect(result).toBeTruthy();
+  })
+
+  it('should call validateNumber', async () => {
+    const result = Service.validateNumber('abc');
+    expect(result).toBeFalsy();
+  })
+
+  it('should call validatePositiveNumber', async () => {
+    const result = Service.validatePositiveNumber('eat');
+    expect(result).toBeFalsy();
+  })
+
+  it('should call checkValidationErrors', async () => {
+    const result = Service.checkValidationErrors([{
+      message: 'psAddCatchDetailsErrorUKCCInValid',
+      key: `catches-ctch-catchCertificateNumber`
+    }]);
+    expect(result).toBeTruthy();
+  })
+
+  it('should call getRedirectionData', async () => {
+    const result = Service.getRedirectionData({headers:{accept: 'text/html'}}, 'case1', 'case2');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call numberAsString', async () => {
+    const result = Service.numberAsString(1);
+    expect(result).toStrictEqual('1');
+  })
+
+  it('should call validateCCNumberFormat', async () => {
+    const result = Service.validateCCNumberFormat('number');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call validateUKCCNumberFormat', async () => {
+    const result = Service.validateUKCCNumberFormat('number');
+    expect(result).toBeFalsy();
+  })
+
+  it('should call validateUKDocumentNumberFormat', async () => {
+    const result = Service.validateUKDocumentNumberFormat('number');
+    expect(result).toBeFalsy();
+  })
+
+  it('should call validateNonUKCCNumberCharLimit', async () => {
+    const result = Service.validateNonUKCCNumberCharLimit('number');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call validatePersonResponsibleForConsignmentFormat', async () => {
+    const result = Service.validatePersonResponsibleForConsignmentFormat('number');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call isTransportUnloadedFromFormatValid', async () => {
+    const result = Service.isTransportUnloadedFromFormatValid('number');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call isPlaceProductEntersUkValid', async () => {
+    const result = Service.isPlaceProductEntersUkValid('number');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call validateProductDescriptions without consignmentDescription', async () => {
+    const result = Service.validateProductDescriptions([
+      {
+        description: 'desc',
+        commodityCode: 'commodityCode',
+      }
+    ], '');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call validateProductDescriptions with consignmentDescription', async () => {
+    const result = Service.validateProductDescriptions(undefined, '*desc');
+    expect(result).toBeTruthy();
+  })
+
+  it('should call validateExportHealthCertificateFormat', async () => {
+    const result = Service.validateExportHealthCertificateFormat(45353);
+    expect(result).toBeFalsy();
+  })
+
+  it('should call validateMaximumFutureDate', async () => {
+    const result = Service.validateMaximumFutureDate(new Date());
+    expect(result).toBeTruthy();
+  })
+
+  it('should call validateDate', async () => {
+    const result = Service.validateDate(new Date());
+    expect(result).toBeTruthy();
+  })
+
+  it('should call cleanDate', async () => {
+    const result = Service.cleanDate(new Date());
+    expect(result).toBeTruthy();
+  })
+
+  it('should call today', async () => {
+    const result = Service.today();
+    expect(result).toBeTruthy();
+  })
+
 });
 

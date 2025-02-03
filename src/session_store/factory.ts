@@ -1,13 +1,10 @@
-import { IStorage } from './storeable';
-import { IStoreable } from './storeable';
+import { IStorage, IStoreable } from './storeable';
 import { RedisStorage } from './redis';
 import { MemoryStorage } from './memory';
 import logger from '../logger';
 
 export class SessionStoreFactory {
   private static sessionStore: IStorage<IStoreable>;
-
-  private constructor() {}
 
   public static async getSessionStore(options: object)
     : Promise<IStorage<IStoreable>> {
@@ -20,7 +17,7 @@ export class SessionStoreFactory {
 
       } else {
         SessionStoreFactory.sessionStore = new RedisStorage();
-        await SessionStoreFactory.sessionStore.initialize(options);
+        SessionStoreFactory.sessionStore.initialize(options);
       }
     }
 

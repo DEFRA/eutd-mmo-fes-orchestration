@@ -3,13 +3,18 @@ name: $(BuildID).$(Date:yyyyMMdd).$(SourceBranchName)
 trigger:
   branches:
     include:
+      # in order as per GitFlow Branching strategy
       - 'main'
+      - 'hotfix/FI0-*'
+      - 'release/*'
       - 'develop'
       - 'feature/FI0-*'
-      - 'bugfix/FI0-*'
-      - 'hotfix/FI0-*'
 
-# variables:
+variables:
+  ${{ if startsWith(variables['Build.SourceBranch'],'refs/heads/release/') }}: #if on release branch, the image TAG will match the release name, ex: release/1.0.0
+    dockerImageTag: release.$(Build.SourceBranchName)
+  ${{else}}:
+    dockerImageTag: $(Build.SourceVersion)
 
 resources:
   repositories:
@@ -31,17 +36,18 @@ stages:
             inputs:
               workingFile: .npmrc
           - script: |
+              echo "$(dockerImageTag)"
               docker build . --target=test \
-                -t test:$(Build.BuildId) \
+                -t test:$(dockerImageTag) \
                 --build-arg NPM_TOKEN=$(System.AccessToken)
             displayName: 'Docker Test'
           - script: |
-              docker run test:$(Build.BuildId) npm run lint
+              docker run test:$(dockerImageTag) npm run lint
             displayName: 'Lint'
             condition: succeededOrFailed()
 
           - script: |
-              docker run test:$(Build.BuildId) npm audit --registry=https://registry.npmjs.org/ --audit-level=critical
+              docker run test:$(dockerImageTag) npm audit --registry=https://registry.npmjs.org/ --audit-level=critical
             displayName: 'NPM Audit'
             continueOnError: true
             condition: succeededOrFailed()
@@ -51,7 +57,7 @@ stages:
               mkdir test-results
               chmod a+rw coverage
               chmod a+rw test-results
-              docker run --user=root -v $(Build.StagingDirectory)/coverage:/home/node/coverage -v $(Build.StagingDirectory)/test-results:/home/node/test-results test:$(Build.BuildId) npm run test:ci
+              docker run --user=root -v $(Build.StagingDirectory)/coverage:/home/node/coverage -v $(Build.StagingDirectory)/test-results:/home/node/test-results test:$(dockerImageTag) npm run test:ci
             displayName: 'Test'
             workingDirectory: $(Build.StagingDirectory)
             condition: succeededOrFailed()
@@ -79,8 +85,9 @@ stages:
             inputs:
               workingFile: .npmrc
           - script: |
+              echo "$(dockerImageTag)"
               docker build . \
-                -t ssvmmoinfcr5401.azurecr.io/mmo-fes-orchestration:$(Build.SourceVersion) \
+                -t ssvmmoinfcr5401.azurecr.io/mmo-fes-orchestration:$(dockerImageTag) \
                 --build-arg GIT_HASH=$(Build.SourceVersion) \
                 --build-arg NPM_TOKEN=$(System.AccessToken)
             displayName: 'Docker build'
@@ -90,7 +97,7 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                docker save ssvmmoinfcr5401.azurecr.io/mmo-fes-orchestration:$(Build.SourceVersion) \
+                docker save ssvmmoinfcr5401.azurecr.io/mmo-fes-orchestration:$(dockerImageTag) \
                   -o $(Pipeline.Workspace)/docker-image.tar
           # Publish application docker image
           - task: PublishPipelineArtifact@1
@@ -102,7 +109,7 @@ stages:
 
       - job: TagAndPushAppImage
         dependsOn: BuildAndArtifactAppImage
-        condition: and(succeeded(), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
+        condition: and(succeeded(), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'],'refs/heads/release/'), eq(variables['Build.Reason'], 'PullRequest')))
         pool:
           name: DEFRA-COMMON-ubuntu2204-SSV5
         steps:
@@ -127,7 +134,7 @@ stages:
               repository: 'mmo-fes-orchestration'
               command: push
               tags: |
-                $(Build.SourceVersion)
+                $(dockerImageTag)
               addPipelineData: false
 
   # Central mmo-fes-central-ado-pipeline-templates reference
@@ -137,7 +144,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: SonarQube_Prepare_Analyze_Publish
-    condition: and(succeeded(), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
+    condition: and(succeeded(), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'],'refs/heads/release/'), eq(variables['Build.Reason'], 'PullRequest')))
     jobs:
       - job: DeployToSND
         steps:
@@ -146,4 +153,4 @@ stages:
             inputs:
               azureSubscription: AZR-MMO-SND1 #service connection name
               appName: SND-MMO-FES-ORCHESTRATION-WA
-              imageName: ssvmmoinfcr5401.azurecr.io/mmo-fes-orchestration:$(Build.SourceVersion)
+              imageName: ssvmmoinfcr5401.azurecr.io/mmo-fes-orchestration:$(dockerImageTag)

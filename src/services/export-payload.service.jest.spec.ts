@@ -18,8 +18,8 @@ import { IExportCertificateResults } from '../persistence/schema/exportCertifica
 import * as crypto from "crypto";
 import applicationConfig from '../applicationConfig';
 import * as LandingsConsolidateService from "./landings-consolidate.service";
+import * as pdfService from 'mmo-ecc-pdf-svc';
 
-const pdfService = require('mmo-ecc-pdf-svc')
 const sinon = require('sinon');
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -1149,6 +1149,21 @@ describe('upsertLanding', () => {
     expect(mockWriteAllFor).toHaveBeenCalledTimes(1);
   });
 
+  it('should save data to REDIS with values from session data', async function () {
+    const expected = { items: [{ "product": { "id": "someProdId" }, "landings": [{ "model": { "id": "test" } }] }], model: { id: "test" }, error: "test" };
+    mockSessionData.mockReturnValue({ landings: [
+      { "landingId": "test", addMode: false }
+    ] });
+    mockReadAllFor.mockResolvedValue(expected);
+    mockWriteAllFor.mockReturnValue(expected);
+    mockGetDraftData.mockReturnValue(expected);
+    mockUpsertDraftData.mockReturnValue(expected);
+
+    await ExportPayloadService.upsertLanding('someProdId', expected, 'Bob', 'GB-34324-34234-234234', CONTACT_ID);
+
+    expect(mockWriteAllFor).toHaveBeenCalledTimes(1);
+  });
+
   describe('POST ExportPayload to mongo with errors', () => {
     let mockCatchCertUpsertDraftData;
 
@@ -1766,8 +1781,6 @@ describe('createExportCerticate', () => {
   let mockIsOfflineValidation;
   let mockRefreshParallel;
   let mockRefreshSerial;
-  let mockRefresh;
-  let mockGetLandingsRefreshData;
   let mockUpdateCertificateStatus;
   let mockSaveErrors;
   let mockSaveSystemErrors;
@@ -1783,8 +1796,8 @@ describe('createExportCerticate', () => {
     const mockGetConvservation = jest.spyOn(CatchCertService, 'getConservation');
     const mockCompleteDraft = jest.spyOn(CatchCertService, 'completeDraft');
 
-    mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
-    mockRefresh = jest.spyOn(VesselLandingsRefresher, 'refresh');
+    const mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
+    const mockRefresh = jest.spyOn(VesselLandingsRefresher, 'refresh');
 
     mockIsOfflineValidation = jest.spyOn(applicationConfig, 'isOfflineValidation');
     mockRefreshParallel = jest.spyOn(ExportPayloadService, 'performParallelRefresh');
@@ -2625,90 +2638,6 @@ describe('getCertificateHash', () => {
   });
 });
 
-describe('getLandingsToRefresh', () => {
-
-  let mockGetLandingsRefreshData;
-
-  beforeAll(() => {
-    mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
-  });
-
-  afterEach(() => {
-    mockGetLandingsRefreshData.mockReset();
-  })
-
-  afterAll(() => {
-    mockGetLandingsRefreshData.mockRestore();
-  })
-
-  it('will return an empty array if there are no products landed', () => {
-    const result = ExportPayloadService.getLandingsToRefresh([]);
-
-    expect(result).toStrictEqual([]);
-  });
-
-  it('will call getLandingsRefreshData with the landings of every product', () => {
-    const products: PayloadSchema.ProductLanded[] = [
-      { product: { id: '', commodityCode: '', species: { code: 'COD', label: 'Atlantic cod (COD)'} }, landings: [{ model: { id: 'landing 1 '}}] },
-      { product: { id: '', commodityCode: '', species: { code: 'HER', label: 'Atlantic herring (HER)'} }, landings: [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}] }
-    ];
-
-    mockGetLandingsRefreshData.mockReturnValue([]);
-
-    ExportPayloadService.getLandingsToRefresh(products);
-
-    expect(mockGetLandingsRefreshData).toHaveBeenCalledTimes(2);
-    expect(mockGetLandingsRefreshData).toHaveBeenNthCalledWith(1, [{ model: { id: 'landing 1 '}}]);
-    expect(mockGetLandingsRefreshData).toHaveBeenNthCalledWith(2, [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}]);
-  });
-
-  it('will return all unique landings to refresh', () => {
-    const products: PayloadSchema.ProductLanded[] = [
-      { product: { id: '', commodityCode: '', species: { code: 'COD', label: 'Atlantic cod (COD)'} }, landings: [{ model: { id: 'landing 1 '}}] },
-      { product: { id: '', commodityCode: '', species: { code: 'HER', label: 'Atlantic herring (HER)'} }, landings: [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}] }
-    ];
-
-    mockGetLandingsRefreshData.mockReturnValueOnce([
-      { pln: 'wiron 5', dateLanded: '2020-01-01' }
-    ]);
-    mockGetLandingsRefreshData.mockReturnValueOnce([
-      { pln: 'wiron 5', dateLanded: '2020-01-01' },
-      { pln: 'wiron 5', dateLanded: '2020-01-02' }
-    ]);
-
-    const result = ExportPayloadService.getLandingsToRefresh(products);
-
-    expect(result).toStrictEqual([
-      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: false },
-      { pln: 'wiron 5', dateLanded: '2020-01-02', isLegallyDue: false }
-    ]);
-  });
-
-  it('will return all landings with correct legally due status', () => {
-    const products: PayloadSchema.ProductLanded[] = [
-      { product: { id: '', commodityCode: '', species: { code: 'COD', label: 'Atlantic cod (COD)'} }, landings: [{ model: { id: 'landing 1 '}}] },
-      { product: { id: '', commodityCode: '', species: { code: 'HER', label: 'Atlantic herring (HER)'} }, landings: [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}] }
-    ];
-
-    mockGetLandingsRefreshData.mockReturnValueOnce([
-      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: true }
-    ]);
-
-    mockGetLandingsRefreshData.mockReturnValueOnce([
-      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: false },
-      { pln: 'wiron 5', dateLanded: '2020-01-02' }
-    ]);
-
-    const result = ExportPayloadService.getLandingsToRefresh(products);
-
-    expect(result).toStrictEqual([
-      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: true },
-      { pln: 'wiron 5', dateLanded: '2020-01-02', isLegallyDue: false }
-    ]);
-  });
-
-});
-
 describe('performRefresh', () => {
   let mockRefreshData;
   let mockLoggerDebug;
@@ -3123,6 +3052,85 @@ describe('performRefresh', () => {
     expect(mockRefreshData).toHaveBeenCalled();
     expect(mockLoggerDebug).toHaveBeenNthCalledWith(1, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-20, IS-LEGALLY-DUE: true]');
     expect(mockLoggerDebug).toHaveBeenNthCalledWith(2, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
+  });
+});
+
+describe('getLandingsToRefresh', () => {
+
+  let mockGetLandingsRefreshData;
+
+  beforeAll(() => {
+    mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
+  });
+
+  afterEach(() => {
+    mockGetLandingsRefreshData.mockReset();
+  })
+
+  it('will return an empty array if there are no products landed', () => {
+    const result = ExportPayloadService.getLandingsToRefresh([]);
+
+    expect(result).toStrictEqual([]);
+  });
+
+  it('will call getLandingsRefreshData with the landings of every product', () => {
+    const products: PayloadSchema.ProductLanded[] = [
+      { product: { id: '', commodityCode: '', species: { code: 'COD', label: 'Atlantic cod (COD)'} }, landings: [{ model: { id: 'landing 1 '}}] },
+      { product: { id: '', commodityCode: '', species: { code: 'HER', label: 'Atlantic herring (HER)'} }, landings: [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}] }
+    ];
+
+    mockGetLandingsRefreshData.mockReturnValue([]);
+
+    ExportPayloadService.getLandingsToRefresh(products);
+
+    expect(mockGetLandingsRefreshData).toHaveBeenCalledTimes(2);
+    expect(mockGetLandingsRefreshData).toHaveBeenNthCalledWith(1, [{ model: { id: 'landing 1 '}}]);
+    expect(mockGetLandingsRefreshData).toHaveBeenNthCalledWith(2, [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}]);
+  });
+
+  it('will return all unique landings to refresh', () => {
+    const products: PayloadSchema.ProductLanded[] = [
+      { product: { id: '', commodityCode: '', species: { code: 'COD', label: 'Atlantic cod (COD)'} }, landings: [{ model: { id: 'landing 1 '}}] },
+      { product: { id: '', commodityCode: '', species: { code: 'HER', label: 'Atlantic herring (HER)'} }, landings: [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}] }
+    ];
+
+    mockGetLandingsRefreshData.mockReturnValueOnce([
+      { pln: 'wiron 5', dateLanded: '2020-01-01' }
+    ]);
+    mockGetLandingsRefreshData.mockReturnValueOnce([
+      { pln: 'wiron 5', dateLanded: '2020-01-01' },
+      { pln: 'wiron 5', dateLanded: '2020-01-02' }
+    ]);
+
+    const result = ExportPayloadService.getLandingsToRefresh(products);
+
+    expect(result).toStrictEqual([
+      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: false },
+      { pln: 'wiron 5', dateLanded: '2020-01-02', isLegallyDue: false }
+    ]);
+  });
+
+  it('will return all landings with correct legally due status', () => {
+    const products: PayloadSchema.ProductLanded[] = [
+      { product: { id: '', commodityCode: '', species: { code: 'COD', label: 'Atlantic cod (COD)'} }, landings: [{ model: { id: 'landing 1 '}}] },
+      { product: { id: '', commodityCode: '', species: { code: 'HER', label: 'Atlantic herring (HER)'} }, landings: [{ model: { id: 'landing 1 '}}, { model: { id: 'landing 2 '}}] }
+    ];
+
+    mockGetLandingsRefreshData.mockReturnValueOnce([
+      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: true }
+    ]);
+
+    mockGetLandingsRefreshData.mockReturnValueOnce([
+      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: false },
+      { pln: 'wiron 5', dateLanded: '2020-01-02' }
+    ]);
+
+    const result = ExportPayloadService.getLandingsToRefresh(products);
+
+    expect(result).toStrictEqual([
+      { pln: 'wiron 5', dateLanded: '2020-01-01', isLegallyDue: true },
+      { pln: 'wiron 5', dateLanded: '2020-01-02', isLegallyDue: false }
+    ]);
   });
 
 });

@@ -94,7 +94,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   async initialize(options?: object): Promise<void> {
     this.connectionOptions = <RedisOptions>options;
     logger.info('Attempt to initialize redis cache connection to', this.connectionOptions.host);
-    await this.startConnection();
+    this.startConnection();
     logger.info('Redis cache connection initialized');
   }
 

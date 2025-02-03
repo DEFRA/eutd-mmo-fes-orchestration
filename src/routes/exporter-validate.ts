@@ -78,10 +78,7 @@ export default class ExporterValidateRoutes {
                     townCity: Joi.string().trim().regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
                     county: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).allow(''),
                     postcode: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).required().min(5).max(8),
-                    country: Joi.string().required(),
-                    isoCodeAlpha2: Joi.string(),
-                    isoCodeAlpha3: Joi.string(),
-                    isoNumericCode: Joi.string()
+                    country: Joi.string().required()
                   })
 
                 const errors = schema.validate(value, {

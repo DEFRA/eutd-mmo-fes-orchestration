@@ -28,6 +28,7 @@ import * as CatchCertService from '../persistence/services/catchCert';
 import ExportLocationService from '../services/exportLocation.service';
 import { NotifyService } from '../services/notify.service';
 import { HapiRequestApplicationStateExtended } from '../types';
+import { ProductsLanded, LandingStatus, ProductLanded } from '../persistence/schema/frontEndModels/payload';
 
 export default class ExportPayloadController {
 
@@ -35,40 +36,7 @@ export default class ExportPayloadController {
     const payload = { ...(req.payload as object) };
     const exportPayload: PayloadSchema.ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
     let errors = {};
-    exportPayload.items.forEach((item) => {
-      if (!item.landings || item.landings.length === 0) {
-        errors['product_' + item.product.id] = {
-          key: (exportPayload.items.length > 1) ? 'error.products.landing.missing' : 'error.product.landing.missing',
-          params: {
-            species: item.product.species.label,
-            state: item.product.state.label,
-            presentation: item.product.presentation.label,
-            commodityCode: item.product.commodityCode
-          }
-        }
-      } else {
-
-        item.landings = item.landings.filter((landing) => {
-          // Filter out empty landings that havent been submitted
-          return !(!landing.error && !landing.model.vessel && !landing.model.dateLanded && !landing.model.exportWeight);
-        });
-
-        item.landings.forEach((landing) => {
-          if ("invalid" === landing.error) {
-            errors["vessel_" + item.product.id + "_" + landing.model.id] =
-              item.product.species.label +
-              ", " +
-              item.product.state.label +
-              ", " +
-              item.product.presentation.label +
-              " has an invalid landing";
-          } else {
-            landing.addMode = undefined;
-            landing.editMode = undefined;
-          }
-        });
-      }
-    });
+    ExportPayloadController.checkPayloadItems(exportPayload, errors);
 
     if (Object.keys(errors).length === 0) {
       try {
@@ -103,15 +71,62 @@ export default class ExportPayloadController {
 
     const result = await ExportPayloadService.save(exportPayload, userPrincipal, documentNumber, contactId);
 
+    return ExportPayloadController.handleValidateResponse(req, h, savingAsDraft, payload, result);
+  }
+
+  static readonly checkPayloadItems = (exportPayload, errors) => {
+    return exportPayload.items.forEach((item) => {
+      if (!item.landings || item.landings.length === 0) {
+        errors['product_' + item.product.id] = {
+          key: (exportPayload.items.length > 1) ? 'error.products.landing.missing' : 'error.product.landing.missing',
+          params: {
+            species: item.product.species.label,
+            state: item.product.state.label,
+            presentation: item.product.presentation.label,
+            commodityCode: item.product.commodityCode
+          }
+        }
+      } else {
+
+        item.landings = item.landings.filter((landing) => {
+          // Filter out empty landings that havent been submitted
+          return !(!landing.error && !landing.model.vessel && !landing.model.dateLanded && !landing.model.exportWeight);
+        });
+
+        item.landings.forEach((landing) => {
+          if ("invalid" === landing.error) {
+            errors["vessel_" + item.product.id + "_" + landing.model.id] =
+              item.product.species.label +
+              ", " +
+              item.product.state.label +
+              ", " +
+              item.product.presentation.label +
+              " has an invalid landing";
+          } else {
+            landing.addMode = undefined;
+            landing.editMode = undefined;
+          }
+        });
+      }
+    });
+  }
+
+  static readonly handleValidateResponse = (
+    req: Hapi.Request,
+    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>,
+    savingAsDraft: boolean,
+    payload: any,
+    result: ProductsLanded
+  ) => {
     if (acceptsHtml(req.headers)) {
-      const p = payload as any;
       if (!result.errors || result.errors.length === 0) {
         if (savingAsDraft) {
-          return h.redirect(p.dashboardUri);
+          return h.redirect(payload.dashboardUri);
+        } else {
+          return h.redirect(payload.nextUri);
         }
-        return h.redirect(p.nextUri);
       } else {
-        return h.redirect(p.currentUri);
+        return h.redirect(payload.currentUri);
       }
     } else {
       if (!result.errors || result.errors.length === 0) {
@@ -322,23 +337,7 @@ export default class ExportPayloadController {
       const landing = product.landings.find(_landing => _landing.model.id === req.params.landingId);
 
       if (landing) {
-        if (landing.addMode || (landing.editMode && !landing.modelCopy)) {
-          // cancel on a brand new form - remove the landing
-          product.landings = ExportPayloadController.removePayloadProductLanding(product.landings, req.params.landingId);
-        } else {
-          // flip edit mode
-          landing.editMode = !landing.editMode;
-          if (landing.editMode) {
-            // going into edit mode - take copy of original so we can reset if needed
-            landing.modelCopy = cloneDeep(landing.model);
-          } else {
-            // cancelling edit mode - restore original values and remove any validation errors
-            landing.error = undefined;
-            landing.errors = undefined;
-            landing.model = cloneDeep(landing.modelCopy);
-            landing.modelCopy = undefined;
-          }
-        }
+        ExportPayloadController.editExportPayloadCheckLanding(landing, product, req.params.landingId);
         result = await ExportPayloadService.save(exportPayload, userPrincipal, documentNumber, contactId);
       } else {
         // add another landing
@@ -361,32 +360,36 @@ export default class ExportPayloadController {
     }
   }
 
+  static readonly editExportPayloadCheckLanding = (landing: LandingStatus, product: ProductLanded, landingId: string) => {
+    if (landing.addMode || (landing.editMode && !landing.modelCopy)) {
+      // cancel on a brand new form - remove the landing
+      product.landings = ExportPayloadController.removePayloadProductLanding(product.landings, landingId);
+    } else {
+      // flip edit mode
+      landing.editMode = !landing.editMode;
+      if (landing.editMode) {
+        // going into edit mode - take copy of original so we can reset if needed
+        landing.modelCopy = cloneDeep(landing.model);
+      } else {
+        // cancelling edit mode - restore original values and remove any validation errors
+        landing.error = undefined;
+        landing.errors = undefined;
+        landing.model = cloneDeep(landing.modelCopy);
+        landing.modelCopy = undefined;
+      }
+    }
+  }
+
   public static async editExportPayloadProductLandingNonjs(req: Hapi.Request, h, userPrincipal: string, documentNumber: string, contactId: string) {
     const exportPayload: any = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
     const product = exportPayload.items.find(item => item.product.id === req.params.productId);
 
-    if (product && product.landings) {
+    if (product?.landings) {
 
       let landing = product.landings.find(_landing => _landing.model.id === (req.payload as any).id);
 
       if (landing) {
-        if (landing.addMode || (landing.editMode && !landing.modelCopy)) {
-          // cancel on a brand new form - remove the landing
-          product.landings = ExportPayloadController.removePayloadProductLanding(product.landings, (req.payload as any).id);
-        } else {
-          // flip edit mode
-          landing.editMode = !landing.editMode;
-          if (landing.editMode) {
-            // going into edit mode - take copy of original so we can reset if needed
-            landing.modelCopy = cloneDeep(landing.model);
-          } else {
-            // cancelling edit mode - restore original values and remove any validation errors
-            landing.error = undefined;
-            landing.errors = undefined;
-            landing.model = cloneDeep(landing.modelCopy);
-            landing.modelCopy = undefined;
-          }
-        }
+        ExportPayloadController.editExportPayloadCheckLanding(landing, product, (req.payload as any).id);
       } else {
         // add another landing
         landing = {

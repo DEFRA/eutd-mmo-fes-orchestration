@@ -139,13 +139,7 @@ export default {
   },
 
   "/create-processing-statement/:documentNumber/add-processing-plant-address": ({ data, errors }) => {
-    if (!data.plantName || validateWhitespace(data.plantName)) {
-      errors['plantName'] = "psAddProcessingPlantAddressErrorNullPlantName";
-    } else if (data.plantName.length > MAX_PLANT_NAME_LENGTH) {
-      errors['plantName'] = "psAddProcessingPlantAddressErrorMaxLimitPlantName";
-    } else if (!isPsPlantNameValid(data.plantName)) {
-      errors['plantName'] = "psAddProcessingPlantAddressErrorFormatPlantName";
-    }
+    addProcessingPlantAddressErrors(data, errors);
 
     if (!data.plantAddressOne && !data.plantAddressTwo && !data.plantTownCity && !data.plantPostcode) errors['plantAddressOne'] = "psAddProcessingPlantAddressErrorAddress";
     else {
@@ -157,7 +151,15 @@ export default {
     data.dateOfAcceptance = today();
     return { errors };
   },
-
+}
+function addProcessingPlantAddressErrors(data, errors) {
+  if (!data.plantName || validateWhitespace(data.plantName)) {
+    errors['plantName'] = "psAddProcessingPlantAddressErrorNullPlantName";
+  } else if (data.plantName.length > MAX_PLANT_NAME_LENGTH) {
+    errors['plantName'] = "psAddProcessingPlantAddressErrorMaxLimitPlantName";
+  } else if (!isPsPlantNameValid(data.plantName)) {
+    errors['plantName'] = "psAddProcessingPlantAddressErrorFormatPlantName";
+  }
 }
 
 export function validateCatchType(ctch: any, index: number, errors: any) {
@@ -235,15 +237,7 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
 }
 
 export function validateCatchWeights(ctch: any, index: number, errors: any) {
-  if (!ctch.totalWeightLanded && ctch.catchCertificateType !== "uk") {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
-  } else if (ctch.totalWeightLanded <= 0 && ctch.catchCertificateType !== "uk") {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
-  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded) && ctch.catchCertificateType !== "uk") {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
-  } else {
-    (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
-  }
+  validateCatchWeightsTotalWeightErrors(ctch, index, errors);
 
   if (!ctch.exportWeightBeforeProcessing) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing';
@@ -267,6 +261,18 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
     (ctch.exportWeightAfterProcessing = numberAsString(ctch.exportWeightAfterProcessing));
   }
   return { errors };
+}
+
+function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
+  if (!ctch.totalWeightLanded && ctch.catchCertificateType !== "uk") {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
+  } else if (ctch.totalWeightLanded <= 0 && ctch.catchCertificateType !== "uk") {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
+  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded) && ctch.catchCertificateType !== "uk") {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
+  } else {
+    (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
+  }
 }
 
 export async function validateProductDescription(product: any, errors: any) {

@@ -10,8 +10,8 @@ import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
 import { voidConsolidateLandings } from "./landings-consolidate.service";
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import DocumentNumberService from './documentNumber.service';
+import * as pdfService from 'mmo-ecc-pdf-svc';
 
-const pdfService = require('mmo-ecc-pdf-svc');
 const https = require('https');
 
 export default class ManageCertsService {
@@ -26,14 +26,14 @@ export default class ManageCertsService {
 
   public static async voidCertificate(documentNumber: string, userPrincipalId: string, contactId: string) {
     let voidSuccess = false;
-   
+
     const document: any = await MongoConnection.findOne(baseConfig.collection, {"documentNumber" : documentNumber})
       .catch(error => logger.error(`[DOCUMENT-VOID][${documentNumber}][ERROR][${error.stack || error}]`));
-  
+
       if(!document) {
       return false;
     }
-   
+
     const ownerValidation = validateDocumentOwner(document, userPrincipalId, contactId);
     if (document && ownerValidation) {
       await MongoConnection.updateStatusAsVoid(baseConfig.collection, {"documentNumber" : documentNumber});
@@ -64,9 +64,10 @@ export default class ManageCertsService {
       .catch(err => logger.error(`Error - Data not sent to BC server: ${err}`));
 
       const serviceName: ServiceNames = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
-     
+
       if (serviceName === ServiceNames.CC) {
          voidConsolidateLandings(documentNumber)
+          .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
       }
    }
 

@@ -31,18 +31,7 @@ export default class FishController {
       }, documentNumber, contactId);
 
       await SummaryErrorsService.clearErrors(documentNumber);
-
-      if (acceptsHtml(req.headers)) {
-        // non js - we have to keep the landings json right because the redux events wont have worked
-        const exportPayload: ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
-        if (exportPayload && exportPayload.items) {
-          const newPayload = ExportPayloadController.removePayloadProduct(exportPayload, p.cancel);
-          if (newPayload.items.length < exportPayload.items.length) {
-            newPayload.errors = undefined;
-            await ExportPayloadService.save(newPayload, userPrincipal, documentNumber, contactId);
-          }
-        }
-      }
+      await FishController.addFishNonJsCancel(req, userPrincipal, documentNumber, contactId, p);     
 
       if (redirectUri !== null) {
         return h.redirect(redirectUri);
@@ -66,38 +55,13 @@ export default class FishController {
       } else {
         logger.info(`[FISH-CONTROLLER][ADDING-FISH][${JSON.stringify({ userPrincipal: (req.app as HapiRequestApplicationStateExtended).claims.sub })}]`);
 
-        if (!payload.presentationLabel || !payload.stateLabel) {
-          const enhanceData: any = await FishController.augmentProductDetails(payload);
-          payload.presentationLabel = enhanceData.presentation.label;
-          payload.stateLabel = enhanceData.state.label
-        }
+        await FishController.addFishGetLabel(payload);
 
         const data: Product = await Services.addFish(payload, documentNumber, contactId, (req.payload as any).isFavourite);
 
-        if (data && (req.payload as any).addToFavourites) {
-          const favouritesList = await saveFavouritesProduct(userPrincipal, toIProduct(payload));
-          data.addedToFavourites = Array.isArray(favouritesList)  && favouritesList.length > 0 ;
-        }
+        await FishController.addFishAddToFavourites(data, req, userPrincipal, payload);
 
-        if (acceptsHtml(req.headers)) {
-          // non js - we have to keep the landings json right because the redux events wont have worked
-          let exportPayload: ProductsLanded;
-          if (payload.commodity_code && payload.commodity_code.length > 1) {
-
-            exportPayload = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
-            if (!exportPayload) {
-              exportPayload = { items: [] };
-            }
-
-            const prd = await FishController.augmentProductDetails(data);
-            const newPayload = ExportPayloadController.addPayloadProduct(exportPayload, prd);
-
-            if (newPayload.items.length > exportPayload.items.length) {
-              newPayload.errors = undefined;
-              await ExportPayloadService.save(newPayload, userPrincipal, documentNumber, contactId);
-            }
-          }
-        }
+        await FishController.addFishNonJsAdd(req, userPrincipal, documentNumber, contactId, payload, data)
 
         logger.debug(`[FISH-CONTROLLER][ADD-FISH][${documentNumber}][REDIRECT][IS-REDIRECTING: ${redirectUri !== null}]`);
 
@@ -106,6 +70,57 @@ export default class FishController {
         }
 
         return data;
+      }
+    }
+  }
+
+  static readonly addFishGetLabel = async (payload: Product) => {
+    if (!payload.presentationLabel || !payload.stateLabel) {
+      const enhanceData: any = await FishController.augmentProductDetails(payload);
+      payload.presentationLabel = enhanceData.presentation.label;
+      payload.stateLabel = enhanceData.state.label
+    }
+  }
+
+  static readonly addFishAddToFavourites = async (data: Product, req: Hapi.Request, userPrincipal: string, payload: Product) => {
+    if (data && (req.payload as any).addToFavourites) {
+      const favouritesList = await saveFavouritesProduct(userPrincipal, toIProduct(payload));
+      data.addedToFavourites = Array.isArray(favouritesList)  && favouritesList.length > 0 ;
+    }
+  }
+
+  static readonly addFishNonJsCancel = async (req: Hapi.Request, userPrincipal, documentNumber: string, contactId: string, p: any) => {
+    if (acceptsHtml(req.headers)) {
+      // non js - we have to keep the landings json right because the redux events wont have worked
+      const exportPayload: ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
+      if (exportPayload?.items) {
+        const newPayload = ExportPayloadController.removePayloadProduct(exportPayload, p.cancel);
+        if (newPayload.items.length < exportPayload.items.length) {
+          newPayload.errors = undefined;
+          await ExportPayloadService.save(newPayload, userPrincipal, documentNumber, contactId);
+        }
+      }
+    }
+  }
+
+  static readonly addFishNonJsAdd = async (req: Hapi.Request, userPrincipal, documentNumber: string, contactId: string, payload: Product, data: Product) => {
+    if (acceptsHtml(req.headers)) {
+      // non js - we have to keep the landings json right because the redux events wont have worked
+      let exportPayload: ProductsLanded;
+      if (payload.commodity_code && payload.commodity_code.length > 1) {
+
+        exportPayload = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
+        if (!exportPayload) {
+          exportPayload = { items: [] };
+        }
+
+        const prd = await FishController.augmentProductDetails(data);
+        const newPayload = ExportPayloadController.addPayloadProduct(exportPayload, prd);
+
+        if (newPayload.items.length > exportPayload.items.length) {
+          newPayload.errors = undefined;
+          await ExportPayloadService.save(newPayload, userPrincipal, documentNumber, contactId);
+        }
       }
     }
   }
@@ -186,16 +201,10 @@ export default class FishController {
 
     if (unmatchedSpecies.length > 0) {
       refreshRequired = true;
-      const ln = unmatchedSpecies.length;
-      for (let idx = 0; idx < ln; idx++) {
-        await Services.removeFish({
-          user_id: userId,
-          cancel: unmatchedSpecies[idx].id
-        }, documentNumber, contactId);
-      }
+      await FishController.removeFish(userId, unmatchedSpecies, documentNumber, contactId, unmatchedSpecies.length);
     }
 
-    if (exportPayload && exportPayload.items) {
+    if (exportPayload?.items) {
       const unmatchedExportPayloadItems = exportPayload.items.filter((item: any) => {
         const found = species.find((s: any) => {
           return s.id === item.product.id;
@@ -227,6 +236,15 @@ export default class FishController {
       }
     }
     return refreshRequired;
+  }
+
+  static readonly removeFish = async (userId: string, unmatchedSpecies: Product[], documentNumber: string, contactId: string, unmatchedSpeciesLength: number) => {
+    for (let idx = 0; idx < unmatchedSpeciesLength; idx++) {
+      await Services.removeFish({
+        user_id: userId,
+        cancel: unmatchedSpecies[idx].id
+      }, documentNumber, contactId);
+    }
   }
 
   public static async removeInCompleteSpecies(userId: string, documentNumber: string, species: Product[], contactId: string): Promise<boolean | void> {

@@ -126,64 +126,68 @@ export const toBackEndNewCcExporterDetails = (
       }
     : null;
 
-export const toBackEndNewPsAndSdExporterDetails = (exporterDetails: ExporterDetails) : ExporterDetails  => {
+const isOldExporterDetails = (exporterDetails: ExporterDetails) =>
+  !isEmpty(exporterDetails) && !isEmpty(exporterDetails.addressOne) &&
+  ['buildingNumber', 'subBuildingName', 'buildingName', 'streetName', 'county', 'country'].every((key: string) =>
+    !Object.prototype.hasOwnProperty.call(exporterDetails, key));
 
-  const isOldExporterDetails = (exporterDetails: ExporterDetails) =>
-    !isEmpty(exporterDetails) && !isEmpty(exporterDetails.addressOne) &&
-    ['buildingNumber', 'subBuildingName', 'buildingName', 'streetName', 'county', 'country'].every((key: string) =>
-      !Object.prototype.hasOwnProperty.call(exporterDetails, key));
+const addressOne = (dynamicsAddress: any): string | undefined => {
+  const addressLineOne: string[] = [];
 
-  const addressOne = (dynamicsAddress: any): string | undefined => {
-    const addressLineOne: string[] = [];
-
-    if (dynamicsAddress && dynamicsAddress.defra_premises) {
-      addressLineOne.push(dynamicsAddress.defra_premises);
-    }
-
-    if (dynamicsAddress && dynamicsAddress.defra_subbuildingname) {
-      addressLineOne.push(dynamicsAddress.defra_subbuildingname);
-    }
-
-    if (dynamicsAddress && dynamicsAddress.defra_buildingname) {
-      addressLineOne.push(dynamicsAddress.defra_buildingname);
-    }
-
-    if (dynamicsAddress && dynamicsAddress.defra_street) {
-      addressLineOne.push(dynamicsAddress.defra_street);
-    }
-
-    if (dynamicsAddress && dynamicsAddress.defra_locality) {
-      addressLineOne.push(dynamicsAddress.defra_locality);
-    }
-
-    if (dynamicsAddress && dynamicsAddress.defra_dependentlocality) {
-      addressLineOne.push(dynamicsAddress.defra_dependentlocality);
-    }
-
-    return (addressLineOne.length > 0)
-      ? addressLineOne
-        .filter((_: string) => _ !== 'null')
-        .join(', ')
-      : '';
+  if (dynamicsAddress && dynamicsAddress.defra_premises) {
+    addressLineOne.push(dynamicsAddress.defra_premises);
   }
+
+  if (dynamicsAddress && dynamicsAddress.defra_subbuildingname) {
+    addressLineOne.push(dynamicsAddress.defra_subbuildingname);
+  }
+
+  if (dynamicsAddress && dynamicsAddress.defra_buildingname) {
+    addressLineOne.push(dynamicsAddress.defra_buildingname);
+  }
+
+  if (dynamicsAddress && dynamicsAddress.defra_street) {
+    addressLineOne.push(dynamicsAddress.defra_street);
+  }
+
+  if (dynamicsAddress && dynamicsAddress.defra_locality) {
+    addressLineOne.push(dynamicsAddress.defra_locality);
+  }
+
+  if (dynamicsAddress && dynamicsAddress.defra_dependentlocality) {
+    addressLineOne.push(dynamicsAddress.defra_dependentlocality);
+  }
+
+  return (addressLineOne.length > 0)
+    ? addressLineOne
+      .filter((_: string) => _ !== 'null')
+      .join(', ')
+    : '';
+}
+
+export const toBackEndNewPsAndSdExporterDetails = (exporterDetails: ExporterDetails) : ExporterDetails  => {
 
   return isOldExporterDetails(exporterDetails) ? {
     ...exporterDetails,
     addressOne: addressOne(exporterDetails._dynamicsAddress),
     addressTwo: undefined,
-    buildingNumber: exporterDetails._dynamicsAddress && exporterDetails._dynamicsAddress.defra_premises !== 'null'
-      ? exporterDetails._dynamicsAddress.defra_premises : null,
+    buildingNumber: getBuildingNumber(exporterDetails),
     subBuildingName: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_subbuildingname : null,
     buildingName: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_buildingname : null,
     streetName: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_street : null,
     townCity: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_towntext : null,
     county: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_county : null,
     postcode: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_postcode : null,
-    country: exporterDetails._dynamicsAddress
-      ? exporterDetails._dynamicsAddress._defra_country_value_OData_Community_Display_V1_FormattedValue
-      : null,
+    country: getConutry(exporterDetails),
     _updated: true
   } : {
     ...exporterDetails
   }
 }
+
+const getBuildingNumber = (exporterDetails: ExporterDetails) => exporterDetails._dynamicsAddress && exporterDetails._dynamicsAddress.defra_premises !== 'null'
+? exporterDetails._dynamicsAddress.defra_premises : null
+
+const getConutry = (exporterDetails: ExporterDetails) => exporterDetails._dynamicsAddress
+? exporterDetails._dynamicsAddress._defra_country_value_OData_Community_Display_V1_FormattedValue
+: null

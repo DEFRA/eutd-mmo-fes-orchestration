@@ -2,11 +2,13 @@ import * as moment from 'moment';
 import * as mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as CatchCertService from './catchCert';
+import * as ReferenceData from '../../../src/services/reference-data.service'
 import { CatchCertModel, CatchCertificate, ExportData, DocumentStatuses } from '../schema/catchCert';
 import { FailedOnlineCertificates } from '../schema/onlineValidationResult';
 import { StorageDocumentModel } from '../schema/storageDoc';
 import { Conservation } from '../schema/frontEndModels/conservation';
 import { Product, toBackEndProduct } from '../schema/frontEndModels/species';
+import { Product as Products } from '../schema/catchCert';
 import * as FrontEndTransportSchema from '../schema/frontEndModels/transport';
 import * as FrontEndExporterSchema from '../schema/frontEndModels/exporterDetails';
 import * as FrontEndPayloadSchema from '../schema/frontEndModels/payload';
@@ -45,7 +47,7 @@ describe("catchCert - saveDraftCache", () => {
     );
     mockGetSessionStore.mockResolvedValue(mockSessionStore);
 
-    const testData: any = {documentNumber: '12345'}
+    const testData: any = { documentNumber: '12345' }
 
     await CatchCertService.saveDraftCache('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', testData);
 
@@ -93,7 +95,7 @@ describe('catchCert - db related', () => {
   beforeAll(async () => {
     mongoServer = new MongoMemoryServer();
     const mongoUri = await mongoServer.getConnectionString();
-    mongoose.connect(mongoUri).catch(err => {console.log(err)});
+    mongoose.connect(mongoUri).catch(err => { console.log(err) });
 
     mockSessionStore = new MockSessionStorage();
     mockWriteAllFor = jest.fn();
@@ -107,7 +109,7 @@ describe('catchCert - db related', () => {
     mockGetSessionStore.mockResolvedValue(mockSessionStore);
   });
 
-  afterEach(async() => {
+  afterEach(async () => {
     jest.setTimeout(10000);
     await CatchCertModel.deleteMany({});
     await FailedOnlineCertificates.deleteMany({});
@@ -127,14 +129,14 @@ describe('catchCert - db related', () => {
   const documentType = "catchCertificate";
 
   const sampleDocument = (documentNumber, status, user?, draftData?, userReference?, createdAt?, exportData?, contId = contactId) => ({
-    documentNumber    : documentNumber,
-    status            : status,
-    createdAt         : createdAt || new Date('2020-01-16'),
-    createdBy         : user || defaultUser,
-    draftData         : draftData || {},
-    exportData        : exportData || undefined,
-    userReference     : userReference || defaultUserReference,
-    contactId         : contId
+    documentNumber: documentNumber,
+    status: status,
+    createdAt: createdAt || new Date('2020-01-16'),
+    createdBy: user || defaultUser,
+    draftData: draftData || {},
+    exportData: exportData || undefined,
+    userReference: userReference || defaultUserReference,
+    contactId: contId
   });
 
   const sampleFailedDocument = (
@@ -144,9 +146,9 @@ describe('catchCert - db related', () => {
     isOverusedAllCerts?: boolean,
     isOverusedThisCert?: boolean,
     isLandingExists?: boolean
-    ) => ({
-    documentNumber    : documentNumber,
-    status            : status || DocumentStatuses.Blocked,
+  ) => ({
+    documentNumber: documentNumber,
+    status: status || DocumentStatuses.Blocked,
     isSpeciesExists: isSpeciesExists || false,
     isOverusedAllCerts: isOverusedAllCerts || false,
     isOverusedThisCert: isOverusedThisCert || false,
@@ -200,10 +202,10 @@ describe('catchCert - db related', () => {
     it('will create a new draft in the system with a randomly generated document number', async () => {
       await CatchCertService.createDraft(defaultUser, defaultUserEmail, defaultRequestedByAdmin, contactId);
 
-      const result = await CatchCertModel.find({createdBy: defaultUser, createdByEmail: defaultUserEmail, status: 'DRAFT', documentNumber: documentNumber});
+      const result = await CatchCertModel.find({ createdBy: defaultUser, createdByEmail: defaultUserEmail, status: 'DRAFT', documentNumber: documentNumber });
 
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
-      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`,contactId);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       expect(result.length).toBe(1);
     });
 
@@ -211,7 +213,7 @@ describe('catchCert - db related', () => {
       const result = await CatchCertService.createDraft(defaultUser, defaultUserEmail, defaultRequestedByAdmin, contactId);
 
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
-      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`,contactId);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       expect(result).toBe(documentNumber);
     });
 
@@ -220,9 +222,9 @@ describe('catchCert - db related', () => {
   describe('getAllCatchCertsForUserByYearAndMonth', () => {
 
     it('should not return draft or void certificates', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6','DRAFT')).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA7','VOID')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6', 'DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA7', 'VOID')).save();
 
       const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
 
@@ -232,8 +234,8 @@ describe('catchCert - db related', () => {
     });
 
     it('should not return pending certificates', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6','PENDING')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6', 'PENDING')).save();
 
       const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
 
@@ -243,9 +245,9 @@ describe('catchCert - db related', () => {
     });
 
     it('should not return locked certificates', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2021-CC-0E42C2DA5','COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
+      await new CatchCertModel(sampleDocument('GBR-2021-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
       await new CatchCertModel(sampleDocument('GBR-2021-CC-0E42C2DA6', 'LOCKED')).save();
-      await new CatchCertModel(sampleDocument('GBR-2021-CC-0E42C2DA7','COMPLETE', defaultUser, {}, 'My Completed Reference 2')).save();
+      await new CatchCertModel(sampleDocument('GBR-2021-CC-0E42C2DA7', 'COMPLETE', defaultUser, {}, 'My Completed Reference 2')).save();
 
 
       const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
@@ -259,9 +261,9 @@ describe('catchCert - db related', () => {
     });
 
     it('should return certificates in createdAt descending order', async () => {
-      await new CatchCertModel(sampleDocument('doc1','COMPLETE', defaultUser, {}, 'First', new Date('2020-01-01'))).save();
-      await new CatchCertModel(sampleDocument('doc3','COMPLETE', defaultUser, {}, 'Third', new Date('2020-01-03'))).save();
-      await new CatchCertModel(sampleDocument('doc2','COMPLETE', defaultUser, {}, 'Second', new Date('2020-01-02'))).save();
+      await new CatchCertModel(sampleDocument('doc1', 'COMPLETE', defaultUser, {}, 'First', new Date('2020-01-01'))).save();
+      await new CatchCertModel(sampleDocument('doc3', 'COMPLETE', defaultUser, {}, 'Third', new Date('2020-01-03'))).save();
+      await new CatchCertModel(sampleDocument('doc2', 'COMPLETE', defaultUser, {}, 'Second', new Date('2020-01-02'))).save();
 
       const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
 
@@ -272,7 +274,7 @@ describe('catchCert - db related', () => {
     });
 
     it('should return certificates for the current year and month', async () => {
-      await new CatchCertModel(sampleDocument('doc1','COMPLETE', defaultUser, {}, 'First', moment.utc().subtract(1, 'month').toISOString())).save();
+      await new CatchCertModel(sampleDocument('doc1', 'COMPLETE', defaultUser, {}, 'First', moment.utc().subtract(1, 'month').toISOString())).save();
 
       const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('', defaultUser, contactId);
 
@@ -284,19 +286,19 @@ describe('catchCert - db related', () => {
 
   describe('delete species', () => {
     const document = {
-      documentNumber    : 'GBR-2020-CC-0E42C2DA5',
-      status            : 'DRAFT',
-      createdAt         : new Date('2020-01-16'),
-      createdBy         : defaultUser,
-      exportData        : {
-        products : [
+      documentNumber: 'GBR-2020-CC-0E42C2DA5',
+      status: 'DRAFT',
+      createdAt: new Date('2020-01-16'),
+      createdBy: defaultUser,
+      exportData: {
+        products: [
           {
-            speciesId : "test-species-id",
-            commodityCode : "test-commoditycode-id"
+            speciesId: "test-species-id",
+            commodityCode: "test-commoditycode-id"
           }
         ],
         transportation: {
-          exportedFrom : "test",
+          exportedFrom: "test",
           exportedTo: {
             officialCountryName: "SPAIN",
             isoCodeAlpha2: "A1",
@@ -314,11 +316,11 @@ describe('catchCert - db related', () => {
     it("will delete a species based on a species id", async () => {
       await new CatchCertModel(document).save();
 
-      await CatchCertService.deleteSpecies(defaultUser,"test-species-id",'GBR-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.deleteSpecies(defaultUser, "test-species-id", 'GBR-2020-CC-0E42C2DA5', contactId);
 
       const draft = await CatchCertModel.findOne({
         createdBy: defaultUser,
-        documentNumber:'GBR-2020-CC-0E42C2DA5',
+        documentNumber: 'GBR-2020-CC-0E42C2DA5',
         'status': 'DRAFT'
       });
 
@@ -328,7 +330,7 @@ describe('catchCert - db related', () => {
     it("will also work when passing a document number", async () => {
       await new CatchCertModel(document).save();
 
-      await CatchCertService.deleteSpecies(defaultUser,"test-species-id",'GBR-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.deleteSpecies(defaultUser, "test-species-id", 'GBR-2020-CC-0E42C2DA5', contactId);
 
       const draft = await CatchCertModel.findOne({
         createdBy: defaultUser,
@@ -339,18 +341,18 @@ describe('catchCert - db related', () => {
       expect(draft.exportData.products.length).toEqual(0)
     });
 
-    it("will only delete the relevant species", async () => {
-      document.exportData.products.push( {
-        speciesId : "test-species-id-2",
-        commodityCode : "test-commoditycode-id-2"
+    it("will delete the relevant species", async () => {
+      document.exportData.products.push({
+        speciesId: "test-species-id-2",
+        commodityCode: "test-commoditycode-id-2"
       });
 
       await new CatchCertModel(document).save();
 
-      await CatchCertService.deleteSpecies(defaultUser,"test-species-id",'GBR-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.deleteSpecies(defaultUser, "test-species-id", 'GBR-2020-CC-0E42C2DA5', contactId);
 
       const draft = await CatchCertModel.findOne({
-        documentNumber:'GBR-2020-CC-0E42C2DA5',
+        documentNumber: 'GBR-2020-CC-0E42C2DA5',
         createdBy: defaultUser,
         'status': 'DRAFT'
       });
@@ -372,9 +374,9 @@ describe('catchCert - db related', () => {
     });
 
     it('should delete drafts', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT','Bob')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT', 'Bob')).save();
 
-      await CatchCertService.deleteDraftCertificate('Bob','GBR-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.deleteDraftCertificate('Bob', 'GBR-2020-CC-0E42C2DA5', contactId);
 
       const draft = await CatchCertModel.findOne({
         createdBy: 'Bob',
@@ -382,35 +384,35 @@ describe('catchCert - db related', () => {
       });
 
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
-      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`,contactId);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       expect(draft).toBeNull();
     });
 
     it('should delete drafts when a doc number is provided', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT','Bob')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT', 'Bob')).save();
 
-      await CatchCertService.deleteDraftCertificate('Bob','GBR-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.deleteDraftCertificate('Bob', 'GBR-2020-CC-0E42C2DA5', contactId);
 
       const draft = await CatchCertModel.findOne({
         createdBy: 'Bob',
         'status': 'DRAFT',
-        documentNumber:'GBR-2020-CC-0E42C2DA5'
+        documentNumber: 'GBR-2020-CC-0E42C2DA5'
       });
 
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
-      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`,contactId);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       expect(draft).toBeNull();
     });
 
     it('should not delete anything other than catchCertificate drafts', async () => {
       const draftSD = {
-        documentNumber    : 'GBR-2020-CC-0E42C2DA5',
-        status            : 'DRAFT',
-        createdAt         : new Date('2020-01-16'),
-        createdBy         : 'Bob',
-        __t               : 'storageDocument',
-        documentUri       : 'test',
-        exportData:       { catches : [{certificateNumber: "aaa"}], storageFacilities: []},
+        documentNumber: 'GBR-2020-CC-0E42C2DA5',
+        status: 'DRAFT',
+        createdAt: new Date('2020-01-16'),
+        createdBy: 'Bob',
+        __t: 'storageDocument',
+        documentUri: 'test',
+        exportData: { catches: [{ certificateNumber: "aaa" }], storageFacilities: [] },
       };
 
       await new StorageDocumentModel(draftSD).save();
@@ -422,24 +424,24 @@ describe('catchCert - db related', () => {
       });
 
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
-      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`,contactId);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       expect(certificate).not.toBeNull();
     });
 
     it('should not delete anything other than drafts', async () => {
-        await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','COMPLETE','Bob')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', 'Bob')).save();
 
-        await CatchCertService.deleteDraftCertificate('Bob',undefined, contactId);
+      await CatchCertService.deleteDraftCertificate('Bob', undefined, contactId);
 
-        const certificate = await CatchCertModel.findOne({
-          documentNumber: 'GBR-2020-CC-0E42C2DA5'
-        });
-
-        expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
-        expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`,contactId);
-        expect(certificate).not.toBeNull();
+      const certificate = await CatchCertModel.findOne({
+        documentNumber: 'GBR-2020-CC-0E42C2DA5'
       });
+
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
+      expect(certificate).not.toBeNull();
     });
+  });
 
   describe('getDraftCatchCertHeadersForUser', () => {
 
@@ -470,14 +472,14 @@ describe('catchCert - db related', () => {
 
     it('should return a draft if one is present', async () => {
       const expected: CatchCertificateDraft[] = [{
-        "documentNumber":"GBR-2020-CC-0E42C2DA5",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference",
+        "documentNumber": "GBR-2020-CC-0E42C2DA5",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference",
         "isFailed": false
       }];
 
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
@@ -488,34 +490,34 @@ describe('catchCert - db related', () => {
     });
 
     it('should return all DRAFTS for a user', async () => {
-      await new CatchCertModel(sampleDocument('test1','DRAFT', 'Juan')).save();
-      await new CatchCertModel(sampleDocument('test2','DRAFT', 'Juan')).save();
-      await new CatchCertModel(sampleDocument('test3','DRAFT', 'Juan')).save();
-      await new CatchCertModel(sampleDocument('test4','DRAFT', 'Juan')).save();
+      await new CatchCertModel(sampleDocument('test1', 'DRAFT', 'Juan')).save();
+      await new CatchCertModel(sampleDocument('test2', 'DRAFT', 'Juan')).save();
+      await new CatchCertModel(sampleDocument('test3', 'DRAFT', 'Juan')).save();
+      await new CatchCertModel(sampleDocument('test4', 'DRAFT', 'Juan')).save();
 
       const expected = [{
-        "documentNumber":"test1",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference",
+        "documentNumber": "test1",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference",
         "isFailed": false
-      },      {
-        "documentNumber":"test2",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference",
+      }, {
+        "documentNumber": "test2",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference",
         "isFailed": false
-      },      {
-        "documentNumber":"test3",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference",
+      }, {
+        "documentNumber": "test3",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference",
         "isFailed": false
-      },      {
-        "documentNumber":"test4",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference",
+      }, {
+        "documentNumber": "test4",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference",
         "isFailed": false
       }];
 
@@ -525,20 +527,20 @@ describe('catchCert - db related', () => {
     });
 
     it('should return no drafts if no drafts are present', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','COMPLETE')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE')).save();
 
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
       expect(result).toStrictEqual([]);
     });
 
-    it('should return only drafts for the specified user cc', async () => {
+    it('should return drafts for the specified user cc', async () => {
       const _ = undefined;
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT', 'Juan', _, _, _, _, null)).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6','DRAFT', 'Chris', _, _, _, _, null)).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA7','DRAFT', defaultUser, _, _, _, _, null)).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA8','COMPLETE', defaultUser)).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA9','DRAFT', null, _, _, _, _, contactId)).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT', 'Juan', _, _, _, _, null)).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6', 'DRAFT', 'Chris', _, _, _, _, null)).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA7', 'DRAFT', defaultUser, _, _, _, _, null)).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA8', 'COMPLETE', defaultUser)).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA9', 'DRAFT', null, _, _, _, _, contactId)).save();
 
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
@@ -561,37 +563,37 @@ describe('catchCert - db related', () => {
     });
 
     it('should return all DRAFTS for a user with the correct user reference', async () => {
-      await new CatchCertModel(sampleDocument('test1','DRAFT', 'Foo', {}, 'User Reference 1')).save();
-      await new CatchCertModel(sampleDocument('test2','DRAFT', 'Foo', {}, 'User Reference 2')).save();
-      await new CatchCertModel(sampleDocument('test3','DRAFT', 'Foo', {}, 'User Reference 3')).save();
-      await new CatchCertModel(sampleDocument('test4','DRAFT', 'Foo', {}, 'User Reference 4')).save();
+      await new CatchCertModel(sampleDocument('test1', 'DRAFT', 'Foo', {}, 'User Reference 1')).save();
+      await new CatchCertModel(sampleDocument('test2', 'DRAFT', 'Foo', {}, 'User Reference 2')).save();
+      await new CatchCertModel(sampleDocument('test3', 'DRAFT', 'Foo', {}, 'User Reference 3')).save();
+      await new CatchCertModel(sampleDocument('test4', 'DRAFT', 'Foo', {}, 'User Reference 4')).save();
 
       const expected = [{
-        "documentNumber":"test1",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 1",
+        "documentNumber": "test1",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 1",
         "isFailed": false
       },
       {
-        "documentNumber":"test2",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 2",
+        "documentNumber": "test2",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 2",
         "isFailed": false
       },
       {
-        "documentNumber":"test3",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 3",
+        "documentNumber": "test3",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 3",
         "isFailed": false
       },
       {
-        "documentNumber":"test4",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 4",
+        "documentNumber": "test4",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 4",
         "isFailed": false
       }];
 
@@ -614,89 +616,89 @@ describe('catchCert - db related', () => {
     });
 
     it('should return a pending draft if one is present', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','PENDING')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'PENDING')).save();
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
       expect(result).toStrictEqual(
         [{
-          "documentNumber":"GBR-2020-CC-0E42C2DA5",
-          "status":"PENDING",
-          "startedAt":"16 Jan 2020",
-          "userReference":"User Reference",
+          "documentNumber": "GBR-2020-CC-0E42C2DA5",
+          "status": "PENDING",
+          "startedAt": "16 Jan 2020",
+          "userReference": "User Reference",
           "isFailed": false
         }]);
     });
 
     it('should return a locked draft if the certificate has been locked by admin', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','LOCKED')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'LOCKED')).save();
 
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
       expect(result).toStrictEqual(
         [{
-          "documentNumber":"GBR-2020-CC-0E42C2DA5",
-          "status":"LOCKED",
-          "startedAt":"16 Jan 2020",
-          "userReference":"User Reference",
+          "documentNumber": "GBR-2020-CC-0E42C2DA5",
+          "status": "LOCKED",
+          "startedAt": "16 Jan 2020",
+          "userReference": "User Reference",
           "isFailed": false
         }]);
     });
 
     it('should return a failed draft if the cert has a failed online certificate', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
       await new FailedOnlineCertificates(sampleFailedDocument('GBR-2020-CC-0E42C2DA5')).save();
 
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
       expect(result).toStrictEqual(
         [{
-          "documentNumber":"GBR-2020-CC-0E42C2DA5",
-          "status":"DRAFT",
-          "startedAt":"16 Jan 2020",
-          "userReference":"User Reference",
+          "documentNumber": "GBR-2020-CC-0E42C2DA5",
+          "status": "DRAFT",
+          "startedAt": "16 Jan 2020",
+          "userReference": "User Reference",
           "isFailed": true
         }]);
     });
 
     it('should return a failed draft if the cert has a failed online certificate and system errors', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
       await new FailedOnlineCertificates(sampleFailedDocument('GBR-2020-CC-0E42C2DA5')).save();
 
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
       expect(result).toStrictEqual(
         [{
-          "documentNumber":"GBR-2020-CC-0E42C2DA5",
-          "status":"DRAFT",
-          "startedAt":"16 Jan 2020",
-          "userReference":"User Reference",
+          "documentNumber": "GBR-2020-CC-0E42C2DA5",
+          "status": "DRAFT",
+          "startedAt": "16 Jan 2020",
+          "userReference": "User Reference",
           "isFailed": true
         }]);
     });
 
-    it('should get all system errors for this user', async()=> {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+    it('should get all system errors for this user', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
       expect(mockGetAllSystemErrors).toHaveBeenCalledWith(defaultUser, contactId);
       expect(result).toStrictEqual(
         [{
-          "documentNumber":"GBR-2020-CC-0E42C2DA5",
-          "status":"DRAFT",
-          "startedAt":"16 Jan 2020",
-          "userReference":"User Reference",
+          "documentNumber": "GBR-2020-CC-0E42C2DA5",
+          "status": "DRAFT",
+          "startedAt": "16 Jan 2020",
+          "userReference": "User Reference",
           "isFailed": false
         }]);
     });
 
     it('should return a failed draft if the cert contains system errors', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
       mockGetAllSystemErrors.mockResolvedValue([
         {
-          documentNumber:'GBR-2020-CC-0E42C2DA5',
+          documentNumber: 'GBR-2020-CC-0E42C2DA5',
           error: 'SYSTEM_ERROR'
         },
         {
-          documentNumber:'GBR-2021-CC-3AA0F6753',
+          documentNumber: 'GBR-2021-CC-3AA0F6753',
           error: 'SYSTEM_ERROR'
         }
       ]);
@@ -705,86 +707,86 @@ describe('catchCert - db related', () => {
 
       expect(result).toStrictEqual(
         [{
-          'documentNumber':'GBR-2020-CC-0E42C2DA5',
-          'status':'DRAFT',
-          'startedAt':'16 Jan 2020',
-          'userReference':'User Reference',
+          'documentNumber': 'GBR-2020-CC-0E42C2DA5',
+          'status': 'DRAFT',
+          'startedAt': '16 Jan 2020',
+          'userReference': 'User Reference',
           'isFailed': true
         }]);
     });
 
     it('should not return a failed pending draft if the cert has a failed online certificate', async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','PENDING')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'PENDING')).save();
       await new FailedOnlineCertificates(sampleFailedDocument('GBR-2020-CC-0E42C2DA5')).save();
 
       const result = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
 
       expect(result).toStrictEqual(
         [{
-          "documentNumber":"GBR-2020-CC-0E42C2DA5",
-          "status":"PENDING",
-          "startedAt":"16 Jan 2020",
-          "userReference":"User Reference",
+          "documentNumber": "GBR-2020-CC-0E42C2DA5",
+          "status": "PENDING",
+          "startedAt": "16 Jan 2020",
+          "userReference": "User Reference",
           "isFailed": false
         }]);
     });
 
     it('should return all DRAFTS for a user from cache', async () => {
       mockGetDraftCache.mockResolvedValue([{
-        "documentNumber":"test1",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 1",
+        "documentNumber": "test1",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 1",
         "isFailed": false
       },
       {
-        "documentNumber":"test2",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 2",
+        "documentNumber": "test2",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 2",
         "isFailed": false
       },
       {
-        "documentNumber":"test3",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 3",
+        "documentNumber": "test3",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 3",
         "isFailed": false
       },
       {
-        "documentNumber":"test4",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 4",
+        "documentNumber": "test4",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 4",
         "isFailed": false
       }]);
 
       const expected = [{
-        "documentNumber":"test1",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 1",
+        "documentNumber": "test1",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 1",
         "isFailed": false
       },
       {
-        "documentNumber":"test2",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 2",
+        "documentNumber": "test2",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 2",
         "isFailed": false
       },
       {
-        "documentNumber":"test3",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 3",
+        "documentNumber": "test3",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 3",
         "isFailed": false
       },
       {
-        "documentNumber":"test4",
-        "status":"DRAFT",
-        "startedAt":"16 Jan 2020",
-        "userReference":"User Reference 4",
+        "documentNumber": "test4",
+        "status": "DRAFT",
+        "startedAt": "16 Jan 2020",
+        "userReference": "User Reference 4",
         "isFailed": false
       }];
 
@@ -799,11 +801,11 @@ describe('catchCert - db related', () => {
 
   describe('getDraftCertificateNumber', () => {
     it('should return a catch cert number for a draft', async () => {
-        await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT', defaultUser)).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT', defaultUser)).save();
 
-        const result = await CatchCertService.getDraftCertificateNumber(defaultUser);
+      const result = await CatchCertService.getDraftCertificateNumber(defaultUser);
 
-        expect(result).toEqual('GBR-2020-CC-0E42C2DA5');
+      expect(result).toEqual('GBR-2020-CC-0E42C2DA5');
     });
 
     it('should return undefined if certificate does not exist', async () => {
@@ -840,12 +842,12 @@ describe('catchCert - db related', () => {
     });
 
     it('should update an existing certificate if one exists', async () => {
-      const filter = {createdBy: defaultUser, status: 'DRAFT', documentNumber: 'RJH-2020-CC-0E42C2DA5'};
+      const filter = { createdBy: defaultUser, status: 'DRAFT', documentNumber: 'RJH-2020-CC-0E42C2DA5' };
       let records = await CatchCertModel.countDocuments(filter);
 
       expect(records).toBe(0);
 
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
 
       await CatchCertService.upsertDraftData(
@@ -866,7 +868,7 @@ describe('catchCert - db related', () => {
       );
 
       records = await CatchCertModel.countDocuments(filter);
-      const draft = await CatchCertModel.findOne(filter, ['exportData'], {lean: true});
+      const draft = await CatchCertModel.findOne(filter, ['exportData'], { lean: true });
 
       expect(records).toBe(1);
       expect(draft.exportData.transportation).toStrictEqual({
@@ -881,10 +883,10 @@ describe('catchCert - db related', () => {
     });
 
     it('should omit any undefined values', async () => {
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
       await CatchCertService.upsertDraftData(
-        defaultUser,'RJH-2020-CC-0E42C2DA5',
+        defaultUser, 'RJH-2020-CC-0E42C2DA5',
         {
           '$set': {
             'exportData.products': [{
@@ -892,7 +894,7 @@ describe('catchCert - db related', () => {
               speciesId: 'test-id',
               speciesCode: undefined,
               commodityCode: 'commodityCode',
-              factor : 2.3,
+              factor: 2.3,
               state: {
                 code: 'FRE',
                 name: undefined
@@ -909,16 +911,16 @@ describe('catchCert - db related', () => {
       );
 
       const draft = await CatchCertModel.findOne(
-        {createdBy: defaultUser, status: 'DRAFT', documentNumber: 'RJH-2020-CC-0E42C2DA5'},
+        { createdBy: defaultUser, status: 'DRAFT', documentNumber: 'RJH-2020-CC-0E42C2DA5' },
         ['exportData'],
-        {lean: true}
+        { lean: true }
       );
 
       expect(draft.exportData.products).toStrictEqual([{
         species: 'Atlantic Cod',
         speciesId: 'test-id',
         commodityCode: 'commodityCode',
-        factor : 2.3,
+        factor: 2.3,
         state: {
           code: 'FRE'
         },
@@ -930,14 +932,14 @@ describe('catchCert - db related', () => {
     });
 
     it('should work with doc number when certificate already exists', async () => {
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
 
-      const filter = {createdBy: defaultUser, status: 'DRAFT', documentNumber: 'GBR-2020-CC-0E42C2DA5'};
+      const filter = { createdBy: defaultUser, status: 'DRAFT', documentNumber: 'GBR-2020-CC-0E42C2DA5' };
 
       await CatchCertService.upsertDraftData(
-        defaultUser,'GBR-2020-CC-0E42C2DA5',
+        defaultUser, 'GBR-2020-CC-0E42C2DA5',
         {
           '$set': {
             'exportData.transportation.exportedFrom': 'New York',
@@ -953,7 +955,7 @@ describe('catchCert - db related', () => {
       );
 
 
-      const draft = await CatchCertModel.findOne(filter, ['exportData'], {lean: true});
+      const draft = await CatchCertModel.findOne(filter, ['exportData'], { lean: true });
 
       expect(draft.exportData.transportation).toStrictEqual({
         exportedFrom: 'New York',
@@ -967,14 +969,14 @@ describe('catchCert - db related', () => {
     });
 
     it('should work when it is new certificate', async () => {
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
 
-      const filter = {createdBy: defaultUser, status: 'DRAFT', documentNumber: 'GBR-2020-CC-0E42C2DA5'};
+      const filter = { createdBy: defaultUser, status: 'DRAFT', documentNumber: 'GBR-2020-CC-0E42C2DA5' };
 
       await CatchCertService.upsertDraftData(
-        defaultUser,'GBR-2020-CC-0E42C2DA5',
+        defaultUser, 'GBR-2020-CC-0E42C2DA5',
         {
           '$set': {
             'exportData.transportation.exportedFrom': 'New York',
@@ -990,7 +992,7 @@ describe('catchCert - db related', () => {
       );
 
 
-      const draft = await CatchCertModel.findOne(filter, ['exportData'], {lean: true});
+      const draft = await CatchCertModel.findOne(filter, ['exportData'], { lean: true });
 
       expect(draft.exportData.transportation).toStrictEqual({
         exportedFrom: 'New York',
@@ -1016,8 +1018,8 @@ describe('catchCert - db related', () => {
         contactId
       );
 
-      const filter = {createdBy: 'user2', status: 'PENDING', documentNumber: 'GBR-2020-CC-0E42C2DA5'};
-      const draft = await CatchCertModel.findOne(filter, ['createdBy'], {lean: true});
+      const filter = { createdBy: 'user2', status: 'PENDING', documentNumber: 'GBR-2020-CC-0E42C2DA5' };
+      const draft = await CatchCertModel.findOne(filter, ['createdBy'], { lean: true });
 
       expect(draft.createdBy).toStrictEqual('user2');
     });
@@ -1035,14 +1037,14 @@ describe('catchCert - db related', () => {
         contactId
       );
 
-      const filter = {createdBy: 'user1', status: 'COMPLETE', documentNumber: 'GBR-2020-CC-0E42C2DA5'};
-      const draft = await CatchCertModel.findOne(filter, ['createdBy'], {lean: true});
+      const filter = { createdBy: 'user1', status: 'COMPLETE', documentNumber: 'GBR-2020-CC-0E42C2DA5' };
+      const draft = await CatchCertModel.findOne(filter, ['createdBy'], { lean: true });
 
       expect(draft.createdBy).toStrictEqual('user1');
     });
 
     it('should not create a new certificate', async () => {
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
       await CatchCertService.upsertDraftData(
         defaultUser, 'GBR-2020-CC-0E42C2DA5',
@@ -1054,7 +1056,7 @@ describe('catchCert - db related', () => {
         contactId
       );
 
-      const drafts = await CatchCertModel.find({}, ['exportData'], {lean: true});
+      const drafts = await CatchCertModel.find({}, ['exportData'], { lean: true });
       expect(drafts.length).toEqual(1);
     });
 
@@ -1111,7 +1113,7 @@ describe('catchCert - db related', () => {
   describe('getDraftDataForCatchCertificate', () => {
 
     const draftData = {
-      test: {message: 'test'}
+      test: { message: 'test' }
     };
 
     describe('should return an empty object when', () => {
@@ -1140,7 +1142,7 @@ describe('catchCert - db related', () => {
       expect(result).toStrictEqual(draftData.test);
     });
 
-    it('should return a default value if one is specified and no results are found', async() => {
+    it('should return a default value if one is specified and no results are found', async () => {
       const result = await CatchCertService.getDraftData(defaultUser, 'test', contactId, 'nothing');
 
       expect(result).toStrictEqual('nothing');
@@ -1150,9 +1152,9 @@ describe('catchCert - db related', () => {
 
   describe('upsertConservation', () => {
 
-    const payload : Conservation = {
+    const payload: Conservation = {
       legislation: ['Test'],
-      caughtInUKWaters : 'Y',
+      caughtInUKWaters: 'Y',
       conservationReference: 'Test',
       user_id: 'Bob',
       currentUri: 'Test',
@@ -1160,39 +1162,39 @@ describe('catchCert - db related', () => {
     };
 
     it("will convert to a back end conservation model", async () => {
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
       await CatchCertService.upsertConservation(defaultUser, payload, 'RJH-2020-CC-0E42C2DA5', contactId);
       const result = await CatchCertModel.findOne({
         createdBy: 'Bob',
-        documentNumber:'RJH-2020-CC-0E42C2DA5',
+        documentNumber: 'RJH-2020-CC-0E42C2DA5',
         status: 'DRAFT'
-      }, ['exportData'], {lean: true});
-      expect(result.exportData.conservation).toStrictEqual({'conservationReference': 'Test'});
+      }, ['exportData'], { lean: true });
+      expect(result.exportData.conservation).toStrictEqual({ 'conservationReference': 'Test' });
     });
 
     it("will convert to a back end conservation model with document number", async () => {
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42CDA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42CDA5', 'DRAFT')).save();
       await CatchCertService.upsertConservation(defaultUser, payload, 'GBR-2020-CC-0E42CDA5', contactId);
       const result = await CatchCertModel.findOne({
         status: 'DRAFT',
         documentNumber: 'GBR-2020-CC-0E42CDA5'
-      }, ['exportData'], {lean: true});
+      }, ['exportData'], { lean: true });
 
-      expect(result.exportData.conservation).toStrictEqual({'conservationReference': 'Test'});
+      expect(result.exportData.conservation).toStrictEqual({ 'conservationReference': 'Test' });
     });
   });
 
   describe('upsertLandingsEntryOption', () => {
 
     it("will upsert a landingsEntryOption to the correct document", async () => {
-      await new CatchCertModel(sampleDocument('GBR-3444-5555-34444','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-3444-5555-34444', 'DRAFT')).save();
       await CatchCertService.upsertLandingsEntryOption(defaultUser, 'GBR-3444-5555-34444', CatchCertSchema.LandingsEntryOptions.ManualEntry, contactId);
 
       const result = await CatchCertModel.findOne({
         createdBy: 'Bob',
         status: 'DRAFT',
-        documentNumber:'GBR-3444-5555-34444'
+        documentNumber: 'GBR-3444-5555-34444'
       }, ['exportData.landingsEntryOption'], { lean: true });
 
       expect(result.exportData.landingsEntryOption).toStrictEqual('manualEntry');
@@ -1240,15 +1242,15 @@ describe('catchCert - db related', () => {
 
     it("will convert to a back end transport model", async () => {
 
-      await new CatchCertModel(sampleDocument('GBR-3444-5555-34444','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-3444-5555-34444', 'DRAFT')).save();
 
 
-      await CatchCertService.upsertTransportDetails(defaultUser, payload,'GBR-3444-5555-34444', contactId);
+      await CatchCertService.upsertTransportDetails(defaultUser, payload, 'GBR-3444-5555-34444', contactId);
 
       const result = await CatchCertModel.findOne({
         createdBy: 'Bob',
         status: 'DRAFT',
-        documentNumber:'GBR-3444-5555-34444'
+        documentNumber: 'GBR-3444-5555-34444'
       }, ['exportData.transportation'], { lean: true });
 
       const expected = {
@@ -1280,15 +1282,15 @@ describe('catchCert - db related', () => {
       const status = 'DRAFT';
 
       await new CatchCertModel({
-        documentNumber    : documentNumber,
-        status            : status,
-        createdAt         : new Date('2020-01-16'),
-        createdBy         : defaultUser,
-        draftData         : {},
-        userReference     : defaultUserReference,
-        exportData        : {
-          conservation    : { conservationReference: 'UK' },
-          transportation  : payload,
+        documentNumber: documentNumber,
+        status: status,
+        createdAt: new Date('2020-01-16'),
+        createdBy: defaultUser,
+        draftData: {},
+        userReference: defaultUserReference,
+        exportData: {
+          conservation: { conservationReference: 'UK' },
+          transportation: payload,
           landingsEntryOption: 'manualEntry'
         }
       }).save();
@@ -1306,76 +1308,76 @@ describe('catchCert - db related', () => {
   });
 
   describe('getExportPayload', () => {
-      let mockGetDraft;
-      let mockMap;
+    let mockGetDraft;
+    let mockMap;
 
-      beforeAll(() => {
-        mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
-        mockMap = jest.spyOn(FrontEndPayloadSchema, 'toFrontEndProductsLanded');
+    beforeAll(() => {
+      mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
+      mockMap = jest.spyOn(FrontEndPayloadSchema, 'toFrontEndProductsLanded');
+    });
+
+    afterAll(() => {
+      mockGetDraft.mockRestore();
+      mockMap.mockRestore();
+    });
+
+    it('should return null if there is no draft', async () => {
+      mockGetDraft.mockResolvedValue(null);
+
+      expect(await CatchCertService.getExportPayload('Bob', undefined, contactId)).toEqual(null);
+    });
+
+    it('should return null if the draft has no products', async () => {
+      const draft = createDraft({
+        products: null,
+        transportation: null,
+        conservation: null,
+        exporterDetails: null
       });
 
-      afterAll(() => {
-        mockGetDraft.mockRestore();
-        mockMap.mockRestore();
+      mockGetDraft.mockResolvedValue(draft);
+
+      expect(await CatchCertService.getExportPayload('Bob', undefined, contactId)).toEqual(null);
+    });
+
+    it('should map and return products if they exist', async () => {
+      const draft = createDraft({
+        products: [
+          { speciesId: '1' },
+          { speciesId: '2' }
+        ],
+        transportation: null,
+        conservation: null,
+        exporterDetails: null
       });
 
-      it('should return null if there is no draft', async () => {
-        mockGetDraft.mockResolvedValue(null);
+      mockGetDraft.mockResolvedValue(draft);
+      mockMap.mockReturnValue('mapped');
 
-        expect(await CatchCertService.getExportPayload('Bob',undefined, contactId)).toEqual(null);
-      });
+      const res = await CatchCertService.getExportPayload('Bob', undefined, contactId);
 
-      it('should return null if the draft has no products', async () => {
-        const draft = createDraft({
-          products: null,
-          transportation: null,
-          conservation: null,
-          exporterDetails: null
-        });
+      expect(mockMap).toHaveBeenCalledWith(draft.exportData.products);
+      expect(res).toEqual('mapped');
+    });
 
-        mockGetDraft.mockResolvedValue(draft);
+    it('should be able to work with a document number', async () => {
+      const draft = createDraft({
+        products: [
+          { speciesId: '1' },
+          { speciesId: '2' }
+        ],
+        transportation: null,
+        conservation: null,
+        exporterDetails: null
+      }, 'GBR-3444-42356-64834');
 
-        expect(await CatchCertService.getExportPayload('Bob',undefined, contactId)).toEqual(null);
-      });
+      mockGetDraft.mockResolvedValue(draft);
+      mockMap.mockReturnValue('mapped');
 
-      it('should map and return products if they exist', async () => {
-        const draft = createDraft({
-          products: [
-            {speciesId: '1'},
-            {speciesId: '2'}
-          ],
-          transportation: null,
-          conservation: null,
-          exporterDetails: null
-        });
+      const res = await CatchCertService.getExportPayload('Bob', 'GBR-3444-42356-64834', contactId);
 
-        mockGetDraft.mockResolvedValue(draft);
-        mockMap.mockReturnValue('mapped');
-
-        const res = await CatchCertService.getExportPayload('Bob',undefined, contactId);
-
-        expect(mockMap).toHaveBeenCalledWith(draft.exportData.products);
-        expect(res).toEqual('mapped');
-      });
-
-      it('should be able to work with a document number', async () => {
-        const draft = createDraft({
-          products: [
-            {speciesId: '1'},
-            {speciesId: '2'}
-          ],
-          transportation: null,
-          conservation: null,
-          exporterDetails: null
-        },'GBR-3444-42356-64834');
-
-        mockGetDraft.mockResolvedValue(draft);
-        mockMap.mockReturnValue('mapped');
-
-        const res = await CatchCertService.getExportPayload('Bob','GBR-3444-42356-64834', contactId);
-
-        expect(res).toEqual('mapped');
-      });
+      expect(res).toEqual('mapped');
+    });
   });
 
   describe('getDirectExportPayload', () => {
@@ -1395,7 +1397,7 @@ describe('catchCert - db related', () => {
     it('should return null if there is no draft', async () => {
       mockGetDraft.mockResolvedValue(null);
 
-      expect(await CatchCertService.getDirectExportPayload('Bob',undefined, contactId)).toEqual(null);
+      expect(await CatchCertService.getDirectExportPayload('Bob', undefined, contactId)).toEqual(null);
     });
 
     it('should return null if the draft has no products', async () => {
@@ -1408,14 +1410,14 @@ describe('catchCert - db related', () => {
 
       mockGetDraft.mockResolvedValue(draft);
 
-      expect(await CatchCertService.getDirectExportPayload('Bob',undefined, contactId)).toEqual(null);
+      expect(await CatchCertService.getDirectExportPayload('Bob', undefined, contactId)).toEqual(null);
     });
 
     it('should map and return products if they exist', async () => {
       const draft = createDraft({
         products: [
-          {speciesId: '1'},
-          {speciesId: '2'}
+          { speciesId: '1' },
+          { speciesId: '2' }
         ],
         transportation: null,
         conservation: null,
@@ -1425,7 +1427,7 @@ describe('catchCert - db related', () => {
       mockGetDraft.mockResolvedValue(draft);
       mockMap.mockReturnValue('mapped');
 
-      const res = await CatchCertService.getDirectExportPayload('Bob',undefined, contactId);
+      const res = await CatchCertService.getDirectExportPayload('Bob', undefined, contactId);
 
       expect(mockMap).toHaveBeenCalledWith(draft.exportData.products);
       expect(res).toEqual('mapped');
@@ -1434,157 +1436,157 @@ describe('catchCert - db related', () => {
     it('should be able to work with a document number', async () => {
       const draft = createDraft({
         products: [
-          {speciesId: '1'},
-          {speciesId: '2'}
+          { speciesId: '1' },
+          { speciesId: '2' }
         ],
         transportation: null,
         conservation: null,
         exporterDetails: null
-      },'GBR-3444-42356-64834');
+      }, 'GBR-3444-42356-64834');
 
       mockGetDraft.mockResolvedValue(draft);
       mockMap.mockReturnValue('mapped');
 
-      const res = await CatchCertService.getDirectExportPayload('Bob','GBR-3444-42356-64834', contactId);
+      const res = await CatchCertService.getDirectExportPayload('Bob', 'GBR-3444-42356-64834', contactId);
 
       expect(res).toEqual('mapped');
     });
   });
 
   describe('getExportLocation', () => {
-      let mockGetDraft;
-      let mockMap;
+    let mockGetDraft;
+    let mockMap;
 
-      beforeAll(() => {
-        mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
-        mockMap = jest.spyOn(CommonSchema, 'toFrontEndExportLocation');
+    beforeAll(() => {
+      mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
+      mockMap = jest.spyOn(CommonSchema, 'toFrontEndExportLocation');
+    });
+
+    afterAll(() => {
+      mockGetDraft.mockRestore();
+      mockMap.mockRestore();
+    });
+
+    it('should return null if there is no draft', async () => {
+      mockGetDraft.mockResolvedValue(null);
+
+      expect(await CatchCertService.getExportLocation('Bob', undefined, contactId)).toBeNull();
+    });
+
+    it('should return null if the draft has no transportation', async () => {
+      const draft = createDraft({
+        products: null,
+        transportation: null,
+        conservation: null,
+        exporterDetails: null
       });
 
-      afterAll(() => {
-        mockGetDraft.mockRestore();
-        mockMap.mockRestore();
+      mockGetDraft.mockResolvedValue(draft);
+
+      expect(await CatchCertService.getExportLocation('Bob', undefined, contactId)).toBeNull();
+    });
+
+    it('should map and return export location if transportation exists', async () => {
+      const draft = createDraft({
+        products: null,
+        transportation: {
+          vehicle: 'spaceship',
+        },
+        conservation: null,
+        exporterDetails: null
       });
 
-      it('should return null if there is no draft', async () => {
-        mockGetDraft.mockResolvedValue(null);
+      mockGetDraft.mockResolvedValue(draft);
+      mockMap.mockReturnValue('mapped');
 
-        expect(await CatchCertService.getExportLocation('Bob',undefined, contactId)).toBeNull();
-      });
+      const res = await CatchCertService.getExportLocation('Bob', 'GBR-3442-2344-23444', contactId);
 
-      it('should return null if the draft has no transportation', async () => {
-        const draft = createDraft({
-          products: null,
-          transportation: null,
-          conservation: null,
-          exporterDetails: null
-        });
+      expect(res).toEqual('mapped');
+      expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-3442-2344-23444', contactId);
+      expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
+    });
 
-        mockGetDraft.mockResolvedValue(draft);
-
-        expect(await CatchCertService.getExportLocation('Bob',undefined, contactId)).toBeNull();
-      });
-
-      it('should map and return export location if transportation exists', async () => {
-        const draft = createDraft({
-          products: null,
-          transportation: {
-            vehicle: 'spaceship',
-          },
-          conservation: null,
-          exporterDetails: null
-        });
-
-        mockGetDraft.mockResolvedValue(draft);
-        mockMap.mockReturnValue('mapped');
-
-        const res = await CatchCertService.getExportLocation('Bob','GBR-3442-2344-23444', contactId);
-
-        expect(res).toEqual('mapped');
-        expect(mockGetDraft).toHaveBeenCalledWith('Bob','GBR-3442-2344-23444', contactId);
-        expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
-      });
-
-      it('should map and return export location when provived with a document number', async () => {
-        const draft = createDraft({
-          exporterDetails: null,
-          products: null,
-          conservation: {
-            conservationReference: "UK Fisheries Policy"
-          },
-          transportation: {
-            vehicle: 'Truck',
-            exportedFrom: 'Jersey',
-            exportedTo: {
-              officialCountryName: "SPAIN",
-              isoCodeAlpha2: "A1",
-              isoCodeAlpha3: "A3",
-              isoNumericCode: "SP"
-            }
+    it('should map and return export location when provived with a document number', async () => {
+      const draft = createDraft({
+        exporterDetails: null,
+        products: null,
+        conservation: {
+          conservationReference: "UK Fisheries Policy"
+        },
+        transportation: {
+          vehicle: 'Truck',
+          exportedFrom: 'Jersey',
+          exportedTo: {
+            officialCountryName: "SPAIN",
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP"
           }
-        });
-
-        mockGetDraft.mockResolvedValue(draft);
-        mockMap.mockReturnValue('mapped');
-
-        const res = await CatchCertService.getExportLocation(defaultUser, 'GBR-3444-42356-64834', contactId);
-        expect(res).toStrictEqual('mapped');
-        expect(mockGetDraft).toHaveBeenCalledWith(defaultUser, 'GBR-3444-42356-64834', contactId);
-        expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
+        }
       });
+
+      mockGetDraft.mockResolvedValue(draft);
+      mockMap.mockReturnValue('mapped');
+
+      const res = await CatchCertService.getExportLocation(defaultUser, 'GBR-3444-42356-64834', contactId);
+      expect(res).toStrictEqual('mapped');
+      expect(mockGetDraft).toHaveBeenCalledWith(defaultUser, 'GBR-3444-42356-64834', contactId);
+      expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
+    });
   });
 
   describe('getTransportDetails', () => {
-      let mockGetDraft;
-      let mockMap;
+    let mockGetDraft;
+    let mockMap;
 
-      beforeAll(() => {
-        mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
-        mockMap = jest.spyOn(FrontEndTransportSchema, 'toFrontEndTransport');
+    beforeAll(() => {
+      mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
+      mockMap = jest.spyOn(FrontEndTransportSchema, 'toFrontEndTransport');
+    });
+
+    afterAll(() => {
+      mockGetDraft.mockRestore();
+      mockMap.mockRestore();
+    });
+
+    it('should return null if there is no draft', async () => {
+      mockGetDraft.mockResolvedValue(null);
+
+      expect(await CatchCertService.getTransportDetails('Bob', undefined, contactId)).toBeNull();
+    });
+
+    it('should return null if the draft has no transportation', async () => {
+      const draft = createDraft({
+        products: null,
+        transportation: null,
+        conservation: null,
+        exporterDetails: null
       });
 
-      afterAll(() => {
-        mockGetDraft.mockRestore();
-        mockMap.mockRestore();
+      mockGetDraft.mockResolvedValue(draft);
+
+      expect(await CatchCertService.getTransportDetails('Bob', undefined, contactId)).toBeNull();
+    });
+
+    it('should map and return transport if transportation exists', async () => {
+      const draft = createDraft({
+        products: null,
+        transportation: {
+          vehicle: 'spaceship',
+        },
+        conservation: null,
+        exporterDetails: null
       });
 
-      it('should return null if there is no draft', async () => {
-        mockGetDraft.mockResolvedValue(null);
+      mockGetDraft.mockResolvedValue(draft);
+      mockMap.mockReturnValue('mapped');
 
-        expect(await CatchCertService.getTransportDetails('Bob',undefined, contactId)).toBeNull();
-      });
+      const res = await CatchCertService.getTransportDetails('Bob', 'GBR-344-23424-23444', contactId);
 
-      it('should return null if the draft has no transportation', async () => {
-        const draft = createDraft({
-          products: null,
-          transportation: null,
-          conservation: null,
-          exporterDetails: null
-        });
-
-        mockGetDraft.mockResolvedValue(draft);
-
-        expect(await CatchCertService.getTransportDetails('Bob',undefined, contactId)).toBeNull();
-      });
-
-      it('should map and return transport if transportation exists', async () => {
-        const draft = createDraft({
-          products: null,
-          transportation: {
-            vehicle: 'spaceship',
-          },
-          conservation: null,
-          exporterDetails: null
-        });
-
-        mockGetDraft.mockResolvedValue(draft);
-        mockMap.mockReturnValue('mapped');
-
-        const res = await CatchCertService.getTransportDetails('Bob','GBR-344-23424-23444', contactId);
-
-        expect(res).toEqual('mapped');
-        expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
-        expect(mockGetDraft).toHaveBeenCalledWith('Bob','GBR-344-23424-23444', contactId);
-      });
+      expect(res).toEqual('mapped');
+      expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
+      expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-344-23424-23444', contactId);
+    });
   });
 
   describe('upsertExportPayload', () => {
@@ -1596,7 +1598,7 @@ describe('catchCert - db related', () => {
           commodityCode: 'commodityCode',
           commodityCodeAdmin: 'admin commodityCode',
           commodityCodeDescription: 'commodityCodeDescription',
-          factor : 2.3,
+          factor: 2.3,
           presentation: {
             code: 'FIL',
             label: 'Filletted',
@@ -1642,14 +1644,14 @@ describe('catchCert - db related', () => {
     };
 
     it('should map and save the data', async () => {
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
-      await CatchCertService.upsertExportPayload(defaultUser, payload,'RJH-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.upsertExportPayload(defaultUser, payload, 'RJH-2020-CC-0E42C2DA5', contactId);
 
       const cert = await CatchCertModel.findOne(
-        {createdBy: defaultUser, status: 'DRAFT', documentNumber: 'RJH-2020-CC-0E42C2DA5'},
+        { createdBy: defaultUser, status: 'DRAFT', documentNumber: 'RJH-2020-CC-0E42C2DA5' },
         ['exportData'],
-        {lean: true}
+        { lean: true }
       );
 
       expect(cert.exportData.products).toStrictEqual(FrontEndPayloadSchema.toBackEndProductsLanded(payload));
@@ -1657,15 +1659,15 @@ describe('catchCert - db related', () => {
 
     it('should map and save the data when a document number is provided', async () => {
 
-      await new CatchCertModel(sampleDocument('GBR-3444-3444-34444','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-3444-3444-34444', 'DRAFT')).save();
 
 
-      await CatchCertService.upsertExportPayload(defaultUser, payload,'GBR-3444-3444-34444', contactId);
+      await CatchCertService.upsertExportPayload(defaultUser, payload, 'GBR-3444-3444-34444', contactId);
 
       const cert = await CatchCertModel.findOne(
-        {createdBy: defaultUser, status: 'DRAFT', documentNumber:'GBR-3444-3444-34444'},
+        { createdBy: defaultUser, status: 'DRAFT', documentNumber: 'GBR-3444-3444-34444' },
         ['exportData'],
-        {lean: true}
+        { lean: true }
       );
 
       expect(cert.exportData.products).toStrictEqual(FrontEndPayloadSchema.toBackEndProductsLanded(payload));
@@ -1674,78 +1676,78 @@ describe('catchCert - db related', () => {
   });
 
   describe('upsertExportLocation', () => {
-      it('should update exportData.transportation', async () => {
-        await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
+    it('should update exportData.transportation', async () => {
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
-        await CatchCertService.upsertExportLocation(
-          defaultUser,
-          {
-            'exportedFrom': 'Albuquerque',
-            'exportedTo': {
-              officialCountryName: "SPAIN",
-              isoCodeAlpha2: "A1",
-              isoCodeAlpha3: "A3",
-              isoNumericCode: "SP"
-            }
-          },
-          'RJH-2020-CC-0E42C2DA5',
-          contactId
-        );
-
-        const cert = await CatchCertModel.findOne(
-          {createdBy: defaultUser, status: 'DRAFT', documentNumber:'RJH-2020-CC-0E42C2DA5'},
-          ['exportData'],
-          {lean: true}
-        );
-
-        expect(cert.exportData).toStrictEqual({
-          transportation: {
-            'exportedFrom': 'Albuquerque',
-            'exportedTo': {
-              officialCountryName: "SPAIN",
-              isoCodeAlpha2: "A1",
-              isoCodeAlpha3: "A3",
-              isoNumericCode: "SP"
-            }
+      await CatchCertService.upsertExportLocation(
+        defaultUser,
+        {
+          'exportedFrom': 'Albuquerque',
+          'exportedTo': {
+            officialCountryName: "SPAIN",
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP"
           }
-        });
-      });
-
-      it('should update exportData.transportation with a document number', async () => {
-        await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42CDA5', 'DRAFT')).save();
-        await CatchCertService.upsertExportLocation(
-          defaultUser,
-          {
-            'exportedFrom': 'Jersey',
-            'exportedTo': {
-              officialCountryName: "SPAIN",
-              isoCodeAlpha2: "A1",
-              isoCodeAlpha3: "A3",
-              isoNumericCode: "SP"
-            }
-          },
-          'GBR-2020-CC-0E42CDA5',
-          contactId);
-        const result = await CatchCertModel.findOne({
-          createdBy: defaultUser,
-          status: 'DRAFT',
-          documentNumber: 'GBR-2020-CC-0E42CDA5'
         },
-        ['exportData'],
-        {lean: true});
+        'RJH-2020-CC-0E42C2DA5',
+        contactId
+      );
 
-        expect(result.exportData).toStrictEqual({
-          transportation: {
-            'exportedFrom': 'Jersey',
-            'exportedTo': {
-              officialCountryName: "SPAIN",
-              isoCodeAlpha2: "A1",
-              isoCodeAlpha3: "A3",
-              isoNumericCode: "SP"
-            }
+      const cert = await CatchCertModel.findOne(
+        { createdBy: defaultUser, status: 'DRAFT', documentNumber: 'RJH-2020-CC-0E42C2DA5' },
+        ['exportData'],
+        { lean: true }
+      );
+
+      expect(cert.exportData).toStrictEqual({
+        transportation: {
+          'exportedFrom': 'Albuquerque',
+          'exportedTo': {
+            officialCountryName: "SPAIN",
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP"
           }
-        });
+        }
       });
+    });
+
+    it('should update exportData.transportation with a document number', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42CDA5', 'DRAFT')).save();
+      await CatchCertService.upsertExportLocation(
+        defaultUser,
+        {
+          'exportedFrom': 'Jersey',
+          'exportedTo': {
+            officialCountryName: "SPAIN",
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP"
+          }
+        },
+        'GBR-2020-CC-0E42CDA5',
+        contactId);
+      const result = await CatchCertModel.findOne({
+        createdBy: defaultUser,
+        status: 'DRAFT',
+        documentNumber: 'GBR-2020-CC-0E42CDA5'
+      },
+        ['exportData'],
+        { lean: true });
+
+      expect(result.exportData).toStrictEqual({
+        transportation: {
+          'exportedFrom': 'Jersey',
+          'exportedTo': {
+            officialCountryName: "SPAIN",
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP"
+          }
+        }
+      });
+    });
   });
 
   describe('getDraft', () => {
@@ -1766,7 +1768,7 @@ describe('catchCert - db related', () => {
     });
 
     it('should call the findOne mongoose method with the correct parameters', async () => {
-      const conditions = {documentNumber: undefined, status: {$in: ['DRAFT', 'PENDING', 'LOCKED']}};
+      const conditions = { documentNumber: undefined, status: { $in: ['DRAFT', 'PENDING', 'LOCKED'] } };
 
       await CatchCertService.getDraft('Bob', undefined, undefined);
 
@@ -1774,37 +1776,37 @@ describe('catchCert - db related', () => {
     });
 
     it('should be able to fetch by documentNumber', async () => {
-      const conditions = {documentNumber: 'GBR-343434-234234-2344', status: {$in: ['DRAFT', 'PENDING', 'LOCKED']}};
+      const conditions = { documentNumber: 'GBR-343434-234234-2344', status: { $in: ['DRAFT', 'PENDING', 'LOCKED'] } };
 
-      await CatchCertService.getDraft('Bob','GBR-343434-234234-2344', contactId);
+      await CatchCertService.getDraft('Bob', 'GBR-343434-234234-2344', contactId);
 
       expect(mockFind).toHaveBeenCalledWith(conditions);
     });
 
     test('cache returns empty', async () => {
       mockGetDraftCache.mockResolvedValue({});
-      mockFind.mockResolvedValue({doc: 'GBR-343434-234234-2344', contactId});
+      mockFind.mockResolvedValue({ doc: 'GBR-343434-234234-2344', contactId });
 
-      const result = await CatchCertService.getDraft(undefined,'GBR-343434-234234-2344', undefined);
+      const result = await CatchCertService.getDraft(undefined, 'GBR-343434-234234-2344', undefined);
 
       expect(result).toBeNull();
     });
 
     test('cache returns object', async () => {
-      mockGetDraftCache.mockResolvedValue({doc: 'GBR-343434-234234-2344'});
+      mockGetDraftCache.mockResolvedValue({ doc: 'GBR-343434-234234-2344' });
 
-      const result = await CatchCertService.getDraft('Bob','GBR-343434-234234-2344', contactId);
+      const result = await CatchCertService.getDraft('Bob', 'GBR-343434-234234-2344', contactId);
 
-      expect(result).toEqual({doc: 'GBR-343434-234234-2344'});
+      expect(result).toEqual({ doc: 'GBR-343434-234234-2344' });
     });
 
     it('should return null when owner validation fails', async () => {
       mockGetDraftCache.mockResolvedValue({});
-      mockFind.mockResolvedValue({doc: 'GBR-343434-234234-2344', contactId});
+      mockFind.mockResolvedValue({ doc: 'GBR-343434-234234-2344', contactId });
 
-      const result = await CatchCertService.getDraft('Bob','GBR-343434-234234-2344', contactId);
+      const result = await CatchCertService.getDraft('Bob', 'GBR-343434-234234-2344', contactId);
 
-      expect(result).toEqual({doc: 'GBR-343434-234234-2344', contactId});
+      expect(result).toEqual({ doc: 'GBR-343434-234234-2344', contactId });
     });
 
   });
@@ -1812,9 +1814,9 @@ describe('catchCert - db related', () => {
   describe('updateCertificateStatus', () => {
 
     const getDocument = async (documentNumber: string) => {
-      const query = {documentNumber: documentNumber};
+      const query = { documentNumber: documentNumber };
       const projection = ['-_id', '-__t', '-__v', '-audit'];
-      const options = {lean: true};
+      const options = { lean: true };
 
       return await CatchCertModel.findOne(query, projection, options);
     };
@@ -1951,9 +1953,9 @@ describe('catchCert - db related', () => {
     });
 
     const getDraft = async (documentNumber: string) => {
-      const query = {documentNumber: documentNumber};
+      const query = { documentNumber: documentNumber };
       const projection = ['-_id', '-__t', '-__v', '-audit'];
-      const options = {lean: true};
+      const options = { lean: true };
 
       return await CatchCertModel.findOne(query, projection, options);
     };
@@ -1962,7 +1964,7 @@ describe('catchCert - db related', () => {
       const testDate = '2020-02-12';
       mockDate.mockReturnValue(testDate);
 
-      await new CatchCertModel(sampleDocument('test','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('test', 'DRAFT')).save();
 
       await CatchCertService.completeDraft(defaultUser, 'test', 'documentUri', 'bob@bob.bob', contactId);
 
@@ -1976,7 +1978,7 @@ describe('catchCert - db related', () => {
         createdBy: defaultUser,
         createdByEmail: 'bob@bob.bob',
         status: 'COMPLETE',
-        userReference : defaultUserReference
+        userReference: defaultUserReference
       });
     });
 
@@ -1998,7 +2000,7 @@ describe('catchCert - db related', () => {
         createdBy: defaultUser,
         createdByEmail: 'bob@bob.bob',
         status: 'COMPLETE',
-        userReference : defaultUserReference
+        userReference: defaultUserReference
       });
     });
 
@@ -2031,58 +2033,58 @@ describe('catchCert - db related', () => {
   });
 
   describe('getSpecies', () => {
-      let mockGetDraft;
-      let mockMap;
+    let mockGetDraft;
+    let mockMap;
 
-      beforeAll(() => {
-        mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
-        mockMap = jest.spyOn(CatchCertSchema, 'toFrontEndSpecies');
+    beforeAll(() => {
+      mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
+      mockMap = jest.spyOn(CatchCertSchema, 'toFrontEndSpecies');
+    });
+
+    afterAll(() => {
+      mockGetDraft.mockRestore();
+      mockMap.mockRestore();
+    });
+
+    it('should return null if there is no draft', async () => {
+      mockGetDraft.mockResolvedValue(null);
+
+      expect(await CatchCertService.getSpecies('Bob', undefined, contactId)).toBeNull();
+    });
+
+    it('should map and return products if they exist', async () => {
+      const draft = createDraft({
+        products: [
+          { speciesId: '1' },
+          { speciesId: '2' }
+        ],
+        transportation: null,
+        conservation: null,
+        exporterDetails: null
       });
 
-      afterAll(() => {
-        mockGetDraft.mockRestore();
-        mockMap.mockRestore();
-      });
+      mockGetDraft.mockResolvedValue(draft);
+      mockMap.mockReturnValue('mapped');
 
-      it('should return null if there is no draft', async () => {
-        mockGetDraft.mockResolvedValue(null);
+      expect(await CatchCertService.getSpecies('Bob', undefined, contactId)).toEqual(['mapped', 'mapped']);
+    });
 
-        expect(await CatchCertService.getSpecies('Bob',undefined, contactId)).toBeNull();
-      });
+    it('return products if we provide a documentNumber', async () => {
+      const draft = createDraft({
+        products: [
+          { speciesId: '1' },
+          { speciesId: '2' }
+        ],
+        transportation: null,
+        conservation: null,
+        exporterDetails: null
+      }, 'GBR-34344-43444-234234234');
 
-      it('should map and return products if they exist', async () => {
-        const draft = createDraft({
-          products: [
-            {speciesId: '1'},
-            {speciesId: '2'}
-          ],
-          transportation: null,
-          conservation: null,
-          exporterDetails: null
-        });
+      mockGetDraft.mockResolvedValue(draft);
+      mockMap.mockReturnValue('mapped');
 
-        mockGetDraft.mockResolvedValue(draft);
-        mockMap.mockReturnValue('mapped');
-
-        expect(await CatchCertService.getSpecies('Bob',undefined, contactId)).toEqual(['mapped', 'mapped']);
-      });
-
-      it('return products if we provide a documentNumber', async () => {
-        const draft = createDraft({
-          products: [
-            {speciesId: '1'},
-            {speciesId: '2'}
-          ],
-          transportation: null,
-          conservation: null,
-          exporterDetails: null
-        },'GBR-34344-43444-234234234');
-
-        mockGetDraft.mockResolvedValue(draft);
-        mockMap.mockReturnValue('mapped');
-
-        expect(await CatchCertService.getSpecies('Bob','GBR-34344-43444-234234234', contactId)).toEqual(['mapped', 'mapped']);
-      });
+      expect(await CatchCertService.getSpecies('Bob', 'GBR-34344-43444-234234234', contactId)).toEqual(['mapped', 'mapped']);
+    });
   });
 
   describe('upsertSpecies', () => {
@@ -2100,16 +2102,16 @@ describe('catchCert - db related', () => {
     }];
 
     it('should map and save the data', async () => {
-      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('RJH-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
 
-      await CatchCertService.upsertSpecies(defaultUser, payload,'RJH-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.upsertSpecies(defaultUser, payload, 'RJH-2020-CC-0E42C2DA5', contactId);
 
       const result = await CatchCertModel.findOne({
         createdBy: 'Bob',
         status: 'DRAFT',
         documentNumber: 'RJH-2020-CC-0E42C2DA5',
-      }, ['exportData'], {lean: true});
+      }, ['exportData'], { lean: true });
 
       const expected = [{
         ...toBackEndProduct(payload[0]),
@@ -2121,15 +2123,15 @@ describe('catchCert - db related', () => {
 
     it('should be able to take in a document number', async () => {
 
-      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
-      await CatchCertService.upsertSpecies(defaultUser, payload,'GBR-2020-CC-0E42C2DA5', contactId);
+      await CatchCertService.upsertSpecies(defaultUser, payload, 'GBR-2020-CC-0E42C2DA5', contactId);
 
       const result = await CatchCertModel.findOne({
         createdBy: 'Bob',
         status: 'DRAFT',
-        documentNumber:'GBR-2020-CC-0E42C2DA5'
-      }, ['exportData'], {lean: true});
+        documentNumber: 'GBR-2020-CC-0E42C2DA5'
+      }, ['exportData'], { lean: true });
 
       const expected = [{
         ...toBackEndProduct(payload[0]),
@@ -2202,7 +2204,7 @@ describe('catchCert - db related', () => {
           transportation: null,
           exporterDetails: null
         },
-        'GBR-3444-42356-64834');
+          'GBR-3444-42356-64834');
         mockGet.mockResolvedValue(draft);
         mockMap.mockReturnValue('mapped');
 
@@ -2218,8 +2220,8 @@ describe('catchCert - db related', () => {
 
       const payload: FrontEndExporterSchema.CcExporter = {
         model: {
-          contactId : 'a contact Id',
-          accountId  : 'an account id',
+          contactId: 'a contact Id',
+          accountId: 'an account id',
           exporterFullName: 'Bob',
           exporterCompanyName: 'Exporter Co Ltd',
           addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
@@ -2235,8 +2237,8 @@ describe('catchCert - db related', () => {
           currentUri: '',
           nextUri: '',
           journey: '',
-          _dynamicsAddress: {someData: 'original data'},
-          _dynamicsUser : {
+          _dynamicsAddress: { someData: 'original data' },
+          _dynamicsUser: {
             firstName: "John",
             lastName: "Doe"
           }
@@ -2244,22 +2246,22 @@ describe('catchCert - db related', () => {
       };
 
       it("will convert to a back end conservation model", async () => {
-        await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5','DRAFT')).save();
+        await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
-        await CatchCertService.upsertExporterDetails(defaultUser,'GBR-2020-CC-0E42C2DA5', payload, contactId);
+        await CatchCertService.upsertExporterDetails(defaultUser, 'GBR-2020-CC-0E42C2DA5', payload, contactId);
 
         const result = await CatchCertModel.findOne({
           createdBy: 'Bob',
           documentNumber: 'GBR-2020-CC-0E42C2DA5',
           status: 'DRAFT'
-        }, ['exportData'], {lean: true});
+        }, ['exportData'], { lean: true });
         expect(result.exportData.exporterDetails).toStrictEqual(FrontEndExporterSchema.toBackEndCcExporterDetails(payload));
       });
 
       it("will work with a document number", async () => {
         await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
 
-        await CatchCertService.upsertExporterDetails(defaultUser,'GBR-2020-CC-0E42C2DA5', payload, contactId);
+        await CatchCertService.upsertExporterDetails(defaultUser, 'GBR-2020-CC-0E42C2DA5', payload, contactId);
 
         const result = await CatchCertModel.findOne({
           createdBy: 'Bob',
@@ -2288,7 +2290,7 @@ describe('catchCert - db related', () => {
       it("will return null if no draft is found", async () => {
         mockGet.mockResolvedValue(null);
 
-        expect(await CatchCertService.getExporterDetails(defaultUser,undefined, contactId)).toBeNull();
+        expect(await CatchCertService.getExporterDetails(defaultUser, undefined, contactId)).toBeNull();
       });
 
       it("will return null if the draft has no exporter", async () => {
@@ -2310,8 +2312,8 @@ describe('catchCert - db related', () => {
           transportation: null,
           conservation: null,
           exporterDetails: {
-            contactId : 'a contact Id',
-            accountId  : 'an account id',
+            contactId: 'a contact Id',
+            accountId: 'an account id',
             exporterFullName: 'Bob',
             exporterCompanyName: 'Exporter Co Ltd',
             addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
@@ -2324,7 +2326,7 @@ describe('catchCert - db related', () => {
             townCity: 'Aberdeen',
             postcode: 'AB1 2XX',
             _dynamicsAddress: {},
-            _dynamicsUser : {
+            _dynamicsUser: {
               firstName: "John",
               lastName: "Doe"
             }
@@ -2332,12 +2334,12 @@ describe('catchCert - db related', () => {
         });
 
         mockGet.mockResolvedValue(draft);
-        mockMap.mockReturnValue({mapped: true});
+        mockMap.mockReturnValue({ mapped: true });
 
         const res = await CatchCertService.getExporterDetails(defaultUser, undefined, contactId);
 
         expect(mockMap).toHaveBeenCalledWith(draft.exportData.exporterDetails);
-        expect(res).toStrictEqual({mapped: true});
+        expect(res).toStrictEqual({ mapped: true });
       });
 
       it("will fetch exporter details by documentNumber", async () => {
@@ -2346,8 +2348,8 @@ describe('catchCert - db related', () => {
           transportation: null,
           conservation: null,
           exporterDetails: {
-            contactId : 'a contact Id',
-            accountId  : 'an account id',
+            contactId: 'a contact Id',
+            accountId: 'an account id',
             exporterFullName: 'Bob',
             exporterCompanyName: 'Exporter Co Ltd',
             addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
@@ -2360,7 +2362,7 @@ describe('catchCert - db related', () => {
             townCity: 'Aberdeen',
             postcode: 'AB1 2XX',
             _dynamicsAddress: {},
-            _dynamicsUser : {
+            _dynamicsUser: {
               firstName: "John",
               lastName: "Doe"
             }
@@ -2368,9 +2370,9 @@ describe('catchCert - db related', () => {
         });
 
         mockGet.mockResolvedValue(draft);
-        mockMap.mockReturnValue({mapped: true});
+        mockMap.mockReturnValue({ mapped: true });
 
-        await CatchCertService.getExporterDetails(defaultUser,'GBR-34344234-24323423-234234', contactId);
+        await CatchCertService.getExporterDetails(defaultUser, 'GBR-34344234-24323423-234234', contactId);
 
         expect(mockGet).toHaveBeenCalledWith("Bob", "GBR-34344234-24323423-234234", contactId);
       });
@@ -2393,7 +2395,7 @@ describe('catchCert - db related', () => {
         const documentNumber = 'doc1234';
         const userReference = 'ref1234';
 
-        await new CatchCertModel({documentNumber: documentNumber, status: 'DRAFT', createdBy: defaultUser}).save();
+        await new CatchCertModel({ documentNumber: documentNumber, status: 'DRAFT', createdBy: defaultUser }).save();
         await CatchCertService.upsertUserReference(defaultUser, documentNumber, userReference, contactId);
 
         const draft = await CatchCertService.getDraft(defaultUser, documentNumber, contactId);
@@ -2402,18 +2404,18 @@ describe('catchCert - db related', () => {
         expect(draft.userReference).toStrictEqual(userReference);
 
         expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
-        expect(mockInvalidateDraftCache).toHaveBeenNthCalledWith(1, defaultUser, 'doc1234' ,contactId);
-        expect(mockInvalidateDraftCache).toHaveBeenNthCalledWith(2, defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}` ,contactId);
+        expect(mockInvalidateDraftCache).toHaveBeenNthCalledWith(1, defaultUser, 'doc1234', contactId);
+        expect(mockInvalidateDraftCache).toHaveBeenNthCalledWith(2, defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       });
 
-      it("will upsert a user reference and invalidate only DRAFT headers for user cache", async () => {
+      it("will upsert a user reference and invalidate DRAFT headers for user cache", async () => {
         const documentNumber = 'doc1234';
         const userReference = 'ref1234';
 
         await CatchCertService.upsertUserReference(defaultUser, documentNumber, userReference, contactId);
 
         expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
-        expect(mockInvalidateDraftCache).toHaveBeenNthCalledWith(1, defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}` ,contactId);
+        expect(mockInvalidateDraftCache).toHaveBeenNthCalledWith(1, defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       });
 
     });
@@ -2464,6 +2466,8 @@ describe('catchCert - db related', () => {
     }
 
     let mockInvalidateDraftCache;
+    let mockGetSpeciesByFaoCode
+    let mockLoggerInfo
 
     beforeEach(async () => {
       jest
@@ -2471,9 +2475,10 @@ describe('catchCert - db related', () => {
         .mockResolvedValue(cloneDocNumber);
 
       await new CatchCertModel(original).save();
-
       mockInvalidateDraftCache = jest.spyOn(CatchCertService, 'invalidateDraftCache');
       mockInvalidateDraftCache.mockResolvedValue(undefined);
+      mockGetSpeciesByFaoCode = jest.spyOn(ReferenceData, "getSpeciesByFaoCode")
+      mockLoggerInfo = jest.spyOn(logger, 'info');
     });
 
     it('will throw an error if the cc can not be found', async () => {
@@ -2501,6 +2506,60 @@ describe('catchCert - db related', () => {
       expect(clone).not.toBeNull();
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
     });
+    it('will return the document number of newly created copy when Products array is empty', async () => {
+      await CatchCertService.cloneCatchCertificate(originalDocNumber, defaultUser, defaultExcludeLandings, contactId, defaultRequestByAdmin, voidOriginal);
+      const clone = await CatchCertService.getDocument(cloneDocNumber, defaultUser, contactId);
+      expect(clone).not.toBeNull();
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
+        `[GET-COPY][PRODUCT][cc1][NO-PRODUCT]`
+      );
+    });
+
+    it('Will Throw an error when something goes wrong while newly creating a copy', async () => {
+      const product: Products = { speciesId: 'abc' };
+      await CatchCertService.updateProductScientificName(product, "abc");
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
+        `[GET-COPY][DOCUMENT-NUMBER][abc][PRODUCT][[object Object]][GET-FAO-CODE][undefined]`
+      );
+
+    });
+
+    it('will return the document number of newly created copy even when scientifcName is already there in the product', async () => {
+      const product: Products = { speciesId: 'abc', speciesCode: '123', scientificName: 'Existing Name' };
+      await CatchCertService.updateProductScientificName(product, "abc");
+      expect(mockGetSpeciesByFaoCode).not.toHaveBeenCalled();
+      expect(product.scientificName).toBe('Existing Name');
+    });
+
+    it('updateProductScientificName will be called when product is present', async () => {
+      const clonedCC = {
+        ...original,
+      }
+      clonedCC.exportData.products = [{
+        speciesId: 'GBR-2024-CC-42101AC39-ce16125a-27cb-4134-abd3-f2f8e8af8ade',
+        species: 'Haddock (HAD)',
+        speciesCode: 'HAD',
+        commodityCode: '03047200',
+        commodityCodeDescription: 'Frozen fillets of haddock "Melanogrammus aeglefinus"',
+        state: { code: 'FRO', name: 'Frozen' },
+        presentation: { code: 'FIS', name: 'Filleted and skinned' },
+        factor: 2.6,
+        caughtBy: []
+      }]
+      await new CatchCertModel(clonedCC).save();
+
+      await CatchCertService.cloneCatchCertificate(originalDocNumber, defaultUser, defaultExcludeLandings, contactId, defaultRequestByAdmin, voidOriginal);
+
+      expect(clonedCC.exportData.products).toHaveLength(1)
+    });
+
+    it('will return the document number of newly created copy when scientificName is not present in the product', async () => {
+      const product: Products = { speciesId: 'abc', speciesCode: '123' };
+      mockGetSpeciesByFaoCode.mockReturnValue([{ faoCode: '123', scientificName: 'New Scientific Name' }])
+      await CatchCertService.updateProductScientificName(product, "abc");
+      expect(mockGetSpeciesByFaoCode).toHaveBeenCalledWith('123');
+      expect(product.scientificName).toBe('New Scientific Name');
+    });
 
     it('will not link the clone with the original - changes to one do not effect the other', async () => {
       await CatchCertService.cloneCatchCertificate(originalDocNumber, defaultUser, defaultExcludeLandings, contactId, defaultRequestByAdmin, voidOriginal);
@@ -2508,7 +2567,7 @@ describe('catchCert - db related', () => {
       await CatchCertService.upsertDraftData(
         defaultUser,
         originalDocNumber,
-        {'$set': {'exportData.exporterDetails.exporterFullName': 'Modified'}},
+        { '$set': { 'exportData.exporterDetails.exporterFullName': 'Modified' } },
         contactId
       );
 
@@ -2759,7 +2818,7 @@ describe('constructOwnerQuery', () => {
     ]);
   });
 
-  it('will return contactId if only contactId is provided', () => {
+  it('will return contactId if contactId is provided', () => {
     const result = CatchCertService.constructOwnerQuery(undefined, 'contactId');
     expect(result).toEqual([
       {
@@ -2771,7 +2830,7 @@ describe('constructOwnerQuery', () => {
     ]);
   });
 
-  it('will return only createdBy if contactId is not provided', () => {
+  it('will return createdBy if contactId is not provided', () => {
     const result = CatchCertService.constructOwnerQuery(
       'userPrincipal',
       undefined

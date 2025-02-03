@@ -31,11 +31,7 @@ export default class DocumentController {
     const email: string = app.claims.email;
     const roles: string[] = app.claims.roles;
     const fesApi: boolean = app.claims.fesApi;
-    const requestByAdmin: boolean = roles ?
-         roles.includes('MMO-ECC-Service-Management')
-      || roles.includes('MMO-ECC-Support-User')
-      || roles.includes('MMO-ECC-IUU-Single-Liaison-Officer')
-      || roles.includes('MMO-ECC-Regulatory-User') : false;
+    const requestByAdmin: boolean = isRequestByAdmin(roles);
 
     const documentType: string = req.params.documentType;
     logger.info(`[ORCHESTRATOR][REQUEST-BY-EACC-ADMIN][${requestByAdmin}]`);
@@ -43,49 +39,12 @@ export default class DocumentController {
       if (canCreateDraft) {
         switch(documentType) {
           case "catchCertificate" :
-            return await CatchCertService.createDraft(userId, email, requestByAdmin, contactId)
-              .then(async (documentNumber) => {
-                await ReferenceDataService.reportDraftCreated(documentNumber)
-                  .catch(e => logger.error(`[REPORT-CC-DOCUMENT-DRAFT][${documentNumber}][ERROR][${e}]`));
-
-                logger.info(`[ORCHESTRATOR][CREATING-CC-DRAFT][SUCCESS]`);
-                if(fesApi || (req.payload as any).mmov2) {
-                  return h.response(documentNumber);
-                }
-                return h.redirect((req.payload as any).nextUri.replace('{documentNumber}', documentNumber));
-              })
-              .catch(error => {
-                logger.error(`[ORCHESTRATOR][CREATING-CC-DRAFT][ERROR][${error.stack || error}]`);
-                return h.response('error').code(500)
-              });
+            return createCatchCertificateDraft(userId, email, requestByAdmin, contactId, fesApi, req, h);
           case "storageDocument":
           case "storageNotes":
-            return await StorageDocumentService.createDraft(userId, email, requestByAdmin, contactId)
-              .then(async documentNumber => {
-                  await ReferenceDataService.reportDraftCreated(documentNumber)
-                    .catch(e => logger.error(`[REPORT-SD-DOCUMENT-DRAFT][${documentNumber}][ERROR][${e}]`));
-
-                logger.info(`[ORCHESTRATOR][CREATING-SD-DRAFT][SUCCESS]`);
-                return returnDraft(fesApi, h, documentNumber, req);
-              }).catch(error => {
-                logger.error(`[ORCHESTRATOR][CREATING-SD-DRAFT][ERROR][${error.stack || error}]`);
-                return h.response('error').code(500)
-              });
+            return createStorageDocumentDraft(userId, email, requestByAdmin, contactId, fesApi, req, h);
           case "processingStatement":
-            return await ProcessingStatementService.createDraft(userId, email, requestByAdmin, contactId)
-              .then(async (documentNumber) => {
-                  await ReferenceDataService.reportDraftCreated(documentNumber)
-                    .catch(e => logger.error(`[REPORT-PS-DOCUMENT-DRAFT][${documentNumber}][ERROR][${e}]`));
-
-                logger.info(`[ORCHESTRATOR][CREATING-PS-DRAFT][SUCCESS]`);
-                if(fesApi || (req.payload as any).mmov2) {
-                  return h.response(documentNumber);
-                }
-                return h.redirect((req.payload as any).nextUri.replace('{documentNumber}', documentNumber));
-              }).catch(error => {
-                logger.error(`[ORCHESTRATOR][CREATING-PS-DRAFT][ERROR][${error.stack || error}]`);
-                return h.response('error').code(500)
-              });
+            return createProcessingStatementDraft(userId, email, requestByAdmin, contactId, fesApi, req, h);
         }
       }
 
@@ -210,10 +169,89 @@ export default class DocumentController {
   }
 }
 
+const isRequestByAdmin = (roles) =>  roles ?
+    roles.includes('MMO-ECC-Service-Management')
+    || roles.includes('MMO-ECC-Support-User')
+    || roles.includes('MMO-ECC-IUU-Single-Liaison-Officer')
+    || roles.includes('MMO-ECC-Regulatory-User') : false;
+
 const returnDraft = (fesApi: boolean, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, documentNumber: string, req: Hapi.Request) => {
   if (fesApi || (req.payload as any).mmov2) {
     return h.response(documentNumber);
   }
 
   return h.redirect((req.payload as any).nextUri.replace('{documentNumber}', documentNumber));
+}
+
+const createCatchCertificateDraft = async (
+  userId: string,
+  email: string,
+  requestByAdmin: boolean,
+  contactId: string,
+  fesApi: boolean,
+  req: Hapi.Request,
+  h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>
+) => {
+  return await CatchCertService.createDraft(userId, email, requestByAdmin, contactId)
+    .then(async (documentNumber) => {
+      await ReferenceDataService.reportDraftCreated(documentNumber)
+        .catch(e => logger.error(`[REPORT-CC-DOCUMENT-DRAFT][${documentNumber}][ERROR][${e}]`));
+
+      logger.info(`[ORCHESTRATOR][CREATING-CC-DRAFT][SUCCESS]`);
+      if(fesApi || (req.payload as any).mmov2) {
+        return h.response(documentNumber);
+      }
+      return h.redirect((req.payload as any).nextUri.replace('{documentNumber}', documentNumber));
+    })
+    .catch(error => {
+      logger.error(`[ORCHESTRATOR][CREATING-CC-DRAFT][ERROR][${error.stack || error}]`);
+      return h.response('error').code(500)
+    });
+}
+
+const createProcessingStatementDraft = async (
+  userId: string,
+  email: string,
+  requestByAdmin: boolean,
+  contactId: string,
+  fesApi: boolean,
+  req: Hapi.Request,
+  h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>
+) => {
+  return await ProcessingStatementService.createDraft(userId, email, requestByAdmin, contactId)
+    .then(async (documentNumber) => {
+        await ReferenceDataService.reportDraftCreated(documentNumber)
+          .catch(e => logger.error(`[REPORT-PS-DOCUMENT-DRAFT][${documentNumber}][ERROR][${e}]`));
+
+      logger.info(`[ORCHESTRATOR][CREATING-PS-DRAFT][SUCCESS]`);
+      if(fesApi || (req.payload as any).mmov2) {
+        return h.response(documentNumber);
+      }
+      return h.redirect((req.payload as any).nextUri.replace('{documentNumber}', documentNumber));
+    }).catch(error => {
+      logger.error(`[ORCHESTRATOR][CREATING-PS-DRAFT][ERROR][${error.stack || error}]`);
+      return h.response('error').code(500)
+    });
+}
+
+const createStorageDocumentDraft = async (
+  userId: string,
+  email: string,
+  requestByAdmin: boolean,
+  contactId: string,
+  fesApi: boolean,
+  req: Hapi.Request,
+  h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>
+) => {
+  return await StorageDocumentService.createDraft(userId, email, requestByAdmin, contactId)
+    .then(async documentNumber => {
+        await ReferenceDataService.reportDraftCreated(documentNumber)
+          .catch(e => logger.error(`[REPORT-SD-DOCUMENT-DRAFT][${documentNumber}][ERROR][${e}]`));
+
+      logger.info(`[ORCHESTRATOR][CREATING-SD-DRAFT][SUCCESS]`);
+      return returnDraft(fesApi, h, documentNumber, req);
+    }).catch(error => {
+      logger.error(`[ORCHESTRATOR][CREATING-SD-DRAFT][ERROR][${error.stack || error}]`);
+      return h.response('error').code(500)
+    });
 }

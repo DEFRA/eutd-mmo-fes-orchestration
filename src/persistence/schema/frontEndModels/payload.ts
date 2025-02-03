@@ -67,6 +67,12 @@ export interface Landing {
   landingDataExpectedDate?: string;
   landingDataEndDate?: string;
   isLegallyDue?: boolean;
+  vesselRiskScore?: number;
+  exporterRiskScore?: number;
+  speciesRiskScore?: number;
+  threshold?: number;
+  riskScore?: number;
+  isSpeciesRiskEnabled?: boolean;
 }
 export interface LandingStatus {
   addMode?: boolean;
@@ -158,49 +164,56 @@ export const toCodeAndName = (input: CodeAndLabel): BackEndModels.State | BackEn
   }
 };
 
+const mapLandings = (landing: LandingStatus) => {
+  const errors = (landing.errors) ? Object.keys(landing.errors) : [];
+  const result = {
+    vessel: landing.model?.vessel?.vesselName,
+    pln: landing.model?.vessel?.pln,
+    homePort: landing.model?.vessel?.homePort,
+    flag: landing.model?.vessel?.flag,
+    cfr: landing.model?.vessel?.cfr,
+    imoNumber: landing.model?.vessel?.imoNumber,
+    licenceNumber: landing.model?.vessel?.licenceNumber,
+    licenceValidTo: landing.model?.vessel?.licenceValidTo,
+    licenceHolder: landing.model?.vessel?.licenceHolder,
+    id: landing.model.id,
+    date: landing.model.dateLanded,
+    faoArea: landing.model.faoArea,
+    weight: landing.model.exportWeight,
+    numberOfSubmissions: landing.model.numberOfSubmissions,
+    vesselOverriddenByAdmin: landing.model?.vessel?.vesselOverriddenByAdmin,
+    vesselNotFound: landing.model?.vessel?.vesselNotFound,
+    dataEverExpected: landing.model.dataEverExpected,
+    landingDataExpectedDate: landing.model.landingDataExpectedDate,
+    landingDataEndDate: landing.model.landingDataEndDate,
+    isLegallyDue: landing.model.isLegallyDue,
+    vesselRiskScore: landing.model.vesselRiskScore,
+    exporterRiskScore: landing.model.exporterRiskScore,
+    speciesRiskScore: landing.model.speciesRiskScore,
+    threshold: landing.model.threshold,
+    riskScore: landing.model.riskScore,
+    isSpeciesRiskEnabled: landing.model.isSpeciesRiskEnabled
+  };
+
+  if (errors.length > 0) {
+    if (errors.includes('vessel.label') && errors.includes('vessel.vesselName')) {
+      delete result['vessel']
+    }
+    if (errors.includes('dateLanded')) {
+      delete result['date']
+    }
+    if (errors.includes('exportWeight')) {
+      delete result['weight']
+    }
+  }
+
+  Object.keys(result).forEach(key => result[key] === undefined ? delete result[key] : {});
+
+  return result;
+}
 export const toBackEndCatches = (landings: LandingStatus[]): BackEndModels.Catch[] => {
   return (landings)
-    ? landings.map<BackEndModels.Catch>((landing: LandingStatus) => {
-      const errors = (landing.errors) ? Object.keys(landing.errors) : [];
-      const result = {
-        vessel: landing.model?.vessel?.vesselName,
-        pln: landing.model?.vessel?.pln,
-        homePort: landing.model?.vessel?.homePort,
-        flag: landing.model?.vessel?.flag,
-        cfr: landing.model?.vessel?.cfr,
-        imoNumber: landing.model?.vessel?.imoNumber,
-        licenceNumber: landing.model?.vessel?.licenceNumber,
-        licenceValidTo: landing.model?.vessel?.licenceValidTo,
-        licenceHolder: landing.model?.vessel?.licenceHolder,
-        id: landing.model.id,
-        date: landing.model.dateLanded,
-        faoArea: landing.model.faoArea,
-        weight: landing.model.exportWeight,
-        numberOfSubmissions: landing.model.numberOfSubmissions,
-        vesselOverriddenByAdmin: landing.model?.vessel?.vesselOverriddenByAdmin,
-        vesselNotFound: landing.model?.vessel?.vesselNotFound,
-        dataEverExpected: landing.model.dataEverExpected,
-        landingDataExpectedDate: landing.model.landingDataExpectedDate,
-        landingDataEndDate: landing.model.landingDataEndDate,
-        isLegallyDue: landing.model.isLegallyDue
-      };
-
-      if (errors.length > 0) {
-        if (errors.includes('vessel.label') && errors.includes('vessel.vesselName')) {
-          delete result['vessel']
-        }
-        if (errors.includes('dateLanded')) {
-          delete result['date']
-        }
-        if (errors.includes('exportWeight')) {
-          delete result['weight']
-        }
-      }
-
-      Object.keys(result).forEach(key => result[key] === undefined ? delete result[key] : {});
-
-      return result;
-    })
+    ? landings.map<BackEndModels.Catch>((landing: LandingStatus) => mapLandings(landing))
     : [];
 };
 
@@ -261,6 +274,12 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
         exportWeight: landing.weight,
         numberOfSubmissions: landing.numberOfSubmissions,
         isLegallyDue: landing.isLegallyDue,
+        vesselRiskScore: landing.vesselRiskScore,
+        exporterRiskScore: landing.exporterRiskScore,
+        speciesRiskScore: landing.speciesRiskScore,
+        threshold: landing.threshold,
+        riskScore: landing.riskScore,
+        isSpeciesRiskEnabled: landing.isSpeciesRiskEnabled
       }
     };
 
@@ -308,14 +327,9 @@ export const toFrontEndProductsLanded = (products: BackEndModels.Product[] = [])
 });
 
 export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): DirectLanding => {
-  const weights: Weight[] = products.map((product: BackEndModels.Product) => ({
-    speciesId: product ? product.speciesId : '',
-    speciesLabel: (product && product.species && product.state && product.presentation && product.commodityCode) ?
-      `${product.speciesAdmin ? product.speciesAdmin : product.species}, ${product.state.admin ? product.state.admin : product.state.name}, ${product.presentation.admin ? product.presentation.admin : product.presentation.name}, ${product.commodityCodeAdmin ? product.commodityCodeAdmin : product.commodityCode}` : undefined,
-    exportWeight: product && product.caughtBy && product.caughtBy.length > 0 ? product.caughtBy[0].weight : undefined
-  }));
+  const weights: Weight[] = products.map((product: BackEndModels.Product) => mapProductsForFrontEndDirectLanding(product));
 
-  const landing: BackEndModels.Catch = (products[0] && products[0].caughtBy && products[0].caughtBy.length > 0)
+  const landing: BackEndModels.Catch = (products[0]?.caughtBy && products[0].caughtBy.length > 0)
     ? products[0].caughtBy[0] : undefined;
 
   const vessel: Vessel = landing ? {
@@ -342,7 +356,7 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
     dateLanded: landing ? landing.date : undefined,
     faoArea: landing ? landing.faoArea : undefined,
     weights: weights.map((weight: Weight) => {
-      Object.keys(weight).forEach(key => weight[key] === undefined ? delete weight[key] : null);
+      Object.keys(weight).forEach(key => mapWeights(weight, key));
       return weight;
     })
   }
@@ -351,6 +365,21 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
 
   return result;
 }
+
+const mapWeights = (weight: Weight, key:string) => weight[key] === undefined ? delete weight[key] : null
+
+const mapProductsForFrontEndDirectLanding = (product: BackEndModels.Product) => ({
+  speciesId: product ? product.speciesId : '',
+  speciesLabel: (product?.species && product?.state && product?.presentation && product?.commodityCode) ?
+    `${speciesName(product)}, ${stateName(product)}, ${presentationName(product)}, ${comodityCode(product)}` 
+    : undefined,
+  exportWeight: product?.caughtBy && product?.caughtBy.length > 0 ? product?.caughtBy[0].weight : undefined
+})
+
+const speciesName = (product: BackEndModels.Product) => product.speciesAdmin ? product.speciesAdmin : product.species;
+const stateName = (product: BackEndModels.Product) => product.state.admin ? product.state.admin : product.state.name;
+const presentationName = (product: BackEndModels.Product) => product.presentation.admin ? product.presentation.admin : product.presentation.name;
+const comodityCode = (product: BackEndModels.Product) => product.commodityCodeAdmin ? product.commodityCodeAdmin : product.commodityCode;
 
 export const toFrontEndValidationFailure = (results: IExportCertificateResults | void): ValidationFailure[] =>
   results ? results.report.map(report => ({
@@ -368,22 +397,27 @@ export const toProduct = (payload: any): Product => payload ? ({
   commodityCodeAdmin: payload.product ? payload.product.commodity_code_admin : undefined,
   commodityCodeDescription: payload.product ? payload.product.commodity_code_description : undefined,
   scientificName: payload.product ? payload.product.scientificName : undefined,
-  presentation: {
-    code: payload.product ? payload.product.presentation : '',
-    label: payload.product ? payload.product.presentationLabel : '',
-    admin: payload.product ? payload.product.presentationAdmin : undefined
-  },
-  state: {
-    code: payload.product ? payload.product.state : '',
-    label: payload.product ? payload.product.stateLabel : '',
-    admin: payload.product ? payload.product.stateAdmin : undefined
-  },
-  species: {
-    code: payload.product ? payload.product.speciesCode : '',
-    label: payload.product ? payload.product.species : '',
-    admin: payload.product ? payload.product.speciesAdmin : undefined
-  },
+  presentation: getPresentationObject(payload),
+  state: getStateObject(payload),
+  species: getSpeciesObject(payload),
   factor: payload.factor
 }) : undefined;
 
+const getPresentationObject = (payload) => ({
+  code: payload.product ? payload.product.presentation : '',
+  label: payload.product ? payload.product.presentationLabel : '',
+  admin: payload.product ? payload.product.presentationAdmin : undefined
+})
+
+const getStateObject = (payload) => ({
+  code: payload.product ? payload.product.state : '',
+  label: payload.product ? payload.product.stateLabel : '',
+  admin: payload.product ? payload.product.stateAdmin : undefined
+})
+
+const getSpeciesObject = (payload) => ({
+  code: payload.product ? payload.product.speciesCode : '',
+  label: payload.product ? payload.product.species : '',
+  admin: payload.product ? payload.product.speciesAdmin : undefined
+})
 

@@ -143,7 +143,7 @@ export const checkVesselLicense = async (vessel: Vessel, date: string, httpClien
     const response:AxiosResponse = await client.get('/v1/vessels/hasLicense', params);
     return response.data;
   } catch(err) {
-    logger.error('Vessel has no valid license', err.message);
+    logger.error(`Vessel ${vessel.vesselName} has no valid license`, err.message);
     throw err;
   }
 };

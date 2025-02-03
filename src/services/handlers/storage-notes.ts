@@ -117,9 +117,7 @@ function validateStorageFacility(storageFacility: any, index: number, errors, is
   }
 
   if (!storageFacility.facilityAddressOne && !storageFacility.facilityTownCity && !storageFacility.facilityPostcode) {
-    errors[`storageFacilities-${index}-facilityAddressOne`] = (isStorageFacilitiesPage)
-      ? 'sdAddStorageFacilityDetailsErrorEditTheStorageFacility'
-      : 'sdAddStorageFacilityDetailsErrorEnterTheAddress';
+    errors[`storageFacilities-${index}-facilityAddressOne`] = getFacilityAddressOneError(isStorageFacilitiesPage)
   } else {
     if (!storageFacility.facilityAddressOne || validateWhitespace(storageFacility.facilityAddressOne)) {
       errors[`storageFacilities-${index}-facilityAddressOne`] = `sdAddStorageFacilityDetailsErrorEnterTheBuilding`;
@@ -134,6 +132,11 @@ function validateStorageFacility(storageFacility: any, index: number, errors, is
 
   return { errors };
 }
+
+function getFacilityAddressOneError(isStorageFacilitiesPage: boolean) {
+  return isStorageFacilitiesPage ? 'sdAddStorageFacilityDetailsErrorEditTheStorageFacility'
+  : 'sdAddStorageFacilityDetailsErrorEnterTheAddress';
+}  
 
 export async function isSpeciesNameValid(productName, scientificName) {
   const refUrl = ApplicationConfig.getReferenceServiceUrl();
@@ -209,31 +212,11 @@ export async function validateProduct(product: any, index: number, errors, isNon
 }
 
 export async function validateEntry(product: any, index: number, errors, documentNumber: string="", userPrincipal: string="", contactId: string="") {
-  if (!product.dateOfUnloading || product.dateOfUnloading === "") {
-    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorNull`;
-  } else if (!validateDate(product.dateOfUnloading)) {
-    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorDateFormat`;
-  } else if (!validateTodayOrInThePast(product.dateOfUnloading)) {
-    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorValidDate`;
-    product.dateOfUnloading = cleanDate(product.dateOfUnloading);
-  }
-  else {
-    product.dateOfUnloading = cleanDate(product.dateOfUnloading);
-  }
-  if (!product.placeOfUnloading || validateWhitespace(product.placeOfUnloading)) {
-    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPlaceOfUnloadingErrorNull';
-  } else if (!isPlaceProductEntersUkValid(product.placeOfUnloading)) {
-    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPlaceOfUnloadingErrorInvalid';
-  } else if (product.placeOfUnloading.length > MAX_PORT_NAME_LENGTH) {
-    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPortErrorMustNotExceed';
-  }
-  if (!product.transportUnloadedFrom || validateWhitespace(product.transportUnloadedFrom)) {
-    errors[`catches-${index}-transportUnloadedFrom`] = 'sdAddProductToConsignmentTransportDetailsErrorNull';
-  } else if (product.transportUnloadedFrom.length > MAX_TRANSPORT_UNLOADED_FROM_LENGTH) {
-    errors[`catches-${index}-transportUnloadedFrom`] = `sdAddProductToConsignmentTransportDetailsErrorMustNotExceed-${MAX_TRANSPORT_UNLOADED_FROM_LENGTH}`;
-  } else if (!isTransportUnloadedFromFormatValid(product.transportUnloadedFrom)) {
-    errors[`catches-${index}-transportUnloadedFrom`] = 'sdAddProductToConsignmentTransportDetailsErrorInValidFormat';
-  }
+  checkDateOfUnloadingErrors(product, errors, index);
+
+  checkPlaceOfUnloadingErrors(product, errors, index);
+
+  checkTransportUnloadedFromErrors(product, errors, index);
 
   if (!product.certificateNumber || validateWhitespace(product.certificateNumber)) {
     errors[`catches-${index}-certificateNumber`] = 'sdAddProductToConsignmentCertificateNumberErrorNull';
@@ -249,6 +232,45 @@ export async function validateEntry(product: any, index: number, errors, documen
     errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentSpeciesDoesNotExistError';
   }
 
+  checkWeightOnCCErrors(product, errors, index);
+  return { errors };
+}
+
+function checkDateOfUnloadingErrors(product: any, errors: any, index: number) {
+  if (!product.dateOfUnloading || product.dateOfUnloading === "") {
+    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorNull`;
+  } else if (!validateDate(product.dateOfUnloading)) {
+    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorDateFormat`;
+  } else if (!validateTodayOrInThePast(product.dateOfUnloading)) {
+    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorValidDate`;
+    product.dateOfUnloading = cleanDate(product.dateOfUnloading);
+  }
+  else {
+    product.dateOfUnloading = cleanDate(product.dateOfUnloading);
+  }
+}
+
+function checkPlaceOfUnloadingErrors(product: any, errors: any, index: number) {
+  if (!product.placeOfUnloading || validateWhitespace(product.placeOfUnloading)) {
+    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPlaceOfUnloadingErrorNull';
+  } else if (!isPlaceProductEntersUkValid(product.placeOfUnloading)) {
+    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPlaceOfUnloadingErrorInvalid';
+  } else if (product.placeOfUnloading.length > MAX_PORT_NAME_LENGTH) {
+    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPortErrorMustNotExceed';
+  }
+}
+
+function checkTransportUnloadedFromErrors(product: any, errors: any, index: number) {
+  if (!product.transportUnloadedFrom || validateWhitespace(product.transportUnloadedFrom)) {
+    errors[`catches-${index}-transportUnloadedFrom`] = 'sdAddProductToConsignmentTransportDetailsErrorNull';
+  } else if (product.transportUnloadedFrom.length > MAX_TRANSPORT_UNLOADED_FROM_LENGTH) {
+    errors[`catches-${index}-transportUnloadedFrom`] = `sdAddProductToConsignmentTransportDetailsErrorMustNotExceed-${MAX_TRANSPORT_UNLOADED_FROM_LENGTH}`;
+  } else if (!isTransportUnloadedFromFormatValid(product.transportUnloadedFrom)) {
+    errors[`catches-${index}-transportUnloadedFrom`] = 'sdAddProductToConsignmentTransportDetailsErrorInValidFormat';
+  }
+}
+
+function checkWeightOnCCErrors(product: any, errors: any, index: number) {
   if (!product.weightOnCC) {
     errors[`catches-${index}-weightOnCC`] = 'sdAddProductToConsignmentWeightOnCCErrorNull';
   } else if ((+product.weightOnCC) <= 0) {
@@ -256,5 +278,4 @@ export async function validateEntry(product: any, index: number, errors, documen
   } else if (!isPositiveNumberWithTwoDecimals(product.weightOnCC)) {
     errors[`catches-${index}-weightOnCC`] = 'sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal';
   }
-  return { errors };
 }

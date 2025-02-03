@@ -177,30 +177,40 @@ export const toFrontEndProcessingStatementExportData = (exportData: ExportData) 
 
 
   return {
-    catches: exportData && exportData.catches ? toFrontEndCatchProcessingStatement(exportData.catches) : [],
+    catches: getCatches(exportData),
     validationErrors: dateValidation,
     error: "",
     addAnotherCatch: "No",
-    products: exportData && exportData.products ? toFrontEndProductProcessingStatement(exportData.products) : null,
-    consignmentDescription: exportData && exportData.consignmentDescription ? exportData.consignmentDescription : null,
-    healthCertificateDate: exportData && exportData.healthCertificateDate ? exportData.healthCertificateDate : null,
-    healthCertificateNumber: exportData && exportData.healthCertificateNumber ? exportData.healthCertificateNumber : null,
-    personResponsibleForConsignment: exportData && exportData.personResponsibleForConsignment ? exportData.personResponsibleForConsignment : null,
-    plantApprovalNumber: exportData && exportData.plantApprovalNumber ? exportData.plantApprovalNumber : null,
-    plantName: exportData && exportData.plantName ? exportData.plantName : null,
-    plantAddressOne: exportData && exportData.plantAddressOne ? exportData.plantAddressOne : null,
-    plantBuildingName: exportData && exportData.plantBuildingName ? exportData.plantBuildingName : null,
-    plantBuildingNumber: exportData && exportData.plantBuildingNumber ? exportData.plantBuildingNumber : null,
-    plantSubBuildingName: exportData && exportData.plantSubBuildingName ? exportData.plantSubBuildingName : null,
-    plantStreetName: exportData && exportData.plantStreetName ? exportData.plantStreetName : null,
-    plantCounty: exportData && exportData.plantCounty ? exportData.plantCounty : null,
-    plantCountry: exportData && exportData.plantCountry ? exportData.plantCountry : null,
-    plantTownCity: exportData && exportData.plantTownCity ? exportData.plantTownCity : null,
-    plantPostcode: exportData && exportData.plantPostcode ? exportData.plantPostcode : null,
-    dateOfAcceptance: exportData && exportData.dateOfAcceptance ? exportData.dateOfAcceptance : null,
-    exportedTo: exportData && exportData.exportedTo ? toExportedTo(exportData.exportedTo) : null,
+    products: getProducts(exportData),
+    consignmentDescription: getDatafromExportData(exportData, 'consignmentDescription'),
+    healthCertificateDate: getDatafromExportData(exportData, 'healthCertificateDate'),
+    healthCertificateNumber: getDatafromExportData(exportData, 'healthCertificateNumber'),
+    personResponsibleForConsignment: getDatafromExportData(exportData, 'personResponsibleForConsignment'),
+    plantApprovalNumber: getDatafromExportData(exportData, 'plantApprovalNumber'),
+    plantName: getDatafromExportData(exportData, 'plantName'),
+    plantAddressOne: getDatafromExportData(exportData, 'plantAddressOne'),
+    plantBuildingName: getDatafromExportData(exportData, 'plantBuildingName'),
+    plantBuildingNumber: getDatafromExportData(exportData, 'plantBuildingNumber'),
+    plantSubBuildingName: getDatafromExportData(exportData, 'plantSubBuildingName'),
+    plantStreetName: getDatafromExportData(exportData, 'plantStreetName'),
+    plantCounty: getDatafromExportData(exportData, 'plantCounty'),
+    plantCountry: getDatafromExportData(exportData, 'plantCountry'),
+    plantTownCity: getDatafromExportData(exportData, 'plantTownCity'),
+    plantPostcode: getDatafromExportData(exportData, 'plantPostcode'),
+    dateOfAcceptance: getDatafromExportData(exportData, 'dateOfAcceptance'),
+    exportedTo: exportData?.exportedTo ? toExportedTo(exportData.exportedTo) : null,
     _plantDetailsUpdated : plantDetailsUpdated ? true : false
   };
+}
+
+const getCatches = (exportData: ExportData) => exportData?.catches ? toFrontEndCatchProcessingStatement(exportData?.catches) : [];
+const getProducts = (exportData: ExportData) => exportData?.products ? toFrontEndProductProcessingStatement(exportData?.products) : null;
+const getDatafromExportData = (exportData: ExportData, property: string) => {
+  if (exportData) {
+    return exportData[property] ? exportData[property] : null
+  } else {
+    return null;
+  }
 }
 
 export const addTotalWeightLandedProcessingStatement = async (documentNumber: string, userPrincipal: string, contactId: string, catches: Catch[]): Promise<Catch[]> =>

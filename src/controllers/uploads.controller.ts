@@ -143,7 +143,7 @@ export default class UploadsController {
         currentLanding.product.commodity_code === item.product.commodityCode);
 
     for (const validLanding of validLandings) {
-      let item: ProductLanded = findLanding(validLanding, exportPayload.items);
+      const item: ProductLanded = findLanding(validLanding, exportPayload.items);
       const newLanding: LandingStatus = {
         model: {
           id: `${documentNumber}-${getRandomNumber()}`,
@@ -154,25 +154,35 @@ export default class UploadsController {
         }
       };
 
-      if (item && Array.isArray(item.landings)) {
-        item.landings.push(newLanding);
-      } else if (item) {
-        item.landings = [newLanding];
-      } else {
-        const productId = `${documentNumber}-${uuidv4()}`;
-        const product: Product = toProduct({ ...validLanding, id: productId });
-        item = {
-          product,
-          landings: [newLanding]
-        };
-
-        exportPayload.items.push(item);
-      }
+      UploadsController.addLanding(item, newLanding, documentNumber, validLanding, exportPayload);
     }
 
     await ExportPayloadService.save(exportPayload, userPrincipal, documentNumber, contactId);
 
     return h.response(landings).code(200);
+  }
+
+  static readonly addLanding = (
+    item: ProductLanded,
+    newLanding: LandingStatus,
+    documentNumber: string,
+    validLanding: IUploadedLanding,
+    exportPayload: ProductsLanded
+  ) => {
+    if (item && Array.isArray(item.landings)) {
+      item.landings.push(newLanding);
+    } else if (item) {
+      item.landings = [newLanding];
+    } else {
+      const productId = `${documentNumber}-${uuidv4()}`;
+      const product: Product = toProduct({ ...validLanding, id: productId });
+      item = {
+        product,
+        landings: [newLanding]
+      };
+
+      exportPayload.items.push(item);
+    }
   }
 
   public static async getCacheUploadedRows(userPrincipal: string, contactId: string): Promise<IUploadedLanding[]> {

@@ -13,6 +13,16 @@ For local installation please refer to your OS documentation,
 - MacOS: `brew install redis mongodb` (The default config should be fine for local development)
 - Windows: `??` (The default settings should work I think!)
 
+# Things to Consider
+* This repository should use GitFlow as a branching strategy.
+* <img
+    src="docs/images/GitFlow-branching-strategy.png"
+    alt="Branching Strategy"
+    title="GitFlow"
+    style="display: inline-block; margin: 0 auto; max-width: 350px">
+* If you won't call your branch as per agreed branching `standards`, the Azure pipeline won't start or may fail to deploy an image.
+
+
 ## Development
 
 For development, the pre-requisites are

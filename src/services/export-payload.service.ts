@@ -29,9 +29,9 @@ import { LandingsRefreshData } from './interfaces';
 import { CcExportedDetailModel } from '../persistence/schema/frontEndModels/exporterDetails';
 import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
 import { updateConsolidateLandings } from "./landings-consolidate.service";
+import * as pdfService from 'mmo-ecc-pdf-svc';
 
 const crypto = require('crypto');
-const pdfService = require('mmo-ecc-pdf-svc');
 const https = require('https');
 
 export default class ExportPayloadService {
@@ -44,24 +44,26 @@ export default class ExportPayloadService {
     if (sessionData && sessionData.landings && exportPayload && exportPayload?.items) {
       exportPayload.items.forEach(item => {
         if (Array.isArray(item.landings)) {
-          item.landings.forEach(landing => {
-            const sessionLanding = sessionData.landings.find(_ => _.landingId === landing.model.id);
-
-            if (sessionLanding) {
-              logger.info(`[GET-EXPORT-PAYLOAD][APPLYING-SESSION-DATA][${sessionLanding.landingId}`);
-              landing.addMode = sessionLanding.addMode;
-              landing.editMode = sessionLanding.editMode;
-              landing.error = sessionLanding.error;
-              landing.errors = sessionLanding.errors;
-              landing.modelCopy = sessionLanding.modelCopy;
-              landing.model = !sessionLanding.error ? landing.model : sessionLanding.model
-            }
-          })
+          item.landings.forEach(landing => ExportPayloadService.applySessionDataToLanding(sessionData, landing))
         }
       })
     }
 
     return exportPayload;
+  }
+
+  static readonly applySessionDataToLanding = (sessionData: SessionStore, landing: LandingStatus) => {
+    const sessionLanding = sessionData.landings.find(_ => _.landingId === landing.model.id);
+
+    if (sessionLanding) {
+      logger.info(`[GET-EXPORT-PAYLOAD][APPLYING-SESSION-DATA][${sessionLanding.landingId}`);
+      landing.addMode = sessionLanding.addMode;
+      landing.editMode = sessionLanding.editMode;
+      landing.error = sessionLanding.error;
+      landing.errors = sessionLanding.errors;
+      landing.modelCopy = sessionLanding.modelCopy;
+      landing.model = !sessionLanding.error ? landing.model : sessionLanding.model
+    }
   }
 
   public static async save(
@@ -104,7 +106,7 @@ export default class ExportPayloadService {
     const sessionData: SessionStore = await getCurrentSessionData(userPrincipal, documentNumber, contactId);
     const directLanding: DirectLanding = await CatchCertService.getDirectExportPayload(userPrincipal, documentNumber, contactId);
 
-    if (sessionData && sessionData.landings && directLanding) {
+    if (sessionData?.landings && directLanding) {
       const sessionLanding = sessionData.landings.find((landing: SessionLanding) => landing.landingId === directLanding.id);
 
       if (sessionLanding) {
@@ -119,25 +121,10 @@ export default class ExportPayloadService {
   public static async upsertLanding(productId, landing, userId, documentNumber, contactId: string): Promise<any> {
     const sessionData: SessionStore = await getCurrentSessionData(userId, documentNumber, contactId);
     const exportPayload: ProductsLanded = await CatchCertService.getExportPayload(userId, documentNumber, contactId);
-    if (exportPayload && exportPayload.items) {
-      exportPayload.items.forEach(item => {
-        if (Array.isArray(item.landings)) {
-          item.landings.forEach(_landing => {
-            if (sessionData?.landings) {
-              const sessionLanding = sessionData.landings.find(_ => _.landingId === _landing.model.id);
-              if (sessionLanding) {
-                _landing.addMode = sessionLanding.addMode;
-                _landing.editMode = sessionLanding.editMode;
-                _landing.error = sessionLanding.error;
-                _landing.errors = sessionLanding.errors;
-                _landing.modelCopy = sessionLanding.modelCopy;
-              }
-            }
-          });
-        }
-      });
+    if (exportPayload?.items) {
+      exportPayload.items.forEach(item => ExportPayloadService.upsertLandingAddSessionData(item, sessionData));
     }
-
+    
     if (!exportPayload.items) {
       exportPayload.items = [];
     }
@@ -188,15 +175,7 @@ export default class ExportPayloadService {
 
       exportPayload.errors = undefined;
 
-      const sessionLanding: SessionLanding = {
-        landingId: landing.model.id,
-        addMode: !matchedLanding ? landing.addMode : false,
-        editMode: !matchedLanding ? landing.editMode : !!matchedLanding.error,
-        error: landing.error,
-        errors: landing.errors,
-        modelCopy: !matchedLanding ? landing.modelCopy : matchedLanding.modelCopy,
-        model: !matchedLanding ? landing.model : matchedLanding.model
-      }
+      const sessionLanding: SessionLanding = ExportPayloadService.upsertLandingGetSessionLanding(landing, matchedLanding)
 
       const _sessionData: SessionData = {
         documentNumber: documentNumber,
@@ -210,6 +189,33 @@ export default class ExportPayloadService {
 
     return exportPayload;
   }
+
+  static readonly upsertLandingAddSessionData = (item: ProductLanded, sessionData: SessionStore) => {
+    if (Array.isArray(item.landings)) {
+      item.landings.forEach(_landing => {
+        if (sessionData?.landings) {
+          const sessionLanding = sessionData.landings.find(_ => _.landingId === _landing.model.id);
+          if (sessionLanding) {
+            _landing.addMode = sessionLanding.addMode;
+            _landing.editMode = sessionLanding.editMode;
+            _landing.error = sessionLanding.error;
+            _landing.errors = sessionLanding.errors;
+            _landing.modelCopy = sessionLanding.modelCopy;
+          }
+        }
+      });
+    }
+  }
+
+  static readonly upsertLandingGetSessionLanding = (landing: LandingStatus, matchedLanding: LandingStatus): SessionLanding => ({
+    landingId: landing.model.id,
+    addMode: !matchedLanding ? landing.addMode : false,
+    editMode: !matchedLanding ? landing.editMode : !!matchedLanding.error,
+    error: landing.error,
+    errors: landing.errors,
+    modelCopy: !matchedLanding ? landing.modelCopy : matchedLanding.modelCopy,
+    model: !matchedLanding ? landing.model : matchedLanding.model
+  })
 
   public static async checkCertificate(payloadToValidate, url): Promise<any> {
     try {
@@ -241,10 +247,10 @@ export default class ExportPayloadService {
 
       logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][START]`);
 
-      const exporter = await CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId) || {} as any;
-      const exportedFrom = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId) || {} as any;
+      const exporter = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId));
+      const exportedFrom = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId));
       const exporterModel: CcExportedDetailModel = (exporter && exporter.model) ? exporter.model : {} as CcExportedDetailModel;
-      const transport: any = await CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId) || {}
+      const transport: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId));
 
       const catchCertificate = {
         transport: { ...transport, ...exportedFrom }
@@ -253,7 +259,7 @@ export default class ExportPayloadService {
       await addIsLegallyDue(documentNumber);
       await CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
 
-      const exportPayload: ProductsLanded = await CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId) || {} as ProductsLanded;
+      const exportPayload: ProductsLanded = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId));
 
       const numberOfLandings = getNumberOfUniqueLandings(exportPayload);
       const offlineValidation = ApplicationConfig.isOfflineValidation(numberOfLandings);
@@ -265,8 +271,8 @@ export default class ExportPayloadService {
         await this.performParallelRefresh(documentNumber, exportPayload.items);
       }
 
-      const conservationData = await CatchCertService.getConservation(userPrincipal, documentNumber, contactId) || {} as any;
-      const transportData = await CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId) || {} as any;
+      const conservationData = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId));
+      const transportData = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId));
       const validationPayload = {
         exportPayload: exportPayload,
         documentNumber: documentNumber,
@@ -292,7 +298,7 @@ export default class ExportPayloadService {
         isBlocking4AEnabled = await getBlockingStatus(ValidationRules.FOUR_A);
       } catch (e) {
         logger.error(`[GETTING-BLOCKING-STATUS-CC][ERROR][${e.stack || e}]`);
-        throw new Error(e.message);
+        throw new Error(e?.message);
       }
 
       const isCatchCertBlockOn = isBlocking3CEnabled || isBlocking3DEnabled || isBlocking4AEnabled || isBlockingNoDataSubmittedEnabled || isBlockingNoLicenceHolderEnabled;
@@ -354,15 +360,14 @@ export default class ExportPayloadService {
         result.uri = storageInfo.uri;
 
         logger.info(`[EXPORT-PAYLOAD-SERVICE][CREATE-EXPORT-CERTIFICATE] Returning ${JSON.stringify(result)}`);
-      } else {
-        if (offlineValidation)
-          await ExportPayloadService.updateCertificateStatus(userPrincipal, documentNumber, contactId, DocumentStatuses.Draft)
-            .then(() => {
-              logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATED-STATUS][${DocumentStatuses.Draft}]`);
-              SummaryErrorsService.saveErrors(documentNumber, toFrontEndValidationFailure(result))
-                .catch((e) => { logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SAVE-ERRORS], ${e}`) });
-            })
-            .catch((e) => { logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATE-STATUS][${DocumentStatuses.Draft}][ERROR], ${e}`) });
+      } else if (offlineValidation) {
+        await ExportPayloadService.updateCertificateStatus(userPrincipal, documentNumber, contactId, DocumentStatuses.Draft)
+          .then(() => {
+            logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATED-STATUS][${DocumentStatuses.Draft}]`);
+            SummaryErrorsService.saveErrors(documentNumber, toFrontEndValidationFailure(result))
+              .catch((e) => { logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SAVE-ERRORS], ${e}`) });
+          })
+          .catch((e) => { logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATE-STATUS][${DocumentStatuses.Draft}][ERROR], ${e}`) });
       }
 
       const reportUrl = '/v1/catchcertificates/data-hub/submit';
@@ -377,10 +382,14 @@ export default class ExportPayloadService {
     }
   }
 
+  static readonly awaitValueOrEmpty = async (functionCall: any) => {
+    return await functionCall || {}
+  }
+
   public static async getItemByProductId(userPrincipal: string, productId: string, documentNumber: string, contactId: string): Promise<any | Error> {
     const exportPayload: any = await CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId) as any || {};
 
-    if (exportPayload && exportPayload.items) {
+    if (exportPayload?.items) {
       const item = exportPayload.items
         .map(_item => _item.product)
         .find(_item => _item.id === productId);

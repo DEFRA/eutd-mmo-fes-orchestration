@@ -12,8 +12,7 @@ import ServiceNames from "./interfaces/service.name.enum";
 export const validateCompletedDocument = async (documentNumber: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string): Promise<boolean> => {
   const draftCache: CatchCertSchema.CatchCertificate | CatchCertificateDraft[] | IDraft = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
 
-  if (!isEmpty(draftCache?.[documentNumber]))
-    return true;
+  if (!isEmpty(draftCache?.[documentNumber])) return true;
 
   const isProcessingStatement: boolean = DocumentNumberService.getServiceNameFromDocumentNumber(foreignDocumentNumber) === ServiceNames.PS;
   const completedDocument: CatchCertSchema.CatchCertificateModel | ProcessingStatementSchema.IProcessingStatementModel | StorageDocSchema.StorageDocumentModel = isProcessingStatement ? await CatchCertSchema.CatchCertModel.findOne({
@@ -32,48 +31,24 @@ export const validateCompletedDocument = async (documentNumber: string, userPrin
     documentNumber: documentNumber,
   }).lean();
 
-  if (!completedDocument) {
-    return false;
-  }
+  if (!completedDocument) return false;
 
   let products: IProductDraft[];
-
   const service = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
   switch (service) {
-    case ServiceNames.CC:
-      {
-        products = (completedDocument as CatchCertSchema.CatchCertificateModel).exportData?.products?.reduce((productDrafts: IProductDraft[], product: CatchCertSchema.Product) => {
-          const index = productDrafts.findIndex((addedProduct: IProductDraft) => addedProduct.species === product.species || (!isEmpty(product.speciesCode) && addedProduct.speciesCode === product.speciesCode));
-          if (index >= 0) {
-            productDrafts[index].totalWeight += product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0);
-            return productDrafts;
-          }
-
-          return [...productDrafts, {
-            species: product.species,
-            speciesCode: product.speciesCode,
-            totalWeight: product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0)
-          }]
-        }, []);
-        break;
-      }
+    case ServiceNames.CC: {
+      const productsArray: CatchCertSchema.Product[] = (completedDocument as CatchCertSchema.CatchCertificateModel).exportData?.products;
+      products = getProductsCatchCertificate(productsArray);
+      break;
+    }
     case ServiceNames.PS: {
       const ctchArray: ProcessingStatementSchema.Catch[] = (completedDocument as ProcessingStatementSchema.IProcessingStatementModel).exportData?.catches;
-      products = Array.isArray(ctchArray) ? ctchArray?.reduce((productDrafts: IProductDraft[], ctch: ProcessingStatementSchema.Catch) =>
-        [...productDrafts, {
-          species: ctch.species,
-          speciesCode: ctch.speciesCode
-        }]
-      , []) : [];
+      products = getProductsProcessingStatement(ctchArray);
       break;
     }
     case ServiceNames.SD: {
       const ctchArray: StorageDocSchema.Catch[] = (completedDocument as StorageDocSchema.StorageDocumentModel).exportData?.catches;
-      products = Array.isArray(ctchArray) ? ctchArray?.reduce((productDrafts: IProductDraft[], ctch: StorageDocSchema.Catch) =>
-        [...productDrafts, {
-          species: ctch.product
-        }]
-      , []) : [];
+      products = getProductsStorageDocument(ctchArray);
       break;
     }
   }
@@ -89,6 +64,31 @@ export const validateCompletedDocument = async (documentNumber: string, userPrin
 
   return true;
 }
+
+const getProductsProcessingStatement = (ctchArray: ProcessingStatementSchema.Catch[]) => Array.isArray(ctchArray) ? ctchArray?.reduce((productDrafts: IProductDraft[], ctch: ProcessingStatementSchema.Catch) =>
+  [...productDrafts, {
+    species: ctch.species,
+    speciesCode: ctch.speciesCode
+  }]
+, []) : [];
+
+const getProductsStorageDocument = (ctchArray: ProcessingStatementSchema.Catch[]) => Array.isArray(ctchArray) ? ctchArray?.reduce((productDrafts: IProductDraft[], ctch: StorageDocSchema.Catch) =>
+  [...productDrafts, {
+    species: ctch.product
+  }], []) : []
+
+export const getProductsCatchCertificate = (productsArray: CatchCertSchema.Product[]) => Array.isArray(productsArray) ? productsArray?.reduce((productDrafts: IProductDraft[], product: CatchCertSchema.Product) => {
+    const index = productDrafts.findIndex((addedProduct: IProductDraft) => addedProduct.species === product.species || (!isEmpty(product.speciesCode) && addedProduct.speciesCode === product.speciesCode));
+    if (index >= 0) {
+      productDrafts[index].totalWeight += product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0);
+      return productDrafts;
+    }
+    return [...productDrafts, {
+      species: product.species,
+      speciesCode: product.speciesCode,
+      totalWeight: product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0)
+    }]
+  }, []) : []
 
 export const validateSpecies = async (documentNumber: string, species: string, speciesCode: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string): Promise<boolean> => {
   const draftCache: CatchCertSchema.CatchCertificate | CatchCertificateDraft[] | IDraft = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);

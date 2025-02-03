@@ -1240,6 +1240,170 @@ describe('document validator', () => {
       expect(result).toBe(false);
     });
 
+    it('should call getProductsCatchCertificate without products', async () => {
+      const result = SUT.getProductsCatchCertificate(null);
+      expect(result).toBeTruthy();
+    })
+
+    it('should call getProductsCatchCertificate with more products', async () => {
+      const result = SUT.getProductsCatchCertificate([
+        {
+          "speciesId": "GBR-2022-CC-3-0",
+          "species": "Atlantic cod (COD)",
+          "speciesCode": "COD",
+          "commodityCode": "03025110",
+          "commodityCodeDescription": "Fresh or chilled cod \"Gadus morhua\"",
+          "scientificName": "Gadus morhua",
+          "state": {
+            "code": "FRE",
+            "name": "Fresh"
+          },
+          "presentation": {
+            "code": "WHL",
+            "name": "Whole"
+          },
+          "factor": 1,
+          "caughtBy": [
+            {
+              "vessel": "CROWDED HOUR",
+              "pln": "N66",
+              "homePort": "ANNALONG",
+              "flag": "GBR",
+              "cfr": "GBR000C18038",
+              "imoNumber": null,
+              "licenceNumber": "23422",
+              "licenceValidTo": "2030-12-31T00:00:00",
+              "licenceHolder": "MR J KEARNEY",
+              "id": "GBR-2022-CC-E80326103-9806927913",
+              "date": "2022-12-12",
+              "faoArea": "FAO18",
+              "weight": 100,
+              "numberOfSubmissions": 1,
+            },
+            {
+              "vessel": "CROWDED HOUR",
+              "pln": "N66",
+              "homePort": "ANNALONG",
+              "flag": "GBR",
+              "cfr": "GBR000C18038",
+              "imoNumber": null,
+              "licenceNumber": "23422",
+              "licenceValidTo": "2030-12-31T00:00:00",
+              "licenceHolder": "MR J KEARNEY",
+              "id": "GBR-2022-CC-E80326103-9806927913",
+              "date": "2022-12-12",
+              "faoArea": "FAO18",
+              "weight": 101,
+              "numberOfSubmissions": 1,
+            }
+          ]
+        },
+        {
+          "speciesId": "GBR-2022-CC-3-2",
+          "species": "Atlantic cod (COD)",
+          "speciesCode": "HER",
+          "commodityCode": "03025110",
+          "commodityCodeDescription": "Fresh or chilled cod \"Gadus morhua\"",
+          "scientificName": "Gadus morhua",
+          "state": {
+            "code": "FRE",
+            "name": "Fresh"
+          },
+          "presentation": {
+            "code": "GUT",
+            "name": "Gutted"
+          },
+          "factor": 1,
+          "caughtBy": [
+            {
+              "vessel": "CROWDED HOUR",
+              "pln": "N66",
+              "homePort": "ANNALONG",
+              "flag": "GBR",
+              "cfr": "GBR000C18038",
+              "imoNumber": null,
+              "licenceNumber": "23422",
+              "licenceValidTo": "2030-12-31T00:00:00",
+              "licenceHolder": "MR J KEARNEY",
+              "id": "GBR-2022-CC-E80326103-9806927913",
+              "date": "2022-12-12",
+              "faoArea": "FAO18",
+              "weight": 100,
+              "numberOfSubmissions": 1,
+            },
+            {
+              "vessel": "CROWDED HOUR",
+              "pln": "N66",
+              "homePort": "ANNALONG",
+              "flag": "GBR",
+              "cfr": "GBR000C18038",
+              "imoNumber": null,
+              "licenceNumber": "23422",
+              "licenceValidTo": "2030-12-31T00:00:00",
+              "licenceHolder": "MR J KEARNEY",
+              "id": "GBR-2022-CC-E80326103-9806927913",
+              "date": "2022-12-12",
+              "faoArea": "FAO18",
+              "weight": 50,
+              "numberOfSubmissions": 1,
+            }
+          ]
+        },
+        {
+          "speciesId": "GBR-2022-CC-3-2",
+          "species": "Atlantic cod (COD)",
+          "speciesCode": "HER",
+          "commodityCode": "03025110",
+          "commodityCodeDescription": "Fresh or chilled cod \"Gadus morhua\"",
+          "scientificName": "Gadus morhua",
+          "state": {
+            "code": "FRE",
+            "name": "Fresh"
+          },
+          "presentation": {
+            "code": "GUT",
+            "name": "Gutted"
+          },
+          "factor": 1,
+          "caughtBy": [
+            {
+              "vessel": "CROWDED HOUR",
+              "pln": "N66",
+              "homePort": "ANNALONG",
+              "flag": "GBR",
+              "cfr": "GBR000C18038",
+              "imoNumber": null,
+              "licenceNumber": "23422",
+              "licenceValidTo": "2030-12-31T00:00:00",
+              "licenceHolder": "MR J KEARNEY",
+              "id": "GBR-2022-CC-E80326103-9806927913",
+              "date": "2022-12-12",
+              "faoArea": "FAO18",
+              "weight": 100,
+              "numberOfSubmissions": 1,
+            },
+            {
+              "vessel": "CROWDED HOUR",
+              "pln": "N66",
+              "homePort": "ANNALONG",
+              "flag": "GBR",
+              "cfr": "GBR000C18038",
+              "imoNumber": null,
+              "licenceNumber": "23422",
+              "licenceValidTo": "2030-12-31T00:00:00",
+              "licenceHolder": "MR J KEARNEY",
+              "id": "GBR-2022-CC-E80326103-9806927913",
+              "date": "2022-12-12",
+              "faoArea": "FAO18",
+              "weight": 50,
+              "numberOfSubmissions": 1,
+            }
+          ]
+        }
+      ]);
+      expect(result).toBeTruthy();
+    })
+
   });
 
 });

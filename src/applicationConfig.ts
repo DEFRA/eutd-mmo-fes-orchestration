@@ -45,8 +45,6 @@ class ApplicationConfig {
   _maxAuthRetries: number;
   _consolidationServicUrl: string;
 
-  constructor() { }
-
   loadProperties() {
     this._disableAuth = process.env.DISABLE_AUTH === 'true';
     this._referenceServiceHost = process.env.MMO_ECC_REFERENCE_SVC_URL;

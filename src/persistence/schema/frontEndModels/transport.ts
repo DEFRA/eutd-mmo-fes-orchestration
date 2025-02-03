@@ -35,60 +35,20 @@ export const toBackEndTransport = (transport: Transport, exportLocation?: Export
     case truck: {
       const hasCmr = (transport.cmr !== null && transport.cmr !== undefined);
       const cmr = (transport.cmr === 'true');
-      backEndTransport =  {
-        vehicle : transport.vehicle,
-        exportedFrom : (exportLocation) ? exportLocation.exportedFrom : undefined,
-        exportedTo : (exportLocation) ? exportLocation.exportedTo : undefined,
-        cmr: hasCmr ? cmr : undefined,
-        nationalityOfVehicle : cmr ? undefined : transport.nationalityOfVehicle,
-        registrationNumber : cmr ? undefined : transport.registrationNumber,
-        departurePlace : cmr ? undefined : transport.departurePlace,
-        exportDate : transport.exportDate
-      };
+      backEndTransport = getTruckBackEndTransport(transport, exportLocation, hasCmr, cmr);
       break;
     }
-
     case  plane :
-      backEndTransport = {
-        vehicle : transport.vehicle,
-        exportedFrom : (exportLocation) ? exportLocation.exportedFrom : undefined,
-        exportedTo : (exportLocation) ? exportLocation.exportedTo : undefined,
-        flightNumber : transport.flightNumber,
-        containerNumber : transport.containerNumber,
-        departurePlace : transport.departurePlace,
-        exportDate : transport.exportDate
-      };
+      backEndTransport = getPlaneBackEndTransport(transport, exportLocation);
       break;
     case train :
-      backEndTransport = {
-        vehicle : transport.vehicle,
-        exportedFrom : (exportLocation) ? exportLocation.exportedFrom : undefined,
-        exportedTo : (exportLocation) ? exportLocation.exportedTo : undefined,
-        railwayBillNumber : transport.railwayBillNumber,
-        departurePlace : transport.departurePlace,
-        exportDate : transport.exportDate
-      };
+      backEndTransport = getTrainBackEndTransport(transport, exportLocation);
       break;
     case containerVessel :
-      backEndTransport = {
-        vehicle : transport.vehicle,
-        exportedFrom : (exportLocation) ? exportLocation.exportedFrom : undefined,
-        exportedTo : (exportLocation) ? exportLocation.exportedTo : undefined,
-        vesselName : transport.vesselName,
-        flagState : transport.flagState,
-        containerNumber : transport.containerNumber,
-        departurePlace : transport.departurePlace,
-        exportDate : transport.exportDate
-      };
+      backEndTransport = getContainerVesselBackEndTransport(transport, exportLocation);
       break;
     case fishingVessel :
-      backEndTransport = {
-        vehicle : transport.vehicle,
-        exportedFrom : (exportLocation) ? exportLocation.exportedFrom : undefined,
-        exportedTo : (exportLocation) ? exportLocation.exportedTo : undefined,
-        departurePlace : transport.departurePlace,
-        exportDate : transport.exportDate
-      };
+      backEndTransport = getFishingVesselBackEndTransport(transport, exportLocation);
       break;
     default :
       return null;
@@ -96,9 +56,56 @@ export const toBackEndTransport = (transport: Transport, exportLocation?: Export
 
   Object.keys(backEndTransport).forEach(key => backEndTransport[key] === undefined ? delete backEndTransport[key] : {});
   return backEndTransport;
-
-
 };
+
+const getTruckBackEndTransport = (transport: Transport, exportLocation: ExportLocation, hasCmr: boolean, cmr: boolean) => ({
+  vehicle: transport.vehicle,
+  exportedFrom: exportLocation ? exportLocation.exportedFrom : undefined,
+  exportedTo: exportLocation ? exportLocation.exportedTo : undefined,
+  cmr: hasCmr ? cmr : undefined,
+  nationalityOfVehicle: cmr ? undefined : transport.nationalityOfVehicle,
+  registrationNumber: cmr ? undefined : transport.registrationNumber,
+  departurePlace: cmr ? undefined : transport.departurePlace,
+  exportDate: transport.exportDate
+});
+
+const getPlaneBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
+  vehicle: transport.vehicle,
+  exportedFrom: exportLocation ? exportLocation.exportedFrom : undefined,
+  exportedTo: exportLocation ? exportLocation.exportedTo : undefined,
+  flightNumber: transport.flightNumber,
+  containerNumber: transport.containerNumber,
+  departurePlace: transport.departurePlace,
+  exportDate: transport.exportDate
+});
+
+const getTrainBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
+  vehicle: transport.vehicle,
+  exportedFrom: exportLocation ? exportLocation.exportedFrom : undefined,
+  exportedTo: exportLocation ? exportLocation.exportedTo : undefined,
+  railwayBillNumber: transport.railwayBillNumber,
+  departurePlace: transport.departurePlace,
+  exportDate: transport.exportDate
+});
+
+const getContainerVesselBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
+  vehicle: transport.vehicle,
+  exportedFrom: (exportLocation) ? exportLocation.exportedFrom : undefined,
+  exportedTo: (exportLocation) ? exportLocation.exportedTo : undefined,
+  vesselName: transport.vesselName,
+  flagState: transport.flagState,
+  containerNumber: transport.containerNumber,
+  departurePlace: transport.departurePlace,
+  exportDate: transport.exportDate
+});
+
+const getFishingVesselBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
+  vehicle: transport.vehicle,
+  exportedFrom: exportLocation ? exportLocation.exportedFrom : undefined,
+  exportedTo: exportLocation ? exportLocation.exportedTo : undefined,
+  departurePlace: transport.departurePlace,
+  exportDate: transport.exportDate
+});
 
 export const toFrontEndTransport = (
   transport: BackEndModels.Transport
@@ -194,84 +201,25 @@ export const checkTransportDataFrontEnd = (transport: Transport): Transport => {
   if (transport) {
     switch (transport.vehicle) {
       case truck: {
-        if (transport.cmr) {
-          if (transport.cmr === "false") {
-            data = (
-              transport.nationalityOfVehicle
-              && transport.registrationNumber
-              && transport.departurePlace
-            ) ? transport : {
-              vehicle: transport.vehicle,
-              cmr: transport.cmr,
-              exportedTo: transport.exportedTo
-            }
-          } else {
-            data = {
-              vehicle: transport.vehicle,
-              cmr: transport.cmr,
-              exportedTo: transport.exportedTo
-            }
-          }
-        } else {
-          data = {
-            vehicle: transport.vehicle,
-            exportedTo: transport.exportedTo
-          }
-        }
-
+        data = checkTruckDataFrontEnd(transport);
         break;
       }
-
       case plane: {
-        data = (
-          transport.flightNumber
-          && transport.containerNumber
-          && transport.departurePlace
-        ) ? transport : {
-          vehicle: transport.vehicle,
-          exportedTo: transport.exportedTo
-        };
-
+        data = checkPlaneDataFrontEnd(transport);
         break
       }
-
       case train: {
-        data = (
-          transport.railwayBillNumber
-          && transport.departurePlace
-        ) ? transport : {
-          vehicle: transport.vehicle,
-          exportedTo: transport.exportedTo
-        };
-
+        data = checkTrainDataFrontEnd(transport);
         break
       }
-
       case containerVessel: {
-        data = (
-          transport.vesselName
-          && transport.flagState
-          && transport.containerNumber
-          && transport.departurePlace
-        ) ? transport : {
-          vehicle: transport.vehicle,
-          exportedTo: transport.exportedTo
-        };
-
+        data = checkContainerVesselDataFrontEnd(transport);
         break
       }
-
       case fishingVessel: {
-        data = (
-          transport.exportDate
-        ) ? transport : {
-          vehicle: transport.vehicle,
-          exportedTo: transport.exportedTo
-        };
-
+        data = checkFishingvesselDataFrontEnd(transport);
         break
       }
-
       default:
         return null;
     }
@@ -290,6 +238,65 @@ export const checkTransportDataFrontEnd = (transport: Transport): Transport => {
   return data;
 };
 
+const checkTruckDataFrontEnd = (transport: Transport) => {
+  let data;
+  if (transport.cmr) {
+    if (transport.cmr === "false") {
+      data = (
+        transport.nationalityOfVehicle
+        && transport.registrationNumber
+        && transport.departurePlace
+      ) ? transport : {
+        vehicle: transport.vehicle,
+        cmr: transport.cmr,
+        exportedTo: transport.exportedTo
+      }
+    } else {
+      data = {
+        vehicle: transport.vehicle,
+        cmr: transport.cmr,
+        exportedTo: transport.exportedTo
+      }
+    }
+  } else {
+    data = {
+      vehicle: transport.vehicle,
+      exportedTo: transport.exportedTo
+    }
+  }
+  return data;
+}
 
+const checkPlaneDataFrontEnd = (transport: Transport) => (
+  transport.flightNumber
+  && transport.containerNumber
+  && transport.departurePlace
+) ? transport : {
+  vehicle: transport.vehicle,
+  exportedTo: transport.exportedTo
+}
 
+const checkTrainDataFrontEnd = (transport: Transport) => (
+  transport.railwayBillNumber
+  && transport.departurePlace
+) ? transport : {
+  vehicle: transport.vehicle,
+  exportedTo: transport.exportedTo
+}
 
+const checkContainerVesselDataFrontEnd = (transport: Transport) => (
+  transport.vesselName
+  && transport.flagState
+  && transport.containerNumber
+  && transport.departurePlace
+) ? transport : {
+  vehicle: transport.vehicle,
+  exportedTo: transport.exportedTo
+}
+
+const checkFishingvesselDataFrontEnd = (transport: Transport) => (
+  transport.exportDate
+) ? transport : {
+  vehicle: transport.vehicle,
+  exportedTo: transport.exportedTo
+};

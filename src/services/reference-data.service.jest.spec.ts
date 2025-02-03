@@ -310,7 +310,7 @@ describe('checkVesselLicense', () => {
     await expect(SUT.checkVesselLicense(vessel, '01/01/1990', mockedAxios)).rejects.toThrow(error.message);
 
     expect(mockLoggerError).toHaveBeenCalledWith(
-      'Vessel has no valid license',
+      'Vessel WIRON 5 has no valid license',
       `${error.message}`
     );
   });

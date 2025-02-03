@@ -122,29 +122,35 @@ export const toBackEndProcessingStatementExportData = (
   exporterDetails: Exporter | null = null,
   documentNumber: string): BackEndProcessingStatement.ExportData => {
   const mappedProperties = {
-    catches: (processingStatement && Array.isArray(processingStatement.catches)) ? toBackEndCatchProcessingStatement(processingStatement.catches) : undefined,
-    exporterDetails: exporterDetails ? toBackEndPsAndSdExporterDetails(exporterDetails) : undefined,
-    products: (processingStatement && Array.isArray(processingStatement.products)) ? toBackEndProductProcessingStatement(processingStatement.products, documentNumber) : undefined,
+    catches: getCatches(processingStatement),
+    exporterDetails: getExporterDetails(exporterDetails),
+    products: getProducts(processingStatement, documentNumber),
     consignmentDescription: processingStatement.consignmentDescription,
-    healthCertificateNumber: processingStatement && processingStatement.healthCertificateNumber ? processingStatement.healthCertificateNumber : undefined,
-    healthCertificateDate: processingStatement && processingStatement.healthCertificateDate ? processingStatement.healthCertificateDate : undefined,
-    personResponsibleForConsignment: processingStatement && processingStatement.personResponsibleForConsignment ? processingStatement.personResponsibleForConsignment : undefined,
-    plantApprovalNumber: processingStatement && processingStatement.plantApprovalNumber ? processingStatement.plantApprovalNumber : undefined,
-    plantName: processingStatement && processingStatement.plantName ? processingStatement.plantName : undefined,
-    plantAddressOne: processingStatement && processingStatement.plantAddressOne ? processingStatement.plantAddressOne : undefined,
-    plantBuildingName: processingStatement && processingStatement.plantBuildingName ? processingStatement.plantBuildingName : undefined,
-    plantBuildingNumber: processingStatement && processingStatement.plantBuildingNumber ? processingStatement.plantBuildingNumber : undefined,
-    plantSubBuildingName: processingStatement && processingStatement.plantSubBuildingName ? processingStatement.plantSubBuildingName : undefined,
-    plantStreetName: processingStatement && processingStatement.plantStreetName ? processingStatement.plantStreetName : undefined,
-    plantCounty: processingStatement && processingStatement.plantCounty ? processingStatement.plantCounty : undefined,
-    plantCountry: processingStatement && processingStatement.plantCountry ? processingStatement.plantCountry : undefined,
-    plantTownCity: processingStatement && processingStatement.plantTownCity ? processingStatement.plantTownCity : undefined,
-    plantPostcode: processingStatement && processingStatement.plantPostcode ? processingStatement.plantPostcode : undefined,
-    dateOfAcceptance: processingStatement && processingStatement.dateOfAcceptance ? processingStatement.dateOfAcceptance : undefined,
-    exportedTo: processingStatement && processingStatement.exportedTo ? processingStatement.exportedTo : undefined
+    healthCertificateNumber: getHealthCertificateNumber(processingStatement),
+    healthCertificateDate: getHealthCertificateDate(processingStatement),
+    personResponsibleForConsignment: processingStatement?.personResponsibleForConsignment ? processingStatement.personResponsibleForConsignment : undefined,
+    plantApprovalNumber: processingStatement?.plantApprovalNumber ? processingStatement.plantApprovalNumber : undefined,
+    plantName: processingStatement?.plantName ? processingStatement.plantName : undefined,
+    plantAddressOne: processingStatement?.plantAddressOne ? processingStatement.plantAddressOne : undefined,
+    plantBuildingName: processingStatement?.plantBuildingName ? processingStatement.plantBuildingName : undefined,
+    plantBuildingNumber: processingStatement?.plantBuildingNumber ? processingStatement.plantBuildingNumber : undefined,
+    plantSubBuildingName: processingStatement?.plantSubBuildingName ? processingStatement.plantSubBuildingName : undefined,
+    plantStreetName: processingStatement?.plantStreetName ? processingStatement.plantStreetName : undefined,
+    plantCounty: processingStatement?.plantCounty ? processingStatement.plantCounty : undefined,
+    plantCountry: processingStatement?.plantCountry ? processingStatement.plantCountry : undefined,
+    plantTownCity: processingStatement?.plantTownCity ? processingStatement.plantTownCity : undefined,
+    plantPostcode: processingStatement?.plantPostcode ? processingStatement.plantPostcode : undefined,
+    dateOfAcceptance: processingStatement?.dateOfAcceptance ? processingStatement.dateOfAcceptance : undefined,
+    exportedTo: processingStatement?.exportedTo ? processingStatement.exportedTo : undefined
   };
 
   Object.keys(mappedProperties).forEach(key => mappedProperties[key] === undefined && delete mappedProperties[key]);
 
   return mappedProperties;
 }
+
+const getCatches = (processingStatement: ProcessingStatement) => (processingStatement && Array.isArray(processingStatement.catches)) ? toBackEndCatchProcessingStatement(processingStatement.catches) : undefined;
+const getExporterDetails = (exporterDetails: Exporter | null) => exporterDetails ? toBackEndPsAndSdExporterDetails(exporterDetails) : undefined;
+const getProducts = (processingStatement: ProcessingStatement, documentNumber) => (processingStatement && Array.isArray(processingStatement.products)) ? toBackEndProductProcessingStatement(processingStatement.products, documentNumber) : undefined;
+const getHealthCertificateNumber = (processingStatement: ProcessingStatement) => processingStatement?.healthCertificateNumber ? processingStatement.healthCertificateNumber : undefined;
+const getHealthCertificateDate = (processingStatement: ProcessingStatement) => processingStatement?.healthCertificateDate ? processingStatement.healthCertificateDate : undefined;

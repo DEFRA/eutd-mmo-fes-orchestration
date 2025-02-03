@@ -4,7 +4,7 @@ import axios from "axios";
 import acceptsHtml from "../helpers/acceptsHtml";
 import acceptsSortSite from "../helpers/acceptsSortSite";
 import { pathToRegexp } from 'path-to-regexp';
-const pdfService = require("mmo-ecc-pdf-svc");
+import * as pdfService from 'mmo-ecc-pdf-svc';
 import {
   BLOB_STORAGE_CONTAINER_NAME,
   JOURNEY,
@@ -142,10 +142,7 @@ export default class OrchestrationService {
     let saveToRedisIfErrors = false;
 
     if (req.query.saveToRedisIfErrors) {
-      saveToRedisIfErrors =
-        (req.query.saveToRedisIfErrors &&
-          req.query.saveToRedisIfErrors === "true") ||
-        false;
+      saveToRedisIfErrors = OrchestrationService.checkSaveToRedis(req);
     }
 
     const setOnValidationSuccess = req.query.setOnValidationSuccess;
@@ -153,25 +150,7 @@ export default class OrchestrationService {
     const sessionStore = await SessionStoreFactory.getSessionStore(
       getRedisOptions()
     );
-    let sessionData: any = {};
-
-    if (redisKey === processingStatement) {
-      sessionData = await ProcessingStatementService.getDraft(
-        userPrincipal,
-        documentNumber,
-        contactId
-      );
-    } else if (redisKey === storageNote) {
-      sessionData = await StorageDocumentService.getDraft(
-        userPrincipal,
-        documentNumber,
-        contactId
-      );
-    } else {
-      sessionData = await sessionStore.readAllFor(userPrincipal, contactId, redisKey);
-    }
-
-    if (!sessionData) sessionData = initialState[redisKey] || {};
+    const sessionData: any = await OrchestrationService.getSessionData(redisKey, userPrincipal, documentNumber, contactId, sessionStore);
 
     const originalSessionData = _.cloneDeep(sessionData);
 
@@ -189,35 +168,90 @@ export default class OrchestrationService {
     }
 
     const handler = findHandler(currentUrl);
-    const result = (handler &&
-      (await handler.exec({
-        data,
-        nextUrl,
-        currentUrl,
-        params: handler.params,
-        errors: {},
-        documentNumber,
-        userPrincipal,
-        contactId
-      }))) || { errors: {} };
+    const result = await handler?.exec({
+      data,
+      nextUrl,
+      currentUrl,
+      params: handler.params,
+      errors: {},
+      documentNumber,
+      userPrincipal,
+      contactId
+    }) || { errors: {} };
 
     let { next = null } = result;
     const { errors } = result;
+    const urlsObj = {
+      currentUrl,
+      nextUrl
+    }
+    next = OrchestrationService.handleErrors(errors, data, documentNumber, originalSessionData, next, urlsObj, setOnValidationSuccess);
 
+    const dataToSave: any = OrchestrationService.getDataToSave(
+      saveToRedisIfErrors,
+      data,
+      req,
+      redisKey,
+      sessionData,
+      documentNumber,
+      originalSessionData
+    );
+
+    await OrchestrationService.updateDraftData(redisKey, userPrincipal, documentNumber, dataToSave, contactId, sessionStore);
+
+    if (acceptsHtml(req.headers) || acceptsSortSite(req.headers)) {
+      if (saveAsDraftUrl && _.isEmpty(errors)) {
+        return h.redirect(saveAsDraftUrl);
+      }
+      return h.redirect(next);
+    }
+
+    if ((saveToRedisIfErrors && data.errors) || !data.errors) {
+      return data;
+    } else {
+      return originalSessionData;
+    }
+  }
+
+  static readonly checkSaveToRedis = (req: Hapi.Request) => (req.query.saveToRedisIfErrors &&
+    req.query.saveToRedisIfErrors === "true") || false;
+
+  static readonly getSessionData = async (redisKey: string, userPrincipal: string, documentNumber: string, contactId: string, sessionStore) => {
+    let sessionData: any = {};
+    if (redisKey === processingStatement) {
+      sessionData = await ProcessingStatementService.getDraft(
+        userPrincipal,
+        documentNumber,
+        contactId
+      );
+    } else if (redisKey === storageNote) {
+      sessionData = await StorageDocumentService.getDraft(
+        userPrincipal,
+        documentNumber,
+        contactId
+      );
+    } else {
+      sessionData = await sessionStore.readAllFor(userPrincipal, contactId, redisKey);
+    }
+    if (!sessionData) sessionData = initialState[redisKey] || {};
+    return sessionData;
+  }
+
+  static readonly handleErrors = (errors, data, documentNumber: string, originalSessionData, next, urlsObj, setOnValidationSuccess) => {
     if (!_.isEmpty(errors)) {
       data.errors = errors;
-      data.errorsUrl = currentUrl.replace(":documentNumber", documentNumber);
+      data.errorsUrl = urlsObj.currentUrl.replace(":documentNumber", documentNumber);
 
       originalSessionData.errors = errors;
-      originalSessionData.errorsUrl = currentUrl.replace(
+      originalSessionData.errorsUrl = urlsObj.currentUrl.replace(
         ":documentNumber",
         documentNumber
       );
 
       // default to set next url to be current url if errors
-      if (!next) next = currentUrl;
+      if (!next) next = urlsObj.currentUrl;
     } else {
-      if (!next) next = nextUrl;
+      if (!next) next = urlsObj.nextUrl;
 
       if (setOnValidationSuccess) {
         data[setOnValidationSuccess] = true;
@@ -225,7 +259,18 @@ export default class OrchestrationService {
       delete data.errors;
       delete data.errorsUrl;
     }
+    return next;
+  }
 
+  static readonly getDataToSave = (
+    saveToRedisIfErrors: boolean,
+    data,
+    req: Hapi.Request,
+    redisKey: string,
+    sessionData,
+    documentNumber: string,
+    originalSessionData
+  ) => {
     let dataToSave: any = {};
     if (
       (saveToRedisIfErrors && data.errors) ||
@@ -252,7 +297,10 @@ export default class OrchestrationService {
     } else {
       dataToSave = originalSessionData.exportData;
     }
+    return dataToSave;
+  }
 
+  static readonly updateDraftData = async (redisKey: string, userPrincipal: string, documentNumber: string, dataToSave, contactId: string, sessionStore) => {
     if (redisKey === processingStatement) {
       await ProcessingStatementService.upsertDraftData(
         userPrincipal,
@@ -277,19 +325,6 @@ export default class OrchestrationService {
       );
     } else {
       await sessionStore.writeAllFor(userPrincipal, contactId, redisKey, dataToSave);
-    }
-
-    if (acceptsHtml(req.headers) || acceptsSortSite(req.headers)) {
-      if (saveAsDraftUrl && _.isEmpty(errors)) {
-        return h.redirect(saveAsDraftUrl);
-      }
-      return h.redirect(next);
-    }
-
-    if ((saveToRedisIfErrors && data.errors) || !data.errors) {
-      return data;
-    } else {
-      return originalSessionData;
     }
   }
 
@@ -322,46 +357,14 @@ export default class OrchestrationService {
 
     switch (redisKey) {
       case processingStatement:
-        for (const ctch in data.catches) {
-          const documentCertificateNumber = data.catches[ctch].catchCertificateNumber;
-          const species = data.catches[ctch].species;
-          const speciesCode = data.catches[ctch].speciesCode;
-          if (data.catches[ctch].catchCertificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber) || !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber))) {
-            data.validationErrors.push({
-              message: 'psAddCatchDetailsErrorUKCCInValid',
-              key: `catches-${ctch}-catchCertificateNumber`
-            })
-          }
-        }
+        await OrchestrationService.checkValidationProcessingStatement(data, userPrincipal, contactId, documentNumber);
         break;
       case storageNote:
-        for (const ctch in data.catches) {
-          const documentCertificateNumber = data.catches[ctch].certificateNumber;
-          const species = data.catches[ctch].product;
-          const speciesCode = null;
-          if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber))) {
-            data.validationErrors.push({
-              message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
-              key: `catches-${ctch}-certificateNumber`,
-              certificateNumber: documentCertificateNumber,
-              product: species
-            });
-          } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber)) {
-            data.validationErrors.push({
-              message: 'sdAddUKEntryDocumentSpeciesDoesNotExistError',
-              key: `catches-${ctch}-certificateNumber`,
-              certificateNumber: documentCertificateNumber,
-              product: species
-            });
-          }
-        }
+        await OrchestrationService.checkValidationStorageNotes(data, userPrincipal, contactId, documentNumber);
         break;
     }
 
     logger.info(`[DOCUMENT-NUMBER: ${documentNumber}][PS-SD-CHECKING-ERRORS]${JSON.stringify(data.validationErrors)}`);
-
-    const checkValidationErrors: (validationErrors: any[]) => boolean = (validationErrors: any[]) =>
-      Array.isArray(validationErrors) && validationErrors.some((validationError: any) => !_.isEmpty(validationError));
 
     if (checkValidationErrors(data.validationErrors)) {
       if (acceptsHtml(req.headers)) {
@@ -418,33 +421,7 @@ export default class OrchestrationService {
         documentNumber
       );
 
-      switch (redisKey) {
-        case processingStatement: {
-          await clearSessionDataForCurrentJourney(
-            userPrincipal,
-            documentNumber,
-            contactId
-          );
-          await ProcessingStatementService.completeDraft(
-            documentNumber,
-            pdf.uri,
-            user.email
-          );
-          break;
-        }
-        case storageNote:
-          await clearSessionDataForCurrentJourney(
-            userPrincipal,
-            documentNumber,
-            contactId
-          );
-          await StorageDocumentService.completeDraft(
-            documentNumber,
-            pdf.uri,
-            user.email
-          );
-          break;
-      }
+      await OrchestrationService.clearDataFromJourney(redisKey, userPrincipal, documentNumber, pdf, user, contactId);
 
       void invalidateDraftCache(userPrincipal, documentNumber, contactId);
       await SaveAsDraftService.deleteDraftLink(
@@ -512,15 +489,77 @@ export default class OrchestrationService {
       );
 
       const uri = encodeURIComponent(pdf.uri);
-      if (acceptsHtml(req.headers)) {
-        return h.redirect(
-          `${nextUrl}?uri=${uri}&documentNumber=${documentNumber}`
-        );
-      }
-
-      return { uri: pdf.uri, documentNumber };
+      return getRedirectionData(req, h.redirect(`${nextUrl}?uri=${uri}&documentNumber=${documentNumber}`), { uri: pdf.uri, documentNumber });
     }
   }
+
+  static readonly checkValidationStorageNotes = async (data, userPrincipal: string, contactId: string, documentNumber: string) => {
+    for (const ctch in data.catches) {
+      const documentCertificateNumber = data.catches[ctch].certificateNumber;
+      const species = data.catches[ctch].product;
+      const speciesCode = null;
+      if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber))) {
+        data.validationErrors.push({
+          message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
+          key: `catches-${ctch}-certificateNumber`,
+          certificateNumber: documentCertificateNumber,
+          product: species
+        });
+      } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber)) {
+        data.validationErrors.push({
+          message: 'sdAddUKEntryDocumentSpeciesDoesNotExistError',
+          key: `catches-${ctch}-certificateNumber`,
+          certificateNumber: documentCertificateNumber,
+          product: species
+        });
+      }
+    }
+  }
+
+  static readonly checkValidationProcessingStatement = async (data, userPrincipal: string, contactId: string, documentNumber: string) => {
+    for (const ctch in data.catches) {
+      const documentCertificateNumber = data.catches[ctch].catchCertificateNumber;
+      const species = data.catches[ctch].species;
+      const speciesCode = data.catches[ctch].speciesCode;
+      if (data.catches[ctch].catchCertificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber) || !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber))) {
+        data.validationErrors.push({
+          message: 'psAddCatchDetailsErrorUKCCInValid',
+          key: `catches-${ctch}-catchCertificateNumber`
+        })
+      }
+    }
+  }
+
+  static readonly clearDataFromJourney = async (redisKey: string, userPrincipal: string, documentNumber: string, pdf, user, contactId: string) => {
+    switch (redisKey) {
+      case processingStatement: {
+        await clearSessionDataForCurrentJourney(
+          userPrincipal,
+          documentNumber,
+          contactId
+        );
+        await ProcessingStatementService.completeDraft(
+          documentNumber,
+          pdf.uri,
+          user.email
+        );
+        break;
+      }
+      case storageNote:
+        await clearSessionDataForCurrentJourney(
+          userPrincipal,
+          documentNumber,
+          contactId
+        );
+        await StorageDocumentService.completeDraft(
+          documentNumber,
+          pdf.uri,
+          user.email
+        );
+        break;
+    }
+  }
+  
 
   public static async checkCertificate(
     payloadToValidate,
@@ -581,6 +620,11 @@ export default class OrchestrationService {
     return data;
   }
 }
+
+export const checkValidationErrors: (validationErrors: any[]) => boolean = (validationErrors: any[]) =>
+  Array.isArray(validationErrors) && validationErrors.some((validationError: any) => !_.isEmpty(validationError));
+
+export const getRedirectionData = (req, case1, case2) => acceptsHtml(req.headers) ? case1 : case2;
 
 export const initialState = {
   ...require("./handlers/processing-statement").initialState,

@@ -86,15 +86,7 @@ export const withUserSessionDataStored = async (userId: string, payload : Sessio
             if (elementFound(currentSessionIndex)) {
                 const currentSessionData : SessionStore = sessionData[currentSessionIndex];
                 logger.info(`[SESSION-MANAGER][SAVING-SESSION-DATA][${payload.documentNumber}]`);
-                Object.keys(payload).forEach(key => {
-                    if (key === "landing") {
-                        logger.info(`[SESSION-MANAGER][UPDATING][LANDINGS]`);
-                        processSessionLandings(currentSessionData, payload);
-                    } else {
-                        logger.info(`[SESSION-MANAGER][UPDATING][ROOT-PROPERTIES]`);
-                        currentSessionData[key] = payload[key]
-                    }
-                });
+                Object.keys(payload).forEach(key => sessionDataUpdateProperties(key, currentSessionData, payload));
                 sessionData[currentSessionIndex] = currentSessionData;
             } else {
                 logger.info(`[SESSION-MANAGER][ADDING-NEW-RECORD]`);
@@ -111,6 +103,16 @@ export const withUserSessionDataStored = async (userId: string, payload : Sessio
     logger.info("[SESSION-MANAGER][SAVING-SESSION-DATA][NEXT-ACTION]");
     return nextAction();
 };
+
+function sessionDataUpdateProperties(key: string, currentSessionData: SessionStore, payload: SessionData) {
+    if (key === "landing") {
+        logger.info(`[SESSION-MANAGER][UPDATING][LANDINGS]`);
+        processSessionLandings(currentSessionData, payload);
+    } else {
+        logger.info(`[SESSION-MANAGER][UPDATING][ROOT-PROPERTIES]`);
+        currentSessionData[key] = payload[key]
+    }
+}
 
 function processSessionLandings(currentSessionData: SessionStore, payload: SessionData) {
     if (Array.isArray(currentSessionData.landings)) {

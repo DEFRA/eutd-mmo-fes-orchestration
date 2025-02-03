@@ -15,6 +15,8 @@ import { utc } from 'moment';
 
 export enum LandingValidationStatus {
   Pending = 'PENDING_LANDING_DATA',
+  Elog = 'ELOG_SPECIES_MISMATCH',
+  LandingOveruse = 'LANDING_DATA_OVERUSED',
   Complete = 'HAS_LANDING_DATA',
   Exceeded14Days = 'EXCEEDED_14_DAY_LIMIT',
   DataNeverExpected = 'LANDING_DATA_NEVER_EXPECTED'
@@ -59,6 +61,12 @@ export interface Catch {
   landingDataExpectedDate?: string;
   landingDataEndDate?: string;
   isLegallyDue?: boolean;
+  vesselRiskScore?: number;
+  exporterRiskScore?: number;
+  speciesRiskScore?: number;
+  threshold?: number;
+  riskScore?: number;
+  isSpeciesRiskEnabled?: boolean;
 }
 
 export interface Conservation {
@@ -303,7 +311,13 @@ const CatchSchema = new Schema({
   dataEverExpected:         { type: Boolean,required: false },
   landingDataExpectedDate:  { type: String, required: false },
   landingDataEndDate:       { type: String, required: false },
-  isLegallyDue:             { type: Boolean, required: false }
+  isLegallyDue:             { type: Boolean, required: false },
+  vesselRiskScore:          { type: Number, required: false },
+  exporterRiskScore:        { type: Number, required: false },
+  speciesRiskScore:         { type: Number, required: false },
+  threshold:                { type: Number, required: false },
+  riskScore:                { type: Number, required: false },
+  isSpeciesRiskEnabled:    { type: Boolean, required: false }
 }, { _id : false } );
 
 const ProductSchema = new Schema({

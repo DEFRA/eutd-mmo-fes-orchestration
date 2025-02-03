@@ -1,25 +1,19 @@
-//
 import * as Hapi from '@hapi/hapi';
 import * as DotEnv from 'dotenv';
-// used only for discovery
-import { Issuer, custom } from 'openid-client';
+import * as mongo from './persistence/mongo';
 
 import setupInsights from './azureAppInsights';
-
 import Router from './router';
 import logger from './logger';
 
 import { SessionStoreFactory } from './session_store/factory';
-
 import { IStorage } from './session_store/storeable';
 import { IStoreable } from './session_store/storeable';
 import { getRedisOptions } from './session_store/redis';
-
-import ApplicationConfig from './applicationConfig';
-import * as mongo from './persistence/mongo';
-import acceptsHtml from "./helpers/acceptsHtml";
 import { HapiRequestApplicationStateExtended } from './types';
 
+import ApplicationConfig from './applicationConfig';
+import acceptsHtml from "./helpers/acceptsHtml";
 
 export default class Server {
   private static _instance: Hapi.Server<Hapi.ServerApplicationState>;
@@ -62,14 +56,14 @@ export default class Server {
         Server.onPreAuth();
 
       } else {
-        await Server.setUpAuth(ApplicationConfig._identityAppUrl, ApplicationConfig._identityPolicyName);
+        await Server.setUpAuth();
         Server.onPreAuthWithAuth();
       }
 
       await Server._instance.register([
-        {plugin: require('@hapi/inert')},
-        {plugin: require('@hapi/vision')},
-        {plugin: require('hapi-boom-decorators')}
+        { plugin: require('@hapi/inert') },
+        { plugin: require('@hapi/vision') },
+        { plugin: require('hapi-boom-decorators') }
       ]);
       await Router.loadRoutes(Server._instance);
 
@@ -101,7 +95,7 @@ export default class Server {
   }
 
   private static onPreAuth() {
-    Server._instance.ext('onPreAuth',  (request, h) => {
+    Server._instance.ext('onPreAuth', (request, h) => {
       (request.app as HapiRequestApplicationStateExtended).claims = {
         // Static GUID as user principal - this should be used only in local DEV
         sub: 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12',
@@ -116,16 +110,16 @@ export default class Server {
     Server._instance.ext('onRequest', function (request, h) {
 
       logger.info({
-          requestId: (request as any).id,
-          data: {
-            method: request.method,
-            path: request.path,
-            requestBody: request.payload ? request.payload : '',
-            requestParams: request.params ? request.params : '',
-            accept: request.headers["accept"], userAgent: request.headers["user-agent"],
-            userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || ''
-          }
-        },
+        requestId: (request as any).id,
+        data: {
+          method: request.method,
+          path: request.path,
+          requestBody: request.payload ? request.payload : '',
+          requestParams: request.params ? request.params : '',
+          accept: request.headers["accept"], userAgent: request.headers["user-agent"],
+          userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || ''
+        }
+      },
         'on-request');
 
       return h.continue;
@@ -133,7 +127,7 @@ export default class Server {
   }
 
   private static onPreAuthWithAuth() {
-    Server._instance.ext('onPreAuth',  (request, h) => {
+    Server._instance.ext('onPreAuth', (request, h) => {
 
       logger.info({
         requestId: (request as any).id,
@@ -146,14 +140,14 @@ export default class Server {
           userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || ''
         }
       },
-      'on-pre-auth');
+        'on-pre-auth');
 
       return h.continue;
     });
   }
 
   private static onCredentials() {
-    Server._instance.ext('onCredentials',  (request, h) => {
+    Server._instance.ext('onCredentials', (request, h) => {
 
       logger.info({
         requestId: (request as any).id,
@@ -166,7 +160,7 @@ export default class Server {
           userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || ''
         }
       },
-      'on-credentials');
+        'on-credentials');
 
       return h.continue;
     });
@@ -176,16 +170,16 @@ export default class Server {
     Server._instance.ext('onPostAuth', function (request, h) {
 
       logger.info({
-          requestId: (request as any).id,
-          data: {
-            method: request.method,
-            path: request.path,
-            requestBody: request.payload ? request.payload : '',
-            requestParams: request.params ? request.params : '',
-            accept: request.headers["accept"], userAgent: request.headers["user-agent"],
-            userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || ''
-          }
-        },
+        requestId: (request as any).id,
+        data: {
+          method: request.method,
+          path: request.path,
+          requestBody: request.payload ? request.payload : '',
+          requestParams: request.params ? request.params : '',
+          accept: request.headers["accept"], userAgent: request.headers["user-agent"],
+          userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || ''
+        }
+      },
         'on-post-auth');
 
       return h.continue;
@@ -197,15 +191,15 @@ export default class Server {
       const { response } = request;
 
       logger.info({
-          requestId: (request as any).id,
-          data: {
-            method: request.method,
-            path: request.path,
-            responseBody: response.source,
-            statusCode: response.statusCode,
-            userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || 'USER-PRINCIPAL-UNAVAILABLE'
-          }
-        },
+        requestId: (request as any).id,
+        data: {
+          method: request.method,
+          path: request.path,
+          responseBody: response.source,
+          statusCode: response.statusCode,
+          userPrincipal: (request.app as HapiRequestApplicationStateExtended)?.claims?.sub || 'USER-PRINCIPAL-UNAVAILABLE'
+        }
+      },
         'api-response');
 
       const permissions =
@@ -217,7 +211,7 @@ export default class Server {
 
       if (response.isBoom && acceptsHtml(request.headers))
         return h.redirect('/there-is-a-problem-with-the-service');
-      else if(request && request.response && request.response.headers) {
+      else if (request && request.response && request.response.headers) {
         request.response.headers['cache-control'] = 'no-store';
         request.response.headers['Pragma'] = 'no-store';
       }
@@ -226,45 +220,8 @@ export default class Server {
     });
   }
 
-  private static async discoverAuth(identityAppUrl: string, policyName: string){
+  private static async setUpAuth() {
     try {
-      logger.info('Issuer discovering', identityAppUrl, policyName);
-      const discoverResult = await Issuer.discover(`${identityAppUrl}/.well-known/openid-configuration?p=${policyName}`)
-
-      return discoverResult;
-    } catch (err) {
-      if(err.code === 'ERR_HTTP_REQUEST_TIMEOUT'){
-        logger.warn('Issuer discovery timed out')
-        return false;
-      }
-
-      logger.error(`An unexpected error occurred during auth discovery - ${JSON.stringify(err)}`)
-      throw err;
-    }
-}
-
-  private static async setUpAuth(identityAppUrl: string, policyName: string) {
-    try {
-      // Do the discovery - allow some time when starting up
-      custom.setHttpOptionsDefaults({
-        timeout: 30000,
-      });
-
-      let attemptsMade = 0;
-      let discoverWrapperSuccess;
-
-      while(!(discoverWrapperSuccess instanceof Issuer) && attemptsMade < ApplicationConfig._maxAuthRetries){
-        attemptsMade++;
-        discoverWrapperSuccess = await Server.discoverAuth(identityAppUrl, policyName);
-        
-        if(attemptsMade === ApplicationConfig._maxAuthRetries){
-          logger.error('Maximum number of authentication discovery attempts reached');
-          throw new Error('Maximum number of authentication discovery attempts reached');
-        } 
-      }
-
-      logger.info('Issuer discovered');
-
       await Server._instance.register(require('@hapi/basic'));
       logger.info('Registered @hapi/basic')
 
@@ -309,18 +266,18 @@ export default class Server {
 
           if (!Object.prototype.hasOwnProperty.call(req.headers, 'authorization')) {
             logger.warn('No auth header set');
-            return {isValid: false,credentials: decoded};
+            return { isValid: false, credentials: decoded };
           }
 
           const tokenHeader = req.headers.authorization.split('Bearer ');
           if (tokenHeader.length < 2) {
             logger.warn('No auth header');
-            return {isValid: false,credentials: decoded};
+            return { isValid: false, credentials: decoded };
           }
 
           req.app.claims = decoded.payload;
           logger.info('Validated token');
-          return {isValid: true,credentials: decoded};
+          return { isValid: true, credentials: decoded };
         }
       });
       logger.info('strategy has been set');

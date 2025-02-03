@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 
 import { Condition, StrictUpdateFilter } from 'mongodb';
-import { CatchCertificate, CatchCertModel, CatchCertificateModel, toFrontEndSpecies, toFrontEndConservation, DocumentStatuses, cloneCatchCertificate as cloneCC, LandingsEntryOptions } from '../schema/catchCert';
+import { CatchCertificate, CatchCertModel, CatchCertificateModel, toFrontEndSpecies, toFrontEndConservation, DocumentStatuses, cloneCatchCertificate as cloneCC, LandingsEntryOptions, Product } from '../schema/catchCert';
 import logger from '../../logger';
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
@@ -21,6 +21,7 @@ import { getRedisOptions } from '../../session_store/redis';
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
 import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
 import { userCanCreateDraft } from '../../validators/draftCreationValidator';
+import { getSpeciesByFaoCode } from '../../services/reference-data.service';
 
 export const getDocument = async (
   documentNumber: string,
@@ -532,6 +533,23 @@ export const upsertUserReference = async (userPrincipal: string, documentNumber:
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 }
 
+export const updateProductScientificName = async (product: Product, documentNumber: string) => {
+  if (!product.scientificName || product.scientificName === null) {
+    const speciesCode = product.speciesCode;
+    try {
+      const data = await getSpeciesByFaoCode(speciesCode);
+      const species = data.find((item) => item.faoCode === speciesCode);
+
+      if (species && species.scientificName) {
+        product.scientificName = species.scientificName;
+      }
+    } catch (error) {
+      logger.
+        info(`[GET-COPY][DOCUMENT-NUMBER][${documentNumber}][PRODUCT][${product}][GET-FAO-CODE][${speciesCode}]`);
+    }
+  }
+};
+
 export const cloneCatchCertificate = async (documentNumber: string, userPrincipal: string, excludeLandings: boolean, contactId: string, requestByAdmin: boolean, voidOriginal: boolean): Promise<string> => {
 
   const original = await getDocument(documentNumber, userPrincipal, contactId);
@@ -543,6 +561,13 @@ export const cloneCatchCertificate = async (documentNumber: string, userPrincipa
   const newDocumentNumber = await DocumentNumberService.getUniqueDocumentNumber(ServiceNames.CC, CatchCertModel);
   const copy = cloneCC(original, newDocumentNumber, excludeLandings, contactId, requestByAdmin, voidOriginal);
 
+  if (Array.isArray(copy.exportData.products) && copy.exportData.products.length > 0) {
+    for (const product of copy.exportData.products) {
+      await updateProductScientificName(product, documentNumber);
+    }
+  } else {
+    logger.info(`[GET-COPY][PRODUCT][${documentNumber}][NO-PRODUCT]`);
+  }
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 

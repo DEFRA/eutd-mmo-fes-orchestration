@@ -29,6 +29,7 @@ jest.mock('ioredis', () => {
 describe("redis", () => {
 
   const mockRedis = new Redis(getRedisOptions())
+
   const mockGet = jest.spyOn(mockRedis, 'get')
   const mockSet = jest.spyOn(mockRedis, 'set')
   const mockDel = jest.spyOn(mockRedis, 'del')
@@ -38,9 +39,9 @@ describe("redis", () => {
   const CONTACT_ID = 'contactBob';
 
   beforeEach(() => {
+
     storage = new RedisStorage(mockRedis);
     mockDel.mockResolvedValue(0)
-    mockGet.mockResolvedValue(JSON.stringify({test: 'test'}))
   });
 
   afterEach(() => {
@@ -48,17 +49,6 @@ describe("redis", () => {
     mockDel.mockReset();
     mockGet.mockReset();
     mockDel.mockReset();
-  });
-
-  describe('deleteFor', () => {
-
-    it('will delete any item stored against a user & document number', async () => {
-      await storage.initialize(getRedisOptions());
-      await storage.deleteFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5');
-
-      expect(mockDel).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5');
-    });
-
   });
 
   describe('readFor', () => {
@@ -76,6 +66,17 @@ describe("redis", () => {
 
   });
 
+  describe('deleteFor', () => {
+
+    it('will delete any item stored against a user & document number', async () => {
+      await storage.initialize(getRedisOptions());
+      await storage.deleteFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5');
+
+      expect(mockDel).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5');
+    });
+
+  });
+
   describe('writeFor', () => {
 
     it('will write data to redis', async () => {
@@ -85,6 +86,28 @@ describe("redis", () => {
       await storage.writeFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data);
 
       expect(mockSet).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data));
+    });
+
+  });
+
+  describe('writeAllFor', () => {
+
+    it('will write all data to redis', async () => {
+      const data: any = {test: 'test'};
+
+      await storage.initialize(getRedisOptions());
+      await storage.writeAllFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data);
+
+      expect(mockSet).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data));
+    });
+
+    it('will write all data to redis with no contact details', async () => {
+      const data: any = {test: 'test'};
+
+      await storage.initialize(getRedisOptions());
+      await storage.writeAllFor('BOB', '', 'GBR-2020-CC-0E42C2DA5', data);
+
+      expect(mockSet).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data));
     });
 
   });

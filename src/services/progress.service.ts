@@ -31,8 +31,8 @@ export default class ProgressService {
 
       logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-CC-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
-      const transportType = (transportation && transportation.vehicle) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
-      const exportJourney = (transportation && transportation.exportedFrom && transportation.exportedTo) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+      const transportType = ProgressService.getTransportType(transportation);
+      const exportJourney = ProgressService.getExportJourney(transportation);
 
       const progressObject: CatchCertificateProgress = {
         reference: ProgressService.getUserReference(data.userReference),
@@ -48,9 +48,7 @@ export default class ProgressService {
         delete progressObject.dataUpload;
       }
 
-      const progressSections = landingsEntryOption === 'directLanding' || transportation?.vehicle === 'directLanding'
-        ? progressObject
-        : { ...progressObject, transportType, transportDetails: ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data.exportData.transportation))) };
+      const progressSections = ProgressService.getProgressSections(landingsEntryOption, transportation, progressObject, transportType, data);
 
       return {
         progress: progressSections,
@@ -62,6 +60,13 @@ export default class ProgressService {
       return null;
     }
   }
+
+  static readonly getTransportType = (transportation) => transportation?.vehicle ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+  static readonly getExportJourney = (transportation) => transportation?.exportedFrom && transportation?.exportedTo ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+
+  static readonly getProgressSections = (landingsEntryOption: string, transportation, progressObject: CatchCertificateProgress, transportType, data: CatchCertificate) => landingsEntryOption === 'directLanding' || transportation?.vehicle === 'directLanding'
+  ? progressObject
+  : { ...progressObject, transportType, transportDetails: ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data.exportData.transportation))) };
 
   public static getCompletedSectionsNumber(sections: CatchCertificateProgress | ProcessingStatementProgress | StorageDocumentProgress): number {
     const completedSections = [];
@@ -279,7 +284,7 @@ export default class ProgressService {
   }
 
   public static getExportDestinationStatus = (exportedTo: ICountry) : ProgressStatus => {
-    return ['officialCountryName','isoCodeAlpha2','isoCodeAlpha3'].every((key: string) => ProgressService.isEmptyAndTrimSpaces(exportedTo?.[key])) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+    return ['officialCountryName'].every((key: string) => ProgressService.isEmptyAndTrimSpaces(exportedTo?.[key])) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
   public static async getProcessingStatementProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
