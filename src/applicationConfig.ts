@@ -18,8 +18,6 @@ class ApplicationConfig {
   _cloudRoleName: string;
   _refServiceBasicAuthUser: string;
   _refServiceBasicAuthPassword: string;
-  _identityAppUrl: string;
-  _identityPolicyName: string;
   _disableAuth: boolean;
   _dbName: string;
   _dbConnectionUri: string;
@@ -56,8 +54,6 @@ class ApplicationConfig {
     this._redisTlsHostName = process.env.REDIS_TLS_HOST_NAME;
     this._instrumentationKey = process.env.INSTRUMENTATION_KEY;
     this._cloudRoleName = process.env.INSTRUMENTATION_CLOUD_ROLE;
-    this._identityAppUrl = process.env.IDENTITY_APP_URL;
-    this._identityPolicyName = process.env.IDENTITY_DEFAULT_POLICY;
     this._enablePdfGen = process.env.ENABLE_PDF_GEN === 'true';
     this._maximumConcurrentDrafts = parseInt(process.env.MAXIMUM_CONCURRENT_DRAFTS);
     this._maximumLandingsForOnlineValidation = parseInt(process.env.MAXIMUM_LANDINGS_FOR_ONLINE_VALIDATION, 10);

@@ -263,7 +263,7 @@ export const cloneExportData = (original: ExportData): ExportData => (
   {
     ...original,
     exportedTo: toExportedTo(original.exportedTo),
-    catches: (original.catches && original.catches.length)
+    catches: (original.catches?.length)
       ? original.catches.map((ctch: Catch) => cloneCatch(ctch))
       : original.catches
   }
@@ -296,15 +296,20 @@ export const cloneCatch = (original: Catch): Catch => {
   return result;
 };
 
-export const isOldProcessingPlantAddress = (exportData: ExportData): boolean =>
-  exportData
-    && exportData.plantName && exportData.plantName !== ''
-    && exportData.plantBuildingName === undefined
-    && exportData.plantSubBuildingName === undefined
-    && exportData.plantBuildingNumber === undefined
-    && exportData.plantStreetName === undefined
-    && exportData.plantCounty === undefined
-    && exportData.plantCountry === undefined
+export const isOldProcessingPlantAddress = (exportData: ExportData): boolean => {
+  if (!exportData || isEmpty(exportData)) {
+    return false;
+  }
+
+  return exportData.plantName !== undefined &&
+    exportData.plantName !== '' &&
+    exportData.plantBuildingName === undefined &&
+    exportData.plantSubBuildingName === undefined &&
+    exportData.plantBuildingNumber === undefined &&
+    exportData.plantStreetName === undefined &&
+    exportData.plantCounty === undefined &&
+    exportData.plantCountry === undefined
+}
 
 
 export const clearOldProcessingPlantAddress = (exportData) => {

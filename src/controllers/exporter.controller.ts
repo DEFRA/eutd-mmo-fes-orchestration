@@ -89,7 +89,7 @@ export default class ExporterController {
     return await Services.get(userPrincipal, journey + '/' + EXPORTER_KEY, contactId);
   }
 
-  public static async addExporterDetails(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean = false, userPrincipal: string, documentNumber: string, contactId: string) {
+  public static async addExporterDetails(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
       const payload = { ...(req.payload as any) };
       payload.user_id = userPrincipal;
 

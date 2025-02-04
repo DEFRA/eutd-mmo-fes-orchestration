@@ -342,7 +342,7 @@ export default class OrchestrationService {
     let blockingStatus: boolean = false;
     const { data, exporter }: any = reportData;
     let exporterModel = {};
-    if (exporter && exporter.model) {
+    if (exporter?.model) {
       exporterModel = exporter.model;
     }
     data.exporter = exporterModel;
@@ -476,9 +476,9 @@ export default class OrchestrationService {
           payload,
           config
         )
-        .then(() => logger.info('Data sent to BC server'))
+        .then(() => logger.info(`Submit Data for ${documentNumber} sent to BC server`))
         .catch((err) =>
-          logger.error(`Error - Data not sent to BC server: ${err}`)
+          logger.error(`Submit Error - Data for ${documentNumber} not sent to BC server: ${err}`)
         );
 
       await reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch(
@@ -559,7 +559,7 @@ export default class OrchestrationService {
         break;
     }
   }
-  
+
 
   public static async checkCertificate(
     payloadToValidate,

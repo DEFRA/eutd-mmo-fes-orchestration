@@ -21,7 +21,7 @@ export const canAddFavourite = async (userPrincipal: string): Promise<boolean> =
 export const saveFavouritesProduct = async (userPrincipal: string, product: IProduct ): Promise<IProduct[]> => {
   let userAttributes = await find(userPrincipal);
   if (userAttributes) {
-    if(!userAttributes.favourites || !userAttributes.favourites.products)  userAttributes.favourites = {products : []};
+    if(!userAttributes.favourites?.products)  userAttributes.favourites = {products : []};
     if(productAlreadyExist(product, userAttributes.favourites.products)) {
       return null;
     } else {
@@ -64,7 +64,7 @@ export const productAlreadyExist = (product: IProduct, products: IProduct[]): bo
 
 export const deleteFavouritesProduct = async (userPrincipal: string, productId: string): Promise<IProduct[] | null> => {
   const userAttributes = await find(userPrincipal);
-  if(userAttributes && userAttributes.favourites && userAttributes.favourites.products && userAttributes.favourites.products.length) {
+  if(userAttributes?.favourites?.products?.length) {
     const newUseAttributes = {...userAttributes} as IUserAttributes;
     newUseAttributes.favourites.products =  userAttributes.favourites.products.filter(prd => prd.id != productId);
     await save(newUseAttributes);

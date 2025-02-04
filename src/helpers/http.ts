@@ -11,11 +11,11 @@ export const checkIfEntityExistsInServer = async (baseUrl: string, path: string,
   return Object.keys(entity).length > 0;
 }
 
-export const getEntityFromServer = async <T extends any> (
+export const getEntityFromServer = async (
   baseUrl: string,
   path: string,
   httpClient?: AxiosInstance
-): Promise<T | null> => {
+): Promise<any> => {
   try {
     if (!httpClient) {
       httpClient = axios.create({

@@ -32,7 +32,7 @@ import { ProductsLanded, LandingStatus, ProductLanded } from '../persistence/sch
 
 export default class ExportPayloadController {
 
-  public static async validate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean = false, userPrincipal: string, documentNumber: string, contactId: string) {
+  public static async validate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = { ...(req.payload as object) };
     const exportPayload: PayloadSchema.ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
     let errors = {};
@@ -128,12 +128,10 @@ export default class ExportPayloadController {
       } else {
         return h.redirect(payload.currentUri);
       }
+    } else if (!result.errors || result.errors.length === 0) {
+      return result;
     } else {
-      if (!result.errors || result.errors.length === 0) {
-        return result;
-      } else {
-        return h.response(result).code(400);
-      }
+      return h.response(result).code(400);
     }
   }
 
@@ -333,7 +331,7 @@ export default class ExportPayloadController {
     const product = exportPayload.items.find(item => item.product.id === req.params.productId);
     let result = exportPayload;
 
-    if (product && product.landings) {
+    if (product?.landings) {
       const landing = product.landings.find(_landing => _landing.model.id === req.params.landingId);
 
       if (landing) {
@@ -413,7 +411,7 @@ export default class ExportPayloadController {
     const product = exportPayload.items.find(item => item.product.id === req.params.productId);
 
     let result;
-    if (product && product.landings) {
+    if (product?.landings) {
 
       let landingId = req.params.landingId;
       if (!landingId) {
@@ -701,12 +699,10 @@ export default class ExportPayloadController {
 
     if (acceptsHtml(req.headers)) {
       return h.redirect(payload.nextUri);
+    } else if (result) {
+      return result;
     } else {
-      if (result) {
-        return result;
-      } else {
-        return exportPayload;
-      }
+      return exportPayload;
     }
   }
 
@@ -762,13 +758,13 @@ export default class ExportPayloadController {
     return landings.filter(landing => landing.model.id !== landingId);
   }
 
-  static numberOfUniqueLandings = (exportPayload: PayloadSchema.ProductsLanded) => {
+  static readonly numberOfUniqueLandings = (exportPayload: PayloadSchema.ProductsLanded) => {
     const landings: {
       pln: string,
       dateLanded: string
     }[] = [];
 
-    if (exportPayload && exportPayload.items) {
+    if (exportPayload?.items) {
       exportPayload.items.forEach((item: PayloadSchema.ProductLanded) => {
         if (item.landings && item.landings.length > 0) {
           item.landings.forEach((landing: PayloadSchema.LandingStatus) => {

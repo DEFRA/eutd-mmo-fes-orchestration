@@ -182,7 +182,7 @@ export const toFrontEndTransport = (
     );
     return frontEndTransport;
   } else {
-    return (frontEndTransport = {
+    const frontEndTransport = {
       vehicle: '',
       exportedTo: {
         officialCountryName: '',
@@ -190,7 +190,8 @@ export const toFrontEndTransport = (
         isoCodeAlpha3: '',
         isoNumericCode: '',
       },
-    });
+    }
+    return frontEndTransport;
   }
 };
 

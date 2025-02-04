@@ -862,6 +862,12 @@ describe('progressService', () => {
       expect(filter({ error: 'system error' })).toStrictEqual(true);
     });
 
+    it('will return false for no products', () => {
+      const filter = ProgressService.filterErrors(documentNumber, null);
+
+      expect(filter(validationFailure)).toStrictEqual(false);
+    });
+
     it('will return true for system errors with a matching document number', () => {
       const filter = ProgressService.filterErrors(documentNumber, []);
 
@@ -925,6 +931,88 @@ describe('progressService', () => {
             date: '2020-01-02',
           },
         ],
+      } as any;
+
+      const filter = ProgressService.filterErrors(documentNumber, [product]);
+
+      expect(filter(validationFailure)).toStrictEqual(false);
+    });
+
+    it('will return false for a validation failure with no catch', () => {
+      const product = {
+        species: 'Atlantic Cod',
+        speciesCode: 'COD',
+        state: {
+          code: 'FRE',
+          name: 'Fresh',
+        },
+        presentation: {
+          code: 'WHL',
+          name: 'Whole',
+        },
+        caughtBy: [undefined],
+      } as any;
+
+      const filter = ProgressService.filterErrors(documentNumber, [product]);
+
+      expect(filter(validationFailure)).toStrictEqual(false);
+    });
+
+    it('will return false for a validation failure with no catches', () => {
+      const product = {
+        species: 'Atlantic Cod',
+        speciesCode: 'COD',
+        state: {
+          code: 'FRE',
+          name: 'Fresh',
+        },
+        presentation: {
+          code: 'WHL',
+          name: 'Whole',
+        },
+        caughtBy: undefined
+      } as any;
+
+      const filter = ProgressService.filterErrors(documentNumber, [product]);
+
+      expect(filter(validationFailure)).toStrictEqual(false);
+    });
+
+    it('will return false for a validation failure with no products', () => {
+      const product = undefined;
+
+      const filter = ProgressService.filterErrors(documentNumber, [product]);
+
+      expect(filter(validationFailure)).toStrictEqual(false);
+    });
+
+    it('will return false for a validation failure with product with no state', () => {
+      const product = {
+        species: 'Atlantic Cod',
+        speciesCode: 'COD',
+        state: undefined,
+        presentation: {
+          code: 'WHL',
+          name: 'Whole',
+        },
+        caughtBy: undefined
+      } as any;
+
+      const filter = ProgressService.filterErrors(documentNumber, [product]);
+
+      expect(filter(validationFailure)).toStrictEqual(false);
+    });
+
+    it('will return false for a validation failure with no presentation', () => {
+      const product = {
+        species: 'Atlantic Cod',
+        speciesCode: 'COD',
+        state: {
+          code: 'FRE',
+          name: 'Fresh',
+        },
+        presentation: undefined,
+        caughtBy: undefined
       } as any;
 
       const filter = ProgressService.filterErrors(documentNumber, [product]);

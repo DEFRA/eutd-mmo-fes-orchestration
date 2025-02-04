@@ -134,27 +134,27 @@ const isOldExporterDetails = (exporterDetails: ExporterDetails) =>
 const addressOne = (dynamicsAddress: any): string | undefined => {
   const addressLineOne: string[] = [];
 
-  if (dynamicsAddress && dynamicsAddress.defra_premises) {
+  if (dynamicsAddress?.defra_premises) {
     addressLineOne.push(dynamicsAddress.defra_premises);
   }
 
-  if (dynamicsAddress && dynamicsAddress.defra_subbuildingname) {
+  if (dynamicsAddress?.defra_subbuildingname) {
     addressLineOne.push(dynamicsAddress.defra_subbuildingname);
   }
 
-  if (dynamicsAddress && dynamicsAddress.defra_buildingname) {
+  if (dynamicsAddress?.defra_buildingname) {
     addressLineOne.push(dynamicsAddress.defra_buildingname);
   }
 
-  if (dynamicsAddress && dynamicsAddress.defra_street) {
+  if (dynamicsAddress?.defra_street) {
     addressLineOne.push(dynamicsAddress.defra_street);
   }
 
-  if (dynamicsAddress && dynamicsAddress.defra_locality) {
+  if (dynamicsAddress?.defra_locality) {
     addressLineOne.push(dynamicsAddress.defra_locality);
   }
 
-  if (dynamicsAddress && dynamicsAddress.defra_dependentlocality) {
+  if (dynamicsAddress?.defra_dependentlocality) {
     addressLineOne.push(dynamicsAddress.defra_dependentlocality);
   }
 

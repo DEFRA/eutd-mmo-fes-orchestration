@@ -102,17 +102,11 @@ export const sdDataToSave = (newStorageDocument: StorageDocument, originalExport
   const toSaveStorageDocument = { ...newStorageDocument };
 
   const hasAddressAndPostCode = (facilityAddressOne: string, facilityPostcode: string) =>
-    facilityAddressOne && facilityAddressOne.length
-    && facilityPostcode && facilityPostcode.length;
+    facilityAddressOne?.length && facilityPostcode?.length;
 
-  const hasFacilityName = (facilityName: string) => facilityName && facilityName.length;
+  const hasFacilityName = (facilityName: string) => facilityName?.length;
 
-  const hasOriginalData = (originalExportData: BackEndSD.ExportData | undefined, index: number) =>
-      originalExportData
-      && originalExportData.storageFacilities
-      && originalExportData.storageFacilities[index]
-      && originalExportData.storageFacilities[index].facilityAddressOne
-      && originalExportData.storageFacilities[index].facilityAddressOne.length
+  const hasOriginalData = (originalExportData: BackEndSD.ExportData | undefined, index: number) => originalExportData?.storageFacilities?.[index]?.facilityAddressOne?.length
 
 
   const toSaveFacilities = newStorageDocument.storageFacilities.map(

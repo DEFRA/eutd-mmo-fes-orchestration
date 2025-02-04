@@ -314,7 +314,7 @@ export const virusDetected = async (fileName: string, content: string, documentN
     const client : AxiosInstance = httpClient? httpClient : axios.create({baseURL: ApplicationConfig.getReferenceServiceUrl()});
     const result : AxiosResponse = await client.post('/v1/virusChecker/csv',payload);
 
-    return (result && result.data) ? result.data.virusDetected : undefined;
+    return result?.data ? result.data.virusDetected : undefined;
   } catch (e) {
     logger.error(`[AV-API][VIRUS-CHECKER][CSV][${documentNumber}][ERROR][${key}] ${e}`);
     return undefined;

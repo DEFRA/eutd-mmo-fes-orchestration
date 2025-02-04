@@ -83,7 +83,7 @@ export default class DocumentNumberService {
       : null;
   }
 
-  public static async getDraftDocuments(userPrincipal:any, key:string = "", contactId: string): Promise<CatchCertificateDraft[]|ProcessingStatementDraft[]|StorageDocumentDraft[]> {
+  public static async getDraftDocuments(userPrincipal:any, key:string, contactId: string): Promise<CatchCertificateDraft[]|ProcessingStatementDraft[]|StorageDocumentDraft[]> {
     if (key.match(processingStatement)) {
       return await ProcessingStatementService.getDraftDocumentHeaders(userPrincipal, contactId) || [];
     }

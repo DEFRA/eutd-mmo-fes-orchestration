@@ -1054,6 +1054,20 @@ describe('Dealing with old ProcessingPlant Address', () =>{
       expect(isOldProcessingPlantAddress(sampleExportDataNew)).toBe(false)
     });
 
+    it('should return false if address is in new format with no export data', () => {
+      const sampleExportDataNew = null;
+
+      expect(isOldProcessingPlantAddress(sampleExportDataNew)).toBe(false)
+    });
+
+
+    it('should return false if address is in new format with no plant name', () => {
+      const sampleExportDataNew = {
+      }
+      // @ts-expect-error checking empty object
+      expect(isOldProcessingPlantAddress(sampleExportDataNew)).toBe(false)
+    });
+
     it('should return true if address is in old format', () => {
       const sampleExportDataOld = {
         ...sampleExportData,

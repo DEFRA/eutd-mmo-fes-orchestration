@@ -5,7 +5,7 @@ import { LandingsRefreshData } from './interfaces';
 
 export default class VesselLandingsRefresher {
 
-  public static refresh = async (landing: LandingsRefreshData): Promise<void> =>
+  public static readonly refresh = async (landing: LandingsRefreshData): Promise<void> =>
     referenceDataService.refreshLandings(landing);
 
   static getLandingsRefreshData(landings: LandingStatus[]): LandingsRefreshData[] {

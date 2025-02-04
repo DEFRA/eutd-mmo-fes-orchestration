@@ -46,6 +46,18 @@ describe("UploadsController", () => {
       ApplicationConfig._maxLimitLandings = originalMaxLimitLandings;
     });
 
+    it("should throw with no data", async () => {
+      const csv = undefined;
+
+      await expect(UploadsController.parseLandingsFile(csv, userPrincipal, contactId)).rejects.toThrow();
+    });
+
+    it("should throw", async () => {
+      const csv = "";
+
+      await expect(UploadsController.parseLandingsFile(csv, userPrincipal, contactId)).rejects.toThrow();
+    });
+
     it("will parse a single landing", async () => {
       const csv = "PRD001,19/07/2021,FAO27,PLN1,100\n";
 

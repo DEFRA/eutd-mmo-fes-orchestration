@@ -315,7 +315,7 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
   };
 
   Object.keys(res.product).forEach(key => res.product[key] === undefined ? delete res.product[key] : {});
-  if (landings && landings.length) {
+  if (landings?.length) {
     res.landings = landings;
   }
 
@@ -371,7 +371,7 @@ const mapWeights = (weight: Weight, key:string) => weight[key] === undefined ? d
 const mapProductsForFrontEndDirectLanding = (product: BackEndModels.Product) => ({
   speciesId: product ? product.speciesId : '',
   speciesLabel: (product?.species && product?.state && product?.presentation && product?.commodityCode) ?
-    `${speciesName(product)}, ${stateName(product)}, ${presentationName(product)}, ${comodityCode(product)}` 
+    `${speciesName(product)}, ${stateName(product)}, ${presentationName(product)}, ${comodityCode(product)}`
     : undefined,
   exportWeight: product?.caughtBy && product?.caughtBy.length > 0 ? product?.caughtBy[0].weight : undefined
 })

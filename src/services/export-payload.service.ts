@@ -41,7 +41,7 @@ export default class ExportPayloadService {
     const sessionData: SessionStore = await getCurrentSessionData(userId, documentNumber, contactId);
     const exportPayload: ProductsLanded = await CatchCertService.getExportPayload(userId, documentNumber, contactId);
 
-    if (sessionData && sessionData.landings && exportPayload && exportPayload?.items) {
+    if (sessionData?.landings && exportPayload?.items) {
       exportPayload.items.forEach(item => {
         if (Array.isArray(item.landings)) {
           item.landings.forEach(landing => ExportPayloadService.applySessionDataToLanding(sessionData, landing))
@@ -73,10 +73,9 @@ export default class ExportPayloadService {
     contactId: string
   ): Promise<ProductsLanded> {
 
-    exportPayload.items.forEach(item => {
+    for (const item of exportPayload.items) {
       if (Array.isArray(item.landings)) {
-        item.landings.forEach(async landing => {
-
+        for (const landing of item.landings) {
           const sessionLanding: SessionLanding = {
             landingId: landing.model.id,
             addMode: landing.addMode,
@@ -93,9 +92,9 @@ export default class ExportPayloadService {
           };
 
           await withUserSessionDataStored(userId, sessionData, contactId);
-        });
+        }
       }
-    });
+    }
 
     await CatchCertService.upsertExportPayload(userId, exportPayload, documentNumber, contactId);
 
@@ -124,7 +123,7 @@ export default class ExportPayloadService {
     if (exportPayload?.items) {
       exportPayload.items.forEach(item => ExportPayloadService.upsertLandingAddSessionData(item, sessionData));
     }
-    
+
     if (!exportPayload.items) {
       exportPayload.items = [];
     }
@@ -146,12 +145,12 @@ export default class ExportPayloadService {
       if (!matchedLanding) {
         // Replace an 'empty' landing if one exists
         matchedLanding = matchedItem.landings.find((lnd) =>
-          !lnd.model || lnd.model.id === undefined
+          lnd.model?.id === undefined
         );
       }
 
       const landingOverriddenByAdmin = (landing: LandingStatus): boolean =>
-        (landing && landing.model && landing.model.vessel && landing.model.vessel.vesselOverriddenByAdmin);
+        landing?.model?.vessel?.vesselOverriddenByAdmin;
 
       if (landingOverriddenByAdmin(matchedLanding) || landingOverriddenByAdmin(landing)) {
         throw new Error('cannot update an overridden landing');
@@ -232,13 +231,13 @@ export default class ExportPayloadService {
     }
   }
 
-  public static updateCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string, status: DocumentStatuses): Promise<void> =>
+  public static readonly updateCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string, status: DocumentStatuses): Promise<void> =>
     CatchCertService.updateCertificateStatus(userPrincipal, documentNumber, contactId, status);
 
-  public static getCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<string> =>
+  public static readonly getCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<string> =>
     CatchCertService.getCertificateStatus(userPrincipal, documentNumber, contactId);
 
-  public static isSubmissionFailure = (results: IExportCertificateResults | void) =>
+  public static readonly isSubmissionFailure = (results: IExportCertificateResults | void) =>
     (results && results.report.length > 0 && results.isBlockingEnabled);
 
   public static async createExportCertificate(userPrincipal: string, documentNumber: string, email: string, contactId: string): Promise<IExportCertificateResults> {
@@ -249,7 +248,7 @@ export default class ExportPayloadService {
 
       const exporter = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId));
       const exportedFrom = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId));
-      const exporterModel: CcExportedDetailModel = (exporter && exporter.model) ? exporter.model : {} as CcExportedDetailModel;
+      const exporterModel: CcExportedDetailModel = exporter?.model ? exporter.model : {} as CcExportedDetailModel;
       const transport: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId));
 
       const catchCertificate = {
@@ -352,8 +351,8 @@ export default class ExportPayloadService {
         };
 
         axios.put(`${ApplicationConfig._businessContinuityUrl}/api/certificates/${documentNumber}`, data, config)
-          .then(() => logger.info('Data sent to BC server'))
-          .catch(err => logger.error(`Error - Data not sent to BC server: ${err}`));
+          .then(() => logger.info(`Submit Data for ${documentNumber} sent to BC server`))
+          .catch(err => logger.error(`Submit Error - Data for ${documentNumber} not sent to BC server: ${err}`));
         updateConsolidateLandings(documentNumber)
           .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
         result.documentNumber = documentNumber;

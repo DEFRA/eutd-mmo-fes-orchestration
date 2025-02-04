@@ -119,7 +119,7 @@ export const toBackEndProcessingStatement = (
 
 export const toBackEndProcessingStatementExportData = (
   processingStatement: ProcessingStatement,
-  exporterDetails: Exporter | null = null,
+  exporterDetails: Exporter | null,
   documentNumber: string): BackEndProcessingStatement.ExportData => {
   const mappedProperties = {
     catches: getCatches(processingStatement),

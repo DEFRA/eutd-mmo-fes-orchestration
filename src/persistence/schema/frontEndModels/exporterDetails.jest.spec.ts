@@ -3,93 +3,93 @@ import * as BackEndModels from "../catchCert"
 import { ExporterDetails } from "../common";
 
 describe("when mapping from a front end exporterDetails to a backend exporterDetails", () => {
-    it("will contain all relevant properties for catch certificates", () => {
-        const myFrontEndExporter : FrontEndExporter.CcExporter = {
-            model : {
-                contactId : 'a contact Id',
-                accountId  : 'an account id',
-                exporterFullName : "Mr. Robot",
-                exporterCompanyName: "FSociety",
-                addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
-                buildingNumber: '123',
-                subBuildingName: 'Unit 1',
-                buildingName: 'CJC Fish Ltd',
-                streetName: '17  Old Edinburgh Road',
-                county: 'West Midlands',
-                country: 'England',
-                townCity: 'Aberdeen',
-                postcode: 'AB1 2XX',
-                user_id: "4023482347523382523",
-                journey: "catchCertificate",
-                currentUri: "test/test.html",
-                nextUri: "test/test.asx",
-                _dynamicsAddress: {},
-                _dynamicsUser : {
-                  firstName: "John",
-                  lastName: "Doe"
-                },
-                _updated: true
-            }
-        };
+  it("will contain all relevant properties for catch certificates", () => {
+    const myFrontEndExporter: FrontEndExporter.CcExporter = {
+      model: {
+        contactId: 'a contact Id',
+        accountId: 'an account id',
+        exporterFullName: "Mr. Robot",
+        exporterCompanyName: "FSociety",
+        addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
+        buildingNumber: '123',
+        subBuildingName: 'Unit 1',
+        buildingName: 'CJC Fish Ltd',
+        streetName: '17  Old Edinburgh Road',
+        county: 'West Midlands',
+        country: 'England',
+        townCity: 'Aberdeen',
+        postcode: 'AB1 2XX',
+        user_id: "4023482347523382523",
+        journey: "catchCertificate",
+        currentUri: "test/test.html",
+        nextUri: "test/test.asx",
+        _dynamicsAddress: {},
+        _dynamicsUser: {
+          firstName: "John",
+          lastName: "Doe"
+        },
+        _updated: true
+      }
+    };
 
-        const expectedResult : BackEndModels.CcExporterDetails = {
-            contactId : 'a contact Id',
-            accountId  : 'an account id',
-            exporterFullName : "Mr. Robot",
-            exporterCompanyName: "FSociety",
-            addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
-            buildingNumber: '123',
-            subBuildingName: 'Unit 1',
-            buildingName: 'CJC Fish Ltd',
-            streetName: '17  Old Edinburgh Road',
-            county: 'West Midlands',
-            country: 'England',
-            townCity: 'Aberdeen',
-            postcode: 'AB1 2XX',
-            _dynamicsAddress: {},
-            _dynamicsUser : {
-              firstName: "John",
-              lastName: "Doe"
-            }
-        };
+    const expectedResult: BackEndModels.CcExporterDetails = {
+      contactId: 'a contact Id',
+      accountId: 'an account id',
+      exporterFullName: "Mr. Robot",
+      exporterCompanyName: "FSociety",
+      addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
+      buildingNumber: '123',
+      subBuildingName: 'Unit 1',
+      buildingName: 'CJC Fish Ltd',
+      streetName: '17  Old Edinburgh Road',
+      county: 'West Midlands',
+      country: 'England',
+      townCity: 'Aberdeen',
+      postcode: 'AB1 2XX',
+      _dynamicsAddress: {},
+      _dynamicsUser: {
+        firstName: "John",
+        lastName: "Doe"
+      }
+    };
 
-        const result = FrontEndExporter.toBackEndCcExporterDetails(myFrontEndExporter);
+    const result = FrontEndExporter.toBackEndCcExporterDetails(myFrontEndExporter);
 
-        expect(result).toStrictEqual(expectedResult);
-    });
+    expect(result).toStrictEqual(expectedResult);
+  });
 
-    it("will deal with optional data", () => {
-        const myFrontEndExporter : FrontEndExporter.CcExporter = {
-            model : {
-                contactId : 'a contact Id',
-                accountId  : 'an account id',
-                exporterFullName : "Mr. Robot",
-                exporterCompanyName: "FSociety",
-                addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
-                subBuildingName: 'Unit 1',
-                buildingName: 'CJC Fish Ltd',
-                streetName: '17  Old Edinburgh Road',
-                county: 'West Midlands',
-                country: 'England',
-                townCity: 'Aberdeen',
-                postcode: 'AB1 2XX',
-                user_id: "4023482347523382523",
-                journey: "catchCertificate",
-                currentUri: "test/test.html",
-                nextUri: "test/test.asx",
-                _dynamicsAddress: {},
-                _dynamicsUser : {
-                  firstName: "John",
-                  lastName: "Doe"
-                }
-            }
-        };
+  it("will deal with optional data", () => {
+    const myFrontEndExporter: FrontEndExporter.CcExporter = {
+      model: {
+        contactId: 'a contact Id',
+        accountId: 'an account id',
+        exporterFullName: "Mr. Robot",
+        exporterCompanyName: "FSociety",
+        addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
+        subBuildingName: 'Unit 1',
+        buildingName: 'CJC Fish Ltd',
+        streetName: '17  Old Edinburgh Road',
+        county: 'West Midlands',
+        country: 'England',
+        townCity: 'Aberdeen',
+        postcode: 'AB1 2XX',
+        user_id: "4023482347523382523",
+        journey: "catchCertificate",
+        currentUri: "test/test.html",
+        nextUri: "test/test.asx",
+        _dynamicsAddress: {},
+        _dynamicsUser: {
+          firstName: "John",
+          lastName: "Doe"
+        }
+      }
+    };
 
-        const result = FrontEndExporter.toBackEndCcExporterDetails(myFrontEndExporter);
+    const result = FrontEndExporter.toBackEndCcExporterDetails(myFrontEndExporter);
 
-        expect(result.buildingNumber).toBeUndefined()
-        expect(result._updated).toBeUndefined();
-    });
+    expect(result.buildingNumber).toBeUndefined()
+    expect(result._updated).toBeUndefined();
+  });
 });
 
 
@@ -146,7 +146,7 @@ describe("when mapping from a front end PS exporterDetails to a backend PS expor
     const result = FrontEndExporter.toBackEndPsAndSdExporterDetails(myFrontEndExporter);
 
     expect(result).toStrictEqual(expectedResult);
-});
+  });
 
   it("will deal with optional data", () => {
     const myFrontEndExporter: FrontEndExporter.Exporter = {
@@ -190,8 +190,8 @@ describe('when mapping from a backend CcExporterDetail to front end CcExporterDe
   it('should return exporterDetails in the format that FE expects', () => {
     const expectedResult: FrontEndExporter.CcExporter = {
       model: {
-        contactId : 'a contact Id',
-        accountId  : 'an account id',
+        contactId: 'a contact Id',
+        accountId: 'an account id',
         exporterFullName: "Mr. Robot",
         exporterCompanyName: "FSociety",
         addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
@@ -208,7 +208,7 @@ describe('when mapping from a backend CcExporterDetail to front end CcExporterDe
         currentUri: "",
         nextUri: "",
         _dynamicsAddress: {},
-        _dynamicsUser : {
+        _dynamicsUser: {
           firstName: "John",
           lastName: "Doe"
         },
@@ -217,8 +217,8 @@ describe('when mapping from a backend CcExporterDetail to front end CcExporterDe
     };
 
     const myBackendExporter: BackEndModels.CcExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterFullName: "Mr. Robot",
       exporterCompanyName: "FSociety",
       addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
@@ -231,7 +231,7 @@ describe('when mapping from a backend CcExporterDetail to front end CcExporterDe
       townCity: 'Aberdeen',
       postcode: 'AB1 2XX',
       _dynamicsAddress: {},
-      _dynamicsUser : {
+      _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       },
@@ -247,8 +247,8 @@ describe('when mapping from a backend CcExporterDetail to front end CcExporterDe
   it('should return exporterDetails with an _updated property in the format expected by the Front End', () => {
 
     const myBackendExporter: BackEndModels.CcExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterFullName: "Mr. Robot",
       exporterCompanyName: "FSociety",
       addressOne: "123 Unit 1 CJC Fish Ltd",
@@ -256,7 +256,7 @@ describe('when mapping from a backend CcExporterDetail to front end CcExporterDe
       townCity: 'Aberdeen',
       postcode: 'AB1 2XX',
       _dynamicsAddress: {},
-      _dynamicsUser : {
+      _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       }
@@ -300,28 +300,28 @@ describe('when mapping from an old back end CcExporterDetail to a new back end C
     "townCity": "town",
     "postcode": "post code",
     "_dynamicsAddress": {
-        "defra_uprn": null,
-        "defra_buildingname": "defra building name",
-        "defra_subbuildingname": "defra sub building name",
-        "defra_premises": "defra premises",
-        "defra_street": "defra street",
-        "defra_locality": "defra locality",
-        "defra_dependentlocality": "defra dependent locality",
-        "defra_towntext": "defra town",
-        "defra_county": "defra county",
-        "defra_postcode": "defra postcode",
-        "_defra_country_value": "defra county value",
-        "defra_internationalpostalcode": null,
-        "defra_fromcompanieshouse": false,
-        "defra_addressid": "defra address id",
-        "_defra_country_value_OData_Community_Display_V1_FormattedValue": "defra country value",
-        "_defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty": "defra_Country",
-        "_defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname": "defra_country",
-        "defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue": "No"
+      "defra_uprn": null,
+      "defra_buildingname": "defra building name",
+      "defra_subbuildingname": "defra sub building name",
+      "defra_premises": "defra premises",
+      "defra_street": "defra street",
+      "defra_locality": "defra locality",
+      "defra_dependentlocality": "defra dependent locality",
+      "defra_towntext": "defra town",
+      "defra_county": "defra county",
+      "defra_postcode": "defra postcode",
+      "_defra_country_value": "defra county value",
+      "defra_internationalpostalcode": null,
+      "defra_fromcompanieshouse": false,
+      "defra_addressid": "defra address id",
+      "_defra_country_value_OData_Community_Display_V1_FormattedValue": "defra country value",
+      "_defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty": "defra_Country",
+      "_defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname": "defra_country",
+      "defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue": "No"
     },
     "_dynamicsUser": {
-        "firstName": "defra first name",
-        "lastName": "defra last name"
+      "firstName": "defra first name",
+      "lastName": "defra last name"
     }
   };
 
@@ -339,24 +339,24 @@ describe('when mapping from an old back end CcExporterDetail to a new back end C
     "townCity": "town",
     "postcode": "post code",
     "_dynamicsAddress": {
-        "defra_uprn": null,
-        "defra_buildingname": null,
-        "defra_subbuildingname": null,
-        "defra_premises": "defra premisis",
-        "defra_street": "defra street",
-        "defra_locality": null,
-        "defra_dependentlocality": null,
-        "defra_towntext": "town text",
-        "defra_county": "defra country",
-        "defra_postcode": "defra postcode",
-        "_defra_country_value": "defra country value",
-        "defra_internationalpostalcode": null,
-        "defra_fromcompanieshouse": false,
-        "defra_addressid": "96773387-81a2-eb11-b1ac-000d3a4addcd",
-        "_defra_country_value_OData_Community_Display_V1_FormattedValue": "defra country",
-        "_defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty": "defra_Country",
-        "_defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname": "defra_country",
-        "defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue": "No"
+      "defra_uprn": null,
+      "defra_buildingname": null,
+      "defra_subbuildingname": null,
+      "defra_premises": "defra premisis",
+      "defra_street": "defra street",
+      "defra_locality": null,
+      "defra_dependentlocality": null,
+      "defra_towntext": "town text",
+      "defra_county": "defra country",
+      "defra_postcode": "defra postcode",
+      "_defra_country_value": "defra country value",
+      "defra_internationalpostalcode": null,
+      "defra_fromcompanieshouse": false,
+      "defra_addressid": "96773387-81a2-eb11-b1ac-000d3a4addcd",
+      "_defra_country_value_OData_Community_Display_V1_FormattedValue": "defra country",
+      "_defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty": "defra_Country",
+      "_defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname": "defra_country",
+      "defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue": "No"
     },
     "_dynamicsUser": {
       "firstName": "defra first name",
@@ -419,6 +419,11 @@ describe('when mapping from an old back end CcExporterDetail to a new back end C
 
     expect(result).toStrictEqual(backEndNewFormatExporterDetails);
     expect(result._updated).toBeFalsy();
+  });
+
+  it('should return null', () => {
+    const result: BackEndModels.CcExporterDetails = FrontEndExporter.toBackEndNewCcExporterDetails(null);
+    expect(result).toBeNull();
   });
 
 });
@@ -535,8 +540,8 @@ describe('when mapping from a backend PS exporterDetail to front end PS exporter
   it('should return exporterDetails in the format that FE expects', () => {
     const expectedResult: FrontEndExporter.Exporter = {
       model: {
-        contactId : 'a contact Id',
-        accountId  : 'an account id',
+        contactId: 'a contact Id',
+        accountId: 'an account id',
         exporterCompanyName: "FSociety",
         addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
         buildingNumber: '123',
@@ -552,7 +557,7 @@ describe('when mapping from a backend PS exporterDetail to front end PS exporter
         currentUri: "",
         nextUri: "",
         _dynamicsAddress: {},
-        _dynamicsUser : {
+        _dynamicsUser: {
           firstName: "John",
           lastName: "Doe"
         },
@@ -561,8 +566,8 @@ describe('when mapping from a backend PS exporterDetail to front end PS exporter
     };
 
     const myBackendExporter: ExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: "FSociety",
       addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
       buildingNumber: '123',
@@ -574,7 +579,7 @@ describe('when mapping from a backend PS exporterDetail to front end PS exporter
       townCity: 'Aberdeen',
       postcode: 'AB1 2XX',
       _dynamicsAddress: {},
-      _dynamicsUser : {
+      _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       },
@@ -590,15 +595,15 @@ describe('when mapping from a backend PS exporterDetail to front end PS exporter
   it('should return exporterDetails with an _updated property in the format expected by the Front End', () => {
 
     const myBackendExporter: ExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: "FSociety",
       addressOne: "123 Unit 1 CJC Fish Ltd",
       addressTwo: "17 Old Edinburgh Road",
       townCity: 'Aberdeen',
       postcode: 'AB1 2XX',
       _dynamicsAddress: {},
-      _dynamicsUser : {
+      _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       }
@@ -613,15 +618,15 @@ describe('when mapping from a backend PS exporterDetail to front end PS exporter
   it('should return exporterDetails as is if flag doNotTransform is true', () => {
 
     const myBackendExporter: ExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: "FSociety",
       addressOne: "123 Unit 1 CJC Fish Ltd",
       addressTwo: "17 Old Edinburgh Road",
       townCity: 'Aberdeen',
       postcode: 'AB1 2XX',
       _dynamicsAddress: {},
-      _dynamicsUser : {
+      _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       }
@@ -803,6 +808,163 @@ describe("when mapping from an old back end PS ExporterDetail to a new back end 
 
     expect(result).toStrictEqual(backEndNewFormatExporterDetails);
   });
+
+  it("should return an updated address one omitting null values with defra sub building name", () => {
+    const nullAddressOneValues = {
+      ...backEndOldFormatExporterDetails,
+      _dynamicsAddress: {
+        defra_uprn: null,
+        defra_buildingname: null,
+        defra_subbuildingname: "defra_subbuildingname",
+        defra_premises: null,
+        defra_street: "defra street",
+        defra_locality: null,
+        defra_dependentlocality: null,
+        defra_towntext: "defra town",
+        defra_county: "defra county",
+        defra_postcode: "defra postcode",
+        _defra_country_value: "defra county value",
+        defra_internationalpostalcode: null,
+        defra_fromcompanieshouse: false,
+        defra_addressid: "defra address id",
+        _defra_country_value_OData_Community_Display_V1_FormattedValue:
+          "defra country value",
+        _defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty:
+          "defra_Country",
+        _defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname:
+          "defra_country",
+        defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue:
+          "No",
+      },
+    };
+
+    const result: ExporterDetails = FrontEndExporter.toBackEndNewPsAndSdExporterDetails(
+      nullAddressOneValues
+    );
+
+    expect(result.addressOne).toBe("defra_subbuildingname, defra street");
+  });
+
+  it("should return an updated address one omitting null values with defra building name", () => {
+    const nullAddressOneValues = {
+      ...backEndOldFormatExporterDetails,
+      _dynamicsAddress: {
+        defra_uprn: null,
+        defra_buildingname: "defra_buildname",
+        defra_subbuildingname: "defra_subbuildingname",
+        defra_premises: null,
+        defra_street: "defra street",
+        defra_locality: null,
+        defra_dependentlocality: null,
+        defra_towntext: "defra town",
+        defra_county: "defra county",
+        defra_postcode: "defra postcode",
+        _defra_country_value: "defra county value",
+        defra_internationalpostalcode: null,
+        defra_fromcompanieshouse: false,
+        defra_addressid: "defra address id",
+        _defra_country_value_OData_Community_Display_V1_FormattedValue:
+          "defra country value",
+        _defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty:
+          "defra_Country",
+        _defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname:
+          "defra_country",
+        defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue:
+          "No",
+      },
+    };
+
+    const result: ExporterDetails = FrontEndExporter.toBackEndNewPsAndSdExporterDetails(
+      nullAddressOneValues
+    );
+
+    expect(result.addressOne).toBe("defra_subbuildingname, defra_buildname, defra street");
+  });
+
+  it("should return an updated address one omitting null values with no defra street", () => {
+    const nullAddressOneValues = {
+      ...backEndOldFormatExporterDetails,
+      _dynamicsAddress: {
+        defra_uprn: null,
+        defra_buildingname: "defra_buildname",
+        defra_subbuildingname: "defra_subbuildingname",
+        defra_premises: null,
+        defra_street: null,
+        defra_locality: null,
+        defra_dependentlocality: null,
+        defra_towntext: "defra town",
+        defra_county: "defra county",
+        defra_postcode: "defra postcode",
+        _defra_country_value: "defra county value",
+        defra_internationalpostalcode: null,
+        defra_fromcompanieshouse: false,
+        defra_addressid: "defra address id",
+        _defra_country_value_OData_Community_Display_V1_FormattedValue:
+          "defra country value",
+        _defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty:
+          "defra_Country",
+        _defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname:
+          "defra_country",
+        defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue:
+          "No",
+      },
+    };
+
+    const result: ExporterDetails = FrontEndExporter.toBackEndNewPsAndSdExporterDetails(
+      nullAddressOneValues
+    );
+
+    expect(result.addressOne).toBe("defra_subbuildingname, defra_buildname");
+  });
+
+  it("should return an updated address one omitting null values with no defra premises", () => {
+    const nullAddressOneValues = {
+      ...backEndOldFormatExporterDetails,
+      _dynamicsAddress: {
+        defra_uprn: null,
+        defra_buildingname: null,
+        defra_subbuildingname: null,
+        defra_premises: null,
+        defra_street: "defra street",
+        defra_locality: null,
+        defra_dependentlocality: null,
+        defra_towntext: "defra town",
+        defra_county: "defra county",
+        defra_postcode: "defra postcode",
+        _defra_country_value: "defra county value",
+        defra_internationalpostalcode: null,
+        defra_fromcompanieshouse: false,
+        defra_addressid: "defra address id",
+        _defra_country_value_OData_Community_Display_V1_FormattedValue:
+          "defra country value",
+        _defra_country_value_Microsoft_Dynamics_CRM_associatednavigationproperty:
+          "defra_Country",
+        _defra_country_value_Microsoft_Dynamics_CRM_lookuplogicalname:
+          "defra_country",
+        defra_fromcompanieshouse_OData_Community_Display_V1_FormattedValue:
+          "No",
+      },
+    };
+
+    const result: ExporterDetails = FrontEndExporter.toBackEndNewPsAndSdExporterDetails(
+      nullAddressOneValues
+    );
+
+    expect(result.addressOne).toBe("defra street");
+  });
+
+  it("should return an updated address one omitting null values with no defra address", () => {
+    const nullAddressOneValues = {
+      ...backEndOldFormatExporterDetails,
+      _dynamicsAddress: undefined,
+    };
+
+    const result: ExporterDetails = FrontEndExporter.toBackEndNewPsAndSdExporterDetails(
+      nullAddressOneValues
+    );
+
+    expect(result.addressOne).toBe("");
+  });
 });
 
 describe("when mapping from an old back end PS ExporterDetail to a new back end PS ExporterDetail for an organisation", () => {
@@ -921,8 +1083,8 @@ describe('Mapping  Exporter Details for Storage Documents ExporterDetail from ba
   it('should return exporterDetails in the format that FE expects', () => {
     const expectedResult: FrontEndExporter.Exporter = {
       model: {
-        contactId : 'a contact Id',
-        accountId  : 'an account id',     
+        contactId: 'a contact Id',
+        accountId: 'an account id',
         exporterCompanyName: "FSociety",
         addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
         buildingNumber: '123',
@@ -938,7 +1100,7 @@ describe('Mapping  Exporter Details for Storage Documents ExporterDetail from ba
         currentUri: "",
         nextUri: "",
         _dynamicsAddress: {},
-        _dynamicsUser : {
+        _dynamicsUser: {
           firstName: "John",
           lastName: "Doe"
         },
@@ -947,8 +1109,8 @@ describe('Mapping  Exporter Details for Storage Documents ExporterDetail from ba
     };
 
     const backendExporter: ExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: "FSociety",
       addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
       buildingNumber: '123',
@@ -960,7 +1122,7 @@ describe('Mapping  Exporter Details for Storage Documents ExporterDetail from ba
       townCity: 'Aberdeen',
       postcode: 'AB1 2XX',
       _dynamicsAddress: {},
-      _dynamicsUser : {
+      _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       },
@@ -1024,7 +1186,7 @@ describe("when mapping from a front end SD exporterDetails to a backend SD expor
     const result = FrontEndExporter.toBackEndPsAndSdExporterDetails(myFrontEndExporter);
 
     expect(result).toStrictEqual(expectedResult);
-});
+  });
 
   it("will deal with optional data", () => {
     const myFrontEndExporter: FrontEndExporter.Exporter = {
@@ -1059,4 +1221,11 @@ describe("when mapping from a front end SD exporterDetails to a backend SD expor
     expect(result.subBuildingName).toBeUndefined();
     expect(result._updated).toBeUndefined();
   });
+
+  it("should return an updated address one omitting null values with no exporter details", () => {
+    // @ts-expect-error testing empty object
+    const result = FrontEndExporter.toBackEndPsAndSdExporterDetails({});
+
+    expect(result).toBeUndefined();
+  })
 });

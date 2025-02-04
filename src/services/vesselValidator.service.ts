@@ -53,7 +53,7 @@ export default class VesselValidator {
   }
 
 
-  public static vesselsAreValid = async (items: ProductLanded[]) =>
+  public static readonly vesselsAreValid = async (items: ProductLanded[]) =>
     await VesselValidator.checkVesselWithDate(items)
       .then(_ => true)
       .catch(_e => {
@@ -64,12 +64,12 @@ export default class VesselValidator {
     return exportedData.filter(VesselValidator.hasProductsWithVesselsNotFound);
   }
 
-  public static hasProductsWithVesselsNotFound = (item: ProductLanded): boolean =>
-    item && item.landings
+  public static readonly hasProductsWithVesselsNotFound = (item: ProductLanded): boolean =>
+    item?.landings
       ? item.landings.some((land: LandingStatus) => land.model.vessel.vesselNotFound)
       : false;
 
-  public static vesselsNotFound = (items: ProductLanded[]): ValidationFailure[] => {
+  public static readonly vesselsNotFound = (items: ProductLanded[]): ValidationFailure[] => {
     const validationFailures: ValidationFailure[] = [];
 
     VesselValidator.getProductsWithVesselNotFound(items).forEach(
@@ -94,7 +94,7 @@ export default class VesselValidator {
     return validationFailures;
   };
 
-  public static invalidLandingDates = (items: ProductLanded[]): ValidationFailure[] => {
+  public static readonly invalidLandingDates = (items: ProductLanded[]): ValidationFailure[] => {
     const maxSubmissionDate = moment(Date.now()).add(3, 'days');
     const isAfterMaxSubmissionDate = (date: string) => moment(date).isAfter(maxSubmissionDate, 'day');
 

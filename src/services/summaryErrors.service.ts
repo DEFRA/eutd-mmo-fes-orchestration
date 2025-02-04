@@ -18,12 +18,12 @@ export default class SummaryErrorsService {
     const key = Object.keys(systemErrors).find(_ => _ === documentNumber);
 
     if (key) {
-      return (data && data.errors && data.errors.length)
+      return data?.errors?.length
         ? [...data.errors, systemErrors[key]]
         : [systemErrors[key]];
     }
 
-    return (data && data.errors && data.errors.length) ? data.errors : null;
+    return data?.errors?.length ? data.errors : null;
   }
 
   public static async getAllSystemErrors(userPrincipal: string, contactId: string): Promise<SystemFailure[]> {

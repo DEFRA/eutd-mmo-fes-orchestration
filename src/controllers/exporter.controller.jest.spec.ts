@@ -78,6 +78,14 @@ describe('Exporter Controller', () => {
       await ExporterController.getExporterDetails(req,'Bob',undefined, contactId);
       expect(mockFn).toHaveBeenCalledWith('Bob', 'Anything else', contactId);
     });
+
+    it('should call getExporterDetailsFromRedis for anything else and return', async () => {
+      req.params = { journey: 'Anything else' };
+      mockFn = jest.spyOn(ExporterController, 'getExporterDetailsFromRedis');
+      mockFn.mockResolvedValue(undefined);
+      await ExporterController.getExporterDetails(req,'Bob',undefined, contactId);
+      expect(mockFn).toHaveBeenCalledWith('Bob', 'Anything else', contactId);
+    });
   });
 
   describe('getExporterDetailsFromRedis', () => {
@@ -117,6 +125,39 @@ describe('Exporter Controller', () => {
       expect(documentCreateMock).toHaveBeenCalledWith(user, ServiceNames.CC, documentKey, journey, contactId);
     });
 
+    it('should create a processing statement document number if one does not exist', async () => {
+      documentGetMock.mockResolvedValue({});
+
+      const documentKey = `processingStatement/${DOCUMENT_NUMBER_KEY}`;
+
+      await ExporterController.getExporterDetailsFromRedis(user, 'processingStatement', contactId);
+
+      expect(documentGetMock).toHaveBeenCalledWith(user, documentKey, contactId);
+      expect(documentCreateMock).toHaveBeenCalledWith(user, ServiceNames.PS, documentKey, 'processingStatement', contactId);
+    });
+
+    it('should create a storage note document number if one does not exist', async () => {
+      documentGetMock.mockResolvedValue({});
+
+      const documentKey = `storageNotes/${DOCUMENT_NUMBER_KEY}`;
+
+      await ExporterController.getExporterDetailsFromRedis(user, 'storageNotes', contactId);
+
+      expect(documentGetMock).toHaveBeenCalledWith(user, documentKey, contactId);
+      expect(documentCreateMock).toHaveBeenCalledWith(user, ServiceNames.SD, documentKey, 'storageNotes', contactId);
+    });
+
+    it('should create a unknown document number if one does not exist', async () => {
+      documentGetMock.mockResolvedValue({});
+
+      const documentKey = `blah/${DOCUMENT_NUMBER_KEY}`;
+
+      await ExporterController.getExporterDetailsFromRedis(user, 'blah', contactId);
+
+      expect(documentGetMock).toHaveBeenCalledWith(user, documentKey, contactId);
+      expect(documentCreateMock).toHaveBeenCalledWith(user, 'UNKNOWN', documentKey, 'blah', contactId);
+    });
+
     it('should get exporter data', async () => {
       documentGetMock.mockResolvedValue(testData);
 
@@ -132,7 +173,16 @@ describe('Exporter Controller', () => {
   describe('addExporterDetails', () => {
     let validator;
     let mockFn;
-    const res = sinon.fake();
+    const res = {
+      response: () => {
+        function code(httpCode) {
+          return httpCode;
+        }
+
+        return { code: code }
+      },
+      redirect: () => {}
+    } as unknown as Hapi.ResponseToolkit<Hapi.ReqRefDefaults>;
 
     beforeAll(() => {
       validator = jest.spyOn(DocOwnerShipValidator, 'validateDocumentOwnership');
@@ -147,6 +197,47 @@ describe('Exporter Controller', () => {
       mockFn.mockResolvedValue({});
 
       await ExporterController.addExporterDetails(req, res, false, 'Bob','GBR-34344-343443-343434', contactId );
+
+      expect(mockFn).toHaveBeenCalledWith({"error": undefined, "errors": undefined, "model": {"test": "test", "user_id": "Bob"}}, "Bob", "GBR-34344-343443-343434", "undefined/exporter", contactId);
+    });
+
+    it('will call to save the exporter details with default values', async () => {
+      validator.mockResolvedValue({ documentNumber: 'GBR-34344-343443-343434'});
+      mockFn.mockResolvedValue({});
+
+      await ExporterController.addExporterDetails(req, res, undefined, 'Bob','GBR-34344-343443-343434', contactId );
+
+      expect(mockFn).toHaveBeenCalledWith({"error": undefined, "errors": undefined, "model": {"test": "test", "user_id": "Bob"}}, "Bob", "GBR-34344-343443-343434", "undefined/exporter", contactId);
+    });
+
+    it('will call to save the exporter details with non-js', async () => {
+      validator.mockResolvedValue({ documentNumber: 'GBR-34344-343443-343434'});
+      mockFn.mockResolvedValue({});
+
+      const nonJSreq = {
+        ...req,
+        headers: {
+          documentNumber: 'GBR-34344-343443-343434',
+          accept: 'text/html'
+        }
+      }
+      await ExporterController.addExporterDetails(nonJSreq, res, undefined, 'Bob','GBR-34344-343443-343434', contactId );
+
+      expect(mockFn).toHaveBeenCalledWith({"error": undefined, "errors": undefined, "model": {"test": "test", "user_id": "Bob"}}, "Bob", "GBR-34344-343443-343434", "undefined/exporter", contactId);
+    });
+
+    it('will call to save the exporter details with non-js for save as draft', async () => {
+      validator.mockResolvedValue({ documentNumber: 'GBR-34344-343443-343434'});
+      mockFn.mockResolvedValue({});
+
+      const nonJSreq = {
+        ...req,
+        headers: {
+          documentNumber: 'GBR-34344-343443-343434',
+          accept: 'text/html'
+        }
+      }
+      await ExporterController.addExporterDetails(nonJSreq, res, true, 'Bob','GBR-34344-343443-343434', contactId );
 
       expect(mockFn).toHaveBeenCalledWith({"error": undefined, "errors": undefined, "model": {"test": "test", "user_id": "Bob"}}, "Bob", "GBR-34344-343443-343434", "undefined/exporter", contactId);
     });
@@ -190,6 +281,9 @@ describe('Exporter Controller', () => {
           return { takeover: takeover }
         }
         return { code: code }
+      },
+      redirect: () => {
+        return { takeover: () => {} }
       }
     } as unknown as Hapi.ResponseToolkit<Hapi.ReqRefDefaults>;
 
@@ -205,6 +299,54 @@ describe('Exporter Controller', () => {
     });
 
     it('will call save with the appropriate document number', async () => {
+      req.payload = {};
+      req.params = { journey: 'catchCertificate'};
+      req.headers = { documentNumber: 'GBR-34344-343443-343434' };
+
+      await ExporterController.processSaveExporterDetailsErrors(req, h,{details: []},'Bob','GBR-3444-2344-234234', contactId);
+
+      expect(mockSaveExporterDetails).toHaveBeenCalledWith({"error": "invalid","errors":{},"model": {} },"Bob","GBR-3444-2344-234234","catchCertificate/exporter", contactId);
+    });
+
+    it('will call save with the appropriate document number for non-js', async () => {
+      req.payload = {};
+      req.params = { journey: 'catchCertificate'};
+      req.headers = { documentNumber: 'GBR-34344-343443-343434' };
+
+      const nonJSreq = {
+        ...req,
+        headers: {
+          documentNumber: 'GBR-34344-343443-343434',
+          accept: 'text/html'
+        }
+      }
+
+      await ExporterController.processSaveExporterDetailsErrors(nonJSreq, h,{details: []},'Bob','GBR-3444-2344-234234', contactId);
+
+      expect(mockSaveExporterDetails).toHaveBeenCalledWith({"error": "invalid","errors":{},"model": {} },"Bob","GBR-3444-2344-234234","catchCertificate/exporter", contactId);
+    });
+
+    it('will call save with the appropriate document number for non-js with nextUri', async () => {
+      req.payload = {
+        nextUri: 'true'
+      };
+      req.params = { journey: 'catchCertificate'};
+      req.headers = { documentNumber: 'GBR-34344-343443-343434' };
+
+      const nonJSreq = {
+        ...req,
+        headers: {
+          documentNumber: 'GBR-34344-343443-343434',
+          accept: 'text/html'
+        }
+      }
+
+      await ExporterController.processSaveExporterDetailsErrors(nonJSreq, h,{details: []},'Bob','GBR-3444-2344-234234', contactId);
+
+      expect(mockSaveExporterDetails).toHaveBeenCalledWith({"error": "invalid","errors":{},"model": { "nextUri": "true" } },"Bob","GBR-3444-2344-234234","catchCertificate/exporter", contactId);
+    });
+
+    it('will call save with the appropriate document number non-js', async () => {
       req.payload = {};
       req.params = { journey: 'catchCertificate'};
       req.headers = { documentNumber: 'GBR-34344-343443-343434' };

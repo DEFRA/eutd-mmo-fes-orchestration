@@ -48,7 +48,7 @@ export default class TransportService {
 
     let data = await TransportService.getTransportData(userPrincipal, journey,documentNumber, contactId);
 
-    if(data && data.vehicle) {
+    if (data?.vehicle) {
       data = checkTransportDataFrontEnd(data);
     }
 

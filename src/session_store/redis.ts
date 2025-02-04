@@ -149,14 +149,14 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   async writeAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T[]): Promise<void> {
-    const stringifiedData = JSON.stringify(data);
+    const stringifiedDataForWriteAll = JSON.stringify(data);
 
     if(contactId) {
       const fullKey = RedisStorage._buildKeyForUser(contactId, key);
-      await this.connection.set(fullKey, stringifiedData);
+      await this.connection.set(fullKey, stringifiedDataForWriteAll);
     } else {
       const fullKey = RedisStorage._buildKeyForUser(userPrincipal, key);
-      await this.connection.set(fullKey, stringifiedData);
+      await this.connection.set(fullKey, stringifiedDataForWriteAll);
     }
   }
 

@@ -955,6 +955,22 @@ describe("methods", () => {
       expect(mockRedirect).toHaveBeenCalledWith(mockReq.url.path);
     });
 
+    it("should call ExportPayloadService.save() with the right params with no landings", async () => {
+      mockReq.params.landingId = "landing-id";
+
+      mockExportPayloadServiceGet.mockResolvedValue({ items: [] });
+
+      await SUT.editExportPayloadProductLanding(
+        mockReq,
+        h,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockExportPayloadServiceSave).not.toHaveBeenCalled();
+    });
+
     it("should call ExportPayloadService.save() with the right params", async () => {
       mockReq.params.landingId = "landing-id";
 
@@ -1022,6 +1038,27 @@ describe("methods", () => {
   describe("removeExportPayloadProductLanding()", () => {
     it("should call ExportPayloadService.get() with the right params", async () => {
       mockReq.params.landingId = "landing-id";
+
+      await SUT.removeExportPayloadProductLanding(
+        mockReq,
+        h,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockExportPayloadServiceGet).toHaveBeenCalledWith(
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+      expect(mockRedirect).toHaveBeenCalledWith(mockReq.payload.currentUri);
+    });
+
+    it("should call ExportPayloadService.get() with the right params with no landings", async () => {
+      mockReq.params.landingId = "landing-id";
+
+      mockExportPayloadServiceGet.mockResolvedValue({ items: [] });
 
       await SUT.removeExportPayloadProductLanding(
         mockReq,
@@ -2033,6 +2070,25 @@ describe("methods", () => {
   });
 
   describe("addExportPayloadProduct()", () => {
+    it("should return a given result", async () => {
+      mockExportPayloadServiceSave.mockReturnValueOnce({ result: 'true' });
+
+      const res = await SUT.addExportPayloadProduct(
+        {
+          ...mockReq,
+          headers: {
+            accept: null
+          }
+        },
+        h,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(res).toEqual({ result: 'true' });
+    });
+
     it("should redirect to payload.nextUri if the accept header is text/html", async () => {
       await SUT.addExportPayloadProduct(
         mockReq,

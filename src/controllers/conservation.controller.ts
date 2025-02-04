@@ -8,7 +8,7 @@ import { HapiRequestApplicationStateExtended } from "../types";
 
 export default class ConservationController {
 
-  public static async addConservation(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean = false, userPrincipal: string, documentNumber: string, contactId: string) {
+  public static async addConservation(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
 
@@ -36,7 +36,7 @@ export default class ConservationController {
     return await ConservationService.getConservation(payload, documentNumber, contactId);
   }
 
-  public static async addConservationAndSaveAsDraft(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, saveAsDraft : boolean = true, userPrincipal: string, documentNumber: string, contactId: string) {
+  public static async addConservationAndSaveAsDraft(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, saveAsDraft : boolean, userPrincipal: string, documentNumber: string, contactId: string) {
     logger.info({userPrincipal: (req.app as HapiRequestApplicationStateExtended).claims.sub}, 'Received a request to add conservation and save as draft link');
     return ConservationController.addConservation(req, h, saveAsDraft, userPrincipal, documentNumber, contactId);
   }

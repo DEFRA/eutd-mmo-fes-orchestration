@@ -9,7 +9,7 @@ import { StorageDocument } from '../persistence/schema/storageDoc';
 
 export default class UserReferenceController {
 
-  static getService = (name: ServiceNames) => {
+  static readonly getService = (name: ServiceNames) => {
     switch(name) {
       case ServiceNames.CC: return CCService;
       case ServiceNames.PS: return PSService;
@@ -17,10 +17,10 @@ export default class UserReferenceController {
     }
   }
 
-  static getUserReference = async (document: CatchCertificate | ProcessingStatement | StorageDocument): Promise<string> =>
+  static readonly getUserReference = async (document: CatchCertificate | ProcessingStatement | StorageDocument): Promise<string> =>
     document ? document.userReference : null;
 
-  static addUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string): Promise<void> => {
+  static readonly addUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string): Promise<void> => {
     const serviceName = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
 
     if (serviceName === ServiceNames.UNKNOWN) {

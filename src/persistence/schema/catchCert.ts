@@ -196,21 +196,24 @@ export const cloneExportData = (original: ExportData, newDocumentNumber: string,
         }
       }
       : original.transportation,
-    products: (original.products && original.products.length)
+    products: (original.products?.length)
       ? original.products.map(product => cloneProductData(product, newDocumentNumber, excludeLandings))
       : original.products
   }
 );
 
 export const cloneProductData = (original: Product, newDocumentNumber: string, excludeLandings: boolean): Product => {
+  let caughtBy: Catch[] | undefined;
+
+  if (!original.caughtBy?.length) {
+    caughtBy = original.caughtBy
+  } else if (!excludeLandings) {
+    caughtBy = original.caughtBy.map((landing: Catch) => cloneCatch(landing, newDocumentNumber));
+  }
   const result = {
     ...original,
     speciesId: `${newDocumentNumber}${original.speciesId.slice(newDocumentNumber.length)}`,
-    caughtBy: (original.caughtBy && original.caughtBy.length)
-      ? excludeLandings
-        ? undefined
-        : original.caughtBy.map((landing: Catch) => cloneCatch(landing, newDocumentNumber))
-      : original.caughtBy
+    caughtBy
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);

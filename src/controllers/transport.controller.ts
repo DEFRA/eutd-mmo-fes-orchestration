@@ -38,7 +38,7 @@ export default class TransportController {
     return payload.cmr === 'true' ? summaryUri : truckDetailsUri;
   }
 
-  public static async addTransport(req: Hapi.Request, h, savingAsDraft: boolean = false, userPrincipal : string, documentNumber: string, contactId: string) {
+  public static async addTransport(req: Hapi.Request, h, savingAsDraft: boolean, userPrincipal : string, documentNumber: string, contactId: string) {
     logger.info({userPrincipal: (req.app as HapiRequestApplicationStateExtended).claims.sub},'Received a request to add a transport');
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
@@ -55,7 +55,7 @@ export default class TransportController {
     return data;
   }
 
-  public static async addTransportDetails(req: Hapi.Request, h, savingAsDraft: boolean = false, userPrincipal : string, documentNumber: string, contactId: string) {
+  public static async addTransportDetails(req: Hapi.Request, h, savingAsDraft: boolean, userPrincipal : string, documentNumber: string, contactId: string) {
     logger.info({userPrincipal: userPrincipal},'Received a request to add a transport details');
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
@@ -73,7 +73,7 @@ export default class TransportController {
     return data;
   }
 
-  public static async addTruckCMR(req: Hapi.Request, h, savingAsDraft: boolean = false, userPrincipal :string, documentNumber: string, contactId: string) {
+  public static async addTruckCMR(req: Hapi.Request, h, savingAsDraft: boolean, userPrincipal :string, documentNumber: string, contactId: string) {
     logger.info({userPrincipal: (req.app as HapiRequestApplicationStateExtended).claims.sub},'addTruckCMR()');
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;

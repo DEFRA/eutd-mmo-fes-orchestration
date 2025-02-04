@@ -23,7 +23,7 @@ export default class SaveAsDraftService {
 
     logger.debug(`[DELETE][${key}][SAVE AS DRAFT][DOCUMENT NUMBER][${documentNumber}]`);
 
-    if (data && data.currentUri) {
+    if (data?.currentUri) {
       delete data.currentUri[documentNumber];
       await sessionStore.writeAllFor(userPrincipal, contactId, key, data);
     }

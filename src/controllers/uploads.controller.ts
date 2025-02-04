@@ -18,14 +18,14 @@ import FavouritesController from './favourites.controller';
 
 export default class UploadsController {
 
-  public static async parseLandingsFile(data: string = '', userPrincipal: string, contactId: string, cache?: boolean): Promise<IUploadedLanding[]> {
-    if (data.trim() === '') {
+  public static async parseLandingsFile(data: string, userPrincipal: string, contactId: string, cache?: boolean): Promise<IUploadedLanding[]> {
+    if (!data?.trim()) {
       throw new Error('error.upload.min-landings');
     }
 
     let rows = await csv({noheader: true, output: 'line'}).fromString(data);
 
-    rows = rows.filter(item => !isEmpty(item.replace(/^(,| )+$/g, '')));
+    rows = rows.filter(item => !isEmpty(item.replace(/^[, ]+$/g, '')));
     rows = rows.map(item => item.toUpperCase());
 
     if (rows.length > ApplicationConfig._maxLimitLandings) {

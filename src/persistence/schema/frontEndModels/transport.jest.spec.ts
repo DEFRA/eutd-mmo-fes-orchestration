@@ -56,6 +56,35 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
   });
 
+  it("if vehicle is truck then it should contain all relevant properties for truck with exported to", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.truck,
+      cmr: "false",
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG Number",
+      departurePlace: "here",
+      user_id: "UID",
+      journey: "Journey",
+      currentUri: "some/uri",
+      nextUri: "next/uri",
+      exportedTo : undefined
+    };
+
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.truck,
+      cmr: false,
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG Number",
+      departurePlace: "here"
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
   it("if vehicle is plane then it should contain all relevant properties for plane", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.plane,
@@ -94,6 +123,32 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
   });
 
+  it("if vehicle is plane then it should contain all relevant properties for plane no exportedTo", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      departurePlace: "here",
+      user_id: "UID",
+      journey: "Journey",
+      currentUri: "some/uri",
+      nextUri: "next/uri",
+      exportedTo : undefined
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      departurePlace: "here"
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
   it("if vehicle is train then it should contain all relevant properties for train", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.train,
@@ -125,6 +180,30 @@ describe("When mapping from a front end transport to a backend transport", () =>
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
+  it("if vehicle is train then it should contain all relevant properties for train no exportedTo", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+      user_id: "UID",
+      journey: "Journey",
+      currentUri: "some/uri",
+      nextUri: "next/uri",
+      exportedTo : undefined
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -170,6 +249,34 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
   });
 
+  it("if vehicle is container vessel then it should contain all relevant properties for container vessel exportedTo", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      containerNumber: "Cont Number",
+      departurePlace: "here",
+      user_id: "UID",
+      journey: "Journey",
+      currentUri: "some/uri",
+      nextUri: "next/uri",
+      exportedTo : undefined
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState : "UK",
+      containerNumber : "Cont Number",
+      departurePlace: "here"
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
   it("if vehicle is fishing vessel then it should contain all relevant properties for fishing vessel", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.fishingVessel,
@@ -197,6 +304,26 @@ describe("When mapping from a front end transport to a backend transport", () =>
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
+  it("if vehicle is fishing vessel then it should contain all relevant properties for fishing vessel no exported to", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.fishingVessel,
+      user_id: "UID",
+      journey: "Journey",
+      currentUri: "some/uri",
+      nextUri: "next/uri",
+      exportedTo : undefined
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.fishingVessel
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -647,6 +774,22 @@ describe("When mapping from a backend transport to front end transport", () => {
 });
 
 describe('checkTransportDataFrontEnd', () => {
+
+  it('should return an empty transport object', () => {
+    expect(FrontEndTransport.checkTransportDataFrontEnd(undefined)).toStrictEqual({
+      vehicle: '',
+      exportedTo: {
+        officialCountryName: '',
+        isoCodeAlpha2: '',
+        isoCodeAlpha3: '',
+        isoNumericCode: '',
+      }
+    })
+  });
+
+  it('should return null', () => {
+    expect(FrontEndTransport.checkTransportDataFrontEnd({ vehicle: '' })).toBeNull()
+  });
 
   const shouldReturnFullObject = (fullObject : FrontEndTransport.Transport) =>
     it('should return full object when all data is valid', () => {

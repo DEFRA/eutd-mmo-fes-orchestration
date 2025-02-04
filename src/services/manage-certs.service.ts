@@ -60,8 +60,8 @@ export default class ManageCertsService {
       }
 
       axios.put(`${ApplicationConfig._businessContinuityUrl}/api/certificates/${documentNumber}`, data, config)
-      .then(()  => logger.info('Data sent to BC server'))
-      .catch(err => logger.error(`Error - Data not sent to BC server: ${err}`));
+        .then(()  => logger.info(`Void Data for ${documentNumber} sent to BC server`))
+        .catch(err => logger.error(`Void Error - Data for ${documentNumber} not sent to BC server: ${err}`));
 
       const serviceName: ServiceNames = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
 
