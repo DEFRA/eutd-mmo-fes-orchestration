@@ -4,8 +4,8 @@
   "version": "1.10.0",
   "private": true,
   "engines": {
-    "node": "~18.12.1",
-    "npm": "~8.19.2"
+    "node": "~22.13.1",
+    "npm": "~10.9.2"
   },
   "nyc": {
     "extension": [
@@ -63,7 +63,7 @@
     "jsonwebtoken": "9.0.2",
     "jwks-rsa": "3.1.0",
     "lodash": "^4.17.21",
-    "mmo-ecc-pdf-svc": "2.1.38",
+    "mmo-ecc-pdf-svc": "2.2.1",
     "moment": "^2.30.1",
     "mongodb": "^6.6.2",
     "mongoose": "^7.5.0",
@@ -155,3 +155,4 @@
     "test:ci": "cross-env JEST_JUNIT_OUTPUT_DIR=test-results JEST_JUNIT_OUTPUT_NAME=junit.xml NODE_ENV=test jest --runInBand --watchAll=false --reporters=default --reporters=jest-junit --coverage --ci"
   }
 }
+
