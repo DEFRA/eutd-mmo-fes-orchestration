@@ -62,6 +62,16 @@ export default class ExportPayloadNonjsRoutes {
               payload: Joi.object({
                 'vessel.label': Joi.string().trim().label("Vessel").required(),
                 dateLanded: extendedJoi.date().format(['YYYY-MM-DD']).max(allowDaysInTheFuture).utc().required(),
+                startDate: extendedJoi.date().custom((value, helpers) => {
+                  const startDate = value;
+                  const dateLanded = helpers.state.ancestors[0].dateLanded;
+
+                  if (moment(dateLanded).utc().isBefore(moment(startDate).utc(), 'day')) {
+                    return helpers.error('date.max');
+                  }
+
+                      return value;
+                }, 'Date validation').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required()
               })
             }

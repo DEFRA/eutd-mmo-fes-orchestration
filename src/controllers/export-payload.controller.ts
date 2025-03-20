@@ -446,6 +446,7 @@ export default class ExportPayloadController {
         id: `${documentNumber}-${getRandomNumber()}`,
         vessel: payload.vessel,
         dateLanded: payload.dateLanded,
+        startDate: payload.startDate,
         exportWeight: payload.exportWeight
       }
     };
@@ -459,6 +460,7 @@ export default class ExportPayloadController {
     const payload: {
       id?: string,
       vessel: PayloadSchema.Vessel,
+      startDate?: string,
       dateLanded: string,
       faoArea: string,
       weights: PayloadSchema.Weight[],
@@ -477,6 +479,7 @@ export default class ExportPayloadController {
         model: {
           id: `${documentNumber}-${getRandomNumber()}`,
           vessel: payload.vessel,
+          startDate: payload.startDate,
           dateLanded: payload.dateLanded,
           exportWeight: weight.exportWeight,
           faoArea: payload.faoArea
@@ -539,6 +542,7 @@ export default class ExportPayloadController {
       id?: string,
       vessel: any,
       dateLanded: string,
+      startDate?: string,
       exportWeight: number,
       faoArea: string,
       currentUri?: string
@@ -554,6 +558,7 @@ export default class ExportPayloadController {
         id: payload.id || `${documentNumber}-${getRandomNumber()}`,
         vessel: payload.vessel,
         dateLanded: payload.dateLanded,
+        startDate: payload.startDate,
         exportWeight: payload.exportWeight,
         faoArea: payload.faoArea
       }
@@ -608,7 +613,7 @@ export default class ExportPayloadController {
     }
   }
 
-  public static async upsertExportPayloadInvalidRequest(req, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, error, userPrincipal, documentNumber, contactId: string) {
+  public static async upsertExportPayloadInvalidRequest(req, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, error: any, userPrincipal: string, documentNumber: string, contactId: string) {
     const newLanding = { model: undefined, editMode: true, error: 'invalid', errors: errorExtractor(error) };
     let result;
     if (req.payload) {
@@ -617,6 +622,7 @@ export default class ExportPayloadController {
         vessel: req.payload.vessel,
         faoArea: req.payload.faoArea,
         dateLanded: req.payload.dateLanded,
+        startDate: req.payload.startDate,
         exportWeight: req.payload.exportWeight
       };
       result = await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
@@ -642,6 +648,7 @@ export default class ExportPayloadController {
         id: payload.id || `${documentNumber}-${getRandomNumber()}`,
         vessel,
         dateLanded: payload.dateLanded,
+        startDate: payload.startDate,
         exportWeight: payload.exportWeight,
         faoArea: payload.faoArea
       }
@@ -674,6 +681,7 @@ export default class ExportPayloadController {
           label: req.payload['vessel.label']
         },
         dateLanded: req.payload.dateLanded,
+        startDate: req.payload.startDate,
         exportWeight: req.payload.exportWeight
       };
       await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);

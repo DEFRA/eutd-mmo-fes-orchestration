@@ -117,7 +117,7 @@ export default class ExportPayloadService {
     return directLanding;
   }
 
-  public static async upsertLanding(productId, landing, userId, documentNumber, contactId: string): Promise<any> {
+  public static async upsertLanding(productId: string, landing, userId: string, documentNumber: string, contactId: string): Promise<any> {
     const sessionData: SessionStore = await getCurrentSessionData(userId, documentNumber, contactId);
     const exportPayload: ProductsLanded = await CatchCertService.getExportPayload(userId, documentNumber, contactId);
     if (exportPayload?.items) {

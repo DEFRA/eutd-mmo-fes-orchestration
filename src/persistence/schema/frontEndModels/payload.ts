@@ -48,6 +48,7 @@ export interface Weight {
 export interface DirectLanding {
   id?: string;
   vessel?: Vessel;
+  startDate?: string;
   dateLanded?: string;
   faoArea?: string;
   weights: Weight[];
@@ -60,6 +61,7 @@ export interface Landing {
   id: string;
   vessel?: Vessel;
   dateLanded?: string;
+  startDate?: string;
   exportWeight?: number;
   faoArea?: string;
   numberOfSubmissions?: number;
@@ -164,9 +166,9 @@ export const toCodeAndName = (input: CodeAndLabel): BackEndModels.State | BackEn
   }
 };
 
-const mapLandings = (landing: LandingStatus) => {
+const mapLandings = (landing: LandingStatus): BackEndModels.Catch => {
   const errors = (landing.errors) ? Object.keys(landing.errors) : [];
-  const result = {
+  const result: BackEndModels.Catch = {
     vessel: landing.model?.vessel?.vesselName,
     pln: landing.model?.vessel?.pln,
     homePort: landing.model?.vessel?.homePort,
@@ -178,6 +180,7 @@ const mapLandings = (landing: LandingStatus) => {
     licenceHolder: landing.model?.vessel?.licenceHolder,
     id: landing.model.id,
     date: landing.model.dateLanded,
+    startDate: landing.model.startDate,
     faoArea: landing.model.faoArea,
     weight: landing.model.exportWeight,
     numberOfSubmissions: landing.model.numberOfSubmissions,
@@ -211,6 +214,7 @@ const mapLandings = (landing: LandingStatus) => {
 
   return result;
 }
+
 export const toBackEndCatches = (landings: LandingStatus[]): BackEndModels.Catch[] => {
   return (landings)
     ? landings.map<BackEndModels.Catch>((landing: LandingStatus) => mapLandings(landing))
@@ -270,6 +274,7 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
         id: landing.id,
         vessel: toFrontEndVessel(landing),
         faoArea: landing.faoArea,
+        startDate: landing.startDate,
         dateLanded: landing.date,
         exportWeight: landing.weight,
         numberOfSubmissions: landing.numberOfSubmissions,
@@ -353,6 +358,7 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
     id: landing ? landing.id : undefined,
     vessel,
     numberOfSubmissions: landing ? landing.numberOfSubmissions : undefined,
+    startDate: landing?.startDate,
     dateLanded: landing ? landing.date : undefined,
     faoArea: landing ? landing.faoArea : undefined,
     weights: weights.map((weight: Weight) => {

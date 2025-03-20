@@ -1,6 +1,7 @@
 import * as Hapi from "@hapi/hapi";
 import Routes from "./export-payload";
 import Controller from "../controllers/export-payload.controller";
+import ExportPayloadService from "../services/export-payload.service";
 import * as Ownership from "../validators/documentOwnershipValidator";
 import * as FishValidator from "../validators/fish.validator";
 import * as SessionManager from "../helpers/sessionManager";
@@ -395,6 +396,36 @@ describe("exporter-payload routes", () => {
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
 
+    it("should return 400 for a request payload containing a start data after the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const currentDate = new Date();
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() + 1);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: nextDate
+        }
+      }
+
+      const expected = {
+        items:[],
+        error: "invalid",
+        errors:{
+          startDate: "error.startDate.date.max"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
     it("should return 403 user is not valid", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(undefined);
 
@@ -428,6 +459,46 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.result).toStrictEqual({ some: "data" });
+    });
+
+    it("should return 200 for a request payload containing a start data equal to the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: new Date()
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it("should return 200 for a request payload containing a start data before the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const currentDate = new Date();
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() - 1);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: nextDate
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
     });
   });
 
@@ -531,6 +602,36 @@ describe("exporter-payload routes", () => {
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
 
+    it("should return 400 for a request payload containing a start data after the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const currentDate = new Date();
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() + 1);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: nextDate
+        }
+      }
+
+      const expected = {
+        items:[],
+        error: "invalid",
+        errors:{
+          startDate: "error.startDate.date.max"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
     it("should return 403 user is not valid", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(undefined);
 
@@ -566,6 +667,46 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.result).toStrictEqual({ some: "data" });
+    });
+
+    it("should return 200 for a request payload containing a start data equal to the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: new Date()
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductDirectLanding).toHaveBeenCalled();
+    });
+
+    it("should return 200 for a request payload containing a start data before the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
+
+      const currentDate = new Date();
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() - 1);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: nextDate
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductDirectLanding).toHaveBeenCalled();
     });
   });
 
@@ -861,6 +1002,7 @@ describe("exporter-payload routes", () => {
     let request;
     let mockValidateDocumentOwnership;
     let mockUpsertExportPayloadProductLanding;
+    let mockUpsertLanding;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -871,6 +1013,10 @@ describe("exporter-payload routes", () => {
         Controller,
         "upsertExportPayloadProductLanding"
       );
+      mockUpsertLanding = jest.spyOn(
+        ExportPayloadService,
+        "upsertLanding"
+      )
 
       request = {
         method: "POST",
@@ -895,6 +1041,43 @@ describe("exporter-payload routes", () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+    });
+
+    it("should return 400 for a request payload containing a start data after the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items:[],
+        error: "invalid",
+        errors:{
+          startDate: "error.startDate.date.max"
+        }
+      });
+
+      const currentDate = new Date();
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() + 1);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: nextDate
+        }
+      }
+
+      const expected = {
+        items:[],
+        error: "invalid",
+        errors:{
+          startDate: "error.startDate.date.max"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
 
     it("should return 403 user is not valid", async () => {
@@ -928,6 +1111,46 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.result).toStrictEqual({ some: "data" });
+    });
+
+    it("should return 200 for a request payload containing a start data equal to the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: new Date()
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it("should return 200 for a request payload containing a start data before the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const currentDate = new Date();
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() - 1);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: nextDate
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
     });
   });
 

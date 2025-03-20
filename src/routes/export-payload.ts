@@ -61,6 +61,16 @@ export default class ExportPayloadRoutes {
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
                 dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
+                startDate: extendedJoi.date().custom((value, helpers) => {
+                  const startDate = value;
+                  const dateLanded = helpers.state.ancestors[0].dateLanded;
+
+                  if (moment(dateLanded).utc().isBefore(moment(startDate).utc(), 'day')) {
+                    return helpers.error('date.max');
+                  }
+
+                  return value;
+                }, 'Date validation').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
                 faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required()
               })
@@ -206,6 +216,16 @@ export default class ExportPayloadRoutes {
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
                 dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : ()=>moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
+                startDate: extendedJoi.date().custom((value, helpers) => {
+                  const startDate = value;
+                  const dateLanded = helpers.state.ancestors[0].dateLanded;
+
+                  if (moment(dateLanded).utc().isBefore(moment(startDate).utc(), 'day')) {
+                    return helpers.error('date.max');
+                  }
+
+                  return value;
+                }, 'Date validation').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
                 faoArea: Joi.string().trim().label("Catch area").required()
               })

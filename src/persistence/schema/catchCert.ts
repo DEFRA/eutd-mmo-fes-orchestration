@@ -51,6 +51,7 @@ export interface Catch {
   licenceValidTo?: string;
   licenceHolder?: string;
   date?: string;
+  startDate?: string;
   faoArea?: string;
   weight?: number;
   _status?: LandingValidationStatus;
@@ -222,7 +223,7 @@ export const cloneProductData = (original: Product, newDocumentNumber: string, e
 }
 
 export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch => {
-  const {id, vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, faoArea, weight} = original;
+  const {id, vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight} = original;
 
   const result = {
     id: `${newDocumentNumber}${id.slice(newDocumentNumber.length)}`,
@@ -236,6 +237,7 @@ export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch =>
     licenceValidTo,
     licenceHolder,
     date,
+    startDate,
     faoArea,
     weight
   }
@@ -294,8 +296,8 @@ const StateSchema = new Schema({
 }, { _id : false } );
 
 const CatchSchema = new Schema({
-  vessel:                   { type: String, required: true },
-  pln:                      { type: String, required: true },
+  vessel:                   { type: String, required: true  },
+  pln:                      { type: String, required: true  },
   homePort:                 { type: String, required: false },
   flag:                     { type: String, required: false },
   cfr:                      { type: String, required: false },
@@ -303,9 +305,10 @@ const CatchSchema = new Schema({
   licenceNumber:            { type: String, required: false },
   licenceValidTo:           { type: String, required: false },
   licenceHolder:            { type: String, required: false },
-  id:                       { type: String, required: true },
-  date:                     { type: String, required: true },
-  faoArea:                  { type: String, required: true },
+  id:                       { type: String, required: true  },
+  date:                     { type: String, required: true  },
+  startDate:                { type: String, required: false },
+  faoArea:                  { type: String, required: true  },
   weight:                   { type: Number },
   numberOfSubmissions:      { type: Number, required: true, default: 0 },
   vesselOverriddenByAdmin:  { type: Boolean, required: false },
@@ -320,7 +323,7 @@ const CatchSchema = new Schema({
   speciesRiskScore:         { type: Number, required: false },
   threshold:                { type: Number, required: false },
   riskScore:                { type: Number, required: false },
-  isSpeciesRiskEnabled:    { type: Boolean, required: false }
+  isSpeciesRiskEnabled:     { type: Boolean,required: false }
 }, { _id : false } );
 
 const ProductSchema = new Schema({
