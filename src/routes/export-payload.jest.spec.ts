@@ -396,7 +396,7 @@ describe("exporter-payload routes", () => {
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
 
-    it("should return 400 for a request payload containing a start data after the dateLanded", async () => {
+    it("should return 400 for a request payload containing a start date after the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
 
       const currentDate = new Date();
@@ -424,6 +424,25 @@ describe("exporter-payload routes", () => {
       expect(response.statusCode).toBe(400);
       expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 for a request payload containing an invalid start date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: 'an-invalid-date'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
     it("should return 403 user is not valid", async () => {
@@ -461,7 +480,7 @@ describe("exporter-payload routes", () => {
       expect(response.result).toStrictEqual({ some: "data" });
     });
 
-    it("should return 200 for a request payload containing a start data equal to the dateLanded", async () => {
+    it("should return 200 for a request payload containing a start date equal to the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 
@@ -479,7 +498,7 @@ describe("exporter-payload routes", () => {
       expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
     });
 
-    it("should return 200 for a request payload containing a start data before the dateLanded", async () => {
+    it("should return 200 for a request payload containing a start date before the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 
@@ -602,7 +621,7 @@ describe("exporter-payload routes", () => {
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
 
-    it("should return 400 for a request payload containing a start data after the dateLanded", async () => {
+    it("should return 400 for a request payload containing a start date after the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
 
       const currentDate = new Date();
@@ -630,6 +649,23 @@ describe("exporter-payload routes", () => {
       expect(response.statusCode).toBe(400);
       expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 for a request payload containing an invalid start date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: 'an-invalid-date'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
     it("should return 403 user is not valid", async () => {
@@ -669,7 +705,7 @@ describe("exporter-payload routes", () => {
       expect(response.result).toStrictEqual({ some: "data" });
     });
 
-    it("should return 200 for a request payload containing a start data equal to the dateLanded", async () => {
+    it("should return 200 for a request payload containing a start date equal to the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
 
@@ -687,7 +723,7 @@ describe("exporter-payload routes", () => {
       expect(mockUpsertExportPayloadProductDirectLanding).toHaveBeenCalled();
     });
 
-    it("should return 200 for a request payload containing a start data before the dateLanded", async () => {
+    it("should return 200 for a request payload containing a start date before the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
 
@@ -1043,7 +1079,7 @@ describe("exporter-payload routes", () => {
       jest.restoreAllMocks();
     });
 
-    it("should return 400 for a request payload containing a start data after the dateLanded", async () => {
+    it("should return 400 for a request payload containing a start date after the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertLanding.mockResolvedValue({
         items:[],
@@ -1113,7 +1149,7 @@ describe("exporter-payload routes", () => {
       expect(response.result).toStrictEqual({ some: "data" });
     });
 
-    it("should return 200 for a request payload containing a start data equal to the dateLanded", async () => {
+    it("should return 200 for a request payload containing a start date equal to the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 
@@ -1131,7 +1167,7 @@ describe("exporter-payload routes", () => {
       expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
     });
 
-    it("should return 200 for a request payload containing a start data before the dateLanded", async () => {
+    it("should return 200 for a request payload containing a start date before the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 

@@ -20,6 +20,12 @@ describe("createExportPayloadForValidation", () => {
 
         expect(payload).toMatchObject(exportPayload);
     });
+
+    it("should transform a product and landing into an export payload without a start date", () => {
+      const payload = createExportPayloadForValidation(product, landing);
+
+      expect(payload[0].landings[0].model.startDate).toBeUndefined();
+  });
 });
 
 describe("validateLanding", () => {

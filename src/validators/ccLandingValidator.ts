@@ -5,7 +5,7 @@ import * as moment from 'moment';
 
 export const createExportPayloadForValidation = (product, landing) => {
   landing.dateLanded = moment.utc(landing.dateLanded).format('YYYY-MM-DD');
-  landing.startDate = moment.utc(landing.startDate).format('YYYY-MM-DD')
+  landing.startDate = landing.startDate ? moment.utc(landing.startDate).format('YYYY-MM-DD') : undefined;
 
   return [{
     product: product,
