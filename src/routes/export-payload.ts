@@ -62,8 +62,12 @@ export default class ExportPayloadRoutes {
                 }),
                 dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
                 startDate: extendedJoi.date().custom((value, helpers) => {
-                  const startDate = value;
+                  const startDate = helpers.original;
                   const dateLanded = helpers.state.ancestors[0].dateLanded;
+
+                  if (!moment(startDate).utc().isValid()) {
+                    return helpers.error('date.base');
+                  }
 
                   if (moment(dateLanded).utc().isBefore(moment(startDate).utc(), 'day')) {
                     return helpers.error('date.max');
@@ -217,8 +221,12 @@ export default class ExportPayloadRoutes {
                 }),
                 dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : ()=>moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
                 startDate: extendedJoi.date().custom((value, helpers) => {
-                  const startDate = value;
+                  const startDate = helpers.original;
                   const dateLanded = helpers.state.ancestors[0].dateLanded;
+
+                  if (!moment(startDate).utc().isValid()) {
+                    return helpers.error('date.base');
+                  }
 
                   if (moment(dateLanded).utc().isBefore(moment(startDate).utc(), 'day')) {
                     return helpers.error('date.max');

@@ -445,6 +445,25 @@ describe("exporter-payload routes", () => {
       expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
+    it("should return 400 for a request payload containing an non-existent start date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: '2025-02-31'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
+    });
+
     it("should return 403 user is not valid", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(undefined);
 
