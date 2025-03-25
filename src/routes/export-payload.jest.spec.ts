@@ -1,4 +1,5 @@
 import * as Hapi from "@hapi/hapi";
+import * as moment from 'moment';
 import Routes from "./export-payload";
 import Controller from "../controllers/export-payload.controller";
 import ExportPayloadService from "../services/export-payload.service";
@@ -342,7 +343,7 @@ describe("exporter-payload routes", () => {
         payload: {
           product: "some",
           vessel: { vesselName: "a vessel" },
-          dateLanded: new Date(),
+          dateLanded: moment().format('YYYY-MM-DD'),
           exportWeight: "123",
           faoArea: "FAO18",
         },
@@ -399,15 +400,11 @@ describe("exporter-payload routes", () => {
     it("should return 400 for a request payload containing a start date after the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
 
-      const currentDate = new Date();
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() + 1);
-
       const _request = {
         ...request,
         payload: {
           ...request.payload,
-          startDate: nextDate
+          startDate: moment().add(1, 'day').format('YYYY-MM-DD')
         }
       }
 
@@ -464,6 +461,25 @@ describe("exporter-payload routes", () => {
       expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
+    it("should return 400 for a request payload containing an inconplete start date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: '-5-'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
+    });
+
     it("should return 403 user is not valid", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(undefined);
 
@@ -507,7 +523,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: new Date()
+          startDate: moment().format('YYYY-MM-DD')
         }
       }
 
@@ -521,15 +537,11 @@ describe("exporter-payload routes", () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 
-      const currentDate = new Date();
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() - 1);
-
       const _request = {
         ...request,
         payload: {
           ...request.payload,
-          startDate: nextDate
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
         }
       }
 
@@ -581,7 +593,7 @@ describe("exporter-payload routes", () => {
         },
         payload: {
           vessel: { vesselName: "a vessel" },
-          dateLanded: new Date(),
+          dateLanded: moment().format('YYYY-MM-DD'),
           faoArea: "FAO18",
           weights: [
             {
@@ -643,15 +655,11 @@ describe("exporter-payload routes", () => {
     it("should return 400 for a request payload containing a start date after the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
 
-      const currentDate = new Date();
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() + 1);
-
       const _request = {
         ...request,
         payload: {
           ...request.payload,
-          startDate: nextDate
+          startDate: moment().add(1, 'day').format('YYYY-MM-DD')
         }
       }
 
@@ -732,7 +740,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: new Date()
+          startDate: moment().format('YYYY-MM-DD')
         }
       }
 
@@ -746,15 +754,11 @@ describe("exporter-payload routes", () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
 
-      const currentDate = new Date();
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() - 1);
-
       const _request = {
         ...request,
         payload: {
           ...request.payload,
-          startDate: nextDate
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
         }
       }
 
@@ -1176,7 +1180,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: new Date()
+          startDate: moment().format('YYYY-MM-DD')
         }
       }
 
@@ -1190,15 +1194,11 @@ describe("exporter-payload routes", () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 
-      const currentDate = new Date();
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() - 1);
-
       const _request = {
         ...request,
         payload: {
           ...request.payload,
-          startDate: nextDate
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
         }
       }
 

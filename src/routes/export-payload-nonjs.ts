@@ -62,11 +62,11 @@ export default class ExportPayloadNonjsRoutes {
               payload: Joi.object({
                 'vessel.label': Joi.string().trim().label("Vessel").required(),
                 dateLanded: extendedJoi.date().format(['YYYY-MM-DD']).max(allowDaysInTheFuture).utc().required(),
-                startDate: extendedJoi.date().custom((value, helpers) => {
+                startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = helpers.original;
                   const dateLanded = helpers.state.ancestors[0].dateLanded;
 
-                  if (!moment(startDate).utc().isValid()) {
+                  if (!moment(startDate, ["YYYY-M-D", "YYYY-MM-DD"], true).utc().isValid()) {
                     return helpers.error('date.base');
                   }
 
@@ -75,7 +75,7 @@ export default class ExportPayloadNonjsRoutes {
                   }
 
                   return value;
-                }, 'Date validation').optional(),
+                }, 'Start Date Validator').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required()
               })
             }

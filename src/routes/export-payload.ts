@@ -61,11 +61,11 @@ export default class ExportPayloadRoutes {
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
                 dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
-                startDate: extendedJoi.date().custom((value, helpers) => {
+                startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = helpers.original;
                   const dateLanded = helpers.state.ancestors[0].dateLanded;
 
-                  if (!moment(startDate).utc().isValid()) {
+                  if (!moment(startDate, ["YYYY-M-D", "YYYY-MM-DD"], true).utc().isValid()) {
                     return helpers.error('date.base');
                   }
 
@@ -74,7 +74,7 @@ export default class ExportPayloadRoutes {
                   }
 
                   return value;
-                }, 'Date validation').optional(),
+                }, 'Start Date Validator').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
                 faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required()
               })
@@ -220,11 +220,11 @@ export default class ExportPayloadRoutes {
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
                 dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : ()=>moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
-                startDate: extendedJoi.date().custom((value, helpers) => {
+                startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = helpers.original;
                   const dateLanded = helpers.state.ancestors[0].dateLanded;
 
-                  if (!moment(startDate).utc().isValid()) {
+                  if (!moment(startDate, ["YYYY-M-D", "YYYY-MM-DD"], true).utc().isValid()) {
                     return helpers.error('date.base');
                   }
 
@@ -233,7 +233,7 @@ export default class ExportPayloadRoutes {
                   }
 
                   return value;
-                }, 'Date validation').optional(),
+                }, 'Start Date Validator').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
                 faoArea: Joi.string().trim().label("Catch area").required()
               })

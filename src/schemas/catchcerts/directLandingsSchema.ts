@@ -7,12 +7,12 @@ import { getFAOAreaList } from '../../helpers/utils/utils';
 const extendedJoi = Joi.extend(require('@hapi/joi-date'));
 
 const directLandingsSchema = Joi.object({
-  dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
-  startDate: extendedJoi.date().custom((value, helpers) => {
+  dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust: () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate() })).utc().required(),
+  startDate: extendedJoi.date().custom((value: string, helpers: any) => {
     const startDate = helpers.original;
     const dateLanded = helpers.state.ancestors[0].dateLanded;
 
-    if (!moment(startDate).utc().isValid()) {
+    if (!moment(startDate, ["YYYY-M-D", "YYYY-MM-DD"], true).utc().isValid()) {
       return helpers.error('date.base');
     }
 
@@ -21,7 +21,7 @@ const directLandingsSchema = Joi.object({
     }
 
     return value;
-  }, 'Date validation').optional(),
+  }, 'Start Date Validator').optional(),
   faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
   vessel: Joi.object().keys({
     vesselName: Joi.string().trim().label("vessel.vesselName").required()
