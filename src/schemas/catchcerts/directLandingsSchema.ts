@@ -9,14 +9,14 @@ const extendedJoi = Joi.extend(require('@hapi/joi-date'));
 const directLandingsSchema = Joi.object({
   dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust: () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate() })).utc().required(),
   startDate: extendedJoi.date().custom((value: string, helpers: any) => {
-    const startDate = helpers.original;
-    const dateLanded = helpers.state.ancestors[0].dateLanded;
+    const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
+    const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
 
-    if (!moment(startDate, ["YYYY-M-D", "YYYY-MM-DD"], true).utc().isValid()) {
+    if (!startDate.isValid()) {
       return helpers.error('date.base');
     }
 
-    if (moment(dateLanded).utc().isBefore(moment(startDate).utc(), 'day')) {
+    if (dateLanded.isBefore(startDate, 'day')) {
       return helpers.error('date.max');
     }
 

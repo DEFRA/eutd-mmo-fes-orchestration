@@ -77,6 +77,26 @@ describe("UploadsController", () => {
       ]);
     });
 
+    it("will parse a single landing with a start date", async () => {
+      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,100\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+      expect(mockCacheUploadRows).not.toHaveBeenCalled();
+      expect(output).toEqual([
+        {
+          rowNumber: 1,
+          originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,100",
+          productId: "PRD001",
+          startDate: "18/07/2021",
+          landingDate: "19/07/2021",
+          faoArea: "FAO27",
+          vesselPln: "PLN1",
+          exportWeight: "100",
+          errors: []
+        }
+      ]);
+    });
+
     it("will remove empty lines", async () => {
       const csv =
         "\n" +
@@ -384,6 +404,7 @@ describe("UploadsController", () => {
           commodity_code: 'some-commidity-code',
           commodity_code_description: 'some-commmodity-description',
         },
+        startDate: 'some-start-date',
         landingDate: 'some-landing-date',
         faoArea: 'faoArea',
         vessel : vessel,
@@ -530,6 +551,64 @@ describe("UploadsController", () => {
               commodity_code: 'some-commidity-code',
               commodity_code_description: 'some-commmodity-description',
             },
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel : vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 10,
+            errors: []
+          },{
+            rowNumber: 2,
+            originalRow: 'some-string',
+            productId: 'some-product-id',
+            product: {
+              id: 'some-product-id',
+              species: 'species',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel : vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 10,
+            errors: [],
+          }]
+        }
+      };
+
+      await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
+      expect(mockCode).toHaveBeenCalledWith(200);
+    });
+
+    it('should return 200 OK with start date', async () => {
+      const mockReq: any = {
+        ...req,
+        payload: {
+          ...req.payload,
+          file: [{
+            rowNumber: 1,
+            originalRow: 'some-string',
+            productId: 'some-product-id',
+            product: {
+              id: 'some-product-id',
+              species: 'species',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            startDate: '10/10/2020',
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
             vessel : vessel,
@@ -744,6 +823,7 @@ describe("UploadsController", () => {
           commodity_code: 'some-commidity-code',
           commodity_code_description: 'some-commmodity-description',
         },
+        startDate: 'some-start-date',
         landingDate: 'some-landing-date',
         faoArea: 'faoArea',
         vessel: vessel,
@@ -769,6 +849,100 @@ describe("UploadsController", () => {
           commodity_code: 'some-commidity-code',
           commodity_code_description: 'some-commmodity-description',
         },
+        landingDate: '10/10/2020',
+        faoArea: 'FAO18',
+        vessel: vessel,
+        vesselPln: 'some-pln',
+        exportWeight: 10,
+        errors: [],
+      }];
+
+      await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
+      expect(mockResponse).toHaveBeenCalledWith(expected);
+      expect(mockCode).toHaveBeenCalledWith(200);
+    });
+
+    it('should return 200 OK if there is at least one valid row with a start date', async () => {
+      const mockReq: any = {
+        ...req,
+        payload: {
+          ...req.payload,
+          file: [{
+            ...req.payload.file[0]
+          },{
+            rowNumber: 2,
+            originalRow: 'some-string',
+            productId: 'some-product-id',
+            product: {
+              id: 'some-product-id',
+              species: 'species',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            startDate: '10/10/2020',
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel: vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 10,
+            errors: [],
+          }]
+        },
+        headers: {
+          ...req.headers,
+          accept: 'text/html'
+        },
+      };
+
+      const expected: IUploadedLanding[] = [{
+        rowNumber: 1,
+        originalRow: 'some-string',
+        productId: 'some-product-id',
+        product: {
+          id: 'some-product-id',
+          species: 'species',
+          speciesCode: 'species-code',
+          scientificName: 'some-scientic-name',
+          state: 'some-state',
+          stateLabel: 'some-label',
+          presentation: 'some-presentation',
+          presentationLabel: 'some-presentation-label',
+          commodity_code: 'some-commidity-code',
+          commodity_code_description: 'some-commmodity-description',
+        },
+        startDate: 'some-start-date',
+        landingDate: 'some-landing-date',
+        faoArea: 'faoArea',
+        vessel: vessel,
+        vesselPln: 'some-pln',
+        exportWeight: 10,
+        errors: [
+          'error.dateLanded.date.base',
+          'error.faoArea.any.invalid',
+        ],
+      },{
+        rowNumber: 2,
+        originalRow: 'some-string',
+        productId: 'some-product-id',
+        product: {
+          id: 'some-product-id',
+          species: 'species',
+          speciesCode: 'species-code',
+          scientificName: 'some-scientic-name',
+          state: 'some-state',
+          stateLabel: 'some-label',
+          presentation: 'some-presentation',
+          presentationLabel: 'some-presentation-label',
+          commodity_code: 'some-commidity-code',
+          commodity_code_description: 'some-commmodity-description',
+        },
+        startDate: '10/10/2020',
         landingDate: '10/10/2020',
         faoArea: 'FAO18',
         vessel: vessel,
@@ -959,6 +1133,155 @@ describe("UploadsController", () => {
                 vesselLength: 10,
                 vesselName: 'some-vessel-name'
               },
+              dateLanded: '2020-10-10',
+              exportWeight: 10,
+              faoArea: 'FAO18'
+            }
+          }]
+        },
+        {
+          product: {
+            id: '123Document-CC-123-some-uuid',
+            species: {
+              code: 'species-code',
+              label: 'species 2'
+            },
+            scientificName: 'some-scientic-name',
+            state: {
+              code: 'some-state',
+              label: 'some-label'
+            },
+            presentation: {
+              code: 'some-presentation',
+              label: 'some-presentation-label'
+            },
+            commodityCode: 'some-commidity-code',
+            commodityCodeDescription: 'some-commmodity-description',
+          },
+          landings: [{
+            model: {
+              id: `${documentNumber}-random-number`,
+              vessel: {
+                cfr: 'some-cfr',
+                flag: 'some-flag',
+                homePort: 'some-home-port',
+                imoNumber: 'some-imo-number',
+                licenceNumber: 'some-licence-number',
+                licenceValidTo: 'some-licence-valid-to',
+                pln: 'some-pln',
+                rssNumber: 'some-rss-number',
+                vesselLength: 10,
+                vesselName: 'some-vessel-name'
+              },
+              dateLanded: '2020-10-10',
+              exportWeight: 20,
+              faoArea: 'FAO18'
+            }
+          }]
+        }]
+      };
+
+      await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
+      expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
+      expect(mockSaveExportPayload).toHaveBeenCalledWith(expected, USER, documentNumber, contactId);
+    });
+
+
+    it('should attempt to save multiple products for only valid landings with a start date', async () => {
+      const mockReq: any = {
+        ...req,
+        payload: {
+          ...req.payload,
+          file: [{
+            ...req.payload.file[0]
+          },{
+            rowNumber: 2,
+            originalRow: 'some-string',
+            productId: 'some-product-id-1',
+            product: {
+              species: 'species 1',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            startDate: '10/10/2020',
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel: vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 10,
+            errors: [],
+          },{
+            rowNumber: 3,
+            originalRow: 'some-string',
+            productId: 'some-product-id-2',
+            product: {
+              id: 'some-product-id-2',
+              species: 'species 2',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel: vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 20,
+            errors: [],
+          }]
+        },
+        headers: {
+          ...req.headers,
+          accept: 'text/html'
+        },
+      };
+
+      const expected: FrontEndPayload.ProductsLanded = {
+        items: [{
+          product: {
+            id: '123Document-CC-123-some-uuid',
+            species: {
+              code: 'species-code',
+              label: 'species 1'
+            },
+            scientificName: 'some-scientic-name',
+            state: {
+              code: 'some-state',
+              label: 'some-label'
+            },
+            presentation: {
+              code: 'some-presentation',
+              label: 'some-presentation-label'
+            },
+            commodityCode: 'some-commidity-code',
+            commodityCodeDescription: 'some-commmodity-description',
+          },
+          landings: [{
+            model: {
+              id: `${documentNumber}-random-number`,
+              vessel: {
+                cfr: 'some-cfr',
+                flag: 'some-flag',
+                homePort: 'some-home-port',
+                imoNumber: 'some-imo-number',
+                licenceNumber: 'some-licence-number',
+                licenceValidTo: 'some-licence-valid-to',
+                pln: 'some-pln',
+                rssNumber: 'some-rss-number',
+                vesselLength: 10,
+                vesselName: 'some-vessel-name'
+              },
+              startDate: '2020-10-10',
               dateLanded: '2020-10-10',
               exportWeight: 10,
               faoArea: 'FAO18'
@@ -2139,6 +2462,7 @@ describe("UploadsController", () => {
             commodity_code: 'some-commidity-code',
             commodity_code_description: 'some-commmodity-description',
           },
+          startDate: 'some-start-date',
           landingDate: 'some-landing-date',
           faoArea: 'faoArea',
           vessel : vessel,
@@ -2278,7 +2602,7 @@ describe("UploadsController", () => {
     it("will throw an error if a row has excess data", async () => {
       const rows = [
         "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,20/07/2021,FAO27,PLN2,200,bob"
+        "PRD002,19/07/2021,20/07/2021,FAO27,PLN2,200,bob"
       ];
 
       await expect(async () =>

@@ -45,16 +45,27 @@ export default class UploadsController {
     let rowNumber = 1;
 
     const landings: IUploadedLanding[] = await Promise.all(rows.map(async (originalRow) => {
+      const numCellsWithoutStartDate = 5;
+      const cells = originalRow.split(',');
+      const headers = cells.length === numCellsWithoutStartDate ? [
+        'productId',
+        'landingDate',
+        'faoArea',
+        'vesselPln',
+        'exportWeight'
+      ] : [
+        'productId',
+        'startDate',
+        'landingDate',
+        'faoArea',
+        'vesselPln',
+        'exportWeight'
+      ];
+
       const params = {
         noheader: true,
 
-        headers: [
-          'productId',
-          'landingDate',
-          'faoArea',
-          'vesselPln',
-          'exportWeight'
-        ],
+        headers: headers,
         checkColumn: true
       };
 
@@ -148,6 +159,7 @@ export default class UploadsController {
         model: {
           id: `${documentNumber}-${getRandomNumber()}`,
           vessel: validLanding.vessel,
+          startDate: validLanding.startDate ? moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD') : undefined,
           dateLanded: moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           exportWeight: validLanding.exportWeight,
           faoArea: validLanding.faoArea

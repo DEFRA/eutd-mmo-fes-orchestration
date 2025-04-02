@@ -6,6 +6,7 @@ export interface IUploadedLanding {
   originalRow : string,
   productId : string,
   product : IProduct,
+  startDate? : string,
   landingDate: string,
   faoArea: string,
   vessel : Vessel,

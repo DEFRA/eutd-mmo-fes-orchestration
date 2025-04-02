@@ -343,7 +343,7 @@ describe("exporter-payload routes", () => {
         payload: {
           product: "some",
           vessel: { vesselName: "a vessel" },
-          dateLanded: moment().format('YYYY-MM-DD'),
+          dateLanded: moment().utc().format('YYYY-MM-DD'),
           exportWeight: "123",
           faoArea: "FAO18",
         },
@@ -404,7 +404,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: moment().add(1, 'day').format('YYYY-MM-DD')
+          startDate: moment().utc().add(1, 'day').format('YYYY-MM-DD')
         }
       }
 
@@ -461,7 +461,7 @@ describe("exporter-payload routes", () => {
       expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
-    it("should return 400 for a request payload containing an inconplete start date", async () => {
+    it("should return 400 for a request payload containing an incomplete start date", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 
@@ -523,7 +523,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: moment().format('YYYY-MM-DD')
+          startDate: moment().utc().format('YYYY-MM-DD')
         }
       }
 
@@ -593,7 +593,7 @@ describe("exporter-payload routes", () => {
         },
         payload: {
           vessel: { vesselName: "a vessel" },
-          dateLanded: moment().format('YYYY-MM-DD'),
+          dateLanded: moment().utc().format('YYYY-MM-DD'),
           faoArea: "FAO18",
           weights: [
             {
@@ -659,7 +659,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: moment().add(1, 'day').format('YYYY-MM-DD')
+          startDate: moment().utc().add(1, 'day').format('YYYY-MM-DD')
         }
       }
 
@@ -740,7 +740,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: moment().format('YYYY-MM-DD')
+          startDate: moment().utc().format('YYYY-MM-DD')
         }
       }
 
@@ -1180,7 +1180,7 @@ describe("exporter-payload routes", () => {
         ...request,
         payload: {
           ...request.payload,
-          startDate: moment().format('YYYY-MM-DD')
+          startDate: moment().utc().format('YYYY-MM-DD')
         }
       }
 
