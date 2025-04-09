@@ -688,7 +688,7 @@ describe('generatePdf', () => {
     };
 
     const res = jest.fn();
-    let mockReportDocumentSubmitted;
+    let mockReportDocumentSubmitted: jest.SpyInstance;
     let mockLoadRequiredData;
     let mockGetBlockingStatus;
     let mockClearSessionDataForCurrentJourney;
@@ -997,6 +997,191 @@ describe('generatePdf', () => {
       expect(mockLoggerInfo).toHaveBeenCalledWith('[DOCUMENT-NUMBER: GBR-3434-PS-3434-3434][PS-SD-CHECKING-ERRORS][{"message":"psAddCatchDetailsErrorUKCCInValid","key":"catches-0-catchCertificateNumber"}]');
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(result).toEqual(400);
+    });
+
+    it('should return 400 for report errors', async () => {
+      const mockInvalidResponse = {
+        data: {
+          isValid: false,
+          details: [],
+          rawData: [{
+            catchCertificateNumber: "FCC051",
+            commodityCode: "423523432",
+            createdAt: expect.any(String),
+            da: "England",
+            documentNumber: "GBR-3434-PS-3434-3434",
+            documentType: "processingStatement",
+            extended: {
+              exporterCompanyName: "BONZO",
+              investigation: undefined,
+              preApprovedBy: undefined,
+              url: undefined,
+              voidedBy: undefined,
+            },
+            isMismatch: false,
+            isOverAllocated: true,
+            overAllocatedByWeight: 200,
+            species: "Atlantic herring (HER)",
+            status: "DRAFT",
+            weightOnAllDocs: 1200,
+            weightOnDoc: 200,
+            weightOnFCC: 1000,
+          }]
+        }
+      };
+
+      mockGetBlockingStatus.mockResolvedValue(true);
+
+      mockedAxios.post.mockResolvedValueOnce(mockInvalidResponse);
+
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-PS-3434-3434';
+
+      const mockDatawithCatchType = {
+        "data": {
+          "catches": [
+            {
+              "species": "Atlantic cod (COD)",
+              "speciesCode": "COD",
+              "id": 'GBR-DOCUMENT-NUMBER-1610018899',
+              "catchCertificateNumber": "GBR-DOCUMENT-NUMBER",
+              "catchCertificateType": "uk",
+              "totalWeightLanded": "12",
+              "exportWeightBeforeProcessing": "12",
+              "exportWeightAfterProcessing": "12"
+            }
+          ],
+          "validationErrors": [],
+          "error": "",
+          "addAnotherCatch": "No",
+          "consignmentDescription": "code",
+          "healthCertificateDate": "04/06/2020",
+          "healthCertificateNumber": "1234",
+          "personResponsibleForConsignment": "Isaac",
+          "plantApprovalNumber": "1234",
+          "plantName": "Plant Name",
+          "plantAddressOne": "Building and Street",
+          "plantAddressTwo": "Building Street name 2",
+          "plantTownCity": "London",
+          "plantPostcode": "WE23 2WE",
+          "dateOfAcceptance": "04/06/2020"
+        },
+        "exporter": {
+          "model": {
+            "exporterCompanyName": "Exporter Fish Ltd",
+            "addressOne": "Build and Street",
+            "addressTwo": "Street",
+            "townCity": "Essex",
+            "postcode": "ES8 7UJ",
+            "user_id": "",
+            "journey": "processingStatement",
+            "currentUri": "",
+            "nextUri": ""
+          }
+        }
+      };
+
+      mockLoadRequiredData.mockResolvedValue(mockDatawithCatchType);
+
+      const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+
+      expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', 'processingStatement', '03fece4e-61e4-e911-a978-000d3a28d891');
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-PS-3434-3434");
+      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', 'COD', 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-PS-3434-3434');
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
+      expect(mockReportDocumentSubmitted).toHaveBeenCalled();
+      expect(result).toEqual(400);
+    });
+
+    it('should log error if data submit fails', async () => {
+      const mockInvalidResponse = {
+        data: {
+          isValid: false,
+          details: [],
+          rawData: [{
+            catchCertificateNumber: "FCC051",
+            commodityCode: "423523432",
+            createdAt: expect.any(String),
+            da: "England",
+            documentNumber: "GBR-3434-PS-3434-3434",
+            documentType: "processingStatement",
+            extended: {
+              exporterCompanyName: "BONZO",
+              investigation: undefined,
+              preApprovedBy: undefined,
+              url: undefined,
+              voidedBy: undefined,
+            },
+            isMismatch: false,
+            isOverAllocated: true,
+            overAllocatedByWeight: 200,
+            species: "Atlantic herring (HER)",
+            status: "DRAFT",
+            weightOnAllDocs: 1200,
+            weightOnDoc: 200,
+            weightOnFCC: 1000,
+          }]
+        }
+      };
+
+      mockGetBlockingStatus.mockResolvedValue(true);
+
+      mockedAxios.post.mockResolvedValueOnce(mockInvalidResponse);
+
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-PS-3434-3434';
+
+      const mockDatawithCatchType = {
+        "data": {
+          "catches": [
+            {
+              "species": "Atlantic cod (COD)",
+              "speciesCode": "COD",
+              "id": 'GBR-DOCUMENT-NUMBER-1610018899',
+              "catchCertificateNumber": "GBR-DOCUMENT-NUMBER",
+              "catchCertificateType": "uk",
+              "totalWeightLanded": "12",
+              "exportWeightBeforeProcessing": "12",
+              "exportWeightAfterProcessing": "12"
+            }
+          ],
+          "validationErrors": [],
+          "error": "",
+          "addAnotherCatch": "No",
+          "consignmentDescription": "code",
+          "healthCertificateDate": "04/06/2020",
+          "healthCertificateNumber": "1234",
+          "personResponsibleForConsignment": "Isaac",
+          "plantApprovalNumber": "1234",
+          "plantName": "Plant Name",
+          "plantAddressOne": "Building and Street",
+          "plantAddressTwo": "Building Street name 2",
+          "plantTownCity": "London",
+          "plantPostcode": "WE23 2WE",
+          "dateOfAcceptance": "04/06/2020"
+        },
+        "exporter": {
+          "model": {
+            "exporterCompanyName": "Exporter Fish Ltd",
+            "addressOne": "Build and Street",
+            "addressTwo": "Street",
+            "townCity": "Essex",
+            "postcode": "ES8 7UJ",
+            "user_id": "",
+            "journey": "processingStatement",
+            "currentUri": "",
+            "nextUri": ""
+          }
+        }
+      };
+
+      mockLoadRequiredData.mockResolvedValue(mockDatawithCatchType);
+
+      mockReportDocumentSubmitted.mockRejectedValueOnce(new Error('something has gone wrong'))
+
+      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+
+      expect(mockLoggerError).toHaveBeenCalledWith('[REPORT-SD-PS-DOCUMENT-SUBMIT][GBR-3434-PS-3434-3434][ERROR][Error: something has gone wrong]')
     });
   });
 
@@ -1392,6 +1577,104 @@ describe('generatePdf', () => {
       expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', null, 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-SD-3434-3434');
       expect(mockLoggerInfo).toHaveBeenCalledWith('[DOCUMENT-NUMBER: GBR-3434-SD-3434-3434][PS-SD-CHECKING-ERRORS][{"message":"sdAddUKEntryDocumentSpeciesDoesNotExistError","key":"catches-0-certificateNumber","certificateNumber":"GBR-DOCUMENT-NUMBER","product":"Atlantic cod (COD)"}]');
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(400);
+    });
+
+    it('should return 400 for report errors', async () => {
+      const mockInvalidResponse = {
+        data: {
+          isValid: false,
+          details: [],
+          rawData: [{
+            catchCertificateNumber: "FCC051",
+            commodityCode: "423523432",
+            createdAt: expect.any(String),
+            da: "England",
+            documentNumber: "GBR-3434-SD-3434-3434",
+            documentType: "storageDocument",
+            extended: {
+              exporterCompanyName: "BONZO",
+              investigation: undefined,
+              preApprovedBy: undefined,
+              url: undefined,
+              voidedBy: undefined,
+            },
+            isMismatch: false,
+            isOverAllocated: true,
+            overAllocatedByWeight: 200,
+            species: "Atlantic herring (HER)",
+            status: "DRAFT",
+            weightOnAllDocs: 1200,
+            weightOnDoc: 200,
+            weightOnFCC: 1000,
+          }]
+        }
+      };
+
+      mockGetBlockingStatus.mockResolvedValue(true);
+
+      mockedAxios.post.mockResolvedValueOnce(mockInvalidResponse);
+
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-SD-3434-3434';
+
+      const mockDatawithCatchType = {
+        data: {
+          catches: [{
+            id: 'some id',
+            product: 'Atlantic cod (COD)',
+            commodityCode: '0123456',
+            productWeight: '10',
+            dateOfUnloading: '10/10/2023',
+            placeOfUnloading: 'Hull',
+            transportUnloadedFrom: 'Dover',
+            certificateNumber: 'GBR-DOCUMENT-NUMBER',
+            weightOnCC: '100',
+            scientificName: 'some scientific name',
+            certificateType: 'uk'
+          }],
+          storageFacilities: [{
+            facilityName: 'storage facility name'
+          }],
+          validationErrors: [],
+          addAnotherProduct: "No",
+          addAnotherStorageFacility: "No",
+          transport: {
+            vehicle: 'truck',
+            cmr: 'true',
+            nationalityOfVehicle: 'UK',
+            registrationNumber: 'registration name',
+            departurePlace: 'UK',
+            exportDate: '10/10/2022',
+            exportedTo: {
+              officialCountryName: 'some official name'
+            },
+          }
+        },
+        exporter: {
+          moel: {
+            exporterCompanyName: "Exporter Fish Ltd",
+            addressOne: "Build and Street",
+            addressTwo: "Street",
+            townCity: "Essex",
+            postcode: "ES8 7UJ",
+            user_id: "",
+            journey: "storageNotes",
+            currentUri: "",
+            nextUri: ""
+          }
+        }
+      };
+
+      mockLoadRequiredData.mockResolvedValue(mockDatawithCatchType);
+
+      const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+
+      expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', 'storageNotes', '03fece4e-61e4-e911-a978-000d3a28d891');
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-SD-3434-3434");
+      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', null, 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-SD-3434-3434');
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
+      expect(mockReportDocumentSubmitted).toHaveBeenCalled();
       expect(result).toEqual(400);
     });
   });

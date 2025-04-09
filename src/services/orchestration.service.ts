@@ -390,7 +390,7 @@ export default class OrchestrationService {
 
     if (validationStatus.isValid === false && blockingStatus) {
       data.documentUri = 'N/A';
-      await reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch(
+      void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch(
         (e) =>
           logger.error(
             `[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`
@@ -481,7 +481,7 @@ export default class OrchestrationService {
           logger.error(`Submit Error - Data for ${documentNumber} not sent to BC server: ${err}`)
         );
 
-      await reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch(
+      void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch(
         (e) =>
           logger.error(
             `[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`
