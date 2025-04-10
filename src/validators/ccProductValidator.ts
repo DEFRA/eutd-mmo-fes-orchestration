@@ -1,5 +1,5 @@
 import { flatten } from 'lodash';
-import * as moment  from 'moment';
+import * as moment from 'moment';
 import { ProductLanded } from '../persistence/schema/frontEndModels/payload';
 
 import { SeasonalFishPeriod, getSeasonalFish } from '../services/reference-data.service'
@@ -8,6 +8,7 @@ type ProductItem = {
   id: string;
   landingId: string;
   pln: string;
+  startDate: string;
   dateLanded: string;
   species: {
     code: string;
@@ -22,6 +23,7 @@ export const unwind = (products): ProductItem[] =>
       id: product.product.id,
       landingId: landing.model.id,
       pln: landing.model.vessel.pln,
+      startDate: landing.model.startDate,
       dateLanded: landing.model.dateLanded,
       species: {
         code: product.product.species.code,
@@ -30,16 +32,25 @@ export const unwind = (products): ProductItem[] =>
       weight: landing.model.exportWeight
     }))))
 
-const seasonalFishValidator =
-  (blackPeriods: SeasonalFishPeriod[]) => (item: ProductItem) =>
-    !blackPeriods.some(
-      (p) =>
-        p.fao === item.species.code &&
-        moment(p.validFrom).isSameOrBefore(item.dateLanded) &&
-        moment(item.dateLanded).isSameOrBefore(p.validTo)
-    );
+const seasonalFishValidator = (blackPeriods: SeasonalFishPeriod[]) =>
+  (item: ProductItem) => {
+    const fields = ['startDate', 'dateLanded'];
+    const result = [];
 
-export const validateProducts = async (products) =>  {
+    fields.forEach(field => {
+      const isSeasonalCatch = blackPeriods.some((p) => p.fao === item.species.code &&
+        moment(p.validFrom).isSameOrBefore(item[field]) &&
+        moment(item[field]).isSameOrBefore(p.validTo));
+
+      if (item[field] && isSeasonalCatch) {
+        result.push(field);
+      }
+    })
+
+    return result;
+  }
+
+export const validateProducts = async (products) => {
   const validators = [{
     name: 'seasonalFish',
     validator: seasonalFishValidator(await getSeasonalFish())
@@ -56,9 +67,13 @@ export const validateProducts = async (products) =>  {
 
 export const productsAreValid = async (products: ProductLanded[]) =>
   await validateProducts(products)
-    .then( (res) => {
-      if (res.some(validation => (validation.result === false && validation.validator === 'seasonalFish'))) {
-        return false;
-      }
-      return true;
+    .then((res) => {
+      const fields = ['startDate', 'dateLanded'];
+      const validations = [];
+      fields.forEach(f => {
+        if (res.some(validation => (validation.result.some((r) => r === f ) && validation.validator === 'seasonalFish'))) {
+          validations.push(f);
+        }
+      })
+      return validations;
     });

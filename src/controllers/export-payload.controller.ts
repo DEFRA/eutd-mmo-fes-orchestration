@@ -55,11 +55,24 @@ export default class ExportPayloadController {
       );
       errors = fromEntries(
         validations
-          .filter((v) => v.result === false && v.validator === "seasonalFish")
-          .map((v) => [
-            `vessel_${v.id}_${v.landingId}`,
-            `${v.species.label} was subject to fishing restrictions on your specified Landing date. Please refer to GOV.UK for further guidance.`,
-          ])
+          .filter((v) => v.result.length > 0 && v.validator === "seasonalFish")
+          .map((v) => {
+            const errs = [];
+            const fields = ['startDate', 'dateLanded'];
+            const dict = {
+              dateLanded: 'Landing date',
+              startDate: 'Start date'
+            };
+            fields.forEach(f => {
+              if (v.result.some((r => r == f))) {
+                errs.push([
+                  `vessel_${v.id}_${v.landingId}`,
+                  `${v.species.label} was subject to fishing restrictions on your specified ${dict[f]}. Please refer to GOV.UK for further guidance.`,
+                ]);
+              }
+            })
+            return errs;
+          })
       );
     }
 
@@ -171,7 +184,8 @@ export default class ExportPayloadController {
     const vesselsAreValid = await VesselValidator.vesselsAreValid(exportPayload.items);
     logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][CHECKED-VESSELS][VALID: ${vesselsAreValid}]`);
 
-    const seasonalFishAreValid = await ProductValidator.productsAreValid(exportPayload.items);
+    const seasonalFishValidationErrors = await ProductValidator.productsAreValid(exportPayload.items);
+    const seasonalFishAreValid = seasonalFishValidationErrors.length === 0;
     logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][VALIDATED-SEASONAL-FISH][VALID: ${seasonalFishAreValid}]`);
 
     if (!vesselsAreValid || !seasonalFishAreValid) {
@@ -488,13 +502,12 @@ export default class ExportPayloadController {
 
       const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-      await LandingValidator.validateLanding(items)
-        .catch(e => {
-          newLanding.error = 'invalid';
-          newLanding.errors = {
-            dateLanded: e.message
-          }
-        });
+      const result = await LandingValidator.validateLanding(items)
+
+      if (result?.error === 'invalid') {
+        newLanding.error = result.error;
+        newLanding.errors = result.errors;
+      }
 
       return {
         product: productItem,
@@ -568,16 +581,16 @@ export default class ExportPayloadController {
 
     const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-    try {
-      await LandingValidator.validateLanding(items);
-    }
-    catch (e) {
+    const validation = await LandingValidator.validateLanding(items);
+
+    if (validation?.error === 'invalid') {
+      newLanding.error = validation.error;
+      newLanding.errors = validation.errors;
+
       const exportPayload = {
         items,
-        error: 'invalid',
-        errors: {
-          dateLanded: e.message,
-        },
+        error: validation.error,
+        errors: validation.errors
       };
 
       return h.response(exportPayload).code(400);
@@ -656,16 +669,13 @@ export default class ExportPayloadController {
 
     const productItem = await ExportPayloadService.getItemByProductId(userPrincipal, req.params.productId, documentNumber, contactId);
 
-    try {
-      const exportPayload = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
+    const exportPayload = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-      await LandingValidator.validateLanding(exportPayload);
-    }
-    catch (e) {
-      newLanding.error = 'invalid';
-      newLanding.errors = {
-        'dateLanded': e.message
-      };
+    const validation = await LandingValidator.validateLanding(exportPayload);
+
+    if (validation?.error === 'invalid') {
+      newLanding.error = validation.error;
+      newLanding.errors = validation.errors;
     }
 
     await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);

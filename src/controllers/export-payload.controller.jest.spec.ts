@@ -451,7 +451,7 @@ describe('preCheckCertificate', () => {
     mockVesselsAreValid = jest.spyOn(VesselValidator, 'vesselsAreValid');
     mockVesselsAreValid.mockResolvedValue(true);
     mockProductsAreValid = jest.spyOn(ProductValidator, 'productsAreValid');
-    mockProductsAreValid.mockResolvedValue(true);
+    mockProductsAreValid.mockResolvedValue([]);
     mockGetErrors = jest.spyOn(SummaryErrorsService, 'get');
     mockGetErrors.mockResolvedValue(null);
   });
@@ -1133,7 +1133,10 @@ describe("methods", () => {
       mockCreateExportPayloadForValidation.mockReturnValue(items);
       mockValidateLanding = jest.spyOn(LandingValidator, "validateLanding");
       mockValidateLanding.mockImplementation(() => {
-        throw new Error("Error Error Error");
+        return {
+          error: 'invalid',
+          errors: { startDate: 'error.startDate.seasonalFish.invalidate', dateLanded: 'error.seasonalFish.invalidate' }
+        }
       });
     });
 
@@ -1159,7 +1162,7 @@ describe("methods", () => {
 
       expect(mockResponse).toHaveBeenCalledWith({
         error: "invalid",
-        errors: { dateLanded: "Error Error Error" },
+        errors: { dateLanded: "error.seasonalFish.invalidate", startDate: "error.startDate.seasonalFish.invalidate" },
         items: items,
       });
       expect(result).toEqual(400);
@@ -1184,7 +1187,7 @@ describe("methods", () => {
       mockCreateExportPayloadForValidation.mockReturnValue(null);
       mockValidateLanding = jest.spyOn(LandingValidator, "validateLanding");
       mockValidateLanding.mockImplementation(() => {
-        throw new Error();
+        return { error: 'invalid', errors: { dateLanded: 'error.seasonalFish.invalidate' }}
       });
     });
 
@@ -1208,14 +1211,10 @@ describe("methods", () => {
         DOCUMENT_NUMBER,
         contactId
       );
-      mockValidateLanding = jest.spyOn(LandingValidator, "validateLanding");
-      mockValidateLanding.mockImplementation(() => {
-        throw new Error("");
-      });
 
       expect(mockResponse).toHaveBeenCalledWith({
         error: "invalid",
-        errors: { dateLanded: "" },
+        errors: { dateLanded: 'error.seasonalFish.invalidate' },
         items: null,
       });
       expect(result).toEqual(400);
@@ -1516,8 +1515,9 @@ describe("methods", () => {
     });
 
     it('should validate a direct landing and throw if invalid', async () => {
-      mockValidateLanding.mockRejectedValue({
-        message: 'error'
+      mockValidateLanding.mockResolvedValue({
+        error: 'invalid',
+        errors: { dateLanded: 'error' }
       });
 
       await SUT.upsertExportPayloadProductDirectLanding(
@@ -1807,9 +1807,12 @@ describe("methods", () => {
           currentUri: 'test/current-uri'
         };
 
-        mockValidateLanding.mockRejectedValueOnce({
-          message: 'error'
-        });
+        mockValidateLanding.mockResolvedValueOnce({
+          error: 'invalid',
+          errors: { dateLanded: 'error' }
+        })
+
+        mockValidateLanding.mockResolvedValueOnce(undefined)
 
         await SUT.upsertExportPayloadProductDirectLanding(
           mockDirectLandingReq,

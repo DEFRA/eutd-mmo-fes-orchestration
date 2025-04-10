@@ -2,18 +2,6 @@ import { validateLanding, createExportPayloadForValidation } from './ccLandingVa
 import VesselValidator from '../services/vesselValidator.service';
 import * as ProductValidator from './ccProductValidator';
 
-const sinon = require('sinon');
-
-let sandbox;
-
-beforeAll(() => {
-    sandbox = sinon.createSandbox();
-});
-
-afterEach(() => {
-    sandbox.restore();
-});
-
 describe("createExportPayloadForValidation", () => {
     it("should transform a product and landing into an export payload", () => {
         const payload = createExportPayloadForValidation(product, landing);
@@ -29,32 +17,52 @@ describe("createExportPayloadForValidation", () => {
 });
 
 describe("validateLanding", () => {
+    let mockCheckVesselWithDate: jest.SpyInstance;
+    let mockValidateProducts: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockCheckVesselWithDate = jest.spyOn(VesselValidator, 'checkVesselWithDate');
+      mockCheckVesselWithDate.mockResolvedValue(undefined);
+      mockValidateProducts = jest.spyOn(ProductValidator, 'validateProducts');
+      mockValidateProducts.mockResolvedValue([]);
+    });
+
+    afterEach(() => {
+      mockCheckVesselWithDate.mockRestore();
+      mockValidateProducts.mockRestore();
+    });
+
     it("should pass", async () => {
-        sandbox.stub(VesselValidator, "checkVesselWithDate");
-        sandbox.stub(ProductValidator, "validateProducts").returns([]);
-
-        await expect(validateLanding(exportPayload))
-            .resolves.toBe(undefined);
+        const result = await validateLanding(exportPayload);
+        expect(result).toBeUndefined();
     });
+
     it("should error if vessel validation throws an error", async () => {
-        sandbox.stub(VesselValidator, "checkVesselWithDate").throws(new Error("Error"));
-        sandbox.stub(ProductValidator, "validateProducts").returns([]);
+        mockCheckVesselWithDate.mockRejectedValueOnce(new Error('Vessel WIRON 5 has no valid license'));
 
-        await expect(validateLanding(exportPayload))
-            .rejects
-            .toThrow("validation.vessel.license.invalid-date");
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
     });
+
     it("should error if product validation fails", async () => {
-        sandbox.stub(VesselValidator, "checkVesselWithDate");
-        sandbox.stub(ProductValidator, "validateProducts").returns([{
-            result: false,
-            validator: 'seasonalFish'
-        }]);
+        mockValidateProducts.mockResolvedValueOnce([{
+          result: ['dateLanded'],
+          validator: 'seasonalFish'
+      }])
 
-        await expect(validateLanding(exportPayload))
-            .rejects
-            .toThrow("error.seasonalFish.invalidate");
+      const result = await validateLanding(exportPayload);
+      expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'error.seasonalFish.invalidate' }});
     });
+
+    it("should error if product validation fails on start date", async () => {
+      mockValidateProducts.mockResolvedValueOnce([{
+        result: ['startDate', 'dateLanded'],
+        validator: 'seasonalFish'
+    }])
+
+    const result = await validateLanding(exportPayload);
+    expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'error.seasonalFish.invalidate', startDate: 'error.startDate.seasonalFish.invalidate' }});
+  });
 });
 
 const product = {
