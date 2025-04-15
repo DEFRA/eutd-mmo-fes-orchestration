@@ -311,8 +311,10 @@ export const virusDetected = async (fileName: string, content: string, documentN
     };
 
     logger.info(`[AV-API][VIRUS-CHECKER][CSV][${documentNumber}][CALLING-API][${key}]`);
-    const client : AxiosInstance = httpClient? httpClient : axios.create({baseURL: ApplicationConfig.getReferenceServiceUrl()});
-    const result : AxiosResponse = await client.post('/v1/virusChecker/csv',payload);
+    const client: AxiosInstance = httpClient? httpClient : axios.create({ baseURL: ApplicationConfig.getReferenceServiceUrl() });
+    const result: AxiosResponse = await client.post('/v1/virusChecker/csv', payload);
+
+    logger.info(`[AV-API][VIRUS-CHECKER][CSV][${documentNumber}][RESPONSE][${JSON.stringify(result?.data, null, 2)}]`);
 
     return result?.data ? result.data.virusDetected : undefined;
   } catch (e) {

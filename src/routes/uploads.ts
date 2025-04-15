@@ -34,7 +34,7 @@ export default class UploadsRoutes {
 
                 const fileHasVirus = await virusDetected(getFileName(payload.file),csv,documentNumber);
 
-                if (fileHasVirus  === true) {
+                if (fileHasVirus === true) {
                   return h.response(getFileValidationError("error.upload.invalid-columns")).code(400);
                 }
 
@@ -93,7 +93,7 @@ export default class UploadsRoutes {
 
                 const fileHasVirus = await virusDetected(getFileName(payload.file),csv,documentNumber);
 
-                if (fileHasVirus  === true) {
+                if (fileHasVirus === true) {
                   return h.response(getFileValidationError("error.upload.invalid-columns")).code(400);
                 }
 
