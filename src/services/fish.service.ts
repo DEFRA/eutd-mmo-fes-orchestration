@@ -59,7 +59,7 @@ export default class FishService {
   }
 
   public static async isDuplicate(payload, documentNumber, contactId: string) {
-    const { speciesCode, presentation, user_id, commodity_code } = payload;
+    const { species, speciesCode, state, presentation, user_id, commodity_code, id } = payload;
     const data: FrontEndSpecies.Product[] = await CatchCertService.getSpecies(
       user_id,
       documentNumber,
@@ -69,14 +69,14 @@ export default class FishService {
     //Ensure the combination of: state, presentation and speciesCode have not already been added
     let hasDuplicate = false;
     if (data) {
-      data.forEach((species: FrontEndSpecies.Product) => {
-        if (
-          payload.state === species.state &&
-          presentation === species.presentation &&
-          commodity_code === species.commodity_code &&
-          (speciesCode === species.speciesCode ||
-            payload.species === species.species)
-        ) {
+      data.forEach((product: FrontEndSpecies.Product) => {
+        const isDuplicated: boolean = id !== product.id &&
+          state === product.state &&
+          presentation === product.presentation &&
+          commodity_code === product.commodity_code &&
+          (speciesCode === product.speciesCode || species === product.species)
+
+        if (isDuplicated) {
           hasDuplicate = true;
         }
       });

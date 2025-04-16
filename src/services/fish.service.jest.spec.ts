@@ -305,6 +305,36 @@ describe('isDuplicate', () => {
     expect(result).toBeFalsy();
   });
 
+  it('should return false for duplicates when updating same record again without do any changes', async () => {
+    mockGetSpecies.mockResolvedValue([{
+      id: 'some-id',
+      species: 'Red Herring',
+      speciesCode: 'HER',
+      scientificName: 'some-scientic-name',
+      commodity_code: 'some-commodity-code',
+      commodity_code_description: 'some-description',
+      state: 'FRE',
+      stateLabel: 'Fresh',
+      presentation: 'WHL',
+      presentationLabel: 'Whole',
+      user_id: null,
+      factor : 0,
+      caughtBy : []
+    }]);
+
+    const result = await FishService.isDuplicate({
+      speciesCode: 'HER',
+      species: 'Red Herring',
+      commodity_code: 'some-commodity-code',
+      state: 'FRE',
+      presentation: 'WHL',
+      user_id: 'Bob',
+      id: 'some-id',
+    },'GBR-3444-3444-3444', contactId);
+
+    expect(result).toBeFalsy();
+  });
+
   it('should return true for duplicates', async () => {
     mockGetSpecies.mockResolvedValue([{
       id: 'some-id',
