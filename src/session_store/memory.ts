@@ -15,7 +15,7 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   async readAll<T extends IStoreable>(key: string): Promise<T[]> {
-    if( Object.prototype.hasOwnProperty.call(this.store, key) ) {
+    if( Object.hasOwn(this.store, key) ) {
       const data = this.store[key];
       return <T[]>data;
 
@@ -25,7 +25,7 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   async read<T extends IStoreable>(key: string): Promise<T> {
-    if( Object.prototype.hasOwnProperty.call(this.store, key) ) {
+    if( Object.hasOwn(this.store, key) ) {
       const data = this.store[key];
       return <T>data;
 
@@ -50,7 +50,7 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
 
   async readFor<T extends IStoreable>(userPrincipal: string, key: string): Promise<T> {
     const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
-    if(Object.prototype.hasOwnProperty.call(this.store, fullKey) ) {
+    if(Object.hasOwn(this.store, fullKey) ) {
       const data = this.store[fullKey];
       return <T>(data);
     }
@@ -58,7 +58,7 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
 
   async readAllFor<T extends IStoreable>(userPrincipal: string, key: string): Promise<T[]> {
     const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
-    if( Object.prototype.hasOwnProperty.call(this.store, fullKey)) {
+    if( Object.hasOwn(this.store, fullKey)) {
       const data = this.store[fullKey];
       return <T[]>(data);
 

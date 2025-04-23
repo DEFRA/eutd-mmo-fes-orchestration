@@ -25,7 +25,7 @@ export const getEntityFromServer = async (
     logger.info(`[GET][${path}][getEntityFromServer]`);
     const response = await httpClient.get(path);
     logger.info(`[GET][RESPONSE][PAYLOAD][${JSON.stringify(response.data)}]`);
-    if (Object.prototype.hasOwnProperty.call(response, 'data')) {
+    if (Object.hasOwn(response, 'data')) {
       return response.data;
     }
     return null;

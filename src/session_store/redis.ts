@@ -1,7 +1,6 @@
 import Redis, { RedisOptions } from 'ioredis';
 
-import { IStorage } from './storeable';
-import { IStoreable } from './storeable';
+import { IStorage, IStoreable } from './storeable';
 import logger from '../logger';
 import {
   CATCHES_KEY,

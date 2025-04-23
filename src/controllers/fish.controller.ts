@@ -257,7 +257,7 @@ export default class FishController {
       'presentation',
       'presentationLabel',
       'commodity_code',
-    ].every(prop => Object.prototype.hasOwnProperty.call(product, prop));
+    ].every(prop => Object.hasOwn(product, prop));
 
     const partiallyFilled: Product[] = species.filter((product: Product) => !hasCompleteSpeciesInformation(product));
 

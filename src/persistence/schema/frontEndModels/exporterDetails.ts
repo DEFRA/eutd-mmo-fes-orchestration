@@ -129,7 +129,7 @@ export const toBackEndNewCcExporterDetails = (
 const isOldExporterDetails = (exporterDetails: ExporterDetails) =>
   !isEmpty(exporterDetails) && !isEmpty(exporterDetails.addressOne) &&
   ['buildingNumber', 'subBuildingName', 'buildingName', 'streetName', 'county', 'country'].every((key: string) =>
-    !Object.prototype.hasOwnProperty.call(exporterDetails, key));
+    !Object.hasOwn(exporterDetails, key));
 
 const addressOne = (dynamicsAddress: any): string | undefined => {
   const addressLineOne: string[] = [];

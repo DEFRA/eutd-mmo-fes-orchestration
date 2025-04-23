@@ -4,7 +4,7 @@ import * as ProcessingStatementService from '../persistence/services/processingS
 import * as StorageDocumentService from '../persistence/services/storageDoc';
 import logger from "../logger";
 import { isEmpty } from 'lodash';
-import { ProgressStatus } from "../persistence/schema/common";
+import { ProgressStatus, ICountry, ExporterDetails } from "../persistence/schema/common";
 import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/catchCertificate";
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
@@ -12,7 +12,6 @@ import { checkTransportDataFrontEnd, toFrontEndTransport, Transport } from "../p
 import { Catch, Product, CcExporterDetails, CatchCertificate } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
 import { utc } from 'moment';
-import { ICountry, ExporterDetails } from '../persistence/schema/common';
 import * as ProcessingStatement  from '../persistence/schema/processingStatement';
 import * as StorageDocument  from '../persistence/schema/storageDoc';
 import * as moment from "moment";

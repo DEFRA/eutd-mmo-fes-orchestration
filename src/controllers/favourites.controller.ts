@@ -8,7 +8,6 @@ import {
 } from "../persistence/services/favourites";
 import logger from '../logger';
 import { getMaxFavouritesError } from '../routes/favourites';
-import applicationConfig from '../applicationConfig';
 import {validateSpeciesWithReferenceData} from "../validators/fish.validator";
 import ApplicationConfig from '../applicationConfig';
 import { HapiRequestApplicationStateExtended } from '../types';
@@ -35,7 +34,7 @@ export default class FavouritesController {
         : result;
     }
     else {
-      return h.response(getMaxFavouritesError(applicationConfig._maximumFavouritesPerUser)).code(400);
+      return h.response(getMaxFavouritesError(ApplicationConfig._maximumFavouritesPerUser)).code(400);
     }
   }
 

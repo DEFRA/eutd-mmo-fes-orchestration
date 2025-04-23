@@ -1,7 +1,6 @@
 import ApplicationConfig from '../applicationConfig';
 import logger from "../logger";
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import axios from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { ConversionFactor } from './interfaces/ConversionFactor';
 import { LandingsRefreshData } from './interfaces';
 import { Vessel } from "../persistence/schema/frontEndModels/payload";
@@ -12,7 +11,7 @@ import { ICcQueryResult } from '../persistence/schema/onlineValidationResult';
 export const refreshLandings = async (landingData: LandingsRefreshData, httpClient?: AxiosInstance) : Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
-    const client: AxiosInstance = httpClient ? httpClient : axios.create({ baseURL: baseUrl });
+    const client: AxiosInstance = httpClient ?? axios.create({ baseURL: baseUrl });
     const response: AxiosResponse = await client.post('/v1/landings/queue', landingData);
 
     return response.data;

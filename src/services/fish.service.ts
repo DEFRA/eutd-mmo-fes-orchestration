@@ -183,5 +183,5 @@ export function mustHaveKeys(obj: FrontEndSpecies.Product, keys: string[]) {
   if (!obj) {
     return false;
   }
-  return keys.every(key => !!Object.prototype.hasOwnProperty.call(obj, key));
+  return keys.every(key => !!Object.hasOwn(obj, key));
 }

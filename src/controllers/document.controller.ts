@@ -1,6 +1,6 @@
 import * as Hapi from '@hapi/hapi';
 import logger from '../logger';
-import DocumentNumberService from '../services/documentNumber.service';
+import DocumentNumberService, { catchCerts, storageNote, processingStatement }  from '../services/documentNumber.service';
 import { DOCUMENT_NUMBER_KEY } from '../session_store/constants';
 
 import {
@@ -17,7 +17,6 @@ import * as ProcessingStatementService from '../persistence/services/processingS
 import * as StorageDocumentService from '../persistence/services/storageDoc'
 import * as ReferenceDataService from '../services/reference-data.service'
 
-import { catchCerts, storageNote, processingStatement } from '../services/documentNumber.service';
 import { userCanCreateDraft } from "../validators/draftCreationValidator";
 import { AllDocuments, DocumentsCompleted, DocumentsInProgress, HapiRequestApplicationStateExtended } from '../types';
 

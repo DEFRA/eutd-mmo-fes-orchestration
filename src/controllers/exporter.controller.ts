@@ -1,5 +1,4 @@
 import * as Hapi from '@hapi/hapi';
-import Services from '../services/exporter.service';
 import acceptsHtml from '../helpers/acceptsHtml';
 import { EXPORTER_KEY, DOCUMENT_NUMBER_KEY } from '../session_store/constants';
 import DocumentNumberService, { catchCerts, storageNote, processingStatement } from '../services/documentNumber.service';
@@ -86,7 +85,7 @@ export default class ExporterController {
       await DocumentNumberService.createDocumentNumber(userPrincipal, serviceName, documentKey, journey, contactId);
     }
 
-    return await Services.get(userPrincipal, journey + '/' + EXPORTER_KEY, contactId);
+    return await ExporterService.get(userPrincipal, journey + '/' + EXPORTER_KEY, contactId);
   }
 
   public static async addExporterDetails(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
@@ -101,7 +100,7 @@ export default class ExporterController {
 
       logger.info(`[ADD-EXPORTER-DETAILS][${JSON.stringify(newExporter.model)}]`);
 
-      const result = await Services.save(newExporter, userPrincipal, documentNumber,payload.journey + '/' + EXPORTER_KEY, contactId);
+      const result = await ExporterService.save(newExporter, userPrincipal, documentNumber,payload.journey + '/' + EXPORTER_KEY, contactId);
 
       if (acceptsHtml(req.headers)) {
         if (savingAsDraft) {

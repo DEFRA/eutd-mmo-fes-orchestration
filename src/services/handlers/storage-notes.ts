@@ -15,7 +15,6 @@ import { validateCompletedDocument, validateSpecies } from "../../validators/doc
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_TRANSPORT_UNLOADED_FROM_LENGTH, MAX_PORT_NAME_LENGTH} from "../constants";
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
-import applicationConfig from "../../applicationConfig";
 import { BusinessError, SpeciesSuggestionError } from "../../validators/validationErrors";
 
 export const initialState = {
@@ -195,7 +194,7 @@ export async function validateProduct(product: any, index: number, errors, isNon
     errors[`catches-${index}-commodityCode`] = 'sdAddProductToConsignmentCommodityCodeErrorNull';
   }
 
-  const error: BusinessError = await validateCommodityCode(product.commodityCode, applicationConfig.getReferenceServiceUrl());
+  const error: BusinessError = await validateCommodityCode(product.commodityCode, ApplicationConfig.getReferenceServiceUrl());
   if (error.isError) {
     errors[`catches-${index}-commodityCode`] = 'sdAddProductToConsignmentCommodityCodeErrorNull';
   }
