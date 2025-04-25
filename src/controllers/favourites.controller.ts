@@ -29,9 +29,11 @@ export default class FavouritesController {
     if (await canAddFavourite(userPrincipal)) {
       const result = await saveFavouritesProduct(userPrincipal, payload);
 
-      return (result === null)
-        ? h.response(['error.favourite.duplicate']).code(400)
-        : result;
+      if (result === null) {
+        return h.response(['error.favourite.duplicate']).code(400);
+      }
+       
+      return result;
     }
     else {
       return h.response(getMaxFavouritesError(ApplicationConfig._maximumFavouritesPerUser)).code(400);

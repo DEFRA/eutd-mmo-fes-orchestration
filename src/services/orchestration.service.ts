@@ -693,8 +693,8 @@ export const loadRequiredData = async (
 };
 
 function findHandler(path) {
-  for (let i = 0; i < handlersLookup.length; i++) {
-    const { regexPath, keys, handler } = handlersLookup[i];
+  for (const element of handlersLookup) {
+    const { regexPath, keys, handler } = element;
     const res = regexPath.exec(path);
     if (!res) continue;
 
@@ -795,12 +795,12 @@ export function validateCCNumberFormat(str: string) {
 }
 
 export function validateUKCCNumberFormat(str: string) {
-  const regex = /^GBR-[0-9]{4}-CC-[A-Z0-9]{9}$/;
+  const regex = /^GBR-\d{4}-CC-[A-Z0-9]{9}$/;
   return regex.test(str);
 }
 
 export function validateUKDocumentNumberFormat(str: string) {
-  const regex = /^GBR-[0-9]{4}-(CC|PS|SD)-[A-Z0-9]{9}$/;
+  const regex = /^GBR-\d{4}-(CC|PS|SD)-[A-Z0-9]{9}$/;
   return regex.test(str);
 }
 

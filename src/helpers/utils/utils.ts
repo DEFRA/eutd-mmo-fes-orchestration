@@ -1,5 +1,5 @@
 // 10 digits
-export const getRandomNumber = (): Number => {
+export const getRandomNumber = (): number => {
   return Math.floor(Math.random() * 9000000000) + 1000000000;
 };
 

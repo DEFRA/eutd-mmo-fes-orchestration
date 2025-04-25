@@ -7,7 +7,7 @@ import logger from '../logger';
 
 import { HapiRequestApplicationStateExtended } from '../types';
 
-export default class confirmDocumentDeleteController {
+export default class ConfirmDocumentDeleteController {
   public static async confirmDocumentDelete(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
     try {
       const journey = <string>(req as any).payload.journey;

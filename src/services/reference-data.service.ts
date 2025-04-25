@@ -173,7 +173,7 @@ export const searchVessel = async (searchTerm: string, date: string, httpClient?
 export const getVesselByPlnDate = async (pln: string, date: string, httpClient?: AxiosInstance) : Promise<Vessel> => {
   const vesselsFound: Vessel[] = await searchVessel(pln, date, httpClient) || [];
   if (vesselsFound && vesselsFound.length > 1) {
-    logger.error(`[GET-VESSEL-BY-PLN-DATE][ERROR][Multiple vessels with same PLN Date: ${vesselsFound[0]}]`);
+    logger.error(`[GET-VESSEL-BY-PLN-DATE][ERROR][Multiple vessels with same PLN Date: ${JSON.stringify(vesselsFound)?.[0]}]`);
     return;
   }
 
@@ -310,7 +310,7 @@ export const virusDetected = async (fileName: string, content: string, documentN
     };
 
     logger.info(`[AV-API][VIRUS-CHECKER][CSV][${documentNumber}][CALLING-API][${key}]`);
-    const client: AxiosInstance = httpClient? httpClient : axios.create({ baseURL: ApplicationConfig.getReferenceServiceUrl() });
+    const client: AxiosInstance = httpClient ?? axios.create({ baseURL: ApplicationConfig.getReferenceServiceUrl() });
     const result: AxiosResponse = await client.post('/v1/virusChecker/csv', payload);
 
     logger.info(`[AV-API][VIRUS-CHECKER][CSV][${documentNumber}][RESPONSE][${JSON.stringify(result?.data, null, 2)}]`);

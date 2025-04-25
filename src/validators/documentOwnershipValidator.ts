@@ -7,7 +7,9 @@ import ServiceNames from './interfaces/service.name.enum';
 
 import logger from '../logger';
 
-export const validateDocumentOwnership = async (userId: string, documentId: string, statuses: DocumentStatuses[], contactId: string): Promise<CatchCertificate | ProcessingStatement | StorageDocument> => {
+type DocumentType = CatchCertificate | ProcessingStatement | StorageDocument;
+
+export const validateDocumentOwnership = async (userId: string, documentId: string, statuses: DocumentStatuses[], contactId: string): Promise<DocumentType> => {
 
   if (!userId && !contactId) {
     return undefined;
@@ -19,7 +21,7 @@ export const validateDocumentOwnership = async (userId: string, documentId: stri
 
   const documentNumber = documentId.toUpperCase();
 
-  let document: CatchCertificate | ProcessingStatement | StorageDocument = await ownerConfirmedInCache(documentNumber, userId, statuses, contactId);
+  let document: DocumentType = await ownerConfirmedInCache(documentNumber, userId, statuses, contactId);
 
   if (document) logger.debug(`[VALIDATE-DOCUMENT-OWNERSHIP][OWNER-CONFIRMED-IN-CACHE][${documentNumber}]`);
 
@@ -43,14 +45,14 @@ export const ownerConfirmedInCache = async (documentNumber: string, userPrincipa
     ? await getDraftCache(userPrincipal, contactId, documentNumber) as CatchCertificate
     : undefined;
 
-  return draft === null ? undefined : draft;
+  return draft ?? undefined;
 }
 
-export const getOwnerFromMongo = async (documentNumber: string, statuses: DocumentStatuses[], userPrincipal: string, contactId: string): Promise<CatchCertificate | ProcessingStatement | StorageDocument> => {
+export const getOwnerFromMongo = async (documentNumber: string, statuses: DocumentStatuses[], userPrincipal: string, contactId: string): Promise<DocumentType> => {
   const service = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
 
   let model;
-  let document: CatchCertificate | ProcessingStatement | StorageDocument;
+  let document: DocumentType;
 
   switch (service) {
     case ServiceNames.CC: model = CatchCertModel; break;
@@ -79,7 +81,7 @@ export const getOwnerFromMongo = async (documentNumber: string, statuses: Docume
 }
 
 export const validateDocumentOwner = (
-  document: CatchCertificate | ProcessingStatement | StorageDocument,
+  document: DocumentType,
   userPrincipal: string,
   contactId: string
 ): boolean => {

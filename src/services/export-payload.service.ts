@@ -385,7 +385,7 @@ export default class ExportPayloadService {
     return await functionCall || {}
   }
 
-  public static async getItemByProductId(userPrincipal: string, productId: string, documentNumber: string, contactId: string): Promise<any | Error> {
+  public static async getItemByProductId(userPrincipal: string, productId: string, documentNumber: string, contactId: string): Promise<any> {
     const exportPayload: any = await CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId) as any || {};
 
     if (exportPayload?.items) {

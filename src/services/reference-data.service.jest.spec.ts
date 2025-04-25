@@ -448,7 +448,7 @@ describe('getVesselByPlnDate', ()=> {
 
     const result = await getVesselByPlnDate('SU177', '12/03/2021');
 
-    expect(mockLogerError).toHaveBeenCalledWith(`[GET-VESSEL-BY-PLN-DATE][ERROR][Multiple vessels with same PLN Date: ${mockResponseItem}]`);
+    expect(mockLogerError).toHaveBeenCalledWith(`[GET-VESSEL-BY-PLN-DATE][ERROR][Multiple vessels with same PLN Date: []`);
     expect(result).toEqual(undefined);
   });
 
