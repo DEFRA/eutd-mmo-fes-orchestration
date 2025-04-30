@@ -117,8 +117,6 @@ export default class DocumentController {
     } catch (e) {
       // error should be handled gracefully!
       logger.error(e);
-      // TODO: may be we just rethrow this as an error, in FE you can take them to a separate page to handle all the errors other than 400
-      // return res().code(500);
       return {
         inProgress: [],
         completed: []

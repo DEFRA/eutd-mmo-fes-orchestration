@@ -1,3 +1,4 @@
+import TransportRoutes from '../../src/routes/transport';
 import {serverTest} from '../testHelpers';
 
 serverTest('[POST] /v1/transport/add (truck) should return 200', async (server, t) => {
@@ -539,3 +540,10 @@ serverTest(
     t.equals(response.statusCode, 200, 'Status code is 200');
   }
 );
+
+describe('TransportRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new TransportRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

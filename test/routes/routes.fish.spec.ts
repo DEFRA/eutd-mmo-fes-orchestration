@@ -8,6 +8,7 @@ import ApplicationConfig from '../../src/applicationConfig';
 const USER_ID     = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12';
 
 import logger from '../../src/logger';
+import FishRoutes from '../../src/routes/fish';
 
 serverTest('[GET] /v1/fish/added should return 200', async (server, t) => {
   const response = await server.inject({
@@ -364,4 +365,11 @@ serverTest('[POST] / species / should throw an error if data contains a species 
   });
   t.equals(response.statusCode, 400, 'Status code is 400');
   t.equals(response.result[0], 'The combination of species, state, presentation and commodity code must be unique for each product');
+});
+
+describe('FishRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new FishRoutes().register;
+    expect(typeof register).toBe("function");
+  });
 });

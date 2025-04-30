@@ -1,5 +1,6 @@
 import { serverTest } from '../testHelpers';
 import ExporterService from '../../src/services/exporter.service';
+import ExporterRoutes from '../../src/routes/exporter';
 const _ = require("lodash");
 const USER_ID = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12';
 
@@ -105,3 +106,10 @@ const exporter1 = {
   townCity: 'townCity',
   postcode: 'aa1 1aa'
 }
+
+describe('ExporterRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ExporterRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

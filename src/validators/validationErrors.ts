@@ -1,4 +1,3 @@
-// TODO: These error messages are not used when we move to global errorsReducer - clear it out if not used
 export const invalidErrorMessage = (name: string) => `child "${name}" fails because ["${name}" is invalid]`;
 export const cannotReachErrorMessage = (name: string) => `child "${name}" fails because ["${name}" cannot be checked if valid]`;
 

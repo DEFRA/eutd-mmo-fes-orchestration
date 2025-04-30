@@ -1,3 +1,4 @@
+import ProgressRoutes from '../../src/routes/progress';
 import { serverTest } from '../testHelpers';
 const _ = require("lodash");
 
@@ -25,4 +26,11 @@ serverTest('[POST] /v1/route-history should return 200', async (server, t) => {
     }
   });
   t.equals(response.statusCode, 200, 'Status code is 200');
+});
+
+describe('ProgressRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ProgressRoutes().register;
+    expect(typeof register).toBe("function");
+  });
 });

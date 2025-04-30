@@ -84,10 +84,10 @@ export default class DocumentNumberService {
   }
 
   public static async getDraftDocuments(userPrincipal:any, key:string, contactId: string): Promise<CatchCertificateDraft[]|ProcessingStatementDraft[]|StorageDocumentDraft[]> {
-    if (key.match(processingStatement)) {
+    if (RegExp(processingStatement).exec(key)) {
       return await ProcessingStatementService.getDraftDocumentHeaders(userPrincipal, contactId) || [];
     }
-    else if (key.match(storageNote)) {
+    else if (RegExp(storageNote).exec(key)) {
       return await StorageDocumentService.getDraftDocumentHeaders(userPrincipal, contactId) || [];
     }
     return await CatchCertService.getDraftCatchCertHeadersForUser(userPrincipal, contactId) || [];

@@ -1,3 +1,4 @@
+import PresentationStateRoutes from '../../src/routes/presentationState';
 import { serverTest } from '../testHelpers';
 
 
@@ -13,4 +14,11 @@ serverTest('[GET] / getPS / should return 200 status', async (server, t) => {
 
 });
   t.equals(response.statusCode, 200, 'Status code is 200');
+});
+
+describe('ProcessingStatementRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new PresentationStateRoutes().register;
+    expect(typeof register).toBe("function");
+  });
 });

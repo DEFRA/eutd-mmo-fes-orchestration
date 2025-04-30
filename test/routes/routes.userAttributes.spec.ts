@@ -1,3 +1,4 @@
+import UserAttributesRoutes from '../../src/routes/userAttributes';
 import { serverTest } from '../testHelpers';
 
 serverTest('[GET] /v1/userAttributes 200 - no user attribute', async (server, t) => {
@@ -61,4 +62,11 @@ serverTest('[POST] /v1/userAttributes 403', async (server, t) => {
     }
   });
   t.equals(response.statusCode, 403, 'Status code is 403');
+});
+
+describe('UserAttributesRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new UserAttributesRoutes().register;
+    expect(typeof register).toBe("function");
+  });
 });

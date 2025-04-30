@@ -1,5 +1,6 @@
 import { serverTest } from '../testHelpers';
 import ExportPayloadService from '../../src/services/export-payload.service';
+import ExportPayloadNonjsRoutes from '../../src/routes/export-payload-nonjs';
 const _ = require("lodash");
 const USER_ID = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12';
 const key = 'catchCertificate/export-payload';
@@ -278,3 +279,10 @@ const exportPayload1 = {
     }
   ]
 };
+
+describe('ExportPayloadNonjsRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ExportPayloadNonjsRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

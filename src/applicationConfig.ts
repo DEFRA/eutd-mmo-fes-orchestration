@@ -5,7 +5,6 @@ import logger from "./logger";
 dotenv.config();
 
 class ApplicationConfig {
-  // TODO: Do we need these underscores?
   _referenceServiceHost: string;
   _host: string;
   _port: any;

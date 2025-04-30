@@ -13,7 +13,7 @@ export default class SaveAsDraftService {
 
     logger.debug(`[GET][${key}][SAVE AS DRAFT]`);
 
-    return data ? data : {};
+    return data ?? {};
   }
 
   public static async deleteDraftLink(userPrincipal: string, documentNumber: string, journey: string, contactId: string) {

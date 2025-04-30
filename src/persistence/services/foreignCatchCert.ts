@@ -5,14 +5,14 @@ import { IForeignCatchCert } from '../schema/foreignCatchCert';
 import { StorageDocumentModel } from '../schema/storageDoc';
 import { ProcessingStatementModel } from '../schema/processingStatement';
 
-interface flattenedCatches {
+interface FlattenedCatches {
 	documentNumber: string;
   createdAt: any;
   species: string;
   weight: number;
 }
 
-const unwindDocument = (documents: any[]): flattenedCatches[] => {
+const unwindDocument = (documents: any[]): FlattenedCatches[] => {
 
   const ret = []
 

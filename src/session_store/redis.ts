@@ -39,7 +39,6 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
     this.connection.disconnect();
   }
 
-  // TODO: Remove this code and remove all up
   async getDocument(documentNumber: string) {
     const redisKeys = await this.connection.smembers(documentNumber);
 
@@ -61,7 +60,6 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
           if (json) {
             document[modKey] = JSON.parse(json);
           }
-          // TODO: We just need to do this once not for every iteration.
           document['userPrincipal'] = userPrincipal;
 
         }
@@ -169,11 +167,9 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
     await this.connection.del(fullKey);    
   }
 
-  // TODO: This is temporary!
   async tagByDocumentNumber(userPrincipal: string, contactId: string, documentNumber: string, journey: string): Promise<void> {
-    const userId = contactId ? contactId : userPrincipal;
+    const userId = contactId ?? userPrincipal;
     const journeyKeys = {
-      // TODO: These keys should be externalized
       [CATCH_CERTIFICATE_KEY]: [
         RedisStorage._buildKeyForUser(userId, CATCH_CERTIFICATE_KEY),
         RedisStorage._buildKeyForUser(userId, SPECIES_KEY),
@@ -204,7 +200,6 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   static _buildKeyForUser(userPrincipal: string, key: string): string {
-    // TODO: Do we need to add some validation?
     return userPrincipal + DELIMITER + key;
   }
 }

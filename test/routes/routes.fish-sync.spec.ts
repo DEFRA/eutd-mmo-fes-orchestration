@@ -3,6 +3,7 @@ import { getRedisOptions } from '../../src/session_store/redis';
 import { SessionStoreFactory } from '../../src/session_store/factory';
 import ExportPayloadService from '../../src/services/export-payload.service';
 import FishService from '../../src/services/fish.service';
+import FishRoutes from '../../src/routes/fish';
 const _ = require("lodash");
 const USER_ID = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12';
 const key = 'catchCertificate/export-payload';
@@ -384,3 +385,10 @@ const exportPayload1 = {
     }
   ]
 };
+
+describe('FishRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new FishRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

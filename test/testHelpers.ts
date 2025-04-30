@@ -7,8 +7,7 @@ import { IStorage } from '../src/session_store/storeable';
 import { MySpecies } from '../src/validators/interfaces/species.interface';
 import TransportDetails from '../src/validators/interfaces/transportDetails.interface';
 import { SessionStoreFactory } from '../src/session_store/factory';
-import { SPECIES_KEY } from '../src/session_store/constants';
-import { TRANSPORT_KEY } from '../src/session_store/constants';
+import { SPECIES_KEY, TRANSPORT_KEY } from '../src/session_store/constants';
 import ApplicationConfig from '../src/applicationConfig';
 import MongoMemoryServer from 'mongodb-memory-server';
 
@@ -70,7 +69,7 @@ export const eraseSpecies = async (sessionStore: IStorage<MySpecies>,
     await sessionStore.writeAllFor(userId, 'TODO', SPECIES_KEY, <MySpecies[]>[]);
 
   } catch (e) {
-    throw new Error('Argh. Did not erase the old species');
+    throw new Error(`Argh. Did not erase the old species ${e}`);
   }
 };
 
@@ -80,7 +79,7 @@ export const addTransportDetails = async(sessionStore: IStorage<TransportDetails
   try {
     await sessionStore.writeAllFor(userId, 'TODO', TRANSPORT_KEY, <TransportDetails[]>[]);
   }  catch(e) {
-    throw new Error('Failed to add transport details');
+    throw new Error(`Failed to add transport details ${e}`);
   }
 };
 

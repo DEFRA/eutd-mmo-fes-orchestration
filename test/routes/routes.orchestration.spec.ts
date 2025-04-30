@@ -1,3 +1,4 @@
+import ProcessingStatementRoutes from '../../src/routes/orchestration';
 import {serverTest} from './../testHelpers';
 
 serverTest(
@@ -134,3 +135,10 @@ serverTest('[POST] /orchestration/api/v1/processingStatement/generatePdf should 
     t.equals(response.statusCode, 200, 'Status code is 200');
   }
 );
+
+describe('ProcessingStatementRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ProcessingStatementRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

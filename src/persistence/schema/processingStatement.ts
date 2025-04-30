@@ -199,7 +199,7 @@ export const toFrontEndProcessingStatementExportData = (exportData: ExportData) 
     plantPostcode: getDatafromExportData(exportData, 'plantPostcode'),
     dateOfAcceptance: getDatafromExportData(exportData, 'dateOfAcceptance'),
     exportedTo: exportData?.exportedTo ? toExportedTo(exportData.exportedTo) : null,
-    _plantDetailsUpdated : plantDetailsUpdated ? true : false
+    _plantDetailsUpdated : !!plantDetailsUpdated
   };
 }
 

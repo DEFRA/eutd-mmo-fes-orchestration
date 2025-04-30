@@ -2,6 +2,7 @@ import { serverTest } from '../testHelpers';
 import {MongoConnection} from "../../src/persistence/mongo";
 import MongoMemoryServer from "mongodb-memory-server";
 import {baseConfig} from "../../src/persistence/schema/base";
+import ConfirmDocumentVoidRoutes from '../../src/routes/void-certificate';
 
 serverTest('[POST] void a certificate', async (server, t) => {
 	let mongod = new MongoMemoryServer({
@@ -58,4 +59,11 @@ serverTest('[POST] attempt to void a certificate should return 400 for invalid i
     payload: {}
   });
   t.equals(response.statusCode, 400, 'Status code is 400');
+});
+
+describe('ConfirmDocumentVoidRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ConfirmDocumentVoidRoutes().register;
+    expect(typeof register).toBe("function");
+  });
 });

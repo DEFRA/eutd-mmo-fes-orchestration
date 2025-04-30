@@ -1,3 +1,4 @@
+import ConfirmDocumentDeleteRoutes from '../../src/routes/confirm-document-delete';
 import { serverTest } from '../testHelpers';
 
 serverTest('[POST] /v1/confirm-document-delete should return 200', async (server, t) => {
@@ -28,3 +29,10 @@ serverTest('[POST] /v1/confirm-document-delete should return 200', async (server
     });
     t.equals(response.statusCode, 400, 'Status code is 400');
   });
+
+describe('ConfirmDocumentDeleteRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ConfirmDocumentDeleteRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

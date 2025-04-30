@@ -7,6 +7,7 @@ const USER_ID = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12';
 const key = 'catchCertificate/export-payload';
 const sinon = require('sinon');
 import VesselValidator from '../../src/services/vesselValidator.service';
+import ExportPayloadRoutes from '../../src/routes/export-payload';
 
 serverTest('[GET] /v1/export-certificates/export-payload should return 200', async (server, t) => {
     const response = await server.inject({
@@ -325,3 +326,10 @@ const exportPayload1 = {
     }
   ]
 };
+
+describe('ExportPayloadRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ExportPayloadRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

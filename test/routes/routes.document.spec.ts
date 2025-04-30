@@ -1,3 +1,4 @@
+import DocumentRoutes from '../../src/routes/document';
 import { serverTest } from '../testHelpers';
 
 serverTest('[GET] /v1/documents?type=catchCertificate should return 200 as type in query param is correct', async (server, t) => {
@@ -79,6 +80,11 @@ serverTest('[GET] /v1/document should return 400', async (server, t) => {
   t.equals(response.statusCode, 400, 'Status code is 400');
 });
 
-
+describe('DocumentRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new DocumentRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});
 
 

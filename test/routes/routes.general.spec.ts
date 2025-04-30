@@ -1,3 +1,4 @@
+import GeneralRoutes from '../../src/routes/general';
 import { serverTest } from '../testHelpers';
 
 
@@ -12,4 +13,11 @@ serverTest('[GET] / general / should return 200 status', async (server, t) => {
     }
   });
   t.equals(response.statusCode, 200, 'Status code is 200');
+});
+
+describe('GeneralRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new GeneralRoutes().register;
+    expect(typeof register).toBe("function");
+  });
 });

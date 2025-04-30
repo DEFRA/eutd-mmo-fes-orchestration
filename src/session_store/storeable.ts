@@ -2,7 +2,6 @@
 // Everything stored in session store is expected to have implemented
 // this marker interface
 export interface IStoreable {
-  // TODO: Check if we can avoid using this dummy method
   _marker();
 }
 

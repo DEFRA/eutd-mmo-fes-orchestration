@@ -1,3 +1,4 @@
+import ExportLocationRoutes from '../../src/routes/exportLocation';
 import {serverTest} from '../testHelpers';
 
 serverTest('[POST] /v1/export-location (United Kingdom) should return 200', async (server, t) => {
@@ -16,4 +17,11 @@ serverTest('[POST] /v1/export-location (United Kingdom) should return 200', asyn
     }
   });
   t.equals(response.statusCode, 200, 'Status code is 200');
+});
+
+describe('ExportLocationRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ExportLocationRoutes().register;
+    expect(typeof register).toBe("function");
+  });
 });

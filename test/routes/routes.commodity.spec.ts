@@ -1,3 +1,4 @@
+import CommodityRoutes from '../../src/routes/commodity';
 import { serverTest } from '../testHelpers';
 
 describe('Commodity routes check', () => {
@@ -12,5 +13,10 @@ describe('Commodity routes check', () => {
       }
     });
     t.equals(response.statusCode, 200, 'Status code is 200');
+  });
+
+  it("check register is exist", () => {
+    const register = new CommodityRoutes().register;
+    expect(typeof register).toBe("function");
   });
 });

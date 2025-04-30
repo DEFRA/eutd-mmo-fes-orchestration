@@ -1,5 +1,6 @@
 import { serverTest } from '../testHelpers';
 import ExportPayloadService from '../../src/services/export-payload.service';
+import ConservationRoutes from '../../src/routes/conservation';
 const _ = require("lodash");
 const USER_ID = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12';
 const key = 'conservation';
@@ -164,3 +165,10 @@ const incompleteConservation = {
   "documentNumber": "DOC-ID-1",
   "caughtInOtherWaters": "Y"
 };
+
+describe('ConservationRoutes routes check', () => {
+  it("check register is exist", () => {
+    const register = new ConservationRoutes().register;
+    expect(typeof register).toBe("function");
+  });
+});

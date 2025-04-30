@@ -94,7 +94,6 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   static _buildKeyForUser(userPrincipal: string, key: string): string {
-    // TODO: Do we need to add some validation?
     return userPrincipal + DELIMITER + key;
   }
 

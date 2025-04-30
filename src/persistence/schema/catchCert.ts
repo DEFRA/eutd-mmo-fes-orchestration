@@ -265,10 +265,6 @@ export interface CatchCertificate {
   createdAt: string;
   createdBy?: string;
   createdByEmail: string;
-  // TODO: Need to update this probably from dynamix directly and not lookup from amended exporter details
-  // createdByFullName: string;
-  // companyName: string;
-  // companyAddress: string;
   draftData?: {};
   exportData: ExportData;
   documentUri?: string;

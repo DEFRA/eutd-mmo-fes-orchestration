@@ -79,7 +79,7 @@ const commonTaskHelper = async (t, request, saveAsDraft = false) => {
     t.assert(exportPayloadServiceGetStub.called);
     t.assert(exportPayloadServiceSaveStub.called);
   } catch (e){
-
+    console.log(e);
   }
   exportPayloadServiceGetStub.restore();
   exportPayloadServiceSaveStub.restore();
