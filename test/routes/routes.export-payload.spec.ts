@@ -329,7 +329,9 @@ const exportPayload1 = {
 
 describe('ExportPayloadRoutes routes check', () => {
   it("check register is exist", () => {
+    const randomNum = 10;
     const register = new ExportPayloadRoutes().register;
     expect(typeof register).toBe("function");
+    expect(randomNum).toBe(10);
   });
 });
