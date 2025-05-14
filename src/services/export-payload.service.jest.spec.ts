@@ -5,6 +5,7 @@ import { SessionStoreFactory } from "../session_store/factory";
 import * as RedisSessionStore from "../session_store/redis";
 import ExportPayloadService from "./export-payload.service";
 import * as CatchCertService from "../persistence/services/catchCert";
+import CatchCertificateTransportation  from "./catch-certificate-transport.service";
 import { MockSessionStorage } from "../../test/session_store/mock";
 import * as PayloadSchema from "../persistence/schema/frontEndModels/payload";
 import { SessionLanding, SessionStore } from "../helpers/sessionManager";
@@ -1792,7 +1793,7 @@ describe('createExportCerticate', () => {
   beforeAll(() => {
     const mockGetExporterDetails = jest.spyOn(CatchCertService, 'getExporterDetails');
     const mockGetExportLocation = jest.spyOn(CatchCertService, 'getExportLocation');
-    const mockGetTransportDetails = jest.spyOn(CatchCertService, 'getTransportDetails');
+    const mockGetCatchCertificateTransportDetails = jest.spyOn(CatchCertificateTransportation, 'getTransportationDetails');
     const mockGetConvservation = jest.spyOn(CatchCertService, 'getConservation');
     const mockCompleteDraft = jest.spyOn(CatchCertService, 'completeDraft');
 
@@ -1848,15 +1849,10 @@ describe('createExportCerticate', () => {
       }
     });
 
-    mockGetTransportDetails.mockResolvedValue({
-      vehicle: "directLanding",
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    });
+    mockGetCatchCertificateTransportDetails.mockResolvedValue({
+      id: "0",
+      vehicle: "directLanding"
+    })
 
     mockCompleteDraft.mockResolvedValue(null);
 

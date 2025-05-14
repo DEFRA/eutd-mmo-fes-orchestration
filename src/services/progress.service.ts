@@ -4,12 +4,12 @@ import * as ProcessingStatementService from '../persistence/services/processingS
 import * as StorageDocumentService from '../persistence/services/storageDoc';
 import logger from "../logger";
 import { isEmpty } from 'lodash';
-import { ProgressStatus, ICountry, ExporterDetails } from "../persistence/schema/common";
+import { ProgressStatus, ICountry, ExporterDetails, Transport as BackEndTransport } from "../persistence/schema/common";
 import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/catchCertificate";
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
 import { checkTransportDataFrontEnd, toFrontEndTransport, Transport } from "../persistence/schema/frontEndModels/transport";
-import { Catch, Product, CcExporterDetails, CatchCertificate } from "../persistence/schema/catchCert";
+import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
 import { utc } from 'moment';
 import * as ProcessingStatement  from '../persistence/schema/processingStatement';
@@ -18,6 +18,7 @@ import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
 import { validateProduct } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
+import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 export default class ProgressService {
 
   public static async get(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
@@ -26,12 +27,12 @@ export default class ProgressService {
     const data: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
 
     if (data?.exportData?.landingsEntryOption) {
-      const { landingsEntryOption, exporterDetails, products, conservation, transportation } = data.exportData;
+      const { landingsEntryOption, exporterDetails, products, conservation, transportation, transportations, exportedFrom, exportedTo } = data.exportData;
 
       logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-CC-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
-      const transportType = ProgressService.getTransportType(transportation);
-      const exportJourney = ProgressService.getExportJourney(transportation);
+      const transportType = ProgressService.getTransportType(transportation, transportations);
+      const exportJourney = ProgressService.getExportJourney(transportation, exportedFrom, exportedTo);
 
       const progressObject: CatchCertificateProgress = {
         reference: ProgressService.getUserReference(data.userReference),
@@ -47,25 +48,43 @@ export default class ProgressService {
         delete progressObject.dataUpload;
       }
 
-      const progressSections = ProgressService.getProgressSections(landingsEntryOption, transportation, progressObject, transportType, data);
+      const progressSections: CatchCertificateProgress = ProgressService.getProgressSections(landingsEntryOption, progressObject, transportType, data);
 
       return {
         progress: progressSections,
         requiredSections: Object.keys(progressSections).filter(key => key !== 'dataUpload' && key !== 'reference').length,
-        completedSections:
-          ProgressService.getCompletedSectionsNumber(progressSections),
+        completedSections: ProgressService.getCompletedSectionsNumber(progressSections),
       };
     } else {
       return null;
     }
   }
 
-  static readonly getTransportType = (transportation) => transportation?.vehicle ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
-  static readonly getExportJourney = (transportation) => transportation?.exportedFrom && transportation?.exportedTo ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+  static readonly getTransportType = (transportation: BackEndTransport, transportations?: CatchCertificateTransport[]) =>
+    transportation?.vehicle || Array.isArray(transportations) && transportations.length > 0 && transportations.every((t: CatchCertificateTransport) => !isEmpty(t.vehicle)) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
 
-  static readonly getProgressSections = (landingsEntryOption: string, transportation, progressObject: CatchCertificateProgress, transportType, data: CatchCertificate) => landingsEntryOption === 'directLanding' || transportation?.vehicle === 'directLanding'
-  ? progressObject
-  : { ...progressObject, transportType, transportDetails: ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data.exportData.transportation))) };
+  static readonly getExportJourney = (transportation: BackEndTransport, exportedFrom: string, exportedTo: ICountry) => {
+    if (exportedFrom && ProgressService.getExportDestinationStatus(exportedTo) === ProgressStatus.COMPLETED) {
+      return ProgressStatus.COMPLETED;
+    }
+
+    return transportation?.exportedFrom && ProgressService.getExportDestinationStatus(transportation?.exportedTo) === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+  }
+
+  static readonly getProgressSections = (landingsEntryOption: string, progressObject: CatchCertificateProgress, transportType: ProgressStatus, data: CatchCertificate) => {
+    if (landingsEntryOption === 'directLanding') {
+      return progressObject;
+    }
+
+    const transportations: CatchCertificateTransport[] = data.exportData.transportations;
+    const transportDetails: ProgressStatus = (Array.isArray(transportations) && transportations.length > 0) ? ProgressService.getCatchCertificateTransportDetails(transportations) : ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data.exportData.transportation)));
+
+    return {
+      ...progressObject,
+      transportType,
+      transportDetails
+    };
+  }
 
   public static getCompletedSectionsNumber(sections: CatchCertificateProgress | ProcessingStatementProgress | StorageDocumentProgress): number {
     const completedSections = [];
@@ -171,7 +190,7 @@ export default class ProgressService {
       const isTruck = transportation.vehicle === 'truck';
       const hasCmr = isTruck && transportation.cmr === 'true';
 
-      if (hasCmr || transportation.departurePlace) {
+      if (hasCmr || transportation.departurePlace && transportation.freightBillNumber) {
         return ProgressStatus.COMPLETED;
       } else {
         return ProgressStatus.INCOMPLETE;
@@ -180,6 +199,34 @@ export default class ProgressService {
 
     return ProgressStatus.CANNOT_START;
   }
+
+  public static readonly getCatchCertificateTransportDetails = (
+    transportations: CatchCertificateTransport[]
+  ): ProgressStatus => {
+    const allHaveVehicles = transportations?.every((transportation: CatchCertificateTransport) =>
+      ProgressService.isEmptyAndTrimSpaces(
+        FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.vehicle
+      )
+    );
+  
+    const allHaveDeparturePlace = transportations.every((transportation: CatchCertificateTransport) =>
+      FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.departurePlace
+    );
+  
+    const allHaveFreightBillNumber = transportations.every((transportation: CatchCertificateTransport) =>
+      FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.freightBillNumber
+    );
+  
+    if (allHaveVehicles) {
+      if (allHaveDeparturePlace && allHaveFreightBillNumber) {
+        return ProgressStatus.COMPLETED;
+      } else {
+        return ProgressStatus.INCOMPLETE;
+      }
+    }
+  
+    return ProgressStatus.CANNOT_START;
+  };
 
   public static readonly getPSCatchStatus = async (catches: ProcessingStatement.Catch[], documentNumber: string, userPrincipal: string, contactId: string): Promise<ProgressStatus> => {
     if (catches === undefined || catches.length <= 0) {

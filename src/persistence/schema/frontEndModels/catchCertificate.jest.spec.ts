@@ -71,7 +71,18 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
             isoNumericCode: "SP"
           }
         },
-        landingsEntryOption: LandingsEntryOptions.ManualEntry
+        transportations: [{
+          id: 0,
+          vehicle: "directLanding"
+        }],
+        landingsEntryOption: LandingsEntryOptions.ManualEntry,
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
       },
       draftData: {},
       documentUri: 'some document uri'
@@ -150,15 +161,10 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         currentUri: "Test",
         nextUri: "Test"
       },
-      transport: {
-        vehicle: "directLanding",
-        exportedTo: {
-          officialCountryName: "SPAIN",
-          isoCodeAlpha2: "A1",
-          isoCodeAlpha3: "A3",
-          isoNumericCode: "SP"
-        }
-      },
+      transportations: [{
+        id: "0",
+        vehicle: "directLanding"
+      }],
       exportLocation: {
         exportedFrom: "United Kingdom",
         exportedTo: {
@@ -248,7 +254,18 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
             isoNumericCode: "SP"
           }
         },
-        landingsEntryOption: LandingsEntryOptions.ManualEntry
+        transportations: [{
+          id: 0,
+          vehicle: "directLanding"
+        }],
+        landingsEntryOption: LandingsEntryOptions.ManualEntry,
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
       },
       draftData: {},
       documentUri: 'some document uri'
@@ -328,15 +345,10 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         currentUri: "Test",
         nextUri: "Test"
       },
-      transport: {
-        vehicle: "directLanding",
-        exportedTo: {
-          officialCountryName: "SPAIN",
-          isoCodeAlpha2: "A1",
-          isoCodeAlpha3: "A3",
-          isoNumericCode: "SP"
-        }
-      },
+      transportations: [{
+        id: "0",
+        vehicle: "directLanding"
+      }],
       exportLocation: {
         exportedFrom: "United Kingdom",
         exportedTo: {

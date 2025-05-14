@@ -77,7 +77,18 @@ describe('get', () => {
             isoNumericCode: "SP"
           }
         },
-        landingsEntryOption: LandingsEntryOptions.ManualEntry
+        transportations: [{
+          id: 0,
+          vehicle: "directLanding",
+        }],
+        landingsEntryOption: LandingsEntryOptions.ManualEntry,
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
       },
       draftData: {},
       documentUri: 'some document uri',
@@ -310,7 +321,18 @@ describe('get', () => {
             isoNumericCode: "SP"
           }
         },
-        landingsEntryOption: LandingsEntryOptions.ManualEntry
+        transportations: [{
+          id: 0,
+          vehicle: "directLanding",
+        }],
+        landingsEntryOption: LandingsEntryOptions.ManualEntry,
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
       },
       draftData: {},
       documentUri: 'some document uri',

@@ -1,0 +1,350 @@
+
+import * as BackEndModels from "../../schema/catchCert";
+import * as FrontEndTransport from "./catchCertificateTransport";
+
+describe("When mapping from a front end transport to a backend transport", () => {
+
+  it("if vehicle is truck then it should contain all relevant properties for truck", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.truck,
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567'
+    };
+
+    const expectedResult: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.truck,
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567'
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is plane then it should contain all relevant properties for plane", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567'
+    };
+
+    const expectedResult: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567'
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
+  it("if vehicle is train then it should contain all relevant properties for train", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const expectedResult: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567'
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is container vessel then it should contain all relevant properties for container vessel", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      containerNumber: "Cont Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567'
+    };
+
+    const expectedResult: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState : "UK",
+      containerNumber : "Cont Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
+  it("if vehicle is fishing vessel then it should contain all relevant properties for fishing vessel", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.fishingVessel
+    };
+
+    const expectedResult: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.fishingVessel
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
+  it("if no valid transport vehicle should return null", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: "no valid vehicle type"
+    };
+
+    expect(FrontEndTransport.toBackEndTransport(transport)).toStrictEqual(null);
+
+  });
+
+  it("if the optional property  exportDate is included then it should be returned", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const expectedResult: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
+  it("if exportLocation property is not provided exportFrom should not be populated", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).not.toHaveProperty('exportFrom');
+  });
+
+  it("if exportDate property is not provided it should not be returned", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "Rwy Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).not.toHaveProperty('exportDate');
+  });
+
+  it("if CMR is not defined it should not be returned", () => {
+    const input: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.truck,
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(input);
+
+    expect(result).toStrictEqual({
+      id: 0,
+      vehicle: input.vehicle
+    });
+  });
+
+});
+
+describe("When mapping from a backend transport to front end transport", () => {
+
+  it("if vehicle is valid", () => {
+
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: 'blah'
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toBeNull();
+  });
+
+  it("if vehicle is truck then it should contain all the relevant properties for a truck", () => {
+
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.truck,
+      nationalityOfVehicle: "British",
+      registrationNumber: "WE78ERF",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const expectedResult: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.truck,
+      nationalityOfVehicle: "British",
+      registrationNumber: "WE78ERF",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is plane then it should contain all the relevant properties for a plane", () => {
+
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "123456",
+      containerNumber: "123456",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const expectedResult: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "123456",
+      containerNumber: "123456",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is train then it should contain all the relevant properties for a train", () => {
+
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "12345",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    const expectedResult: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "12345",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is container vessel then it should contain all the relevant properties for a container vessel", () => {
+
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.containerVessel,
+      containerNumber: "12345",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+      vesselName: "Vessel Name",
+      flagState: "UK"
+    };
+
+    const expectedResult: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      containerNumber: "12345",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is fishing vessel then it should contain all the relevant properties for a fishing vessel", () => {
+
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.fishingVessel
+    };
+
+    const expectedResult: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.fishingVessel
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if no valid transport vehicle should return null", () => {
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: "Not a valid vehicle",
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(null);
+  });
+
+  it("if valid transport vehicle should return expected results", () => {
+
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.containerVessel,
+      containerNumber: "12345",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+      vesselName: "Vessel Name",
+      flagState: "UK"
+    };
+
+    const expectedResult: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      containerNumber: "12345",
+      departurePlace: "London",
+      freightBillNumber: 'AA1234567',
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+});

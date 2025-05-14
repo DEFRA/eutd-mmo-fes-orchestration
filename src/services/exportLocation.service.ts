@@ -1,5 +1,4 @@
 import logger from '../logger';
-import { EXPORT_LOCATION_KEY } from '../session_store/constants';
 import * as CatchCertService from '../persistence/services/catchCert';
 import { ExportLocation } from '../persistence/schema/frontEndModels/export-location';
 import * as StorageDocumentService from '../persistence/services/storageDoc';
@@ -9,7 +8,7 @@ import ServiceNames from "../validators/interfaces/service.name.enum";
 
 export default class ExportLocationService {
 
-  public static async get(userId, key, documentNumber: string, contactId: string) : Promise<ExportLocation> {
+  public static async get(userId: string, documentNumber: string, contactId: string) : Promise<ExportLocation> {
     const journey = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
     switch (journey) {
       case ServiceNames.SD : {
@@ -24,7 +23,7 @@ export default class ExportLocationService {
     }
   }
 
-  public static async save(userId, key, load, documentNumber: string, contactId: string) : Promise<void> {
+  public static async save(userId: string, load: ExportLocation, documentNumber: string, contactId: string) : Promise<void> {
     const journey = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
     switch (journey) {
       case ServiceNames.SD : {
@@ -47,10 +46,10 @@ export default class ExportLocationService {
         throw new Error(`[ERROR][${documentNumber}] Invalid departure country`);
       }
 
-      const load = await this.get(userPrincipal, EXPORT_LOCATION_KEY, documentNumber, contactId) as any || {};
+      const load: ExportLocation = await this.get(userPrincipal, documentNumber, contactId) as any || {};
       load.exportedFrom = payload.exportedFrom;
       load.exportedTo = payload.exportedTo;
-      await this.save(userPrincipal, EXPORT_LOCATION_KEY, load, documentNumber, contactId);
+      await this.save(userPrincipal, load, documentNumber, contactId);
       return load;
     } catch(e) {
       logger.error(e);

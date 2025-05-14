@@ -1,10 +1,10 @@
 import * as BackEndCertificate from "../catchCert";
+import * as CatchCertificateTransport from "./catchCertificateTransport";
 import { Conservation } from "./conservation";
 import { ExportLocation } from "./export-location";
 import { ProductsLanded, toFrontEndProductsLanded, BaseProgress } from "./payload";
-import { toFrontEndTransport, Transport } from "./transport";
 import { CcExporter, toFrontEndCcExporterDetails } from "./exporterDetails";
-import { toFrontEndExportLocation, ProgressStatus } from "../common";
+import { ProgressStatus } from "../common";
 import { toFrontEndConservation, LandingsEntryOptions } from "../catchCert";
 
 export interface CatchCertificateDraft {
@@ -19,7 +19,7 @@ export interface CatchCertificate {
   exporter: CcExporter,
   exportPayload: ProductsLanded,
   conservation: Conservation,
-  transport: Transport
+  transportations: CatchCertificateTransport.CatchCertificateTransport[],
   exportLocation: ExportLocation,
   landingsEntryOption: LandingsEntryOptions
 }
@@ -47,10 +47,24 @@ export const toFrontEndCatchCert = (
         conservation: toFrontEndConservation(
           certificate.exportData.conservation
         ),
-        transport: toFrontEndTransport(certificate.exportData.transportation),
         exportLocation: toFrontEndExportLocation(
-          certificate.exportData.transportation
+          certificate.exportData
         ),
         landingsEntryOption: certificate.exportData.landingsEntryOption,
+        transportations: certificate.exportData.transportations.map((t: BackEndCertificate.CatchCertificateTransport) => CatchCertificateTransport.toFrontEndTransport(t))
       }
     : null;
+
+export const toFrontEndExportLocation = (exportData: BackEndCertificate.ExportData): ExportLocation => {
+  if (exportData?.exportedFrom || exportData?.exportedTo) {
+    return {
+      exportedFrom: exportData.exportedFrom,
+      exportedTo: exportData.exportedTo
+    }
+  }
+
+  return {
+    exportedFrom: exportData?.transportation ? exportData.transportation.exportedFrom : '',
+    exportedTo: exportData?.transportation ? exportData.transportation.exportedTo : undefined
+  }
+};

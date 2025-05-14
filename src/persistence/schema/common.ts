@@ -1,6 +1,5 @@
 import { Schema } from 'mongoose';
 import { DocumentNumber } from "./frontEndModels/documentNumber";
-import { ExportLocation } from "./frontEndModels/export-location";
 
 // model types
 export interface Audit {
@@ -20,6 +19,7 @@ export interface BasicTransportDetails {
   departurePlace? : string,
   exportDate? : string,
   exportedTo? : ICountry,
+  freightBillNumber?: string,
 }
 
 export interface Train extends BasicTransportDetails {
@@ -43,16 +43,16 @@ export interface Truck extends BasicTransportDetails {
   registrationNumber?: string
 }
 
+type FishingVessel = BasicTransportDetails;
+
+export type Transport = Train | Plane | ContainerVessel | Truck | FishingVessel;
+
 export const Country = new Schema({
   officialCountryName:  { type: String, required: true },
   isoCodeAlpha2:        { type: String, required: false },
   isoCodeAlpha3:        { type: String, required: false },
   isoNumericCode:       { type: String, required: false }
 }, { _id: false });
-
-type FishingVessel = BasicTransportDetails;
-
-export type Transport = Train | Plane | ContainerVessel | Truck | FishingVessel;
 
 export const TransportSchema = new Schema({
   exportedFrom:         { type: String },
@@ -65,9 +65,10 @@ export const TransportSchema = new Schema({
   railwayBillNumber:    { type: String,  required: false },
   flightNumber:         { type: String,  required: false },
   vesselName:           { type: String,  required: false },
-  flagState:           { type: String,  required: false },
+  flagState:            { type: String,  required: false },
   containerNumber:      { type: String,  required: false },
-  exportDate:           { type: String,  required: false }
+  exportDate:           { type: String,  required: false },
+  freightBillNumber:    { type: String,  required: false }
 }, { _id : false });
 
 export interface ExporterDetails {
@@ -154,13 +155,6 @@ export const ExporterDetailsSchema = new Schema({
   _dynamicsUser:        { type: Object },
   _updated:             { type: Boolean, required: false }
 }, { _id : false } );
-
-export const toFrontEndExportLocation = (transport: BasicTransportDetails): ExportLocation => {
-  return {
-    exportedFrom: transport ? transport.exportedFrom : '',
-    exportedTo: transport ? transport.exportedTo : undefined
-  }
-};
 
 export const toFrontEndDocumentNumber = (document : any) : DocumentNumber => {
   return {

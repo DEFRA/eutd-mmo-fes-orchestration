@@ -139,15 +139,10 @@ describe('Certificates routes', () => {
           currentUri: "Test",
           nextUri: "Test"
         },
-        transport: {
-          vehicle: "directLanding",
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
-        },
+        transportations: [{
+          id: "0",
+          vehicle: "directLanding"
+        }],
         exportLocation: {
           exportedFrom: "United Kingdom",
           exportedTo: {

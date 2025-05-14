@@ -9,12 +9,12 @@ import ManageCertsService from '../../services/manage-certs.service';
 import ServiceNames from '../../validators/interfaces/service.name.enum';
 import * as FrontEndConservation from '../schema/frontEndModels/conservation';
 import * as FrontEndSpecies from "../schema/frontEndModels/species";
-import { CatchCertificateDraft } from '../schema/frontEndModels/catchCertificate';
+import { CatchCertificateDraft, toFrontEndExportLocation } from '../schema/frontEndModels/catchCertificate';
 import { Transport, toBackEndTransport, toFrontEndTransport } from '../schema/frontEndModels/transport';
 import { ExportLocation } from "../schema/frontEndModels/export-location";
 import { toBackEndCcExporterDetails, CcExporter, toFrontEndCcExporterDetails } from '../schema/frontEndModels/exporterDetails';
 import { toBackEndProductsLanded, ProductsLanded, toFrontEndProductsLanded, DirectLanding, toFrontEndDirectLanding, SystemFailure } from '../schema/frontEndModels/payload';
-import { IDraft, toFrontEndExportLocation } from '../schema/common';
+import { IDraft } from '../schema/common';
 import SummaryErrorsService from '../../services/summaryErrors.service';
 import { SessionStoreFactory } from '../../session_store/factory';
 import { getRedisOptions } from '../../session_store/redis';
@@ -268,7 +268,7 @@ export const deleteSpecies = async (userPrincipal: string, speciesId: string, do
 
 export const deleteDraftCertificate = async (
   userPrincipal: string,
-  documentNumber: string,
+  documentNumber: string | undefined,
   contactId: string
 ) => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
@@ -492,9 +492,7 @@ export const upsertLandingsEntryOption = async (userPrincipal: string, documentN
 };
 
 export const upsertTransportDetails = async (userPrincipal: string, payload: Transport, documentNumber: string, contactId: string) => {
-  const exportLocation: ExportLocation = await getExportLocation(userPrincipal, documentNumber, contactId);
-
-  const transport = toBackEndTransport(payload, exportLocation);
+  const transport = toBackEndTransport(payload);
 
   await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportation': transport } }, contactId);
 };
@@ -506,13 +504,13 @@ export const deleteTransportDetails = async (userPrincipal: string, documentNumb
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.transportation)
-    ? toFrontEndExportLocation(draft.exportData.transportation)
+  return (draft && draft.exportData)
+    ? toFrontEndExportLocation(draft.exportData)
     : null;
 };
 
 export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber: string, contactId: string) => {
-  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportation.exportedFrom': payload.exportedFrom, 'exportData.transportation.exportedTo': payload.exportedTo } }, contactId);
+  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedFrom': payload.exportedFrom, 'exportData.exportedTo': payload.exportedTo } }, contactId);
 };
 
 export const upsertConservation = async (userPrincipal: string, payload: FrontEndConservation.Conservation, documentNumber: string, contactId: string) => {

@@ -8,6 +8,7 @@ import {
 } from './constants';
 import ApplicationConfig from "../applicationConfig";
 import * as CatchCertService from "../persistence/services/catchCert";
+import CatchCertificateTransport from "./catch-certificate-transport.service";
 import ValidationFilterService from './onlineValidationReportFilter';
 import SummaryErrorsService from '../services/summaryErrors.service';
 import { getBlockingStatus } from '../persistence/services/systemBlock';
@@ -249,7 +250,7 @@ export default class ExportPayloadService {
       const exporter = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId));
       const exportedFrom = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId));
       const exporterModel: CcExportedDetailModel = exporter?.model ? exporter.model : {} as CcExportedDetailModel;
-      const transport: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId));
+      const transport: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId));
 
       const catchCertificate = {
         transport: { ...transport, ...exportedFrom }
@@ -271,7 +272,7 @@ export default class ExportPayloadService {
       }
 
       const conservationData = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId));
-      const transportData = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId));
+      const transportData = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId));
       const validationPayload = {
         exportPayload: exportPayload,
         documentNumber: documentNumber,

@@ -97,7 +97,18 @@ const backEndCc: BackEnd.CatchCertificate = {
             isoNumericCode: "SP"
           }
     },
-    landingsEntryOption: BackEnd.LandingsEntryOptions.ManualEntry
+    transportations: [{
+      id: 0,
+      vehicle: "directLanding",
+    }],
+    landingsEntryOption: BackEnd.LandingsEntryOptions.ManualEntry,
+    exportedFrom: "United Kingdom",
+    exportedTo: {
+      officialCountryName: "SPAIN",
+      isoCodeAlpha2: "A1",
+      isoCodeAlpha3: "A3",
+      isoNumericCode: "SP"
+    }
   },
   draftData: {},
   documentUri: 'some document uri',
@@ -175,7 +186,18 @@ const backEndCcAdmin: BackEnd.CatchCertificate = {
             isoNumericCode: "SP"
           }
     },
-    landingsEntryOption: BackEnd.LandingsEntryOptions.ManualEntry
+    transportations: [{
+      id: 0,
+      vehicle: "directLanding"
+    }],
+    landingsEntryOption: BackEnd.LandingsEntryOptions.ManualEntry,
+    exportedFrom: "United Kingdom",
+    exportedTo: {
+      officialCountryName: "SPAIN",
+      isoCodeAlpha2: "A1",
+      isoCodeAlpha3: "A3",
+      isoNumericCode: "SP"
+    }
   },
   draftData: {},
   documentUri: 'some document uri',
@@ -295,15 +317,10 @@ describe('Certificate Controller', () => {
           currentUri: "Test",
           nextUri: "Test"
         },
-        transport: {
-          vehicle: "directLanding",
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
-        },
+        transportations: [{
+          id: "0",
+          vehicle: "directLanding"
+        }],
         exportLocation: {
           exportedFrom: "United Kingdom",
           exportedTo: {
@@ -415,15 +432,10 @@ describe('Certificate Controller', () => {
           currentUri: "Test",
           nextUri: "Test"
         },
-        transport: {
+        transportations: [{
+          id: "0",
           vehicle: "directLanding",
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
-        },
+        }],
         exportLocation: {
           exportedFrom: "United Kingdom",
           exportedTo: {
@@ -544,15 +556,10 @@ describe('Certificate Controller', () => {
           currentUri: "Test",
           nextUri: "Test"
         },
-        transport: {
-          vehicle: "directLanding",
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
-        },
+        transportations: [{
+          id: "0",
+          vehicle: "directLanding"
+        }],
         exportLocation: {
           exportedFrom: "United Kingdom",
           exportedTo: {

@@ -1,12 +1,11 @@
 import * as Hapi from '@hapi/hapi';
 import Services from '../services/exportLocation.service';
 import acceptsHtml from "../helpers/acceptsHtml";
-import { EXPORT_LOCATION_KEY } from '../session_store/constants';
 
 export default class ExportLocationController {
 
   public static async getExportLocation(userPrincipal: string, documentNumber: string, contactId: string) {
-    return await Services.get(userPrincipal, EXPORT_LOCATION_KEY, documentNumber, contactId);
+    return await Services.get(userPrincipal, documentNumber, contactId);
   }
 
   public static async addExportLocation(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {

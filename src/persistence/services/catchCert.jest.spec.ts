@@ -12,7 +12,7 @@ import { Product as Products } from '../schema/catchCert';
 import * as FrontEndTransportSchema from '../schema/frontEndModels/transport';
 import * as FrontEndExporterSchema from '../schema/frontEndModels/exporterDetails';
 import * as FrontEndPayloadSchema from '../schema/frontEndModels/payload';
-import { CatchCertificateDraft } from '../schema/frontEndModels/catchCertificate';
+import * as FrontEndCatchCertificateSchema from '../schema/frontEndModels/catchCertificate';
 import * as CommonSchema from '../schema/common';
 import * as CatchCertSchema from '../schema/catchCert';
 import * as Validator from '../../validators/draftCreationValidator';
@@ -324,7 +324,7 @@ describe('catchCert - db related', () => {
         'status': 'DRAFT'
       });
 
-      expect(draft.exportData.products.length).toEqual(0)
+      expect(draft?.exportData.products.length).toEqual(0)
     });
 
     it("will also work when passing a document number", async () => {
@@ -338,7 +338,7 @@ describe('catchCert - db related', () => {
         documentNumber: 'GBR-2020-CC-0E42C2DA5'
       });
 
-      expect(draft.exportData.products.length).toEqual(0)
+      expect(draft?.exportData.products.length).toEqual(0)
     });
 
     it("will delete the relevant species", async () => {
@@ -357,7 +357,7 @@ describe('catchCert - db related', () => {
         'status': 'DRAFT'
       });
 
-      expect(draft.exportData.products.length).toEqual(1)
+      expect(draft?.exportData.products.length).toEqual(1)
     });
   });
 
@@ -471,7 +471,7 @@ describe('catchCert - db related', () => {
     });
 
     it('should return a draft if one is present', async () => {
-      const expected: CatchCertificateDraft[] = [{
+      const expected: FrontEndCatchCertificateSchema.CatchCertificateDraft[] = [{
         "documentNumber": "GBR-2020-CC-0E42C2DA5",
         "status": "DRAFT",
         "startedAt": "16 Jan 2020",
@@ -871,7 +871,7 @@ describe('catchCert - db related', () => {
       const draft = await CatchCertModel.findOne(filter, ['exportData'], { lean: true });
 
       expect(records).toBe(1);
-      expect(draft.exportData.transportation).toStrictEqual({
+      expect(draft?.exportData.transportation).toStrictEqual({
         exportedFrom: 'New York',
         exportedTo: {
           officialCountryName: "SPAIN",
@@ -916,7 +916,7 @@ describe('catchCert - db related', () => {
         { lean: true }
       );
 
-      expect(draft.exportData.products).toStrictEqual([{
+      expect(draft?.exportData.products).toStrictEqual([{
         species: 'Atlantic Cod',
         speciesId: 'test-id',
         commodityCode: 'commodityCode',
@@ -957,7 +957,7 @@ describe('catchCert - db related', () => {
 
       const draft = await CatchCertModel.findOne(filter, ['exportData'], { lean: true });
 
-      expect(draft.exportData.transportation).toStrictEqual({
+      expect(draft?.exportData.transportation).toStrictEqual({
         exportedFrom: 'New York',
         exportedTo: {
           officialCountryName: "SPAIN",
@@ -994,7 +994,7 @@ describe('catchCert - db related', () => {
 
       const draft = await CatchCertModel.findOne(filter, ['exportData'], { lean: true });
 
-      expect(draft.exportData.transportation).toStrictEqual({
+      expect(draft?.exportData.transportation).toStrictEqual({
         exportedFrom: 'New York',
         exportedTo: {
           officialCountryName: "SPAIN",
@@ -1021,7 +1021,7 @@ describe('catchCert - db related', () => {
       const filter = { createdBy: 'user2', status: 'PENDING', documentNumber: 'GBR-2020-CC-0E42C2DA5' };
       const draft = await CatchCertModel.findOne(filter, ['createdBy'], { lean: true });
 
-      expect(draft.createdBy).toStrictEqual('user2');
+      expect(draft?.createdBy).toStrictEqual('user2');
     });
 
     it('should not be able to upsert a complete certificate', async () => {
@@ -1040,7 +1040,7 @@ describe('catchCert - db related', () => {
       const filter = { createdBy: 'user1', status: 'COMPLETE', documentNumber: 'GBR-2020-CC-0E42C2DA5' };
       const draft = await CatchCertModel.findOne(filter, ['createdBy'], { lean: true });
 
-      expect(draft.createdBy).toStrictEqual('user1');
+      expect(draft?.createdBy).toStrictEqual('user1');
     });
 
     it('should not create a new certificate', async () => {
@@ -1170,7 +1170,7 @@ describe('catchCert - db related', () => {
         documentNumber: 'RJH-2020-CC-0E42C2DA5',
         status: 'DRAFT'
       }, ['exportData'], { lean: true });
-      expect(result.exportData.conservation).toStrictEqual({ 'conservationReference': 'Test' });
+      expect(result?.exportData.conservation).toStrictEqual({ 'conservationReference': 'Test' });
     });
 
     it("will convert to a back end conservation model with document number", async () => {
@@ -1181,7 +1181,7 @@ describe('catchCert - db related', () => {
         documentNumber: 'GBR-2020-CC-0E42CDA5'
       }, ['exportData'], { lean: true });
 
-      expect(result.exportData.conservation).toStrictEqual({ 'conservationReference': 'Test' });
+      expect(result?.exportData.conservation).toStrictEqual({ 'conservationReference': 'Test' });
     });
   });
 
@@ -1197,7 +1197,7 @@ describe('catchCert - db related', () => {
         documentNumber: 'GBR-3444-5555-34444'
       }, ['exportData.landingsEntryOption'], { lean: true });
 
-      expect(result.exportData.landingsEntryOption).toStrictEqual('manualEntry');
+      expect(result?.exportData.landingsEntryOption).toStrictEqual('manualEntry');
     });
   });
 
@@ -1209,6 +1209,7 @@ describe('catchCert - db related', () => {
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
+      freightBillNumber: 'AA1234567',
       user_id: "UID",
       journey: "Journey",
       currentUri: "some/uri",
@@ -1255,20 +1256,14 @@ describe('catchCert - db related', () => {
 
       const expected = {
         departurePlace: 'here',
-        exportedFrom: 'somewhere',
-        exportedTo: {
-          officialCountryName: "SPAIN",
-          isoCodeAlpha2: "A1",
-          isoCodeAlpha3: "A3",
-          isoNumericCode: "SP"
-        },
+        freightBillNumber: 'AA1234567',
         nationalityOfVehicle: 'UK',
         cmr: false,
         registrationNumber: 'REG Number',
         vehicle: 'truck'
       };
 
-      expect(result.exportData.transportation).toStrictEqual(expected);
+      expect(result?.exportData.transportation).toStrictEqual(expected);
     });
   });
 
@@ -1303,7 +1298,7 @@ describe('catchCert - db related', () => {
         documentNumber: documentNumber
       }, ['exportData.transportation'], { lean: true });
 
-      expect(result.exportData.transportation).toBeUndefined()
+      expect(result?.exportData.transportation).toBeUndefined()
     });
   });
 
@@ -1331,6 +1326,7 @@ describe('catchCert - db related', () => {
       const draft = createDraft({
         products: null,
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       });
@@ -1347,6 +1343,7 @@ describe('catchCert - db related', () => {
           { speciesId: '2' }
         ],
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       });
@@ -1356,7 +1353,7 @@ describe('catchCert - db related', () => {
 
       const res = await CatchCertService.getExportPayload('Bob', undefined, contactId);
 
-      expect(mockMap).toHaveBeenCalledWith(draft.exportData.products);
+      expect(mockMap).toHaveBeenCalledWith(draft?.exportData.products);
       expect(res).toEqual('mapped');
     });
 
@@ -1367,6 +1364,7 @@ describe('catchCert - db related', () => {
           { speciesId: '2' }
         ],
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       }, 'GBR-3444-42356-64834');
@@ -1404,6 +1402,7 @@ describe('catchCert - db related', () => {
       const draft = createDraft({
         products: null,
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       });
@@ -1420,6 +1419,7 @@ describe('catchCert - db related', () => {
           { speciesId: '2' }
         ],
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       });
@@ -1429,7 +1429,7 @@ describe('catchCert - db related', () => {
 
       const res = await CatchCertService.getDirectExportPayload('Bob', undefined, contactId);
 
-      expect(mockMap).toHaveBeenCalledWith(draft.exportData.products);
+      expect(mockMap).toHaveBeenCalledWith(draft?.exportData.products);
       expect(res).toEqual('mapped');
     });
 
@@ -1440,6 +1440,7 @@ describe('catchCert - db related', () => {
           { speciesId: '2' }
         ],
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       }, 'GBR-3444-42356-64834');
@@ -1459,7 +1460,7 @@ describe('catchCert - db related', () => {
 
     beforeAll(() => {
       mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
-      mockMap = jest.spyOn(CommonSchema, 'toFrontEndExportLocation');
+      mockMap = jest.spyOn(FrontEndCatchCertificateSchema, 'toFrontEndExportLocation');
     });
 
     afterAll(() => {
@@ -1474,12 +1475,7 @@ describe('catchCert - db related', () => {
     });
 
     it('should return null if the draft has no transportation', async () => {
-      const draft = createDraft({
-        products: null,
-        transportation: null,
-        conservation: null,
-        exporterDetails: null
-      });
+      const draft = createDraft(undefined);
 
       mockGetDraft.mockResolvedValue(draft);
 
@@ -1492,6 +1488,10 @@ describe('catchCert - db related', () => {
         transportation: {
           vehicle: 'spaceship',
         },
+        transportations: [{
+          id: 0,
+          vehicle: 'spaceship',
+        }],
         conservation: null,
         exporterDetails: null
       });
@@ -1503,7 +1503,7 @@ describe('catchCert - db related', () => {
 
       expect(res).toEqual('mapped');
       expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-3442-2344-23444', contactId);
-      expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
+      expect(mockMap).toHaveBeenCalledWith(draft?.exportData);
     });
 
     it('should map and return export location when provived with a document number', async () => {
@@ -1522,6 +1522,17 @@ describe('catchCert - db related', () => {
             isoCodeAlpha3: "A3",
             isoNumericCode: "SP"
           }
+        },
+        transportations: [{
+          id: 0,
+          vehicle: 'Truck'
+        }],
+        exportedFrom: 'Jersey',
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
         }
       });
 
@@ -1531,7 +1542,7 @@ describe('catchCert - db related', () => {
       const res = await CatchCertService.getExportLocation(defaultUser, 'GBR-3444-42356-64834', contactId);
       expect(res).toStrictEqual('mapped');
       expect(mockGetDraft).toHaveBeenCalledWith(defaultUser, 'GBR-3444-42356-64834', contactId);
-      expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
+      expect(mockMap).toHaveBeenCalledWith(draft?.exportData);
     });
   });
 
@@ -1559,6 +1570,7 @@ describe('catchCert - db related', () => {
       const draft = createDraft({
         products: null,
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       });
@@ -1574,6 +1586,10 @@ describe('catchCert - db related', () => {
         transportation: {
           vehicle: 'spaceship',
         },
+        transportations: [{
+          id: 0,
+          vehicle: 'spaceship',
+        }],
         conservation: null,
         exporterDetails: null
       });
@@ -1584,7 +1600,7 @@ describe('catchCert - db related', () => {
       const res = await CatchCertService.getTransportDetails('Bob', 'GBR-344-23424-23444', contactId);
 
       expect(res).toEqual('mapped');
-      expect(mockMap).toHaveBeenCalledWith(draft.exportData.transportation);
+      expect(mockMap).toHaveBeenCalledWith(draft?.exportData.transportation);
       expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-344-23424-23444', contactId);
     });
   });
@@ -1654,7 +1670,7 @@ describe('catchCert - db related', () => {
         { lean: true }
       );
 
-      expect(cert.exportData.products).toStrictEqual(FrontEndPayloadSchema.toBackEndProductsLanded(payload));
+      expect(cert?.exportData.products).toStrictEqual(FrontEndPayloadSchema.toBackEndProductsLanded(payload));
     });
 
     it('should map and save the data when a document number is provided', async () => {
@@ -1670,7 +1686,7 @@ describe('catchCert - db related', () => {
         { lean: true }
       );
 
-      expect(cert.exportData.products).toStrictEqual(FrontEndPayloadSchema.toBackEndProductsLanded(payload));
+      expect(cert?.exportData.products).toStrictEqual(FrontEndPayloadSchema.toBackEndProductsLanded(payload));
     });
 
   });
@@ -1700,15 +1716,13 @@ describe('catchCert - db related', () => {
         { lean: true }
       );
 
-      expect(cert.exportData).toStrictEqual({
-        transportation: {
-          'exportedFrom': 'Albuquerque',
-          'exportedTo': {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
+      expect(cert?.exportData).toStrictEqual({
+        'exportedFrom': 'Albuquerque',
+        'exportedTo': {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
         }
       });
     });
@@ -1736,15 +1750,13 @@ describe('catchCert - db related', () => {
         ['exportData'],
         { lean: true });
 
-      expect(result.exportData).toStrictEqual({
-        transportation: {
-          'exportedFrom': 'Jersey',
-          'exportedTo': {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
+      expect(result?.exportData).toStrictEqual({
+        'exportedFrom': 'Jersey',
+        'exportedTo': {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
         }
       });
     });
@@ -2059,6 +2071,7 @@ describe('catchCert - db related', () => {
           { speciesId: '2' }
         ],
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       });
@@ -2076,6 +2089,7 @@ describe('catchCert - db related', () => {
           { speciesId: '2' }
         ],
         transportation: null,
+        transportations: null,
         conservation: null,
         exporterDetails: null
       }, 'GBR-34344-43444-234234234');
@@ -2118,7 +2132,7 @@ describe('catchCert - db related', () => {
         caughtBy: [] // mongoose will default an undefined array type to an empty array
       }];
 
-      expect(result.exportData.products).toStrictEqual(expected);
+      expect(result?.exportData.products).toStrictEqual(expected);
     });
 
     it('should be able to take in a document number', async () => {
@@ -2138,7 +2152,7 @@ describe('catchCert - db related', () => {
         caughtBy: [] // mongoose will default an undefined array type to an empty array
       }];
 
-      expect(result.exportData.products).toStrictEqual(expected);
+      expect(result?.exportData.products).toStrictEqual(expected);
     });
 
     describe('getConservation', () => {
@@ -2168,6 +2182,7 @@ describe('catchCert - db related', () => {
           conservation: null,
           products: null,
           transportation: null,
+          transportations: null,
           exporterDetails: null
         });
         mockGet.mockResolvedValue(draft);
@@ -2184,6 +2199,7 @@ describe('catchCert - db related', () => {
           },
           products: null,
           transportation: null,
+          transportations: null,
           exporterDetails: null
         });
         mockGet.mockResolvedValue(draft);
@@ -2192,7 +2208,7 @@ describe('catchCert - db related', () => {
         const res = await CatchCertService.getConservation(defaultUser, undefined, contactId);
 
         expect(res).toStrictEqual('mapped');
-        expect(mockMap).toHaveBeenCalledWith(draft.exportData.conservation);
+        expect(mockMap).toHaveBeenCalledWith(draft?.exportData.conservation);
       });
 
       it('should map and return a conservation when given a document number', async () => {
@@ -2202,6 +2218,7 @@ describe('catchCert - db related', () => {
           },
           products: null,
           transportation: null,
+          transportations: null,
           exporterDetails: null
         },
           'GBR-3444-42356-64834');
@@ -2212,7 +2229,7 @@ describe('catchCert - db related', () => {
 
         expect(res).toStrictEqual('mapped');
         expect(mockGet).toHaveBeenCalledWith(defaultUser, 'GBR-3444-42356-64834', contactId);
-        expect(mockMap).toHaveBeenCalledWith(draft.exportData.conservation);
+        expect(mockMap).toHaveBeenCalledWith(draft?.exportData.conservation);
       });
     });
 
@@ -2255,7 +2272,7 @@ describe('catchCert - db related', () => {
           documentNumber: 'GBR-2020-CC-0E42C2DA5',
           status: 'DRAFT'
         }, ['exportData'], { lean: true });
-        expect(result.exportData.exporterDetails).toStrictEqual(FrontEndExporterSchema.toBackEndCcExporterDetails(payload));
+        expect(result?.exportData.exporterDetails).toStrictEqual(FrontEndExporterSchema.toBackEndCcExporterDetails(payload));
       });
 
       it("will work with a document number", async () => {
@@ -2269,7 +2286,7 @@ describe('catchCert - db related', () => {
           documentNumber: 'GBR-2020-CC-0E42C2DA5'
         }, ['exportData'], { lean: true });
 
-        expect(result.exportData.exporterDetails).toStrictEqual(FrontEndExporterSchema.toBackEndCcExporterDetails(payload));
+        expect(result?.exportData.exporterDetails).toStrictEqual(FrontEndExporterSchema.toBackEndCcExporterDetails(payload));
       });
     });
 
@@ -2297,6 +2314,7 @@ describe('catchCert - db related', () => {
         const draft = createDraft({
           products: null,
           transportation: null,
+          transportations: null,
           conservation: null,
           exporterDetails: null
         });
@@ -2310,6 +2328,7 @@ describe('catchCert - db related', () => {
         const draft = createDraft({
           products: null,
           transportation: null,
+          transportations: null,
           conservation: null,
           exporterDetails: {
             contactId: 'a contact Id',
@@ -2338,7 +2357,7 @@ describe('catchCert - db related', () => {
 
         const res = await CatchCertService.getExporterDetails(defaultUser, undefined, contactId);
 
-        expect(mockMap).toHaveBeenCalledWith(draft.exportData.exporterDetails);
+        expect(mockMap).toHaveBeenCalledWith(draft?.exportData.exporterDetails);
         expect(res).toStrictEqual({ mapped: true });
       });
 
@@ -2346,6 +2365,7 @@ describe('catchCert - db related', () => {
         const draft = createDraft({
           products: null,
           transportation: null,
+          transportations: null,
           conservation: null,
           exporterDetails: {
             contactId: 'a contact Id',
@@ -2456,6 +2476,10 @@ describe('catchCert - db related', () => {
         transportation: {
           vehicle: 'Truck'
         },
+        transportations: [{
+          id: 0,
+          vehicle: 'Truck'
+        }],
         conservation: {
           conservationReference: 'conservationReference'
         },
@@ -2712,7 +2736,7 @@ describe('catchCert - db related', () => {
     });
   });
 
-  const createDraft = (exportData: ExportData, documentNumber: string = 'X'): CatchCertificate => {
+  const createDraft = (exportData: ExportData | undefined, documentNumber: string = 'X'): CatchCertificate => {
     return {
       documentNumber: documentNumber,
       status: 'DRAFT',

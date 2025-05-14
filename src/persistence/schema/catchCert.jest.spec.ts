@@ -52,6 +52,18 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
           departurePlace: "Aylesbury",
           exportedFrom: "United Kingdom"
         },
+        transportations: [{
+          id: 0,
+          vehicle: "truck",
+          nationalityOfVehicle: "adsf",
+          registrationNumber: "asdsfsd",
+          departurePlace: "Aylesbury",
+          freightBillNumber: 'AA1234567'
+        }, {
+          id: 1,
+          vehicle: 'Train',
+        }],
+        exportedFrom: "United Kingdom",
         conservation: {
           conservationReference: "UK Fisheries Policy, Common Fisheries Policy, dsf"
         },
@@ -122,10 +134,22 @@ describe('cloneCatchCertificate', () => {
         vehicle: 'Truck',
 
       },
+      transportations: [{
+        id: 0,
+        vehicle: "truck",
+        nationalityOfVehicle: "adsf",
+        registrationNumber: "asdsfsd",
+        departurePlace: "Aylesbury",
+        freightBillNumber: 'AA1234567'
+      }, {
+        id: 1,
+        vehicle: 'Truck',
+      }],
       conservation: {
         conservationReference: 'conservationReference'
       },
-      landingsEntryOption: LandingsEntryOptions.ManualEntry
+      landingsEntryOption: LandingsEntryOptions.ManualEntry,
+      exportedFrom: "United Kingdom"
     },
     userReference: 'userReference',
     requestByAdmin: false
@@ -212,6 +236,16 @@ describe('cloneExportData - with an old exportedTo', () => {
       vehicle: 'Truck',
       exportedTo: 'Nigeria'
     },
+    transportations: [{
+      vehicle: "truck",
+      nationalityOfVehicle: "adsf",
+      registrationNumber: "asdsfsd",
+      departurePlace: "Aylesbury",
+      freightBillNumber: 'AA1234567',
+      exportedFrom: "United Kingdom"
+    }, {
+      vehicle: 'Truck',
+    }],
     conservation: {
       conservationReference: 'conservationReference'
     },
@@ -271,10 +305,22 @@ describe('cloneExportData', () => {
     transportation: {
       vehicle: 'Truck'
     },
+    transportations: [{
+      id: 0,
+      vehicle: "truck",
+      nationalityOfVehicle: "adsf",
+      registrationNumber: "asdsfsd",
+      departurePlace: "Aylesbury",
+      freightBillNumber: 'AA1234567'
+    }, {
+      id: 1,
+      vehicle: 'Truck',
+    }],
     conservation: {
       conservationReference: 'conservationReference'
     },
-    landingsEntryOption: LandingsEntryOptions.ManualEntry
+    landingsEntryOption: LandingsEntryOptions.ManualEntry,
+    exportedFrom: "United Kingdom"
   };
 
   const clone = cloneExportData(original, 'DOC2', defaultExcludeLandings);
@@ -317,10 +363,22 @@ describe('cloneExportData', () => {
       transportation: {
         vehicle: 'Truck'
       },
+      transportations: [{
+        id: 0,
+        vehicle: "truck",
+        nationalityOfVehicle: "adsf",
+        registrationNumber: "asdsfsd",
+        departurePlace: "Aylesbury",
+        freightBillNumber: 'AA1234567'
+      }, {
+        id: 1,
+        vehicle: 'Truck',
+      }],
       conservation: {
         conservationReference: 'conservationReference'
       },
-      landingsEntryOption: LandingsEntryOptions.ManualEntry
+      landingsEntryOption: LandingsEntryOptions.ManualEntry,
+      exportedFrom: "United Kingdom"
     };
 
     const clone = cloneExportData(original, 'cc2', defaultExcludeLandings);
@@ -374,10 +432,22 @@ describe('cloneExportData', () => {
       transportation: {
         vehicle: 'Truck'
       },
+      transportations: [{
+        id: 0,
+        vehicle: "truck",
+        nationalityOfVehicle: "adsf",
+        registrationNumber: "asdsfsd",
+        departurePlace: "Aylesbury",
+        freightBillNumber: 'AA1234567'
+      }, {
+        id: 1,
+        vehicle: 'Truck',
+      }],
       conservation: {
         conservationReference: 'conservationReference'
       },
-      landingsEntryOption: LandingsEntryOptions.ManualEntry
+      landingsEntryOption: LandingsEntryOptions.ManualEntry,
+      exportedFrom: "United Kingdom"
     };
 
     const expected: Catch[] = [
@@ -440,10 +510,22 @@ describe('cloneExportData', () => {
       transportation: {
         vehicle: 'Truck'
       },
+      transportations: [{
+        id: 0,
+        vehicle: "truck",
+        nationalityOfVehicle: "adsf",
+        registrationNumber: "asdsfsd",
+        departurePlace: "Aylesbury",
+        freightBillNumber: 'AA1234567'
+      }, {
+        id: 1,
+        vehicle: 'Truck',
+      }],
       conservation: {
         conservationReference: 'conservationReference'
       },
-      landingsEntryOption: LandingsEntryOptions.ManualEntry
+      landingsEntryOption: LandingsEntryOptions.ManualEntry,
+      exportedFrom: "United Kingdom"
     };
 
     const clone = cloneExportData(original, 'cc2', true);

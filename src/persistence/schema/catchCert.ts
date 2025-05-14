@@ -5,9 +5,11 @@ import {
   AuditSchema,
   Transport,
   TransportSchema,
+  Country,
   ExporterDetailsSchema,
   toFrontEndDocumentNumber,
-  ExporterDetails
+  ExporterDetails,
+  ICountry
 } from './common';
 import * as FrontEndModel from "../schema/frontEndModels/conservation";
 import * as SpeciesModelFE from "../schema/frontEndModels/species";
@@ -251,12 +253,51 @@ export interface CcExporterDetails extends ExporterDetails {
   exporterFullName: string;
 }
 
+export interface CatchCertificateTransportDocument {
+  name: string,
+  reference: string
+}
+
+export interface CatchCertificateBasicTransportDetails {
+  id: number,
+  vehicle: string,
+  departurePlace?: string,
+  freightBillNumber?: string,
+  transportDocuments?: CatchCertificateTransportDocument[]
+}
+export interface CatchCertificateTrain extends CatchCertificateBasicTransportDetails {
+  railwayBillNumber: string,
+}
+
+export interface CatchCertificatePlane extends CatchCertificateBasicTransportDetails {
+  flightNumber: string,
+  containerNumber: string
+}
+
+export interface CatchCertificateContainerVessel extends CatchCertificateBasicTransportDetails {
+  vesselName: string,
+  flagState: string,
+  containerNumber: string
+}
+
+export interface CatchCertificateTruck extends CatchCertificateBasicTransportDetails {
+  nationalityOfVehicle?: string,
+  registrationNumber?: string
+}
+
+type CatchCertificateFishingVessel = CatchCertificateBasicTransportDetails;
+
+export type CatchCertificateTransport = CatchCertificateTrain | CatchCertificatePlane | CatchCertificateContainerVessel | CatchCertificateTruck | CatchCertificateFishingVessel;
+
 export interface ExportData {
   products: Product[];
-  transportation: Transport;
+  transportation?: Transport;
+  transportations?: CatchCertificateTransport[];
   conservation: Conservation;
   exporterDetails: CcExporterDetails;
   landingsEntryOption?: LandingsEntryOptions;
+  exportedTo?: ICountry;
+  exportedFrom?: string;
 }
 
 export interface CatchCertificate {
@@ -341,12 +382,35 @@ const ConservationSchema = new Schema({
   conservationReference: { type: String, required: true }
 }, { _id : false } );
 
+const CatchCertificateTransportDocumentSchema = new Schema({
+  name:       { type: String, required: true },
+  reference:  { type: String, required: true }
+}, { _id: false });
+
+export const CatchCertificateTransportSchema = new Schema({
+  id:                   { type: Number,  required: true  },
+  vehicle:              { type: String,  required: true  },
+  departurePlace:       { type: String,  required: false },
+  nationalityOfVehicle: { type: String,  required: false },
+  registrationNumber:   { type: String,  required: false },
+  railwayBillNumber:    { type: String,  required: false },
+  flightNumber:         { type: String,  required: false },
+  vesselName:           { type: String,  required: false },
+  flagState:            { type: String,  required: false },
+  containerNumber:      { type: String,  required: false },
+  freightBillNumber:    { type: String,  required: false },
+  transportDocuments:   { type: [CatchCertificateTransportDocumentSchema], required: false }
+}, { _id : false });
+
 const ExportDataSchema = new Schema({
-  products:         { type: [ProductSchema], required: true },
-  transportation:   { type: TransportSchema, required: true },
-  conservation:     { type: ConservationSchema, required: true },
-  exporterDetails:  { type: ExporterDetailsSchema, require: true },
-  landingsEntryOption: { type: String, required: false, enum: Object.values(LandingsEntryOptions) }
+  products:             { type: [ProductSchema], required: true },
+  transportation:       { type: TransportSchema, required: false },
+  transportations:      { type: [CatchCertificateTransportSchema], required: false },
+  conservation:         { type: ConservationSchema, required: true },
+  exporterDetails:      { type: ExporterDetailsSchema, require: true },
+  landingsEntryOption:  { type: String,  required: false, enum: Object.values(LandingsEntryOptions) },
+  exportedFrom:         { type: String,  required: false },
+  exportedTo:           { type: Country, required: false },
 }, { _id : false } );
 
 const CatchCertSchema = new Schema({

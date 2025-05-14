@@ -4,6 +4,7 @@ import * as StorageDocumentService from "../persistence/services/storageDoc";
 import DocumentNumberService from "./documentNumber.service";
 import ServiceNames from "../validators/interfaces/service.name.enum";
 import * as ProcessingStatementService from "../persistence/services/processingStatement";
+import { ExportLocation } from "../persistence/schema/frontEndModels/export-location";
 
 describe("Export location service", () => {
 
@@ -63,7 +64,7 @@ describe("Export location service", () => {
       mockGetExportLocationDataCC.mockResolvedValue({});
       mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
 
-      await ExportLocationService.get("User 1", "test", undefined, contactId);
+      await ExportLocationService.get("User 1", undefined, contactId);
 
       expect(mockGetExportLocationDataCC).toHaveBeenCalledWith('User 1', undefined, contactId);
   });
@@ -72,7 +73,7 @@ describe("Export location service", () => {
     mockGetExportLocationDataCC.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
 
-    await ExportLocationService.get("User 1","test","GBR-3444-3453-3543", contactId);
+    await ExportLocationService.get("User 1", "GBR-3444-3453-3543", contactId);
 
     expect(mockGetExportLocationDataCC).toHaveBeenCalledWith('User 1', "GBR-3444-3453-3543", contactId);
   });
@@ -101,7 +102,7 @@ describe("Export location service", () => {
     mockGetExportLocationDataSD.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
 
-    await ExportLocationService.get("User 1", "test", undefined, contactId);
+    await ExportLocationService.get("User 1", undefined, contactId);
 
     expect(mockGetExportLocationDataSD).toHaveBeenCalledWith('User 1', undefined, 'contactBob');
   });
@@ -110,7 +111,7 @@ describe("Export location service", () => {
     mockGetExportLocationDataSD.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
 
-    await ExportLocationService.get("User 1","test","GBR-3444-3453-3543", contactId);
+    await ExportLocationService.get("User 1","GBR-3444-3453-3543", contactId);
 
     expect(mockGetExportLocationDataSD).toHaveBeenCalledWith('User 1', "GBR-3444-3453-3543", 'contactBob');
   });
@@ -119,7 +120,7 @@ describe("Export location service", () => {
     mockGetExportLocationDataPS.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
 
-    await ExportLocationService.get("User 1", "test", undefined, contactId);
+    await ExportLocationService.get("User 1", undefined, contactId);
 
     expect(mockGetExportLocationDataPS).toHaveBeenCalledWith('User 1', undefined, contactId);
   });
@@ -128,7 +129,7 @@ describe("Export location service", () => {
     mockGetExportLocationDataPS.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
 
-    await ExportLocationService.get("User 1","test","GBR-3444-3453-3543", contactId);
+    await ExportLocationService.get("User 1", "GBR-3444-3453-3543", contactId);
 
     expect(mockGetExportLocationDataPS).toHaveBeenCalledWith('User 1', "GBR-3444-3453-3543", contactId);
   });
@@ -136,35 +137,59 @@ describe("Export location service", () => {
   it("will save the  CC export location in mongo", async () => {
       mockSaveExportLocationDataCC.mockResolvedValue({});
 
-      await ExportLocationService.save("User 1","hi", {test: "test"}, undefined, contactId);
+      const exportLocation: ExportLocation = {
+        exportedTo: {
+          officialCountryName: 'France'
+        }
+      }
 
-      expect(mockSaveExportLocationDataCC).toHaveBeenCalledWith("User 1", {"test": "test"}, undefined, contactId);
+      await ExportLocationService.save("User 1", exportLocation, undefined, contactId);
+
+      expect(mockSaveExportLocationDataCC).toHaveBeenCalledWith("User 1", exportLocation, undefined, contactId);
   });
 
   it("will save the  SD export location in mongo", async () => {
     mockSaveExportLocationDataSD.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
 
-    await ExportLocationService.save("User 1","hi", {test: "test"}, undefined, contactId);
+    const exportLocation: ExportLocation = {
+      exportedTo: {
+        officialCountryName: 'France'
+      }
+    }
 
-    expect(mockSaveExportLocationDataSD).toHaveBeenCalledWith("User 1", {"test": "test"}, undefined, 'contactBob');
+    await ExportLocationService.save("User 1", exportLocation, undefined, contactId);
+
+    expect(mockSaveExportLocationDataSD).toHaveBeenCalledWith("User 1", exportLocation, undefined, 'contactBob');
   });
 
   it("will save the  PS export location in mongo", async () => {
     mockSaveExportLocationDataPS.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
 
-    await ExportLocationService.save("User 1","hi", {test: "test"}, undefined, contactId);
+    const exportLocation: ExportLocation = {
+      exportedTo: {
+        officialCountryName: 'France'
+      }
+    }
 
-    expect(mockSaveExportLocationDataPS).toHaveBeenCalledWith("User 1", {"test": "test"}, undefined, contactId);
+    await ExportLocationService.save("User 1", exportLocation, undefined, contactId);
+
+    expect(mockSaveExportLocationDataPS).toHaveBeenCalledWith("User 1", exportLocation, undefined, contactId);
   });
 
   it("will save the CC export location in mongo with document number", async () => {
     mockSaveExportLocationDataCC.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
 
-    await ExportLocationService.save("User 1","hi", {test: "test"}, "GBR-3444-CC-3444-3533", contactId);
+    const exportLocation: ExportLocation = {
+      exportedTo: {
+        officialCountryName: 'France'
+      }
+    }
 
-    expect(mockSaveExportLocationDataCC).toHaveBeenCalledWith("User 1", {"test": "test"}, "GBR-3444-CC-3444-3533", contactId);
+    await ExportLocationService.save("User 1", exportLocation, "GBR-3444-CC-3444-3533", contactId);
+
+    expect(mockSaveExportLocationDataCC).toHaveBeenCalledWith("User 1", exportLocation, "GBR-3444-CC-3444-3533", contactId);
   });
 });

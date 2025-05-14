@@ -1,17 +1,39 @@
+import * as CatchCertificateBackEndModels from "./catchCert";
 import * as BackEndModels from "./common"
+import * as CatchCertificateFrontEndModels from "./frontEndModels/catchCertificate";
 import * as FrontEndModels from "./frontEndModels/export-location"
 
 describe("When mapping basic transport details to a front end model", () => {
     it("will map the export location", async() => {
         const basicTransport : BackEndModels.BasicTransportDetails = {
-            vehicle : "Truck",
-            exportedFrom: "Isle Of Man",
-            exportedTo: {
-              officialCountryName: "SPAIN",
-              isoCodeAlpha2: "A1",
-              isoCodeAlpha3: "A3",
-              isoNumericCode: "SP"
+          vehicle : "Truck",
+          exportedFrom: "Isle Of Man",
+          exportedTo: {
+            officialCountryName: "SPAIN",
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP"
+          }
+        }
+
+        const exportData: CatchCertificateBackEndModels.ExportData = {
+          conservation: {
+            conservationReference: '',
+          },
+          exporterDetails: {
+            _dynamicsAddress: '',
+            _dynamicsUser: '',
+            addressOne: '',
+            exporterCompanyName: '',
+            exporterFullName: '',
+            postcode: ''
+          },
+          products: [
+            {
+              speciesId: ''
             }
+          ],
+          transportation: basicTransport,
         }
 
         const expectedResult : FrontEndModels.ExportLocation = {
@@ -24,7 +46,7 @@ describe("When mapping basic transport details to a front end model", () => {
             }
         }
 
-        const result = BackEndModels.toFrontEndExportLocation(basicTransport);
+        const result = CatchCertificateFrontEndModels.toFrontEndExportLocation(exportData);
 
         expect(result).toStrictEqual(expectedResult);
     });
@@ -35,8 +57,68 @@ describe("When mapping basic transport details to a front end model", () => {
           exportedTo: undefined
         }
 
-        const result = BackEndModels.toFrontEndExportLocation(undefined);
+        const result = CatchCertificateFrontEndModels.toFrontEndExportLocation(undefined);
 
         expect(result).toStrictEqual(expectedResult);
     });
+
+    it("will map the export location from exportData", async() => {
+      const basicTransport : BackEndModels.BasicTransportDetails = {
+        vehicle : "Truck",
+        exportedFrom: "Isle Of Man",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
+      }
+
+      const catchCertificateTransport: CatchCertificateBackEndModels.CatchCertificateBasicTransportDetails = {
+        id: 0,
+        vehicle: 'truck'
+      }
+
+      const exportData: CatchCertificateBackEndModels.ExportData = {
+        conservation: {
+          conservationReference: '',
+        },
+        exporterDetails: {
+          _dynamicsAddress: '',
+          _dynamicsUser: '',
+          addressOne: '',
+          exporterCompanyName: '',
+          exporterFullName: '',
+          postcode: ''
+        },
+        products: [
+          {
+            speciesId: ''
+          }
+        ],
+        transportation: basicTransport,
+        transportations: [catchCertificateTransport],
+        exportedFrom: 'England',
+        exportedTo: {
+          officialCountryName: "NIGERIA",
+          isoCodeAlpha2: "N1",
+          isoCodeAlpha3: "N3",
+          isoNumericCode: "NG"
+        }
+      }
+
+      const expectedResult : FrontEndModels.ExportLocation = {
+          exportedFrom : "England",
+          exportedTo : {
+            officialCountryName: "NIGERIA",
+            isoCodeAlpha2: "N1",
+            isoCodeAlpha3: "N3",
+            isoNumericCode: "NG"
+          }
+      }
+
+      const result = CatchCertificateFrontEndModels.toFrontEndExportLocation(exportData);
+
+      expect(result).toStrictEqual(expectedResult);
+  });
 });

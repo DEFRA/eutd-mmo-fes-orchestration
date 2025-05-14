@@ -310,6 +310,17 @@ describe('document validator', () => {
             isoNumericCode: "020"
           },
           cmr: true
+        },
+        transportations: [{
+          id: 0,
+          vehicle: "truck"
+        }],
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "Andorra",
+          isoCodeAlpha2: "AD",
+          isoCodeAlpha3: "AND",
+          isoNumericCode: "020"
         }
       };
 
@@ -483,6 +494,17 @@ describe('document validator', () => {
             isoNumericCode: "020"
           },
           cmr: true
+        },
+        transportations: [{
+          id: 0,
+          vehicle: "truck"
+        }],
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "Andorra",
+          isoCodeAlpha2: "AD",
+          isoCodeAlpha3: "AND",
+          isoNumericCode: "020"
         }
       };
 
@@ -638,6 +660,17 @@ describe('document validator', () => {
             isoNumericCode: "020"
           },
           cmr: true
+        },
+        transportations: [{
+          id: 0,
+          vehicle: "truck"
+        }],
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "Andorra",
+          isoCodeAlpha2: "AD",
+          isoCodeAlpha3: "AND",
+          isoNumericCode: "020"
         }
       };
 

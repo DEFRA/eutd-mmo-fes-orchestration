@@ -4,6 +4,7 @@ import GeneralRoutes from "./routes/general";
 import FishRoutes from "./routes/fish";
 import CommodityRoutes from "./routes/commodity";
 import PresentationStateRoutes from "./routes/presentationState";
+import CatchCertificateTransportRoutes from "./routes/catch-certificate-transport";
 import TransportRoutes from "./routes/transport";
 import ExportPayloadRoutes from "./routes/export-payload";
 import ExportPayloadNonjsRoutes from "./routes/export-payload-nonjs";
@@ -37,6 +38,7 @@ export default class Router {
       new UploadsRoutes(),
       new CommodityRoutes(),
       new PresentationStateRoutes(),
+      new CatchCertificateTransportRoutes(),
       new TransportRoutes(),
       new ExportPayloadRoutes(),
       new ExportPayloadNonjsRoutes(),
