@@ -1209,7 +1209,7 @@ describe("UploadsController", () => {
               commodity_code: 'some-commidity-code',
               commodity_code_description: 'some-commmodity-description',
             },
-            startDate: '10/10/2020',
+            startDate: '09/10/2020',
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
             vessel: vessel,
@@ -1281,7 +1281,7 @@ describe("UploadsController", () => {
                 vesselLength: 10,
                 vesselName: 'some-vessel-name'
               },
-              startDate: '2020-10-10',
+              startDate: '2020-10-09',
               dateLanded: '2020-10-10',
               exportWeight: 10,
               faoArea: 'FAO18'

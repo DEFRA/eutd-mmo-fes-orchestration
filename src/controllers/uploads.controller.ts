@@ -159,7 +159,7 @@ export default class UploadsController {
         model: {
           id: `${documentNumber}-${getRandomNumber()}`,
           vessel: validLanding.vessel,
-          startDate: validLanding.startDate ? moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD') : undefined,
+          startDate: validLanding.startDate ? moment(validLanding.startDate, 'DD/MM/YYYY').format('YYYY-MM-DD') : undefined,
           dateLanded: moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           exportWeight: validLanding.exportWeight,
           faoArea: validLanding.faoArea
