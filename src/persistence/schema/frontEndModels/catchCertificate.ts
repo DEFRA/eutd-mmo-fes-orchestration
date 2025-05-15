@@ -3,6 +3,7 @@ import * as CatchCertificateTransport from "./catchCertificateTransport";
 import { Conservation } from "./conservation";
 import { ExportLocation } from "./export-location";
 import { ProductsLanded, toFrontEndProductsLanded, BaseProgress } from "./payload";
+import { toFrontEndTransport, Transport } from "./transport";
 import { CcExporter, toFrontEndCcExporterDetails } from "./exporterDetails";
 import { ProgressStatus } from "../common";
 import { toFrontEndConservation, LandingsEntryOptions } from "../catchCert";
@@ -19,7 +20,8 @@ export interface CatchCertificate {
   exporter: CcExporter,
   exportPayload: ProductsLanded,
   conservation: Conservation,
-  transportations: CatchCertificateTransport.CatchCertificateTransport[],
+  transport?: Transport,
+  transportations?: CatchCertificateTransport.CatchCertificateTransport[],
   exportLocation: ExportLocation,
   landingsEntryOption: LandingsEntryOptions
 }
@@ -51,7 +53,8 @@ export const toFrontEndCatchCert = (
           certificate.exportData
         ),
         landingsEntryOption: certificate.exportData.landingsEntryOption,
-        transportations: certificate.exportData.transportations.map((t: BackEndCertificate.CatchCertificateTransport) => CatchCertificateTransport.toFrontEndTransport(t))
+        transport: toFrontEndTransport(certificate.exportData.transportation),
+        transportations: Array.isArray(certificate.exportData.transportations) ? certificate.exportData.transportations.map((t: BackEndCertificate.CatchCertificateTransport) => CatchCertificateTransport.toFrontEndTransport(t)) : []
       }
     : null;
 

@@ -11,7 +11,7 @@ const documentNumber = 'GBR-X-CC-1';
 const contactId = 'contactBob';
 
 const req: any = {
-  app: { claims: { sub: 'Bob', contactId }},
+  app: { claims: { sub: 'Bob', contactId } },
   headers: {},
   params: {
     journey: 'catchCertificate'
@@ -27,7 +27,7 @@ const h = {
 
     return { code: code }
   },
-  redirect: () => {}
+  redirect: () => { }
 } as unknown as Hapi.ResponseToolkit<Hapi.ReqRefDefaults>;
 
 const backEndCc: BackEnd.CatchCertificate = {
@@ -41,61 +41,61 @@ const backEndCc: BackEnd.CatchCertificate = {
   userReference: "",
   exportData: {
     exporterDetails: {
-          exporterFullName: "Joe Blogg",
-          exporterCompanyName: "Company name",
-          addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
-          buildingNumber: '123',
-          subBuildingName: 'Unit 1',
-          buildingName: 'CJC Fish Ltd',
-          streetName: '17  Old Edinburgh Road',
-          county: 'West Midlands',
-          country: 'England',
-          townCity: "Aberdeen",
-          postcode: "AB1 2XX",
-          _dynamicsAddress: '',
-          _dynamicsUser: '',
-          accountId: ''
+      exporterFullName: "Joe Blogg",
+      exporterCompanyName: "Company name",
+      addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
+      buildingNumber: '123',
+      subBuildingName: 'Unit 1',
+      buildingName: 'CJC Fish Ltd',
+      streetName: '17  Old Edinburgh Road',
+      county: 'West Midlands',
+      country: 'England',
+      townCity: "Aberdeen",
+      postcode: "AB1 2XX",
+      _dynamicsAddress: '',
+      _dynamicsUser: '',
+      accountId: ''
     },
     products: [{
-          species: "Atlantic cod (COD)",
-          speciesId: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
-          speciesCode: "COD",
-          commodityCode: "03024310",
-          state: {
-              code: "FRE",
-              name: "Fresh"
-          },
-          presentation: {
-              code: "WHL",
-              name: "Whole"
-          },
-          caughtBy: [{
-              numberOfSubmissions: 0,
-              vessel: "AGAN BORLOWEN",
-              pln: "SS229",
-              homePort: "NEWLYN",
-              flag: "GBR",
-              imoNumber: null,
-              licenceNumber: "25072",
-              licenceValidTo: "2382-12-31T00:00:00",
-              id: "GBR-X-CC-1-1610013801",
-              date: "2021-01-07",
-              faoArea: "FAO27",
-              weight: 12
-          }]
+      species: "Atlantic cod (COD)",
+      speciesId: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
+      speciesCode: "COD",
+      commodityCode: "03024310",
+      state: {
+        code: "FRE",
+        name: "Fresh"
+      },
+      presentation: {
+        code: "WHL",
+        name: "Whole"
+      },
+      caughtBy: [{
+        numberOfSubmissions: 0,
+        vessel: "AGAN BORLOWEN",
+        pln: "SS229",
+        homePort: "NEWLYN",
+        flag: "GBR",
+        imoNumber: null,
+        licenceNumber: "25072",
+        licenceValidTo: "2382-12-31T00:00:00",
+        id: "GBR-X-CC-1-1610013801",
+        date: "2021-01-07",
+        faoArea: "FAO27",
+        weight: 12
+      }]
     }],
     conservation: {
-          conservationReference: "UK Fisheries Policy"
+      conservationReference: "UK Fisheries Policy"
     },
     transportation: {
-          vehicle: "directLanding",
-          exportedFrom: "United Kingdom",
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
+      vehicle: "directLanding",
+      exportedFrom: "United Kingdom",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     },
     transportations: [{
       id: 0,
@@ -125,66 +125,66 @@ const backEndCcAdmin: BackEnd.CatchCertificate = {
   userReference: "",
   exportData: {
     exporterDetails: {
-          exporterFullName: "Joe Blogg",
-          exporterCompanyName: "Company name",
-          addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
-          buildingNumber: '123',
-          subBuildingName: 'Unit 1',
-          buildingName: 'CJC Fish Ltd',
-          streetName: '17  Old Edinburgh Road',
-          county: 'West Midlands',
-          country: 'England',
-          townCity: "Aberdeen",
-          postcode: "AB1 2XX",
-          _dynamicsAddress: '',
-          _dynamicsUser: '',
-          accountId: ''
+      exporterFullName: "Joe Blogg",
+      exporterCompanyName: "Company name",
+      addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
+      buildingNumber: '123',
+      subBuildingName: 'Unit 1',
+      buildingName: 'CJC Fish Ltd',
+      streetName: '17  Old Edinburgh Road',
+      county: 'West Midlands',
+      country: 'England',
+      townCity: "Aberdeen",
+      postcode: "AB1 2XX",
+      _dynamicsAddress: '',
+      _dynamicsUser: '',
+      accountId: ''
     },
     products: [{
-          species: "Atlantic cod (COD)",
-          speciesAdmin: "ADMIN SPECIES",
-          speciesId: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
-          speciesCode: "COD",
-          commodityCode: "03024310",
-          commodityCodeAdmin: "ADMIN COMMODITY CODE",
-          commodityCodeDescription: "some description",
-          state: {
-              code: "FRE",
-              name: "Fresh",
-              admin: "ADMIN"
-          },
-          presentation: {
-              code: "WHL",
-              name: "Whole",
-              admin: "ADMIN"
-          },
-          caughtBy: [{
-              numberOfSubmissions: 0,
-              vessel: "AGAN BORLOWEN",
-              pln: "SS229",
-              homePort: "NEWLYN",
-              flag: "GBR",
-              imoNumber: null,
-              licenceNumber: "25072",
-              licenceValidTo: "2382-12-31T00:00:00",
-              id: "GBR-X-CC-1-1610013801",
-              date: "2021-01-07",
-              faoArea: "FAO27",
-              weight: 12
-          }]
+      species: "Atlantic cod (COD)",
+      speciesAdmin: "ADMIN SPECIES",
+      speciesId: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
+      speciesCode: "COD",
+      commodityCode: "03024310",
+      commodityCodeAdmin: "ADMIN COMMODITY CODE",
+      commodityCodeDescription: "some description",
+      state: {
+        code: "FRE",
+        name: "Fresh",
+        admin: "ADMIN"
+      },
+      presentation: {
+        code: "WHL",
+        name: "Whole",
+        admin: "ADMIN"
+      },
+      caughtBy: [{
+        numberOfSubmissions: 0,
+        vessel: "AGAN BORLOWEN",
+        pln: "SS229",
+        homePort: "NEWLYN",
+        flag: "GBR",
+        imoNumber: null,
+        licenceNumber: "25072",
+        licenceValidTo: "2382-12-31T00:00:00",
+        id: "GBR-X-CC-1-1610013801",
+        date: "2021-01-07",
+        faoArea: "FAO27",
+        weight: 12
+      }]
     }],
     conservation: {
-          conservationReference: "UK Fisheries Policy"
+      conservationReference: "UK Fisheries Policy"
     },
     transportation: {
-          vehicle: "directLanding",
-          exportedFrom: "United Kingdom",
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
+      vehicle: "directLanding",
+      exportedFrom: "United Kingdom",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     },
     transportations: [{
       id: 0,
@@ -270,42 +270,42 @@ describe('Certificate Controller', () => {
         exportPayload: {
           items: [{
             product: {
-                id: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
-                commodityCode: "03024310",
-                presentation: {
-                  code: "WHL",
-                  label: "Whole",
-                  admin: undefined
-                },
-                state: {
-                  code: "FRE",
-                  label: "Fresh",
-                  admin: undefined
-                },
-                species: {
-                  code: "COD",
-                  label: "Atlantic cod (COD)",
-                  admin: undefined
-                }
+              id: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
+              commodityCode: "03024310",
+              presentation: {
+                code: "WHL",
+                label: "Whole",
+                admin: undefined
+              },
+              state: {
+                code: "FRE",
+                label: "Fresh",
+                admin: undefined
+              },
+              species: {
+                code: "COD",
+                label: "Atlantic cod (COD)",
+                admin: undefined
+              }
             },
             landings: [{
-                model: {
-                    id: "GBR-X-CC-1-1610013801",
-                    vessel: {
-                        pln: "SS229",
-                        vesselName: "AGAN BORLOWEN",
-                        label: "AGAN BORLOWEN (SS229)",
-                        homePort: "NEWLYN",
-                        flag: "GBR",
-                        imoNumber: null,
-                        licenceNumber: "25072",
-                        licenceValidTo: "2382-12-31T00:00:00"
-                    },
-                    faoArea: "FAO27",
-                    dateLanded: "2021-01-07",
-                    exportWeight: 12,
-                    numberOfSubmissions: 0
-                }
+              model: {
+                id: "GBR-X-CC-1-1610013801",
+                vessel: {
+                  pln: "SS229",
+                  vesselName: "AGAN BORLOWEN",
+                  label: "AGAN BORLOWEN (SS229)",
+                  homePort: "NEWLYN",
+                  flag: "GBR",
+                  imoNumber: null,
+                  licenceNumber: "25072",
+                  licenceValidTo: "2382-12-31T00:00:00"
+                },
+                faoArea: "FAO27",
+                dateLanded: "2021-01-07",
+                exportWeight: 12,
+                numberOfSubmissions: 0
+              }
             }]
           }]
         },
@@ -316,6 +316,15 @@ describe('Certificate Controller', () => {
           user_id: "Test",
           currentUri: "Test",
           nextUri: "Test"
+        },
+        transport: {
+          exportedTo: {
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP",
+            officialCountryName: "SPAIN",
+          },
+          vehicle: "directLanding",
         },
         transportations: [{
           id: "0",
@@ -383,44 +392,44 @@ describe('Certificate Controller', () => {
         exportPayload: {
           items: [{
             product: {
-                id: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
-                commodityCode: "03024310",
-                commodityCodeAdmin: "ADMIN COMMODITY CODE",
-                commodityCodeDescription: "some description",
-                presentation: {
-                  code: "WHL",
-                  label: "Whole",
-                  admin: "ADMIN"
-                },
-                state: {
-                  code: "FRE",
-                  label: "Fresh",
-                  admin: "ADMIN"
-                },
-                species: {
-                  code: "COD",
-                  label: "Atlantic cod (COD)",
-                  admin: "ADMIN SPECIES"
-                }
+              id: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
+              commodityCode: "03024310",
+              commodityCodeAdmin: "ADMIN COMMODITY CODE",
+              commodityCodeDescription: "some description",
+              presentation: {
+                code: "WHL",
+                label: "Whole",
+                admin: "ADMIN"
+              },
+              state: {
+                code: "FRE",
+                label: "Fresh",
+                admin: "ADMIN"
+              },
+              species: {
+                code: "COD",
+                label: "Atlantic cod (COD)",
+                admin: "ADMIN SPECIES"
+              }
             },
             landings: [{
-                model: {
-                    id: "GBR-X-CC-1-1610013801",
-                    vessel: {
-                        pln: "SS229",
-                        vesselName: "AGAN BORLOWEN",
-                        label: "AGAN BORLOWEN (SS229)",
-                        homePort: "NEWLYN",
-                        flag: "GBR",
-                        imoNumber: null,
-                        licenceNumber: "25072",
-                        licenceValidTo: "2382-12-31T00:00:00"
-                    },
-                    faoArea: "FAO27",
-                    dateLanded: "2021-01-07",
-                    exportWeight: 12,
-                    numberOfSubmissions: 0
-                }
+              model: {
+                id: "GBR-X-CC-1-1610013801",
+                vessel: {
+                  pln: "SS229",
+                  vesselName: "AGAN BORLOWEN",
+                  label: "AGAN BORLOWEN (SS229)",
+                  homePort: "NEWLYN",
+                  flag: "GBR",
+                  imoNumber: null,
+                  licenceNumber: "25072",
+                  licenceValidTo: "2382-12-31T00:00:00"
+                },
+                faoArea: "FAO27",
+                dateLanded: "2021-01-07",
+                exportWeight: 12,
+                numberOfSubmissions: 0
+              }
             }]
           }]
         },
@@ -431,6 +440,15 @@ describe('Certificate Controller', () => {
           user_id: "Test",
           currentUri: "Test",
           nextUri: "Test"
+        },
+        transport: {
+          exportedTo: {
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP",
+            officialCountryName: "SPAIN",
+          },
+          vehicle: "directLanding",
         },
         transportations: [{
           id: "0",
@@ -509,42 +527,42 @@ describe('Certificate Controller', () => {
         exportPayload: {
           items: [{
             product: {
-                id: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
-                commodityCode: "03024310",
-                presentation: {
-                  code: "WHL",
-                  label: "Whole",
-                  admin: undefined
-                },
-                state: {
-                  code: "FRE",
-                  label: "Fresh",
-                  admin: undefined
-                },
-                species: {
-                  code: "COD",
-                  label: "Atlantic cod (COD)",
-                  admin: undefined
-                }
+              id: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
+              commodityCode: "03024310",
+              presentation: {
+                code: "WHL",
+                label: "Whole",
+                admin: undefined
+              },
+              state: {
+                code: "FRE",
+                label: "Fresh",
+                admin: undefined
+              },
+              species: {
+                code: "COD",
+                label: "Atlantic cod (COD)",
+                admin: undefined
+              }
             },
             landings: [{
-                model: {
-                    id: "GBR-X-CC-1-1610013801",
-                    vessel: {
-                        pln: "SS229",
-                        vesselName: "AGAN BORLOWEN",
-                        label: "AGAN BORLOWEN (SS229)",
-                        homePort: "NEWLYN",
-                        flag: "GBR",
-                        imoNumber: null,
-                        licenceNumber: "25072",
-                        licenceValidTo: "2382-12-31T00:00:00"
-                    },
-                    faoArea: "FAO27",
-                    dateLanded: "2021-01-07",
-                    exportWeight: 12,
-                    numberOfSubmissions: 0
-                }
+              model: {
+                id: "GBR-X-CC-1-1610013801",
+                vessel: {
+                  pln: "SS229",
+                  vesselName: "AGAN BORLOWEN",
+                  label: "AGAN BORLOWEN (SS229)",
+                  homePort: "NEWLYN",
+                  flag: "GBR",
+                  imoNumber: null,
+                  licenceNumber: "25072",
+                  licenceValidTo: "2382-12-31T00:00:00"
+                },
+                faoArea: "FAO27",
+                dateLanded: "2021-01-07",
+                exportWeight: 12,
+                numberOfSubmissions: 0
+              }
             }]
           }]
         },
@@ -555,6 +573,15 @@ describe('Certificate Controller', () => {
           user_id: "Test",
           currentUri: "Test",
           nextUri: "Test"
+        },
+        transport: {
+          exportedTo: {
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP",
+            officialCountryName: "SPAIN",
+          },
+          vehicle: "directLanding",
         },
         transportations: [{
           id: "0",

@@ -4,7 +4,7 @@ import { CcExporter } from './exporterDetails';
 import { Conservation } from './conservation';
 import { CatchCertificateTransport } from './catchCertificateTransport';
 import { ExportLocation } from './export-location';
-import { ProgressStatus } from '../../../persistence/schema/common';
+import { ProgressStatus, Transport } from '../../../persistence/schema/common';
 import { CatchCertificateProgress } from './catchCertificate';
 import { ProcessingStatementProgress } from './processingStatement';
 import { StorageDocumentProgress } from './storageDocument';
@@ -140,7 +140,8 @@ export interface CertificateSummary {
   exporter: CcExporter,
   exportPayload: ProductsLanded,
   conservation: Conservation,
-  transportations: CatchCertificateTransport[],
+  transport?: Transport,
+  transportations?: CatchCertificateTransport[],
   exportLocation: ExportLocation,
   landingsEntryOption: BackEndModels.LandingsEntryOptions
   validationErrors: (ValidationFailure | SystemFailure)[]

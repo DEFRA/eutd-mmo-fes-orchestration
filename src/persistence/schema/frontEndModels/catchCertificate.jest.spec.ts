@@ -61,16 +61,6 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         conservation: {
           conservationReference: "UK Fisheries Policy"
         },
-        transportation: {
-          vehicle: "directLanding",
-          exportedFrom: "United Kingdom",
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
-        },
         transportations: [{
           id: 0,
           vehicle: "directLanding"
@@ -165,6 +155,15 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         id: "0",
         vehicle: "directLanding"
       }],
+      transport: {
+        exportedTo: {
+          isoCodeAlpha2: "",
+          isoCodeAlpha3: "",
+          isoNumericCode: "",
+          officialCountryName: "",
+        },
+        vehicle: "",
+      },
       exportLocation: {
         exportedFrom: "United Kingdom",
         exportedTo: {
@@ -254,10 +253,6 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
             isoNumericCode: "SP"
           }
         },
-        transportations: [{
-          id: 0,
-          vehicle: "directLanding"
-        }],
         landingsEntryOption: LandingsEntryOptions.ManualEntry,
         exportedFrom: "United Kingdom",
         exportedTo: {
@@ -345,10 +340,16 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         currentUri: "Test",
         nextUri: "Test"
       },
-      transportations: [{
-        id: "0",
-        vehicle: "directLanding"
-      }],
+      transport: {
+        vehicle: "directLanding",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
+      },
+      transportations: [],
       exportLocation: {
         exportedFrom: "United Kingdom",
         exportedTo: {
@@ -384,6 +385,92 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
     const result = FrontEnd.toFrontEndCatchCert(backEndCc);
 
     expect(result).toStrictEqual(null);
+  });
+
+  it('should return an empty array when oly a single transportation detail has been added', () => {
+    const backEndCc: CatchCertificate = {
+      createdAt: "2021-01-05T16:59:29.190Z",
+      createdBy: "ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12",
+      createdByEmail: "foo@foo.com",
+      status: "LOCKED",
+      documentNumber: "CC-1",
+      requestByAdmin: false,
+      audit: [],
+      userReference: "",
+      exportData: {
+        exporterDetails: {
+          exporterFullName: "Joe Blogg",
+          exporterCompanyName: "Company name",
+          addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
+          buildingNumber: '123',
+          subBuildingName: 'Unit 1',
+          buildingName: 'CJC Fish Ltd',
+          streetName: '17  Old Edinburgh Road',
+          county: 'West Midlands',
+          country: 'England',
+          townCity: "Aberdeen",
+          postcode: "AB1 2XX",
+          _dynamicsAddress: '',
+          _dynamicsUser: '',
+          accountId: ''
+        },
+        products: [{
+          species: "Atlantic cod (COD)",
+          speciesId: "GBR-X-CC-1-ad634ac5-6a9a-4726-8e4b-f9c0f3ec32c5",
+          speciesCode: "COD",
+          commodityCode: "03024310",
+          state: {
+            code: "FRE",
+            name: "Fresh"
+          },
+          presentation: {
+            code: "WHL",
+            name: "Whole"
+          },
+          caughtBy: [{
+            numberOfSubmissions: 0,
+            vessel: "AGAN BORLOWEN",
+            pln: "SS229",
+            homePort: "NEWLYN",
+            flag: "GBR",
+            imoNumber: null,
+            licenceNumber: "25072",
+            licenceValidTo: "2382-12-31T00:00:00",
+            id: "GBR-X-CC-1-1610013801",
+            date: "2021-01-07",
+            faoArea: "FAO27",
+            weight: 12
+          }]
+        }],
+        conservation: {
+          conservationReference: "UK Fisheries Policy"
+        },
+        transportation: {
+          vehicle: "directLanding",
+          exportedFrom: "United Kingdom",
+          exportedTo: {
+            officialCountryName: "SPAIN",
+            isoCodeAlpha2: "A1",
+            isoCodeAlpha3: "A3",
+            isoNumericCode: "SP"
+          }
+        },
+        landingsEntryOption: LandingsEntryOptions.ManualEntry,
+        exportedFrom: "United Kingdom",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
+      },
+      draftData: {},
+      documentUri: 'some document uri'
+    }
+
+    const result = FrontEnd.toFrontEndCatchCert(backEndCc);
+
+    expect(result.transportations).toStrictEqual([]);
   });
 
 });

@@ -226,10 +226,7 @@ describe('CatchCertificateTransport - getTransportDetails', () => {
         }
       ],
       transportation: {
-        vehicle: "truck",
-        nationalityOfVehicle: "adsf",
-        registrationNumber: "asdsfsd",
-        departurePlace: "Aylesbury",
+        vehicle: "directLanding",
         exportedFrom: "United Kingdom"
       },
       transportations: [{
@@ -299,11 +296,21 @@ describe('CatchCertificateTransport - getTransportDetails', () => {
   });
 
   it('will null for a missing catch certificate', async () => {
-    mockGetDraftData.mockResolvedValue({ ...catchCertificate, exportData: { ...catchCertificate.exportData, transportations: [] }});
+    mockGetDraftData.mockResolvedValue({ ...catchCertificate, exportData: { ...catchCertificate.exportData, transportations: [], transportation: undefined }});
 
     const result = await SUT.getTransportationDetails(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
     expect(result).toBeNull();
+  });
+
+    it('will a direct landing catch certificate', async () => {
+    mockGetDraftData.mockResolvedValue({ ...catchCertificate, exportData: { ...catchCertificate.exportData, transportations: [] }});
+
+    const result = await SUT.getTransportationDetails(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
+    expect(result).toEqual({
+      vehicle: "directLanding",
+    });
   });
 
 });
