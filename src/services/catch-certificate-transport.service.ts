@@ -61,6 +61,7 @@ export default class CatchCertificateTransportService {
 
     return payload;
   }
+
   public static async editTransportDetails(payload: CatchCertificateTransport, userPrincipal: string, documentNumber: string, contactId: string, isDocument: boolean = false): Promise<CatchCertificateTransport> {
     const transport: BackEndModels.CatchCertificateTransport = toBackEndTransport(payload);
     const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
@@ -87,7 +88,7 @@ export default class CatchCertificateTransportService {
           }
         }, contactId);
       } else {
-        transportations[index] = toBackEndTransport(payload);
+        transportations[index] = toBackEndTransport({ ...payload, documents: transportations[index].transportDocuments });
         await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': transportations } }, contactId);
       }
 
