@@ -5,7 +5,7 @@ import { getRandomNumber } from "../helpers/utils/utils";
 
 export default class CatchCertificateTransportController {
 
-  public static async addTransport(req: Hapi.Request, userPrincipal: string, documentNumber : string, contactId: string) {
+  public static async addTransport(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const transport: CatchCertificateTransport = {
       id: getRandomNumber().toString(),
       vehicle: (req.payload as any).vehicle
@@ -14,17 +14,17 @@ export default class CatchCertificateTransportController {
     return Service.addTransport(transport, userPrincipal, documentNumber, contactId);
   }
 
-  public static async getTransportations(req: Hapi.Request, userPrincipal: string, documentNumber : string, contactId: string) {
+  public static async getTransportations(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     return Service.getTransportations(userPrincipal, documentNumber, contactId);
   }
 
-  public static async getTransport(req: Hapi.Request, userPrincipal: string, documentNumber : string, contactId: string) {
+  public static async getTransport(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const id: number = parseInt((req.params as any).transportId);
 
     return Service.getTransport(id, userPrincipal, documentNumber, contactId);
   }
 
-  public static async updateTransport(req: Hapi.Request, userPrincipal: string, documentNumber : string, contactId: string) {
+  public static async updateTransport(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = (req.payload as CatchCertificateTransport)
     const transport: CatchCertificateTransport = {
       id: payload.id,
@@ -35,7 +35,7 @@ export default class CatchCertificateTransportController {
     return Service.updateTransport(transport, userPrincipal, documentNumber, contactId);
   }
 
-  public static async updateTransportDocuments(req: Hapi.Request, userPrincipal: string, documentNumber : string, contactId: string) {
+  public static async updateTransportDocuments(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = (req.payload as CatchCertificateTransport)
     const transport: CatchCertificateTransport = {
       id: payload.id,
@@ -46,4 +46,12 @@ export default class CatchCertificateTransportController {
     return Service.updateTransportDocuments(transport, userPrincipal, documentNumber, contactId);
   }
 
+  public static async removeTransportationById(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
+    const id: number = parseInt((req.params as any).transportId);
+    await Service.removeTransportation(id, userPrincipal, documentNumber, contactId);
+  }
+
+  public static async removeTransportations(userPrincipal: string, documentNumber: string, contactId: string) {
+    await Service.removeTransportations(userPrincipal, documentNumber, contactId);
+  }
 }

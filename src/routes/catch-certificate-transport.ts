@@ -88,6 +88,26 @@ export default class CatchCertificateTransportRoutes {
           }
         }
       },
+            {
+        method: 'DELETE',
+        path: '/v1/catch-certificate/transport/{transportId}',
+        options: {
+          auth: defineAuthStrategies(),
+          security: true,
+          cors: true,
+          handler: async (request, h) => {
+            return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+              await Controller.removeTransportationById(request, userPrincipal, documentNumber, contactId);
+              return h.response().code(200);
+            }).catch(error => {
+              logger.error(`[REMOVE-TRANSPORT-DOCUMENTS][ERROR][${error.stack ?? error}`);
+              return h.response().code(500);
+            })
+          },
+          description: 'Update transport documents',
+          tags: ['api', 'transportDocuments']
+        }
+      },
       {
         method: 'PUT',
         path: '/v1/catch-certificate/transport-details/{transportId}',

@@ -15,7 +15,7 @@ describe("addTransport", () => {
     },
     headers: { accept: "text/html" },
   };
-  const transport:Transport = {
+  const transport: Transport = {
     vehicle: "train"
   }
 
@@ -50,7 +50,7 @@ describe("getTransportations", () => {
     headers: { accept: "text/html" },
   };
 
-  const transport:Transport = {
+  const transport: Transport = {
     vehicle: "train"
   }
 
@@ -86,7 +86,7 @@ describe("getTransport", () => {
     headers: { accept: "text/html" },
   };
 
-  const transport:Transport = {
+  const transport: Transport = {
     vehicle: "train"
   }
 
@@ -124,7 +124,7 @@ describe("updateTransport", () => {
     headers: { accept: "text/html" },
   };
 
-  const transport:Transport = {
+  const transport: Transport = {
     vehicle: "train"
   }
 
@@ -151,3 +151,46 @@ describe("updateTransport", () => {
     await expect(TransportController.updateTransport(mockReq, USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
   })
 });
+
+describe("removeTransport", () => {
+  const mockReq: any = {
+    app: { claims: { sub: "test", email: "test@test.com" } },
+    params: { documentType: "catchCertificate", transportId: 0 },
+    payload: {
+      vehicle: "train",
+    },
+    headers: { accept: "text/html" },
+  };
+
+  let mockService: jest.SpyInstance;
+  let mockRemoveService: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockService = jest.spyOn(TransportService, 'removeTransportations');
+    mockService.mockResolvedValue(undefined);
+
+    mockRemoveService = jest.spyOn(TransportService, 'removeTransportation');
+    mockRemoveService.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    mockService.mockRestore();
+    mockRemoveService.mockRestore();
+  });
+
+  it('will remove all transportations', async () => {
+    await TransportController.removeTransportations(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockService).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+  })
+
+  it('will fail to remove all transportations', async () => {
+    mockService.mockRejectedValue(new Error('something has gone wrong'));
+    await expect(TransportController.removeTransportations(USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
+  })
+
+  it('will remove a transportation', async () => {
+    await TransportController.removeTransportationById(mockReq, USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockRemoveService).toHaveBeenCalledWith(0, USER_ID, DOCUMENT_NUMBER, contactId);
+  })
+});
+

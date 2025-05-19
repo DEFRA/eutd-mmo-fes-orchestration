@@ -6,6 +6,10 @@ import logger from "../logger";
 
 export default class CatchCertificateTransportService {
 
+  private static hasTransport(transportId: number, modes: BackEndModels.CatchCertificateTransport[]) {
+    return modes.some((mode: BackEndModels.CatchCertificateTransport) => mode.id === transportId);
+  }
+
   public static async getTransport(id: number, userPrincipal: string, documentNumber: string, contactId: string): Promise<CatchCertificateTransport> {
     const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
     const transportations: BackEndModels.CatchCertificateTransport[] = draft?.exportData?.transportations;
@@ -56,6 +60,7 @@ export default class CatchCertificateTransportService {
 
     return payload;
   }
+
   public static async updateTransportDocuments(payload: CatchCertificateTransport, userPrincipal: string, documentNumber: string, contactId: string): Promise<CatchCertificateTransport> {
     await this.editTransportDetails(payload, userPrincipal, documentNumber, contactId, true)
 
@@ -65,26 +70,19 @@ export default class CatchCertificateTransportService {
   public static async editTransportDetails(payload: CatchCertificateTransport, userPrincipal: string, documentNumber: string, contactId: string, isDocument: boolean = false): Promise<CatchCertificateTransport> {
     const transport: BackEndModels.CatchCertificateTransport = toBackEndTransport(payload);
     const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
-    const transportations: BackEndModels.CatchCertificateTransport[] = draft?.exportData?.transportations ?? [];
+    const transportations: BackEndModels.CatchCertificateTransport[] = draft?.exportData?.transportations ? [ ...draft.exportData.transportations ] : [];
 
-    const hasTransport: (modes: BackEndModels.CatchCertificateTransport[]) => boolean = (modes: BackEndModels.CatchCertificateTransport[]) =>
-      modes.some((mode: BackEndModels.CatchCertificateTransport) => mode.id === transport?.id);
-
-    const shouldUpdate = hasTransport(transportations);
+    const shouldUpdate = CatchCertificateTransportService.hasTransport(transport.id, transportations);
     logger.info(`[UPDATE-TRANSPORT-DETAILS][${documentNumber}][HAS-TRANSPORTATION-DETAILS][${shouldUpdate}]`);
 
     if (shouldUpdate) {
       const index = transportations.findIndex((t: BackEndModels.CatchCertificateTransport) => t.id === transport.id);
-
       logger.info(`[UPDATE-TRANSPORT-DETAILS][${documentNumber}][TRANSPORTATION-DETAILS][${index}]`);
 
-
       if (isDocument) {
-        transportations[index] = toBackEndTransport(payload);
-
         await upsertDraftData(userPrincipal, documentNumber, {
           '$set': {
-            [`exportData.transportations.${index}.transportDocuments`]: transportations[index].transportDocuments
+            [`exportData.transportations.${index}.transportDocuments`]: toBackEndTransport(payload).transportDocuments
           }
         }, contactId);
       } else {
@@ -97,4 +95,20 @@ export default class CatchCertificateTransportService {
     return payload;
   }
 
+  public static async removeTransportations(userPrincipal: string, documentNumber: string, contactId: string): Promise<void> {
+    await upsertDraftData(userPrincipal, documentNumber, { '$unset': { 'exportData.transportations': [] } }, contactId);
+  }
+
+  public static async removeTransportation(transportId: number, userPrincipal: string, documentNumber: string, contactId: string): Promise<void> {
+    const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
+    const transportations: BackEndModels.CatchCertificateTransport[] = draft?.exportData?.transportations ?? [];
+
+    const shouldUpdate = CatchCertificateTransportService.hasTransport(transportId, transportations);
+    logger.info(`[REMOVE-TRANSPORT-DETAILS][${documentNumber}][HAS-TRANSPORTATION-DETAILS][${shouldUpdate}]`);
+
+    if (shouldUpdate) {
+      const payload: BackEndModels.CatchCertificateTransport[] = transportations.filter((t: BackEndModels.CatchCertificateTransport) => t.id !== transportId);
+      await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': payload} }, contactId);
+    }
+  }
 }

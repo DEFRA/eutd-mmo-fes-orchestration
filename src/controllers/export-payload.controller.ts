@@ -24,6 +24,7 @@ import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/ca
 import { getRandomNumber } from '../helpers/utils/utils';
 import SummaryErrorsService from '../services/summaryErrors.service';
 import TransportService from '../services/transport.service';
+import CatchCertificateTransportService from '../services/catch-certificate-transport.service';
 import * as CatchCertService from '../persistence/services/catchCert';
 import ExportLocationService from '../services/exportLocation.service';
 import { NotifyService } from '../services/notify.service';
@@ -885,6 +886,7 @@ export default class ExportPayloadController {
 
     const exportLocation = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId);
 
+    await CatchCertificateTransportService.removeTransportations(userPrincipal, documentNumber, contactId)
     await TransportService.removeTransport(userPrincipal, documentNumber, contactId);
 
     if (hasProductItems && exportLocation?.exportedFrom) {

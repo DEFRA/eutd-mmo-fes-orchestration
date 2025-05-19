@@ -45,6 +45,7 @@ describe("Transport endpoints", () => {
   let mockUpdateTransport: jest.SpyInstance;
   let mockUpdateTransportDocuments: jest.SpyInstance;
   let mockGetTransportations: jest.SpyInstance;
+  let mockRemoveTransportation: jest.SpyInstance;
 
   const DOCUMENT_NUMBER = "DOCUMENT-NUMBER";
 
@@ -95,6 +96,9 @@ describe("Transport endpoints", () => {
 
     mockGetTransportations = jest.spyOn(Controller, 'getTransportations');
     mockGetTransportations.mockResolvedValue([transport]);
+
+    mockRemoveTransportation = jest.spyOn(Controller, 'removeTransportationById');
+    mockRemoveTransportation.mockResolvedValue(undefined);
   })
 
   afterEach(() => {
@@ -416,6 +420,41 @@ describe("Transport endpoints", () => {
     expect(response.result).toEqual(null);
   });
 
+  it('returns 200 when we DELETE /v1/catch-certificate/transport/0', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
+
+    const response = await server.inject(request);
+    expect(mockRemoveTransportation).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+    expect(response.result).toBeNull();
+  });
+
+  it('returns 500 when we DELETE /v1/catch-certificate/transport/0', async () => {
+    mockRemoveTransportation.mockRejectedValue(new Error("something has gone wrong"));
+
+    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
+
+    const response = await server.inject(request);
+    expect(mockRemoveTransportation).toHaveBeenCalled();
+    expect(response.statusCode).toBe(500);
+    expect(response.result).toBeNull();
+  });
+
+  it('returns 500 when we DELETE /v1/catch-certificate/transport/0 with no stack', async () => {
+    const error = new Error("something has gone wrong");
+    error.stack = undefined;
+
+    mockRemoveTransportation.mockRejectedValue(error);
+
+    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
+
+    const response = await server.inject(request);
+    expect(mockRemoveTransportation).toHaveBeenCalled();
+    expect(response.statusCode).toBe(500);
+    expect(response.result).toBeNull();
+  });
+
   it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete details', async () => {
 
     const request = createRequestObj(
@@ -649,10 +688,12 @@ describe("Transport endpoints", () => {
 
   it('returns 200 when we PUT /v1/catch-certificate/transport-documents/0', async () => {
 
-    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{
-      name: 'road-transport-document',
-      reference: 'AA123456'
-    }] }, 'PUT');
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
+      id: '0', vehicle: 'truck', documents: [{
+        name: 'road-transport-document',
+        reference: 'AA123456'
+      }]
+    }, 'PUT');
 
     const response = await server.inject(request);
     expect(mockUpdateTransportDocuments).toHaveBeenCalled();
@@ -673,10 +714,31 @@ describe("Transport endpoints", () => {
   it('returns 500 and FAILS when we PUT /v1/catch-certificate/transport-documents/0', async () => {
     mockUpdateTransportDocuments.mockRejectedValue(new Error('an error'))
 
-    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{
-      name: 'road-transport-document',
-      reference: 'AA123456'
-    }] }, 'PUT');
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
+      id: '0', vehicle: 'truck', documents: [{
+        name: 'road-transport-document',
+        reference: 'AA123456'
+      }]
+    }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(500);
+    expect(response.result).toEqual(null);
+  });
+
+  it('returns 500 and FAILS with no error stack when we PUT /v1/catch-certificate/transport-documents/0', async () => {
+    const error = new Error('an error');
+    error.stack = undefined;
+
+    mockUpdateTransportDocuments.mockRejectedValue(error);
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
+      id: '0', vehicle: 'truck', documents: [{
+        name: 'road-transport-document',
+        reference: 'AA123456'
+      }]
+    }, 'PUT');
 
     const response = await server.inject(request);
     expect(mockUpdateTransportDocuments).toHaveBeenCalled();

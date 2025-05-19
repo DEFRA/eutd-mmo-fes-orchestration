@@ -69,7 +69,8 @@ const getPlaneBackEndTransport = (transport: CatchCertificateTransport) => ({
   flightNumber: transport.flightNumber,
   containerNumber: transport.containerNumber,
   departurePlace: transport.departurePlace,
-  freightBillNumber: transport.freightBillNumber
+  freightBillNumber: transport.freightBillNumber,
+  transportDocuments: transport.documents,
 });
 
 const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
@@ -77,7 +78,8 @@ const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
   vehicle: transport.vehicle,
   railwayBillNumber: transport.railwayBillNumber,
   departurePlace: transport.departurePlace,
-  freightBillNumber: transport.freightBillNumber
+  freightBillNumber: transport.freightBillNumber,
+  transportDocuments: transport.documents,
 });
 
 const getContainerVesselBackEndTransport = (transport: CatchCertificateTransport) => ({
@@ -87,13 +89,15 @@ const getContainerVesselBackEndTransport = (transport: CatchCertificateTransport
   flagState: transport.flagState,
   containerNumber: transport.containerNumber,
   departurePlace: transport.departurePlace,
-  freightBillNumber: transport.freightBillNumber
+  freightBillNumber: transport.freightBillNumber,
+  transportDocuments: transport.documents,
 });
 
 const getFishingVesselBackEndTransport = (transport: CatchCertificateTransport) => ({
   id: parseInt(transport.id),
   vehicle: transport.vehicle,
-  departurePlace: transport.departurePlace
+  departurePlace: transport.departurePlace,
+  transportDocuments: transport.documents,
 });
 
 export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTransport): CatchCertificateTransport => {
@@ -109,7 +113,7 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         registrationNumber: model.registrationNumber,
         departurePlace: model.departurePlace,
         freightBillNumber: model.freightBillNumber,
-        documents:model.transportDocuments
+        documents: model.transportDocuments
       };
       break;
     }
@@ -121,7 +125,8 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         flightNumber: model.flightNumber,
         containerNumber: model.containerNumber,
         departurePlace: model.departurePlace,
-        freightBillNumber: model.freightBillNumber
+        freightBillNumber: model.freightBillNumber,
+        documents: model.transportDocuments
       };
       break;
     }
@@ -132,7 +137,8 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         vehicle: model.vehicle,
         railwayBillNumber: model.railwayBillNumber,
         departurePlace: model.departurePlace,
-        freightBillNumber: model.freightBillNumber
+        freightBillNumber: model.freightBillNumber,
+        documents: model.transportDocuments
       };
       break;
     }
@@ -145,7 +151,8 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         flagState: model.flagState,
         containerNumber: model.containerNumber,
         departurePlace: model.departurePlace,
-        freightBillNumber: model.freightBillNumber
+        freightBillNumber: model.freightBillNumber,
+        documents: model.transportDocuments
       };
       break;
     }

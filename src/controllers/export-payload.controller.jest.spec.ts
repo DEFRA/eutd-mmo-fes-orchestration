@@ -17,6 +17,7 @@ import { fishingVessel, truck } from '../persistence/schema/frontEndModels/trans
 import applicationConfig from "../applicationConfig";
 import SummaryErrorsService from "../services/summaryErrors.service";
 import TransportService from "../services/transport.service";
+import CatchCertificateTransportService from "../services/catch-certificate-transport.service";
 import * as CatchCertService from "../persistence/services/catchCert";
 import ExportLocationService from "../services/exportLocation.service";
 import { NotifyService } from "../services/notify.service";
@@ -2627,6 +2628,7 @@ describe("confirmLandingsType", () => {
   let mockExportPayloadServiceUpsertLanding: jest.SpyInstance;
   let mockTransportServiceGet: jest.SpyInstance;
   let mockTransportServiceRemove: jest.SpyInstance;
+  let mockCatchCertificateTransportServiceRemove: jest.SpyInstance;
   let mockLogger: jest.SpyInstance;
   let mockGetExportLocation: jest.SpyInstance;
   let mockAddExportLocation: jest.SpyInstance;
@@ -2692,6 +2694,9 @@ describe("confirmLandingsType", () => {
     mockTransportServiceRemove = jest.spyOn(TransportService, 'removeTransport');
     mockTransportServiceRemove.mockResolvedValue(undefined);
 
+    mockCatchCertificateTransportServiceRemove = jest.spyOn(CatchCertificateTransportService, 'removeTransportations');
+    mockCatchCertificateTransportServiceRemove.mockResolvedValue(undefined);
+
     mockUpsertLandingsEntryOption = jest.spyOn(CatchCertService, 'upsertLandingsEntryOption');
     mockUpsertLandingsEntryOption.mockResolvedValue(undefined);
 
@@ -2704,6 +2709,7 @@ describe("confirmLandingsType", () => {
     mockExportPayloadServiceSave.mockRestore();
     mockTransportServiceGet.mockRestore();
     mockTransportServiceRemove.mockRestore();
+    mockCatchCertificateTransportServiceRemove.mockRestore();
     mockLogger.mockRestore();
     mockAddLandingsEntryOption.mockRestore();
   });
@@ -2732,6 +2738,7 @@ describe("confirmLandingsType", () => {
     expect(mockExportPayloadServiceGet).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockGetExportLocation).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockCatchCertificateTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockAddExportLocation).toHaveBeenCalledWith(USER_ID, exportLocation, DOCUMENT_NUMBER, contactId);
     expect(mockLogger).toHaveBeenCalledWith('[CONFIRM-LANDINGS-TYPE][REMOVING-LANDINGS-FOR][product-id][SUCCESS]');
     expect(mockExportPayloadServiceSave).toHaveBeenCalledWith({ items: expected }, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -2750,6 +2757,7 @@ describe("confirmLandingsType", () => {
     expect(mockExportPayloadServiceSave).not.toHaveBeenCalled();
     expect(mockGetExportLocation).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockCatchCertificateTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockAddExportLocation).not.toHaveBeenCalledWith(USER_ID, exportLocation, DOCUMENT_NUMBER, contactId);
     expect(mockAddLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
     expect(mockUpsertLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
@@ -2762,6 +2770,7 @@ describe("confirmLandingsType", () => {
     await SUT.confirmLandingsType(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
 
     expect(mockTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockCatchCertificateTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockAddExportLocation).not.toHaveBeenCalledWith(USER_ID, exportLocation ,DOCUMENT_NUMBER, contactId);
     expect(mockAddLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
     expect(mockUpsertLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
@@ -2775,6 +2784,7 @@ describe("confirmLandingsType", () => {
 
     expect(mockExportPayloadServiceSave).not.toHaveBeenCalled();
     expect(mockTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockCatchCertificateTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockAddExportLocation).not.toHaveBeenCalledWith(USER_ID, exportLocation, DOCUMENT_NUMBER, contactId);
     expect(mockAddLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
     expect(mockUpsertLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
@@ -2788,6 +2798,7 @@ describe("confirmLandingsType", () => {
 
     expect(mockExportPayloadServiceSave).not.toHaveBeenCalled();
     expect(mockTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockCatchCertificateTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockAddExportLocation).not.toHaveBeenCalledWith(USER_ID, exportLocation, DOCUMENT_NUMBER, contactId);
     expect(mockAddLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
     expect(mockUpsertLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);

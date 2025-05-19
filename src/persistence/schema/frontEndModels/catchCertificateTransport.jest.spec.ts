@@ -11,7 +11,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
-      freightBillNumber: 'AA1234567'
+      freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: BackEndModels.CatchCertificateTransport = {
@@ -20,7 +21,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
-      freightBillNumber: 'AA1234567'
+      freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -35,7 +37,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       flightNumber: "Fl Number",
       containerNumber: "Cont Number",
       departurePlace: "here",
-      freightBillNumber: 'AA1234567'
+      freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: BackEndModels.CatchCertificateTransport = {
@@ -44,7 +47,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       flightNumber: "Fl Number",
       containerNumber: "Cont Number",
       departurePlace: "here",
-      freightBillNumber: 'AA1234567'
+      freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -60,6 +64,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: BackEndModels.CatchCertificateTransport = {
@@ -67,7 +72,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.train,
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
-      freightBillNumber: 'AA1234567'
+      freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -83,7 +89,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       flagState: "UK",
       containerNumber: "Cont Number",
       departurePlace: "here",
-      freightBillNumber: 'AA1234567'
+      freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: BackEndModels.CatchCertificateTransport = {
@@ -94,6 +101,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       containerNumber : "Cont Number",
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -135,6 +143,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: BackEndModels.CatchCertificateTransport = {
@@ -143,6 +152,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -157,6 +167,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -171,6 +182,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -215,6 +227,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       registrationNumber: "WE78ERF",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: FrontEndTransport.CatchCertificateTransport = {
@@ -224,6 +237,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       registrationNumber: "WE78ERF",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -238,6 +252,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       containerNumber: "123456",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: FrontEndTransport.CatchCertificateTransport = {
@@ -247,6 +262,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       containerNumber: "123456",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -260,6 +276,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       railwayBillNumber: "12345",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: FrontEndTransport.CatchCertificateTransport = {
@@ -268,6 +285,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       railwayBillNumber: "12345",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -282,7 +300,8 @@ describe("When mapping from a backend transport to front end transport", () => {
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       vesselName: "Vessel Name",
-      flagState: "UK"
+      flagState: "UK",
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: FrontEndTransport.CatchCertificateTransport = {
@@ -293,6 +312,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       containerNumber: "12345",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -331,7 +351,8 @@ describe("When mapping from a backend transport to front end transport", () => {
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       vesselName: "Vessel Name",
-      flagState: "UK"
+      flagState: "UK",
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
     };
 
     const expectedResult: FrontEndTransport.CatchCertificateTransport = {
@@ -342,6 +363,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       containerNumber: "12345",
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
