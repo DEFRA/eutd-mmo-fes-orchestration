@@ -12,8 +12,8 @@ import { checkTransportDataFrontEnd, toFrontEndTransport, Transport } from "../p
 import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
 import { utc } from 'moment';
-import * as ProcessingStatement  from '../persistence/schema/processingStatement';
-import * as StorageDocument  from '../persistence/schema/storageDoc';
+import * as ProcessingStatement from '../persistence/schema/processingStatement';
+import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
 import { validateProduct } from './handlers/storage-notes';
@@ -94,7 +94,7 @@ export default class ProgressService {
       }
     }
 
-    return  completedSections.filter(value => value === ProgressStatus.COMPLETED || value === ProgressStatus.ERROR).length;
+    return completedSections.filter(value => value === ProgressStatus.COMPLETED || value === ProgressStatus.ERROR).length;
   }
 
   public static async getLandingsStatus(userPrincipal: string, documentNumber: string, products: Product[], contactId: string): Promise<ProgressStatus> {
@@ -165,7 +165,7 @@ export default class ProgressService {
     return false;
   }
 
-  public static readonly getExporterDetails = (exporterDetails: ExporterDetails, requestByAdmin: boolean) : ProgressStatus => {
+  public static readonly getExporterDetails = (exporterDetails: ExporterDetails, requestByAdmin: boolean): ProgressStatus => {
     if (!isEmpty(exporterDetails)) {
 
       const expected: string[] = requestByAdmin ? [
@@ -208,23 +208,32 @@ export default class ProgressService {
         FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.vehicle
       )
     );
-  
-    const allHaveDeparturePlace = transportations.every((transportation: CatchCertificateTransport) =>
+
+    const allHaveDeparturePlace = transportations?.every((transportation: CatchCertificateTransport) =>
       FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.departurePlace
     );
-  
-    const allHaveFreightBillNumber = transportations.every((transportation: CatchCertificateTransport) =>
+
+    const allHaveFreightBillNumber = transportations?.every((transportation: CatchCertificateTransport) =>
       FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.freightBillNumber
     );
-  
+
+    const allHaveTransportDocuments = transportations?.every((transportation: CatchCertificateTransport) => {
+      const transport: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
+      if (!transport.documents || transport.documents.length === 0) {
+        return false;
+      }
+
+      return transport.documents.every((document: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) => ProgressService.isEmptyAndTrimSpaces(document.name) && ProgressService.isEmptyAndTrimSpaces(document.reference));
+    });
+
     if (allHaveVehicles) {
-      if (allHaveDeparturePlace && allHaveFreightBillNumber) {
+      if (allHaveDeparturePlace && allHaveFreightBillNumber && allHaveTransportDocuments) {
         return ProgressStatus.COMPLETED;
       } else {
         return ProgressStatus.INCOMPLETE;
       }
     }
-  
+
     return ProgressStatus.CANNOT_START;
   };
 
@@ -233,7 +242,7 @@ export default class ProgressService {
       return ProgressStatus.INCOMPLETE;
     }
 
-    if(!catches.every(
+    if (!catches.every(
       (singleCatch: ProcessingStatement.Catch) => [
         'id',
         'species',
@@ -312,21 +321,21 @@ export default class ProgressService {
       ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
-  public static readonly getStorageFacilitiesStatus = (storageFacilities: StorageDocument.StorageFacility[]) : ProgressStatus => {
+  public static readonly getStorageFacilitiesStatus = (storageFacilities: StorageDocument.StorageFacility[]): ProgressStatus => {
     const storageFacilitiesStatusCheck: (sf: StorageDocument.StorageFacility) => boolean = (sf: StorageDocument.StorageFacility) =>
       ProgressService.isEmptyAndTrimSpaces(sf['facilityName']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityAddressOne']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityTownCity']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityPostcode'])
 
     return (storageFacilities !== undefined && storageFacilities.length > 0) && storageFacilities.every(storageFacilitiesStatusCheck)
-     ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+      ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
-  public static readonly getUserReference = (userReference: string) : ProgressStatus => {
+  public static readonly getUserReference = (userReference: string): ProgressStatus => {
     return ProgressService.isEmptyAndTrimSpaces(userReference)
-        ? ProgressStatus.COMPLETED
-        : ProgressStatus.OPTIONAL;
+      ? ProgressStatus.COMPLETED
+      : ProgressStatus.OPTIONAL;
   }
 
-  public static readonly getExportDestinationStatus = (exportedTo: ICountry) : ProgressStatus => {
+  public static readonly getExportDestinationStatus = (exportedTo: ICountry): ProgressStatus => {
     return ['officialCountryName'].every((key: string) => ProgressService.isEmptyAndTrimSpaces(exportedTo?.[key])) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
@@ -351,18 +360,18 @@ export default class ProgressService {
 
     const processingPlant =
       data?.exportData?.plantApprovalNumber?.trim() &&
-      data.exportData.personResponsibleForConsignment?.trim()
+        data.exportData.personResponsibleForConsignment?.trim()
         ? ProgressStatus.COMPLETED
         : ProgressStatus.INCOMPLETE;
     const processingPlantAddress =
       data?.exportData?.plantPostcode &&
-      data.exportData.plantAddressOne &&
-      ProgressService.isEmptyAndTrimSpaces(data.exportData.plantName)
+        data.exportData.plantAddressOne &&
+        ProgressService.isEmptyAndTrimSpaces(data.exportData.plantName)
         ? ProgressStatus.COMPLETED
         : ProgressStatus.INCOMPLETE;
     const exportHealthCertificate =
       hasValidHealthCertificate(data?.exportData?.healthCertificateNumber) &&
-      hasValidHeathCertificateDate(data?.exportData?.healthCertificateDate)
+        hasValidHeathCertificateDate(data?.exportData?.healthCertificateDate)
         ? ProgressStatus.COMPLETED
         : ProgressStatus.INCOMPLETE;
 
@@ -384,9 +393,9 @@ export default class ProgressService {
       requiredSections: requiredSectionsLength,
       completedSections: ProgressService.getCompletedSectionsNumber(psProgress),
     };
- }
+  }
 
- public static async getStorageDocumentProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
+  public static async getStorageDocumentProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`);
 
     const data = await StorageDocumentService.getDraft(userPrincipal, documentNumber, contactId);
