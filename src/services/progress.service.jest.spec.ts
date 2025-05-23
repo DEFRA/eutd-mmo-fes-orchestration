@@ -193,9 +193,7 @@ describe('get', () => {
         products: [],
         exporterDetails,
         transportation: {
-          vehicle: 'directLanding',
-          departurePlace: 'London Heathrow',
-          freightBillNumber: 'AA1234567'
+          vehicle: 'directLanding'
         },
         landingsEntryOption: 'directLanding',
         exportedFrom: 'United Kingdom',
@@ -239,9 +237,7 @@ describe('get', () => {
         products: [],
         exporterDetails,
         transportation: {
-          vehicle: 'directLanding',
-          departurePlace: 'London Heathrow',
-          freightBillNumber: 'AA1234567'
+          vehicle: 'directLanding'
         },
         landingsEntryOption: 'directLanding',
         exportedFrom: 'United Kingdom',
@@ -491,21 +487,26 @@ describe('get', () => {
   it('will return COMPLETED transportationDetails if the user adds a vehicle and the transport details', async () => {
     mockGetDraft.mockResolvedValue({
       exportData: {
-        transportation: {
+        transportations: [{
+          id: 0,
           vehicle: 'plane',
-          exportedFrom: 'United Kingdom',
-          exportedTo: {
-            officialCountryName: 'Afghanistan',
-            isoCodeAlpha2: 'AF',
-            isoCodeAlpha3: 'AFG',
-            isoNumericCode: '004',
-          },
           flightNumber: '3456',
           containerNumber: '34567',
           departurePlace: 'London',
-          freightBillNumber: 'AA1234567'
-        },
+          freightBillNumber: 'AA123456',
+          transportDocuments: [{
+            name: 'name',
+            reference: 'reference'
+          }]
+        }],
         landingsEntryOption: 'manualEntry',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
+        },
       },
     });
 
@@ -774,24 +775,30 @@ describe('get', () => {
           },
         ],
         exporterDetails,
-        transportation: {
+        transportations: [{
+          id: 0,
           vehicle: 'plane',
           exportedFrom: 'United Kingdom',
           flightNumber: 'BA078',
           containerNumber: '0123456789',
-          exportedTo: {
-            officialCountryName: 'Afghanistan',
-            isoCodeAlpha2: 'AF',
-            isoCodeAlpha3: 'AFG',
-            isoNumericCode: '004',
-          },
           departurePlace: 'London Heathrow',
-          freightBillNumber: 'AA1234567'
-        },
+          freightBillNumber: 'AA123456',
+          transportDocuments: [{
+            name: 'name',
+            reference: 'reference'
+          }]
+        }],
         conservation: {
           conservationReference: 'UK Fisheries Policy',
         },
         landingsEntryOption: 'manualEntry',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
+        },
+        exportedFrom: 'United Kingdom'
       },
     });
 
@@ -1379,8 +1386,7 @@ describe('getTransportDetails', () => {
         isoNumericCode: '076',
       },
       cmr: 'false',
-      departurePlace: 'Hull',
-      freightBillNumber: 'AA1234567'
+      departurePlace: 'Hull'
     };
 
     expect(ProgressService.getTransportDetails(transport)).toBe(
@@ -1398,8 +1404,7 @@ describe('getTransportDetails', () => {
         isoNumericCode: '076',
       },
       cmr: 'false',
-      departurePlace: 'Hull',
-      freightBillNumber: 'AA1234567'
+      departurePlace: 'Hull'
     };
 
     expect(ProgressService.getTransportDetails(transport)).toBe(
@@ -3811,8 +3816,7 @@ describe('getStorageDocumentProgress', () => {
             isoCodeAlpha3: 'AFG',
             isoNumericCode: '004',
           },
-          departurePlace: 'London Heathrow',
-          freightBillNumber: 'AA1234567'
+          departurePlace: 'London Heathrow'
         },
       },
       requestByAdmin: false,

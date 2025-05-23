@@ -25,7 +25,6 @@ export interface Transport {
   nextUri? : string;
   exportDate?: string;
   exportedTo?: ICountry;
-  freightBillNumber?: string;
 }
 
 export const toBackEndTransport = (transport: Transport, exportLocation?: ExportLocation) : BackEndModels.Transport => {
@@ -67,8 +66,7 @@ const getTruckBackEndTransport = (transport: Transport, exportLocation: ExportLo
   nationalityOfVehicle: cmr ? undefined : transport.nationalityOfVehicle,
   registrationNumber: cmr ? undefined : transport.registrationNumber,
   departurePlace: cmr ? undefined : transport.departurePlace,
-  exportDate: transport.exportDate,
-  freightBillNumber: transport.freightBillNumber
+  exportDate: transport.exportDate
 });
 
 const getPlaneBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
@@ -78,8 +76,7 @@ const getPlaneBackEndTransport = (transport: Transport, exportLocation: ExportLo
   flightNumber: transport.flightNumber,
   containerNumber: transport.containerNumber,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate,
-  freightBillNumber: transport.freightBillNumber
+  exportDate: transport.exportDate
 });
 
 const getTrainBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
@@ -88,8 +85,7 @@ const getTrainBackEndTransport = (transport: Transport, exportLocation: ExportLo
   exportedTo: exportLocation ? exportLocation.exportedTo : undefined,
   railwayBillNumber: transport.railwayBillNumber,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate,
-  freightBillNumber: transport.freightBillNumber
+  exportDate: transport.exportDate
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
@@ -100,8 +96,7 @@ const getContainerVesselBackEndTransport = (transport: Transport, exportLocation
   flagState: transport.flagState,
   containerNumber: transport.containerNumber,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate,
-  freightBillNumber: transport.freightBillNumber
+  exportDate: transport.exportDate
 });
 
 const getFishingVesselBackEndTransport = (transport: Transport, exportLocation: ExportLocation) => ({
@@ -129,8 +124,7 @@ export const toFrontEndTransport = (
           registrationNumber: model.registrationNumber,
           departurePlace: model.departurePlace,
           exportDate: transport.exportDate,
-          exportedTo: toExportedTo(model.exportedTo),
-          freightBillNumber: model.freightBillNumber
+          exportedTo: toExportedTo(model.exportedTo)
         };
 
         break;
@@ -143,8 +137,7 @@ export const toFrontEndTransport = (
           containerNumber: model.containerNumber,
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
-          exportedTo: toExportedTo(model.exportedTo),
-          freightBillNumber: model.freightBillNumber
+          exportedTo: toExportedTo(model.exportedTo)
         };
         break;
       }
@@ -155,8 +148,7 @@ export const toFrontEndTransport = (
           railwayBillNumber: model.railwayBillNumber,
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
-          exportedTo: toExportedTo(model.exportedTo),
-          freightBillNumber: model.freightBillNumber
+          exportedTo: toExportedTo(model.exportedTo)
         };
         break;
       }
@@ -169,8 +161,7 @@ export const toFrontEndTransport = (
           containerNumber: model.containerNumber,
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
-          exportedTo: toExportedTo(model.exportedTo),
-          freightBillNumber: model.freightBillNumber
+          exportedTo: toExportedTo(model.exportedTo)
         };
         break;
       }
@@ -256,7 +247,6 @@ const checkTruckDataFrontEnd = (transport: Transport) => {
         transport.nationalityOfVehicle
         && transport.registrationNumber
         && transport.departurePlace
-        && transport.freightBillNumber
       ) ? transport : {
         vehicle: transport.vehicle,
         cmr: transport.cmr,
@@ -282,7 +272,6 @@ const checkPlaneDataFrontEnd = (transport: Transport) => (
   transport.flightNumber
   && transport.containerNumber
   && transport.departurePlace
-  && transport.freightBillNumber
 ) ? transport : {
   vehicle: transport.vehicle,
   exportedTo: transport.exportedTo
@@ -291,7 +280,6 @@ const checkPlaneDataFrontEnd = (transport: Transport) => (
 const checkTrainDataFrontEnd = (transport: Transport) => (
   transport.railwayBillNumber
   && transport.departurePlace
-  && transport.freightBillNumber
 ) ? transport : {
   vehicle: transport.vehicle,
   exportedTo: transport.exportedTo
@@ -302,7 +290,6 @@ const checkContainerVesselDataFrontEnd = (transport: Transport) => (
   && transport.flagState
   && transport.containerNumber
   && transport.departurePlace
-  && transport.freightBillNumber
 ) ? transport : {
   vehicle: transport.vehicle,
   exportedTo: transport.exportedTo

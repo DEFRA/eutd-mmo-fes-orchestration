@@ -190,7 +190,7 @@ export default class ProgressService {
       const isTruck = transportation.vehicle === 'truck';
       const hasCmr = isTruck && transportation.cmr === 'true';
 
-      if (hasCmr || transportation.departurePlace && transportation.freightBillNumber) {
+      if (hasCmr || transportation.departurePlace) {
         return ProgressStatus.COMPLETED;
       } else {
         return ProgressStatus.INCOMPLETE;

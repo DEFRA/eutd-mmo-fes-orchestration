@@ -809,7 +809,6 @@ describe('checkTransportDataFrontEnd', () => {
       nationalityOfVehicle: "British",
       registrationNumber: "WE78ERF",
       departurePlace: "London",
-      freightBillNumber: 'AA1234567',
       exportDate: "some date",
       exportedTo : {
         officialCountryName: "SPAIN",
@@ -907,7 +906,6 @@ describe('checkTransportDataFrontEnd', () => {
       flightNumber : 'flight number',
       containerNumber : 'cont. number',
       departurePlace : 'here or there',
-      freightBillNumber: 'AA1234567',
       exportDate : 'some date',
       exportedTo : {
         officialCountryName: "SPAIN",
@@ -971,7 +969,6 @@ describe('checkTransportDataFrontEnd', () => {
       vehicle : FrontEndTransport.train,
       railwayBillNumber : 'rail way num',
       departurePlace : 'here or there',
-      freightBillNumber: 'AA1234567',
       exportDate : 'some date',
       exportedTo : {
         officialCountryName: "SPAIN",
@@ -1023,7 +1020,6 @@ describe('checkTransportDataFrontEnd', () => {
       flagState : 'some flag name',
       containerNumber : 'container number',
       departurePlace : 'here or there',
-      freightBillNumber: 'AA1234567',
       exportDate : 'some date',
       exportedTo : {
         officialCountryName: "SPAIN",

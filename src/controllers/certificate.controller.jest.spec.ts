@@ -99,7 +99,7 @@ const backEndCc: BackEnd.CatchCertificate = {
     },
     transportations: [{
       id: 0,
-      vehicle: "directLanding",
+      vehicle: "truck"
     }],
     landingsEntryOption: BackEnd.LandingsEntryOptions.ManualEntry,
     exportedFrom: "United Kingdom",
@@ -188,7 +188,7 @@ const backEndCcAdmin: BackEnd.CatchCertificate = {
     },
     transportations: [{
       id: 0,
-      vehicle: "directLanding"
+      vehicle: "truck"
     }],
     landingsEntryOption: BackEnd.LandingsEntryOptions.ManualEntry,
     exportedFrom: "United Kingdom",
@@ -328,7 +328,7 @@ describe('Certificate Controller', () => {
         },
         transportations: [{
           id: "0",
-          vehicle: "directLanding"
+          vehicle: "truck"
         }],
         exportLocation: {
           exportedFrom: "United Kingdom",
@@ -452,7 +452,7 @@ describe('Certificate Controller', () => {
         },
         transportations: [{
           id: "0",
-          vehicle: "directLanding",
+          vehicle: "truck"
         }],
         exportLocation: {
           exportedFrom: "United Kingdom",
@@ -585,7 +585,7 @@ describe('Certificate Controller', () => {
         },
         transportations: [{
           id: "0",
-          vehicle: "directLanding"
+          vehicle: "truck"
         }],
         exportLocation: {
           exportedFrom: "United Kingdom",

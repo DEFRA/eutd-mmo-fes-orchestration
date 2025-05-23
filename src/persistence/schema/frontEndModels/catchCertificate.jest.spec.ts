@@ -63,7 +63,7 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         },
         transportations: [{
           id: 0,
-          vehicle: "directLanding"
+          vehicle: "truck"
         }],
         landingsEntryOption: LandingsEntryOptions.ManualEntry,
         exportedFrom: "United Kingdom",
@@ -153,7 +153,7 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
       },
       transportations: [{
         id: "0",
-        vehicle: "directLanding"
+        vehicle: "truck"
       }],
       transport: {
         exportedTo: {

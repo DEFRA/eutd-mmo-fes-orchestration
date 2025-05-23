@@ -113,12 +113,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
   it("if vehicle is fishing vessel then it should contain all relevant properties for fishing vessel", () => {
     const transport: FrontEndTransport.CatchCertificateTransport = {
       id: '0',
-      vehicle: FrontEndTransport.fishingVessel
+      vehicle: FrontEndTransport.truck
     };
 
     const expectedResult: BackEndModels.CatchCertificateTransport = {
       id: 0,
-      vehicle: FrontEndTransport.fishingVessel
+      vehicle: FrontEndTransport.truck
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -322,12 +322,12 @@ describe("When mapping from a backend transport to front end transport", () => {
 
     const transport: BackEndModels.CatchCertificateTransport = {
       id: 0,
-      vehicle: FrontEndTransport.fishingVessel
+      vehicle: FrontEndTransport.truck
     };
 
     const expectedResult: FrontEndTransport.CatchCertificateTransport = {
       id: '0',
-      vehicle: FrontEndTransport.fishingVessel
+      vehicle: FrontEndTransport.truck
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);

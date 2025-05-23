@@ -1209,7 +1209,6 @@ describe('catchCert - db related', () => {
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
-      freightBillNumber: 'AA1234567',
       user_id: "UID",
       journey: "Journey",
       currentUri: "some/uri",
@@ -1256,7 +1255,6 @@ describe('catchCert - db related', () => {
 
       const expected = {
         departurePlace: 'here',
-        freightBillNumber: 'AA1234567',
         nationalityOfVehicle: 'UK',
         cmr: false,
         registrationNumber: 'REG Number',

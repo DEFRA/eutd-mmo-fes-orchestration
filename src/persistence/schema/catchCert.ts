@@ -285,9 +285,7 @@ export interface CatchCertificateTruck extends CatchCertificateBasicTransportDet
   registrationNumber?: string
 }
 
-type CatchCertificateFishingVessel = CatchCertificateBasicTransportDetails;
-
-export type CatchCertificateTransport = CatchCertificateTrain | CatchCertificatePlane | CatchCertificateContainerVessel | CatchCertificateTruck | CatchCertificateFishingVessel;
+export type CatchCertificateTransport = CatchCertificateTrain | CatchCertificatePlane | CatchCertificateContainerVessel | CatchCertificateTruck;
 
 export interface ExportData {
   products: Product[];

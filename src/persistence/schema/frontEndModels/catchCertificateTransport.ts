@@ -4,7 +4,6 @@ export const truck = 'truck';
 export const plane = 'plane';
 export const train = 'train';
 export const containerVessel = 'containerVessel';
-export const fishingVessel = 'directLanding';
 
 export interface CatchCertificateTransportDocument {
   name: string,
@@ -41,9 +40,6 @@ export const toBackEndTransport = (transport: CatchCertificateTransport): BackEn
       break;
     case containerVessel:
       backEndTransport = getContainerVesselBackEndTransport(transport);
-      break;
-    case fishingVessel:
-      backEndTransport = getFishingVesselBackEndTransport(transport);
       break;
     default:
       return null;
@@ -90,13 +86,6 @@ const getContainerVesselBackEndTransport = (transport: CatchCertificateTransport
   containerNumber: transport.containerNumber,
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
-  transportDocuments: transport.documents,
-});
-
-const getFishingVesselBackEndTransport = (transport: CatchCertificateTransport) => ({
-  id: parseInt(transport.id),
-  vehicle: transport.vehicle,
-  departurePlace: transport.departurePlace,
   transportDocuments: transport.documents,
 });
 
@@ -153,13 +142,6 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         departurePlace: model.departurePlace,
         freightBillNumber: model.freightBillNumber,
         documents: model.transportDocuments
-      };
-      break;
-    }
-    case fishingVessel: {
-      frontEndTransport = {
-        id: transport.id.toString(),
-        vehicle: transport.vehicle
       };
       break;
     }
