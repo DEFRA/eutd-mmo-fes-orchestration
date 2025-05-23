@@ -39,6 +39,11 @@ export enum LandingsEntryOptions {
   UploadEntry = 'uploadEntry'
 }
 
+export enum AddTransportation {
+  Yes = 'yes',
+  No = 'No'
+}
+
 export const LandingStatuses = Object.freeze(LandingValidationStatus);
 
 export interface Catch {
@@ -291,6 +296,7 @@ export interface ExportData {
   products: Product[];
   transportation?: Transport;
   transportations?: CatchCertificateTransport[];
+  addTransportation?: AddTransportation;
   conservation: Conservation;
   exporterDetails: CcExporterDetails;
   landingsEntryOption?: LandingsEntryOptions;
@@ -404,6 +410,7 @@ const ExportDataSchema = new Schema({
   products:             { type: [ProductSchema], required: true },
   transportation:       { type: TransportSchema, required: false },
   transportations:      { type: [CatchCertificateTransportSchema], required: false },
+  addTransportation:    { type: String, required: false, enum: Object.values(AddTransportation) },
   conservation:         { type: ConservationSchema, required: true },
   exporterDetails:      { type: ExporterDetailsSchema, require: true },
   landingsEntryOption:  { type: String,  required: false, enum: Object.values(LandingsEntryOptions) },

@@ -3,6 +3,7 @@ import * as Transport from "../persistence/schema/frontEndModels/transport";
 import { toBackEndTransport, CatchCertificateTransport, toFrontEndTransport } from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import { getDraft, upsertDraftData } from "../persistence/services/catchCert";
 import logger from "../logger";
+import { AddTransportation } from "../persistence/schema/catchCert";
 
 export default class CatchCertificateTransportService {
 
@@ -55,6 +56,19 @@ export default class CatchCertificateTransportService {
     return payload;
   }
 
+  public static async addTransportCheck(payload: AddTransportation, userPrincipal: string, documentNumber: string, contactId: string): Promise<AddTransportation> {
+
+    await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.addTransportation': payload } }, contactId);
+
+    return payload;
+  }
+
+  public static async getTransportCheck(userPrincipal: string, documentNumber: string, contactId: string): Promise<{ addTransportation: AddTransportation }> {
+    const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
+
+    return draft?.exportData?.addTransportation ? { addTransportation: draft.exportData.addTransportation } : { addTransportation: undefined };
+  }
+
   public static async updateTransport(payload: CatchCertificateTransport, userPrincipal: string, documentNumber: string, contactId: string): Promise<CatchCertificateTransport> {
     await this.editTransportDetails(payload, userPrincipal, documentNumber, contactId)
 
@@ -70,7 +84,7 @@ export default class CatchCertificateTransportService {
   public static async editTransportDetails(payload: CatchCertificateTransport, userPrincipal: string, documentNumber: string, contactId: string, isDocument: boolean = false): Promise<CatchCertificateTransport> {
     const transport: BackEndModels.CatchCertificateTransport = toBackEndTransport(payload);
     const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
-    const transportations: BackEndModels.CatchCertificateTransport[] = draft?.exportData?.transportations ? [ ...draft.exportData.transportations ] : [];
+    const transportations: BackEndModels.CatchCertificateTransport[] = draft?.exportData?.transportations ? [...draft.exportData.transportations] : [];
 
     const shouldUpdate = CatchCertificateTransportService.hasTransport(transport.id, transportations);
     logger.info(`[UPDATE-TRANSPORT-DETAILS][${documentNumber}][HAS-TRANSPORTATION-DETAILS][${shouldUpdate}]`);
@@ -108,7 +122,7 @@ export default class CatchCertificateTransportService {
 
     if (shouldUpdate) {
       const payload: BackEndModels.CatchCertificateTransport[] = transportations.filter((t: BackEndModels.CatchCertificateTransport) => t.id !== transportId);
-      await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': payload} }, contactId);
+      await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': payload } }, contactId);
     }
   }
 }

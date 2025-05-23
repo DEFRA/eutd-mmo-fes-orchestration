@@ -1,4 +1,4 @@
-import { CatchCertificate, LandingsEntryOptions, CatchCertificateTransport as BackEndCatchCertificateTransport } from "../persistence/schema/catchCert";
+import { CatchCertificate, LandingsEntryOptions, CatchCertificateTransport as BackEndCatchCertificateTransport, AddTransportation } from "../persistence/schema/catchCert";
 import { CatchCertificateTransport } from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import SUT from "./catch-certificate-transport.service";
 import * as Service from "../persistence/services/catchCert";
@@ -41,6 +41,7 @@ const catchCertificate: CatchCertificate = {
         ]
       }
     ],
+    addTransportation: AddTransportation.Yes,
     transportation: {
       vehicle: "truck",
       nationalityOfVehicle: "adsf",
@@ -184,6 +185,58 @@ describe('CatchCertificateTransport - getTransport', () => {
     const result = await SUT.getTransport(0, USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
     expect(result).toBeNull();
+  });
+});
+
+describe('CatchCertificateTransport - addTransportation', () => {
+
+  let mockGetDraftData: jest.SpyInstance;
+  let mockUpsertDraftData: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockGetDraftData = jest.spyOn(Service, 'getDraft');
+    mockGetDraftData.mockResolvedValue(catchCertificate);
+
+    mockUpsertDraftData = jest.spyOn(Service, 'upsertDraftData');
+    mockUpsertDraftData.mockResolvedValue(undefined);
+  })
+
+  afterEach(() => {
+    mockGetDraftData.mockRestore();
+    mockUpsertDraftData.mockRestore();
+  })
+
+  it('will return a single transportation check response', async () => {
+    const result = await SUT.getTransportCheck(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
+    expect(result).toEqual({ addTransportation: 'yes' });
+  });
+
+  it('will return undefined', async () => {
+    mockGetDraftData.mockResolvedValue({ ...catchCertificate, exportData: { ...catchCertificate.exportData, addTransportation: undefined } });
+    const result = await SUT.getTransportCheck(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
+    expect(result.addTransportation).toBeUndefined();
+  });
+
+  it('will return undefined when export data is empty', async () => {
+    mockGetDraftData.mockResolvedValue({ ...catchCertificate, exportData: undefined });
+    const result = await SUT.getTransportCheck(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
+    expect(result.addTransportation).toBeUndefined();
+  });
+
+
+  it('should update a single transportation check', async () => {
+    const transport: AddTransportation = AddTransportation.Yes;
+    const res = await SUT.addTransportCheck(transport, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(res).toEqual(transport);
+    expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {
+      '$set': {
+        'exportData.addTransportation': transport
+      }
+    }, 'contactId');
   });
 });
 
@@ -359,7 +412,7 @@ describe('CatchCertificateTransportService - updateTransport', () => {
       vehicle: 'train',
       documents: [{ name: 'name', reference: 'reference' }]
     }
-  const res = await SUT.updateTransportDocuments(transport, USER_ID, DOCUMENT_NUMBER, contactId);
+    const res = await SUT.updateTransportDocuments(transport, USER_ID, DOCUMENT_NUMBER, contactId);
 
     expect(res).toEqual(transport);
     expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {

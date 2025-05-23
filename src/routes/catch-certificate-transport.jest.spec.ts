@@ -4,6 +4,7 @@ import * as DocumentOwnershipValidator from "../validators/documentOwnershipVali
 import CatchCertificateTransportRoutes from "./catch-certificate-transport";
 import Controller from '../controllers/catch-certificate-transport.controller';
 import { CatchCertificateTransport } from "../persistence/schema/frontEndModels/catchCertificateTransport";
+import { AddTransportation } from "../persistence/schema/catchCert";
 
 const createServerInstance = async () => {
   const server = Hapi.server();
@@ -46,6 +47,8 @@ describe("Transport endpoints", () => {
   let mockUpdateTransportDocuments: jest.SpyInstance;
   let mockGetTransportations: jest.SpyInstance;
   let mockRemoveTransportation: jest.SpyInstance;
+  let mockAddTransportationCheck: jest.SpyInstance;
+  let mockGetTransportationCheck: jest.SpyInstance;
 
   const DOCUMENT_NUMBER = "DOCUMENT-NUMBER";
 
@@ -99,6 +102,12 @@ describe("Transport endpoints", () => {
 
     mockRemoveTransportation = jest.spyOn(Controller, 'removeTransportationById');
     mockRemoveTransportation.mockResolvedValue(undefined);
+
+    mockAddTransportationCheck = jest.spyOn(Controller, 'addTransportationCheck');
+    mockAddTransportationCheck.mockResolvedValue({ addTransportation: AddTransportation.Yes });
+
+    mockGetTransportationCheck = jest.spyOn(Controller, 'getTransportationCheck');
+    mockGetTransportationCheck.mockResolvedValue({ addTransportation: AddTransportation.Yes });
   })
 
   afterEach(() => {
@@ -191,6 +200,26 @@ describe("Transport endpoints", () => {
     expect(response.statusCode).toBe(400);
     const error = { vehicle: 'error.vehicle.any.only' }
     expect(response.payload).toStrictEqual(JSON.stringify(error));
+  });
+
+  it('returns 200 and doesnt fail when we GET /v1/catch-certificate/transport/check', async () => {
+    const request = createRequestObj('/v1/catch-certificate/transport/check', {}, 'GET')
+
+    const response = await server.inject(request);
+    expect(mockWithDocumentLegitimatelyOwned).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+    expect(response.result).toEqual({ addTransportation: "yes" });
+  });
+
+  it('returns 500 and FAILS when we GET /v1/catch-certificate/transport/check', async () => {
+    mockWithDocumentLegitimatelyOwned.mockRejectedValue(new Error('an error'))
+
+    const request = createRequestObj('/v1/catch-certificate/transport/check', {}, 'GET');
+
+    const response = await server.inject(request);
+    expect(mockWithDocumentLegitimatelyOwned).toHaveBeenCalled();
+    expect(response.statusCode).toBe(500);
+    expect(response.result).toEqual(null);
   });
 
   it('returns 200 and doesnt fail when we POST /v1/catch-certificate/transport/check', async () => {

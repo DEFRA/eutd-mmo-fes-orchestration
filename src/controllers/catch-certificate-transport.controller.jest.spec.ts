@@ -1,6 +1,7 @@
 import TransportController from "./catch-certificate-transport.controller";
 import TransportService from "../services/catch-certificate-transport.service";
 import { Transport } from "../persistence/schema/frontEndModels/transport";
+import { AddTransportation } from "../persistence/schema/catchCert";
 
 const USER_ID = "ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12";
 const contactId = 'contactBob';
@@ -42,14 +43,68 @@ describe("addTransport", () => {
   })
 });
 
-describe("getTransportations", () => {
+
+describe("addTransportCheck", () => {
   const mockReq: any = {
     app: { claims: { sub: "test", email: "test@test.com" } },
-    params: { documentType: "catchCertificate", transportId: 0 },
-    payload: {},
+    params: { documentType: "catchCertificate" },
+    payload: {
+      addTransportation: 'yes'
+    },
     headers: { accept: "text/html" },
   };
+  const transport: { addTransportation: AddTransportation } = { addTransportation: AddTransportation.Yes };
 
+  let mockService: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockService = jest.spyOn(TransportService, 'addTransportCheck');
+    mockService.mockResolvedValue(transport);
+  });
+
+  afterEach(() => {
+    mockService.mockRestore();
+  });
+
+  it('will add transportation check from payload', async () => {
+    const result = await TransportController.addTransportationCheck(mockReq, USER_ID, DOCUMENT_NUMBER, contactId)
+    expect(result).toEqual(transport);
+  })
+
+  it('will fail to add transportation check', async () => {
+    mockService.mockRejectedValue(new Error('something has gone wrong'));
+
+    await expect(TransportController.addTransportationCheck(mockReq, USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
+  })
+});
+
+describe("getTransportationCheck", () => {
+
+  let mockService: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockService = jest.spyOn(TransportService, 'getTransportCheck');
+    mockService.mockResolvedValue(AddTransportation.Yes);
+  });
+
+  afterEach(() => {
+    mockService.mockRestore();
+  });
+
+  it('will all transportations', async () => {
+    const result = await TransportController.getTransportationCheck(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockService).toHaveBeenCalledWith('ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12', 'document-number', 'contactBob');
+    expect(result).toEqual('yes');
+  })
+
+  it('will fail to get transportations', async () => {
+    mockService.mockRejectedValue(new Error('something has gone wrong'));
+
+    await expect(TransportController.getTransportationCheck(USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
+  })
+});
+
+describe("getTransportations", () => {
   const transport: Transport = {
     vehicle: "train"
   }
@@ -66,7 +121,7 @@ describe("getTransportations", () => {
   });
 
   it('will all transportations', async () => {
-    const result = await TransportController.getTransportations(mockReq, USER_ID, DOCUMENT_NUMBER, contactId);
+    const result = await TransportController.getTransportations(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockService).toHaveBeenCalledWith('ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12', 'document-number', 'contactBob');
     expect(result).toEqual(transport);
   })
@@ -74,7 +129,7 @@ describe("getTransportations", () => {
   it('will fail to get transportations', async () => {
     mockService.mockRejectedValue(new Error('something has gone wrong'));
 
-    await expect(TransportController.getTransportations(mockReq, USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
+    await expect(TransportController.getTransportations(USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
   })
 });
 

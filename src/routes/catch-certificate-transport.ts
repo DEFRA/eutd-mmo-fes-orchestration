@@ -23,7 +23,7 @@ export default class CatchCertificateTransportRoutes {
           cors: true,
           handler: async (request, h) => {
             return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-              return await Controller.getTransportations(request, userPrincipal, documentNumber, contactId);
+              return await Controller.getTransportations(userPrincipal, documentNumber, contactId);
             }).catch(error => {
               logger.error(`[GET-TRANSPORTATIONS][ERROR][${error.stack || error}`);
               return h.response().code(500);
@@ -88,7 +88,7 @@ export default class CatchCertificateTransportRoutes {
           }
         }
       },
-            {
+      {
         method: 'DELETE',
         path: '/v1/catch-certificate/transport/{transportId}',
         options: {
@@ -169,6 +169,25 @@ export default class CatchCertificateTransportRoutes {
         }
       },
       {
+        method: 'GET',
+        path: '/v1/catch-certificate/transport/check',
+        options: {
+          auth: defineAuthStrategies(),
+          security: true,
+          cors: true,
+          handler: async (request, h) => {
+            return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+              return await Controller.getTransportationCheck(userPrincipal, documentNumber, contactId);
+            }).catch(error => {
+              logger.error(`[GET-TRANSPORTATION-CHECK][ERROR][${error.stack || error}`);
+              return h.response().code(500);
+            })
+          },
+          description: 'Add Another transport check',
+          tags: ['api', 'transport']
+        }
+      },
+      {
         method: 'POST',
         path: '/v1/catch-certificate/transport/check',
         options: {
@@ -177,11 +196,9 @@ export default class CatchCertificateTransportRoutes {
           cors: true,
           handler: async (request, h) => {
             return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-              logger.info(`[ADD-TRANSPORT-CHECK][${documentNumber}][USER][${userPrincipal}][${contactId}]`);
-              const addTransportation = (request.payload as any).addTransportation;
-              return h.response({ addTransportation }).code(200);
+              return await Controller.addTransportationCheck(request, userPrincipal, documentNumber, contactId);
             }).catch(error => {
-              logger.error(`[ADD-TRANSPORT-CHECK][ERROR][${error.stack || error}`);
+              logger.error(`[ADD-TRANSPORTATION-CHECK][ERROR][${error.stack || error}`);
               return h.response().code(500);
             })
           },
