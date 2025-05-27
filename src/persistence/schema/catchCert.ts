@@ -41,7 +41,7 @@ export enum LandingsEntryOptions {
 
 export enum AddTransportation {
   Yes = 'yes',
-  No = 'No'
+  No = 'no',
 }
 
 export const LandingStatuses = Object.freeze(LandingValidationStatus);
