@@ -421,6 +421,100 @@ describe('CatchCertificateTransportService - updateTransport', () => {
       }
     }, 'contactId');
   });
+
+  it('should retain documents for existing transportation when updated', async () => {
+    mockGetDraftData.mockResolvedValue({
+      ...catchCertificate,
+      exportData: {
+        ...catchCertificate.exportData,
+        // add a transport with some existing documents
+        transportations: [{
+          id: 0,
+          vehicle: "truck",
+          nationalityOfVehicle: "adsf",
+          registrationNumber: "asdsfsd",
+          departurePlace: "Aylesbury",
+          transportDocuments: [{
+            name: 'truck doc 1',
+            reference: 'TRK00001'
+          }, {
+            name: 'truck doc 2',
+            reference: 'TRK0002'
+          }]
+        }]
+      }
+    });
+
+    const expected: BackEndCatchCertificateTransport = {
+      id: 0,
+      vehicle: "truck",
+      nationalityOfVehicle: 'British',
+      transportDocuments: [{
+        name: 'truck doc 1',
+        reference: 'TRK00001'
+      }, {
+        name: 'truck doc 2',
+        reference: 'TRK0002'
+      }]
+    }
+
+    const transport: CatchCertificateTransport = {
+      id: "0",
+      vehicle: 'truck',
+      nationalityOfVehicle: "British", // switch from adsf to British
+    }
+    const res = await SUT.updateTransport(transport, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(res).toEqual(transport);
+    expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {
+      '$set': {
+        'exportData.transportations': [expected],
+      }
+    }, 'contactId');
+  })
+
+  it('should clear documents for existing transportation when vehicle type is changed', async () => {
+    mockGetDraftData.mockResolvedValue({
+      ...catchCertificate,
+      exportData: {
+        ...catchCertificate.exportData,
+        // add a transport with some existing documents
+        transportations: [{
+          id: 0,
+          vehicle: "truck",
+          nationalityOfVehicle: "adsf",
+          registrationNumber: "asdsfsd",
+          departurePlace: "Aylesbury",
+          transportDocuments: [{
+            name: 'truck doc 1',
+            reference: 'TRK00001'
+          }, {
+            name: 'truck doc 2',
+            reference: 'TRK0002'
+          }]
+        }]
+      }
+    });
+
+    const expected: BackEndCatchCertificateTransport = {
+      id: 0,
+      vehicle: "train",
+      transportDocuments: []
+    }
+
+    const transport: CatchCertificateTransport = {
+      id: "0",
+      vehicle: "train", // switch vehicle from 'truck' to 'train'
+    }
+    const res = await SUT.updateTransport(transport, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(res).toEqual(transport);
+    expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {
+      '$set': {
+        'exportData.transportations': [expected],
+      }
+    }, 'contactId');
+  })
 });
 
 describe('CatchCertificateTransportService - removeTransportations', () => {

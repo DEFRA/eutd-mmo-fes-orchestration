@@ -100,7 +100,8 @@ export default class CatchCertificateTransportService {
           }
         }, contactId);
       } else {
-        transportations[index] = toBackEndTransport({ ...payload, documents: transportations[index].transportDocuments });
+        const vehicleHasChanged = payload.vehicle?.toLowerCase() !== transportations[index].vehicle?.toLowerCase();
+        transportations[index] = toBackEndTransport({ ...payload, documents: vehicleHasChanged ? [] : transportations[index].transportDocuments });
         await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': transportations } }, contactId);
       }
 
