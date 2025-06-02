@@ -43,7 +43,7 @@ export default class CatchCertificateTransportService {
       return toFrontEndTransport(_);
     }
 
-    return (draft && draft.exportData && draft.exportData.transportation)
+    return (draft?.exportData?.transportation)
       ? Transport.toFrontEndTransport(draft.exportData.transportation)
       : null;
   }
