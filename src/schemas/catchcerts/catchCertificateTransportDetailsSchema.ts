@@ -39,7 +39,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     otherwise: Joi.any()
   }),
   departurePlace: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
-  freightBillNumber: Joi.string().trim().optional()
+  freightBillNumber: Joi.string().trim().optional().max(60)
 });
 
 export default catchCertificateTransportDetailsSchema;

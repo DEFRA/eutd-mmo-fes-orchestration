@@ -774,4 +774,28 @@ describe("Transport endpoints", () => {
     expect(response.statusCode).toBe(500);
     expect(response.result).toEqual(null);
   });
+
+  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with freight bill number which exceeds the 60 character limit', async () => {
+    const request = createRequestObj(
+      '/v1/catch-certificate/transport-details/0',
+      {
+        id: '0',
+        vehicle: 'truck',
+        nationalityOfVehicle: 'UK',
+        registrationNumber: 'UI90UXB',
+        departurePlace: 'Hull',
+        freightBillNumber:
+          'Very Very Very Very Very Very Very Lengthy Freight Bill Number',
+      },
+      'PUT',
+    );
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransport).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    const error = {
+      freightBillNumber: 'error.freightBillNumber.string.max',
+    };
+    expect(response.result).toEqual(error);
+  });
 });
