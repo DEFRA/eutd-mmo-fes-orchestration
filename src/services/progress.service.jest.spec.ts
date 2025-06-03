@@ -547,7 +547,6 @@ describe('get', () => {
           flightNumber: '3456',
           containerNumber: '34567',
           departurePlace: 'London',
-          freightBillNumber: 'AA1234567',
           transportDocuments: [{
             name: 'name',
             reference: 'reference'
@@ -602,7 +601,7 @@ describe('get', () => {
           containerNumber: '34567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
-          documents: [{
+          transportDocuments: [{
             name: 'name'
           }]
         }],
@@ -644,7 +643,7 @@ describe('get', () => {
     );
   });
 
-  it('will return INCOMPLETE transportationDetails if the user adds a vehicle and the transport details for transportation with no documents', async () => {
+  it('will return COMPLETE transportationDetails if the user adds a vehicle and the transport details for transportation with no name', async () => {
     mockGetDraft.mockResolvedValue({
       exportData: {
         transportation: undefined,
@@ -655,7 +654,9 @@ describe('get', () => {
           containerNumber: '34567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
-          documents: []
+          transportDocuments: [{
+            reference: 'reference'
+          }]
         }],
         landingsEntryOption: 'manualEntry',
         exportedFrom: 'United Kingdom',
@@ -687,6 +688,57 @@ describe('get', () => {
       },
       requiredSections: 7,
       completedSections: 2,
+    });
+    expect(mockGetDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return COMPLETE transportationDetails if the user adds a vehicle and the transport details for transportation with no documents', async () => {
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        transportation: undefined,
+        transportations: [{
+          id: 0,
+          vehicle: 'plane',
+          flightNumber: '3456',
+          containerNumber: '34567',
+          departurePlace: 'London',
+          freightBillNumber: 'AA1234567',
+          transportDocuments: []
+        }],
+        landingsEntryOption: 'manualEntry',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
+        },
+      },
+    });
+
+    const result = await ProgressService.get(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    expect(result).toStrictEqual({
+      progress: {
+        reference: 'OPTIONAL',
+        exporter: 'INCOMPLETE',
+        products: 'INCOMPLETE',
+        landings: 'CANNOT START',
+        conservation: 'INCOMPLETE',
+        exportJourney: 'COMPLETED',
+        transportType: 'COMPLETED',
+        transportDetails: 'COMPLETED',
+      },
+      requiredSections: 7,
+      completedSections: 3,
     });
     expect(mockGetDraft).toHaveBeenCalledWith(
       userPrincipal,

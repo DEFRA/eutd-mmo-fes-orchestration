@@ -213,21 +213,13 @@ export default class ProgressService {
       FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.departurePlace
     );
 
-    const allHaveFreightBillNumber = transportations?.every((transportation: CatchCertificateTransport) =>
-      FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.freightBillNumber
-    );
-
     const allHaveTransportDocuments = transportations?.every((transportation: CatchCertificateTransport) => {
       const transport: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
-      if (!transport.documents || transport.documents.length === 0) {
-        return false;
-      }
-
-      return transport.documents.every((document: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) => ProgressService.isEmptyAndTrimSpaces(document.name) && ProgressService.isEmptyAndTrimSpaces(document.reference));
+      return transport?.documents ? transport?.documents.every((document: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) => ProgressService.isEmptyAndTrimSpaces(document.name) && ProgressService.isEmptyAndTrimSpaces(document.reference)) : true;
     });
 
     if (allHaveVehicles) {
-      if (allHaveDeparturePlace && allHaveFreightBillNumber && allHaveTransportDocuments) {
+      if (allHaveDeparturePlace && allHaveTransportDocuments) {
         return ProgressStatus.COMPLETED;
       } else {
         return ProgressStatus.INCOMPLETE;
