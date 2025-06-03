@@ -730,15 +730,41 @@ describe("Transport endpoints", () => {
     expect(response.result).toEqual(transportWithDocuments);
   });
 
-  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0', async () => {
+  it('returns 200 when we PUT /v1/catch-certificate/transport-documents/0 with empty documents', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [] }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with name only', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'name' }] }, 'PUT');
 
     const response = await server.inject(request);
     expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
   });
 
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with reference only', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ reference: 'reference' }] }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with reference only on second document', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'name', reference: 'reference' }, { reference: 'reference' }] }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+  });
 
   it('returns 500 and FAILS when we PUT /v1/catch-certificate/transport-documents/0', async () => {
     mockUpdateTransportDocuments.mockRejectedValue(new Error('an error'))

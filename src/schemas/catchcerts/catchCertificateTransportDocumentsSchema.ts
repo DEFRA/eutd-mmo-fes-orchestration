@@ -8,7 +8,7 @@ const catchCertificateTransportDocumentsSchema = Joi.object({
       name: Joi.string().trim().max(50).required(),
       reference: Joi.string().trim().max(50).required()
     })
-  ).min(1).required()
+  ).required()
 });
 
 export default catchCertificateTransportDocumentsSchema;
