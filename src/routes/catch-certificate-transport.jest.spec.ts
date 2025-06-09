@@ -735,8 +735,18 @@ describe("Transport endpoints", () => {
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [] }, 'PUT');
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.payload).toEqual(JSON.stringify({ documents: "error.documents.array.min" }));
+  });
+
+  it('returns 200 when we PUT /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }] }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
   });
 
   it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with name only', async () => {
