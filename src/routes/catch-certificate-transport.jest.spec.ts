@@ -730,7 +730,7 @@ describe("Transport endpoints", () => {
     expect(response.result).toEqual(transportWithDocuments);
   });
 
-  it('returns 200 when we PUT /v1/catch-certificate/transport-documents/0 with empty documents', async () => {
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with empty documents', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [] }, 'PUT');
 
@@ -740,7 +740,7 @@ describe("Transport endpoints", () => {
     expect(response.payload).toEqual(JSON.stringify({ documents: "error.documents.array.min" }));
   });
 
-  it('returns 200 when we PUT /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }] }, 'PUT');
 
@@ -804,6 +804,101 @@ describe("Transport endpoints", () => {
         reference: 'AA123456'
       }]
     }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(500);
+    expect(response.result).toEqual(null);
+  });
+
+  it('returns 200 when we POST /v1/catch-certificate/transport-documents/0', async () => {
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
+      id: '0', vehicle: 'truck', documents: [{
+        name: 'road-transport-document',
+        reference: 'AA123456'
+      }]
+    });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+    expect(response.result).toEqual(transportWithDocuments);
+  });
+
+  it('returns 200 when we POST /v1/catch-certificate/transport-documents/0 with empty documents', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [] });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+    expect(response.result).toEqual(transportWithDocuments);
+  });
+
+  it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }] });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with name only', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'name' }] });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with reference only', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ reference: 'reference' }] });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with reference only on second document', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'name', reference: 'reference' }, { reference: 'reference' }] });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('returns 500 and FAILS when we POST /v1/catch-certificate/transport-documents/0', async () => {
+    mockUpdateTransportDocuments.mockRejectedValue(new Error('an error'))
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
+      id: '0', vehicle: 'truck', documents: [{
+        name: 'road-transport-document',
+        reference: 'AA123456'
+      }]
+    });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(500);
+    expect(response.result).toEqual(null);
+  });
+
+  it('returns 500 and FAILS with no error stack when we POST /v1/catch-certificate/transport-documents/0', async () => {
+    const error = new Error('an error');
+    error.stack = undefined;
+
+    mockUpdateTransportDocuments.mockRejectedValue(error);
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
+      id: '0', vehicle: 'truck', documents: [{
+        name: 'road-transport-document',
+        reference: 'AA123456'
+      }]
+    });
 
     const response = await server.inject(request);
     expect(mockUpdateTransportDocuments).toHaveBeenCalled();

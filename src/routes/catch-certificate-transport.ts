@@ -9,6 +9,7 @@ import { CatchCertificateTransport } from '../persistence/schema/frontEndModels/
 import catchCertificateTransportSchema from '../schemas/catchcerts/catchCertificateTransportSelectionSchema';
 import catchCertificateTransportDetailsSchema from '../schemas/catchcerts/catchCertificateTransportDetailsSchema';
 import catchCertificateTransportDocumentsSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSchema';
+import catchCertificateTransportDocumentsSaveAndContinueSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSaveAndContinueSchema';
 
 export default class CatchCertificateTransportRoutes {
 
@@ -165,6 +166,36 @@ export default class CatchCertificateTransportRoutes {
               return h.response(errorObject).code(400).takeover();
             },
             payload: catchCertificateTransportDocumentsSchema
+          }
+        }
+      },
+      {
+        method: 'POST',
+        path: '/v1/catch-certificate/transport-documents/{transportId}',
+        options: {
+          auth: defineAuthStrategies(),
+          security: true,
+          cors: true,
+          handler: async (request, h) => {
+            return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+              return await Controller.updateTransportDocuments(request, userPrincipal, documentNumber, contactId);
+            }).catch(error => {
+
+              logger.error(`[SAVE-TRANSPORT-DOCUMENTS][ERROR][${error.stack ?? error}`);
+              return h.response().code(500);
+            })
+          },
+          description: 'Save transport documents',
+          tags: ['api', 'transportDocuments'],
+          validate: {
+            options: {
+              abortEarly: false
+            },
+            failAction: function (req, h, error) {
+              const errorObject = errorExtractor(error);
+              return h.response(errorObject).code(400).takeover();
+            },
+            payload: catchCertificateTransportDocumentsSaveAndContinueSchema
           }
         }
       },
