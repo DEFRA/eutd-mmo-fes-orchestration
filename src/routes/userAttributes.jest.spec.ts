@@ -86,6 +86,72 @@ describe('user attribute routes', () => {
       expect(response.result).toHaveLength(1)
     });
 
+    it('will return cookies accepted if date is after Last updated date', async () => {
+      const data = {
+        userPrincipal: 'Bob',
+        attributes: [{
+          name: 'accepts_cookies',
+          value: 'yes', 
+          modifiedAt: '2025-06-10T13:00:00Z'
+        }],
+        favourites: {
+          products: []
+        }
+      }
+
+      ApplicationConfig._lastUpdatedCookiePolicy = '2025-06-10T12:00:00Z';
+      
+      mockFindUserAttributes.mockResolvedValue(data);
+
+      const response = await server.inject(request);
+
+      expect(response.result).toHaveLength(1)
+    });
+
+    it('will return cookies not accepted if date is before Last updated date', async () => {
+      const data = {
+        userPrincipal: 'Bob',
+        attributes: [{
+          name: 'accepts_cookies',
+          value: 'no', 
+          modifiedAt: '2025-06-10T11:00:00Z'
+        }],
+        favourites: {
+          products: []
+        }
+      }
+
+      ApplicationConfig._lastUpdatedCookiePolicy = '2025-06-10T12:00:00Z';
+      
+      mockFindUserAttributes.mockResolvedValue(data);
+
+      const response = await server.inject(request);
+
+      expect(response.result).toHaveLength(0)
+    });
+
+    it('will return cookies accepted if _lastUpdatedCookiePolicy is empty', async () => {
+      const data = {
+        userPrincipal: 'Bob',
+        attributes: [{
+          name: 'accepts_cookies',
+          value: 'yes', 
+          modifiedAt: '2025-06-10T13:00:00Z'
+        }],
+        favourites: {
+          products: []
+        }
+      }
+
+      ApplicationConfig._lastUpdatedCookiePolicy = '';
+      
+      mockFindUserAttributes.mockResolvedValue(data);
+
+      const response = await server.inject(request);
+
+      expect(response.result).toHaveLength(1)
+    });
+
     it('will not return privacy accepted if date is before Last updated date', async () => {
       const data = {
         userPrincipal: 'Bob',

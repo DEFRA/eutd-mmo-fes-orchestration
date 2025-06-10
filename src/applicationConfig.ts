@@ -39,6 +39,7 @@ class ApplicationConfig {
   _fesNotifyTechnicalErrorTemplateId: string;
   _blobStorageConnection: string;
   _lastUpdatedPrivacyStatement: string;
+  _lastUpdatedCookiePolicy: string;
   _maxAuthRetries: number;
   _consolidationServicUrl: string;
 
@@ -91,6 +92,7 @@ class ApplicationConfig {
     this._maxLimitLandings = parseInt(process.env.LIMIT_ADD_LANDINGS, 10);
     this._maxUploadFileSize = parseInt(process.env.MAX_UPLOAD_FILE_SIZE, 10)
     this._lastUpdatedPrivacyStatement = process.env.LAST_UPDATED_PRIVACY_STATEMENT;
+    this._lastUpdatedCookiePolicy = process.env.LAST_UPDATED_COOKIE_POLICY;
 
     this._maxAuthRetries = parseInt(process.env.MAX_AUTH_RETRIES, 10) || 2;
   }

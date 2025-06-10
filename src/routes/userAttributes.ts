@@ -59,8 +59,9 @@ export default class UserAttributesRoutes {
             description: 'Get user attributes for user',
             handler: async (req: Hapi.Request) => {
               const allUserAttributes = await find((req.app as HapiRequestApplicationStateExtended).claims.sub);
-              if (allUserAttributes && allUserAttributes.attributes) {
-                return allUserAttributes.attributes.filter((val) => (val.name === "privacy_statement" && moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement).isSameOrBefore(val.modifiedAt)) || isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement) ? val : val.name !== 'privacy_statement');
+              if (allUserAttributes?.attributes) {
+                const allUserAttributesPrivacyFiltered = allUserAttributes.attributes.filter((val) => (val.name === "privacy_statement" && moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement).isSameOrBefore(val.modifiedAt)) || isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement) ? val : val.name !== 'privacy_statement');
+                return allUserAttributesPrivacyFiltered.filter((val) => (val.name === "accepts_cookies" && moment.utc(ApplicationConfig._lastUpdatedCookiePolicy).isSameOrBefore(val.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedCookiePolicy) ? val : val.name !== 'accepts_cookies'))
               }
               return [];
             },
