@@ -36,6 +36,16 @@ Use the following targets,
 - `npm start` will start without auth
 - `npm run start-with-auth` will start with auth
 
+### Troubleshooting
+
+#### Error "no such file or directory: ./node_modules/pre-commit/hook" when commiting a change
+
+This is likely due to a `husky` misconfiguration. You should be able to resolve this issue with a clean install of the packages
+```
+rm -rf ./node_modules && npm i
+```
+If you are still having trouble please see the [husky troubleshooting guide](https://typicode.github.io/husky/troubleshoot.html)
+
 ## Environment variables
 
 Look up applicationConfig.ts

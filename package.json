@@ -121,7 +121,6 @@
     "nock": "13.5.4",
     "nodemon": "^3.1.4",
     "nyc": "^15.1.0",
-    "pre-commit": "1.2.2",
     "prettier": "^3.3.2",
     "sinon": "19.0.2",
     "source-map-support": "0.5.21",
@@ -152,7 +151,7 @@
     "debug:without-auth": "cross-env DB_CONNECTION_URI=\"mongodb://127.0.0.1:27017\" DISABLE_AUTH=true AZURE_STORAGE_PROXY_URL=http://127.0.0.1:3001 REDIS_HOST_NAME=127.0.0.1 REDIS_PORT=6379 REDIS_PASSWORD='' REDIS_TLS_ENABLED=false npm-run-all clean lint build start-debug --print-label",
     "test:pre-commit": "cross-env NODE_ENV=test jest",
     "test": "cross-env NODE_ENV=test jest --coverage",
-    "test:ci": "cross-env JEST_JUNIT_OUTPUT_DIR=test-results JEST_JUNIT_OUTPUT_NAME=junit.xml NODE_ENV=test jest --runInBand --watchAll=false --reporters=default --reporters=jest-junit --coverage --ci"
+    "test:ci": "cross-env JEST_JUNIT_OUTPUT_DIR=test-results JEST_JUNIT_OUTPUT_NAME=junit.xml NODE_ENV=test jest --runInBand --watchAll=false --reporters=default --reporters=jest-junit --coverage --ci",
+    "prepare": "husky || true"
   }
 }
-
