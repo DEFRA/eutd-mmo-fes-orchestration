@@ -4,11 +4,11 @@ import * as Joi from 'joi';
 import acceptsHtml from "../helpers/acceptsHtml";
 import errorExtractor from '../helpers/errorExtractor';
 import { saveOrUpdate, find } from '../persistence/services/userAttributes';
+import { IAttribute, IUserAttributes } from '../persistence/schema/userAttributes';
 import { HapiRequestApplicationStateExtended } from '../types';
 import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 import ApplicationConfig from '../applicationConfig'
-
 
 export default class UserAttributesRoutes {
 
@@ -58,10 +58,21 @@ export default class UserAttributesRoutes {
             cors: true,
             description: 'Get user attributes for user',
             handler: async (req: Hapi.Request) => {
-              const allUserAttributes = await find((req.app as HapiRequestApplicationStateExtended).claims.sub);
+              const allUserAttributes: IUserAttributes | null = await find((req.app as HapiRequestApplicationStateExtended).claims.sub);
               if (allUserAttributes?.attributes) {
-                const allUserAttributesPrivacyFiltered = allUserAttributes.attributes.filter((val) => (val.name === "privacy_statement" && moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement).isSameOrBefore(val.modifiedAt)) || isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement) ? val : val.name !== 'privacy_statement');
-                return allUserAttributesPrivacyFiltered.filter((val) => (val.name === "accepts_cookies" && moment.utc(ApplicationConfig._lastUpdatedCookiePolicy).isSameOrBefore(val.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedCookiePolicy) ? val : val.name !== 'accepts_cookies'))
+                return allUserAttributes.attributes.reduce((attributes: IAttribute[], attribute: IAttribute, ) => {
+                  if (attribute.name === "privacy_statement") {
+                    const shouldIncludePrivacyAttribute = moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement).isSameOrBefore(attribute.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement);
+                    return shouldIncludePrivacyAttribute ? [ ...attributes, attribute] : attributes;
+                  }
+
+                  if (attribute.name === "accepts_cookies") {
+                    const shouldIncludeCookieAttribute = moment.utc(ApplicationConfig._lastUpdatedCookiePolicy).isSameOrBefore(attribute.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedCookiePolicy);
+                    return shouldIncludeCookieAttribute ? [ ...attributes, attribute] : attributes;
+                  }
+
+                  return [ ...attributes, attribute];
+                }, []);
               }
               return [];
             },

@@ -12,7 +12,6 @@ export const find = async (userPrincipal: string, property?: string[]): Promise<
   return await UserAttributesModel.findOne({userPrincipal}).select(property).lean(true);
 };
 
-
 export const saveOrUpdate = async(userPrincipal: string, attributeKey: string, attributeValue: any): Promise<IAttribute[]> => {
   const allUserAttributes = await find(userPrincipal, ["userPrincipal","attributes"]);
   if (allUserAttributes) {

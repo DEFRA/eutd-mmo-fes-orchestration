@@ -69,7 +69,7 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
         name: 'privacy_statement',
-        value: true, 
+        value: true,
         modifiedAt: '2019-02-26T23:54:00Z'
       }],
         favourites: {
@@ -78,7 +78,7 @@ describe('user attribute routes', () => {
       }
 
       ApplicationConfig._lastUpdatedPrivacyStatement = '2018-12-20';
-      
+
       mockFindUserAttributes.mockResolvedValue(data);
 
       const response = await server.inject(request);
@@ -91,7 +91,7 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
           name: 'accepts_cookies',
-          value: 'yes', 
+          value: 'yes',
           modifiedAt: '2025-06-10T13:00:00Z'
         }],
         favourites: {
@@ -100,7 +100,7 @@ describe('user attribute routes', () => {
       }
 
       ApplicationConfig._lastUpdatedCookiePolicy = '2025-06-10T12:00:00Z';
-      
+
       mockFindUserAttributes.mockResolvedValue(data);
 
       const response = await server.inject(request);
@@ -113,7 +113,7 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
           name: 'accepts_cookies',
-          value: 'no', 
+          value: 'no',
           modifiedAt: '2025-06-10T11:00:00Z'
         }],
         favourites: {
@@ -122,7 +122,7 @@ describe('user attribute routes', () => {
       }
 
       ApplicationConfig._lastUpdatedCookiePolicy = '2025-06-10T12:00:00Z';
-      
+
       mockFindUserAttributes.mockResolvedValue(data);
 
       const response = await server.inject(request);
@@ -135,7 +135,7 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
           name: 'accepts_cookies',
-          value: 'yes', 
+          value: 'yes',
           modifiedAt: '2025-06-10T13:00:00Z'
         }],
         favourites: {
@@ -144,7 +144,7 @@ describe('user attribute routes', () => {
       }
 
       ApplicationConfig._lastUpdatedCookiePolicy = '';
-      
+
       mockFindUserAttributes.mockResolvedValue(data);
 
       const response = await server.inject(request);
@@ -157,7 +157,7 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
         name: 'privacy_statement',
-        value: true, 
+        value: true,
         modifiedAt: '2017-02-26T23:54:00Z'
       }],
         favourites: {
@@ -176,11 +176,11 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
         name: 'privacy_statement',
-        value: true, 
+        value: true,
         modifiedAt: '2017-02-26T23:54:00Z'
       }, {
         name: 'language',
-        value: 'en_UK', 
+        value: 'en_UK',
         modifiedAt: '2019-02-26T23:54:00Z'
         }],
         favourites: {
@@ -192,7 +192,7 @@ describe('user attribute routes', () => {
       mockFindUserAttributes.mockResolvedValue(data);
       const response = await server.inject(request);
       expect(response.result).toHaveLength(1)
-      expect(response.result[0].name).toEqual("language");
+      expect(response.result?.[0].name).toEqual("language");
     });
 
     it('will return privacy accepted if date and time is after Last updated date', async () => {
@@ -200,7 +200,7 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
         name: 'privacy_statement',
-        value: true, 
+        value: true,
         modifiedAt: '2018-11-20T20:15:00Z'
       }],
         favourites: {
@@ -209,7 +209,7 @@ describe('user attribute routes', () => {
       }
 
       ApplicationConfig._lastUpdatedPrivacyStatement = '2018-11-20T20:14:00Z';
-      
+
       mockFindUserAttributes.mockResolvedValue(data);
 
       const response = await server.inject(request);
@@ -222,7 +222,7 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
         name: 'privacy_statement',
-        value: true, 
+        value: true,
         modifiedAt: '2017-02-26T21:14:00Z'
       }],
         favourites: {
@@ -241,11 +241,11 @@ describe('user attribute routes', () => {
         userPrincipal: 'Bob',
         attributes: [{
         name: 'privacy_statement',
-        value: true, 
+        value: true,
         modifiedAt: '2017-02-26T19:47:00Z'
       }, {
         name: 'language',
-        value: 'en_UK', 
+        value: 'en_UK',
         modifiedAt: '2019-04-20T23:54:00Z'
         }],
         favourites: {
@@ -257,7 +257,7 @@ describe('user attribute routes', () => {
       mockFindUserAttributes.mockResolvedValue(data);
       const response = await server.inject(request);
       expect(response.result).toHaveLength(1)
-      expect(response.result[0].name).toEqual("language");
+      expect(response.result?.[0].name).toEqual("language");
     });
 
     it('will throw an 500 error', async () => {
