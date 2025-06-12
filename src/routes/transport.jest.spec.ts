@@ -250,25 +250,9 @@ describe("transport routes", () => {
                 expect(response.result).toEqual(null);
             });
 
-            it(`returns 400 and fails when no required fields given when ${url}/saveAsDraft`, async () => {
+           
 
-                const request = createRequestObj(url+'/saveAsDraft', {
-                    ...{dashboardUri: '/uri', exportDate:moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
-                })
-                const response = await server.inject(request);
-                expect(mockAddTransportSaveAsDraft).not.toHaveBeenCalled();
-                expect(response.statusCode).toBe(400);
-            });
-
-            it(`returns 302 and fails when no required fields given when ${url}/saveAsDraft and acceptsHtml`, async () => {
-
-                const request = createRequestObj(url+'/saveAsDraft', {
-                    ...{dashboardUri: '/uri', exportDate:moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
-                }, 'POST', true)
-                const response = await server.inject(request);
-                expect(mockAddTransportSaveAsDraft).not.toHaveBeenCalled();
-                expect(response.statusCode).toBe(302);
-            });
+           
         } // end of testing saveVehicleEndpointTestCases
 
         // transport/add cases with saveAsDraft

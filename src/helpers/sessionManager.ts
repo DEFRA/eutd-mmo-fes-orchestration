@@ -32,7 +32,6 @@ export const getCurrentSessionData = async(userId: string, documentNumber: strin
         const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
 
         const [sessionData] = await attempt(sessionStore.readAllFor(userId, contactId, SESSION_DATA_KEY));
-
         if (sessionData) {
             logger.info(`[SESSION-MANAGER][GETTING-SESSION-DATA][${documentNumber}][DATA-FOUND]`);
             return sessionData.find(i => i.documentNumber.toUpperCase() === documentNumber.toUpperCase());

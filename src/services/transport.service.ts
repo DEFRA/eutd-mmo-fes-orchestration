@@ -1,7 +1,7 @@
 import * as CatchCertService from '../persistence/services/catchCert';
 import * as StorageNotesService from '../persistence/services/storageDoc';
 import { withUserSessionDataStored, SessionData, getCurrentSessionData } from '../helpers/sessionManager';
-import { Transport, checkTransportDataFrontEnd } from '../persistence/schema/frontEndModels/transport';
+import {  Transport } from '../persistence/schema/frontEndModels/transport';
 
 export default class TransportService {
 
@@ -46,13 +46,8 @@ export default class TransportService {
 
   public static async getTransportDetails(userPrincipal: string, journey: string, documentNumber: string, contactId: string): Promise<Transport> {
 
-    let data = await TransportService.getTransportData(userPrincipal, journey,documentNumber, contactId);
-
-    if (data?.vehicle) {
-      data = checkTransportDataFrontEnd(data);
-    }
-
-    if (data) {
+    const data = await TransportService.getTransportData(userPrincipal, journey,documentNumber, contactId);
+if (data) {
       const sessionData = await getCurrentSessionData(userPrincipal, documentNumber, contactId);
 
       if (sessionData) {

@@ -96,8 +96,9 @@ describe("The Transport Service", () => {
 
       expect(mockCatchCertUpsertTransportData).toHaveBeenCalledWith("Bob", {"journey": "catchCertificate", "transport": "some data", "user_id": "Bob"},"GB-34324-34234-234234", contactId);
     });
-
+   
     it("Will save transport details to mongo when there existing data", async () => {
+      mockGetCurrentSessionData.mockResolvedValue(undefined);
       mockGetTransportData.mockResolvedValue({
         vehicle : "water rocket"
       });
@@ -109,6 +110,7 @@ describe("The Transport Service", () => {
     });
 
     it("Will save session data in REDIS", async () => {
+      mockGetCurrentSessionData.mockResolvedValue(undefined);
       mockGetTransportData.mockResolvedValue({
         vehicle : "water rocket"
       });

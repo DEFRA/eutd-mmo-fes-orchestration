@@ -10,10 +10,6 @@ import planeSchema from '../schemas/catchcerts/planeSchema';
 import containerVesselSchema from '../schemas/catchcerts/containerVesselSchema';
 import transportSelectionSaveAsDraftSchema from '../schemas/catchcerts/transportSelectionSaveAsDraftSchema';
 import truckCmrSaveAsDraftSchema from '../schemas/catchcerts/truckCmrSaveAsDraftSchema';
-import truckSaveAsDraftSchema from '../schemas/catchcerts/truckSaveAsDraftSchema';
-import planeSaveAsDraftSchema from '../schemas/catchcerts/planeSaveAsDraftSchema';
-import trainSaveAsDraftSchema from '../schemas/catchcerts/trainSaveAsDraftSchema';
-import containerVesselSaveAsDraftSchema from '../schemas/catchcerts/containerVesselSaveAsDraftSchema';
 import errorExtractor, {buildNonJsErrorObject} from '../helpers/errorExtractor';
 import {withDocumentLegitimatelyOwned} from "../helpers/withDocumentLegitimatelyOwned";
 import logger from "../logger";
@@ -116,7 +112,7 @@ export default class TransportRoutes {
               return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
                 return await Controller.addTransportDetails(request,h,false,userPrincipal,documentNumber, contactId)
               }).catch(error => {
-                logger.error(`[ADD-TRUCK-DETAILS][ERROR][${error.stack || error}`);
+                logger.error(`[ADD-TRUCK-DETAILS][ERROR][${error.stack ?? error}`);
                 return h.response().code(500);
               });
             },
@@ -142,7 +138,7 @@ export default class TransportRoutes {
 
                   return h.redirect(`${(req.payload as any).currentUri}?error=`+JSON.stringify(jsErrorObject)).takeover();
                 }
-
+                
                 return h.response(errorObject).code(400).takeover();
               },
               payload: truckSchema
@@ -377,21 +373,7 @@ export default class TransportRoutes {
               });
             },
             description: 'Add truck transport details',
-            tags: ['api', 'transport', 'details', 'save as draft'],
-            validate:{
-              options: {
-                abortEarly: false
-              },
-              failAction: function(req, h, error) {
-                const errorObject = errorExtractor(error);
-
-                if (acceptsHtml(req.headers)) {
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
-                }
-                return h.response(errorObject).code(400).takeover();
-              },
-              payload: truckSaveAsDraftSchema
-            }
+            tags: ['api', 'transport', 'details', 'save as draft']
           }
         },
         {
@@ -410,20 +392,7 @@ export default class TransportRoutes {
               });
             },
             description: 'Add plane transport details and save as draft',
-            tags: ['api', 'plane transport', 'save as draft'],
-            validate: {
-              options: {
-                abortEarly: false
-              },
-              failAction: function (req, h, error) {
-                const errorObject = errorExtractor(error);
-                if (acceptsHtml(req.headers)) {
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
-                }
-                return h.response(errorObject).code(400).takeover();
-              },
-              payload: planeSaveAsDraftSchema
-            }
+            tags: ['api', 'plane transport', 'save as draft']
           }
         },
         {
@@ -442,20 +411,7 @@ export default class TransportRoutes {
               });
             },
             description: 'Add train transport details and save as draft',
-            tags: ['api', 'transport details', 'save as draft'],
-            validate: {
-              options: {
-                abortEarly: false
-              },
-              failAction: function(req, h, error) {
-                const errorObject = errorExtractor(error);
-                if (acceptsHtml(req.headers)) {
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
-                }
-                return h.response(errorObject).code(400).takeover();
-              },
-              payload: trainSaveAsDraftSchema
-            }
+            tags: ['api', 'transport details', 'save as draft']
           }
         },
         {
@@ -474,22 +430,7 @@ export default class TransportRoutes {
               });
             },
             description: 'Add container vessel transport details and save as draft',
-            tags: ['api', 'transport', 'save as draft'],
-            validate:{
-              options: {
-                abortEarly: false
-              },
-              failAction: function(req, h, error) {
-                const errorObject = errorExtractor(error);
-
-                if (acceptsHtml(req.headers)) {
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
-                }
-
-                return h.response(errorObject).code(400).takeover();
-              },
-              payload: containerVesselSaveAsDraftSchema
-            }
+            tags: ['api', 'transport', 'save as draft']
           }
         }
       ]);
