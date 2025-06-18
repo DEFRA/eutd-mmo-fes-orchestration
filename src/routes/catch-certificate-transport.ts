@@ -135,6 +135,9 @@ export default class CatchCertificateTransportRoutes {
 
               return h.response(errorObject).code(400).takeover();
             },
+            query: Joi.object({
+              draft: Joi.boolean(),
+            }),
             payload: catchCertificateTransportDetailsSchema
           }
         }
@@ -165,6 +168,9 @@ export default class CatchCertificateTransportRoutes {
               const errorObject = errorExtractor(error);
               return h.response(errorObject).code(400).takeover();
             },
+            query: Joi.object({
+              draft: Joi.boolean(),
+            }),
             payload: catchCertificateTransportDocumentsSchema
           }
         }
@@ -195,6 +201,9 @@ export default class CatchCertificateTransportRoutes {
               const errorObject = errorExtractor(error);
               return h.response(errorObject).code(400).takeover();
             },
+            query: Joi.object({
+              draft: Joi.boolean(),
+            }),
             payload: catchCertificateTransportDocumentsSaveAndContinueSchema
           }
         }

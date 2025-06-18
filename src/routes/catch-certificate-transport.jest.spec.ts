@@ -381,74 +381,6 @@ describe("Transport endpoints", () => {
     expect(response.payload).toStrictEqual(JSON.stringify(error));
   });
 
-  it('returns 200 when we PUT /v1/catch-certificate/transport-details/0', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'truck',
-        nationalityOfVehicle: 'UK',
-        registrationNumber: 'UI90UXB',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.result).toEqual(transport);
-  });
-
-  it('returns 500 when we PUT /v1/catch-certificate/transport-details/0', async () => {
-    mockUpdateTransport.mockRejectedValue(new Error("something has gone wrong"));
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'truck',
-        nationalityOfVehicle: 'UK',
-        registrationNumber: 'UI90UXB',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toEqual(null);
-  });
-
-  it('returns 500 when we PUT /v1/catch-certificate/transport-details/0 with no stack', async () => {
-    const error = new Error("something has gone wrong");
-    error.stack = undefined;
-
-    mockUpdateTransport.mockRejectedValue(error);
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'truck',
-        nationalityOfVehicle: 'UK',
-        registrationNumber: 'UI90UXB',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toEqual(null);
-  });
-
   it('returns 200 when we DELETE /v1/catch-certificate/transport/0', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
@@ -482,201 +414,6 @@ describe("Transport endpoints", () => {
     expect(mockRemoveTransportation).toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
     expect(response.result).toBeNull();
-  });
-
-  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete details', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'truck',
-        registrationNumber: 'UI90UXB',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    const error = { nationalityOfVehicle: "error.nationalityOfVehicle.any.required" };
-    expect(response.result).toEqual(error);
-  });
-
-  it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete plane details', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'plane',
-        flightNumber: 'UI90UXB',
-        containerNumber: '012345678',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.result).toEqual(transport);
-  });
-
-  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete plane details', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'plane',
-        flightNumber: 'UI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXB',
-        containerNumber: '012345678',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    const error = { flightNumber: "error.flightNumber.string.max" };
-    expect(response.result).toEqual(error);
-  });
-
-  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete plane details on containerNumber', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'plane',
-        flightNumber: '01234567',
-        containerNumber: '@$%%$$%%',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    const error = { containerNumber: "error.containerNumber.string.alphanum" };
-    expect(response.result).toEqual(error);
-  });
-
-  it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete train details', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'train',
-        railwayBillNumber: '01234567',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.result).toEqual(transport);
-  });
-
-  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete train details', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'train',
-        railwayBillNumber: '0123456789012345',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    const error = { railwayBillNumber: "error.railwayBillNumber.string.max" };
-    expect(response.result).toEqual(error);
-  });
-
-  it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete containerVessel details', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'containerVessel',
-        vesselName: 'WIRON 5',
-        containerNumber: '0192394',
-        flagState: 'UK',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.result).toEqual(transport);
-  });
-
-  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete containerVessel details', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'containerVessel',
-        vesselName: '&£*W(W$*$*(W$&',
-        containerNumber: '0192394',
-        flagState: 'UK',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    const error = { vesselName: "error.vesselName.string.pattern.base" };
-    expect(response.result).toEqual(error);
-  });
-
-  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete containerVessel details for containerNumber', async () => {
-
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'containerVessel',
-        vesselName: 'Wiron 5',
-        containerNumber: '£%%%@%%@',
-        flagState: 'UK',
-        departurePlace: 'Hull',
-        freightBillNumber: 'AA1234567'
-      },
-      'PUT'
-    );
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    const error = { containerNumber: "error.containerNumber.string.alphanum", };
-    expect(response.result).toEqual(error);
   });
 
   it('returns 200 when we GET /v1/catch-certificate/transportations', async () => {
@@ -906,27 +643,439 @@ describe("Transport endpoints", () => {
     expect(response.result).toEqual(null);
   });
 
-  it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with freight bill number which exceeds the 60 character limit', async () => {
-    const request = createRequestObj(
-      '/v1/catch-certificate/transport-details/0',
-      {
-        id: '0',
-        vehicle: 'truck',
-        nationalityOfVehicle: 'UK',
-        registrationNumber: 'UI90UXB',
-        departurePlace: 'Hull',
-        freightBillNumber:
-          'Very Very Very Very Very Very Very Lengthy Freight Bill Number',
-      },
-      'PUT',
-    );
+  describe('/v1/catch-certificate/transport-details', () => {
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete truck details', async () => {
 
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    const error = {
-      freightBillNumber: 'error.freightBillNumber.string.max',
-    };
-    expect(response.result).toEqual(error);
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete plane details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'plane',
+          flightNumber: 'UI90UXB',
+          containerNumber: '012345678',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete train details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'train',
+          railwayBillNumber: '01234567',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete containerVessel details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'containerVessel',
+          vesselName: 'WIRON 5',
+          containerNumber: '0192394',
+          flagState: 'UK',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with incomplete truck details', async () => {
+      
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'truck',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with incomplete plane details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'plane',
+          flightNumber: 'UI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXB',
+          containerNumber: '012345678',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with incomplete plane details on containerNumber', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'plane',
+          flightNumber: '01234567',
+          containerNumber: '@$%%$$%%',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with incomplete train details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'train',
+          railwayBillNumber: '0123456789012345',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with incomplete containerVessel details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'containerVessel',
+          vesselName: '&£*W(W$*$*(W$&',
+          containerNumber: '0192394',
+          flagState: 'UK',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with incomplete containerVessel details for containerNumber', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'containerVessel',
+          vesselName: 'Wiron 5',
+          containerNumber: '£%%%@%%@',
+          flagState: 'UK',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with freight bill number which exceeds the 60 character limit', async () => {
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber:
+            'Very Very Very Very Very Very Very Lengthy Freight Bill Number',
+        },
+        'PUT',
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete truck details', async () => {
+      
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { nationalityOfVehicle: "error.nationalityOfVehicle.any.required" };
+      expect(response.result).toEqual(error);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete plane details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'plane',
+          flightNumber: 'UI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXB',
+          containerNumber: '012345678',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { flightNumber: "error.flightNumber.string.max" };
+      expect(response.result).toEqual(error);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete plane details on containerNumber', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'plane',
+          flightNumber: '01234567',
+          containerNumber: '@$%%$$%%',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { containerNumber: "error.containerNumber.string.alphanum" };
+      expect(response.result).toEqual(error);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete train details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'train',
+          railwayBillNumber: '0123456789012345',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { railwayBillNumber: "error.railwayBillNumber.string.max" };
+      expect(response.result).toEqual(error);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete containerVessel details', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'containerVessel',
+          vesselName: '&£*W(W$*$*(W$&',
+          containerNumber: '0192394',
+          flagState: 'UK',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { vesselName: "error.vesselName.string.pattern.base" };
+      expect(response.result).toEqual(error);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete containerVessel details for containerNumber', async () => {
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'containerVessel',
+          vesselName: 'Wiron 5',
+          containerNumber: '£%%%@%%@',
+          flagState: 'UK',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { containerNumber: "error.containerNumber.string.alphanum", };
+      expect(response.result).toEqual(error);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with freight bill number which exceeds the 60 character limit', async () => {
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber:
+            'Very Very Very Very Very Very Very Lengthy Freight Bill Number',
+        },
+        'PUT',
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = {
+        freightBillNumber: 'error.freightBillNumber.string.max',
+      };
+      expect(response.result).toEqual(error);
+    });
+
+    it('returns 500 when we PUT /v1/catch-certificate/transport-details/0 when the controller throws an error', async () => {
+      mockUpdateTransport.mockRejectedValue(new Error("something has gone wrong"));
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toEqual(null);
+    });
+
+    it('returns 500 when we PUT /v1/catch-certificate/transport-details/0 when the controller throws an error with no stack', async () => {
+      const error = new Error("something has gone wrong");
+      error.stack = undefined;
+
+      mockUpdateTransport.mockRejectedValue(error);
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toEqual(null);
+    });
   });
 });

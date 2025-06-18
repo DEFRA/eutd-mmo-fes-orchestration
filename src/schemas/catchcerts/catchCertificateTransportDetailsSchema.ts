@@ -5,41 +5,77 @@ const catchCertificateTransportDetailsSchema = Joi.object({
   vehicle: Joi.string().valid("truck", "plane", "train", "containerVessel").required(),
   nationalityOfVehicle: Joi.when('vehicle', {
     is: 'truck',
-    then: Joi.string().trim().required(),
-    otherwise: Joi.any()
+    then: Joi.when('$query.draft', { 
+      is: true, 
+      then: Joi.any(), 
+      otherwise: Joi.string().trim().required(),
+    }),
+    otherwise: Joi.forbidden(),
   }),
   registrationNumber: Joi.when('vehicle', {
     is: 'truck',
-    then: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
-    otherwise: Joi.any()
+    then: Joi.when('$query.draft', { 
+      is: true, 
+      then: Joi.any(), 
+      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\- ]+$/).required(),
+    }),
+    otherwise: Joi.forbidden(),
   }),
   flightNumber: Joi.when('vehicle', {
     is: 'plane',
-    then: Joi.string().trim().alphanum().max(15).required(),
-    otherwise: Joi.any()
+    then: Joi.when('$query.draft', { 
+      is: true, 
+      then: Joi.any(), 
+      otherwise: Joi.string().trim().alphanum().max(15).required(),
+     }),
+    otherwise: Joi.forbidden(),
   }),
   containerNumber: Joi.when('vehicle', {
     is: Joi.valid('plane', 'containerVessel'),
-    then: Joi.string().trim().alphanum().max(50).required(),
-    otherwise: Joi.any()
+    then: Joi.when('$query.draft', {
+      is: true,
+      then: Joi.any(),
+      otherwise: Joi.string().trim().alphanum().max(50).required(),
+    }),
+    otherwise: Joi.forbidden(),
   }),
   railwayBillNumber: Joi.when('vehicle', {
     is: 'train',
-    then: Joi.string().trim().alphanum().max(15).required(),
-    otherwise: Joi.any()
+    then: Joi.when('$query.draft', {
+      is: true,
+      then: Joi.any(),
+      otherwise: Joi.string().trim().alphanum().max(15).required(),
+    }),
+    otherwise: Joi.forbidden(),
   }),
   vesselName: Joi.when('vehicle', {
     is: 'containerVessel',
-    then: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/).required(),
-    otherwise: Joi.any()
+    then: Joi.when('$query.draft', {
+      is: true,
+      then: Joi.any(),
+      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/).required(),
+    }),
+    otherwise: Joi.forbidden()
   }),
   flagState: Joi.when('vehicle', {
     is: 'containerVessel',
-    then: Joi.string().trim().required(),
-    otherwise: Joi.any()
+    then: Joi.when('$query.draft', {
+      is: true,
+      then: Joi.any(),
+      otherwise: Joi.string().trim().required(),
+    }),
+    otherwise: Joi.forbidden()
   }),
-  departurePlace: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
-  freightBillNumber: Joi.string().trim().optional().max(60)
+  departurePlace: Joi.when('$query.draft', {
+    is: true,
+    then: Joi.any(),
+    otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/).required(),
+  }),
+  freightBillNumber: Joi.when('$query.draft', {
+    is: true,
+    then: Joi.any(),
+    otherwise: Joi.string().trim().max(60),
+  })
 });
 
 export default catchCertificateTransportDetailsSchema;
