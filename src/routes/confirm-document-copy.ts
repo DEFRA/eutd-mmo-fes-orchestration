@@ -20,6 +20,7 @@ import logger from '../logger';
 
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import { HapiRequestApplicationStateExtended } from '../types';
+import { userCanCreateDraft } from '../validators/draftCreationValidator';
 export default class ConfirmDocumentCopyRoutes {
   public async register(server: Hapi.Server): Promise<any> {
     return new Promise<void>(resolve => {
@@ -49,68 +50,73 @@ export default class ConfirmDocumentCopyRoutes {
                   const { journey, copyDocumentAcknowledged, voidOriginal, ipAddress, excludeLandings } = request.payload as any;
                   let newDocumentNumber: string;
 
-                  switch(journey) {
-                    case catchCerts:
-                      newDocumentNumber = await CatchCertService.cloneCatchCertificate(documentNumber, userPrincipal, excludeLandings, contactId, requestByAdmin, voidOriginal);
-                      break;
-                    case processingStatement:
-                      newDocumentNumber = await ProcessingStatmentService.cloneProcessingStatement(documentNumber, userPrincipal, contactId, requestByAdmin, voidOriginal);
-                      break;
-                    case storageNote:
-                      newDocumentNumber = await StorageDocumentService.cloneStorageDocument(documentNumber, userPrincipal, contactId, requestByAdmin, voidOriginal);
-                      break;
-                    default:
-                      throw 'JOURNEY-UNKNOWN'
-                  }
-
-                  logger.debug(`[COPY-CERTIFICATE][${documentNumber}][COPIED][${newDocumentNumber}]`);
-
-                  logger.debug(`[COPY-CERTIFICATE][${documentNumber}][REPORTING][${newDocumentNumber}]`);
-
-                  reportDraftCreated(newDocumentNumber)
-                    .catch(e =>
-                      logger.error(`[COPY-CERTIFICATE][${documentNumber}][REPORTING][${newDocumentNumber}][ERROR][${e.stack || e}]`)
-                    );
-
-                  logger.debug(`[COPY-CERTIFICATE][${documentNumber}][SUCCESS]`);
-
-                  if (voidOriginal) {
-                    logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][START]`);
-
-                    let voided = false;
-
-                    switch(journey) {
+                  const canCreateDraft = await userCanCreateDraft(userPrincipal, journey, contactId);
+       
+                  if (canCreateDraft) {
+                    switch (journey) {
                       case catchCerts:
-                        voided = await CatchCertService.voidCatchCertificate(documentNumber, userPrincipal, contactId);
+                        newDocumentNumber = await CatchCertService.cloneCatchCertificate(documentNumber, userPrincipal, excludeLandings, contactId, requestByAdmin, voidOriginal);
                         break;
                       case processingStatement:
-                        voided = await ProcessingStatmentService.voidProcessingStatement(documentNumber, userPrincipal, contactId);
+                        newDocumentNumber = await ProcessingStatmentService.cloneProcessingStatement(documentNumber, userPrincipal, contactId, requestByAdmin, voidOriginal);
                         break;
                       case storageNote:
-                        voided = await StorageDocumentService.voidStorageDocument(documentNumber, userPrincipal, contactId);
+                        newDocumentNumber = await StorageDocumentService.cloneStorageDocument(documentNumber, userPrincipal, contactId, requestByAdmin, voidOriginal);
                         break;
                       default:
                         throw 'JOURNEY-UNKNOWN'
                     }
 
-                    logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][VOIDED]`);
+                    logger.debug(`[COPY-CERTIFICATE][${documentNumber}][COPIED][${newDocumentNumber}]`);
 
-                    logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][REPORTING]`);
-                    const monitoringInfo = `void/${JOURNEY[journey]}/dn:${documentNumber}`;
-                    const app = request.app as HapiRequestApplicationStateExtended;
-                    const sessionId = `${app.claims.auth_time}:${app.claims.contactId}`;
-                    const transaction = `${PROTECTIVE_MONITORING_VOID_TRANSACTION}-${DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber)}`;
+                    logger.debug(`[COPY-CERTIFICATE][${documentNumber}][REPORTING][${newDocumentNumber}]`);
 
-                    const message = voided ? `User voided a ${JOURNEY[journey]}` : `An attempt was made to void a ${JOURNEY[journey]} not created by the current user`;
-                    const priorityCode = voided ? PROTECTIVE_MONITORING_PRIORITY_NORMAL : PROTECTIVE_MONITORING_PRIORITY_UNUSUAL;
+                    reportDraftCreated(newDocumentNumber)
+                      .catch(e =>
+                        logger.error(`[COPY-CERTIFICATE][${documentNumber}][REPORTING][${newDocumentNumber}][ERROR][${e.stack || e}]`)
+                      );
 
-                    await postEventData(userPrincipal, message, monitoringInfo, ipAddress, priorityCode, sessionId, transaction)
-                      .catch(error => logger.error(`[COPY-VOID-CERTIFICATE][${documentNumber}][EVENT-HUB][ERROR][${error.stack || error}]`));
+                    logger.debug(`[COPY-CERTIFICATE][${documentNumber}][SUCCESS]`);
 
-                    logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][SUCCESS]`);
+                    if (voidOriginal) {
+                      logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][START]`);
+
+                      let voided = false;
+
+                      switch (journey) {
+                        case catchCerts:
+                          voided = await CatchCertService.voidCatchCertificate(documentNumber, userPrincipal, contactId);
+                          break;
+                        case processingStatement:
+                          voided = await ProcessingStatmentService.voidProcessingStatement(documentNumber, userPrincipal, contactId);
+                          break;
+                        case storageNote:
+                          voided = await StorageDocumentService.voidStorageDocument(documentNumber, userPrincipal, contactId);
+                          break;
+                        default:
+                          throw 'JOURNEY-UNKNOWN'
+                      }
+
+                      logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][VOIDED]`);
+
+                      logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][REPORTING]`);
+                      const monitoringInfo = `void/${JOURNEY[journey]}/dn:${documentNumber}`;
+                      const app = request.app as HapiRequestApplicationStateExtended;
+                      const sessionId = `${app.claims.auth_time}:${app.claims.contactId}`;
+                      const transaction = `${PROTECTIVE_MONITORING_VOID_TRANSACTION}-${DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber)}`;
+
+                      const message = voided ? `User voided a ${JOURNEY[journey]}` : `An attempt was made to void a ${JOURNEY[journey]} not created by the current user`;
+                      const priorityCode = voided ? PROTECTIVE_MONITORING_PRIORITY_NORMAL : PROTECTIVE_MONITORING_PRIORITY_UNUSUAL;
+
+                      await postEventData(userPrincipal, message, monitoringInfo, ipAddress, priorityCode, sessionId, transaction)
+                        .catch(error => logger.error(`[COPY-VOID-CERTIFICATE][${documentNumber}][EVENT-HUB][ERROR][${error.stack || error}]`));
+
+                      logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][SUCCESS]`);
+                    }
+
+                    return h.response({ documentNumber, newDocumentNumber, voidOriginal, copyDocumentAcknowledged });
                   }
-
-                  return h.response({ documentNumber, newDocumentNumber, voidOriginal, copyDocumentAcknowledged  });
+                  return h.response({message: 'unauthorised'}).code(403);  
                 },
                 [DocumentStatuses.Complete]
               ).catch(error => {

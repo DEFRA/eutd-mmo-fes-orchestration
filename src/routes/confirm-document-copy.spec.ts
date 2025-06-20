@@ -9,6 +9,7 @@ import * as constants from '../session_store/constants';
 import ConfirmDocumentCopyRoutes from './confirm-document-copy';
 import logger from '../logger';
 import { DocumentStatuses } from '../persistence/schema/catchCert';
+import * as draftCreationValidator from "../validators/draftCreationValidator";
 
 describe('confirm document copy routes', () => {
 
@@ -32,6 +33,7 @@ describe('confirm document copy routes', () => {
     let mockLogError;
     let mockLogDebug;
     let mockPostEventData;
+    let mockUserCanCreateDraft;
 
     const document = {
       documentNumber: 'GBR-2020-CC-0E42C2DA5'
@@ -43,12 +45,14 @@ describe('confirm document copy routes', () => {
       mockValidateDocumentOwnership = jest.spyOn(DocumentOwnershipValidator, 'validateDocumentOwnership');
       mockReportDraftCreated = jest.spyOn(ReferenceDataService, 'reportDraftCreated');
       mockPostEventData = jest.spyOn(MonitoringService, 'postEventData');
+      mockUserCanCreateDraft = jest.spyOn(draftCreationValidator, 'userCanCreateDraft');
     });
 
     beforeEach(() => {
       mockValidateDocumentOwnership.mockResolvedValue(document);
       mockReportDraftCreated.mockResolvedValue(true);
       mockPostEventData.mockResolvedValue(null);
+      mockUserCanCreateDraft.mockResolvedValue(() => Promise.resolve(true));
     });
 
     afterAll(() => {
@@ -243,6 +247,15 @@ describe('confirm document copy routes', () => {
         expect(response.result).toBeNull();
       })
 
+        it('returns 403 if userCanCreateDraft returns false', async () => {
+        mockUserCanCreateDraft.mockResolvedValueOnce(false);
+
+        const response = await server.inject(request);
+
+        expect(response.statusCode).toBe(403);
+        expect(response.result).toEqual({ message: 'unauthorised' });
+      });
+
       it('will log any errors', async () => {
         const error = new Error('something went wrong');
 
@@ -431,6 +444,15 @@ describe('confirm document copy routes', () => {
         expect(response.result).toBeNull();
       })
 
+      it('returns 403 if userCanCreateDraft returns false', async () => {
+        mockUserCanCreateDraft.mockResolvedValueOnce(false);
+
+        const response = await server.inject(request);
+
+        expect(response.statusCode).toBe(403);
+        expect(response.result).toEqual({ message: 'unauthorised' });
+      });
+
       it('will log any errors', async () => {
         const error = new Error('something went wrong');
 
@@ -618,6 +640,15 @@ describe('confirm document copy routes', () => {
         expect(response.statusCode).toBe(403);
         expect(response.result).toBeNull();
       })
+
+        it('returns 403 if userCanCreateDraft returns false', async () => {
+        mockUserCanCreateDraft.mockResolvedValueOnce(false);
+
+        const response = await server.inject(request);
+
+        expect(response.statusCode).toBe(403);
+        expect(response.result).toEqual({ message: 'unauthorised' });
+      });
 
       it('will log any errors', async () => {
         const error = new Error('something went wrong');
