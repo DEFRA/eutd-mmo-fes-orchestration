@@ -61,6 +61,8 @@ export interface Catch {
   startDate?: string;
   faoArea?: string;
   weight?: number;
+  gearCategory?: string;
+  gearType?: string;
   _status?: LandingValidationStatus;
   numberOfSubmissions?: number;
   vesselOverriddenByAdmin?: boolean;
@@ -230,7 +232,7 @@ export const cloneProductData = (original: Product, newDocumentNumber: string, e
 }
 
 export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch => {
-  const {id, vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight} = original;
+  const {id,vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType } = original;
 
   const result = {
     id: `${newDocumentNumber}${id.slice(newDocumentNumber.length)}`,
@@ -246,7 +248,9 @@ export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch =>
     date,
     startDate,
     faoArea,
-    weight
+    weight,
+    gearCategory,
+    gearType
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);
@@ -351,6 +355,8 @@ const CatchSchema = new Schema({
   startDate:                { type: String, required: false },
   faoArea:                  { type: String, required: true  },
   weight:                   { type: Number },
+  gearCategory:             { type: String, required: false  },
+  gearType:                 { type: String, required: false  },
   numberOfSubmissions:      { type: Number, required: true, default: 0 },
   vesselOverriddenByAdmin:  { type: Boolean, required: false },
   vesselNotFound:           { type: Boolean, required: false },

@@ -76,6 +76,17 @@ export default class ExportPayloadRoutes {
                   return value;
                 }, 'Start Date Validator').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
+                gearCategory: Joi.string().allow('', null).label("Gear Category").optional(),
+                gearType: Joi.custom((value: string, helpers: any) => {
+                  const gearType = helpers.original;
+                  const gearCategory = helpers.state.ancestors[0].gearCategory;
+
+                  if (gearCategory && !gearType) {
+                    return helpers.error('string.empty');
+                  }
+
+                  return value;
+                }, 'Start Date Validator').optional(),
                 faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required()
               })
             }
@@ -235,6 +246,17 @@ export default class ExportPayloadRoutes {
                   return value;
                 }, 'Start Date Validator').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
+                gearCategory: Joi.string().allow('', null).label("Gear Category").optional(),
+                gearType: Joi.custom((value: string, helpers: any) => {
+                  const gearType = helpers.original;
+                  const gearCategory = helpers.state.ancestors[0].gearCategory;
+
+                  if (gearCategory && !gearType) {
+                    return helpers.error('string.empty');
+                  }
+
+                  return value;
+                }, 'Start Date Validator').optional(),
                 faoArea: Joi.string().trim().label("Catch area").required()
               })
             }

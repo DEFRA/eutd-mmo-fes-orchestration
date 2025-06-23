@@ -462,7 +462,9 @@ export default class ExportPayloadController {
         vessel: payload.vessel,
         dateLanded: payload.dateLanded,
         startDate: payload.startDate,
-        exportWeight: payload.exportWeight
+        exportWeight: payload.exportWeight,
+        gearCategory: payload.gearCategory,
+        gearType: payload.gearType,
       }
     };
 
@@ -479,6 +481,8 @@ export default class ExportPayloadController {
       dateLanded: string,
       faoArea: string,
       weights: PayloadSchema.Weight[],
+      gearCategory?: string,
+      gearType?: string,
       currentUri?: string
     } = { ...(req.payload as any) };
 
@@ -497,6 +501,8 @@ export default class ExportPayloadController {
           startDate: payload.startDate,
           dateLanded: payload.dateLanded,
           exportWeight: weight.exportWeight,
+          gearCategory: payload.gearCategory,
+          gearType: payload.gearType,
           faoArea: payload.faoArea
         }
       };
@@ -559,7 +565,9 @@ export default class ExportPayloadController {
       startDate?: string,
       exportWeight: number,
       faoArea: string,
-      currentUri?: string
+      currentUri?: string,
+      gearCategory?: string,
+      gearType?: string,
     } = { ...(req.payload as any) };
 
     logger.info(`[UPSERT-EXPORT-PAYLOAD][PRODUCT-LANDING][DOCUMENT-NUMBER][${documentNumber}]`);
@@ -574,6 +582,8 @@ export default class ExportPayloadController {
         dateLanded: payload.dateLanded,
         startDate: payload.startDate,
         exportWeight: payload.exportWeight,
+        gearCategory: payload.gearCategory,
+        gearType: payload.gearType,
         faoArea: payload.faoArea
       }
     };
@@ -637,7 +647,9 @@ export default class ExportPayloadController {
         faoArea: req.payload.faoArea,
         dateLanded: req.payload.dateLanded,
         startDate: req.payload.startDate,
-        exportWeight: req.payload.exportWeight
+        exportWeight: req.payload.exportWeight,
+        gearCategory: req.payload.gearCategory,
+        gearType: req.payload.gearType,
       };
       result = await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
     }
@@ -663,6 +675,8 @@ export default class ExportPayloadController {
         vessel,
         dateLanded: payload.dateLanded,
         startDate: payload.startDate,
+        gearCategory: payload.gearCategory,
+        gearType: payload.gearType,
         exportWeight: payload.exportWeight,
         faoArea: payload.faoArea
       }
@@ -693,6 +707,8 @@ export default class ExportPayloadController {
         },
         dateLanded: req.payload.dateLanded,
         startDate: req.payload.startDate,
+        gearCategory: req.payload.gearCategory,
+        gearType: req.payload.gearType,
         exportWeight: req.payload.exportWeight
       };
       await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);

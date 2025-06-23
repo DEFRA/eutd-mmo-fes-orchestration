@@ -52,6 +52,8 @@ export interface DirectLanding {
   dateLanded?: string;
   faoArea?: string;
   weights: Weight[];
+  gearCategory?: string;
+  gearType?: string;
   numberOfSubmissions?: number;
   error?: string;
   errors?: {};
@@ -63,6 +65,8 @@ export interface Landing {
   dateLanded?: string;
   startDate?: string;
   exportWeight?: number;
+  gearCategory?: string;
+  gearType?: string;
   faoArea?: string;
   numberOfSubmissions?: number;
   dataEverExpected?: boolean;
@@ -184,6 +188,8 @@ const mapLandings = (landing: LandingStatus): BackEndModels.Catch => {
     startDate: landing.model.startDate,
     faoArea: landing.model.faoArea,
     weight: landing.model.exportWeight,
+    gearCategory: landing.model.gearCategory,
+    gearType: landing.model.gearType,
     numberOfSubmissions: landing.model.numberOfSubmissions,
     vesselOverriddenByAdmin: landing.model?.vessel?.vesselOverriddenByAdmin,
     vesselNotFound: landing.model?.vessel?.vesselNotFound,
@@ -278,6 +284,8 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
         startDate: landing.startDate,
         dateLanded: landing.date,
         exportWeight: landing.weight,
+        gearCategory: landing.gearCategory,
+        gearType: landing.gearType,
         numberOfSubmissions: landing.numberOfSubmissions,
         isLegallyDue: landing.isLegallyDue,
         vesselRiskScore: landing.vesselRiskScore,
@@ -360,6 +368,8 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
     vessel,
     numberOfSubmissions: landing ? landing.numberOfSubmissions : undefined,
     startDate: landing?.startDate,
+    gearCategory: landing?.gearCategory,
+    gearType: landing?.gearType,
     dateLanded: landing ? landing.date : undefined,
     faoArea: landing ? landing.faoArea : undefined,
     weights: weights.map((weight: Weight) => {

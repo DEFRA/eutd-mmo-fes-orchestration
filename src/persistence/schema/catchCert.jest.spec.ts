@@ -39,6 +39,8 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
                 id: "test-id",
                 date: "2020-02-04",
                 weight: 150,
+                gearCategory: "Category 1",
+                gearType: "Type 1",
                 faoArea: "test-fao",
                 numberOfSubmissions: 0
               }
@@ -642,6 +644,8 @@ describe('cloneCatch', () => {
     licenceHolder: 'LICENSE HOLDER NAME',
     date: 'DATE',
     faoArea: 'FAO1',
+    gearCategory: "Category 1",
+    gearType: "Type 1",
     weight: 100,
     _status: LandingStatuses.Complete,
     numberOfSubmissions: 1,
@@ -682,6 +686,8 @@ describe('cloneCatch', () => {
     expect(clone.licenceHolder).toBe(original.licenceHolder);
     expect(clone.licenceValidTo).toBe(original.licenceValidTo);
     expect(clone.date).toBe(original.date);
+    expect(clone.gearCategory).toBe(original.gearCategory);
+    expect(clone.gearType).toBe(original.gearType);
     expect(clone.weight).toBe(original.weight);
   });
 

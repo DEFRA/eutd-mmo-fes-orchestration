@@ -36,6 +36,8 @@ const backendProduct: BackEndModels.Product = {
     date: '2020-02-04',
     faoArea: 'test-fao',
     weight: 1000,
+    gearCategory: "Category 1",
+    gearType: "Type 1",
     numberOfSubmissions: 1,
     vesselOverriddenByAdmin: true
   }]
@@ -91,6 +93,8 @@ describe('toBackEndProductsLanded', () => {
             },
             dateLanded: '2020-02-04',
             exportWeight: 1000,
+            gearCategory: "Category 1",
+            gearType: "Type 1",
             faoArea: 'test-fao'
           }
         }]
@@ -150,6 +154,8 @@ describe('toBackEndProductsLanded', () => {
             },
             dateLanded: '2020-02-04',
             exportWeight: 1000,
+            gearCategory: "Category 1",
+            gearType: "Type 1",
             faoArea: 'test-fao'
           }
         }]
@@ -189,6 +195,8 @@ describe('toBackEndProductsLanded', () => {
         id: 'test-id',
         date: '2020-02-04',
         faoArea: 'test-fao',
+        gearCategory: "Category 1",
+        gearType: "Type 1",
         weight: 1000,
         numberOfSubmissions: 1,
         vesselOverriddenByAdmin: true
@@ -334,13 +342,14 @@ describe('toBackEndProductsLanded', () => {
         landings: [
           {
             model: {
-              id: 'test-landing-id'
+              id: 'test-landing-id',
             },
             error: "invalid",
             errors: {
               "dateLanded": 'blah',
               "vessel.vesselName": 'blah',
-              "exportWeight": 'blah'
+              "exportWeight": 'blah',
+              "gearType": 'blah',
             }
           }
         ]
@@ -400,13 +409,14 @@ describe('toBackEndProductsLanded', () => {
         landings: [
           {
             model: {
-              id: 'test-landing-id'
+              id: 'test-landing-id',
             },
             error: "invalid",
             errors: {
               "dateLanded": 'blah',
               "vessel.label": 'blah',
-              "exportWeight": 'blah'
+              "exportWeight": 'blah',
+              "gearType": 'blah',
             }
           }
         ]
@@ -486,6 +496,8 @@ describe('toFrontEndProductLanded', () => {
             vesselOverriddenByAdmin: true
           },
           dateLanded: '2020-02-04',
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           exportWeight: 1000,
           faoArea: 'test-fao'
         }
@@ -584,6 +596,8 @@ describe('toFrontEndProductLanded', () => {
         id: "GBR-2021-CC-C6A7D756F-1610013801",
         date: "2021-01-07",
         faoArea: "FAO27",
+        gearCategory: "Category 1",
+        gearType: "Type 1",
         weight: 12,
         vesselOverriddenByAdmin: true
       }]
@@ -607,6 +621,8 @@ describe('toFrontEndProductLanded', () => {
           id: "GBR-2021-CC-C6A7D756F-1610013801",
           dateLanded: "2021-01-07",
           faoArea: "FAO27",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           exportWeight: 12,
           numberOfSubmissions: 0,
           vessel: {
@@ -664,6 +680,8 @@ describe('toFrontEndProductLanded', () => {
         id: "GBR-2021-CC-C6A7D756F-1610013801",
         date: "2021-01-07",
         faoArea: "FAO27",
+        gearCategory: "Category 1",
+        gearType: "Type 1",
         weight: 12
       }]
     };
@@ -697,6 +715,8 @@ describe('toFrontEndProductLanded', () => {
           id: "GBR-2021-CC-C6A7D756F-1610013801",
           dateLanded: "2021-01-07",
           faoArea: "FAO27",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           exportWeight: 12,
           numberOfSubmissions: 0,
           vessel: {
@@ -800,6 +820,8 @@ describe('getNumberOfUniqueLandings', () => {
         vesselOverriddenByAdmin
       },
       dateLanded: dateLanded,
+      gearCategory: "Category 1",
+      gearType: "Type 1",
       exportWeight: 1000,
       faoArea: 'test-fao'
     }
@@ -851,6 +873,8 @@ describe('toFrontEndDirectLanding', () => {
       "dateLanded": "2020-02-04",
       "faoArea": "test-fao",
       "numberOfSubmissions": 1,
+      "gearCategory": "Category 1",
+      "gearType": "Type 1",
       "weights": [{
         "speciesId": "test-product-id",
         "speciesLabel": "test-species-label, test-state-label, test-presentation-label, test-commodityCode",
@@ -897,6 +921,8 @@ describe('toFrontEndDirectLanding', () => {
         id: 'test-id',
         date: '2020-02-04',
         faoArea: 'test-fao',
+        gearCategory: "Category 1",
+        gearType: "Type 1",
         weight: 1000,
         numberOfSubmissions: 1
       }]
@@ -917,6 +943,8 @@ describe('toFrontEndDirectLanding', () => {
       },
       "dateLanded": "2020-02-04",
       "faoArea": "test-fao",
+      "gearCategory": "Category 1",
+      "gearType": "Type 1",
       "numberOfSubmissions": 1,
       "weights": [{
         "speciesId": "test-product-id",
@@ -950,6 +978,8 @@ describe('toFrontEndDirectLanding', () => {
       },
       "dateLanded": "2020-02-04",
       "faoArea": "test-fao",
+      "gearCategory": "Category 1",
+      "gearType": "Type 1",
       "weights": [{
         "speciesId": "test-product-id",
         "speciesLabel": "test-species-label, test-state-label, test-presentation-label, test-commodityCode",
@@ -1003,6 +1033,8 @@ describe('toFrontEndDirectLanding', () => {
           id: 'id',
           date: '2020-02-04',
           faoArea: 'fao',
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           weight: 1,
           numberOfSubmissions: 1,
           vesselOverriddenByAdmin: true,
@@ -1046,6 +1078,8 @@ describe('toFrontEndDirectLanding', () => {
       },
       "dateLanded": "2020-02-04",
       "faoArea": "test-fao",
+      "gearCategory": "Category 1",
+      "gearType": "Type 1",
       "weights": [{
         "speciesId": "test-product-id",
         "speciesLabel": "test-species-label, test-state-label, test-presentation-label, test-commodityCode",

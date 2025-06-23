@@ -1290,6 +1290,8 @@ describe("methods", () => {
           numberOfSubmissions: undefined,
           dateLanded: undefined,
           exportWeight: undefined,
+          gearCategory: undefined,
+          gearType: undefined,
           faoArea: undefined,
           vessel: undefined,
         },
@@ -1326,6 +1328,8 @@ describe("methods", () => {
         model: {
           dateLanded: undefined,
           exportWeight: undefined,
+          gearCategory: undefined,
+          gearType: undefined,
           faoArea: undefined,
           id: "payload-id",
           numberOfSubmissions: undefined,
@@ -1398,6 +1402,8 @@ describe("methods", () => {
         model: {
           dateLanded: undefined,
           exportWeight: undefined,
+          gearCategory: undefined,
+          gearType: undefined,
           id: "payload-id",
           numberOfSubmissions: undefined,
           vessel: {
@@ -1451,6 +1457,8 @@ describe("methods", () => {
             domId: "AWEL-Y-MOR-CA182"
           },
           dateLanded: "2382-12-31",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           exportWeight: 988,
           faoArea: "FAO27"
         }
@@ -1494,6 +1502,8 @@ describe("methods", () => {
         },
         dateLanded: "2020-10-10",
         faoArea: "FAO27",
+        gearCategory: "Category 1",
+        gearType: "Type 1",
         weights: [{
           speciesId: "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
           speciesLabel: "Atlantic cod (COD), Fresh, Filleted and skinned, 03044410",
@@ -1553,6 +1563,8 @@ describe("methods", () => {
                 model: {
                   dateLanded: "2020-10-10",
                   exportWeight: 988,
+                  gearCategory: "Category 1",
+                  gearType: "Type 1",
                   faoArea: "FAO27",
                   id: `${DOCUMENT_NUMBER}-landing-id`,
                   vessel: {
@@ -1622,6 +1634,8 @@ describe("methods", () => {
                 errors: {},
                 model: {
                   dateLanded: "2020-10-10",
+                  gearCategory: "Category 1",
+                  gearType: "Type 1",
                   exportWeight: 988,
                   faoArea: "FAO27",
                   id: `${DOCUMENT_NUMBER}-landing-id`,
@@ -1683,6 +1697,8 @@ describe("methods", () => {
         },
         dateLanded: "2020-10-10",
         faoArea: "FAO27",
+        gearCategory: "Category 1",
+        gearType: "Type 1",
         weights: [{
           speciesId: "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
           speciesLabel: "Atlantic cod (COD), Fresh, Filleted and skinned, 03044410",
@@ -1719,6 +1735,8 @@ describe("methods", () => {
                 errors: {},
                 model: {
                   dateLanded: "2020-10-10",
+                  gearCategory: "Category 1",
+                  gearType: "Type 1",
                   exportWeight: 988,
                   faoArea: "FAO27",
                   id: `${DOCUMENT_NUMBER}-landing-id`,
@@ -1794,6 +1812,8 @@ describe("methods", () => {
           },
           dateLanded: "2020-10-10",
           faoArea: "FAO27",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           weights: [{
             speciesId: "GBR-2021-CC-1",
             speciesLabel: "Species 1",
@@ -1852,6 +1872,8 @@ describe("methods", () => {
                   },
                   model: {
                     dateLanded: "2020-10-10",
+                    gearCategory: "Category 1",
+                    gearType: "Type 1",
                     exportWeight: 9,
                     faoArea: "FAO27",
                     id: `${DOCUMENT_NUMBER}-first-random-id`,
@@ -1893,6 +1915,8 @@ describe("methods", () => {
                   errors: {},
                   model: {
                     dateLanded: "2020-10-10",
+                    gearCategory: "Category 1",
+                    gearType: "Type 1",
                     exportWeight: 8,
                     faoArea: "FAO27",
                     id: `${DOCUMENT_NUMBER}-second-random-id`,
@@ -1955,6 +1979,8 @@ describe("methods", () => {
           },
           dateLanded: "2020-10-10",
           faoArea: "FAO27",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           weights: [{
             speciesId: "GBR-2021-CC-1",
             speciesLabel: "Species 1",
@@ -1989,6 +2015,8 @@ describe("methods", () => {
                   errors: {},
                   model: {
                     dateLanded: "2020-10-10",
+                    gearCategory: "Category 1",
+                    gearType: "Type 1",
                     exportWeight: 9,
                     faoArea: "FAO27",
                     id: "GBR-2020-CC-2345-3453-first-random-id",
@@ -2030,6 +2058,8 @@ describe("methods", () => {
                   errors: {},
                   model: {
                     dateLanded: "2020-10-10",
+                    gearCategory: "Category 1",
+                    gearType: "Type 1",
                     exportWeight: 8,
                     faoArea: "FAO27",
                     id: "GBR-2020-CC-2345-3453-second-random-id",

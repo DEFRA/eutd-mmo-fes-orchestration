@@ -346,6 +346,8 @@ describe("exporter-payload routes", () => {
           dateLanded: moment().utc().format('YYYY-MM-DD'),
           exportWeight: "123",
           faoArea: "FAO18",
+          gearCategory: "",
+          gearType: "",
         },
       };
     });
@@ -601,6 +603,8 @@ describe("exporter-payload routes", () => {
               exportWeight: 23,
             },
           ],
+          gearCategory: "Category 1",
+          gearType: "Type 1",
         },
       };
     });
@@ -1094,6 +1098,8 @@ describe("exporter-payload routes", () => {
           dateLanded: new Date(),
           exportWeight: "12",
           faoArea: "12",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
         },
       };
     });
@@ -1206,6 +1212,78 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(200);
       expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it("should return 200 for a request payload containing a Gear category and type before the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: 'Type 1',
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it("should return 200 for a request payload not containing a Gear category and type before the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: '',
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it("should return 400 for a request payload containing a Gear Category and not a Gear Type after the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items:[],
+        error: "invalid",
+        errors:{
+          gearType: "error.gearType.string.empty"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: ''
+        }
+      }
+
+      const expected = {
+        items:[],
+        error: "invalid",
+        errors:{
+          gearType: "error.gearType.string.empty"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
   });
 
