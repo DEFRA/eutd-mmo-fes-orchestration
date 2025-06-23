@@ -1,6 +1,6 @@
 import TransportController from "./catch-certificate-transport.controller";
 import TransportService from "../services/catch-certificate-transport.service";
-import { Transport } from "../persistence/schema/frontEndModels/transport";
+import { CatchCertificateTransport } from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import { AddTransportation } from "../persistence/schema/catchCert";
 
 const USER_ID = "ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12";
@@ -16,7 +16,8 @@ describe("addTransport", () => {
     },
     headers: { accept: "text/html" },
   };
-  const transport: Transport = {
+  const transport: CatchCertificateTransport = {
+    id: 'some-transport-id',
     vehicle: "train"
   }
 
@@ -42,7 +43,6 @@ describe("addTransport", () => {
     await expect(TransportController.addTransport(mockReq, USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
   })
 });
-
 
 describe("addTransportCheck", () => {
   const mockReq: any = {
@@ -105,7 +105,8 @@ describe("getTransportationCheck", () => {
 });
 
 describe("getTransportations", () => {
-  const transport: Transport = {
+  const transport: CatchCertificateTransport = {
+    id: 'some-transport-id',
     vehicle: "train"
   }
 
@@ -141,7 +142,8 @@ describe("getTransport", () => {
     headers: { accept: "text/html" },
   };
 
-  const transport: Transport = {
+  const transport: CatchCertificateTransport = {
+    id: 'some-transport-id',
     vehicle: "train"
   }
 
@@ -169,17 +171,61 @@ describe("getTransport", () => {
   })
 });
 
+describe("saveTransportDocuments", () => {
+  const mockReq: any = {
+    app: { claims: { sub: "test", email: "test@test.com" } },
+    params: { documentType: "catchCertificate", transportId: 0 },
+    payload: {
+      id: "5325443602",
+      vehicle: "truck",
+      documents: [{}, {}, {}, {}, { name: "name", reference: "reference" }, { name: '', reference: '' }, { name: '     ', reference: '    ' }]
+    },
+    headers: { accept: "text/html" },
+  };
+
+  const transport: CatchCertificateTransport = {
+      id: "5325443602",
+      vehicle: "truck",
+      documents: [{ name: "name", reference: "reference" }]
+  }
+
+  let mockService: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockService = jest.spyOn(TransportService, 'updateTransportDocuments');
+    mockService.mockResolvedValue(transport);
+  });
+
+  afterEach(() => {
+    mockService.mockRestore();
+  });
+
+  it('will save transportation from payload', async () => {
+    const result = await TransportController.saveTransportDocuments(mockReq, USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockService).toHaveBeenCalledWith(transport, 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12', 'document-number', 'contactBob');
+    expect(result).toEqual(transport);
+  })
+
+  it('will fail to update transportation', async () => {
+    mockService.mockRejectedValue(new Error('something has gone wrong'));
+
+    await expect(TransportController.saveTransportDocuments(mockReq, USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
+  })
+});
+
 describe("updateTransport", () => {
   const mockReq: any = {
     app: { claims: { sub: "test", email: "test@test.com" } },
     params: { documentType: "catchCertificate", transportId: 0 },
     payload: {
+      id: 'some-transport-id',
       vehicle: 'train'
     },
     headers: { accept: "text/html" },
   };
 
-  const transport: Transport = {
+  const transport: CatchCertificateTransport = {
+    id: 'some-transport-id',
     vehicle: "train"
   }
 

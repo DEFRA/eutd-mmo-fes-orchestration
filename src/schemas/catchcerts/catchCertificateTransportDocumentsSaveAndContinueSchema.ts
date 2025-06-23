@@ -5,9 +5,9 @@ const catchCertificateTransportDocumentsSaveAndContinueSchema = Joi.object({
   vehicle: Joi.string().valid("truck", "plane", "train", "containerVessel").required(),
   documents: Joi.array().items(
     Joi.object({
-      name: Joi.string().trim().max(50).required(),
-      reference: Joi.string().trim().max(50).required()
-    })
+      name: Joi.string().trim().max(50).empty(''),
+      reference: Joi.string().trim().max(50).empty(''),
+    }).and('name', 'reference')
   ).required()
 });
 

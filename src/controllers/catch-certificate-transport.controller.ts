@@ -1,6 +1,6 @@
 import * as Hapi from "@hapi/hapi"
 import Service from "../services/catch-certificate-transport.service";
-import { CatchCertificateTransport } from "../persistence/schema/frontEndModels/catchCertificateTransport";
+import { CatchCertificateTransport, CatchCertificateTransportDocument } from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import { getRandomNumber } from "../helpers/utils/utils";
 import { AddTransportation } from "../persistence/schema/catchCert";
 
@@ -34,6 +34,17 @@ export default class CatchCertificateTransportController {
     };
 
     return Service.updateTransport(transport, userPrincipal, documentNumber, contactId);
+  }
+
+  public static async saveTransportDocuments(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
+    const payload = (req.payload as CatchCertificateTransport)
+    const transport: CatchCertificateTransport = {
+      id: payload.id,
+      vehicle: payload.vehicle,
+      documents: payload.documents.filter((transportDocument: CatchCertificateTransportDocument) => transportDocument.name?.trim() && transportDocument.reference?.trim()),
+    };
+
+    return Service.updateTransportDocuments(transport, userPrincipal, documentNumber, contactId);
   }
 
   public static async updateTransportDocuments(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {

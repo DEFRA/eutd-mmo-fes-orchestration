@@ -184,7 +184,7 @@ export default class CatchCertificateTransportRoutes {
           cors: true,
           handler: async (request, h) => {
             return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-              return await Controller.updateTransportDocuments(request, userPrincipal, documentNumber, contactId);
+              return await Controller.saveTransportDocuments(request, userPrincipal, documentNumber, contactId);
             }).catch(error => {
 
               logger.error(`[SAVE-TRANSPORT-DOCUMENTS][ERROR][${error.stack ?? error}`);

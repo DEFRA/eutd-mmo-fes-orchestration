@@ -45,6 +45,7 @@ describe("Transport endpoints", () => {
   let mockGetTransport: jest.SpyInstance;
   let mockUpdateTransport: jest.SpyInstance;
   let mockUpdateTransportDocuments: jest.SpyInstance;
+  let mockSaveTransportDocuments: jest.SpyInstance;
   let mockGetTransportations: jest.SpyInstance;
   let mockRemoveTransportation: jest.SpyInstance;
   let mockAddTransportationCheck: jest.SpyInstance;
@@ -96,6 +97,9 @@ describe("Transport endpoints", () => {
 
     mockUpdateTransportDocuments = jest.spyOn(Controller, 'updateTransportDocuments');
     mockUpdateTransportDocuments.mockResolvedValue(transportWithDocuments);
+
+    mockSaveTransportDocuments = jest.spyOn(Controller, 'saveTransportDocuments');
+    mockSaveTransportDocuments.mockResolvedValue(transportWithDocuments);
 
     mockGetTransportations = jest.spyOn(Controller, 'getTransportations');
     mockGetTransportations.mockResolvedValue([transport]);
@@ -467,6 +471,15 @@ describe("Transport endpoints", () => {
     expect(response.result).toEqual(transportWithDocuments);
   });
 
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }] }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+  });
+
   it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with empty documents', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [] }, 'PUT');
@@ -477,15 +490,6 @@ describe("Transport endpoints", () => {
     expect(response.payload).toEqual(JSON.stringify({ documents: "error.documents.array.min" }));
   });
 
-  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
-
-    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }] }, 'PUT');
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-  });
-
   it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with name only', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'name' }] }, 'PUT');
@@ -493,6 +497,7 @@ describe("Transport endpoints", () => {
     const response = await server.inject(request);
     expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
+    expect(response.payload).toEqual(JSON.stringify({ "documents.0.reference": "error.documents.0.reference.any.required" }));
   });
 
   it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with reference only', async () => {
@@ -557,7 +562,7 @@ describe("Transport endpoints", () => {
     });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(mockSaveTransportDocuments).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.result).toEqual(transportWithDocuments);
   });
@@ -567,18 +572,18 @@ describe("Transport endpoints", () => {
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [] });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(mockSaveTransportDocuments).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.result).toEqual(transportWithDocuments);
   });
 
-  it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
+  it('returns 200 when we POST /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }] });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
+    expect(mockSaveTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
   });
 
   it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with name only', async () => {
@@ -586,8 +591,9 @@ describe("Transport endpoints", () => {
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'name' }] });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(mockSaveTransportDocuments).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
+    expect(response.payload).toEqual(JSON.stringify({ "documents.0": "error.documents.0.object.and" }));
   });
 
   it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with reference only', async () => {
@@ -595,8 +601,9 @@ describe("Transport endpoints", () => {
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ reference: 'reference' }] });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(mockSaveTransportDocuments).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
+    expect(response.payload).toEqual(JSON.stringify({ "documents.0": "error.documents.0.object.and" }));
   });
 
   it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with reference only on second document', async () => {
@@ -604,12 +611,12 @@ describe("Transport endpoints", () => {
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'name', reference: 'reference' }, { reference: 'reference' }] });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(mockSaveTransportDocuments).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
   });
 
   it('returns 500 and FAILS when we POST /v1/catch-certificate/transport-documents/0', async () => {
-    mockUpdateTransportDocuments.mockRejectedValue(new Error('an error'))
+    mockSaveTransportDocuments.mockRejectedValue(new Error('an error'))
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
       id: '0', vehicle: 'truck', documents: [{
@@ -619,7 +626,7 @@ describe("Transport endpoints", () => {
     });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(mockSaveTransportDocuments).toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
     expect(response.result).toEqual(null);
   });
@@ -628,7 +635,7 @@ describe("Transport endpoints", () => {
     const error = new Error('an error');
     error.stack = undefined;
 
-    mockUpdateTransportDocuments.mockRejectedValue(error);
+    mockSaveTransportDocuments.mockRejectedValue(error);
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', {
       id: '0', vehicle: 'truck', documents: [{
@@ -638,7 +645,7 @@ describe("Transport endpoints", () => {
     });
 
     const response = await server.inject(request);
-    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(mockSaveTransportDocuments).toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
     expect(response.result).toEqual(null);
   });
@@ -729,7 +736,7 @@ describe("Transport endpoints", () => {
     });
 
     it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with incomplete truck details', async () => {
-      
+
       const request = createRequestObj(
         '/v1/catch-certificate/transport-details/0?draft=true',
         {
@@ -876,7 +883,7 @@ describe("Transport endpoints", () => {
     });
 
     it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete truck details', async () => {
-      
+
       const request = createRequestObj(
         '/v1/catch-certificate/transport-details/0',
         {
