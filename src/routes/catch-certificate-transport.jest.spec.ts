@@ -480,6 +480,16 @@ describe("Transport endpoints", () => {
     expect(response.statusCode).toBe(400);
   });
 
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with name and reference for over 50 characters', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!', reference: 'ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!' }] }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.payload).toEqual(JSON.stringify({ "documents.0.name": "error.documents.0.name.string.max", "documents.0.reference": "error.documents.0.reference.string.max" }));
+  });
+
   it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with empty documents', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [] }, 'PUT');
@@ -604,6 +614,16 @@ describe("Transport endpoints", () => {
     expect(mockSaveTransportDocuments).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
     expect(response.payload).toEqual(JSON.stringify({ "documents.0": "error.documents.0.object.and" }));
+  });
+
+  it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with name and reference for over 50 characters', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: 'ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!', reference: 'ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!' }] });
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.payload).toEqual(JSON.stringify({ "documents.0.name": "error.documents.0.name.string.max", "documents.0.reference": "error.documents.0.reference.string.max" }));
   });
 
   it('returns 400 when we POST /v1/catch-certificate/transport-documents/0 with reference only on second document', async () => {
