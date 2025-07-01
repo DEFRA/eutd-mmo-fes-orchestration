@@ -8,7 +8,7 @@ import { ProgressStatus, ICountry, ExporterDetails, Transport as BackEndTranspor
 import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/catchCertificate";
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
-import { checkTransportDataFrontEnd, toFrontEndTransport, Transport } from "../persistence/schema/frontEndModels/transport";
+import { checkTransportDataFrontEnd, toFrontEndTransport, Transport, truck } from "../persistence/schema/frontEndModels/transport";
 import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
 import { utc } from 'moment';
@@ -209,13 +209,17 @@ export default class ProgressService {
       )
     );
 
-    const allHaveDeparturePlace = transportations?.every((transportation: CatchCertificateTransport) =>
-      FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.departurePlace
-    );
+    const allHaveDeparturePlace = transportations?.every((transportation: CatchCertificateTransport) => {
+      const transport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
+      return transport?.vehicle === truck && transport?.cmr === 'true' || transport?.departurePlace
+    });
+
+    const isValidTransportDocument = (doc: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) => 
+      ProgressService.isEmptyAndTrimSpaces(doc.name) && ProgressService.isEmptyAndTrimSpaces(doc.reference);
 
     const allHaveTransportDocuments = transportations?.every((transportation: CatchCertificateTransport) => {
-      const transport: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
-      return transport?.documents ? transport?.documents.every((document: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) => ProgressService.isEmptyAndTrimSpaces(document.name) && ProgressService.isEmptyAndTrimSpaces(document.reference)) : true;
+      const transport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
+      return transport?.vehicle === truck && transport?.cmr === 'true' || !transport?.documents || transport?.documents.every(isValidTransportDocument);
     });
 
     if (allHaveVehicles) {

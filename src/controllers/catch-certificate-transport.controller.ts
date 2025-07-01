@@ -10,7 +10,7 @@ export default class CatchCertificateTransportController {
     const transport: CatchCertificateTransport = {
       id: getRandomNumber().toString(),
       vehicle: (req.payload as any).vehicle
-    }
+    };
 
     return Service.addTransport(transport, userPrincipal, documentNumber, contactId);
   }

@@ -206,6 +206,34 @@ describe("Transport endpoints", () => {
     expect(response.payload).toStrictEqual(JSON.stringify(error));
   });
 
+  it('returns 400 and fails when we POST /v1/catch-certificate/transport/add with a CMR flag for a truck transportation', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport/add', {
+      vehicle: "truck",
+      cmr: "true",
+    })
+
+    const response = await server.inject(request);
+    expect(mockAddTransport).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.result).toEqual({
+      cmr: "error.cmr.object.unknown",
+    });
+  });
+
+  it('returns 400 and FAILS when we POST /v1/catch-certificate/transport/add with a CMR flag for non-truck transportation', async () => {
+    const request = createRequestObj('/v1/catch-certificate/transport/add', {
+      vehicle: "plane",
+      cmr: 'true',
+    })
+
+    const response = await server.inject(request);
+    expect(mockAddTransport).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    const error = { cmr: 'error.cmr.object.unknown' }
+    expect(response.payload).toStrictEqual(JSON.stringify(error));
+  });
+
   it('returns 200 and doesnt fail when we GET /v1/catch-certificate/transport/check', async () => {
     const request = createRequestObj('/v1/catch-certificate/transport/check', {}, 'GET')
 
@@ -288,90 +316,225 @@ describe("Transport endpoints", () => {
     expect(response.payload).toStrictEqual(JSON.stringify(error));
   });
 
-  it('returns 200 when we GET /v1/catch-certificate/transport/0', async () => {
+  describe('/v1/catch-certificate/transport/:id', () => {
+    it('returns 200 when we GET /v1/catch-certificate/transport/0', async () => {
 
-    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'GET');
+      const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'GET');
 
-    const response = await server.inject(request);
-    expect(mockGetTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.result).toEqual(transport);
+      const response = await server.inject(request);
+      expect(mockGetTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport/0', async () => {
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'train' }, 'PUT');
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we DELETE /v1/catch-certificate/transport/0', async () => {
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
+
+      const response = await server.inject(request);
+      expect(mockRemoveTransportation).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toBeNull();
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport/0 with truck transportation and valid CMR flag', async () => {
+      const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'truck', cmr: 'true' }, 'PUT');
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toEqual({
+        cmr: "error.cmr.object.unknown",
+      });
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport/0 with non-truck transportation with CMR flag', async () => {
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'train', cmr: 'true' }, 'PUT');
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toEqual({
+        cmr: "error.cmr.object.unknown",
+      });
+    });
+
+    it('returns 404 when we GET /v1/catch-certificate/transport/NaN', async () => {
+      mockGetTransport.mockResolvedValue(null);
+
+      const request = createRequestObj('/v1/catch-certificate/transport/NaN', {}, 'GET');
+
+      const response = await server.inject(request);
+      expect(mockGetTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(404);
+      expect(response.result).toBeNull();
+    });
+
+    it('returns 500 and FAILS when we PUT /v1/catch-certificate/transport/0', async () => {
+
+      mockUpdateTransport.mockRejectedValue(new Error('an error'))
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'train' }, 'PUT');
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toEqual(null);
+    });
+
+    it('returns 500 and FAILS when we PUT /v1/catch-certificate/transport/0 with no stack', async () => {
+      const error = new Error('an error');
+      error.stack = undefined;
+
+      mockUpdateTransport.mockRejectedValue(error);
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'train' }, 'PUT');
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toEqual(null);
+    });
+
+    it('returns 500 when we DELETE /v1/catch-certificate/transport/0', async () => {
+      mockRemoveTransportation.mockRejectedValue(new Error("something has gone wrong"));
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
+
+      const response = await server.inject(request);
+      expect(mockRemoveTransportation).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toBeNull();
+    });
+
+    it('returns 500 when we DELETE /v1/catch-certificate/transport/0 with no stack', async () => {
+      const error = new Error("something has gone wrong");
+      error.stack = undefined;
+
+      mockRemoveTransportation.mockRejectedValue(error);
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
+
+      const response = await server.inject(request);
+      expect(mockRemoveTransportation).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toBeNull();
+    });
+
+    it('returns 500 and FAILS when we GET /v1/catch-certificate/transport/0', async () => {
+
+      mockGetTransport.mockRejectedValue(new Error('an error'))
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'GET');
+
+      const response = await server.inject(request);
+      expect(mockGetTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toEqual(null);
+    });
+
+    it('returns 500 and FAILS when we GET /v1/catch-certificate/transport/0 on error with no stack', async () => {
+      const error = new Error('an error');
+      error.stack = undefined;
+
+      mockGetTransport.mockRejectedValue(error);
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'GET');
+
+      const response = await server.inject(request);
+      expect(mockGetTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toEqual(null);
+    });
   });
 
-  it('returns 404 when we GET /v1/catch-certificate/transport/NaN', async () => {
-    mockGetTransport.mockResolvedValue(null);
+  describe('/v1/catch-certificate/transport/:id/cmr', () => {
+    it('returns 200 when we PUT /v1/catch-certificate/transport/0/cmr as true for truck transport', async () => {
 
-    const request = createRequestObj('/v1/catch-certificate/transport/NaN', {}, 'GET');
+      const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
+        id: '0',
+        vehicle: 'truck',
+        cmr: 'true',
+      }, 'PUT');
 
-    const response = await server.inject(request);
-    expect(mockGetTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(404);
-    expect(response.result).toBeNull();
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport/0/cmr as false for truck transport', async () => {
+
+      const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
+        id: '0',
+        vehicle: 'truck',
+        cmr: 'false',
+      }, 'PUT');
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport/0/cmr with no cmr value provided', async () => {
+      const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
+        id: '0',
+        vehicle: "truck",
+      }, 'PUT');
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response).toMatchObject({ statusCode: 400, result: { cmr: "error.cmr.any.required" } });
+    
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport/0/cmr as invalid boolean string', async () => {
+      const requests = ["tru", "yes", "no", "1", "0", "blah"].map(cmr => {
+        const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
+          id: '0',
+          vehicle: "truck",
+          cmr,
+        }, 'PUT');
+
+        return server.inject(request);
+      });
+      const responses = await Promise.all(requests);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      responses.forEach(r => expect(r).toMatchObject({ statusCode: 400, result: { cmr: "error.cmr.any.only" } }))
+    
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport/0/cmr with non-truck transport', async () => {
+
+      const requests = ["plane", "train", "containerVessel"].map(vehicle => {
+        const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
+          id: '0',
+          vehicle,
+          cmr: 'true',
+        }, 'PUT');
+
+        return server.inject(request);
+      });
+      const responses = await Promise.all(requests);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      responses.forEach(r => expect(r).toMatchObject({ statusCode: 400, result: { vehicle: "error.vehicle.any.only" } }))
+    
+    });
   });
 
-  it('returns 500 and FAILS when we GET /v1/catch-certificate/transport/0', async () => {
-
-    mockGetTransport.mockRejectedValue(new Error('an error'))
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'GET');
-
-    const response = await server.inject(request);
-    expect(mockGetTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toEqual(null);
-  });
-
-  it('returns 500 and FAILS when we GET /v1/catch-certificate/transport/0 on error with no stack', async () => {
-    const error = new Error('an error');
-    error.stack = undefined;
-
-    mockGetTransport.mockRejectedValue(error);
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'GET');
-
-    const response = await server.inject(request);
-    expect(mockGetTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toEqual(null);
-  });
-
-  it('returns 200 when we PUT /v1/catch-certificate/transport/0', async () => {
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'train' }, 'PUT');
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.result).toEqual(transport);
-  });
-
-  it('returns 500 and FAILS when we PUT /v1/catch-certificate/transport/0', async () => {
-
-    mockUpdateTransport.mockRejectedValue(new Error('an error'))
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'train' }, 'PUT');
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toEqual(null);
-  });
-
-  it('returns 500 and FAILS when we PUT /v1/catch-certificate/transport/0 with no stack', async () => {
-    const error = new Error('an error');
-    error.stack = undefined;
-
-    mockUpdateTransport.mockRejectedValue(error);
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', { id: '0', vehicle: 'train' }, 'PUT');
-
-    const response = await server.inject(request);
-    expect(mockUpdateTransport).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toEqual(null);
-  });
-
-  it('returns 400 and FAILS when we PUT /v1/catch-certificate/transport/add with an invalid a vehicle', async () => {
+  it('returns 400 and FAILS when we PUT /v1/catch-certificate/transport/0 with an invalid a vehicle', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport/0', {
       id: '0',
@@ -383,41 +546,6 @@ describe("Transport endpoints", () => {
     expect(response.statusCode).toBe(400);
     const error = { vehicle: 'error.vehicle.any.only' }
     expect(response.payload).toStrictEqual(JSON.stringify(error));
-  });
-
-  it('returns 200 when we DELETE /v1/catch-certificate/transport/0', async () => {
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
-
-    const response = await server.inject(request);
-    expect(mockRemoveTransportation).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.result).toBeNull();
-  });
-
-  it('returns 500 when we DELETE /v1/catch-certificate/transport/0', async () => {
-    mockRemoveTransportation.mockRejectedValue(new Error("something has gone wrong"));
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
-
-    const response = await server.inject(request);
-    expect(mockRemoveTransportation).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toBeNull();
-  });
-
-  it('returns 500 when we DELETE /v1/catch-certificate/transport/0 with no stack', async () => {
-    const error = new Error("something has gone wrong");
-    error.stack = undefined;
-
-    mockRemoveTransportation.mockRejectedValue(error);
-
-    const request = createRequestObj('/v1/catch-certificate/transport/0', {}, 'DELETE');
-
-    const response = await server.inject(request);
-    expect(mockRemoveTransportation).toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.result).toBeNull();
   });
 
   it('returns 200 when we GET /v1/catch-certificate/transportations', async () => {

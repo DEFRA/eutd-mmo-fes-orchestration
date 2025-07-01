@@ -125,6 +125,24 @@ describe('CatchCertificateTransportService - addTransport', () => {
     expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', { '$push': { 'exportData.transportations': expected } }, 'contactId')
   });
 
+  it('should omit vehicle details for truck transportation when upserting truck with CMR flag set to true', async () => {
+    const expected: BackEndCatchCertificateTransport = {
+      id: 0,
+      vehicle: 'truck',
+      cmr: true,
+    };
+
+    const payload = { ...transport, cmr: 'true' };
+    const res = await SUT.addTransport(payload, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(res).toStrictEqual(payload);
+    expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {
+      '$push': {
+        'exportData.transportations': expected
+      }
+    }, 'contactId');
+  });
+
   it('should throw an error if upsertDraftData fails to upsert', async () => {
     mockUpsertDraftData.mockRejectedValue(new Error('something has gone wrong'));
     await expect(() => SUT.addTransport(transport, USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
@@ -253,7 +271,7 @@ describe('CatchCertificateTransport - getTransportDetails', () => {
     mockGetDraftData.mockRestore();
   })
 
-  it('will return a the last transportation', async () => {
+  it('will return the last transportation', async () => {
     const expectedResult: CatchCertificateTransport = {
       id: "0",
       vehicle: "truck",
@@ -283,6 +301,26 @@ describe('CatchCertificateTransport - getTransportDetails', () => {
     expect(result).toEqual({
       vehicle: "directLanding",
     });
+  });
+
+  it('will return a transportation with CMR', async () => {
+    const transportation: BackEndCatchCertificateTransport = {
+      id: 0,
+      vehicle: "truck",
+      cmr: true,
+      transportDocuments: []
+    };
+
+    mockGetDraftData.mockResolvedValue({ ...catchCertificate, exportData: { ...catchCertificate.exportData, transportations: [transportation] } });
+    const expectedResult: CatchCertificateTransport = {
+      id: "0",
+      vehicle: "truck",
+      cmr: "true"
+    }
+
+    const result = await SUT.getTransportationDetails(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
+    expect(result).toEqual(expectedResult);
   });
 
 });
@@ -471,7 +509,7 @@ describe('CatchCertificateTransportService - updateTransport', () => {
         'exportData.transportations': [expected],
       }
     }, 'contactId');
-  })
+  });
 
   it('should clear documents for existing transportation when vehicle type is changed', async () => {
     mockGetDraftData.mockResolvedValue({
@@ -514,7 +552,159 @@ describe('CatchCertificateTransportService - updateTransport', () => {
         'exportData.transportations': [expected],
       }
     }, 'contactId');
-  })
+  });
+
+  it('should clear existing truck transportation details when vehicle has CMR flag is set to true', async () => {
+    mockGetDraftData.mockResolvedValue({
+      ...catchCertificate,
+      exportData: {
+        ...catchCertificate.exportData,
+        // add a transport with some existing documents
+        transportations: [{
+          id: 0,
+          vehicle: "truck",
+          nationalityOfVehicle: "adsf",
+          registrationNumber: "asdsfsd",
+          departurePlace: "Aylesbury",
+          transportDocuments: [{
+            name: 'truck doc 1',
+            reference: 'TRK00001'
+          }, {
+            name: 'truck doc 2',
+            reference: 'TRK0002'
+          }]
+        }]
+      }
+    });
+
+    const expected: BackEndCatchCertificateTransport = {
+      id: 0,
+      vehicle: "truck",
+      cmr: true,
+    }
+
+    const transport: CatchCertificateTransport = {
+      id: "0",
+      vehicle: "truck",
+      cmr: 'true',
+    }
+    const res = await SUT.updateTransport(transport, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(res).toEqual(transport);
+    expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {
+      '$set': {
+        'exportData.transportations': [expected],
+      }
+    }, 'contactId');
+  });
+
+  it('should retain previous cmr value when not provided in the payload', async () => {
+    mockGetDraftData.mockResolvedValue({
+      ...catchCertificate,
+      exportData: {
+        ...catchCertificate.exportData,
+        // add a transport with some existing documents
+        transportations: [{
+          id: 0,
+          vehicle: "truck",
+          cmr: false,
+          nationalityOfVehicle: "adsf",
+          registrationNumber: "asdsfsd",
+          departurePlace: "Aylesbury",
+          transportDocuments: [{
+            name: 'truck doc 1',
+            reference: 'TRK00001'
+          }, {
+            name: 'truck doc 2',
+            reference: 'TRK0002'
+          }]
+        }]
+      }
+    });
+
+    const expected: BackEndCatchCertificateTransport = {
+      id: 0,
+      vehicle: "truck",
+      cmr: false,
+      nationalityOfVehicle: "blah",
+      transportDocuments: [{
+        name: 'truck doc 1',
+        reference: 'TRK00001'
+      }, {
+        name: 'truck doc 2',
+        reference: 'TRK0002'
+      }]
+    }
+
+    const transport: CatchCertificateTransport = {
+      id: "0",
+      vehicle: "truck",
+      nationalityOfVehicle: "blah",
+    }
+    const res = await SUT.updateTransport(transport, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(res).toEqual(transport);
+    expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {
+      '$set': {
+        'exportData.transportations': [expected],
+      }
+    }, 'contactId');
+  });
+
+  it('should retain previous truck details when cmr is set to false', async () => {
+    mockGetDraftData.mockResolvedValue({
+      ...catchCertificate,
+      exportData: {
+        ...catchCertificate.exportData,
+        // add a transport with some existing documents
+        transportations: [{
+          id: 0,
+          vehicle: "truck",
+          cmr: false,
+          nationalityOfVehicle: "adsf",
+          registrationNumber: "asdsfsd",
+          departurePlace: "Aylesbury",
+          transportDocuments: [{
+            name: 'truck doc 1',
+            reference: 'TRK00001'
+          }, {
+            name: 'truck doc 2',
+            reference: 'TRK0002'
+          }]
+        }]
+      }
+    });
+
+    const expected: BackEndCatchCertificateTransport = {
+      id: 0,
+      vehicle: "truck",
+      cmr: false,
+      nationalityOfVehicle: "adsf",
+      registrationNumber: "asdsfsd",
+      departurePlace: "Aylesbury",
+      transportDocuments: [{
+        name: 'truck doc 1',
+        reference: 'TRK00001'
+      }, {
+        name: 'truck doc 2',
+        reference: 'TRK0002'
+      }]
+    }
+
+    const transport: CatchCertificateTransport = {
+      id: "0",
+      vehicle: "truck",
+      cmr: "false",
+    }
+    const res = await SUT.updateTransport(transport, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(res).toEqual(transport);
+    expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', {
+      '$set': {
+        'exportData.transportations': [expected],
+      }
+    }, 'contactId');
+  });
 });
 
 describe('CatchCertificateTransportService - removeTransportations', () => {

@@ -12,6 +12,7 @@ export interface CatchCertificateTransportDocument {
 export interface CatchCertificateTransport {
   id: string;
   vehicle: string;
+  cmr?: string;
   nationalityOfVehicle?: string;
   registrationNumber?: string;
   departurePlace?: string;
@@ -49,15 +50,21 @@ export const toBackEndTransport = (transport: CatchCertificateTransport): BackEn
   return backEndTransport;
 };
 
-const getTruckBackEndTransport = (transport: CatchCertificateTransport) => ({
-  id: parseInt(transport.id),
-  vehicle: transport.vehicle,
-  nationalityOfVehicle: transport.nationalityOfVehicle,
-  registrationNumber: transport.registrationNumber,
-  departurePlace: transport.departurePlace,
-  freightBillNumber: transport.freightBillNumber,
-  transportDocuments: transport.documents,
-});
+const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEndModels.CatchCertificateTruck => {
+  const cmrIsSet = typeof transport.cmr === 'string';
+  const hasCmr = transport.cmr === 'true';
+  const result = {
+    id: parseInt(transport.id),
+    vehicle: transport.vehicle,
+    cmr: cmrIsSet ? hasCmr : undefined,
+    nationalityOfVehicle: cmrIsSet && hasCmr ? undefined : transport.nationalityOfVehicle,
+    registrationNumber: cmrIsSet && hasCmr ? undefined : transport.registrationNumber,
+    departurePlace: cmrIsSet && hasCmr ? undefined : transport.departurePlace,
+    freightBillNumber: cmrIsSet && hasCmr ? undefined : transport.freightBillNumber,
+    transportDocuments: cmrIsSet && hasCmr ? undefined : transport.documents,
+  };
+  return result;
+};
 
 const getPlaneBackEndTransport = (transport: CatchCertificateTransport) => ({
   id: parseInt(transport.id),
@@ -95,14 +102,16 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
   switch (transport.vehicle) {
     case truck: {
       const model = transport as BackEndModels.CatchCertificateTruck;
+      const hasCmr = model.cmr !== undefined && model.cmr !== null;
       frontEndTransport = {
         id: transport.id.toString(),
         vehicle: model.vehicle,
-        nationalityOfVehicle: model.nationalityOfVehicle,
-        registrationNumber: model.registrationNumber,
-        departurePlace: model.departurePlace,
-        freightBillNumber: model.freightBillNumber,
-        documents: model.transportDocuments
+        cmr: hasCmr ? model.cmr.toString() : undefined,
+        nationalityOfVehicle: model.cmr ? undefined : model.nationalityOfVehicle,
+        registrationNumber: model.cmr ? undefined : model.registrationNumber,
+        departurePlace: model.cmr ? undefined : model.departurePlace,
+        freightBillNumber: model.cmr ? undefined : model.freightBillNumber,
+        documents: model.cmr ? undefined : model.transportDocuments
       };
       break;
     }

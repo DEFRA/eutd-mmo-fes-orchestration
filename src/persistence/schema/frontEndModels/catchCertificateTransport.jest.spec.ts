@@ -190,7 +190,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     expect(result).not.toHaveProperty('exportDate');
   });
 
-  it("if CMR is not defined it should not be returned", () => {
+  it("if CMR is not defined for truck transport it should not be mapped", () => {
     const input: FrontEndTransport.CatchCertificateTransport = {
       id: '0',
       vehicle: FrontEndTransport.truck,
@@ -202,6 +202,39 @@ describe("When mapping from a front end transport to a backend transport", () =>
       id: 0,
       vehicle: input.vehicle
     });
+  });
+
+  it("if CMR is defined for truck transport it should be converted to boolean for backend storage", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.truck,
+      cmr: 'false',
+    };
+    const result = FrontEndTransport.toBackEndTransport(transport);
+    expect(result).toHaveProperty('cmr', false);
+  });
+
+  it("if CMR is defined for truck transport and is true it should not map vehicle details", () => {
+    const transport: FrontEndTransport.CatchCertificateTransport = {
+      id: '0',
+      vehicle: FrontEndTransport.truck,
+      cmr: 'true',
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+      documents: [{ name: 'name', reference: 'reference' }]
+    };
+
+    const expectedResult: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.truck,
+      cmr: true,
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
   });
 
 });
@@ -367,6 +400,49 @@ describe("When mapping from a backend transport to front end transport", () => {
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if CMR is not defined for truck transport it should not be mapped", () => {
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.truck,
+    };
+
+    const actual = FrontEndTransport.toFrontEndTransport(transport);
+    expect(actual).toStrictEqual({
+      id: '0',
+      vehicle: FrontEndTransport.truck,
+    });
+  });
+
+  it("if CMR is defined it should be converted to string for frontend", () => {
+    const transport: BackEndModels.CatchCertificateTransport = {
+      id: 0,
+      vehicle: FrontEndTransport.truck,
+      cmr: true,
+    };
+    const result = FrontEndTransport.toFrontEndTransport(transport);
+    expect(result).toHaveProperty('cmr', 'true');
+  });
+
+  it("if CMR is defined and is true it should not map existing vehicle details", () => {
+    const transport: BackEndModels.CatchCertificateTruck = {
+      id: 0,
+      vehicle: FrontEndTransport.truck,
+      cmr: true,
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG Number",
+      departurePlace: "here",
+      freightBillNumber: 'AA1234567',
+      transportDocuments: [{ name: 'name', reference: 'reference' }]
+    };
+
+    const result = FrontEndTransport.toFrontEndTransport(transport);
+    expect(result).toStrictEqual({
+      id: '0',
+      vehicle: FrontEndTransport.truck,
+      cmr: 'true',
+    });
   });
 
 });

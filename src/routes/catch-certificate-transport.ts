@@ -6,7 +6,7 @@ import logger from '../logger';
 import errorExtractor from '../helpers/errorExtractor';
 import Controller from '../controllers/catch-certificate-transport.controller';
 import { CatchCertificateTransport } from '../persistence/schema/frontEndModels/catchCertificateTransport';
-import catchCertificateTransportSchema from '../schemas/catchcerts/catchCertificateTransportSelectionSchema';
+import catchCertificateTransportSchema, { catchCertificateTransportCmrSchema } from '../schemas/catchcerts/catchCertificateTransportSelectionSchema';
 import catchCertificateTransportDetailsSchema from '../schemas/catchcerts/catchCertificateTransportDetailsSchema';
 import catchCertificateTransportDocumentsSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSchema';
 import catchCertificateTransportDocumentsSaveAndContinueSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSaveAndContinueSchema';
@@ -86,6 +86,36 @@ export default class CatchCertificateTransportRoutes {
               return h.response(errorObject).code(400).takeover();
             },
             payload: catchCertificateTransportSchema
+          }
+        }
+      },
+      {
+        method: 'PUT',
+        path: '/v1/catch-certificate/transport/{transportId}/cmr',
+        options: {
+          auth: defineAuthStrategies(),
+          security: true,
+          cors: true,
+          handler: async (request, h) => {
+            return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+              return await Controller.updateTransport(request, userPrincipal, documentNumber, contactId);
+            }).catch(error => {
+              logger.error(`[UPDATE-TRANSPORT-CMR][ERROR][${error.stack || error}`);
+              return h.response().code(500);
+            })
+          },
+          description: 'Update transport CMR value',
+          tags: ['api', 'transport'],
+          validate: {
+            options: {
+              abortEarly: false
+            },
+            failAction: function (_, h, error) {
+              const errorObject = errorExtractor(error);
+
+              return h.response(errorObject).code(400).takeover();
+            },
+            payload: catchCertificateTransportCmrSchema,
           }
         }
       },
@@ -286,7 +316,7 @@ export default class CatchCertificateTransportRoutes {
               return h.response(errorObject).code(400).takeover();
             },
             payload: Joi.object({
-              vehicle: Joi.string().valid("truck", "plane", "train", "containerVessel").required()
+              vehicle: Joi.string().valid("truck", "plane", "train", "containerVessel").required(),
             })
           }
         }

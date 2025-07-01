@@ -290,6 +290,7 @@ export interface CatchCertificateContainerVessel extends CatchCertificateBasicTr
 }
 
 export interface CatchCertificateTruck extends CatchCertificateBasicTransportDetails {
+  cmr?: boolean;
   nationalityOfVehicle?: string,
   registrationNumber?: string
 }
@@ -400,6 +401,7 @@ const CatchCertificateTransportDocumentSchema = new Schema({
 export const CatchCertificateTransportSchema = new Schema({
   id:                   { type: Number,  required: true  },
   vehicle:              { type: String,  required: true  },
+  cmr:                  { type: Boolean, required: false },
   departurePlace:       { type: String,  required: false },
   nationalityOfVehicle: { type: String,  required: false },
   registrationNumber:   { type: String,  required: false },

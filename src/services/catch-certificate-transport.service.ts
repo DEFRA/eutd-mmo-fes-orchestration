@@ -1,6 +1,6 @@
 import * as BackEndModels from "../persistence/schema/catchCert"
 import * as Transport from "../persistence/schema/frontEndModels/transport";
-import { toBackEndTransport, CatchCertificateTransport, toFrontEndTransport } from "../persistence/schema/frontEndModels/catchCertificateTransport";
+import { toBackEndTransport, CatchCertificateTransport, toFrontEndTransport, truck } from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import { getDraft, upsertDraftData } from "../persistence/services/catchCert";
 import logger from "../logger";
 import { AddTransportation } from "../persistence/schema/catchCert";
@@ -39,7 +39,7 @@ export default class CatchCertificateTransportService {
     const transportations: BackEndModels.CatchCertificateTransport[] = draft.exportData.transportations;
 
     if (Array.isArray(transportations) && transportations.length > 0) {
-      const _ = transportations.find((t: BackEndModels.CatchCertificateTransport) => t.departurePlace);
+      const _ = transportations.find((t: BackEndModels.CatchCertificateTransport) => t.departurePlace || t.vehicle === truck && (t as BackEndModels.CatchCertificateTruck).cmr);
       return toFrontEndTransport(_);
     }
 
@@ -100,8 +100,16 @@ export default class CatchCertificateTransportService {
           }
         }, contactId);
       } else {
-        const vehicleHasChanged = payload.vehicle?.toLowerCase() !== transportations[index].vehicle?.toLowerCase();
-        transportations[index] = toBackEndTransport({ ...payload, documents: vehicleHasChanged ? [] : transportations[index].transportDocuments });
+        const draftTransport = transportations[index];
+        const vehicleHasChanged = payload.vehicle?.toLowerCase() !== draftTransport.vehicle?.toLowerCase();
+        if (draftTransport.vehicle === truck && typeof payload.cmr !== 'string' && typeof (draftTransport as BackEndModels.CatchCertificateTruck).cmr === 'boolean') {
+          // retain cmr value from previous edits if updating details
+          payload.cmr = (draftTransport as BackEndModels.CatchCertificateTruck).cmr.toString();
+        } else if (draftTransport.vehicle === truck && typeof payload.cmr === 'string') {
+          // keep details from existing transport if changing the CMR value (this can only happen for trucks)
+          payload = { ...toFrontEndTransport({ ...transportations[index], cmr: payload.cmr === 'true' }) };
+        }
+        transportations[index] = toBackEndTransport({ ...payload, documents: vehicleHasChanged ? [] : draftTransport.transportDocuments });
         await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': transportations } }, contactId);
       }
 
