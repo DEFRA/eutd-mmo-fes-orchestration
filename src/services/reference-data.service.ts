@@ -6,6 +6,7 @@ import { LandingsRefreshData } from './interfaces';
 import { Vessel } from "../persistence/schema/frontEndModels/payload";
 import { v4 as uuidv4 } from  'uuid';
 import { ICcQueryResult } from '../persistence/schema/onlineValidationResult';
+import { GearType } from './interfaces/GearType';
 
 
 export const refreshLandings = async (landingData: LandingsRefreshData, httpClient?: AxiosInstance) : Promise<any> => {
@@ -335,5 +336,28 @@ export const addIsLegallyDue = async (documentNumber: string, httpClient?: Axios
   } catch(err) {
     logger.error('Failed to update exportData is legally due status', err);
     return err;
+  }
+};
+
+export const isValidGearType = async (gearType: string, gearCategory: string, httpClient?: AxiosInstance) : Promise<boolean> => {
+  try {
+    const baseUrl = ApplicationConfig.getReferenceServiceUrl();
+    let client = httpClient;
+    if (!client) {
+      client = axios.create({
+        baseURL: baseUrl
+      });
+    }
+
+    const response: AxiosResponse<GearType[]> = await client.get('/v1/gear-type/' + gearCategory);
+
+    logger.info(`[GET-VALID-GEAR-TYPES][RESPONSE][${JSON.stringify(response?.data)}]`);
+    if (!Array.isArray(response.data)) throw new Error(`unexpected response format (expected array, got ${typeof response.data})`);
+
+    return response.data.some(item => gearType === `${item.gearName} (${item.gearCode})`);
+  }
+  catch(e) {
+    logger.error(`[GET-VALID-GEAR-TYPES][ERROR] ${e}`);
+    throw e;
   }
 };

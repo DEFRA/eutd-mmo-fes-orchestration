@@ -757,3 +757,60 @@ describe('isLegallyDue', ()=>{
   });
 
 });
+
+describe('isValidGearType', () => {
+  it('should call /v1/gear-types/:category endpoint with correct parameters', async () => {
+    mockedAxios.get.mockResolvedValue({
+      status: 200,
+      data: [],
+    });
+    await SUT.isValidGearType('Purse seines (PS)', 'Surrounding nets', mockedAxios);
+
+    expect(axios.get).toHaveBeenCalledWith('/v1/gear-type/Surrounding nets');
+  });
+
+  it('should create a new instance of axios when not passed in', async () => {
+    mockedAxios.create.mockReturnValue(mockedAxios);
+    await SUT.isValidGearType('Purse seines (PS)', 'Surrounding nets');
+    expect(axios.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return true when gear type matches item for category', async () => {
+    mockedAxios.get.mockResolvedValue({
+      status: 200,
+      data: [
+        { gearName: "Surrounding nets without purse lines", gearCode: "LA" },
+        { gearName: "Purse seines", gearCode: "PS" },
+        { gearName: "Surrounding nets (nei)", gearCode: "SUX" }
+      ],
+    });
+    const result = await SUT.isValidGearType('Purse seines (PS)', 'Surrounding nets', mockedAxios);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when gear type does not match item for category', async () => {
+    mockedAxios.get.mockResolvedValue({
+      status: 200,
+      data: [
+        { gearName: "Surrounding nets without purse lines", gearCode: "LA" },
+        { gearName: "Purse seines", gearCode: "PS" },
+        { gearName: "Surrounding nets (nei)", gearCode: "SUX" }
+      ],
+    });
+    const result = await SUT.isValidGearType('Boat seines (SV)', 'Surrounding nets', mockedAxios);
+    expect(result).toBe(false);
+  });
+
+  it('should throw error when API returns an invalid response', async () => {
+    mockedAxios.get.mockResolvedValue({ 
+      status: 200,
+      data: {
+        gearTypes: [{}, {}, {}]
+      }
+    });
+
+    await expect(SUT.isValidGearType('Boat seines (SV)', 'Surrounding nets', mockedAxios))
+      .rejects.toMatchObject({ message: 'unexpected response format (expected array, got object)' });
+  });
+});
