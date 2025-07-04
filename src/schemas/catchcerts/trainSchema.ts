@@ -3,6 +3,8 @@ const Extension = require('@hapi/joi-date');
 const Joi = BaseJoi.extend(Extension);
 
 const trainSchema = Joi.object({
+  vehicle: Joi.string().optional(),
+  exportedTo: Joi.any().optional(),
   railwayBillNumber: Joi.string().trim().alphanum().max(15).required(),
   departurePlace: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
   journey: Joi.string(),

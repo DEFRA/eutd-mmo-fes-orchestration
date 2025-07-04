@@ -3,6 +3,8 @@ const Extension = require('@hapi/joi-date');
 const Joi = BaseJoi.extend(Extension);
 
 const containerVesselSchema = Joi.object({
+  vehicle: Joi.string().optional(),
+  exportedTo: Joi.any().optional(),
   vesselName: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/).required(),
   flagState: Joi.string().trim().required(),
   containerNumber: Joi.string().trim().regex(/^[a-zA-Z0-9 ]*$/).max(50).required(),

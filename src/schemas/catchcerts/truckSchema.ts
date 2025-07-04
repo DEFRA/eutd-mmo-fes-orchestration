@@ -3,6 +3,9 @@ const Extension = require('@hapi/joi-date');
 const Joi = BaseJoi.extend(Extension);
 
 const truckSchema = Joi.object({
+  vehicle: Joi.string().optional(),
+  exportedTo: Joi.any().optional(),
+  cmr: Joi.string().optional(),
   nationalityOfVehicle: Joi.string().trim().required(),
   registrationNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
   departurePlace: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),

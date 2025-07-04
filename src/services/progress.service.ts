@@ -8,7 +8,7 @@ import { ProgressStatus, ICountry, ExporterDetails, Transport as BackEndTranspor
 import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/catchCertificate";
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
-import { checkTransportDataFrontEnd, toFrontEndTransport, Transport } from "../persistence/schema/frontEndModels/transport";
+import { checkTransportDataFrontEnd, toFrontEndTransport, Transport, truck, train, plane, containerVessel } from "../persistence/schema/frontEndModels/transport";
 import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
 import { utc } from 'moment';
@@ -20,6 +20,11 @@ import { validateProduct } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
+import truckSchema from "../schemas/catchcerts/truckSchema";
+import trainSchema from "../schemas/catchcerts/trainSchema";
+import planeSchema from "../schemas/catchcerts/planeSchema";
+import containerVesselSchema from "../schemas/catchcerts/containerVesselSchema";
+
 export default class ProgressService {
 
   public static async get(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
@@ -186,16 +191,44 @@ export default class ProgressService {
     return ProgressStatus.INCOMPLETE;
   }
 
-  public static readonly getTransportDetails = (transportation: Transport): ProgressStatus => {
+  public static readonly getTransportDetails = (transportation: Transport, journey?: string): ProgressStatus => {
     if (ProgressService.isEmptyAndTrimSpaces(transportation?.vehicle)) {
       const isTruck = transportation.vehicle === 'truck';
       const hasCmr = isTruck && transportation.cmr === 'true';
 
-      if (hasCmr || transportation.departurePlace) {
+      if (hasCmr) {
         return ProgressStatus.COMPLETED;
-      } else {
+      }
+
+      let schema;
+
+      switch (transportation.vehicle) {
+        case truck:
+          schema = truckSchema
+          break;
+        case train:
+          schema = trainSchema;
+          break;
+        case plane:
+          schema = planeSchema;
+          break;
+        case containerVessel:
+          schema = containerVesselSchema;
+          break;
+        default:
+          schema = null;
+      }
+
+      if (!schema) {
         return ProgressStatus.INCOMPLETE;
       }
+
+      const { error } = schema.validate({ ...transportation, journey, exportDateTo: journey === "storageNotes" && moment().startOf("day").add(1, "day").toISOString() });
+      if (error) {
+        return ProgressStatus.INCOMPLETE;
+      }
+
+      return ProgressStatus.COMPLETED;
     }
 
     return ProgressStatus.CANNOT_START;
@@ -223,7 +256,7 @@ export default class ProgressService {
         const missingTransportationDetails = bypassForTruckCMR && !frontEndTransportation.departurePlace
         const transportationDocumentIncomplete = bypassForTruckCMR && Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);
 
-        return hasValidationError|| missingTransportationDetails || transportationDocumentIncomplete;
+        return hasValidationError || missingTransportationDetails || transportationDocumentIncomplete;
       })
 
       if (transportationIsIncomplete) {
@@ -410,7 +443,7 @@ export default class ProgressService {
       storageFacilities: ProgressService.getStorageFacilitiesStatus(data?.exportData?.storageFacilities),
       exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo),
       transportType,
-      transportDetails: ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data?.exportData?.transportation)))
+      transportDetails: ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data?.exportData?.transportation)), "storageNotes")
     };
 
     const requiredSectionsLength = Object.keys(sdProgress).filter((key) => key !== "reference").length;

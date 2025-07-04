@@ -1525,6 +1525,171 @@ describe('filterErrors', () => {
 });
 
 describe('getTransportDetails', () => {
+  describe('with journey as storage notes', () => {
+    it('should return INCOMPLETE for a incomplete truck', () => {
+      const transport = {
+        vehicle: 'truck',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return COMPLETED for a truck with a cmr', () => {
+      const transport: Transport = {
+        vehicle: 'truck',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'true'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.COMPLETED
+      );
+    });
+
+    it('should return INCOMPLETED for a truck without a cmr or departure place', () => {
+      const transport: Transport = {
+        vehicle: 'truck',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'false',
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return COMPLETE for a truck without a cmr but with a departure place', () => {
+      const transport: Transport & { exportDateTo: string } = {
+        vehicle: 'truck',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'false',
+        nationalityOfVehicle: 'UK',
+        registrationNumber: 'OP98Y89',
+        departurePlace: 'Hull',
+        exportDate: '04/07/2024',
+        exportDateTo: '04/07/2024'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.COMPLETED
+      );
+    });
+
+    it('should return INCOMPLETED for a truck without a cmr but with a departure place with validation errors', () => {
+      const transport: Transport = {
+        vehicle: 'truck',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'false',
+        departurePlace: '@'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETED for a train with a departure place with validation errors', () => {
+      const transport: Transport = {
+        vehicle: 'train',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'false',
+        departurePlace: '@'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETED for a plane with a departure place with validation errors', () => {
+      const transport: Transport = {
+        vehicle: 'plane',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'false',
+        departurePlace: '@'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETED for a container vessel with a departure place with validation errors', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'false',
+        departurePlace: '@'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE if there is no valid transport type', () => {
+      const transport: Transport = {
+        vehicle: 'not valid',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        cmr: 'false',
+        departurePlace: 'Hull'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+  });
+
   it('should return INCOMPLETE for a incomplete truck', () => {
     const transport = {
       vehicle: 'truck',
@@ -1576,9 +1741,101 @@ describe('getTransportDetails', () => {
     );
   });
 
-  it('should return COMPLETE for a truck without a cmr but with a departure place and freight bill number', () => {
+  it('should return COMPLETE for a truck without a cmr but with a departure place', () => {
     const transport: Transport = {
       vehicle: 'truck',
+      exportedTo: {
+        officialCountryName: 'Brazil',
+        isoCodeAlpha2: 'BR',
+        isoCodeAlpha3: 'BRA',
+        isoNumericCode: '076',
+      },
+      cmr: 'false',
+      nationalityOfVehicle: 'UK',
+      registrationNumber: 'OP98Y89',
+      departurePlace: 'Hull'
+    };
+
+    expect(ProgressService.getTransportDetails(transport)).toBe(
+      ProgressStatus.COMPLETED
+    );
+  });
+
+  it('should return INCOMPLETED for a truck without a cmr but with a departure place with validation errors', () => {
+    const transport: Transport = {
+      vehicle: 'truck',
+      exportedTo: {
+        officialCountryName: 'Brazil',
+        isoCodeAlpha2: 'BR',
+        isoCodeAlpha3: 'BRA',
+        isoNumericCode: '076',
+      },
+      cmr: 'false',
+      departurePlace: '@'
+    };
+
+    expect(ProgressService.getTransportDetails(transport)).toBe(
+      ProgressStatus.INCOMPLETE
+    );
+  });
+
+  it('should return INCOMPLETED for a train with a departure place with validation errors', () => {
+    const transport: Transport = {
+      vehicle: 'train',
+      exportedTo: {
+        officialCountryName: 'Brazil',
+        isoCodeAlpha2: 'BR',
+        isoCodeAlpha3: 'BRA',
+        isoNumericCode: '076',
+      },
+      cmr: 'false',
+      departurePlace: '@'
+    };
+
+    expect(ProgressService.getTransportDetails(transport)).toBe(
+      ProgressStatus.INCOMPLETE
+    );
+  });
+
+  it('should return INCOMPLETED for a plane with a departure place with validation errors', () => {
+    const transport: Transport = {
+      vehicle: 'plane',
+      exportedTo: {
+        officialCountryName: 'Brazil',
+        isoCodeAlpha2: 'BR',
+        isoCodeAlpha3: 'BRA',
+        isoNumericCode: '076',
+      },
+      cmr: 'false',
+      departurePlace: '@'
+    };
+
+    expect(ProgressService.getTransportDetails(transport)).toBe(
+      ProgressStatus.INCOMPLETE
+    );
+  });
+
+  it('should return INCOMPLETED for a container vessel with a departure place with validation errors', () => {
+    const transport: Transport = {
+      vehicle: 'containerVessel',
+      exportedTo: {
+        officialCountryName: 'Brazil',
+        isoCodeAlpha2: 'BR',
+        isoCodeAlpha3: 'BRA',
+        isoNumericCode: '076',
+      },
+      cmr: 'false',
+      departurePlace: '@'
+    };
+
+    expect(ProgressService.getTransportDetails(transport)).toBe(
+      ProgressStatus.INCOMPLETE
+    );
+  });
+
+  it('should return INCOMPLETE if there is no valid transport type', () => {
+    const transport: Transport = {
+      vehicle: 'not valid',
       exportedTo: {
         officialCountryName: 'Brazil',
         isoCodeAlpha2: 'BR',
@@ -1590,7 +1847,7 @@ describe('getTransportDetails', () => {
     };
 
     expect(ProgressService.getTransportDetails(transport)).toBe(
-      ProgressStatus.COMPLETED
+      ProgressStatus.INCOMPLETE
     );
   });
 
@@ -1607,7 +1864,7 @@ describe('getTransportDetails', () => {
       departurePlace: 'Hull'
     };
 
-    expect(ProgressService.getTransportDetails(transport)).toBe(
+    expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
       ProgressStatus.CANNOT_START
     );
   });
@@ -4010,6 +4267,7 @@ describe('getStorageDocumentProgress', () => {
           flightNumber: 'BA078',
           containerNumber: '0123456789',
           exportedFrom: 'United Kingdom',
+          exportDate: '26/05/2023',
           exportedTo: {
             officialCountryName: 'Afghanistan',
             isoCodeAlpha2: 'AF',
