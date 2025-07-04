@@ -8,7 +8,7 @@ import { ProgressStatus, ICountry, ExporterDetails, Transport as BackEndTranspor
 import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/catchCertificate";
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
-import { checkTransportDataFrontEnd, toFrontEndTransport, Transport, truck } from "../persistence/schema/frontEndModels/transport";
+import { checkTransportDataFrontEnd, toFrontEndTransport, Transport } from "../persistence/schema/frontEndModels/transport";
 import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
 import { utc } from 'moment';
@@ -19,6 +19,7 @@ import { validateCatchDetails, validateCatchWeights } from './handlers/processin
 import { validateProduct } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
+import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
 export default class ProgressService {
 
   public static async get(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
@@ -203,30 +204,32 @@ export default class ProgressService {
   public static readonly getCatchCertificateTransportDetails = (
     transportations: CatchCertificateTransport[]
   ): ProgressStatus => {
-    const allHaveVehicles = transportations?.every((transportation: CatchCertificateTransport) =>
+    const allHaveVehicles = transportations.every((transportation: CatchCertificateTransport) =>
       ProgressService.isEmptyAndTrimSpaces(
         FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.vehicle
       )
     );
 
-    const allHaveDeparturePlace = transportations?.every((transportation: CatchCertificateTransport) => {
-      const transport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
-      return transport?.vehicle === truck && transport?.cmr === 'true' || transport?.departurePlace
-    });
-
-    const isValidTransportDocument = (doc: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) => 
-      ProgressService.isEmptyAndTrimSpaces(doc.name) && ProgressService.isEmptyAndTrimSpaces(doc.reference);
-
-    const allHaveTransportDocuments = transportations?.every((transportation: CatchCertificateTransport) => {
-      const transport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
-      return transport?.vehicle === truck && transport?.cmr === 'true' || !transport?.documents || transport?.documents.every(isValidTransportDocument);
-    });
-
     if (allHaveVehicles) {
-      if (allHaveDeparturePlace && allHaveTransportDocuments) {
-        return ProgressStatus.COMPLETED;
-      } else {
+
+      const isValidTransportDocument = (doc: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) =>
+        ProgressService.isEmptyAndTrimSpaces(doc.name) && ProgressService.isEmptyAndTrimSpaces(doc.reference);
+
+      const transportationIsIncomplete: boolean = transportations.some((transportation: CatchCertificateTransport) => {
+        const frontEndTransportation: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
+        const bypassForTruckCMR = frontEndTransportation.cmr === 'false' || !frontEndTransportation.cmr;
+        const { error } = catchCertificateTransportDetailsSchema.validate(frontEndTransportation);
+        const hasValidationError = bypassForTruckCMR && error;
+        const missingTransportationDetails = bypassForTruckCMR && !frontEndTransportation.departurePlace
+        const transportationDocumentIncomplete = bypassForTruckCMR && Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);
+
+        return hasValidationError|| missingTransportationDetails || transportationDocumentIncomplete;
+      })
+
+      if (transportationIsIncomplete) {
         return ProgressStatus.INCOMPLETE;
+      } else {
+        return ProgressStatus.COMPLETED;
       }
     }
 

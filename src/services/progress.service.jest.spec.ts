@@ -896,6 +896,59 @@ describe('get', () => {
     );
   });
 
+  it('will return INCOMPLETE transportationDetails if the user adds a vehicle and the transport details for transportation has a validation error', async () => {
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        transportation: undefined,
+        transportations: [{
+          id: 0,
+          vehicle: 'plane',
+          flightNumber: '3456345634563456345634563456',
+          containerNumber: '345634563456345634563456345634563456345634563456345634563456345634563456345634563456345634563456345634563456345634563456345634563456345634563456345634563456345634563456',
+          departurePlace: '@',
+          transportDocuments: [{
+            name: 'name',
+            reference: 'reference'
+          }]
+        }],
+        landingsEntryOption: 'manualEntry',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
+        },
+      },
+    });
+
+    const result = await ProgressService.get(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    expect(result).toStrictEqual({
+      progress: {
+        reference: 'OPTIONAL',
+        exporter: 'INCOMPLETE',
+        products: 'INCOMPLETE',
+        landings: 'CANNOT START',
+        conservation: 'INCOMPLETE',
+        exportJourney: 'COMPLETED',
+        transportType: 'COMPLETED',
+        transportDetails: 'INCOMPLETE',
+      },
+      requiredSections: 7,
+      completedSections: 2,
+    });
+    expect(mockGetDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
   it('will count the landings section as completed if it has errors', async () => {
     mockGetSummaryErrors.mockResolvedValue([
       {
