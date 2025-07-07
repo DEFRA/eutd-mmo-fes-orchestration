@@ -251,7 +251,9 @@ export default class ProgressService {
       const transportationIsIncomplete: boolean = transportations.some((transportation: CatchCertificateTransport) => {
         const frontEndTransportation: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
         const bypassForTruckCMR = frontEndTransportation.cmr === 'false' || !frontEndTransportation.cmr;
-        const { error } = catchCertificateTransportDetailsSchema.validate(frontEndTransportation);
+        const payload = { ...frontEndTransportation };
+        delete payload.cmr;
+        const { error } = catchCertificateTransportDetailsSchema.validate(payload);
         const hasValidationError = bypassForTruckCMR && error;
         const missingTransportationDetails = bypassForTruckCMR && !frontEndTransportation.departurePlace
         const transportationDocumentIncomplete = bypassForTruckCMR && Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);

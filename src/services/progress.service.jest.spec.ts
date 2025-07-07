@@ -843,6 +843,58 @@ describe('get', () => {
     );
   });
 
+  it('will return COMPLETE transportationDetails if the user adds a vehicle and the transport details for transportation with no CMR', async () => {
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        transportation: undefined,
+        transportations: [{
+          id: 0,
+          vehicle: 'truck',
+          cmr: false,
+          departurePlace: 'Hull',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'NU89OUJ',
+          freightBillNumber: 'AA1234567',
+          transportDocuments: []
+        }],
+        landingsEntryOption: 'manualEntry',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
+        },
+      },
+    });
+
+    const result = await ProgressService.get(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    expect(result).toStrictEqual({
+      progress: {
+        reference: 'OPTIONAL',
+        exporter: 'INCOMPLETE',
+        products: 'INCOMPLETE',
+        landings: 'CANNOT START',
+        conservation: 'INCOMPLETE',
+        exportJourney: 'COMPLETED',
+        transportType: 'COMPLETED',
+        transportDetails: 'COMPLETED',
+      },
+      requiredSections: 7,
+      completedSections: 3,
+    });
+    expect(mockGetDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
   it('will return INCOMPLETE transportationDetails if the user adds a vehicle and the transport details for only one transportation', async () => {
     mockGetDraft.mockResolvedValue({
       exportData: {
