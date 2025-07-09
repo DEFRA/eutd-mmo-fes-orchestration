@@ -14,7 +14,7 @@ export interface IUploadedLanding {
   exportWeight: number,
   gearCode?: string,
   gearCategory?: string,
-  gearType?: string,
+  gearName?: string,
   errors : Array<ErrorObject | string>
 }
 export interface ErrorObject {

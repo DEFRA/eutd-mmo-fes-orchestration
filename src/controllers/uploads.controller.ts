@@ -165,7 +165,9 @@ export default class UploadsController {
           startDate: validLanding.startDate ? moment(validLanding.startDate, 'DD/MM/YYYY').format('YYYY-MM-DD') : undefined,
           dateLanded: moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           exportWeight: validLanding.exportWeight,
-          faoArea: validLanding.faoArea
+          faoArea: validLanding.faoArea,
+          gearCategory: validLanding.gearCategory,
+          gearType: validLanding.gearCode && `${validLanding.gearName} (${validLanding.gearCode})`
         }
       };
 

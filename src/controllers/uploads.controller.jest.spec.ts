@@ -686,6 +686,102 @@ describe("UploadsController", () => {
       expect(mockCode).toHaveBeenCalledWith(200);
     });
 
+    it('should return 200 OK with gear details', async () => {
+      const mockReq: any = {
+        ...req,
+        payload: {
+          ...req.payload,
+          file: [{
+            rowNumber: 1,
+            originalRow: 'some-string',
+            productId: 'some-product-id',
+            product: {
+              id: 'some-product-id',
+              species: 'species',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            startDate: '10/10/2020',
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel : vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 10,
+            gearCode: 'LA',
+            gearCategory: 'Surrounding nets',
+            gearName: 'Surrounding nets without purse lines',
+            errors: []
+          }]
+        }
+      };
+
+      const expected = {
+       items:[
+         {
+           landings: [
+             {
+               model: {
+                 dateLanded: "2020-10-10",
+                 exportWeight: 10,
+                 faoArea: "FAO18",
+                 id: "123Document-CC-123-random-number",
+                 startDate: "2020-10-10",
+                 vessel: {
+                   cfr: "some-cfr",
+                   flag: "some-flag",
+                   homePort: "some-home-port",
+                   imoNumber: "some-imo-number",
+                   licenceNumber: "some-licence-number",
+                   licenceValidTo: "some-licence-valid-to",
+                   pln: "some-pln",
+                   rssNumber: "some-rss-number",
+                   vesselLength: 10,
+                   vesselName: "some-vessel-name",
+                 },
+                 gearCategory: 'Surrounding nets',
+                 gearType: 'Surrounding nets without purse lines (LA)',
+               },
+             },
+           ],
+           product: {
+             commodityCode: "some-commidity-code",
+             commodityCodeAdmin: undefined,
+             commodityCodeDescription: "some-commmodity-description",
+             factor: undefined,
+             id: "123Document-CC-123-some-uuid",
+             presentation: {
+               admin: undefined,
+               code: "some-presentation",
+               label: "some-presentation-label",
+             },
+             scientificName: "some-scientic-name",
+             species: {
+               admin: undefined,
+               code: "species-code",
+               label: "species",
+             },
+             state: {
+               admin: undefined,
+               code: "some-state",
+               label: "some-label",
+             },
+           },
+         },
+       ]
+      }
+
+      await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
+
+      expect(mockSaveExportPayload).toHaveBeenCalledWith(expected, USER, documentNumber, contactId);
+      expect(mockCode).toHaveBeenCalledWith(200);
+    });
+
     it('should return 200 OK with provided rows', async () => {
       const file: IUploadedLanding[] = [{
         rowNumber: 1,
@@ -1226,7 +1322,6 @@ describe("UploadsController", () => {
       expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
       expect(mockSaveExportPayload).toHaveBeenCalledWith(expected, USER, documentNumber, contactId);
     });
-
 
     it('should attempt to save multiple products for only valid landings with a start date', async () => {
       const mockReq: any = {
