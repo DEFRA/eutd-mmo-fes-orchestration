@@ -12,6 +12,9 @@ export interface IUploadedLanding {
   vessel : Vessel,
   vesselPln: string,
   exportWeight: number,
+  gearCode?: string,
+  gearCategory?: string,
+  gearType?: string,
   errors : Array<ErrorObject | string>
 }
 export interface ErrorObject {
