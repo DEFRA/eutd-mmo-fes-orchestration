@@ -97,6 +97,47 @@ describe("UploadsController", () => {
       ]);
     });
 
+    it("will parse a single landing with all optional fields", async () => {
+      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,PS,100\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+      expect(mockCacheUploadRows).not.toHaveBeenCalled();
+      expect(output).toEqual([
+        {
+          rowNumber: 1,
+          originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,PS,100",
+          productId: "PRD001",
+          startDate: "18/07/2021",
+          landingDate: "19/07/2021",
+          faoArea: "FAO27",
+          vesselPln: "PLN1",
+          exportWeight: "100",
+          gearCode: 'PS',
+          errors: []
+        }
+      ]);
+    });
+
+    it("will parse a single landing with gear code and no start date", async () => {
+      const csv = "PRD001,19/07/2021,FAO27,PLN1,PS,100\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+      expect(mockCacheUploadRows).not.toHaveBeenCalled();
+      expect(output).toEqual([
+        {
+          rowNumber: 1,
+          originalRow: "PRD001,19/07/2021,FAO27,PLN1,PS,100",
+          productId: "PRD001",
+          landingDate: "19/07/2021",
+          faoArea: "FAO27",
+          vesselPln: "PLN1",
+          exportWeight: "100",
+          gearCode: 'PS',
+          errors: []
+        }
+      ]);
+    });
+
     it("will remove empty lines", async () => {
       const csv =
         "\n" +
@@ -2602,7 +2643,7 @@ describe("UploadsController", () => {
     it("will throw an error if a row has excess data", async () => {
       const rows = [
         "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,19/07/2021,20/07/2021,FAO27,PLN2,200,bob"
+        "PRD002,19/07/2021,20/07/2021,FAO27,PLN2,PS,200,bob"
       ];
 
       await expect(async () =>

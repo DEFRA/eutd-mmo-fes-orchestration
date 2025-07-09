@@ -2,9 +2,9 @@ import { v4 as uuidv4 } from 'uuid';
 import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 import * as Hapi from '@hapi/hapi';
-import { IUploadedLanding } from "../persistence/schema/uploads";
+import { IUploadedLanding, UploadedLandingMeta } from "../persistence/schema/uploads";
 import { buildRedirectUrlWithErrorStringInQueryParam } from '../helpers/errorExtractor';
-import { getRandomNumber } from '../helpers/utils/utils';
+import { getRandomNumber, looksLikeADate } from '../helpers/utils/utils';
 import { LandingStatus, ProductLanded, ProductsLanded, Product, toProduct } from "../persistence/schema/frontEndModels/payload";
 import ExportPayloadService from "../services/export-payload.service";
 import UploadsService from "../services/uploads.service";
@@ -44,28 +44,31 @@ export default class UploadsController {
   public static async parseRows(rows: string[]): Promise<IUploadedLanding[]> {
     let rowNumber = 1;
 
+
+
     const landings: IUploadedLanding[] = await Promise.all(rows.map(async (originalRow) => {
-      const numCellsWithoutStartDate = 5;
       const cells = originalRow.split(',');
-      const headers = cells.length === numCellsWithoutStartDate ? [
-        'productId',
-        'landingDate',
-        'faoArea',
-        'vesselPln',
-        'exportWeight'
-      ] : [
-        'productId',
-        'startDate',
-        'landingDate',
-        'faoArea',
-        'vesselPln',
-        'exportWeight'
-      ];
+
+      const allKeys = Object.keys(UploadedLandingMeta);
+      const optionalKeys = allKeys.filter((k: string) => UploadedLandingMeta[k].optional);
+      const landingDateIndex = allKeys.indexOf('landingDate');
+
+      let headers = allKeys;
+      // make assumptions based on field count
+      if (cells.length === (allKeys.length - optionalKeys.length)) {
+        // mandatory fields only
+        headers = allKeys.filter(k => !optionalKeys.includes(k))
+      } else if (cells.length === allKeys.length-1 && looksLikeADate(cells[landingDateIndex]))
+        // assume start date is there if landing date still looks a date
+        headers = allKeys.filter(k => k !== 'gearCode');
+      else if (cells.length === allKeys.length-1) {
+        // otherwise assume no start date is present
+        headers = allKeys.filter(k => k !== 'startDate');
+      }
 
       const params = {
         noheader: true,
-
-        headers: headers,
+        headers,
         checkColumn: true
       };
 

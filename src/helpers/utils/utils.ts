@@ -26,3 +26,6 @@ export const getFAOAreaList = () : string[] => {
     'FAO88',
   ];
 }
+
+const fuzzyDateRegex = /(\d+\/+){2,}/;
+export const looksLikeADate = (value: string) => fuzzyDateRegex.test(value);
