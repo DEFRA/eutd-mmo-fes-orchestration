@@ -1,3 +1,4 @@
+import { hasValue, valueOrDefault } from "../../../helpers/utils/utils";
 import * as BackEndModels from "../../schema/catchCert";
 
 export const truck = 'truck';
@@ -102,16 +103,15 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
   switch (transport.vehicle) {
     case truck: {
       const model = transport as BackEndModels.CatchCertificateTruck;
-      const hasCmr = model.cmr !== undefined && model.cmr !== null;
       frontEndTransport = {
         id: transport.id.toString(),
         vehicle: model.vehicle,
-        cmr: hasCmr ? model.cmr.toString() : undefined,
-        nationalityOfVehicle: model.cmr ? undefined : model.nationalityOfVehicle,
-        registrationNumber: model.cmr ? undefined : model.registrationNumber,
-        departurePlace: model.cmr ? undefined : model.departurePlace,
-        freightBillNumber: model.cmr ? undefined : model.freightBillNumber,
-        documents: model.cmr ? undefined : model.transportDocuments
+        cmr: valueOrDefault(model.cmr?.toString(), hasValue(model.cmr)),
+        nationalityOfVehicle: valueOrDefault(model.nationalityOfVehicle, !model.cmr),
+        registrationNumber: valueOrDefault(model.registrationNumber, !model.cmr),
+        departurePlace: valueOrDefault(model.departurePlace, !model.cmr),
+        freightBillNumber: valueOrDefault(model.freightBillNumber, !model.cmr),
+        documents: valueOrDefault(model.transportDocuments, !model.cmr)
       };
       break;
     }

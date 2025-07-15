@@ -29,3 +29,7 @@ export const getFAOAreaList = () : string[] => {
 
 const fuzzyDateRegex = /(\d+\/+){2,}/;
 export const looksLikeADate = (value: string) => fuzzyDateRegex.test(value);
+
+export const valueOrDefault = <T>(value: T, condition: boolean, defaultValue?: any) => condition ? value : defaultValue;
+
+export const hasValue = <T>(value: T) => value !== undefined && value !== null;
