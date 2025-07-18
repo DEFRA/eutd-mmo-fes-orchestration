@@ -1606,6 +1606,88 @@ describe("methods", () => {
       expect(mockResponse).toHaveBeenCalledWith({ items })
     });
 
+    it('should validate a empty gear category and throw if invalid', async () => {
+      mockValidateLanding.mockResolvedValue({
+        error: 'invalid',
+        errors: { gearCategory: 'error' }
+      });
+
+      await SUT.upsertExportPayloadProductDirectLanding(
+        mockDirectLandingReq,
+        responseToolkit,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockLogger).toHaveBeenCalledWith('[UPSERT-EXPORT-PAYLOAD][DIRECT-LANDING][DOCUMENT-NUMBER][GBR-2020-CC-2345-3453]');
+      expect(mockExportPayloadServiceGetItemByProductId).toHaveBeenCalledWith(
+        USER_ID,
+        "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
+        DOCUMENT_NUMBER,
+        contactId);
+      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation);
+
+      expect(mockExportPayloadServiceSave).toHaveBeenCalledWith(
+        {
+          error: "invalid",
+          errors: {
+            gearCategory: "error"
+          },
+          items: [{
+            landings: [{
+                addMode: false,
+                editMode: false,
+                error: "invalid",
+                errors: {
+                  gearCategory: "error"
+                },
+                model: {
+                  dateLanded: "2020-10-10",
+                  exportWeight: 988,
+                  gearCategory: "Category 1",
+                  gearType: "Type 1",
+                  faoArea: "FAO27",
+                  id: `${DOCUMENT_NUMBER}-landing-id`,
+                  vessel: {
+                    cfr: "GBR000B11999",
+                    domId: "AWEL-Y-MOR-CA182",
+                    flag: "GBR",
+                    homePort: "PORTHGAIN",
+                    imoNumber: null,
+                    label: "AWEL-Y-MOR (CA182)",
+                    licenceNumber: "22896",
+                    licenceValidTo: "2382-12-31T00:00:00",
+                    pln: "CA182",
+                    rssNumber: "B11999",
+                    vesselLength: 6.55,
+                    vesselName: "AWEL-Y-MOR"
+                  }
+                }
+              }
+            ],
+            product: {
+              id: "product-id",
+              presentation: {
+                label: "presentation-label"
+              },
+              species: {
+                label: "species-label"
+              },
+              state: {
+                label: "state-label"
+              }
+            }
+          }]
+        },
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+      expect(mockCode).toHaveBeenCalledWith(400);
+      expect(mockResponse).toHaveBeenCalledWith({ items })
+    });
+
     it('should validate a direct landing and redirect', async () => {
       await SUT.upsertExportPayloadProductDirectLanding(
         mockDirectLandingReq,

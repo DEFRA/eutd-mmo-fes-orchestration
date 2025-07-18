@@ -552,6 +552,24 @@ describe("exporter-payload routes", () => {
       expect(response.statusCode).toBe(200);
       expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
     });
+
+    it("should return 400 not containing a Gear Category and containing a Gear Type after the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: 'Type 1',
+        }
+      }
+      const response = await server.inject(_request);
+
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+    });
   });
 
   describe("POST /v1/export-certificates/direct-landing/validate", () => {
@@ -770,6 +788,24 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(200);
       expect(mockUpsertExportPayloadProductDirectLanding).toHaveBeenCalled();
+    });
+
+    it("should return 400 for a request payload not contain gear category and contain type an invalid gear category", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: 'Type 1',
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(JSON.parse(response.payload).errors.gearCategory).toBe('error.gearCategory.string.empty');
     });
   });
 
@@ -1145,6 +1181,44 @@ describe("exporter-payload routes", () => {
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
 
+    it("should return 400 for a request payload not containing gear catergory and not contains gear type after the gear category", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items:[],
+        error: "invalid",
+        errors:{
+          gearCategory: "error.gearCategory.string.empty"
+        }
+      });
+
+      const currentDate = new Date();
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() + 1);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: 'Type 1',
+        }
+      }
+
+      const expected = {
+        items:[],
+        error: "invalid",
+        errors:{
+          gearCategory: "error.gearCategory.string.empty"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
     it("should return 403 user is not valid", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(undefined);
       const response = await server.inject(request);
@@ -1276,6 +1350,40 @@ describe("exporter-payload routes", () => {
         error: "invalid",
         errors:{
           gearType: "error.gearType.string.empty"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 for a request payload not containing a Gear Category and containing a Gear Type after the dateLanded", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items:[],
+        error: "invalid",
+        errors:{
+          gearType: "error.gearCategory.string.empty"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: 'Type 1'
+        }
+      }
+
+      const expected = {
+        items:[],
+        error: "invalid",
+        errors:{
+          gearType: "error.gearCategory.string.empty"
         }
       };
 

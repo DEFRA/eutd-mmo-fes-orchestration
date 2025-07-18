@@ -30,7 +30,16 @@ const directLandingsSchema = Joi.object({
     speciesId: Joi.string().trim().label("speciesId").required(),
     exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required()
   })).min(1).required(),
-  gearCategory: Joi.string().allow('', null).label("Gear Category").optional(),
+  gearCategory: Joi.custom((value: string, helpers: any) => {
+    const gearCategory = helpers.original;
+    const gearType = helpers.state.ancestors[0].gearType;
+
+    if (!gearCategory && gearType) {
+      return helpers.error('string.empty');
+    }
+    
+    return value;
+  }, 'Gear Category Validator').optional(),
   gearType: Joi.custom((value: string, helpers: any) => {
     const gearType = helpers.original;
     const gearCategory = helpers.state.ancestors[0].gearCategory;
@@ -40,7 +49,7 @@ const directLandingsSchema = Joi.object({
     }
 
     return value;
-  }, 'Start Date Validator').optional(),
+  }, 'Gear Type Validator').optional(),
 });
 
 export default directLandingsSchema;

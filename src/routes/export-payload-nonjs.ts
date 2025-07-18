@@ -77,7 +77,16 @@ export default class ExportPayloadNonjsRoutes {
                   return value;
                 }, 'Start Date Validator').optional(),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
-                gearCategory: Joi.string().allow('', null).label("Gear Category").optional(),
+                gearCategory: Joi.custom((value: string, helpers: any) => {
+                  const gearCategory = helpers.original;
+                  const gearType = helpers.state.ancestors[0].gearType;
+
+                  if (!gearCategory && gearType) {
+                    return helpers.error('string.empty');
+                  }
+                  
+                  return value;
+                }, 'Gear Category Validator').optional(),
                 gearType: Joi.custom((value: string, helpers: any) => {
                   const gearType = helpers.original;
                   const gearCategory = helpers.state.ancestors[0].gearCategory;
@@ -87,7 +96,7 @@ export default class ExportPayloadNonjsRoutes {
                   }
 
                   return value;
-                }, 'Start Date Validator').optional(),
+                }, 'Gear Type Validator').optional(),
               })
             }
           }
