@@ -61,26 +61,23 @@ describe("utils", () => {
     it('returns false when the value contains only forward slashes', () => {
       expect(utils.looksLikeADate('/////')).toBe(false);
     });
-    it('returns false when the value contains only forward slashes', () => {
-      expect(utils.looksLikeADate('/////')).toBe(false);
-    });
   });
 
-    describe('valueOrDefault', () => {
+  describe('valueOrDefault', () => {
     it('returns value when the condition parameter is true', () => {
       expect(utils.valueOrDefault("hello", true)).toBe("hello");
       expect(utils.valueOrDefault(12345, true)).toBe(12345);
-      expect(utils.valueOrDefault({one: 1}, true)).toStrictEqual({one:1});
+      expect(utils.valueOrDefault({ one: 1 }, true)).toStrictEqual({ one: 1 });
     });
     it('returns default value when the condition parameter is false', () => {
       expect(utils.valueOrDefault("hello", false, "olleh")).toBe("olleh");
       expect(utils.valueOrDefault(12345, false, 54321)).toBe(54321);
-      expect(utils.valueOrDefault({one: 1}, false, {two: 2})).toStrictEqual({two: 2});
+      expect(utils.valueOrDefault({ one: 1 }, false, { two: 2 })).toStrictEqual({ two: 2 });
     });
     it('returns undefined when no default value is passed and condition parameter is false', () => {
       expect(utils.valueOrDefault("hello", false)).toBe(undefined);
       expect(utils.valueOrDefault(12345, false)).toBe(undefined);
-      expect(utils.valueOrDefault({one:1}, false)).toBe(undefined);
+      expect(utils.valueOrDefault({ one: 1 }, false)).toBe(undefined);
     });
   });
 

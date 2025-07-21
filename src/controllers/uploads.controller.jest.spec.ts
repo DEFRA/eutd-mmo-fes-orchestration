@@ -14,7 +14,7 @@ import { BusinessError } from "../validators/validationErrors";
 import ApplicationConfig from "../applicationConfig";
 import axios from "axios";
 
-jest.mock('uuid', () => ({ v4: () =>  'some-uuid'}));
+jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
 
 describe("UploadsController", () => {
 
@@ -143,8 +143,8 @@ describe("UploadsController", () => {
         "\n" +
         "PRD001,19/07/2021,FAO27,PLN1,100\n" +
         "PRD002,20/07/2021,FAO27,PLN2,200\n" +
-        "\n"+
-        "\n"+
+        "\n" +
+        "\n" +
         "PRD003,21/07/2021,FAO27,PLN3,300\n";
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
@@ -186,9 +186,9 @@ describe("UploadsController", () => {
     it("will remove lines containing just commas and/or spaces", async () => {
       const csv =
         "PRD001,19/07/2021,FAO27,PLN1,100\n" +
-        ",,,,\n"+
-        ", , , ,\n"+
-        "   \n"+
+        ",,,,\n" +
+        ", , , ,\n" +
+        "   \n" +
         "PRD003,21/07/2021,FAO27,PLN3,300\n";
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
@@ -219,8 +219,8 @@ describe("UploadsController", () => {
 
     it("will not remove lines that have at least one data point", async () => {
       const csv =
-        ",,,,X\n"+
-        "   \n"+
+        ",,,,X\n" +
+        "   \n" +
         "Y,,,,\n";
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
@@ -448,7 +448,7 @@ describe("UploadsController", () => {
         startDate: 'some-start-date',
         landingDate: 'some-landing-date',
         faoArea: 'faoArea',
-        vessel : vessel,
+        vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
         errors: [
@@ -502,7 +502,7 @@ describe("UploadsController", () => {
         presentationLabel: 'some-presentation-label',
         commodity_code: 'some-commidity-code',
         commodity_code_description: 'some-commmodity-description',
-      },{
+      }, {
         id: 'some-product-id-1',
         species: 'species 1',
         speciesCode: 'species-code',
@@ -513,7 +513,7 @@ describe("UploadsController", () => {
         presentationLabel: 'some-presentation-label',
         commodity_code: 'some-commidity-code',
         commodity_code_description: 'some-commmodity-description',
-      },{
+      }, {
         id: 'some-product-id-2',
         species: 'species 2',
         speciesCode: 'species-code',
@@ -594,11 +594,11 @@ describe("UploadsController", () => {
             },
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
-            vessel : vessel,
+            vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
             errors: []
-          },{
+          }, {
             rowNumber: 2,
             originalRow: 'some-string',
             productId: 'some-product-id',
@@ -616,7 +616,7 @@ describe("UploadsController", () => {
             },
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
-            vessel : vessel,
+            vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
             errors: [],
@@ -652,11 +652,11 @@ describe("UploadsController", () => {
             startDate: '10/10/2020',
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
-            vessel : vessel,
+            vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
             errors: []
-          },{
+          }, {
             rowNumber: 2,
             originalRow: 'some-string',
             productId: 'some-product-id',
@@ -674,7 +674,7 @@ describe("UploadsController", () => {
             },
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
-            vessel : vessel,
+            vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
             errors: [],
@@ -710,7 +710,7 @@ describe("UploadsController", () => {
             startDate: '10/10/2020',
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
-            vessel : vessel,
+            vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
             gearCode: 'LA',
@@ -722,58 +722,58 @@ describe("UploadsController", () => {
       };
 
       const expected = {
-       items:[
-         {
-           landings: [
-             {
-               model: {
-                 dateLanded: "2020-10-10",
-                 exportWeight: 10,
-                 faoArea: "FAO18",
-                 id: "123Document-CC-123-random-number",
-                 startDate: "2020-10-10",
-                 vessel: {
-                   cfr: "some-cfr",
-                   flag: "some-flag",
-                   homePort: "some-home-port",
-                   imoNumber: "some-imo-number",
-                   licenceNumber: "some-licence-number",
-                   licenceValidTo: "some-licence-valid-to",
-                   pln: "some-pln",
-                   rssNumber: "some-rss-number",
-                   vesselLength: 10,
-                   vesselName: "some-vessel-name",
-                 },
-                 gearCategory: 'Surrounding nets',
-                 gearType: 'Surrounding nets without purse lines (LA)',
-               },
-             },
-           ],
-           product: {
-             commodityCode: "some-commidity-code",
-             commodityCodeAdmin: undefined,
-             commodityCodeDescription: "some-commmodity-description",
-             factor: undefined,
-             id: "123Document-CC-123-some-uuid",
-             presentation: {
-               admin: undefined,
-               code: "some-presentation",
-               label: "some-presentation-label",
-             },
-             scientificName: "some-scientic-name",
-             species: {
-               admin: undefined,
-               code: "species-code",
-               label: "species",
-             },
-             state: {
-               admin: undefined,
-               code: "some-state",
-               label: "some-label",
-             },
-           },
-         },
-       ]
+        items: [
+          {
+            landings: [
+              {
+                model: {
+                  dateLanded: "2020-10-10",
+                  exportWeight: 10,
+                  faoArea: "FAO18",
+                  id: "123Document-CC-123-random-number",
+                  startDate: "2020-10-10",
+                  vessel: {
+                    cfr: "some-cfr",
+                    flag: "some-flag",
+                    homePort: "some-home-port",
+                    imoNumber: "some-imo-number",
+                    licenceNumber: "some-licence-number",
+                    licenceValidTo: "some-licence-valid-to",
+                    pln: "some-pln",
+                    rssNumber: "some-rss-number",
+                    vesselLength: 10,
+                    vesselName: "some-vessel-name",
+                  },
+                  gearCategory: 'Surrounding nets',
+                  gearType: 'Surrounding nets without purse lines (LA)',
+                },
+              },
+            ],
+            product: {
+              commodityCode: "some-commidity-code",
+              commodityCodeAdmin: undefined,
+              commodityCodeDescription: "some-commmodity-description",
+              factor: undefined,
+              id: "123Document-CC-123-some-uuid",
+              presentation: {
+                admin: undefined,
+                code: "some-presentation",
+                label: "some-presentation-label",
+              },
+              scientificName: "some-scientic-name",
+              species: {
+                admin: undefined,
+                code: "species-code",
+                label: "species",
+              },
+              state: {
+                admin: undefined,
+                code: "some-state",
+                label: "some-label",
+              },
+            },
+          },
+        ]
       }
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
@@ -801,11 +801,11 @@ describe("UploadsController", () => {
         },
         landingDate: '10/10/2020',
         faoArea: 'FAO18',
-        vessel : vessel,
+        vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
         errors: []
-      },{
+      }, {
         rowNumber: 2,
         originalRow: 'some-string',
         productId: 'some-product-id',
@@ -823,7 +823,7 @@ describe("UploadsController", () => {
         },
         landingDate: '10/10/2020',
         faoArea: 'FAO18',
-        vessel : vessel,
+        vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
         errors: [],
@@ -862,7 +862,7 @@ describe("UploadsController", () => {
             },
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
-            vessel : vessel,
+            vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
           }]
@@ -895,7 +895,7 @@ describe("UploadsController", () => {
             },
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
-            vessel : vessel,
+            vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
             errors: null
@@ -914,7 +914,7 @@ describe("UploadsController", () => {
           ...req.payload,
           file: [{
             ...req.payload.file[0]
-          },{
+          }, {
             rowNumber: 2,
             originalRow: 'some-string',
             productId: 'some-product-id',
@@ -970,7 +970,7 @@ describe("UploadsController", () => {
           'error.dateLanded.date.base',
           'error.faoArea.any.invalid',
         ],
-      },{
+      }, {
         rowNumber: 2,
         originalRow: 'some-string',
         productId: 'some-product-id',
@@ -1006,7 +1006,7 @@ describe("UploadsController", () => {
           ...req.payload,
           file: [{
             ...req.payload.file[0]
-          },{
+          }, {
             rowNumber: 2,
             originalRow: 'some-string',
             productId: 'some-product-id',
@@ -1063,7 +1063,7 @@ describe("UploadsController", () => {
           'error.dateLanded.date.base',
           'error.faoArea.any.invalid',
         ],
-      },{
+      }, {
         rowNumber: 2,
         originalRow: 'some-string',
         productId: 'some-product-id',
@@ -1100,7 +1100,7 @@ describe("UploadsController", () => {
           ...req.payload,
           file: [{
             ...req.payload.file[0]
-          },{
+          }, {
             rowNumber: 2,
             originalRow: 'some-string',
             productId: 'some-product-id',
@@ -1167,6 +1167,8 @@ describe("UploadsController", () => {
               dateLanded: '2020-10-10',
               exportWeight: 10,
               faoArea: 'FAO18',
+              gearCategory: '',
+              gearType: ''
             }
           }]
         }]
@@ -1184,7 +1186,7 @@ describe("UploadsController", () => {
           ...req.payload,
           file: [{
             ...req.payload.file[0]
-          },{
+          }, {
             rowNumber: 2,
             originalRow: 'some-string',
             productId: 'some-product-id-1',
@@ -1205,7 +1207,7 @@ describe("UploadsController", () => {
             vesselPln: 'some-pln',
             exportWeight: 10,
             errors: [],
-          },{
+          }, {
             rowNumber: 3,
             originalRow: 'some-string',
             productId: 'some-product-id-2',
@@ -1272,7 +1274,9 @@ describe("UploadsController", () => {
               },
               dateLanded: '2020-10-10',
               exportWeight: 10,
-              faoArea: 'FAO18'
+              faoArea: 'FAO18',
+              gearCategory: '',
+              gearType: ''
             }
           }]
         },
@@ -1312,7 +1316,9 @@ describe("UploadsController", () => {
               },
               dateLanded: '2020-10-10',
               exportWeight: 20,
-              faoArea: 'FAO18'
+              faoArea: 'FAO18',
+              gearCategory: '',
+              gearType: ''
             }
           }]
         }]
@@ -1330,7 +1336,7 @@ describe("UploadsController", () => {
           ...req.payload,
           file: [{
             ...req.payload.file[0]
-          },{
+          }, {
             rowNumber: 2,
             originalRow: 'some-string',
             productId: 'some-product-id-1',
@@ -1352,7 +1358,7 @@ describe("UploadsController", () => {
             vesselPln: 'some-pln',
             exportWeight: 10,
             errors: [],
-          },{
+          }, {
             rowNumber: 3,
             originalRow: 'some-string',
             productId: 'some-product-id-2',
@@ -1420,7 +1426,9 @@ describe("UploadsController", () => {
               startDate: '2020-10-09',
               dateLanded: '2020-10-10',
               exportWeight: 10,
-              faoArea: 'FAO18'
+              faoArea: 'FAO18',
+              gearCategory: '',
+              gearType: ''
             }
           }]
         },
@@ -1460,7 +1468,9 @@ describe("UploadsController", () => {
               },
               dateLanded: '2020-10-10',
               exportWeight: 20,
-              faoArea: 'FAO18'
+              faoArea: 'FAO18',
+              gearCategory: '',
+              gearType: ''
             }
           }]
         }]
@@ -1485,7 +1495,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1551,7 +1561,9 @@ describe("UploadsController", () => {
                 },
                 dateLanded: '2020-10-10',
                 exportWeight: 10,
-                faoArea: 'FAO18'
+                faoArea: 'FAO18',
+                gearCategory: '',
+                gearType: ''
               }
             }]
           }]
@@ -1569,7 +1581,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1590,7 +1602,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 10,
               errors: [],
-            },{
+            }, {
               rowNumber: 3,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1611,7 +1623,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 10,
               errors: [],
-            },{
+            }, {
               rowNumber: 4,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1677,9 +1689,11 @@ describe("UploadsController", () => {
                 },
                 dateLanded: '2020-10-10',
                 exportWeight: 10,
-                faoArea: 'FAO18'
+                faoArea: 'FAO18',
+                gearCategory: '',
+                gearType: '',
               }
-            },{
+            }, {
               model: {
                 id: `${documentNumber}-random-number`,
                 vessel: {
@@ -1696,9 +1710,11 @@ describe("UploadsController", () => {
                 },
                 dateLanded: '2020-10-10',
                 exportWeight: 10,
-                faoArea: 'FAO18'
+                faoArea: 'FAO18',
+                gearCategory: '',
+                gearType: '',
               }
-            },{
+            }, {
               model: {
                 id: `${documentNumber}-random-number`,
                 vessel: {
@@ -1715,7 +1731,9 @@ describe("UploadsController", () => {
                 },
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
-                faoArea: 'FAO18'
+                faoArea: 'FAO18',
+                gearCategory: '',
+                gearType: ''
               }
             }]
           }]
@@ -1786,7 +1804,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1807,7 +1825,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 3,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1828,7 +1846,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 4,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1849,7 +1867,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 5,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1870,7 +1888,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 6,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1895,7 +1913,8 @@ describe("UploadsController", () => {
           }
         };
 
-        const expected = { file:
+        const expected = {
+          file:
           {
             key: 'error.upload.max-landings',
             params: {
@@ -1916,7 +1935,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1937,7 +1956,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 3,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1958,7 +1977,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 4,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -1979,7 +1998,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 5,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2000,7 +2019,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 100,
               errors: [],
-            },{
+            }, {
               rowNumber: 6,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2029,7 +2048,8 @@ describe("UploadsController", () => {
           },
         };
 
-        const expected = { file:
+        const expected = {
+          file:
           {
             key: 'error.upload.max-landings',
             params: {
@@ -2050,7 +2070,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2136,7 +2156,9 @@ describe("UploadsController", () => {
                 },
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
-                faoArea: 'FAO18'
+                faoArea: 'FAO18',
+                gearCategory: '',
+                gearType: ''
               }
             }]
           }]
@@ -2205,7 +2227,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2309,7 +2331,9 @@ describe("UploadsController", () => {
                 },
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
-                faoArea: 'FAO18'
+                faoArea: 'FAO18',
+                gearCategory: '',
+                gearType: ''
               }
             }]
           }]
@@ -2358,7 +2382,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2424,7 +2448,9 @@ describe("UploadsController", () => {
                 },
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
-                faoArea: 'FAO18'
+                faoArea: 'FAO18',
+                gearCategory: '',
+                gearType: '',
               }
             }]
           }]
@@ -2445,7 +2471,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2488,7 +2514,7 @@ describe("UploadsController", () => {
             ...req.payload,
             file: [{
               ...req.payload.file[0]
-            },{
+            }, {
               rowNumber: 2,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2510,7 +2536,7 @@ describe("UploadsController", () => {
               vesselPln: 'some-pln',
               exportWeight: 10,
               errors: ['error.dateLanded.date.missing'],
-            },{
+            }, {
               rowNumber: 3,
               originalRow: 'some-string',
               productId: 'some-product-id',
@@ -2544,6 +2570,8 @@ describe("UploadsController", () => {
                   dateLanded: "2020-10-10",
                   exportWeight: 2000,
                   faoArea: "FAO18",
+                  gearCategory: '',
+                  gearType: '',
                   id: "123Document-CC-123-random-number",
                   vessel: {
                     cfr: "some-cfr",
@@ -2601,11 +2629,11 @@ describe("UploadsController", () => {
           startDate: 'some-start-date',
           landingDate: 'some-landing-date',
           faoArea: 'faoArea',
-          vessel : vessel,
+          vessel: vessel,
           vesselPln: 'some-pln',
           exportWeight: 10,
           errors: ['error.dateLanded.date.base', 'error.faoArea.any.invalid'],
-        },{
+        }, {
           rowNumber: 2,
           originalRow: 'some-string',
           productId: 'some-product-id',
@@ -2627,7 +2655,7 @@ describe("UploadsController", () => {
           vesselPln: 'some-pln',
           exportWeight: 10,
           errors: ['error.dateLanded.date.missing'],
-        },{
+        }, {
           rowNumber: 3,
           originalRow: 'some-string',
           productId: 'some-product-id',
@@ -2802,7 +2830,7 @@ describe("UploadsController", () => {
       mockGetReferenceServiceUrl.mockReturnValue(refServiceUrl);
 
       mockAxiosPost = jest.spyOn(axios, 'post');
-      mockAxiosPost.mockResolvedValue({data: responseData});
+      mockAxiosPost.mockResolvedValue({ data: responseData });
     });
 
     afterEach(() => {
@@ -2865,7 +2893,7 @@ describe("UploadsController", () => {
         }
       ];
 
-      mockAxiosPost.mockResolvedValue({data: response});
+      mockAxiosPost.mockResolvedValue({ data: response });
 
       const result = await UploadsController.validateLandings(userPrincipal, landings);
 

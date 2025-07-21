@@ -23,7 +23,7 @@ export default class UploadsController {
       throw new Error('error.upload.min-landings');
     }
 
-    let rows = await csv({noheader: true, output: 'line'}).fromString(data);
+    let rows = await csv({ noheader: true, output: 'line' }).fromString(data);
 
     rows = rows.filter(item => !isEmpty(item.replace(/^[, ]+$/g, '')));
     rows = rows.map(item => item.toUpperCase());
@@ -58,10 +58,10 @@ export default class UploadsController {
       if (cells.length === (allKeys.length - optionalKeys.length)) {
         // mandatory fields only
         headers = allKeys.filter(k => !optionalKeys.includes(k))
-      } else if (cells.length === allKeys.length-1 && looksLikeADate(cells[landingDateIndex]))
+      } else if (cells.length === allKeys.length - 1 && looksLikeADate(cells[landingDateIndex]))
         // assume start date is there if landing date still looks a date
         headers = allKeys.filter(k => k !== 'gearCode');
-      else if (cells.length === allKeys.length-1) {
+      else if (cells.length === allKeys.length - 1) {
         // otherwise assume no start date is present
         headers = allKeys.filter(k => k !== 'startDate');
       }
@@ -95,7 +95,7 @@ export default class UploadsController {
 
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     const url = `${baseUrl}/v1/upload/landings/validate`;
-    const payload = {landings, products, landingLimitDaysInFuture}
+    const payload = { landings, products, landingLimitDaysInFuture }
 
     const res = await axios.post(url, payload);
     const validatedLandings: IUploadedLanding[] = res.data;
@@ -114,7 +114,7 @@ export default class UploadsController {
 
     const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors && landing.errors.length === 0 || !landing.errors;
     const hasValidLanding = (_: IUploadedLanding[]): boolean => _.some(isValidLanding);
-    const failSaveLandingRows = (errorDetailsObj: { file: string } | { file: { key: string , params: { limit: number }}}): Hapi.ResponseObject => {
+    const failSaveLandingRows = (errorDetailsObj: { file: string } | { file: { key: string, params: { limit: number } } }): Hapi.ResponseObject => {
       if (acceptsHtml(req.headers)) {
         const url = buildRedirectUrlWithErrorStringInQueryParam(errorDetailsObj, (req.payload as any).currentUri);
         return h.redirect(url);
@@ -127,7 +127,7 @@ export default class UploadsController {
     }
 
     const validLandings: IUploadedLanding[] = landings.filter(isValidLanding);
-    const exportPayload: ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId) || { items: []};
+    const exportPayload: ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId) || { items: [] };
     const totalCurrentLandings: LandingStatus[] = exportPayload.items.reduce((acc: LandingStatus[], curr: ProductLanded) => {
       if (curr.landings && curr.landings.length > 0) {
         return [...acc, ...curr.landings]
@@ -162,12 +162,12 @@ export default class UploadsController {
         model: {
           id: `${documentNumber}-${getRandomNumber()}`,
           vessel: validLanding.vessel,
-          startDate: validLanding.startDate ? moment(validLanding.startDate, 'DD/MM/YYYY').format('YYYY-MM-DD') : undefined,
+          startDate: UploadsController.getStartDate(validLanding),
           dateLanded: moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           exportWeight: validLanding.exportWeight,
           faoArea: validLanding.faoArea,
-          gearCategory: validLanding.gearCategory,
-          gearType: validLanding.gearCode && `${validLanding.gearName} (${validLanding.gearCode})`
+          gearCategory: UploadsController.geGearCategory(validLanding),
+          gearType: UploadsController.getGearType(validLanding)
         }
       };
 
@@ -178,6 +178,18 @@ export default class UploadsController {
 
     return h.response(landings).code(200);
   }
+
+  static readonly getStartDate = (
+    landing: IUploadedLanding
+  ) => landing.startDate ? moment(landing.startDate, 'DD/MM/YYYY').format('YYYY-MM-DD') : undefined;
+
+  static readonly geGearCategory = (
+    landing: IUploadedLanding
+  ) => landing.gearCategory ? landing.gearCategory : '';
+
+  static readonly getGearType = (
+    landing: IUploadedLanding
+  ) => landing.gearCode ? `${landing.gearName} (${landing.gearCode})` : '';
 
   static readonly addLanding = (
     item: ProductLanded,
