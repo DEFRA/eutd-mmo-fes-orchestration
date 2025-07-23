@@ -14,6 +14,7 @@ import {
 import * as FrontEndModel from "../schema/frontEndModels/conservation";
 import * as SpeciesModelFE from "../schema/frontEndModels/species";
 import { utc } from 'moment';
+import { HighSeasAreaType } from './frontEndModels/payload';
 
 export enum LandingValidationStatus {
   Pending = 'PENDING_LANDING_DATA',
@@ -44,6 +45,11 @@ export enum AddTransportation {
   No = 'no',
 }
 
+export enum HighSeasAreaOptions {
+  Yes = 'yes',
+  No = 'no'
+}
+
 export const LandingStatuses = Object.freeze(LandingValidationStatus);
 
 export interface Catch {
@@ -63,6 +69,8 @@ export interface Catch {
   weight?: number;
   gearCategory?: string;
   gearType?: string;
+  highSeasArea?: HighSeasAreaType;
+  exclusiveEconomicZone?: string;
   _status?: LandingValidationStatus;
   numberOfSubmissions?: number;
   vesselOverriddenByAdmin?: boolean;
@@ -77,6 +85,7 @@ export interface Catch {
   threshold?: number;
   riskScore?: number;
   isSpeciesRiskEnabled?: boolean;
+  rfmo?: string;
 }
 
 export interface Conservation {
@@ -232,7 +241,8 @@ export const cloneProductData = (original: Product, newDocumentNumber: string, e
 }
 
 export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch => {
-  const {id,vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType } = original;
+  const {id,vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType,highSeasArea,
+    exclusiveEconomicZone, rfmo } = original;
 
   const result = {
     id: `${newDocumentNumber}${id.slice(newDocumentNumber.length)}`,
@@ -250,7 +260,10 @@ export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch =>
     faoArea,
     weight,
     gearCategory,
-    gearType
+    gearType,
+    highSeasArea,
+    exclusiveEconomicZone,
+    rfmo
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);
@@ -355,6 +368,8 @@ const CatchSchema = new Schema({
   date:                     { type: String, required: true  },
   startDate:                { type: String, required: false },
   faoArea:                  { type: String, required: true  },
+  highSeasArea:             { type: String, required: false, enum: Object.values(HighSeasAreaOptions) },
+  exclusiveEconomicZone:    { type: String, required: false },
   weight:                   { type: Number },
   gearCategory:             { type: String, required: false  },
   gearType:                 { type: String, required: false  },
@@ -371,7 +386,8 @@ const CatchSchema = new Schema({
   speciesRiskScore:         { type: Number, required: false },
   threshold:                { type: Number, required: false },
   riskScore:                { type: Number, required: false },
-  isSpeciesRiskEnabled:     { type: Boolean,required: false }
+  isSpeciesRiskEnabled:     { type: Boolean,required: false },
+  rfmo:                     { type: String, required: false },
 }, { _id : false } );
 
 const ProductSchema = new Schema({

@@ -348,6 +348,8 @@ describe("exporter-payload routes", () => {
           faoArea: "FAO18",
           gearCategory: "",
           gearType: "",
+          highSeasArea: "no",
+          exclusiveEconomicZone: "no",
         },
       };
     });
@@ -623,6 +625,8 @@ describe("exporter-payload routes", () => {
           ],
           gearCategory: "Category 1",
           gearType: "Type 1",
+          highSeasArea:"yes",
+          exclusiveEconomicZone:"yes",
         },
       };
     });
@@ -1136,6 +1140,8 @@ describe("exporter-payload routes", () => {
           faoArea: "12",
           gearCategory: "Category 1",
           gearType: "Type 1",
+          highSeasArea:"yes",
+          exclusiveEconomicZone:"yes",
         },
       };
     });

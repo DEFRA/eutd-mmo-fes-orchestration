@@ -96,6 +96,8 @@ export default class ExportPayloadRoutes {
 
                   return value;
                 }, 'Gear Type Validator').optional(),
+                highSeasArea: Joi.string().optional(),
+                exclusiveEconomicZone: Joi.string().optional(),
                 faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required()
               })
             }
@@ -274,8 +276,11 @@ export default class ExportPayloadRoutes {
                   }
 
                   return value;
-                }, 'Gear Type Validator').optional(),
-                faoArea: Joi.string().trim().label("Catch area").required()
+                }, 'Start Date Validator').optional(),
+                faoArea: Joi.string().trim().label("Catch area").required(),
+                highSeasArea: Joi.string().optional(),
+                exclusiveEconomicZone: Joi.string().optional(),
+                rfmo: Joi.string().optional()
               })
             }
           }

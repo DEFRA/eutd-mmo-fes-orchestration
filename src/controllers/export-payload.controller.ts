@@ -465,6 +465,8 @@ export default class ExportPayloadController {
         exportWeight: payload.exportWeight,
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
+        highSeasArea: payload.highSeasArea,
+        exclusiveEconomicZone: payload.exclusiveEconomicZone
       }
     };
 
@@ -483,7 +485,10 @@ export default class ExportPayloadController {
       weights: PayloadSchema.Weight[],
       gearCategory?: string,
       gearType?: string,
-      currentUri?: string
+      highSeasArea?: PayloadSchema.HighSeasAreaType,
+      exclusiveEconomicZone?: string,
+      currentUri?: string,
+      rfmo?: string,
     } = { ...(req.payload as any) };
 
     logger.info(`[UPSERT-EXPORT-PAYLOAD][DIRECT-LANDING][DOCUMENT-NUMBER][${documentNumber}]`);
@@ -503,7 +508,10 @@ export default class ExportPayloadController {
           exportWeight: weight.exportWeight,
           gearCategory: payload.gearCategory,
           gearType: payload.gearType,
-          faoArea: payload.faoArea
+          highSeasArea: payload.highSeasArea,
+          exclusiveEconomicZone:payload.exclusiveEconomicZone,   
+          faoArea: payload.faoArea,
+          rfmo: payload.rfmo
         }
       };
 
@@ -568,6 +576,9 @@ export default class ExportPayloadController {
       currentUri?: string,
       gearCategory?: string,
       gearType?: string,
+      highSeasArea?: PayloadSchema.HighSeasAreaType,
+      exclusiveEconomicZone?: string,
+      rfmo: string,
     } = { ...(req.payload as any) };
 
     logger.info(`[UPSERT-EXPORT-PAYLOAD][PRODUCT-LANDING][DOCUMENT-NUMBER][${documentNumber}]`);
@@ -584,7 +595,10 @@ export default class ExportPayloadController {
         exportWeight: payload.exportWeight,
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
-        faoArea: payload.faoArea
+        highSeasArea: payload.highSeasArea,
+        exclusiveEconomicZone: payload.exclusiveEconomicZone,
+        faoArea: payload.faoArea,
+        rfmo: payload.rfmo
       }
     };
 
@@ -650,6 +664,8 @@ export default class ExportPayloadController {
         exportWeight: req.payload.exportWeight,
         gearCategory: req.payload.gearCategory,
         gearType: req.payload.gearType,
+        highSeasArea: req.payload.highSeasArea,
+        exclusiveEconomicZone: req.payload.exclusiveEconomicZone,
       };
       result = await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
     }
@@ -677,6 +693,8 @@ export default class ExportPayloadController {
         startDate: payload.startDate,
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
+        highSeasArea: payload.highSeasArea,
+        exclusiveEconomicZone: payload.exclusiveEconomicZone,
         exportWeight: payload.exportWeight,
         faoArea: payload.faoArea
       }
@@ -709,7 +727,10 @@ export default class ExportPayloadController {
         startDate: req.payload.startDate,
         gearCategory: req.payload.gearCategory,
         gearType: req.payload.gearType,
-        exportWeight: req.payload.exportWeight
+        highSeasArea: req.payload.highSeasArea,
+        exclusiveEconomicZone: req.payload.exclusiveEconomicZone,
+        exportWeight: req.payload.exportWeight,
+        rfmo: req.payload.rfmo,
       };
       await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
     }

@@ -37,6 +37,7 @@ export interface Vessel {
   vesselOverriddenByAdmin?: boolean;
   vesselNotFound?: boolean;
 }
+export type HighSeasAreaType = 'yes' | 'no' | undefined;
 
 export interface Weight {
   speciesId: string,
@@ -54,9 +55,12 @@ export interface DirectLanding {
   weights: Weight[];
   gearCategory?: string;
   gearType?: string;
+  highSeasArea?: HighSeasAreaType;
+  exclusiveEconomicZone?: string;
   numberOfSubmissions?: number;
   error?: string;
   errors?: {};
+  rfmo?: string,
 }
 
 export interface Landing {
@@ -67,6 +71,8 @@ export interface Landing {
   exportWeight?: number;
   gearCategory?: string;
   gearType?: string;
+  highSeasArea?: HighSeasAreaType;
+  exclusiveEconomicZone?: string;
   faoArea?: string;
   numberOfSubmissions?: number;
   dataEverExpected?: boolean;
@@ -79,6 +85,7 @@ export interface Landing {
   threshold?: number;
   riskScore?: number;
   isSpeciesRiskEnabled?: boolean;
+  rfmo?: string;
 }
 export interface LandingStatus {
   addMode?: boolean;
@@ -190,6 +197,8 @@ const mapLandings = (landing: LandingStatus): BackEndModels.Catch => {
     weight: landing.model.exportWeight,
     gearCategory: landing.model.gearCategory,
     gearType: landing.model.gearType,
+    highSeasArea: landing.model.highSeasArea,
+    exclusiveEconomicZone: landing.model.exclusiveEconomicZone,
     numberOfSubmissions: landing.model.numberOfSubmissions,
     vesselOverriddenByAdmin: landing.model?.vessel?.vesselOverriddenByAdmin,
     vesselNotFound: landing.model?.vessel?.vesselNotFound,
@@ -202,7 +211,8 @@ const mapLandings = (landing: LandingStatus): BackEndModels.Catch => {
     speciesRiskScore: landing.model.speciesRiskScore,
     threshold: landing.model.threshold,
     riskScore: landing.model.riskScore,
-    isSpeciesRiskEnabled: landing.model.isSpeciesRiskEnabled
+    isSpeciesRiskEnabled: landing.model.isSpeciesRiskEnabled,
+    rfmo: landing.model.rfmo,
   };
 
   if (errors.length > 0) {
@@ -286,6 +296,8 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
         exportWeight: landing.weight,
         gearCategory: landing.gearCategory,
         gearType: landing.gearType,
+        highSeasArea: landing.highSeasArea as HighSeasAreaType,
+        exclusiveEconomicZone: landing.exclusiveEconomicZone,
         numberOfSubmissions: landing.numberOfSubmissions,
         isLegallyDue: landing.isLegallyDue,
         vesselRiskScore: landing.vesselRiskScore,
@@ -293,7 +305,8 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
         speciesRiskScore: landing.speciesRiskScore,
         threshold: landing.threshold,
         riskScore: landing.riskScore,
-        isSpeciesRiskEnabled: landing.isSpeciesRiskEnabled
+        isSpeciesRiskEnabled: landing.isSpeciesRiskEnabled,
+        rfmo: landing.rfmo,
       }
     };
 
@@ -370,12 +383,15 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
     startDate: landing?.startDate,
     gearCategory: landing?.gearCategory,
     gearType: landing?.gearType,
+    highSeasArea: landing?.highSeasArea as HighSeasAreaType,
+    exclusiveEconomicZone: landing?.exclusiveEconomicZone,
     dateLanded: landing ? landing.date : undefined,
     faoArea: landing ? landing.faoArea : undefined,
     weights: weights.map((weight: Weight) => {
       Object.keys(weight).forEach(key => mapWeights(weight, key));
       return weight;
-    })
+    }),
+    rfmo: landing?.rfmo ?? undefined,
   }
 
   Object.keys(result).forEach(key => result[key] === undefined ? delete result[key] : null);

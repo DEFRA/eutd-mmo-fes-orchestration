@@ -50,6 +50,9 @@ const directLandingsSchema = Joi.object({
 
     return value;
   }, 'Gear Type Validator').optional(),
+  highSeasArea: Joi.string().optional(),
+  exclusiveEconomicZone: Joi.string().optional(),
+  rfmo: Joi.string().optional(),
 });
 
 export default directLandingsSchema;
