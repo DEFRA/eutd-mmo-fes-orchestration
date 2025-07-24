@@ -74,7 +74,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
   freightBillNumber: Joi.when('$query.draft', {
     is: true,
     then: Joi.any(),
-    otherwise: Joi.string().trim().max(60),
+    otherwise: Joi.string().trim().max(60).regex(/^[a-zA-Z0-9-./]+$/),
   }),
   documents: Joi.array().optional()
 });

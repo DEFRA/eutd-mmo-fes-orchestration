@@ -895,6 +895,60 @@ describe('get', () => {
     );
   });
 
+  it('will return COMPLETE transportationDetails if the transport details have valid freightBillNumber format', async () => {
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        transportation: undefined,
+        transportations: [{
+          id: 0,
+          vehicle: 'plane',
+          flightNumber: '3456',
+          containerNumber: '34567',
+          departurePlace: 'London',
+          freightBillNumber: 'ABC-123/456.789',
+          transportDocuments: [{
+            name: 'name',
+            reference: 'reference'
+          }]
+        }],
+        landingsEntryOption: 'manualEntry',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
+        },
+      },
+    });
+  
+    const result = await ProgressService.get(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  
+    expect(result).toStrictEqual({
+      progress: {
+        reference: 'OPTIONAL',
+        exporter: 'INCOMPLETE',
+        products: 'INCOMPLETE',
+        landings: 'CANNOT START',
+        conservation: 'INCOMPLETE',
+        exportJourney: 'COMPLETED',
+        transportType: 'COMPLETED',
+        transportDetails: 'COMPLETED',
+      },
+      requiredSections: 7,
+      completedSections: 3,
+    });
+    expect(mockGetDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
   it('will return INCOMPLETE transportationDetails if the user adds a vehicle and the transport details for only one transportation', async () => {
     mockGetDraft.mockResolvedValue({
       exportData: {
@@ -980,6 +1034,60 @@ describe('get', () => {
       contactId
     );
 
+    expect(result).toStrictEqual({
+      progress: {
+        reference: 'OPTIONAL',
+        exporter: 'INCOMPLETE',
+        products: 'INCOMPLETE',
+        landings: 'CANNOT START',
+        conservation: 'INCOMPLETE',
+        exportJourney: 'COMPLETED',
+        transportType: 'COMPLETED',
+        transportDetails: 'INCOMPLETE',
+      },
+      requiredSections: 7,
+      completedSections: 2,
+    });
+    expect(mockGetDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return INCOMPLETE transportationDetails if the user adds a vehicle and the transport details with invalid freightBillNumber format', async () => {
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        transportation: undefined,
+        transportations: [{
+          id: 0,
+          vehicle: 'plane',
+          flightNumber: '3456',
+          containerNumber: '34567',
+          departurePlace: 'London',
+          freightBillNumber: 'ABC@123#!£$',
+          transportDocuments: [{
+            name: 'name',
+            reference: 'reference'
+          }]
+        }],
+        landingsEntryOption: 'manualEntry',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
+        },
+      },
+    });
+  
+    const result = await ProgressService.get(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  
     expect(result).toStrictEqual({
       progress: {
         reference: 'OPTIONAL',

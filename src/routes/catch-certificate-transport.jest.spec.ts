@@ -1009,7 +1009,7 @@ describe("Transport endpoints", () => {
       expect(response.result).toEqual(transport);
     });
 
-    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with freight bill number which exceeds the 60 character limit', async () => {
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0?draft=true with freight bill number which below the 60 character limit', async () => {
       const request = createRequestObj(
         '/v1/catch-certificate/transport-details/0?draft=true',
         {
@@ -1019,13 +1019,52 @@ describe("Transport endpoints", () => {
           registrationNumber: 'UI90UXB',
           departurePlace: 'Hull',
           freightBillNumber:
-            'Very Very Very Very Very Very Very Lengthy Freight Bill Number',
+            'VeryVeryVeryVeryVeryVeryVeryLengthyFreightBillNumber',
         },
         'PUT',
       );
 
       const response = await server.inject(request);
       expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+
+    it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with valid freight bill number containing allowed characters', async () => {
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0', 
+          vehicle: 'truck',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'ABC-123/456.789',
+        },
+        'PUT'
+      );
+    
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+    });
+    
+    it('returns 200 when freight bill number is not provided', async () => {
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck', 
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull'
+        },
+        'PUT'
+      );
+    
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled(); 
       expect(response.statusCode).toBe(200);
       expect(response.result).toEqual(transport);
     });
@@ -1172,7 +1211,7 @@ describe("Transport endpoints", () => {
           registrationNumber: 'UI90UXB',
           departurePlace: 'Hull',
           freightBillNumber:
-            'Very Very Very Very Very Very Very Lengthy Freight Bill Number',
+            'VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLengthyFreightBillNumber',
         },
         'PUT',
       );
@@ -1184,6 +1223,28 @@ describe("Transport endpoints", () => {
         freightBillNumber: 'error.freightBillNumber.string.max',
       };
       expect(response.result).toEqual(error);
+    });
+
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with invalid characters in freight bill number', async () => {
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'ABC#123@!',
+        },
+        'PUT'
+      );
+    
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toEqual({
+        freightBillNumber: 'error.freightBillNumber.string.pattern.base',
+      });
     });
 
     it('returns 500 when we PUT /v1/catch-certificate/transport-details/0 when the controller throws an error', async () => {

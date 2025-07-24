@@ -27,7 +27,7 @@ export interface CatchCertificateTransport {
 }
 
 export const toBackEndTransport = (transport: CatchCertificateTransport): BackEndModels.CatchCertificateTransport => {
-
+  
   let backEndTransport: BackEndModels.CatchCertificateTransport;
 
   switch (transport.vehicle) {
