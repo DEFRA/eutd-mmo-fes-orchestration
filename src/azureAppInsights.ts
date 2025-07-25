@@ -5,7 +5,7 @@ export default () => {
   const instrumentationKey = ApplicationConfig._instrumentationKey;
 
   if (instrumentationKey) {
-    appInsights.setup(instrumentationKey)
+    appInsights.setup()
       .setAutoDependencyCorrelation(true)
       .setAutoCollectRequests(true)
       .setAutoCollectPerformance(true, true)
