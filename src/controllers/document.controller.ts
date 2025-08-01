@@ -19,6 +19,7 @@ import * as ReferenceDataService from '../services/reference-data.service'
 
 import { userCanCreateDraft } from "../validators/draftCreationValidator";
 import { AllDocuments, DocumentsCompleted, DocumentsInProgress, HapiRequestApplicationStateExtended } from '../types';
+import { isRequestByAdmin } from '../helpers/auth';
 
 
 export default class DocumentController {
@@ -165,12 +166,6 @@ export default class DocumentController {
     };
   }
 }
-
-const isRequestByAdmin = (roles) =>  roles ?
-    roles.includes('MMO-ECC-Service-Management')
-    || roles.includes('MMO-ECC-Support-User')
-    || roles.includes('MMO-ECC-IUU-Single-Liaison-Officer')
-    || roles.includes('MMO-ECC-Regulatory-User') : false;
 
 const returnDraft = (fesApi: boolean, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, documentNumber: string, req: Hapi.Request) => {
   if (fesApi || (req.payload as any).mmov2) {

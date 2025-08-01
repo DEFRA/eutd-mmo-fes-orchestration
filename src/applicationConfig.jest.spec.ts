@@ -9,6 +9,8 @@ describe("ApplicationConfig", () => {
     ApplicationConfig._referenceServiceHost = "http://localhost:9000";
     ApplicationConfig.eventHubNamespace = "insights-application-logs";
     ApplicationConfig._refServiceBasicAuthUser = 'REF-SERVICE-BASIC-AUTH-USER';
+    ApplicationConfig._identityAppUrl = 'http://fesidp';
+    ApplicationConfig._fesApiMasterPassword = 'foobar';
   });
 
   beforeEach(() => {
@@ -40,6 +42,14 @@ describe("ApplicationConfig", () => {
 
   it('should return correct host as localeLowerCase', () => {
     expect(ApplicationConfig.getApplicationHost()).toContain('localhost');
+  });
+
+  it('should return auth token issuer', () => {
+    expect(ApplicationConfig.getAuthIssuer()).toBe('http://fesidp');
+  });
+
+  it('should return auth token secret', () => {
+    expect(ApplicationConfig.getAuthSecret()).toBe('foobar');
   });
 
   describe('maximum favourites per user', () => {

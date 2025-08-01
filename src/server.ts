@@ -14,6 +14,9 @@ import { HapiRequestApplicationStateExtended } from './types';
 
 import ApplicationConfig from './applicationConfig';
 import acceptsHtml from "./helpers/acceptsHtml";
+import { verify as jwtVerify, Jwt, JwtPayload } from 'jsonwebtoken';
+import applicationConfig from './applicationConfig';
+import { isRequestByAdmin } from './helpers/auth';
 
 export default class Server {
   private static _instance: Hapi.Server<Hapi.ServerApplicationState>;
@@ -234,16 +237,14 @@ export default class Server {
         password: string
       ) => {
         logger.info('Validating token for FES API');
-        const jwt = require('jsonwebtoken');
-
         try {
-          const claims = jwt.verify(
+          const claims = jwtVerify(
             password,
-            ApplicationConfig._fesApiMasterPassword
+            ApplicationConfig.getAuthSecret(),
           );
 
           const app = request.app as HapiRequestApplicationStateExtended;
-          app.claims = claims;
+          app.claims = claims as JwtPayload;
           app.claims.fesApi = true;
 
           const credentials = { id: "fesApi", name: username };
@@ -261,21 +262,22 @@ export default class Server {
 
       Server._instance.auth.strategy('jwt', 'jwt', {
         complete: true,
-        verify: (decoded, req) => {
+        verify: (decoded: Jwt, req) => {
           logger.info('Validating token');
 
-          if (!Object.prototype.hasOwnProperty.call(req.headers, 'authorization')) {
-            logger.warn('No auth header set');
-            return { isValid: false, credentials: decoded };
-          }
+          const { iss, roles } = decoded.payload as JwtPayload;
+          const isAdminRole = Array.isArray(roles) && isRequestByAdmin(roles);
+          const authIssuer = applicationConfig.getAuthIssuer();
+          const isKnownIssuer = authIssuer && authIssuer === iss;
 
-          const tokenHeader = req.headers.authorization.split('Bearer ');
-          if (tokenHeader.length < 2) {
-            logger.warn('No auth header');
-            return { isValid: false, credentials: decoded };
+          const isValidToken = isAdminRole || isKnownIssuer;
+          if (!isValidToken) {
+            logger.warn('Invalid auth issuer');
+            return { isValid: false, credentials: decoded }
           }
 
           req.app.claims = decoded.payload;
+
           logger.info('Validated token');
           return { isValid: true, credentials: decoded };
         }

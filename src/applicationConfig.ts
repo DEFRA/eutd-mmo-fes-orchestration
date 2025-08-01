@@ -42,6 +42,7 @@ class ApplicationConfig {
   _lastUpdatedCookiePolicy: string;
   _maxAuthRetries: number;
   _consolidationServicUrl: string;
+  _identityAppUrl: string;
 
   loadProperties() {
     this._disableAuth = process.env.DISABLE_AUTH === 'true';
@@ -67,8 +68,15 @@ class ApplicationConfig {
 
     this._blobStorageConnection = process.env.BLOB_STORAGE_CONNECTION;
     this._fesApiMasterPassword = process.env.FES_API_MASTER_PASSWORD;
+    if (!this._fesApiMasterPassword) {
+      logger.error('FES_API_MASTER_PASSWORD is not set');
+    }
     this._fesNotifyApiKey = process.env.FES_NOTIFY_API_KEY;
     this._consolidationServicUrl = process.env.MMO_CC_LANDINGS_CONSOLIDATION_SVC_URL;
+    this._identityAppUrl = process.env.IDENTITY_APP_URL;
+    if (!this._identityAppUrl) {
+      logger.error('IDENTITY_APP_URL is not set');
+    }
 
 
     if (isNaN(this._maximumFavouritesPerUser)) {
@@ -122,6 +130,14 @@ class ApplicationConfig {
 
   isOfflineValidation(numberOfLandings: number): boolean {
     return (numberOfLandings > this._maximumLandingsForOnlineValidation);
+  }
+
+  getAuthIssuer() {
+    return this._identityAppUrl;
+  }
+
+  getAuthSecret() {
+    return this._fesApiMasterPassword;
   }
 }
 
