@@ -1293,7 +1293,7 @@ describe("methods", () => {
           gearCategory: undefined,
           gearType: undefined,
           highSeasArea: undefined,
-          exclusiveEconomicZone:undefined,
+          exclusiveEconomicZones:undefined,
           rfmo: undefined,
           faoArea: undefined,
           vessel: undefined,
@@ -1334,7 +1334,7 @@ describe("methods", () => {
           gearCategory: undefined,
           gearType: undefined,
           highSeasArea: undefined,
-          exclusiveEconomicZone: undefined,
+          exclusiveEconomicZones: undefined,
           faoArea: undefined,
           id: "payload-id",
           numberOfSubmissions: undefined,
@@ -1410,7 +1410,7 @@ describe("methods", () => {
           gearCategory: undefined,
           gearType: undefined,
           highSeasArea: undefined,
-          exclusiveEconomicZone:undefined,
+          exclusiveEconomicZones:undefined,
           rfmo: undefined,
           id: "payload-id",
           numberOfSubmissions: undefined,
@@ -1468,7 +1468,20 @@ describe("methods", () => {
           gearCategory: "Category 1",
           gearType: "Type 1",
           highSeasArea: "yes",
-          exclusiveEconomicZone:"yes",
+          exclusiveEconomicZones:[
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            },
+            {
+              officialCountryName: "Åland Islands",
+              isoCodeAlpha2: "AX",
+              isoCodeAlpha3: "ALA",
+              isoNumericCode: "248",
+            }
+          ],
           exportWeight: 988,
           faoArea: "FAO27",
           rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)"
@@ -1516,7 +1529,20 @@ describe("methods", () => {
         gearCategory: "Category 1",
         gearType: "Type 1",
         highSeasArea: "yes",
-        exclusiveEconomicZone:"yes",
+        exclusiveEconomicZones:[
+          {
+            officialCountryName: "Afghanistan",
+            isoCodeAlpha2: "AF",
+            isoCodeAlpha3: "AFG",
+            isoNumericCode: "004"
+          },
+          {
+            officialCountryName: "Åland Islands",
+            isoCodeAlpha2: "AX",
+            isoCodeAlpha3: "ALA",
+            isoNumericCode: "248",
+          }
+        ],
         rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
         weights: [{
           speciesId: "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
@@ -1580,7 +1606,20 @@ describe("methods", () => {
                   gearCategory: "Category 1",
                   gearType: "Type 1",
                   highSeasArea: "yes",
-                  exclusiveEconomicZone:"yes",
+                  exclusiveEconomicZones:[
+                    {
+                      officialCountryName: "Afghanistan",
+                      isoCodeAlpha2: "AF",
+                      isoCodeAlpha3: "AFG",
+                      isoNumericCode: "004"
+                    },
+                    {
+                      officialCountryName: "Åland Islands",
+                      isoCodeAlpha2: "AX",
+                      isoCodeAlpha3: "ALA",
+                      isoNumericCode: "248",
+                    }
+                  ],
                   rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                   faoArea: "FAO27",
                   id: `${DOCUMENT_NUMBER}-landing-id`,
@@ -1667,7 +1706,20 @@ describe("methods", () => {
                   faoArea: "FAO27",
                   highSeasArea: "yes",
                   startDate: undefined,
-                  exclusiveEconomicZone: "yes",
+                  exclusiveEconomicZones:[
+                    {
+                      officialCountryName: "Afghanistan",
+                      isoCodeAlpha2: "AF",
+                      isoCodeAlpha3: "AFG",
+                      isoNumericCode: "004"
+                    },
+                    {
+                      officialCountryName: "Åland Islands",
+                      isoCodeAlpha2: "AX",
+                      isoCodeAlpha3: "ALA",
+                      isoNumericCode: "248",
+                    }
+                  ],
                   rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                   id: `${DOCUMENT_NUMBER}-landing-id`,
                   vessel: {
@@ -1740,7 +1792,20 @@ describe("methods", () => {
                   gearCategory: "Category 1",
                   gearType: "Type 1",
                   highSeasArea: "yes",
-                  exclusiveEconomicZone:"yes",
+                  exclusiveEconomicZones:[
+                    {
+                      officialCountryName: "Afghanistan",
+                      isoCodeAlpha2: "AF",
+                      isoCodeAlpha3: "AFG",
+                      isoNumericCode: "004"
+                    },
+                    {
+                      officialCountryName: "Åland Islands",
+                      isoCodeAlpha2: "AX",
+                      isoCodeAlpha3: "ALA",
+                      isoNumericCode: "248",
+                    }
+                  ],
                   rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                   exportWeight: 988,
                   faoArea: "FAO27",
@@ -1806,7 +1871,20 @@ describe("methods", () => {
         gearCategory: "Category 1",
         gearType: "Type 1",
         highSeasArea: "yes",
-        exclusiveEconomicZone:"yes",
+        exclusiveEconomicZones:[
+          {
+            officialCountryName: "Afghanistan",
+            isoCodeAlpha2: "AF",
+            isoCodeAlpha3: "AFG",
+            isoNumericCode: "004"
+          },
+          {
+            officialCountryName: "Åland Islands",
+            isoCodeAlpha2: "AX",
+            isoCodeAlpha3: "ALA",
+            isoNumericCode: "248",
+          }
+        ],
         rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
         weights: [{
           speciesId: "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
@@ -1847,7 +1925,20 @@ describe("methods", () => {
                   gearCategory: "Category 1",
                   gearType: "Type 1",
                   highSeasArea: "yes",
-                  exclusiveEconomicZone:"yes",
+                  exclusiveEconomicZones:[
+                    {
+                      officialCountryName: "Afghanistan",
+                      isoCodeAlpha2: "AF",
+                      isoCodeAlpha3: "AFG",
+                      isoNumericCode: "004"
+                    },
+                    {
+                      officialCountryName: "Åland Islands",
+                      isoCodeAlpha2: "AX",
+                      isoCodeAlpha3: "ALA",
+                      isoNumericCode: "248",
+                    }
+                  ],
                   rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                   exportWeight: 988,
                   faoArea: "FAO27",
@@ -1927,7 +2018,20 @@ describe("methods", () => {
           gearCategory: "Category 1",
           gearType: "Type 1",
           highSeasArea: "yes",
-          exclusiveEconomicZone:"yes",
+          exclusiveEconomicZones:[
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            },
+            {
+              officialCountryName: "Åland Islands",
+              isoCodeAlpha2: "AX",
+              isoCodeAlpha3: "ALA",
+              isoNumericCode: "248",
+            }
+          ],
           rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
           weights: [{
             speciesId: "GBR-2021-CC-1",
@@ -1990,7 +2094,20 @@ describe("methods", () => {
                     gearCategory: "Category 1",
                     gearType: "Type 1",
                     highSeasArea: "yes",
-                    exclusiveEconomicZone:"yes",
+                    exclusiveEconomicZones:[
+                      {
+                        officialCountryName: "Afghanistan",
+                        isoCodeAlpha2: "AF",
+                        isoCodeAlpha3: "AFG",
+                        isoNumericCode: "004"
+                      },
+                      {
+                        officialCountryName: "Åland Islands",
+                        isoCodeAlpha2: "AX",
+                        isoCodeAlpha3: "ALA",
+                        isoNumericCode: "248",
+                      }
+                    ],
                     rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                     exportWeight: 9,
                     faoArea: "FAO27",
@@ -2036,7 +2153,20 @@ describe("methods", () => {
                     gearCategory: "Category 1",
                     gearType: "Type 1",
                     highSeasArea: "yes",
-                    exclusiveEconomicZone:"yes",
+                    exclusiveEconomicZones:[
+                      {
+                        officialCountryName: "Afghanistan",
+                        isoCodeAlpha2: "AF",
+                        isoCodeAlpha3: "AFG",
+                        isoNumericCode: "004"
+                      },
+                      {
+                        officialCountryName: "Åland Islands",
+                        isoCodeAlpha2: "AX",
+                        isoCodeAlpha3: "ALA",
+                        isoNumericCode: "248",
+                      }
+                    ],
                     rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                     exportWeight: 8,
                     faoArea: "FAO27",
@@ -2103,7 +2233,20 @@ describe("methods", () => {
           gearCategory: "Category 1",
           gearType: "Type 1",
           highSeasArea: "yes",
-          exclusiveEconomicZone:"yes",
+          exclusiveEconomicZones:[
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            },
+            {
+              officialCountryName: "Åland Islands",
+              isoCodeAlpha2: "AX",
+              isoCodeAlpha3: "ALA",
+              isoNumericCode: "248",
+            }
+          ],
           rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
           weights: [{
             speciesId: "GBR-2021-CC-1",
@@ -2142,7 +2285,20 @@ describe("methods", () => {
                     gearCategory: "Category 1",
                     gearType: "Type 1",
                     highSeasArea: "yes",
-                    exclusiveEconomicZone:"yes",
+                    exclusiveEconomicZones:[
+                      {
+                        officialCountryName: "Afghanistan",
+                        isoCodeAlpha2: "AF",
+                        isoCodeAlpha3: "AFG",
+                        isoNumericCode: "004"
+                      },
+                      {
+                        officialCountryName: "Åland Islands",
+                        isoCodeAlpha2: "AX",
+                        isoCodeAlpha3: "ALA",
+                        isoNumericCode: "248",
+                      }
+                    ],
                     rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                     exportWeight: 9,
                     faoArea: "FAO27",
@@ -2188,7 +2344,20 @@ describe("methods", () => {
                     gearCategory: "Category 1",
                     gearType: "Type 1",
                     highSeasArea: "yes",
-                    exclusiveEconomicZone:"yes",
+                    exclusiveEconomicZones:[
+                      {
+                        officialCountryName: "Afghanistan",
+                        isoCodeAlpha2: "AF",
+                        isoCodeAlpha3: "AFG",
+                        isoNumericCode: "004"
+                      },
+                      {
+                        officialCountryName: "Åland Islands",
+                        isoCodeAlpha2: "AX",
+                        isoCodeAlpha3: "ALA",
+                        isoNumericCode: "248",
+                      }
+                    ],
                     rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                     exportWeight: 8,
                     faoArea: "FAO27",

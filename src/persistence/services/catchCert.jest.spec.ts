@@ -1648,6 +1648,7 @@ describe('catchCert - db related', () => {
                 vesselNotFound: false
               },
               dateLanded: '2021-01-01',
+              exclusiveEconomicZones: [],
               exportWeight: 1000,
               faoArea: 'fao1',
               numberOfSubmissions: 2

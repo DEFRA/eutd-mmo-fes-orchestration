@@ -2,10 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 import * as Hapi from '@hapi/hapi';
-import { IUploadedLanding, UploadedLandingMeta } from "../persistence/schema/uploads";
+import { IUploadedLanding } from "../persistence/schema/uploads";
 import { buildRedirectUrlWithErrorStringInQueryParam } from '../helpers/errorExtractor';
-import { getRandomNumber, looksLikeADate } from '../helpers/utils/utils';
-import { LandingStatus, ProductLanded, ProductsLanded, Product, toProduct } from "../persistence/schema/frontEndModels/payload";
+import { getRandomNumber } from '../helpers/utils/utils';
+import { LandingStatus, ProductLanded, ProductsLanded, Product, toProduct, HighSeasAreaType } from "../persistence/schema/frontEndModels/payload";
 import ExportPayloadService from "../services/export-payload.service";
 import UploadsService from "../services/uploads.service";
 import acceptsHtml from "../helpers/acceptsHtml";
@@ -13,7 +13,6 @@ import * as csv from 'csvtojson'
 import ApplicationConfig from '../applicationConfig'
 import { readFavouritesProducts } from '../persistence/services/favourites';
 import { IProduct } from '../persistence/schema/userAttributes';
-import axios from 'axios';
 import FavouritesController from './favourites.controller';
 
 export default class UploadsController {
@@ -23,83 +22,26 @@ export default class UploadsController {
       throw new Error('error.upload.min-landings');
     }
 
-    let rows = await csv({ noheader: true, output: 'line' }).fromString(data);
-
+    let rows: string[] = await csv({ noheader: true, output: 'line' }).fromString(data);
+    
     rows = rows.filter(item => !isEmpty(item.replace(/^[, ]+$/g, '')));
     rows = rows.map(item => item.toUpperCase());
 
     if (rows.length > ApplicationConfig._maxLimitLandings) {
       throw new Error('error.upload.max-landings')
     }
-
-    const landings = await this.parseRows(rows);
-    const validatedLandings: IUploadedLanding[] = await this.validateLandings(userPrincipal, landings);
+    const validatedLandings: IUploadedLanding[] = await this.validateLandings(userPrincipal, rows);
 
     if (cache)
       await UploadsService.cacheUploadedRows(userPrincipal, contactId, validatedLandings);
-
     return validatedLandings;
   }
 
-  public static async parseRows(rows: string[]): Promise<IUploadedLanding[]> {
-    let rowNumber = 1;
-
-
-
-    const landings: IUploadedLanding[] = await Promise.all(rows.map(async (originalRow) => {
-      const cells = originalRow.split(',');
-
-      const allKeys = Object.keys(UploadedLandingMeta);
-      const optionalKeys = allKeys.filter((k: string) => UploadedLandingMeta[k].optional);
-      const landingDateIndex = allKeys.indexOf('landingDate');
-
-      let headers = allKeys;
-      // make assumptions based on field count
-      if (cells.length === (allKeys.length - optionalKeys.length)) {
-        // mandatory fields only
-        headers = allKeys.filter(k => !optionalKeys.includes(k))
-      } else if (cells.length === allKeys.length - 1 && looksLikeADate(cells[landingDateIndex]))
-        // assume start date is there if landing date still looks a date
-        headers = allKeys.filter(k => k !== 'gearCode');
-      else if (cells.length === allKeys.length - 1) {
-        // otherwise assume no start date is present
-        headers = allKeys.filter(k => k !== 'startDate');
-      }
-
-      const params = {
-        noheader: true,
-        headers,
-        checkColumn: true
-      };
-
-      const json: IUploadedLanding[] = await csv(params).fromString(originalRow);
-
-      const landing: IUploadedLanding = {
-        ...json[0],
-        rowNumber,
-        originalRow,
-        errors: []
-      };
-
-      rowNumber++;
-
-      return landing;
-    }));
-
-    return landings;
-  }
-
-  public static async validateLandings(userPrincipal: string, landings: IUploadedLanding[]): Promise<IUploadedLanding[]> {
+  public static async validateLandings(userPrincipal: string, rows?: string[], landings?: IUploadedLanding[]): Promise<IUploadedLanding[]> {
     const products: IProduct[] = await readFavouritesProducts(userPrincipal) || [];
     const landingLimitDaysInFuture: number = ApplicationConfig._landingLimitDaysInTheFuture;
-
-    const baseUrl = ApplicationConfig.getReferenceServiceUrl();
-    const url = `${baseUrl}/v1/upload/landings/validate`;
-    const payload = { landings, products, landingLimitDaysInFuture }
-
-    const res = await axios.post(url, payload);
-    const validatedLandings: IUploadedLanding[] = res.data;
-
+    const payload = { products, landingLimitDaysInFuture, rows, landings }
+    const validatedLandings: IUploadedLanding[] = await UploadsService.parseAndValidateData(payload)
     validatedLandings.forEach(landing => {
       if (landing.errors.includes('error.product.any.invalid')) {
         FavouritesController.removeInvalidFavouriteProduct(userPrincipal, landing.productId);
@@ -109,8 +51,8 @@ export default class UploadsController {
     return validatedLandings;
   }
 
-  public static async saveLandingRows(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, rows: IUploadedLanding[]): Promise<Hapi.ResponseObject> {
-    const landings = await this.validateLandings(userPrincipal, rows);
+  public static async saveLandingRows(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, uploadedLandings: IUploadedLanding[]): Promise<Hapi.ResponseObject> {
+    const landings = await this.validateLandings(userPrincipal, undefined, uploadedLandings);
 
     const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors && landing.errors.length === 0 || !landing.errors;
     const hasValidLanding = (_: IUploadedLanding[]): boolean => _.some(isValidLanding);
@@ -166,6 +108,9 @@ export default class UploadsController {
           dateLanded: moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           exportWeight: validLanding.exportWeight,
           faoArea: validLanding.faoArea,
+          highSeasArea: validLanding.highSeasArea?.toLowerCase() as HighSeasAreaType,
+          exclusiveEconomicZones: this.getExclusiveEconomicZone(validLanding),
+          rfmo: this.getRfmo(validLanding),
           gearCategory: UploadsController.geGearCategory(validLanding),
           gearType: UploadsController.getGearType(validLanding)
         }
@@ -190,6 +135,14 @@ export default class UploadsController {
   static readonly getGearType = (
     landing: IUploadedLanding
   ) => landing.gearCode ? `${landing.gearName} (${landing.gearCode})` : '';
+
+  static readonly getExclusiveEconomicZone = (
+    landing: IUploadedLanding
+  ) => landing.eezCode ? landing.eezData : [];
+
+  static readonly getRfmo = (
+    landing: IUploadedLanding
+  ) => landing.rfmoCode ? landing.rfmoName : '';
 
   static readonly addLanding = (
     item: ProductLanded,

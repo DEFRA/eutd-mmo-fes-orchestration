@@ -70,7 +70,7 @@ export interface Catch {
   gearCategory?: string;
   gearType?: string;
   highSeasArea?: HighSeasAreaType;
-  exclusiveEconomicZone?: string;
+  exclusiveEconomicZones?: ICountry[];
   _status?: LandingValidationStatus;
   numberOfSubmissions?: number;
   vesselOverriddenByAdmin?: boolean;
@@ -242,7 +242,7 @@ export const cloneProductData = (original: Product, newDocumentNumber: string, e
 
 export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch => {
   const {id,vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType,highSeasArea,
-    exclusiveEconomicZone, rfmo } = original;
+    exclusiveEconomicZones, rfmo } = original;
 
   const result = {
     id: `${newDocumentNumber}${id.slice(newDocumentNumber.length)}`,
@@ -262,7 +262,7 @@ export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch =>
     gearCategory,
     gearType,
     highSeasArea,
-    exclusiveEconomicZone,
+    exclusiveEconomicZones,
     rfmo
   }
 
@@ -369,7 +369,7 @@ const CatchSchema = new Schema({
   startDate:                { type: String, required: false },
   faoArea:                  { type: String, required: true  },
   highSeasArea:             { type: String, required: false, enum: Object.values(HighSeasAreaOptions) },
-  exclusiveEconomicZone:    { type: String, required: false },
+  exclusiveEconomicZones:    { type: [Country], required: false },
   weight:                   { type: Number },
   gearCategory:             { type: String, required: false  },
   gearType:                 { type: String, required: false  },

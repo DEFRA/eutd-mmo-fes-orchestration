@@ -1,37 +1,36 @@
 import { IProduct } from "./userAttributes";
-import { Vessel } from "./frontEndModels/payload"
+import { Vessel } from "./frontEndModels/payload";
+import { ICountry } from "./common";
 
 export interface IUploadedLanding {
-  rowNumber : number,
-  originalRow : string,
-  productId : string,
-  product : IProduct,
-  startDate? : string,
-  landingDate: string,
-  faoArea: string,
-  vessel : Vessel,
-  vesselPln: string,
-  exportWeight: number,
-  gearCode?: string,
-  gearCategory?: string,
-  gearName?: string,
-  errors : Array<ErrorObject | string>
+  rowNumber: number;
+  originalRow: string;
+  productId: string;
+  product: IProduct;
+  startDate?: string;
+  landingDate: string;
+  faoArea: string;
+  highSeasArea?: string;
+  rfmoCode?: string;
+  rfmoName?: string;
+  eezCode?: string;
+  eezData?: ICountry[];
+  vessel: Vessel;
+  vesselPln: string;
+  exportWeight: number;
+  gearCode?: string;
+  gearCategory?: string;
+  gearName?: string;
+  errors: Array<ErrorObject | string>;
 }
 export interface ErrorObject {
-  key : string,
-  params : number[]
+  key: string;
+  params: number[];
 }
 
-export interface UploadedLandedFieldMeta {
-  optional?: boolean;
+export interface UploadValidatorPayload {
+  products: IProduct[];
+  landingLimitDaysInFuture: number;
+  rows?: string[];
+  landings?: IUploadedLanding[];
 }
-
-export const UploadedLandingMeta: Record<string, UploadedLandedFieldMeta> = {
-  productId: {},
-  startDate: {optional: true},
-  landingDate: {},
-  faoArea: {},
-  vesselPln: {},
-  gearCode: {optional: true},
-  exportWeight: {}
-};

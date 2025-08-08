@@ -19,13 +19,14 @@ jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
 describe("UploadsController", () => {
 
   const contactId = 'contactBob';
+  const userPrincipal = 'Bob';
 
   describe("parseLandingsFile", () => {
 
     const userPrincipal = 'Bob';
     const contactId = 'Bob';
-    let mockValidateLandings;
-    let mockParseRows;
+    let mockParseAndValidateLandings;
+    let mockParseAndValidateLandingsService;
     let originalMaxLimitLandings;
     let mockCacheUploadRows;
 
@@ -34,9 +35,10 @@ describe("UploadsController", () => {
     });
 
     beforeEach(() => {
-      mockValidateLandings = jest.spyOn(UploadsController, 'validateLandings');
-      mockValidateLandings.mockImplementation((_, l) => Promise.resolve(l));
-      mockParseRows = jest.spyOn(UploadsController, 'parseRows');
+      mockParseAndValidateLandings = jest.spyOn(UploadsController, 'validateLandings');
+      mockParseAndValidateLandings.mockImplementation((_, l) => Promise.resolve(l));
+      mockParseAndValidateLandingsService = jest.spyOn(UploadsService, 'parseAndValidateData');
+      mockParseAndValidateLandingsService.mockImplementation((_, l) => Promise.resolve(l));
       originalMaxLimitLandings = ApplicationConfig._maxLimitLandings;
       mockCacheUploadRows = jest.spyOn(UploadsService, "cacheUploadedRows");
     });
@@ -60,82 +62,86 @@ describe("UploadsController", () => {
 
     it("will parse a single landing", async () => {
       const csv = "PRD001,19/07/2021,FAO27,PLN1,100\n";
+      const mockParseAndValidateLandingResolvedValue = [
+      {
+        rowNumber: 1,
+        originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
+        productId: "PRD001",
+        landingDate: "19/07/2021",
+        faoArea: "FAO27",
+        vesselPln: "PLN1",
+        exportWeight: "100",
+        errors: []
+      }
+    ]
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
       expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual([
-        {
-          rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
-          productId: "PRD001",
-          landingDate: "19/07/2021",
-          faoArea: "FAO27",
-          vesselPln: "PLN1",
-          exportWeight: "100",
-          errors: []
-        }
-      ]);
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will parse a single landing with a start date", async () => {
       const csv = "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,100\n";
+      const mockParseAndValidateLandingResolvedValue = [{
+        rowNumber: 1,
+        originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,100",
+        productId: "PRD001",
+        startDate: "18/07/2021",
+        landingDate: "19/07/2021",
+        faoArea: "FAO27",
+        vesselPln: "PLN1",
+        exportWeight: "100",
+        errors: []
+      }]
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
       expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual([
-        {
-          rowNumber: 1,
-          originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,100",
-          productId: "PRD001",
-          startDate: "18/07/2021",
-          landingDate: "19/07/2021",
-          faoArea: "FAO27",
-          vesselPln: "PLN1",
-          exportWeight: "100",
-          errors: []
-        }
-      ]);
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will parse a single landing with all optional fields", async () => {
-      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,PS,100\n";
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-      expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual([
-        {
-          rowNumber: 1,
-          originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,PS,100",
+      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,Yes,CHN;DEU,IOTC,PLN1,PS,100\n"; // EEZ to be added(FI0-9472)
+      const mockParseAndValidateLandingResolvedValue = [{
+        rowNumber: 1,
+          originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,YES,IOTC,PLN1,PS,100",
           productId: "PRD001",
           startDate: "18/07/2021",
           landingDate: "19/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "YES",
+          rfmoCode: "IOTC",
           vesselPln: "PLN1",
           exportWeight: "100",
           gearCode: 'PS',
           errors: []
-        }
-      ]);
+      }]
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+      expect(mockCacheUploadRows).not.toHaveBeenCalled();
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will parse a single landing with gear code and no start date", async () => {
       const csv = "PRD001,19/07/2021,FAO27,PLN1,PS,100\n";
+      const mockParseAndValidateLandingResolvedValue = [{
+        rowNumber: 1,
+        originalRow: "PRD001,19/07/2021,FAO27,PLN1,PS,100",
+        productId: "PRD001",
+        landingDate: "19/07/2021",
+        faoArea: "FAO27",
+        vesselPln: "PLN1",
+        exportWeight: "100",
+        gearCode: 'PS',
+        errors: []
+      }]
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
       expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual([
-        {
-          rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,PS,100",
-          productId: "PRD001",
-          landingDate: "19/07/2021",
-          faoArea: "FAO27",
-          vesselPln: "PLN1",
-          exportWeight: "100",
-          gearCode: 'PS',
-          errors: []
-        }
-      ]);
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will remove empty lines", async () => {
@@ -146,10 +152,7 @@ describe("UploadsController", () => {
         "\n" +
         "\n" +
         "PRD003,21/07/2021,FAO27,PLN3,300\n";
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-
-      expect(output).toEqual([
+      const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
           originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
@@ -180,7 +183,12 @@ describe("UploadsController", () => {
           exportWeight: "300",
           errors: []
         }
-      ]);
+      ]
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will remove lines containing just commas and/or spaces", async () => {
@@ -190,10 +198,7 @@ describe("UploadsController", () => {
         ", , , ,\n" +
         "   \n" +
         "PRD003,21/07/2021,FAO27,PLN3,300\n";
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-
-      expect(output).toEqual([
+      const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
           originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
@@ -214,39 +219,14 @@ describe("UploadsController", () => {
           exportWeight: "300",
           errors: []
         }
-      ]);
-    });
-
-    it("will not remove lines that have at least one data point", async () => {
-      const csv =
-        ",,,,X\n" +
-        "   \n" +
-        "Y,,,,\n";
+      ]
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue)
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+      expect(mockParseAndValidateLandings).toHaveBeenCalledTimes(1);
 
-      expect(output).toEqual([
-        {
-          rowNumber: 1,
-          originalRow: ",,,,X",
-          productId: "",
-          landingDate: "",
-          faoArea: "",
-          vesselPln: "",
-          exportWeight: "X",
-          errors: []
-        },
-        {
-          rowNumber: 2,
-          originalRow: "Y,,,,",
-          productId: "Y",
-          landingDate: "",
-          faoArea: "",
-          vesselPln: "",
-          exportWeight: "",
-          errors: []
-        }
-      ]);
+
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will parse multiple landings", async () => {
@@ -254,10 +234,7 @@ describe("UploadsController", () => {
         "PRD001,19/07/2021,FAO27,PLN1,100\n" +
         "PRD002,20/07/2021,FAO27,PLN2,200\n" +
         "PRD003,21/07/2021,FAO27,PLN3,300\n";
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-
-      expect(output).toEqual([
+      const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
           originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
@@ -288,7 +265,12 @@ describe("UploadsController", () => {
           exportWeight: "300",
           errors: []
         }
-      ]);
+      ]
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue)
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will capitalize every row before parsing them", async () => {
@@ -299,11 +281,13 @@ describe("UploadsController", () => {
 
       await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
-      expect(mockParseRows).toHaveBeenCalledWith([
+      expect(mockParseAndValidateLandings).toHaveBeenCalledWith(userPrincipal,
+        [
         "PRD001,19/07/2021,FAO27,PLN1,100",
         "PRD002,20/07/2021,FAO27,PLN2,200",
         "PRD003,21/07/2021,FAO27,PLN3,300",
-      ]);
+        ]
+    );
     });
 
     it("will strip empty rows before parsing them", async () => {
@@ -315,11 +299,13 @@ describe("UploadsController", () => {
 
       await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
-      expect(mockParseRows).toHaveBeenCalledWith([
+      expect(mockParseAndValidateLandings).toHaveBeenCalledWith(userPrincipal,
+        [
         "PRD001,19/07/2021,FAO27,PLN1,100",
         "PRD002,20/07/2021,FAO27,PLN2,200",
         "PRD003,21/07/2021,FAO27,PLN3,300",
-      ]);
+        ]
+      );
     });
 
     it("will throw an error if there are too many landings", async () => {
@@ -336,22 +322,19 @@ describe("UploadsController", () => {
     });
 
     it("will call validateLandings with all the parsed landings", async () => {
-      const landings = ["landing 1", "landing 2"];
-
-      mockParseRows.mockResolvedValue(landings);
 
       const csv = "PRD001,19/07/2021,FAO27,PLN1,100"
 
       await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
-      expect(mockValidateLandings).toHaveBeenCalledWith(userPrincipal, landings);
+      expect(mockParseAndValidateLandings).toHaveBeenCalledWith(userPrincipal, [csv]);
     });
 
     it("will return the response back from validateLandings", async () => {
       const csv = "PRD001,19/07/2021,FAO27,PLN1,100";
       const response = ["validated landing 1", "validated landing 2"];
 
-      mockValidateLandings.mockResolvedValue(response);
+      mockParseAndValidateLandings.mockResolvedValue(response);
 
       const result = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
@@ -362,7 +345,7 @@ describe("UploadsController", () => {
       const csv = "PRD001,19/07/2021,FAO27,PLN1,100";
       const error = new Error("something went wrong");
 
-      mockValidateLandings.mockRejectedValue(error);
+      mockParseAndValidateLandings.mockRejectedValue(error);
 
       await expect(async () =>
         UploadsController.parseLandingsFile(csv, userPrincipal, contactId)
@@ -421,7 +404,7 @@ describe("UploadsController", () => {
     let mockSearchVessel;
     let mockFavourites;
     let mockFavouritesRemove;
-    let mockValidateLandings;
+    let mockParseAndValidateLandings;
     let originalMaxLimitLandings;
 
     beforeAll(() => {
@@ -535,8 +518,8 @@ describe("UploadsController", () => {
       mockSearchVessel = jest.spyOn(ReferenceDataService, 'searchVessel');
       mockSearchVessel.mockResolvedValue([vessel]);
 
-      mockValidateLandings = jest.spyOn(UploadsController, 'validateLandings');
-      mockValidateLandings.mockImplementation((_, l) => Promise.resolve(l));
+      mockParseAndValidateLandings = jest.spyOn(UploadsController, 'validateLandings');
+      mockParseAndValidateLandings.mockImplementation((_, l) => Promise.resolve(l));
 
       originalMaxLimitLandings = ApplicationConfig._maxLimitLandings;
     });
@@ -557,6 +540,7 @@ describe("UploadsController", () => {
       };
 
       const expected = { file: 'error.file.any.required' };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockBuildRedirectUrlWithErrorStringInQueryParam).toHaveBeenCalledWith(expected, '/create-catch-certificate/:documentNumber/upload-file');
@@ -565,6 +549,7 @@ describe("UploadsController", () => {
 
     it('should return 400 Bad Request if there are no valid rows', async () => {
       const expected = { file: 'error.file.any.required' };
+      mockParseAndValidateLandings.mockResolvedValue(req.payload.file);
 
       await UploadsController.saveLandingRows(req, h, USER, documentNumber, contactId, req.payload.file);
       expect(mockResponse).toHaveBeenCalledWith(expected);
@@ -623,6 +608,7 @@ describe("UploadsController", () => {
           }]
         }
       };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockCode).toHaveBeenCalledWith(200);
@@ -681,6 +667,7 @@ describe("UploadsController", () => {
           }]
         }
       };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockCode).toHaveBeenCalledWith(200);
@@ -744,6 +731,9 @@ describe("UploadsController", () => {
                     vesselLength: 10,
                     vesselName: "some-vessel-name",
                   },
+                  exclusiveEconomicZones: [],
+                  highSeasArea: undefined,
+                  rfmo: "",
                   gearCategory: 'Surrounding nets',
                   gearType: 'Surrounding nets without purse lines (LA)',
                 },
@@ -775,12 +765,212 @@ describe("UploadsController", () => {
           },
         ]
       }
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
 
       expect(mockSaveExportPayload).toHaveBeenCalledWith(expected, USER, documentNumber, contactId);
       expect(mockCode).toHaveBeenCalledWith(200);
     });
+
+    it('should return 200 OK with rfmo details', async () => {
+      const mockReq: any = {
+        ...req,
+        payload: {
+          ...req.payload,
+          file: [{
+            rowNumber: 1,
+            originalRow: 'some-string',
+            productId: 'some-product-id',
+            product: {
+              id: 'some-product-id',
+              species: 'species',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            startDate: '10/10/2020',
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel: vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 10,
+            rfmoCode: 'IOTC',
+            rfmoName: 'Indian Ocean Tuna Commission (IOTC)',
+            errors: []
+          }]
+        }
+      };
+
+      const expected = {
+        items: [
+          {
+            landings: [
+              {
+                model: {
+                  dateLanded: "2020-10-10",
+                  exportWeight: 10,
+                  faoArea: "FAO18",
+                  id: "123Document-CC-123-random-number",
+                  startDate: "2020-10-10",
+                  vessel: {
+                    cfr: "some-cfr",
+                    flag: "some-flag",
+                    homePort: "some-home-port",
+                    imoNumber: "some-imo-number",
+                    licenceNumber: "some-licence-number",
+                    licenceValidTo: "some-licence-valid-to",
+                    pln: "some-pln",
+                    rssNumber: "some-rss-number",
+                    vesselLength: 10,
+                    vesselName: "some-vessel-name",
+                  },
+                  exclusiveEconomicZones: [],
+                  highSeasArea: undefined,
+                  rfmo: 'Indian Ocean Tuna Commission (IOTC)',
+                  gearCategory: '',
+                  gearType: '',
+                },
+              },
+            ],
+            product: {
+              commodityCode: "some-commidity-code",
+              commodityCodeAdmin: undefined,
+              commodityCodeDescription: "some-commmodity-description",
+              factor: undefined,
+              id: "123Document-CC-123-some-uuid",
+              presentation: {
+                admin: undefined,
+                code: "some-presentation",
+                label: "some-presentation-label",
+              },
+              scientificName: "some-scientic-name",
+              species: {
+                admin: undefined,
+                code: "species-code",
+                label: "species",
+              },
+              state: {
+                admin: undefined,
+                code: "some-state",
+                label: "some-label",
+              },
+            },
+          },
+        ]
+      }
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
+
+      await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
+
+      expect(mockSaveExportPayload).toHaveBeenCalledWith(expected, USER, documentNumber, contactId);
+      expect(mockCode).toHaveBeenCalledWith(200);
+    });
+
+    it('should return 200 OK with High seas area details', async () => {
+      const mockReq: any = {
+        ...req,
+        payload: {
+          ...req.payload,
+          file: [{
+            rowNumber: 1,
+            originalRow: 'some-string',
+            productId: 'some-product-id',
+            product: {
+              id: 'some-product-id',
+              species: 'species',
+              speciesCode: 'species-code',
+              scientificName: 'some-scientic-name',
+              state: 'some-state',
+              stateLabel: 'some-label',
+              presentation: 'some-presentation',
+              presentationLabel: 'some-presentation-label',
+              commodity_code: 'some-commidity-code',
+              commodity_code_description: 'some-commmodity-description',
+            },
+            startDate: '10/10/2020',
+            landingDate: '10/10/2020',
+            faoArea: 'FAO18',
+            vessel: vessel,
+            vesselPln: 'some-pln',
+            exportWeight: 10,
+            highSeasArea: 'Yes',
+            errors: []
+          }]
+        }
+      };
+
+      const expected = {
+        items: [
+          {
+            landings: [
+              {
+                model: {
+                  dateLanded: "2020-10-10",
+                  exportWeight: 10,
+                  faoArea: "FAO18",
+                  id: "123Document-CC-123-random-number",
+                  startDate: "2020-10-10",
+                  vessel: {
+                    cfr: "some-cfr",
+                    flag: "some-flag",
+                    homePort: "some-home-port",
+                    imoNumber: "some-imo-number",
+                    licenceNumber: "some-licence-number",
+                    licenceValidTo: "some-licence-valid-to",
+                    pln: "some-pln",
+                    rssNumber: "some-rss-number",
+                    vesselLength: 10,
+                    vesselName: "some-vessel-name",
+                  },
+                  exclusiveEconomicZones: [],
+                  highSeasArea: 'yes',
+                  rfmo: '',
+                  gearCategory: '',
+                  gearType: '',
+                },
+              },
+            ],
+            product: {
+              commodityCode: "some-commidity-code",
+              commodityCodeAdmin: undefined,
+              commodityCodeDescription: "some-commmodity-description",
+              factor: undefined,
+              id: "123Document-CC-123-some-uuid",
+              presentation: {
+                admin: undefined,
+                code: "some-presentation",
+                label: "some-presentation-label",
+              },
+              scientificName: "some-scientic-name",
+              species: {
+                admin: undefined,
+                code: "species-code",
+                label: "species",
+              },
+              state: {
+                admin: undefined,
+                code: "some-state",
+                label: "some-label",
+              },
+            },
+          },
+        ]
+      }
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
+
+      await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
+
+      expect(mockSaveExportPayload).toHaveBeenCalledWith(expected, USER, documentNumber, contactId);
+      expect(mockCode).toHaveBeenCalledWith(200);
+    });
+
+    //EEZ Details to be added(FI0-9472)
 
     it('should return 200 OK with provided rows', async () => {
       const file: IUploadedLanding[] = [{
@@ -834,6 +1024,7 @@ describe("UploadsController", () => {
         url: "/v2/save/landings",
         payload: {}
       };
+      mockParseAndValidateLandings.mockResolvedValue(file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, file);
       expect(mockSaveExportPayload).toHaveBeenCalled();
@@ -868,6 +1059,7 @@ describe("UploadsController", () => {
           }]
         }
       };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockCode).toHaveBeenCalledWith(200);
@@ -902,6 +1094,7 @@ describe("UploadsController", () => {
           }]
         }
       };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockCode).toHaveBeenCalledWith(200);
@@ -993,6 +1186,7 @@ describe("UploadsController", () => {
         exportWeight: 10,
         errors: [],
       }];
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockResponse).toHaveBeenCalledWith(expected);
@@ -1087,6 +1281,7 @@ describe("UploadsController", () => {
         exportWeight: 10,
         errors: [],
       }];
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockResponse).toHaveBeenCalledWith(expected);
@@ -1164,15 +1359,20 @@ describe("UploadsController", () => {
                 vesselLength: 10,
                 vesselName: 'some-vessel-name'
               },
+              startDate: undefined,
               dateLanded: '2020-10-10',
               exportWeight: 10,
               faoArea: 'FAO18',
+              exclusiveEconomicZones: [],
+              highSeasArea: undefined,
+              rfmo: '',
               gearCategory: '',
-              gearType: ''
+              gearType: '',
             }
           }]
         }]
       };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -1275,6 +1475,10 @@ describe("UploadsController", () => {
               dateLanded: '2020-10-10',
               exportWeight: 10,
               faoArea: 'FAO18',
+              startDate: undefined,
+              exclusiveEconomicZones: [],
+              highSeasArea: undefined,
+              rfmo: '',
               gearCategory: '',
               gearType: ''
             }
@@ -1316,13 +1520,17 @@ describe("UploadsController", () => {
               },
               dateLanded: '2020-10-10',
               exportWeight: 20,
-              faoArea: 'FAO18',
+              faoArea: 'FAO18',startDate: undefined,
+              exclusiveEconomicZones: [],
+              highSeasArea: undefined,
+              rfmo: '',
               gearCategory: '',
               gearType: ''
             }
           }]
         }]
       };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -1427,8 +1635,11 @@ describe("UploadsController", () => {
               dateLanded: '2020-10-10',
               exportWeight: 10,
               faoArea: 'FAO18',
+              exclusiveEconomicZones: [],
+              highSeasArea: undefined,
+              rfmo: '',
               gearCategory: '',
-              gearType: ''
+              gearType: '',
             }
           }]
         },
@@ -1469,12 +1680,16 @@ describe("UploadsController", () => {
               dateLanded: '2020-10-10',
               exportWeight: 20,
               faoArea: 'FAO18',
+              exclusiveEconomicZones: [],
+              highSeasArea: undefined,
+              rfmo: '',
               gearCategory: '',
-              gearType: ''
+              gearType: '',
             }
           }]
         }]
       };
+      mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
       await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
       expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -1559,15 +1774,20 @@ describe("UploadsController", () => {
                   vesselLength: 10,
                   vesselName: 'some-vessel-name'
                 },
+                startDate: undefined,
                 dateLanded: '2020-10-10',
                 exportWeight: 10,
                 faoArea: 'FAO18',
+                exclusiveEconomicZones: [],
+                highSeasArea: undefined,
+                rfmo: '',
                 gearCategory: '',
-                gearType: ''
+                gearType: '',
               }
             }]
           }]
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
         expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -1690,6 +1910,9 @@ describe("UploadsController", () => {
                 dateLanded: '2020-10-10',
                 exportWeight: 10,
                 faoArea: 'FAO18',
+                exclusiveEconomicZones: [],
+                highSeasArea: undefined,
+                rfmo: '',
                 gearCategory: '',
                 gearType: '',
               }
@@ -1711,6 +1934,10 @@ describe("UploadsController", () => {
                 dateLanded: '2020-10-10',
                 exportWeight: 10,
                 faoArea: 'FAO18',
+                startDate: undefined,
+                exclusiveEconomicZones: [],
+                highSeasArea: undefined,
+                rfmo: '',
                 gearCategory: '',
                 gearType: '',
               }
@@ -1729,15 +1956,20 @@ describe("UploadsController", () => {
                   vesselLength: 10,
                   vesselName: 'some-vessel-name'
                 },
+                startDate: undefined,
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
                 faoArea: 'FAO18',
+                exclusiveEconomicZones: [],
+                highSeasArea: undefined,
+                rfmo: '',
                 gearCategory: '',
-                gearType: ''
+                gearType: '',
               }
             }]
           }]
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
         expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -1922,6 +2154,7 @@ describe("UploadsController", () => {
             }
           }
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
         expect(mockResponse).toHaveBeenCalledWith(expected);
@@ -2057,6 +2290,7 @@ describe("UploadsController", () => {
             }
           }
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
         expect(mockBuildRedirectUrlWithErrorStringInQueryParam).toHaveBeenCalledWith(expected, '/create-catch-certificate/:documentNumber/upload-file');
@@ -2157,12 +2391,17 @@ describe("UploadsController", () => {
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
                 faoArea: 'FAO18',
+                startDate: undefined,
+                exclusiveEconomicZones: [],
+                highSeasArea: undefined,
+                rfmo: '',
                 gearCategory: '',
-                gearType: ''
+                gearType: '',
               }
             }]
           }]
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
         expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -2332,12 +2571,17 @@ describe("UploadsController", () => {
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
                 faoArea: 'FAO18',
+                startDate: undefined,
+                exclusiveEconomicZones: [],
+                highSeasArea: undefined,
+                rfmo: '',
                 gearCategory: '',
-                gearType: ''
+                gearType: '',
               }
             }]
           }]
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
         expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -2449,12 +2693,17 @@ describe("UploadsController", () => {
                 dateLanded: '2020-10-10',
                 exportWeight: 100,
                 faoArea: 'FAO18',
+                startDate: undefined,
+                exclusiveEconomicZones: [],
+                highSeasArea: undefined,
+                rfmo: '',
                 gearCategory: '',
                 gearType: '',
               }
             }]
           }]
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
         expect(mockGetExportPayload).toHaveBeenCalledWith(USER, documentNumber, contactId);
@@ -2495,6 +2744,7 @@ describe("UploadsController", () => {
             }]
           }
         };
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         const expected: { file: string } = { file: 'error.file.any.required' };
 
@@ -2570,6 +2820,10 @@ describe("UploadsController", () => {
                   dateLanded: "2020-10-10",
                   exportWeight: 2000,
                   faoArea: "FAO18",
+                  startDate: undefined,
+                  exclusiveEconomicZones: [],
+                  highSeasArea: undefined,
+                  rfmo: '',
                   gearCategory: '',
                   gearType: '',
                   id: "123Document-CC-123-random-number",
@@ -2678,6 +2932,7 @@ describe("UploadsController", () => {
           exportWeight: 2000,
           errors: [],
         }];
+        mockParseAndValidateLandings.mockResolvedValue(mockReq.payload.file);
 
         await UploadsController.saveLandingRows(mockReq, h, USER, documentNumber, contactId, mockReq.payload.file);
 
@@ -2689,13 +2944,18 @@ describe("UploadsController", () => {
   });
 
   describe("parseRows", () => {
+    let mockReadFavouriteProducts;
+    let mockParseAndValidateLandings;
+    const favourites = ['product 1', 'product 2'] as any;
+    beforeEach(() => {
+      mockReadFavouriteProducts = jest.spyOn(FavouritesService, 'readFavouritesProducts');
+      mockReadFavouriteProducts.mockResolvedValue(favourites);
+      mockParseAndValidateLandings = jest.spyOn(UploadsService, 'parseAndValidateData');
+    });
 
     it("will parse a single landing", async () => {
       const rows = ["PRD001,19/07/2021,FAO27,PLN1,100"];
-
-      const output = await UploadsController.parseRows(rows);
-
-      expect(output).toEqual([
+      const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
           originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
@@ -2706,7 +2966,12 @@ describe("UploadsController", () => {
           exportWeight: "100",
           errors: []
         }
-      ]);
+      ];
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
+
+      const output = await UploadsController.validateLandings(userPrincipal, rows);
+
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will parse multiple landings", async () => {
@@ -2715,10 +2980,7 @@ describe("UploadsController", () => {
         "PRD002,20/07/2021,FAO27,PLN2,200",
         "PRD003,21/07/2021,FAO27,PLN3,300"
       ]
-
-      const output = await UploadsController.parseRows(rows);
-
-      expect(output).toEqual([
+      const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
           originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
@@ -2749,7 +3011,12 @@ describe("UploadsController", () => {
           exportWeight: "300",
           errors: []
         }
-      ]);
+      ];
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
+
+      const output = await UploadsController.validateLandings(userPrincipal, rows);
+
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will throw an error if a row is missing data", async () => {
@@ -2757,20 +3024,20 @@ describe("UploadsController", () => {
         "PRD001,19/07/2021,FAO27,PLN1,100",
         "PRD002,20/07/2021,FAO27,PLN2"
       ];
-
+      mockParseAndValidateLandings.mockRejectedValue(new Error(""));
       await expect(async () =>
-        UploadsController.parseRows(rows)
+        UploadsController.validateLandings(userPrincipal, rows)
       ).rejects.toThrow();
     });
 
     it("will throw an error if a row has excess data", async () => {
       const rows = [
         "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,19/07/2021,20/07/2021,FAO27,PLN2,PS,200,bob"
+        "PRD002,19/07/2021,20/07/2021,FAO27,Yes,IOTC,PLN2,PS,200,bob"
       ];
-
+      mockParseAndValidateLandings.mockRejectedValue(new Error(""));
       await expect(async () =>
-        UploadsController.parseRows(rows)
+        UploadsController.validateLandings(userPrincipal, rows)
       ).rejects.toThrow();
     });
 
@@ -2778,10 +3045,7 @@ describe("UploadsController", () => {
       const rows = [
         "X,X,X,X,X"
       ];
-
-      const output = await UploadsController.parseRows(rows);
-
-      expect(output).toEqual([
+      const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
           originalRow: "X,X,X,X,X",
@@ -2792,7 +3056,12 @@ describe("UploadsController", () => {
           exportWeight: "X",
           errors: []
         }
-      ]);
+      ];
+      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
+
+      const output = await UploadsController.validateLandings(userPrincipal, rows);
+
+      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
   });
@@ -2803,6 +3072,7 @@ describe("UploadsController", () => {
     let mockRemoveInvalidFavouriteProduct;
     let mockGetReferenceServiceUrl;
     let mockAxiosPost;
+    let mockParseAndValidateLandings;
 
     const userPrincipal = 'Bob';
     const landings = ['landing 1', 'landing 2'] as any;
@@ -2831,54 +3101,12 @@ describe("UploadsController", () => {
 
       mockAxiosPost = jest.spyOn(axios, 'post');
       mockAxiosPost.mockResolvedValue({ data: responseData });
+
+      mockParseAndValidateLandings = jest.spyOn(UploadsService, 'parseAndValidateData');
     });
 
     afterEach(() => {
       jest.restoreAllMocks();
-    });
-
-    it('should call axios with the correct params', async () => {
-      await UploadsController.validateLandings(userPrincipal, landings);
-
-      const expectedUrl = `${refServiceUrl}/v1/upload/landings/validate`;
-      const expectedPayload = {
-        landings,
-        products: favourites,
-        landingLimitDaysInFuture: ApplicationConfig._landingLimitDaysInTheFuture
-      }
-
-      expect(mockAxiosPost).toHaveBeenCalledWith(expectedUrl, expectedPayload);
-    });
-
-    it('should default products to an empty array if it is null', async () => {
-      mockReadFavouriteProducts.mockResolvedValue(null);
-
-      await UploadsController.validateLandings(userPrincipal, landings);
-
-      const expectedUrl = `${refServiceUrl}/v1/upload/landings/validate`;
-      const expectedPayload = {
-        landings,
-        products: [],
-        landingLimitDaysInFuture: ApplicationConfig._landingLimitDaysInTheFuture
-      }
-
-      expect(mockAxiosPost).toHaveBeenCalledWith(expectedUrl, expectedPayload);
-    });
-
-    it('should return the axios response data on success', async () => {
-      const res = await UploadsController.validateLandings(userPrincipal, landings);
-
-      expect(res).toBe(responseData);
-    });
-
-    it('should allow any axios errors to bubble up', async () => {
-      const error = new Error('something went wrong');
-
-      mockAxiosPost.mockRejectedValue(error);
-
-      await expect(async () =>
-        UploadsController.validateLandings(userPrincipal, landings)
-      ).rejects.toThrow(error);
     });
 
     it('should remove from the db any products flagged with the error.product.any.invalid error', async () => {
@@ -2893,7 +3121,7 @@ describe("UploadsController", () => {
         }
       ];
 
-      mockAxiosPost.mockResolvedValue({ data: response });
+      mockParseAndValidateLandings.mockResolvedValue(response);
 
       const result = await UploadsController.validateLandings(userPrincipal, landings);
 

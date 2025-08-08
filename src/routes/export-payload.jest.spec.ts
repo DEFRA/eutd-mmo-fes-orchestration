@@ -349,7 +349,20 @@ describe("exporter-payload routes", () => {
           gearCategory: "",
           gearType: "",
           highSeasArea: "no",
-          exclusiveEconomicZone: "no",
+          exclusiveEconomicZones:[
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            },
+            {
+              officialCountryName: "Åland Islands",
+              isoCodeAlpha2: "AX",
+              isoCodeAlpha3: "ALA",
+              isoNumericCode: "248",
+            }
+          ],
         },
       };
     });
@@ -626,7 +639,20 @@ describe("exporter-payload routes", () => {
           gearCategory: "Category 1",
           gearType: "Type 1",
           highSeasArea:"yes",
-          exclusiveEconomicZone:"yes",
+          exclusiveEconomicZones:[
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            },
+            {
+              officialCountryName: "Åland Islands",
+              isoCodeAlpha2: "AX",
+              isoCodeAlpha3: "ALA",
+              isoNumericCode: "248",
+            }
+          ],
         },
       };
     });
@@ -1141,7 +1167,20 @@ describe("exporter-payload routes", () => {
           gearCategory: "Category 1",
           gearType: "Type 1",
           highSeasArea:"yes",
-          exclusiveEconomicZone:"yes",
+          exclusiveEconomicZones:[
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            },
+            {
+              officialCountryName: "Åland Islands",
+              isoCodeAlpha2: "AX",
+              isoCodeAlpha3: "ALA",
+              isoNumericCode: "248",
+            }
+          ],
         },
       };
     });

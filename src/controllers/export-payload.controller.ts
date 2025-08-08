@@ -30,6 +30,7 @@ import ExportLocationService from '../services/exportLocation.service';
 import { NotifyService } from '../services/notify.service';
 import { HapiRequestApplicationStateExtended } from '../types';
 import { ProductsLanded, LandingStatus, ProductLanded } from '../persistence/schema/frontEndModels/payload';
+import { ICountry } from '../persistence/schema/common';
 
 export default class ExportPayloadController {
 
@@ -466,7 +467,7 @@ export default class ExportPayloadController {
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
         highSeasArea: payload.highSeasArea,
-        exclusiveEconomicZone: payload.exclusiveEconomicZone
+        exclusiveEconomicZones: payload.exclusiveEconomicZones
       }
     };
 
@@ -486,7 +487,7 @@ export default class ExportPayloadController {
       gearCategory?: string,
       gearType?: string,
       highSeasArea?: PayloadSchema.HighSeasAreaType,
-      exclusiveEconomicZone?: string,
+      exclusiveEconomicZones?: ICountry[],
       currentUri?: string,
       rfmo?: string,
     } = { ...(req.payload as any) };
@@ -509,7 +510,7 @@ export default class ExportPayloadController {
           gearCategory: payload.gearCategory,
           gearType: payload.gearType,
           highSeasArea: payload.highSeasArea,
-          exclusiveEconomicZone:payload.exclusiveEconomicZone,   
+          exclusiveEconomicZones:payload.exclusiveEconomicZones,   
           faoArea: payload.faoArea,
           rfmo: payload.rfmo
         }
@@ -577,7 +578,7 @@ export default class ExportPayloadController {
       gearCategory?: string,
       gearType?: string,
       highSeasArea?: PayloadSchema.HighSeasAreaType,
-      exclusiveEconomicZone?: string,
+      exclusiveEconomicZones?: ICountry[],
       rfmo: string,
     } = { ...(req.payload as any) };
 
@@ -596,7 +597,7 @@ export default class ExportPayloadController {
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
         highSeasArea: payload.highSeasArea,
-        exclusiveEconomicZone: payload.exclusiveEconomicZone,
+        exclusiveEconomicZones: payload.exclusiveEconomicZones,
         faoArea: payload.faoArea,
         rfmo: payload.rfmo
       }
@@ -665,7 +666,7 @@ export default class ExportPayloadController {
         gearCategory: req.payload.gearCategory,
         gearType: req.payload.gearType,
         highSeasArea: req.payload.highSeasArea,
-        exclusiveEconomicZone: req.payload.exclusiveEconomicZone,
+        exclusiveEconomicZones: req.payload.exclusiveEconomicZones,
       };
       result = await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
     }
@@ -694,7 +695,7 @@ export default class ExportPayloadController {
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
         highSeasArea: payload.highSeasArea,
-        exclusiveEconomicZone: payload.exclusiveEconomicZone,
+        exclusiveEconomicZones: payload.exclusiveEconomicZones,
         exportWeight: payload.exportWeight,
         faoArea: payload.faoArea
       }
@@ -728,7 +729,7 @@ export default class ExportPayloadController {
         gearCategory: req.payload.gearCategory,
         gearType: req.payload.gearType,
         highSeasArea: req.payload.highSeasArea,
-        exclusiveEconomicZone: req.payload.exclusiveEconomicZone,
+        exclusiveEconomicZones: req.payload.exclusiveEconomicZones,
         exportWeight: req.payload.exportWeight,
         rfmo: req.payload.rfmo,
       };

@@ -4,7 +4,7 @@ import { CcExporter } from './exporterDetails';
 import { Conservation } from './conservation';
 import { CatchCertificateTransport } from './catchCertificateTransport';
 import { ExportLocation } from './export-location';
-import { ProgressStatus, Transport } from '../../../persistence/schema/common';
+import { ICountry, ProgressStatus, Transport } from '../../../persistence/schema/common';
 import { CatchCertificateProgress } from './catchCertificate';
 import { ProcessingStatementProgress } from './processingStatement';
 import { StorageDocumentProgress } from './storageDocument';
@@ -56,7 +56,7 @@ export interface DirectLanding {
   gearCategory?: string;
   gearType?: string;
   highSeasArea?: HighSeasAreaType;
-  exclusiveEconomicZone?: string;
+  exclusiveEconomicZones?: ICountry[];
   numberOfSubmissions?: number;
   error?: string;
   errors?: {};
@@ -72,7 +72,7 @@ export interface Landing {
   gearCategory?: string;
   gearType?: string;
   highSeasArea?: HighSeasAreaType;
-  exclusiveEconomicZone?: string;
+  exclusiveEconomicZones?: ICountry[];
   faoArea?: string;
   numberOfSubmissions?: number;
   dataEverExpected?: boolean;
@@ -198,7 +198,7 @@ const mapLandings = (landing: LandingStatus): BackEndModels.Catch => {
     gearCategory: landing.model.gearCategory,
     gearType: landing.model.gearType,
     highSeasArea: landing.model.highSeasArea,
-    exclusiveEconomicZone: landing.model.exclusiveEconomicZone,
+    exclusiveEconomicZones: landing.model.exclusiveEconomicZones,
     numberOfSubmissions: landing.model.numberOfSubmissions,
     vesselOverriddenByAdmin: landing.model?.vessel?.vesselOverriddenByAdmin,
     vesselNotFound: landing.model?.vessel?.vesselNotFound,
@@ -296,8 +296,8 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
         exportWeight: landing.weight,
         gearCategory: landing.gearCategory,
         gearType: landing.gearType,
-        highSeasArea: landing.highSeasArea as HighSeasAreaType,
-        exclusiveEconomicZone: landing.exclusiveEconomicZone,
+        highSeasArea: landing.highSeasArea,
+        exclusiveEconomicZones: landing.exclusiveEconomicZones,
         numberOfSubmissions: landing.numberOfSubmissions,
         isLegallyDue: landing.isLegallyDue,
         vesselRiskScore: landing.vesselRiskScore,
@@ -383,8 +383,8 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
     startDate: landing?.startDate,
     gearCategory: landing?.gearCategory,
     gearType: landing?.gearType,
-    highSeasArea: landing?.highSeasArea as HighSeasAreaType,
-    exclusiveEconomicZone: landing?.exclusiveEconomicZone,
+    highSeasArea: landing?.highSeasArea,
+    exclusiveEconomicZones: landing?.exclusiveEconomicZones,
     dateLanded: landing ? landing.date : undefined,
     faoArea: landing ? landing.faoArea : undefined,
     weights: weights.map((weight: Weight) => {

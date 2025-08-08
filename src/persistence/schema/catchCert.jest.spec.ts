@@ -42,7 +42,7 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
                 gearCategory: "Category 1",
                 gearType: "Type 1",
                 highSeasArea: 'yes',
-                exclusiveEconomicZone: 'yes',
+                exclusiveEconomicZones: [],
                 faoArea: "test-fao",
                 numberOfSubmissions: 0,
                 rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
