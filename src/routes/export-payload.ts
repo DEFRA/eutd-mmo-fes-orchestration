@@ -98,7 +98,8 @@ export default class ExportPayloadRoutes {
                 }, 'Gear Type Validator').optional(),
                 highSeasArea: Joi.string().optional(),
                 exclusiveEconomicZones: Joi.array().items(Joi.object()).optional(),
-                faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required()
+                faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
+                rfmo: Joi.string().optional(),
               })
             }
           }

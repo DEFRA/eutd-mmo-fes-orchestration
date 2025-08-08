@@ -348,6 +348,7 @@ describe("exporter-payload routes", () => {
           faoArea: "FAO18",
           gearCategory: "",
           gearType: "",
+          rfmo: undefined,
           highSeasArea: "no",
           exclusiveEconomicZones:[
             {
