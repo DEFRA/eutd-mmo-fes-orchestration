@@ -929,7 +929,7 @@ describe("UploadsController", () => {
                     vesselName: "some-vessel-name",
                   },
                   exclusiveEconomicZones: [],
-                  highSeasArea: 'yes',
+                  highSeasArea: 'Yes',
                   rfmo: '',
                   gearCategory: '',
                   gearType: '',

@@ -1467,7 +1467,7 @@ describe("methods", () => {
           dateLanded: "2382-12-31",
           gearCategory: "Category 1",
           gearType: "Type 1",
-          highSeasArea: "yes",
+          highSeasArea: "Yes",
           exclusiveEconomicZones:[
             {
               officialCountryName: "Afghanistan",
@@ -1528,7 +1528,7 @@ describe("methods", () => {
         faoArea: "FAO27",
         gearCategory: "Category 1",
         gearType: "Type 1",
-        highSeasArea: "yes",
+        highSeasArea: "Yes",
         exclusiveEconomicZones:[
           {
             officialCountryName: "Afghanistan",
@@ -1605,7 +1605,7 @@ describe("methods", () => {
                   exportWeight: 988,
                   gearCategory: "Category 1",
                   gearType: "Type 1",
-                  highSeasArea: "yes",
+                  highSeasArea: "Yes",
                   exclusiveEconomicZones:[
                     {
                       officialCountryName: "Afghanistan",
@@ -1704,7 +1704,7 @@ describe("methods", () => {
                   gearCategory: "Category 1",
                   gearType: "Type 1",
                   faoArea: "FAO27",
-                  highSeasArea: "yes",
+                  highSeasArea: "Yes",
                   startDate: undefined,
                   exclusiveEconomicZones:[
                     {
@@ -1791,7 +1791,7 @@ describe("methods", () => {
                   dateLanded: "2020-10-10",
                   gearCategory: "Category 1",
                   gearType: "Type 1",
-                  highSeasArea: "yes",
+                  highSeasArea: "Yes",
                   exclusiveEconomicZones:[
                     {
                       officialCountryName: "Afghanistan",
@@ -1870,7 +1870,7 @@ describe("methods", () => {
         faoArea: "FAO27",
         gearCategory: "Category 1",
         gearType: "Type 1",
-        highSeasArea: "yes",
+        highSeasArea: "Yes",
         exclusiveEconomicZones:[
           {
             officialCountryName: "Afghanistan",
@@ -1924,7 +1924,7 @@ describe("methods", () => {
                   dateLanded: "2020-10-10",
                   gearCategory: "Category 1",
                   gearType: "Type 1",
-                  highSeasArea: "yes",
+                  highSeasArea: "Yes",
                   exclusiveEconomicZones:[
                     {
                       officialCountryName: "Afghanistan",
@@ -2017,7 +2017,7 @@ describe("methods", () => {
           faoArea: "FAO27",
           gearCategory: "Category 1",
           gearType: "Type 1",
-          highSeasArea: "yes",
+          highSeasArea: "Yes",
           exclusiveEconomicZones:[
             {
               officialCountryName: "Afghanistan",
@@ -2093,7 +2093,7 @@ describe("methods", () => {
                     dateLanded: "2020-10-10",
                     gearCategory: "Category 1",
                     gearType: "Type 1",
-                    highSeasArea: "yes",
+                    highSeasArea: "Yes",
                     exclusiveEconomicZones:[
                       {
                         officialCountryName: "Afghanistan",
@@ -2152,7 +2152,7 @@ describe("methods", () => {
                     dateLanded: "2020-10-10",
                     gearCategory: "Category 1",
                     gearType: "Type 1",
-                    highSeasArea: "yes",
+                    highSeasArea: "Yes",
                     exclusiveEconomicZones:[
                       {
                         officialCountryName: "Afghanistan",
@@ -2232,7 +2232,7 @@ describe("methods", () => {
           faoArea: "FAO27",
           gearCategory: "Category 1",
           gearType: "Type 1",
-          highSeasArea: "yes",
+          highSeasArea: "Yes",
           exclusiveEconomicZones:[
             {
               officialCountryName: "Afghanistan",
@@ -2284,7 +2284,7 @@ describe("methods", () => {
                     dateLanded: "2020-10-10",
                     gearCategory: "Category 1",
                     gearType: "Type 1",
-                    highSeasArea: "yes",
+                    highSeasArea: "Yes",
                     exclusiveEconomicZones:[
                       {
                         officialCountryName: "Afghanistan",
@@ -2343,7 +2343,7 @@ describe("methods", () => {
                     dateLanded: "2020-10-10",
                     gearCategory: "Category 1",
                     gearType: "Type 1",
-                    highSeasArea: "yes",
+                    highSeasArea: "Yes",
                     exclusiveEconomicZones:[
                       {
                         officialCountryName: "Afghanistan",

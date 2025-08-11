@@ -349,7 +349,7 @@ describe("exporter-payload routes", () => {
           gearCategory: "",
           gearType: "",
           rfmo: undefined,
-          highSeasArea: "no",
+          highSeasArea: "No",
           exclusiveEconomicZones:[
             {
               officialCountryName: "Afghanistan",
@@ -639,7 +639,7 @@ describe("exporter-payload routes", () => {
           ],
           gearCategory: "Category 1",
           gearType: "Type 1",
-          highSeasArea:"yes",
+          highSeasArea: "Yes",
           exclusiveEconomicZones:[
             {
               officialCountryName: "Afghanistan",
@@ -1167,7 +1167,7 @@ describe("exporter-payload routes", () => {
           faoArea: "12",
           gearCategory: "Category 1",
           gearType: "Type 1",
-          highSeasArea:"yes",
+          highSeasArea: "Yes",
           exclusiveEconomicZones:[
             {
               officialCountryName: "Afghanistan",

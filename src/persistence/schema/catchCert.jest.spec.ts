@@ -41,7 +41,7 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
                 weight: 150,
                 gearCategory: "Category 1",
                 gearType: "Type 1",
-                highSeasArea: 'yes',
+                highSeasArea: 'Yes',
                 exclusiveEconomicZones: [],
                 faoArea: "test-fao",
                 numberOfSubmissions: 0,

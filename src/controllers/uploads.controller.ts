@@ -23,7 +23,7 @@ export default class UploadsController {
     }
 
     let rows: string[] = await csv({ noheader: true, output: 'line' }).fromString(data);
-    
+
     rows = rows.filter(item => !isEmpty(item.replace(/^[, ]+$/g, '')));
     rows = rows.map(item => item.toUpperCase());
 
@@ -108,7 +108,7 @@ export default class UploadsController {
           dateLanded: moment(validLanding.landingDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           exportWeight: validLanding.exportWeight,
           faoArea: validLanding.faoArea,
-          highSeasArea: validLanding.highSeasArea?.toLowerCase() as HighSeasAreaType,
+          highSeasArea: this.getHighSeaArea(validLanding),
           exclusiveEconomicZones: this.getExclusiveEconomicZone(validLanding),
           rfmo: this.getRfmo(validLanding),
           gearCategory: UploadsController.geGearCategory(validLanding),
@@ -135,6 +135,14 @@ export default class UploadsController {
   static readonly getGearType = (
     landing: IUploadedLanding
   ) => landing.gearCode ? `${landing.gearName} (${landing.gearCode})` : '';
+
+  static readonly getHighSeaArea = (
+    landing: IUploadedLanding
+  ):  HighSeasAreaType | undefined => {
+    if (landing.highSeasArea) {
+      return landing.highSeasArea.toLowerCase() === "yes" ? 'Yes' : 'No'
+    }
+  }
 
   static readonly getExclusiveEconomicZone = (
     landing: IUploadedLanding

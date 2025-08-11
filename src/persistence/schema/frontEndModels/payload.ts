@@ -37,7 +37,7 @@ export interface Vessel {
   vesselOverriddenByAdmin?: boolean;
   vesselNotFound?: boolean;
 }
-export type HighSeasAreaType = 'yes' | 'no' | undefined;
+export type HighSeasAreaType = 'Yes' | 'No' | undefined;
 
 export interface Weight {
   speciesId: string,

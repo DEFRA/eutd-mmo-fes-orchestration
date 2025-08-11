@@ -46,8 +46,8 @@ export enum AddTransportation {
 }
 
 export enum HighSeasAreaOptions {
-  Yes = 'yes',
-  No = 'no'
+  Yes = 'Yes',
+  No = 'No'
 }
 
 export const LandingStatuses = Object.freeze(LandingValidationStatus);
