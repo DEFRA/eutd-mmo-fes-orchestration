@@ -857,7 +857,8 @@ describe('cloneExportData', () => {
       totalWeightLanded: "34",
       exportWeightBeforeProcessing: "34",
       exportWeightAfterProcessing: "45",
-      scientificName: 'scientificName'
+      scientificName: 'scientificName',
+      speciesCode: 'HER'
     },
     {
       species: "Cod",
@@ -921,7 +922,8 @@ describe('cloneExportData - with an old exportedTo', () => {
       totalWeightLanded: "34",
       exportWeightBeforeProcessing: "34",
       exportWeightAfterProcessing: "45",
-      scientificName: 'scientificName'
+      scientificName: 'scientificName',
+      speciesCode: 'HER'
     },
     {
       species: "Cod",
@@ -982,7 +984,8 @@ describe('cloneCatch', () => {
     totalWeightLanded: "34",
     exportWeightBeforeProcessing: "34",
     exportWeightAfterProcessing: "45",
-    scientificName: 'scientificName'
+    scientificName: 'scientificName',
+    speciesCode: 'HER'
   };
 
   it('will update the catch id', () => {
@@ -1002,6 +1005,7 @@ describe('cloneCatch', () => {
     expect(clone2.exportWeightBeforeProcessing).toBe(original.exportWeightBeforeProcessing);
     expect(clone2.exportWeightAfterProcessing).toBe(original.exportWeightAfterProcessing);
     expect(clone2.scientificName).toBe(original.scientificName);
+    expect(clone2.speciesCode).toBe(original.speciesCode);
   });
 });
 

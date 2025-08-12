@@ -272,6 +272,7 @@ export const cloneExportData = (original: ExportData): ExportData => (
 export const cloneCatch = (original: Catch): Catch => {
   const {
     species,
+    speciesCode,
     catchCertificateNumber,
     catchCertificateType,
     totalWeightLanded,
@@ -283,6 +284,7 @@ export const cloneCatch = (original: Catch): Catch => {
   const result = {
     id: catchCertificateNumber + '-' + getRandomNumber(),
     species,
+    speciesCode,
     catchCertificateNumber,
     catchCertificateType,
     totalWeightLanded,
