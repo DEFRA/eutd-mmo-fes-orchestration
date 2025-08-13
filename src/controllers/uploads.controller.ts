@@ -30,17 +30,68 @@ export default class UploadsController {
     if (rows.length > ApplicationConfig._maxLimitLandings) {
       throw new Error('error.upload.max-landings')
     }
-    const validatedLandings: IUploadedLanding[] = await this.validateLandings(userPrincipal, rows);
+
+    const landings = await this.parseRows(rows);
+    const validatedLandings: IUploadedLanding[] = await this.validateLandings(userPrincipal, landings);
 
     if (cache)
       await UploadsService.cacheUploadedRows(userPrincipal, contactId, validatedLandings);
     return validatedLandings;
   }
 
-  public static async validateLandings(userPrincipal: string, rows?: string[], landings?: IUploadedLanding[]): Promise<IUploadedLanding[]> {
+  public static async parseRows(rows: string[]): Promise<IUploadedLanding[]> {
+    let rowNumber = 1;
+
+    const landings: IUploadedLanding[] = await Promise.all(rows.map(async (originalRow) => {
+      const numCellsMandatory = 5;
+      const cells = originalRow.split(',');
+      const hasMadatoryFieldsOnly = cells.length === numCellsMandatory
+      const headers = hasMadatoryFieldsOnly ? [
+        'productId',
+        'landingDate',
+        'faoArea',
+        'vesselPln',
+        'exportWeight'
+      ] : [
+        'productId',
+        'startDate',
+        'landingDate',
+        'faoArea',
+        'highSeasArea',
+        'eezCode',
+        'rfmoCode',
+        'vesselPln',
+        'gearCode',
+        'exportWeight'
+      ];
+
+      const params = {
+        noheader: true,
+        headers: headers,
+        checkColumn: true
+      };
+
+      const json: IUploadedLanding[] = await csv(params).fromString(originalRow);
+
+      const landing: IUploadedLanding = {
+        ...json[0],
+        rowNumber,
+        originalRow,
+        errors: []
+      };
+
+      rowNumber++;
+
+      return landing;
+    }));
+
+    return landings;
+  }
+
+  public static async validateLandings(userPrincipal: string, landings: IUploadedLanding[]): Promise<IUploadedLanding[]> {
     const products: IProduct[] = await readFavouritesProducts(userPrincipal) || [];
     const landingLimitDaysInFuture: number = ApplicationConfig._landingLimitDaysInTheFuture;
-    const payload = { products, landingLimitDaysInFuture, rows, landings }
+    const payload = { products, landingLimitDaysInFuture, landings }
     const validatedLandings: IUploadedLanding[] = await UploadsService.parseAndValidateData(payload)
     validatedLandings.forEach(landing => {
       if (landing.errors.includes('error.product.any.invalid')) {
@@ -52,7 +103,7 @@ export default class UploadsController {
   }
 
   public static async saveLandingRows(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, uploadedLandings: IUploadedLanding[]): Promise<Hapi.ResponseObject> {
-    const landings = await this.validateLandings(userPrincipal, undefined, uploadedLandings);
+    const landings = await this.validateLandings(userPrincipal, uploadedLandings);
 
     const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors && landing.errors.length === 0 || !landing.errors;
     const hasValidLanding = (_: IUploadedLanding[]): boolean => _.some(isValidLanding);
@@ -138,7 +189,7 @@ export default class UploadsController {
 
   static readonly getHighSeaArea = (
     landing: IUploadedLanding
-  ):  HighSeasAreaType | undefined => {
+  ): HighSeasAreaType | undefined => {
     if (landing.highSeasArea) {
       return landing.highSeasArea.toLowerCase() === "yes" ? 'Yes' : 'No'
     }

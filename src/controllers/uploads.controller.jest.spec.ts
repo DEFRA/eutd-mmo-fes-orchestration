@@ -19,14 +19,13 @@ jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
 describe("UploadsController", () => {
 
   const contactId = 'contactBob';
-  const userPrincipal = 'Bob';
 
   describe("parseLandingsFile", () => {
 
     const userPrincipal = 'Bob';
     const contactId = 'Bob';
-    let mockParseAndValidateLandings;
-    let mockParseAndValidateLandingsService;
+    let mockValidateLandings;
+    let mockParseRows;
     let originalMaxLimitLandings;
     let mockCacheUploadRows;
 
@@ -35,10 +34,9 @@ describe("UploadsController", () => {
     });
 
     beforeEach(() => {
-      mockParseAndValidateLandings = jest.spyOn(UploadsController, 'validateLandings');
-      mockParseAndValidateLandings.mockImplementation((_, l) => Promise.resolve(l));
-      mockParseAndValidateLandingsService = jest.spyOn(UploadsService, 'parseAndValidateData');
-      mockParseAndValidateLandingsService.mockImplementation((_, l) => Promise.resolve(l));
+      mockValidateLandings = jest.spyOn(UploadsController, 'validateLandings');
+      mockValidateLandings.mockImplementation((_, l) => Promise.resolve(l));
+      mockParseRows = jest.spyOn(UploadsController, 'parseRows');
       originalMaxLimitLandings = ApplicationConfig._maxLimitLandings;
       mockCacheUploadRows = jest.spyOn(UploadsService, "cacheUploadedRows");
     });
@@ -60,251 +58,305 @@ describe("UploadsController", () => {
       await expect(UploadsController.parseLandingsFile(csv, userPrincipal, contactId)).rejects.toThrow();
     });
 
-    it("will parse a single landing", async () => {
+    it("will parse a single landing with madatory fields only", async () => {
       const csv = "PRD001,19/07/2021,FAO27,PLN1,100\n";
-      const mockParseAndValidateLandingResolvedValue = [
-      {
-        rowNumber: 1,
-        originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
-        productId: "PRD001",
-        landingDate: "19/07/2021",
-        faoArea: "FAO27",
-        vesselPln: "PLN1",
-        exportWeight: "100",
-        errors: []
-      }
-    ]
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
       expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
+      expect(output).toEqual([
+        {
+          rowNumber: 1,
+          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
+          productId: "PRD001",
+          landingDate: "19/07/2021",
+          faoArea: "FAO27",
+          vesselPln: "PLN1",
+          exportWeight: "100",
+          errors: []
+        }
+      ]);
+    });
+
+    it("will parse a single landing", async () => {
+      const csv = "PRD001,,19/07/2021,FAO27,,,,PLN1,,100\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+      expect(mockCacheUploadRows).not.toHaveBeenCalled();
+      expect(output).toEqual([
+        {
+          rowNumber: 1,
+          originalRow: "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
+          productId: "PRD001",
+          startDate: "",
+          landingDate: "19/07/2021",
+          faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
+          vesselPln: "PLN1",
+          gearCode: "",
+          exportWeight: "100",
+          errors: []
+        }
+      ]);
     });
 
     it("will parse a single landing with a start date", async () => {
-      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,100\n";
-      const mockParseAndValidateLandingResolvedValue = [{
+      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,,,,PLN1,,100\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+      expect(mockCacheUploadRows).not.toHaveBeenCalled();
+      expect(output).toEqual([{
         rowNumber: 1,
-        originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,PLN1,100",
+        originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,,,,PLN1,,100",
         productId: "PRD001",
         startDate: "18/07/2021",
         landingDate: "19/07/2021",
         faoArea: "FAO27",
+        highSeasArea: "",
+        eezCode: "",
+        rfmoCode: "",
         vesselPln: "PLN1",
+        gearCode: "",
         exportWeight: "100",
         errors: []
-      }]
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-      expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
+      }]);
     });
 
     it("will parse a single landing with all optional fields", async () => {
-      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,Yes,CHN;DEU,IOTC,PLN1,PS,100\n"; // EEZ to be added(FI0-9472)
-      const mockParseAndValidateLandingResolvedValue = [{
-        rowNumber: 1,
-          originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,YES,IOTC,PLN1,PS,100",
-          productId: "PRD001",
-          startDate: "18/07/2021",
-          landingDate: "19/07/2021",
-          faoArea: "FAO27",
-          highSeasArea: "YES",
-          rfmoCode: "IOTC",
-          vesselPln: "PLN1",
-          exportWeight: "100",
-          gearCode: 'PS',
-          errors: []
-      }]
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
-
+      const csv = "PRD001,18/07/2021,19/07/2021,FAO27,Yes,CHN;DEU,IOTC,PLN1,PS,100\n";
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
       expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
-    });
-
-    it("will parse a single landing with gear code and no start date", async () => {
-      const csv = "PRD001,19/07/2021,FAO27,PLN1,PS,100\n";
-      const mockParseAndValidateLandingResolvedValue = [{
+      expect(output).toEqual([{
         rowNumber: 1,
-        originalRow: "PRD001,19/07/2021,FAO27,PLN1,PS,100",
+        originalRow: "PRD001,18/07/2021,19/07/2021,FAO27,YES,CHN;DEU,IOTC,PLN1,PS,100",
         productId: "PRD001",
+        startDate: "18/07/2021",
         landingDate: "19/07/2021",
         faoArea: "FAO27",
+        highSeasArea: "YES",
+        eezCode: "CHN;DEU",
+        rfmoCode: "IOTC",
         vesselPln: "PLN1",
         exportWeight: "100",
         gearCode: 'PS',
         errors: []
-      }]
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
+      }]);
+    });
+
+    it("will parse a single landing with gear code and no start date", async () => {
+      const csv = "PRD001,,19/07/2021,FAO27,,,,PLN1,PS,100\n";
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
       expect(mockCacheUploadRows).not.toHaveBeenCalled();
-      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
+      expect(output).toEqual([{
+        rowNumber: 1,
+        originalRow: "PRD001,,19/07/2021,FAO27,,,,PLN1,PS,100",
+        productId: "PRD001",
+        startDate: "",
+        landingDate: "19/07/2021",
+        faoArea: "FAO27",
+        highSeasArea: "",
+        eezCode: "",
+        rfmoCode: "",
+        vesselPln: "PLN1",
+        exportWeight: "100",
+        gearCode: 'PS',
+        errors: []
+      }]);
     });
 
     it("will remove empty lines", async () => {
       const csv =
         "\n" +
-        "PRD001,19/07/2021,FAO27,PLN1,100\n" +
-        "PRD002,20/07/2021,FAO27,PLN2,200\n" +
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100\n" +
+        "PRD002,,20/07/2021,FAO27,,,,PLN2,,200\n" +
         "\n" +
         "\n" +
-        "PRD003,21/07/2021,FAO27,PLN3,300\n";
-      const mockParseAndValidateLandingResolvedValue = [
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+
+      expect(output).toEqual([
         {
           rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
+          originalRow: "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
           productId: "PRD001",
+          startDate: "",
           landingDate: "19/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN1",
+          gearCode: "",
           exportWeight: "100",
           errors: []
         },
         {
           rowNumber: 2,
-          originalRow: "PRD002,20/07/2021,FAO27,PLN2,200",
+          originalRow: "PRD002,,20/07/2021,FAO27,,,,PLN2,,200",
           productId: "PRD002",
+          startDate: "",
           landingDate: "20/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN2",
+          gearCode: "",
           exportWeight: "200",
           errors: []
         },
         {
           rowNumber: 3,
-          originalRow: "PRD003,21/07/2021,FAO27,PLN3,300",
+          originalRow: "PRD003,,21/07/2021,FAO27,,,,PLN3,,300",
           productId: "PRD003",
+          startDate: "",
           landingDate: "21/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN3",
+          gearCode: "",
           exportWeight: "300",
           errors: []
         }
-      ]
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-
-      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
+      ]);
     });
 
     it("will remove lines containing just commas and/or spaces", async () => {
       const csv =
-        "PRD001,19/07/2021,FAO27,PLN1,100\n" +
-        ",,,,\n" +
-        ", , , ,\n" +
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100\n" +
+        ",,,,,,,,,\n" +
+        ", , , , , , , , ,\n" +
         "   \n" +
-        "PRD003,21/07/2021,FAO27,PLN3,300\n";
-      const mockParseAndValidateLandingResolvedValue = [
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+
+      expect(output).toEqual([
         {
           rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
+          originalRow: "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
           productId: "PRD001",
+          startDate: "",
           landingDate: "19/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN1",
+          gearCode: "",
           exportWeight: "100",
           errors: []
         },
         {
           rowNumber: 2,
-          originalRow: "PRD003,21/07/2021,FAO27,PLN3,300",
+          originalRow: "PRD003,,21/07/2021,FAO27,,,,PLN3,,300",
           productId: "PRD003",
+          startDate: "",
           landingDate: "21/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN3",
+          gearCode: "",
           exportWeight: "300",
           errors: []
         }
-      ]
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue)
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-      expect(mockParseAndValidateLandings).toHaveBeenCalledTimes(1);
-
-
-      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
+      ]);
     });
 
     it("will parse multiple landings", async () => {
       const csv =
-        "PRD001,19/07/2021,FAO27,PLN1,100\n" +
-        "PRD002,20/07/2021,FAO27,PLN2,200\n" +
-        "PRD003,21/07/2021,FAO27,PLN3,300\n";
-      const mockParseAndValidateLandingResolvedValue = [
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100\n" +
+        "PRD002,,20/07/2021,FAO27,,,,PLN2,,200\n" +
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300\n";
+
+      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
+
+      expect(output).toEqual([
         {
           rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
+          originalRow: "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
           productId: "PRD001",
+          startDate: "",
           landingDate: "19/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN1",
+          gearCode: "",
           exportWeight: "100",
           errors: []
         },
         {
           rowNumber: 2,
-          originalRow: "PRD002,20/07/2021,FAO27,PLN2,200",
+          originalRow: "PRD002,,20/07/2021,FAO27,,,,PLN2,,200",
           productId: "PRD002",
+          startDate: "",
           landingDate: "20/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN2",
+          gearCode: "",
           exportWeight: "200",
           errors: []
         },
         {
           rowNumber: 3,
-          originalRow: "PRD003,21/07/2021,FAO27,PLN3,300",
+          originalRow: "PRD003,,21/07/2021,FAO27,,,,PLN3,,300",
           productId: "PRD003",
+          startDate: "",
           landingDate: "21/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN3",
+          gearCode: "",
           exportWeight: "300",
           errors: []
         }
-      ]
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue)
-
-      const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
-
-      expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
+      ]);
     });
 
     it("will capitalize every row before parsing them", async () => {
       const csv =
-        "prd001,19/07/2021,fao27,pln1,100\n" +
-        "prd002,20/07/2021,fao27,pln2,200\n" +
-        "prd003,21/07/2021,fao27,pln3,300\n";
+        "prd001,,19/07/2021,fao27,,,,pln1,,100\n" +
+        "prd002,,20/07/2021,fao27,,,,pln2,,200\n" +
+        "prd003,,21/07/2021,fao27,,,,pln3,,300\n";
 
       await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
-      expect(mockParseAndValidateLandings).toHaveBeenCalledWith(userPrincipal,
-        [
-        "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,20/07/2021,FAO27,PLN2,200",
-        "PRD003,21/07/2021,FAO27,PLN3,300",
-        ]
-    );
+      expect(mockParseRows).toHaveBeenCalledWith([
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
+        "PRD002,,20/07/2021,FAO27,,,,PLN2,,200",
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300",
+      ]
+      );
     });
 
     it("will strip empty rows before parsing them", async () => {
       const csv =
-        "PRD001,19/07/2021,FAO27,PLN1,100\n" +
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100\n" +
         "\n" +
-        "PRD002,20/07/2021,FAO27,PLN2,200\n" +
-        "PRD003,21/07/2021,FAO27,PLN3,300\n";
+        "PRD002,,20/07/2021,FAO27,,,,PLN2,,200\n" +
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300\n";
 
       await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
-      expect(mockParseAndValidateLandings).toHaveBeenCalledWith(userPrincipal,
-        [
-        "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,20/07/2021,FAO27,PLN2,200",
-        "PRD003,21/07/2021,FAO27,PLN3,300",
-        ]
+      expect(mockParseRows).toHaveBeenCalledWith([
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
+        "PRD002,,20/07/2021,FAO27,,,,PLN2,,200",
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300",
+      ]
       );
     });
 
@@ -312,9 +364,9 @@ describe("UploadsController", () => {
       ApplicationConfig._maxLimitLandings = 2;
 
       const csv =
-        "PRD001,19/07/2021,FAO27,PLN1,100\n" +
-        "PRD002,20/07/2021,FAO27,PLN2,200\n" +
-        "PRD003,21/07/2021,FAO27,PLN3,300\n";
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100\n" +
+        "PRD002,,20/07/2021,FAO27,,,,PLN2,,200\n" +
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300\n";
 
       await expect(async () => UploadsController.parseLandingsFile(csv, userPrincipal, contactId))
         .rejects
@@ -322,19 +374,22 @@ describe("UploadsController", () => {
     });
 
     it("will call validateLandings with all the parsed landings", async () => {
+      const landings = ["landing 1", "landing 2"];
 
-      const csv = "PRD001,19/07/2021,FAO27,PLN1,100"
+      mockParseRows.mockResolvedValue(landings);
+
+      const csv = "PRD001,,19/07/2021,FAO27,,,,PLN1,,100"
 
       await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
-      expect(mockParseAndValidateLandings).toHaveBeenCalledWith(userPrincipal, [csv]);
+      expect(mockValidateLandings).toHaveBeenCalledWith(userPrincipal, landings);
     });
 
     it("will return the response back from validateLandings", async () => {
-      const csv = "PRD001,19/07/2021,FAO27,PLN1,100";
+      const csv = "PRD001,,19/07/2021,FAO27,,,,PLN1,,100";
       const response = ["validated landing 1", "validated landing 2"];
 
-      mockParseAndValidateLandings.mockResolvedValue(response);
+      mockValidateLandings.mockResolvedValue(response);
 
       const result = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
 
@@ -342,10 +397,10 @@ describe("UploadsController", () => {
     });
 
     it("will bubble up any errors from validateLandings", async () => {
-      const csv = "PRD001,19/07/2021,FAO27,PLN1,100";
+      const csv = "PRD001,,19/07/2021,FAO27,,,,PLN1,,100";
       const error = new Error("something went wrong");
 
-      mockParseAndValidateLandings.mockRejectedValue(error);
+      mockValidateLandings.mockRejectedValue(error);
 
       await expect(async () =>
         UploadsController.parseLandingsFile(csv, userPrincipal, contactId)
@@ -353,7 +408,7 @@ describe("UploadsController", () => {
     });
 
     it("will cache the validated rows", async () => {
-      const csv = "PRD001,19/07/2021,FAO27,PLN1,100\n";
+      const csv = "PRD001,,19/07/2021,FAO27,,,,PLN1,,100\n";
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId, true);
       expect(mockCacheUploadRows).toHaveBeenCalledTimes(1);
@@ -970,8 +1025,6 @@ describe("UploadsController", () => {
       expect(mockCode).toHaveBeenCalledWith(200);
     });
 
-    //EEZ Details to be added(FI0-9472)
-
     it('should return 200 OK with provided rows', async () => {
       const file: IUploadedLanding[] = [{
         rowNumber: 1,
@@ -1520,7 +1573,7 @@ describe("UploadsController", () => {
               },
               dateLanded: '2020-10-10',
               exportWeight: 20,
-              faoArea: 'FAO18',startDate: undefined,
+              faoArea: 'FAO18', startDate: undefined,
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
               rfmo: '',
@@ -2944,122 +2997,135 @@ describe("UploadsController", () => {
   });
 
   describe("parseRows", () => {
-    let mockReadFavouriteProducts;
-    let mockParseAndValidateLandings;
-    const favourites = ['product 1', 'product 2'] as any;
-    beforeEach(() => {
-      mockReadFavouriteProducts = jest.spyOn(FavouritesService, 'readFavouritesProducts');
-      mockReadFavouriteProducts.mockResolvedValue(favourites);
-      mockParseAndValidateLandings = jest.spyOn(UploadsService, 'parseAndValidateData');
-    });
-
     it("will parse a single landing", async () => {
-      const rows = ["PRD001,19/07/2021,FAO27,PLN1,100"];
+      const rows = ["PRD001,,19/07/2021,FAO27,,,,PLN1,,100"];
       const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
+          originalRow: "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
           productId: "PRD001",
+          startDate: "",
           landingDate: "19/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN1",
+          gearCode: "",
           exportWeight: "100",
           errors: []
         }
       ];
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
 
-      const output = await UploadsController.validateLandings(userPrincipal, rows);
+      const output = await UploadsController.parseRows(rows);
 
       expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will parse multiple landings", async () => {
       const rows = [
-        "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,20/07/2021,FAO27,PLN2,200",
-        "PRD003,21/07/2021,FAO27,PLN3,300"
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
+        "PRD002,,20/07/2021,FAO27,,,,PLN2,,200",
+        "PRD003,,21/07/2021,FAO27,,,,PLN3,,300"
       ]
       const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
+          originalRow: "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
           productId: "PRD001",
+          startDate: "",
           landingDate: "19/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN1",
+          gearCode: "",
           exportWeight: "100",
           errors: []
         },
         {
           rowNumber: 2,
-          originalRow: "PRD002,20/07/2021,FAO27,PLN2,200",
+          originalRow: "PRD002,,20/07/2021,FAO27,,,,PLN2,,200",
           productId: "PRD002",
+          startDate: "",
           landingDate: "20/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN2",
+          gearCode: "",
           exportWeight: "200",
           errors: []
         },
         {
           rowNumber: 3,
-          originalRow: "PRD003,21/07/2021,FAO27,PLN3,300",
+          originalRow: "PRD003,,21/07/2021,FAO27,,,,PLN3,,300",
           productId: "PRD003",
+          startDate: "",
           landingDate: "21/07/2021",
           faoArea: "FAO27",
+          highSeasArea: "",
+          eezCode: "",
+          rfmoCode: "",
           vesselPln: "PLN3",
+          gearCode: "",
           exportWeight: "300",
           errors: []
         }
       ];
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
 
-      const output = await UploadsController.validateLandings(userPrincipal, rows);
+      const output = await UploadsController.parseRows(rows);
 
       expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
 
     it("will throw an error if a row is missing data", async () => {
       const rows = [
-        "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,20/07/2021,FAO27,PLN2"
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
+        "PRD002,,20/07/2021,FAO27,,,,PLN2"
       ];
-      mockParseAndValidateLandings.mockRejectedValue(new Error(""));
+
       await expect(async () =>
-        UploadsController.validateLandings(userPrincipal, rows)
+        UploadsController.parseRows(rows)
       ).rejects.toThrow();
     });
 
     it("will throw an error if a row has excess data", async () => {
       const rows = [
-        "PRD001,19/07/2021,FAO27,PLN1,100",
-        "PRD002,19/07/2021,20/07/2021,FAO27,Yes,IOTC,PLN2,PS,200,bob"
+        "PRD001,,19/07/2021,FAO27,,,,PLN1,,100",
+        "PRD002,19/07/2021,20/07/2021,FAO27,Yes,UK,IOTC,PLN2,PS,200,bob"
       ];
-      mockParseAndValidateLandings.mockRejectedValue(new Error(""));
+
       await expect(async () =>
-        UploadsController.validateLandings(userPrincipal, rows)
+        UploadsController.parseRows(rows)
       ).rejects.toThrow();
     });
 
     it("will not validate any field data", async () => {
       const rows = [
-        "X,X,X,X,X"
+        "X,X,X,X,X,X,X,X,X,X"
       ];
       const mockParseAndValidateLandingResolvedValue = [
         {
           rowNumber: 1,
-          originalRow: "X,X,X,X,X",
+          originalRow: "X,X,X,X,X,X,X,X,X,X",
           productId: "X",
+          startDate: "X",
           landingDate: "X",
           faoArea: "X",
+          highSeasArea: "X",
+          eezCode: "X",
+          rfmoCode: "X",
           vesselPln: "X",
+          gearCode: "X",
           exportWeight: "X",
           errors: []
         }
       ];
-      mockParseAndValidateLandings.mockResolvedValue(mockParseAndValidateLandingResolvedValue);
 
-      const output = await UploadsController.validateLandings(userPrincipal, rows);
+      const output = await UploadsController.parseRows(rows);
 
       expect(output).toEqual(mockParseAndValidateLandingResolvedValue);
     });
