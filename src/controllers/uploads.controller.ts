@@ -163,7 +163,8 @@ export default class UploadsController {
           exclusiveEconomicZones: this.getExclusiveEconomicZone(validLanding),
           rfmo: this.getRfmo(validLanding),
           gearCategory: UploadsController.geGearCategory(validLanding),
-          gearType: UploadsController.getGearType(validLanding)
+          gearCode: validLanding.gearCode,
+          gearType: UploadsController.getGearType(validLanding),
         }
       };
 
@@ -181,11 +182,11 @@ export default class UploadsController {
 
   static readonly geGearCategory = (
     landing: IUploadedLanding
-  ) => landing.gearCategory ? landing.gearCategory : '';
+  ) => landing.gearCategory ? landing.gearCategory : undefined;
 
   static readonly getGearType = (
     landing: IUploadedLanding
-  ) => landing.gearCode ? `${landing.gearName} (${landing.gearCode})` : '';
+  ) => landing.gearCode ? `${landing.gearName} (${landing.gearCode})` : undefined;
 
   static readonly getHighSeaArea = (
     landing: IUploadedLanding

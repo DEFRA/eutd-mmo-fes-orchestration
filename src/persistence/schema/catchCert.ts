@@ -69,6 +69,7 @@ export interface Catch {
   weight?: number;
   gearCategory?: string;
   gearType?: string;
+  gearCode?: string;
   highSeasArea?: HighSeasAreaType;
   exclusiveEconomicZones?: ICountry[];
   _status?: LandingValidationStatus;
@@ -241,7 +242,7 @@ export const cloneProductData = (original: Product, newDocumentNumber: string, e
 }
 
 export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch => {
-  const {id,vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType,highSeasArea,
+  const {id,vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType, gearCode, highSeasArea,
     exclusiveEconomicZones, rfmo } = original;
 
   const result = {
@@ -261,6 +262,7 @@ export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch =>
     weight,
     gearCategory,
     gearType,
+    gearCode,
     highSeasArea,
     exclusiveEconomicZones,
     rfmo
@@ -373,6 +375,7 @@ const CatchSchema = new Schema({
   weight:                   { type: Number },
   gearCategory:             { type: String, required: false  },
   gearType:                 { type: String, required: false  },
+  gearCode:                 { type: String, required: false  },
   numberOfSubmissions:      { type: Number, required: true, default: 0 },
   vesselOverriddenByAdmin:  { type: Boolean, required: false },
   vesselNotFound:           { type: Boolean, required: false },

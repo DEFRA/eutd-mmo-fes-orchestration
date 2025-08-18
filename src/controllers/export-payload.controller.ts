@@ -466,6 +466,7 @@ export default class ExportPayloadController {
         exportWeight: payload.exportWeight,
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
+        gearCode: payload.gearCode,
         highSeasArea: payload.highSeasArea,
         exclusiveEconomicZones: payload.exclusiveEconomicZones
       }
@@ -486,6 +487,7 @@ export default class ExportPayloadController {
       weights: PayloadSchema.Weight[],
       gearCategory?: string,
       gearType?: string,
+      gearCode?: string
       highSeasArea?: PayloadSchema.HighSeasAreaType,
       exclusiveEconomicZones?: ICountry[],
       currentUri?: string,
@@ -509,6 +511,7 @@ export default class ExportPayloadController {
           exportWeight: weight.exportWeight,
           gearCategory: payload.gearCategory,
           gearType: payload.gearType,
+          gearCode: payload.gearCode,
           highSeasArea: payload.highSeasArea,
           exclusiveEconomicZones:payload.exclusiveEconomicZones,   
           faoArea: payload.faoArea,
@@ -577,6 +580,7 @@ export default class ExportPayloadController {
       currentUri?: string,
       gearCategory?: string,
       gearType?: string,
+      gearCode?: string,
       highSeasArea?: PayloadSchema.HighSeasAreaType,
       exclusiveEconomicZones?: ICountry[],
       rfmo: string,
@@ -596,6 +600,7 @@ export default class ExportPayloadController {
         exportWeight: payload.exportWeight,
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
+        gearCode: payload.gearCode,
         highSeasArea: payload.highSeasArea,
         exclusiveEconomicZones: payload.exclusiveEconomicZones,
         faoArea: payload.faoArea,
@@ -665,6 +670,7 @@ export default class ExportPayloadController {
         exportWeight: req.payload.exportWeight,
         gearCategory: req.payload.gearCategory,
         gearType: req.payload.gearType,
+        gearCode: req.payload.gearCode,
         highSeasArea: req.payload.highSeasArea,
         exclusiveEconomicZones: req.payload.exclusiveEconomicZones,
       };
@@ -694,6 +700,7 @@ export default class ExportPayloadController {
         startDate: payload.startDate,
         gearCategory: payload.gearCategory,
         gearType: payload.gearType,
+        gearCode: payload.gearCode,
         highSeasArea: payload.highSeasArea,
         exclusiveEconomicZones: payload.exclusiveEconomicZones,
         exportWeight: payload.exportWeight,
@@ -728,6 +735,7 @@ export default class ExportPayloadController {
         startDate: req.payload.startDate,
         gearCategory: req.payload.gearCategory,
         gearType: req.payload.gearType,
+        gearCode: req.payload.gearCode,
         highSeasArea: req.payload.highSeasArea,
         exclusiveEconomicZones: req.payload.exclusiveEconomicZones,
         exportWeight: req.payload.exportWeight,

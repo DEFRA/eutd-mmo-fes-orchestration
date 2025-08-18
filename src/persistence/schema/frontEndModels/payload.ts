@@ -55,6 +55,7 @@ export interface DirectLanding {
   weights: Weight[];
   gearCategory?: string;
   gearType?: string;
+  gearCode?: string;
   highSeasArea?: HighSeasAreaType;
   exclusiveEconomicZones?: ICountry[];
   numberOfSubmissions?: number;
@@ -71,6 +72,7 @@ export interface Landing {
   exportWeight?: number;
   gearCategory?: string;
   gearType?: string;
+  gearCode?: string;
   highSeasArea?: HighSeasAreaType;
   exclusiveEconomicZones?: ICountry[];
   faoArea?: string;
@@ -197,6 +199,7 @@ const mapLandings = (landing: LandingStatus): BackEndModels.Catch => {
     weight: landing.model.exportWeight,
     gearCategory: landing.model.gearCategory,
     gearType: landing.model.gearType,
+    gearCode: landing.model.gearCode,
     highSeasArea: landing.model.highSeasArea,
     exclusiveEconomicZones: landing.model.exclusiveEconomicZones,
     numberOfSubmissions: landing.model.numberOfSubmissions,
@@ -296,6 +299,7 @@ export const toFrontEndProductLanded = (productLanded: BackEndModels.Product): P
         exportWeight: landing.weight,
         gearCategory: landing.gearCategory,
         gearType: landing.gearType,
+        gearCode: landing.gearCode,
         highSeasArea: landing.highSeasArea,
         exclusiveEconomicZones: landing.exclusiveEconomicZones,
         numberOfSubmissions: landing.numberOfSubmissions,
@@ -383,6 +387,7 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
     startDate: landing?.startDate,
     gearCategory: landing?.gearCategory,
     gearType: landing?.gearType,
+    gearCode: landing?.gearCode,
     highSeasArea: landing?.highSeasArea,
     exclusiveEconomicZones: landing?.exclusiveEconomicZones,
     dateLanded: landing ? landing.date : undefined,

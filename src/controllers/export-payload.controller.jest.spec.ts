@@ -1249,6 +1249,9 @@ describe("methods", () => {
           dateLanded: undefined,
           exportWeight: undefined,
           faoArea: undefined,
+          gearCategory: undefined,
+          gearType: undefined,
+          gearCode: undefined,
           vessel: undefined,
         },
       };
@@ -1292,6 +1295,7 @@ describe("methods", () => {
           exportWeight: undefined,
           gearCategory: undefined,
           gearType: undefined,
+          gearCode: undefined,
           highSeasArea: undefined,
           exclusiveEconomicZones:undefined,
           rfmo: undefined,
@@ -1333,6 +1337,7 @@ describe("methods", () => {
           exportWeight: undefined,
           gearCategory: undefined,
           gearType: undefined,
+          gearCode: undefined,
           highSeasArea: undefined,
           exclusiveEconomicZones: undefined,
           faoArea: undefined,
@@ -1409,8 +1414,9 @@ describe("methods", () => {
           exportWeight: undefined,
           gearCategory: undefined,
           gearType: undefined,
+          gearCode: undefined,
           highSeasArea: undefined,
-          exclusiveEconomicZones:undefined,
+          exclusiveEconomicZones: undefined,
           rfmo: undefined,
           id: "payload-id",
           numberOfSubmissions: undefined,
@@ -1467,6 +1473,7 @@ describe("methods", () => {
           dateLanded: "2382-12-31",
           gearCategory: "Category 1",
           gearType: "Type 1",
+          gearCode: "OTB",
           highSeasArea: "Yes",
           exclusiveEconomicZones:[
             {
@@ -1528,6 +1535,7 @@ describe("methods", () => {
         faoArea: "FAO27",
         gearCategory: "Category 1",
         gearType: "Type 1",
+        gearCode: "OTB",
         highSeasArea: "Yes",
         exclusiveEconomicZones:[
           {
@@ -1605,6 +1613,7 @@ describe("methods", () => {
                   exportWeight: 988,
                   gearCategory: "Category 1",
                   gearType: "Type 1",
+                  gearCode: "OTB",
                   highSeasArea: "Yes",
                   exclusiveEconomicZones:[
                     {
@@ -1703,6 +1712,7 @@ describe("methods", () => {
                   exportWeight: 988,
                   gearCategory: "Category 1",
                   gearType: "Type 1",
+                  gearCode: "OTB",
                   faoArea: "FAO27",
                   highSeasArea: "Yes",
                   startDate: undefined,
@@ -1791,6 +1801,7 @@ describe("methods", () => {
                   dateLanded: "2020-10-10",
                   gearCategory: "Category 1",
                   gearType: "Type 1",
+                  gearCode: "OTB",
                   highSeasArea: "Yes",
                   exclusiveEconomicZones:[
                     {
@@ -1806,7 +1817,7 @@ describe("methods", () => {
                       isoNumericCode: "248",
                     }
                   ],
-                  rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
+                  rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                   exportWeight: 988,
                   faoArea: "FAO27",
                   id: `${DOCUMENT_NUMBER}-landing-id`,
@@ -1870,6 +1881,7 @@ describe("methods", () => {
         faoArea: "FAO27",
         gearCategory: "Category 1",
         gearType: "Type 1",
+        gearCode: "OTB",
         highSeasArea: "Yes",
         exclusiveEconomicZones:[
           {
@@ -1924,6 +1936,7 @@ describe("methods", () => {
                   dateLanded: "2020-10-10",
                   gearCategory: "Category 1",
                   gearType: "Type 1",
+                  gearCode: "OTB",
                   highSeasArea: "Yes",
                   exclusiveEconomicZones:[
                     {
@@ -2358,7 +2371,7 @@ describe("methods", () => {
                         isoNumericCode: "248",
                       }
                     ],
-                    rfmo:"Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
+                    rfmo: "Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)",
                     exportWeight: 8,
                     faoArea: "FAO27",
                     id: "GBR-2020-CC-2345-3453-second-random-id",
@@ -3100,7 +3113,7 @@ describe("confirmLandingsType", () => {
 
     expect(mockTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockCatchCertificateTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
-    expect(mockAddExportLocation).not.toHaveBeenCalledWith(USER_ID, exportLocation ,DOCUMENT_NUMBER, contactId);
+    expect(mockAddExportLocation).not.toHaveBeenCalledWith(USER_ID, exportLocation, DOCUMENT_NUMBER, contactId);
     expect(mockAddLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
     expect(mockUpsertLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
   });

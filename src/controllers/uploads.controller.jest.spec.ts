@@ -791,6 +791,7 @@ describe("UploadsController", () => {
                   rfmo: "",
                   gearCategory: 'Surrounding nets',
                   gearType: 'Surrounding nets without purse lines (LA)',
+                  gearCode: 'LA'
                 },
               },
             ],
@@ -888,8 +889,8 @@ describe("UploadsController", () => {
                   exclusiveEconomicZones: [],
                   highSeasArea: undefined,
                   rfmo: 'Indian Ocean Tuna Commission (IOTC)',
-                  gearCategory: '',
-                  gearType: '',
+                  gearCategory: undefined,
+                  gearType: undefined,
                 },
               },
             ],
@@ -986,8 +987,8 @@ describe("UploadsController", () => {
                   exclusiveEconomicZones: [],
                   highSeasArea: 'Yes',
                   rfmo: '',
-                  gearCategory: '',
-                  gearType: '',
+                  gearCategory: undefined,
+                  gearType: undefined,
                 },
               },
             ],
@@ -1419,8 +1420,8 @@ describe("UploadsController", () => {
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
               rfmo: '',
-              gearCategory: '',
-              gearType: '',
+              gearCategory: undefined,
+              gearType: undefined,
             }
           }]
         }]
@@ -1532,8 +1533,8 @@ describe("UploadsController", () => {
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
               rfmo: '',
-              gearCategory: '',
-              gearType: ''
+              gearCategory: undefined,
+              gearType: undefined
             }
           }]
         },
@@ -1577,8 +1578,8 @@ describe("UploadsController", () => {
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
               rfmo: '',
-              gearCategory: '',
-              gearType: ''
+              gearCategory: undefined,
+              gearType: undefined
             }
           }]
         }]
@@ -1691,8 +1692,8 @@ describe("UploadsController", () => {
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
               rfmo: '',
-              gearCategory: '',
-              gearType: '',
+              gearCategory: undefined,
+              gearType: undefined,
             }
           }]
         },
@@ -1736,8 +1737,8 @@ describe("UploadsController", () => {
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
               rfmo: '',
-              gearCategory: '',
-              gearType: '',
+              gearCategory: undefined,
+              gearType: undefined,
             }
           }]
         }]
@@ -1834,8 +1835,8 @@ describe("UploadsController", () => {
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
                 rfmo: '',
-                gearCategory: '',
-                gearType: '',
+                gearCategory: undefined,
+                gearType: undefined,
               }
             }]
           }]
@@ -1966,8 +1967,8 @@ describe("UploadsController", () => {
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
                 rfmo: '',
-                gearCategory: '',
-                gearType: '',
+                gearCategory: undefined,
+                gearType: undefined,
               }
             }, {
               model: {
@@ -1991,8 +1992,8 @@ describe("UploadsController", () => {
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
                 rfmo: '',
-                gearCategory: '',
-                gearType: '',
+                gearCategory: undefined,
+                gearType: undefined,
               }
             }, {
               model: {
@@ -2016,8 +2017,8 @@ describe("UploadsController", () => {
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
                 rfmo: '',
-                gearCategory: '',
-                gearType: '',
+                gearCategory: undefined,
+                gearType: undefined,
               }
             }]
           }]
@@ -2448,8 +2449,8 @@ describe("UploadsController", () => {
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
                 rfmo: '',
-                gearCategory: '',
-                gearType: '',
+                gearCategory: undefined,
+                gearType: undefined,
               }
             }]
           }]
@@ -2628,8 +2629,8 @@ describe("UploadsController", () => {
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
                 rfmo: '',
-                gearCategory: '',
-                gearType: '',
+                gearCategory: undefined,
+                gearType: undefined,
               }
             }]
           }]
@@ -2750,8 +2751,8 @@ describe("UploadsController", () => {
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
                 rfmo: '',
-                gearCategory: '',
-                gearType: '',
+                gearCategory: undefined,
+                gearType: undefined,
               }
             }]
           }]
@@ -2877,8 +2878,8 @@ describe("UploadsController", () => {
                   exclusiveEconomicZones: [],
                   highSeasArea: undefined,
                   rfmo: '',
-                  gearCategory: '',
-                  gearType: '',
+                  gearCategory: undefined,
+                  gearType: undefined,
                   id: "123Document-CC-123-random-number",
                   vessel: {
                     cfr: "some-cfr",
