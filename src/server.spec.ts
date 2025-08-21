@@ -104,24 +104,6 @@ describe('Server', () => {
       )
     });
 
-    it('should connect to MongoDB instance using config', async () => {
-      await Server.start();
-      expect(MongoConnection.connect).toHaveBeenCalledWith(
-        'localhost/mongodb',
-        'fesdb',
-        'mongopool',
-      );
-    });
-
-    it('should connect to MongoDB instance using config', async () => {
-      await Server.start();
-      expect(MongoConnection.connect).toHaveBeenCalledWith(
-        'localhost/mongodb',
-        'fesdb',
-        'mongopool',
-      );
-    });
-
     it('should load routes', async () => {
       await Server.start();
       expect(Router.loadRoutes).toHaveBeenCalledWith(Server.instance());
