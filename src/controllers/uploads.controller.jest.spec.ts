@@ -788,7 +788,7 @@ describe("UploadsController", () => {
                   },
                   exclusiveEconomicZones: [],
                   highSeasArea: undefined,
-                  rfmo: "",
+                  rfmo: undefined,
                   gearCategory: 'Surrounding nets',
                   gearType: 'Surrounding nets without purse lines (LA)',
                   gearCode: 'LA'
@@ -986,7 +986,7 @@ describe("UploadsController", () => {
                   },
                   exclusiveEconomicZones: [],
                   highSeasArea: 'Yes',
-                  rfmo: '',
+                  rfmo: undefined,
                   gearCategory: undefined,
                   gearType: undefined,
                 },
@@ -1419,7 +1419,7 @@ describe("UploadsController", () => {
               faoArea: 'FAO18',
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
-              rfmo: '',
+              rfmo: undefined,
               gearCategory: undefined,
               gearType: undefined,
             }
@@ -1532,7 +1532,7 @@ describe("UploadsController", () => {
               startDate: undefined,
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
-              rfmo: '',
+              rfmo: undefined,
               gearCategory: undefined,
               gearType: undefined
             }
@@ -1577,7 +1577,7 @@ describe("UploadsController", () => {
               faoArea: 'FAO18', startDate: undefined,
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
-              rfmo: '',
+              rfmo: undefined,
               gearCategory: undefined,
               gearType: undefined
             }
@@ -1691,7 +1691,7 @@ describe("UploadsController", () => {
               faoArea: 'FAO18',
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
-              rfmo: '',
+              rfmo: undefined,
               gearCategory: undefined,
               gearType: undefined,
             }
@@ -1736,7 +1736,7 @@ describe("UploadsController", () => {
               faoArea: 'FAO18',
               exclusiveEconomicZones: [],
               highSeasArea: undefined,
-              rfmo: '',
+              rfmo: undefined,
               gearCategory: undefined,
               gearType: undefined,
             }
@@ -1834,7 +1834,7 @@ describe("UploadsController", () => {
                 faoArea: 'FAO18',
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
-                rfmo: '',
+                rfmo: undefined,
                 gearCategory: undefined,
                 gearType: undefined,
               }
@@ -1966,7 +1966,7 @@ describe("UploadsController", () => {
                 faoArea: 'FAO18',
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
-                rfmo: '',
+                rfmo: undefined,
                 gearCategory: undefined,
                 gearType: undefined,
               }
@@ -1991,7 +1991,7 @@ describe("UploadsController", () => {
                 startDate: undefined,
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
-                rfmo: '',
+                rfmo: undefined,
                 gearCategory: undefined,
                 gearType: undefined,
               }
@@ -2016,7 +2016,7 @@ describe("UploadsController", () => {
                 faoArea: 'FAO18',
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
-                rfmo: '',
+                rfmo: undefined,
                 gearCategory: undefined,
                 gearType: undefined,
               }
@@ -2448,7 +2448,7 @@ describe("UploadsController", () => {
                 startDate: undefined,
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
-                rfmo: '',
+                rfmo: undefined,
                 gearCategory: undefined,
                 gearType: undefined,
               }
@@ -2628,7 +2628,7 @@ describe("UploadsController", () => {
                 startDate: undefined,
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
-                rfmo: '',
+                rfmo: undefined,
                 gearCategory: undefined,
                 gearType: undefined,
               }
@@ -2750,7 +2750,7 @@ describe("UploadsController", () => {
                 startDate: undefined,
                 exclusiveEconomicZones: [],
                 highSeasArea: undefined,
-                rfmo: '',
+                rfmo: undefined,
                 gearCategory: undefined,
                 gearType: undefined,
               }
@@ -2877,7 +2877,7 @@ describe("UploadsController", () => {
                   startDate: undefined,
                   exclusiveEconomicZones: [],
                   highSeasArea: undefined,
-                  rfmo: '',
+                  rfmo: undefined,
                   gearCategory: undefined,
                   gearType: undefined,
                   id: "123Document-CC-123-random-number",

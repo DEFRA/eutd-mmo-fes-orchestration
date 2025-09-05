@@ -163,7 +163,7 @@ export default class UploadsController {
           exclusiveEconomicZones: this.getExclusiveEconomicZone(validLanding),
           rfmo: this.getRfmo(validLanding),
           gearCategory: UploadsController.geGearCategory(validLanding),
-          gearCode: validLanding.gearCode,
+          gearCode: !isEmpty(validLanding.gearCode) ? validLanding.gearCode : undefined,
           gearType: UploadsController.getGearType(validLanding),
         }
       };
@@ -202,7 +202,7 @@ export default class UploadsController {
 
   static readonly getRfmo = (
     landing: IUploadedLanding
-  ) => landing.rfmoCode ? landing.rfmoName : '';
+  ) => landing.rfmoCode ? landing.rfmoName : undefined;
 
   static readonly addLanding = (
     item: ProductLanded,
