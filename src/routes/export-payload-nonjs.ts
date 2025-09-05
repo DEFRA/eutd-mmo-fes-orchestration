@@ -7,7 +7,7 @@ import { decimalPlacesValidator } from '../helpers/customValidators';
 import ApplicationConfig from "../applicationConfig";
 import * as moment from 'moment';
 
-const extendedJoi = Joi.extend(require('@hapi/joi-date'));
+const extendedJoi = Joi.extend(require('@joi/date'));
 const allowDaysInTheFuture = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate();
 
 export default class ExportPayloadNonjsRoutes {

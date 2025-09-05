@@ -4,7 +4,7 @@ import ApplicationConfig from "../../applicationConfig";
 import { decimalPlacesValidator } from "../../helpers/customValidators";
 import { getFAOAreaList } from '../../helpers/utils/utils';
 
-const extendedJoi = Joi.extend(require('@hapi/joi-date'));
+const extendedJoi = Joi.extend(require('@joi/date'));
 
 const directLandingsSchema = Joi.object({
   dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust: () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate() })).utc().required(),

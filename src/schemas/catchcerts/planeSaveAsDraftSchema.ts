@@ -1,5 +1,5 @@
-const BaseJoi = require('@hapi/joi');
-const Extension = require('@hapi/joi-date');
+const BaseJoi = require('joi');
+const Extension = require('@joi/date');
 const Joi = BaseJoi.extend(Extension);
 
 const planeSaveAsDraftSchema = Joi.object({

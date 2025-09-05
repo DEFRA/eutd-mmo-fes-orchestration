@@ -20,7 +20,7 @@ import { SYSTEM_ERROR } from '../services/constants';
 import { defineAuthStrategies } from '../helpers/auth';
 import { getFAOAreaList } from '../helpers/utils/utils';
 
-const extendedJoi = Joi.extend(require('@hapi/joi-date'));
+const extendedJoi = Joi.extend(require('@joi/date'));
 
 export default class ExportPayloadRoutes {
 
