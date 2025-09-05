@@ -56,6 +56,7 @@ export interface ExportData {
   storageFacilities       ? : StorageFacility[],
   exporterDetails           : ExporterDetails,
   transportation          ? : Transport,
+  arrivalTransportation   ? : Transport,
   exportedTo              ? : ICountry
 }
 
@@ -111,6 +112,7 @@ const ExportDataSchema = new Schema({
   storageFacilities         : { type: [StorageFacilitySchema] },
   exporterDetails           : { type: ExporterDetailsSchema },
   transportation            : { type: TransportSchema },
+  arrivalTransportation     : { type: TransportSchema, required: false },
   exportedTo                : { type: Country }
 }, { _id : false } );
 

@@ -290,17 +290,15 @@ export const upsertExporterDetails = async (
 
 export const upsertTransportDetails = async (userPrincipal: string, payload: Transport, documentNumber: string, contactId: string) => {
 
-  const exportLocation: ExportLocation = await getExportLocation(userPrincipal, documentNumber, contactId);
-  const transport = toBackEndTransport(payload, exportLocation);
-  await upsertDraftData(userPrincipal,documentNumber, {'$set': {'exportData.transportation': transport}}, contactId);
+  const transport = toBackEndTransport(payload);
+  const key = payload.arrival ? 'exportData.arrivalTransportation' : 'exportData.transportation'
+  await upsertDraftData(userPrincipal,documentNumber, {'$set': {[key]: transport}}, contactId);
 };
 
-export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<Transport> => {
+export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string, arrival?:boolean): Promise<Transport> => {
     const draft = await getDraft(userPrincipal, documentNumber, contactId);
-
-    return (draft && draft.exportData && draft.exportData.transportation)
-      ? toFrontEndTransport(draft.exportData.transportation)
-      : null;
+    const transportation = arrival ? draft?.exportData?.arrivalTransportation : draft?.exportData?.transportation;
+    return transportation ? toFrontEndTransport(transportation) : null;
 };
 
 export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber:string, contactId: string) => {

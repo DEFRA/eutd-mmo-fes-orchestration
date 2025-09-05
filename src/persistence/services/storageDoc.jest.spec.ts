@@ -862,21 +862,17 @@ describe('upsertTransportDetails', () => {
   };
 
     let spy;
-    let mockGetExportLocation;
 
     beforeEach(() => {
       spy = jest.spyOn(StorageDocumentService, 'upsertDraftData');
       spy.mockResolvedValue(null);
-      mockGetExportLocation = jest.spyOn(StorageDocumentService, 'getExportLocation');
-      mockGetExportLocation.mockResolvedValue({ exportedTo: 'SPAIN'});
     });
 
     afterEach(() => {
       spy.mockRestore();
-      mockGetExportLocation.mockRestore();
     });
 
-    it('should call upsertDraftData', async () => {
+    it('should call upsertDraftData to export transportation', async () => {
       await StorageDocumentService.upsertTransportDetails('Bob', transport, 'GBR-234234-234234-23424', defaultContact);
 
       expect(spy).toHaveBeenCalledWith(
@@ -886,7 +882,6 @@ describe('upsertTransportDetails', () => {
           '$set': {
             'exportData.transportation': {
               "cmr": true,
-              "exportedTo": "SPAIN",
               "vehicle": "truck"
             }
           }
@@ -894,12 +889,24 @@ describe('upsertTransportDetails', () => {
         'contactBob'
       )
     });
+    it('should call upsertDraftData to arrival transportation', async () => {
+      transport.arrival = true;
+      await StorageDocumentService.upsertTransportDetails('Bob', transport, 'GBR-234234-234234-23424', defaultContact);
 
-  it('should call getExportLocation', async () => {
-    await StorageDocumentService.upsertTransportDetails('Bob', transport, 'GBR-234234-234234-23424', defaultContact);
-
-    expect(mockGetExportLocation).toHaveBeenCalledWith('Bob','GBR-234234-234234-23424', 'contactBob')
-  });
+      expect(spy).toHaveBeenCalledWith(
+        'Bob',
+        'GBR-234234-234234-23424',
+        {
+          '$set': {
+            'exportData.arrivalTransportation': {
+              "cmr": true,
+              "vehicle": "truck"
+            }
+          }
+        },
+        'contactBob'
+      )
+    });
 });
 
 describe('getTransportDetails', () => {

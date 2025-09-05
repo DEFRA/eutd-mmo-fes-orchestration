@@ -73,16 +73,16 @@ describe("The Transport Service", () => {
       sessionDataMock.mockResolvedValue(sessionData);
       mockGetTransportData.mockResolvedValue({});
 
-      const result = await TransportService.getTransportDetails('User 1', 'catchCertificate','GB-34324-34234-234234', contactId);
+      const result = await TransportService.getTransportDetails('User 1', 'catchCertificate','GB-34324-34234-234234', contactId, undefined);
 
       expect(result).toStrictEqual(expectedResult);
-      expect(mockGetTransportData).toHaveBeenCalledWith('User 1', 'catchCertificate','GB-34324-34234-234234', contactId);
+      expect(mockGetTransportData).toHaveBeenCalledWith('User 1', 'catchCertificate','GB-34324-34234-234234', contactId, undefined);
     });
 
     it("will deal with no transport data", async () => {
       mockGetTransportData.mockResolvedValue(null);
 
-      const result = await TransportService.getTransportDetails("User 1","catchCertificate",'GB-34324-34234-234234', contactId);
+      const result = await TransportService.getTransportDetails("User 1","catchCertificate",'GB-34324-34234-234234', contactId, undefined);
 
       expect(result).toEqual({})
     });
@@ -146,9 +146,9 @@ describe("The Transport Service", () => {
     it("Will retrieve transport details from mongo", async () => {
       mockGetTransportData.mockResolvedValue(null);
 
-      await TransportService.getTransportDetails("User 1", "storageNotes",undefined, contactId);
+      await TransportService.getTransportDetails("User 1", "storageNotes",undefined, contactId, undefined);
 
-      expect(mockGetTransportData).toHaveBeenCalledWith('User 1', 'storageNotes',undefined, contactId);
+      expect(mockGetTransportData).toHaveBeenCalledWith('User 1', 'storageNotes',undefined, contactId, undefined);
     });
 
     it("Will call upsert transport data with the correct params", async () => {
@@ -235,21 +235,21 @@ describe("The Transport Service", () => {
     });
 
     it('should call CC service for CC journey with a document number', async () => {
-      await TransportService.getTransportData('Bob', 'catchCertificate','GBR-23423423-234234-2344', contactId);
+      await TransportService.getTransportData('Bob', 'catchCertificate','GBR-23423423-234234-2344', contactId, false);
 
       expect(mockGetCCTransport).toHaveBeenCalledWith('Bob','GBR-23423423-234234-2344', contactId);
       expect(mockGetSDTransport).not.toHaveBeenCalled();
     });
 
     it('should call CC service for CC journey', async () => {
-      await TransportService.getTransportData('Bob', 'storageNotes',undefined, contactId);
+      await TransportService.getTransportData('Bob', 'storageNotes',undefined, contactId, false);
 
       expect(mockGetCCTransport).not.toHaveBeenCalled();
-      expect(mockGetSDTransport).toHaveBeenCalledWith('Bob',undefined, contactId);
+      expect(mockGetSDTransport).toHaveBeenCalledWith('Bob',undefined, contactId, false);
     });
 
     it('should throw an error for any other journey', async () => {
-      await expect(TransportService.getTransportData('Bob', 'test',undefined, contactId)).rejects.toThrow("Invalid arguments");
+      await expect(TransportService.getTransportData('Bob', 'test',undefined, contactId, false)).rejects.toThrow("Invalid arguments");
     });
 
   });

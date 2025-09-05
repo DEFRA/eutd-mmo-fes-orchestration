@@ -8,7 +8,7 @@ export default class TransportService {
   public static async addTransport(payload: any, documentNumber : string, contactId: string) {
     const userPrincipal = payload.user_id;
 
-    let transport = await TransportService.getTransportData(userPrincipal, payload.journey,documentNumber, contactId);
+    let transport = await TransportService.getTransportData(userPrincipal, payload.journey, documentNumber, contactId, payload.arrival);
 
     transport = {...transport, ...payload};
 
@@ -44,9 +44,9 @@ export default class TransportService {
     await CatchCertService.deleteTransportDetails(userPrincipal, documentNumber, contactId);
   }
 
-  public static async getTransportDetails(userPrincipal: string, journey: string, documentNumber: string, contactId: string): Promise<Transport> {
+  public static async getTransportDetails(userPrincipal: string, journey: string, documentNumber: string, contactId: string, arrival?: boolean): Promise<Transport> {
 
-    const data = await TransportService.getTransportData(userPrincipal, journey,documentNumber, contactId);
+    const data = await TransportService.getTransportData(userPrincipal, journey,documentNumber, contactId, arrival);
 if (data) {
       const sessionData = await getCurrentSessionData(userPrincipal, documentNumber, contactId);
 
@@ -64,10 +64,10 @@ if (data) {
     }
   }
 
-  public static async getTransportData(userPrincipal: string, journey: string, documentNumber: string, contactId: string): Promise<Transport> {
+  public static async getTransportData(userPrincipal: string, journey: string, documentNumber: string, contactId: string, arrival?:boolean): Promise<Transport> {
     switch(journey) {
       case "catchCertificate" : return await CatchCertService.getTransportDetails(userPrincipal,documentNumber, contactId);
-      case "storageNotes" : return await StorageNotesService.getTransportDetails(userPrincipal,documentNumber, contactId);
+      case "storageNotes" : return await StorageNotesService.getTransportDetails(userPrincipal,documentNumber, contactId, arrival);
       default: throw new Error("Invalid arguments");
     }
   }

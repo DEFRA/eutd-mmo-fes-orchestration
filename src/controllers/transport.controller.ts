@@ -93,8 +93,8 @@ export default class TransportController {
   public static async getTransportDetails(req: Hapi.Request, userPrincipal : string, documentNumber : string, contactId: string) {
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
-
-    const data = await Services.getTransportDetails(userPrincipal, req.params.journey, documentNumber, contactId) as any;
+    const arrival = req.query?.arrival ? req.query.arrival === 'true' : false;
+    const data = await Services.getTransportDetails(userPrincipal, req.params.journey, documentNumber, contactId, arrival) as any;
 
     return data;
   }

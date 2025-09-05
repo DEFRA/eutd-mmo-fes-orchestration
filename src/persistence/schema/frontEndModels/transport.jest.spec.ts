@@ -1,19 +1,8 @@
 import * as FrontEndTransport from "./transport"
 import * as BackEndModels from "../common"
-import { ExportLocation } from "./export-location";
 
 
 describe("When mapping from a front end transport to a backend transport", () => {
-
-  const exportLocation: ExportLocation = {
-    exportedFrom: "somewhere",
-    exportedTo: {
-      officialCountryName: "SPAIN",
-      isoCodeAlpha2: "A1",
-      isoCodeAlpha3: "A3",
-      isoNumericCode: "SP"
-    }
-  };
 
   it("if vehicle is truck then it should contain all relevant properties for truck", () => {
     const transport: FrontEndTransport.Transport = {
@@ -38,19 +27,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.truck,
       cmr: false,
-      exportedFrom: "somewhere",
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -79,7 +61,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       departurePlace: "here"
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -105,19 +87,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.plane,
-      exportedFrom: "somewhere",
       flightNumber: "Fl Number",
       containerNumber: "Cont Number",
       departurePlace: "here",
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -143,7 +118,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       departurePlace: "here"
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -168,18 +143,11 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.train,
-      exportedFrom: "somewhere",
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -203,7 +171,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       departurePlace: "here",
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -230,20 +198,13 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.containerVessel,
-      exportedFrom: "somewhere",
       vesselName: "Vessel Name",
       flagState : "UK",
       containerNumber : "Cont Number",
       departurePlace: "here",
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -271,7 +232,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       departurePlace: "here"
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -294,16 +255,9 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.fishingVessel,
-      exportedFrom: "somewhere",
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -323,7 +277,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.fishingVessel
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, undefined);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -344,7 +298,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       }
     };
 
-    expect(FrontEndTransport.toBackEndTransport(transport, exportLocation)).toStrictEqual(null);
+    expect(FrontEndTransport.toBackEndTransport(transport)).toStrictEqual(null);
 
   });
 
@@ -368,19 +322,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.train,
-      exportedFrom: "somewhere",
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
       exportDate : " some date ",
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
 
@@ -418,15 +365,9 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).not.toHaveProperty('exportDate');
   });
@@ -442,17 +383,10 @@ describe("When mapping from a front end transport to a backend transport", () =>
       }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(input, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(input);
 
     expect(result).toStrictEqual({
-      exportedFrom: exportLocation.exportedFrom,
       vehicle: input.vehicle,
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     });
   });
 
@@ -468,18 +402,11 @@ describe("When mapping from a front end transport to a backend transport", () =>
       }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(input, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(input);
 
     expect(result).toStrictEqual({
-      exportedFrom: exportLocation.exportedFrom,
       vehicle: input.vehicle,
       cmr: false,
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     });
   });
 
@@ -502,16 +429,9 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.truck,
       cmr: true,
-      exportedFrom: exportLocation.exportedFrom,
-      exportedTo : {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
     };
 
-    const result = FrontEndTransport.toBackEndTransport(transport, exportLocation);
+    const result = FrontEndTransport.toBackEndTransport(transport);
 
     expect(result).toStrictEqual(expectedResult);
   });
