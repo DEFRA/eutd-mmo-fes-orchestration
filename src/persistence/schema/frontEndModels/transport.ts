@@ -25,6 +25,10 @@ export interface Transport {
   exportDate?: string;
   exportedTo?: ICountry;
   arrival?: boolean;
+  departureCountry?: ICountry;
+  departurePort?: string;
+  departureDate?: string;
+  freightBillNumber?: string;
 }
 
 export const toBackEndTransport = (transport: Transport) : BackEndModels.Transport => {
@@ -78,8 +82,12 @@ const getPlaneBackEndTransport = (transport: Transport) => ({
 const getTrainBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
   railwayBillNumber: transport.railwayBillNumber,
+  freightBillNumber: transport.freightBillNumber,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate
+  exportDate: transport.exportDate,
+  departureCountry: transport.departureCountry,
+  departurePort: transport.departurePort,
+  departureDate: transport.departureDate
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
@@ -136,9 +144,13 @@ export const toFrontEndTransport = (
         frontEndTransport = {
           vehicle: model.vehicle,
           railwayBillNumber: model.railwayBillNumber,
+          freightBillNumber: model.freightBillNumber,
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
-          exportedTo: toExportedTo(model.exportedTo)
+          exportedTo: toExportedTo(model.exportedTo),
+          departureCountry: model.departureCountry,
+          departurePort: model.departurePort,
+          departureDate: model.departureDate
         };
         break;
       }
