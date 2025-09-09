@@ -60,6 +60,7 @@ export default class TransportController {
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
     if( payload.exportDate ) payload.exportDate = cleanDate(payload.exportDate);
+    if( payload.departureDate ) payload.departureDate = cleanDate(payload.departureDate);
 
     const data = await Services.addTransport(payload,documentNumber, contactId) as any;
 
