@@ -921,13 +921,13 @@ describe('get', () => {
         },
       },
     });
-  
+
     const result = await ProgressService.get(
       userPrincipal,
       documentNumber,
       contactId
     );
-  
+
     expect(result).toStrictEqual({
       progress: {
         reference: 'OPTIONAL',
@@ -1081,13 +1081,13 @@ describe('get', () => {
         },
       },
     });
-  
+
     const result = await ProgressService.get(
       userPrincipal,
       documentNumber,
       contactId
     );
-  
+
     expect(result).toStrictEqual({
       progress: {
         reference: 'OPTIONAL',

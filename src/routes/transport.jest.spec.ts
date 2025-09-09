@@ -498,7 +498,9 @@ describe("transport routes", () => {
               journey: "storageNotes",
               railwayBillNumber: "",
               freightBillNumber: "",
+              departureCountry: "",
               departurePort: "",
+              departureDate: "",
               vehicle:"train",
               arrival: true
             };
@@ -512,6 +514,41 @@ describe("transport routes", () => {
 
         it('returns 400 when we POST an arrival /v1/transport/train/details', async () => {
             const request = createRequestObj(`/v1/transport/train/details`, { arrival: true, railwayBillNumber: 'QWERTYUIOPASDFGHJKLZXCVBNMOPQ' }, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+        });
+
+        it('returns 200 when we POST an arrival /v1/transport/truck/details', async () => {
+            const request = createRequestObj(`/v1/transport/truck/details`, { arrival: true }, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(200);
+            expect(mockAddTransport).toHaveBeenCalled();
+            expect(response.result).toEqual({some: 'data'});
+        });
+
+        it('returns 200 when we POST an arrival with empty strings /v1/transport/truck/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              nationalityOfVehicle: "",
+              registrationNumber: "",
+              freightBillNumber: "",
+              departureCountry: "",
+              departurePort: "",
+              departureDate: "",
+              vehicle:"truck",
+              arrival: true
+            };
+
+            const request = createRequestObj(`/v1/transport/truck/details`, body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(200);
+            expect(mockAddTransport).toHaveBeenCalled();
+            expect(response.result).toEqual({some: 'data'});
+        });
+
+        it('returns 400 when we POST an arrival /v1/transport/truck/details', async () => {
+            const request = createRequestObj(`/v1/transport/truck/details`, { arrival: true, registrationNumber: '@£$%^&*@($)@' }, 'POST')
             const response = await server.inject(request);
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();

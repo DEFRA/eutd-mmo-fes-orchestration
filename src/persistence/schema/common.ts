@@ -20,13 +20,13 @@ export interface BasicTransportDetails {
   exportDate? : string,
   exportedTo? : ICountry,
   freightBillNumber?: string,
-}
-
-export interface Train extends BasicTransportDetails {
-  railwayBillNumber: string,
   departureCountry?: ICountry;
   departurePort?: string;
   departureDate?: string;
+}
+
+export interface Train extends BasicTransportDetails {
+  railwayBillNumber: string
 }
 
 export interface Plane extends BasicTransportDetails {

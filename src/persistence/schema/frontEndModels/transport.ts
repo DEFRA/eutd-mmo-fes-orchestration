@@ -67,8 +67,12 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   cmr: hasCmr ? cmr : undefined,
   nationalityOfVehicle: cmr ? undefined : transport.nationalityOfVehicle,
   registrationNumber: cmr ? undefined : transport.registrationNumber,
+  freightBillNumber: transport.freightBillNumber,
   departurePlace: cmr ? undefined : transport.departurePlace,
-  exportDate: transport.exportDate
+  exportDate: transport.exportDate,
+  departureCountry: transport.departureCountry,
+  departurePort: transport.departurePort,
+  departureDate: transport.departureDate
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
@@ -120,9 +124,13 @@ export const toFrontEndTransport = (
           cmr: hasCmr ? (model.cmr === true).toString() : undefined,
           nationalityOfVehicle: model.nationalityOfVehicle,
           registrationNumber: model.registrationNumber,
+          freightBillNumber: model.freightBillNumber,
           departurePlace: model.departurePlace,
           exportDate: transport.exportDate,
-          exportedTo: toExportedTo(model.exportedTo)
+          exportedTo: toExportedTo(model.exportedTo),
+          departureCountry: model.departureCountry,
+          departurePort: model.departurePort,
+          departureDate: model.departureDate
         };
 
         break;

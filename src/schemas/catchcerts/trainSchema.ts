@@ -18,19 +18,27 @@ const trainSchema = Joi.object({
     otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
   }),
   journey: Joi.string(),
-  exportDate: Joi.when('arrival', {
-    is: true,
-    then: Joi.date().allow('').optional(),
-    otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY','D/M/YYYY']).max(Joi.ref('exportDateTo')).required()
+  exportDate: Joi.when('journey', {
+    is: 'storageNotes',
+    then: Joi.when('arrival', {
+      is: true,
+      then: Joi.date().allow('').optional(),
+      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY','D/M/YYYY']).max(Joi.ref('exportDateTo')).required()
+    }),
+    otherwise: Joi.any()
   }),
-  exportDateTo: Joi.when('arrival', {
-    is: true,
-    then: Joi.date().allow('').optional(),
-    otherwise: Joi.date().required()
+  exportDateTo: Joi.when('journey', {
+    is: 'storageNotes',
+    then: Joi.when('arrival', {
+      is: true,
+      then: Joi.date().allow('').optional(),
+      otherwise: Joi.date().required()
+    }),
+    otherwise: Joi.any()
   }),
   departureCountry: Joi.any().allow('').optional(),
   departurePort: Joi.string().trim().allow('').optional(),
-  depatureDate: Joi.date().allow('').optional()
+  departureDate: Joi.date().allow('').optional()
 });
 
 export default trainSchema;
