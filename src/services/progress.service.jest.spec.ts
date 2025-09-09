@@ -2025,7 +2025,7 @@ describe('getTransportDetails', () => {
     };
 
     expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
-      ProgressStatus.CANNOT_START
+      ProgressStatus.INCOMPLETE
     );
   });
 });
@@ -3828,11 +3828,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportType: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3880,11 +3880,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportType: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3931,11 +3931,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportType: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3983,11 +3983,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportType: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4033,11 +4033,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4084,11 +4084,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.COMPLETED,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4131,11 +4131,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4174,11 +4174,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4229,11 +4229,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4263,11 +4263,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4306,11 +4306,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.COMPLETED,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4348,11 +4348,11 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.CANNOT_START,
-        transportType: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4456,10 +4456,91 @@ describe('getStorageDocumentProgress', () => {
         storageFacilities: ProgressStatus.COMPLETED,
         exportDestination: ProgressStatus.COMPLETED,
         transportDetails: ProgressStatus.COMPLETED,
-        transportType: ProgressStatus.COMPLETED,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
       },
-      completedSections: 6,
-      requiredSections: 6,
+      completedSections: 5,
+      requiredSections: 5,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`
+    );
+    expect(mockStorageDocumentDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return a completed arrival transportation section', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        arrivalTransportation: {
+          vehicle: 'train',
+          railwayBillNumber: '0123456789'
+        },
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        catches: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.COMPLETED,
+      },
+      completedSections: 1,
+      requiredSections: 5,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`
+    );
+    expect(mockStorageDocumentDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return a uncompleted arrival transportation section as optional', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        arrivalTransportation: {
+          railwayBillNumber: '0123456789'
+        },
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        catches: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+      },
+      completedSections: 0,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);

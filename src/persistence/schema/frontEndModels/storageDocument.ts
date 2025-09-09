@@ -38,7 +38,7 @@ export interface StorageDocumentProgress extends BaseProgress {
   catches: ProgressStatus;
   storageFacilities: ProgressStatus;
   exportDestination: ProgressStatus;
-  transportType: ProgressStatus;
+  arrivalTransportationDetails?: ProgressStatus;
   transportDetails: ProgressStatus;
 }
 

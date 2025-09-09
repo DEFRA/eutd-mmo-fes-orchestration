@@ -4,6 +4,7 @@ const Joi = BaseJoi.extend(Extension);
 
 const schema = Joi.object({
   vehicle: Joi.string().optional(),
+  arrival: Joi.boolean().optional(),
   exportedTo: Joi.any().optional(),
   flightNumber: Joi.string().trim().alphanum().max(15).required(),
   departurePlace: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
