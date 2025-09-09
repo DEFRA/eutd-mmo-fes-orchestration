@@ -43,7 +43,7 @@ const truckSchema = Joi.object({
     otherwise: Joi.any()
   }),
   departureCountry: Joi.any().allow('').optional(),
-  departurePort: Joi.string().trim().allow('').optional(),
+  departurePort: Joi.string().allow('').trim().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/).optional(),
   departureDate: Joi.date().allow('').optional()
 })
 
