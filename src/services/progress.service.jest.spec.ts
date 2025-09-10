@@ -4482,12 +4482,7 @@ describe('getStorageDocumentProgress', () => {
           freightBillNumber: 'a',
           departurePort: 'Port',
           departureDate: '09/01/2020',
-          departureCountry: {
-            officialCountryName: 'Equatorial Guinea',
-            isoCodeAlpha2: 'GQ',
-            isoCodeAlpha3: 'GNQ',
-            isoNumericCode: '226'
-          }
+          departureCountry: 'Equatorial Guinea'
         },
       },
     });
@@ -4533,12 +4528,7 @@ describe('getStorageDocumentProgress', () => {
           departurePort: 'Port',
           departureDate: '09/01/2020',
           nationalityOfVehicle: 'UK',
-          departureCountry: {
-            officialCountryName: 'Equatorial Guinea',
-            isoCodeAlpha2: 'GQ',
-            isoCodeAlpha3: 'GNQ',
-            isoNumericCode: '226'
-          }
+          departureCountry: 'Equatorial Guinea'
         },
       },
     });
@@ -4620,9 +4610,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         arrivalTransportation: {
           vehicle: 'truck',
-          nationalityOfVehicle: {
-            officialCountryName: '',
-          }
+          nationalityOfVehicle: ''
         },
       },
     });

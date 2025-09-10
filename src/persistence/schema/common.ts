@@ -20,7 +20,7 @@ export interface BasicTransportDetails {
   exportDate? : string,
   exportedTo? : ICountry,
   freightBillNumber?: string,
-  departureCountry?: ICountry;
+  departureCountry?: string;
   departurePort?: string;
   departureDate?: string;
 }
@@ -72,9 +72,9 @@ export const TransportSchema = new Schema({
   containerNumber:      { type: String,  required: false },
   exportDate:           { type: String,  required: false },
   freightBillNumber:    { type: String,  required: false },
-  departureCountry:     { type: Country, required: false },
+  departureCountry:     { type: String, required: false },
   departurePort:        { type: String,  required: false },
-  departureDate:         { type: String,  required: false }
+  departureDate:        { type: String,  required: false }
 }, { _id : false });
 
 export interface ExporterDetails {

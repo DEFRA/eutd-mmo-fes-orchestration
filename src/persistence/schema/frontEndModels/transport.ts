@@ -25,7 +25,7 @@ export interface Transport {
   exportDate?: string;
   exportedTo?: ICountry;
   arrival?: boolean;
-  departureCountry?: ICountry;
+  departureCountry?: string;
   departurePort?: string;
   departureDate?: string;
   freightBillNumber?: string;
