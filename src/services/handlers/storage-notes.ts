@@ -1,5 +1,7 @@
-  import {
+import {
   cleanDate,
+  isApprovalNumberValid,
+  isInvalidLength,
   isPlaceProductEntersUkValid,
   isPositiveNumberWithTwoDecimals,
   isTransportUnloadedFromFormatValid,
@@ -13,7 +15,7 @@
 import ApplicationConfig from '../../applicationConfig';
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
-import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_TRANSPORT_UNLOADED_FROM_LENGTH, MAX_PORT_NAME_LENGTH} from "../constants";
+import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_TRANSPORT_UNLOADED_FROM_LENGTH, MAX_PORT_NAME_LENGTH } from "../constants";
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
 import { BusinessError, SpeciesSuggestionError } from "../../validators/validationErrors";
 
@@ -43,10 +45,10 @@ export default {
     return await validateEntry(product, index, errors, documentNumber, userPrincipal, contactId);
   },
 
-  "/create-storage-document/:documentNumber/add-UK-entry-document/:index": async ({ data, _nextUrl, _currentUrl, errors, params,  documentNumber, userPrincipal, contactId }) => {
+  "/create-storage-document/:documentNumber/add-UK-entry-document/:index": async ({ data, _nextUrl, _currentUrl, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = +params.index;
     const product = data.catches[index];
-    return await validateEntry(product, index, errors,  documentNumber, userPrincipal, contactId);
+    return await validateEntry(product, index, errors, documentNumber, userPrincipal, contactId);
   },
 
   "/create-storage-document/:documentNumber/you-have-added-a-product": async ({ data, _nextUrl, currentUrl, errors, documentNumber, userPrincipal, contactId }) => {
@@ -77,6 +79,18 @@ export default {
     const index = +params.index;
     const storageFacility = data.storageFacilities[index];
     return validateStorageFacility(storageFacility, index, errors)
+  },
+
+  "/create-storage-document/:documentNumber/add-storage-facility-approval": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
+    const index = 0;
+    const storageFacility = data.storageFacilities[index];
+    return validateStorageApproval(storageFacility, index, errors)
+  },
+
+  "/create-storage-document/:documentNumber/add-storage-facility-approval/:index": ({ data, _nextUrl, _currentUrl, errors, params }) => {
+    const index = +params.index;
+    const storageFacility = data.storageFacilities[index];
+    return validateStorageApproval(storageFacility, index, errors)
   },
 
   "/create-storage-document/:documentNumber/add-document-type/:productIndex": async ({ data, errors, params }) => {
@@ -132,10 +146,22 @@ function validateStorageFacility(storageFacility: any, index: number, errors, is
   return { errors };
 }
 
+function validateStorageApproval(storageFacility: any, index: number, errors) {
+  if (storageFacility.facilityApprovalNumber && isInvalidLength(storageFacility.facilityApprovalNumber, 0, 50)) {
+    errors[`storageFacilities-${index}-facilityApproval`] = 'sdAddStorageFacilityApprovalCharacterError';
+  }
+
+  if (storageFacility.facilityApprovalNumber && !isApprovalNumberValid(storageFacility.facilityApprovalNumber)) {
+    errors[`storageFacilities-${index}-facilityApproval`] = 'sdAddStorageFacilityApprovalInvalidError';
+  }
+
+  return { errors }
+}
+
 function getFacilityAddressOneError(isStorageFacilitiesPage: boolean) {
   return isStorageFacilitiesPage ? 'sdAddStorageFacilityDetailsErrorEditTheStorageFacility'
-  : 'sdAddStorageFacilityDetailsErrorEnterTheAddress';
-}  
+    : 'sdAddStorageFacilityDetailsErrorEnterTheAddress';
+}
 
 export async function isSpeciesNameValid(productName, scientificName) {
   const refUrl = ApplicationConfig.getReferenceServiceUrl();
@@ -190,7 +216,7 @@ export async function validateProduct(product: any, index: number, errors, isNon
     product.scientificName = undefined;
   }
 
-  if (!product.commodityCode || validateWhitespace(product.commodityCode) ){
+  if (!product.commodityCode || validateWhitespace(product.commodityCode)) {
     errors[`catches-${index}-commodityCode`] = 'sdAddProductToConsignmentCommodityCodeErrorNull';
   }
 
@@ -210,7 +236,7 @@ export async function validateProduct(product: any, index: number, errors, isNon
   return { errors };
 }
 
-export async function validateEntry(product: any, index: number, errors, documentNumber: string="", userPrincipal: string="", contactId: string="") {
+export async function validateEntry(product: any, index: number, errors, documentNumber: string = "", userPrincipal: string = "", contactId: string = "") {
   checkDateOfUnloadingErrors(product, errors, index);
 
   checkPlaceOfUnloadingErrors(product, errors, index);

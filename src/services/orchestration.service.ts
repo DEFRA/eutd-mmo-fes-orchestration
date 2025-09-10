@@ -813,6 +813,11 @@ export const isPsPlantNameValid = (str: string) => {
   return regex.test(str);
 };
 
+export const isApprovalNumberValid = (str: string) => {
+  const regex = /^[ A-Za-z0-9-./]*$/;
+  return regex.test(str);
+}
+
 export function validatePersonResponsibleForConsignmentFormat(str: string) {
   const regex = /^[ A-Za-z-'’]*$/;
   return regex.test(str);

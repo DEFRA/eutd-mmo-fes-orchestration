@@ -847,10 +847,12 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-suggest": {
-      translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
-      possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
-    } };
+    const expectedErrors = {
+      "catches-species-suggest": {
+        translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
+        possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
+      }
+    };
     expect(errors).toEqual(expectedErrors);
   });
 });
@@ -992,10 +994,12 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-suggest": {
-      translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
-      possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
-    } };
+    const expectedErrors = {
+      "catches-species-suggest": {
+        translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
+        possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
+      }
+    };
     expect(errors).toEqual(expectedErrors);
   });
 });
@@ -2046,6 +2050,157 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details/
   });
 });
 
+describe("/create-storage-document/:documentNumber/add-storage-facility-approval", () => {
+  it("with storage approval number validates as error", async () => {
+    const data = {
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "UK/ABC/001UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00"
+      }],
+      addAnotherProduct: "notset",
+    };
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-approval";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      _params: {},
+    });
+
+    const expectedErrors = {
+      "storageFacilities-0-facilityApproval": "sdAddStorageFacilityApprovalCharacterError",
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it("with storage approval number invalid characters validates as error", async () => {
+    const data = {
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "@£$%^&*(@£"
+      }],
+      addAnotherProduct: "notset",
+    };
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-approval";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      _params: {},
+    });
+
+    const expectedErrors = {
+      "storageFacilities-0-facilityApproval": "sdAddStorageFacilityApprovalInvalidError",
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+});
+
+describe("/create-storage-document/:documentNumber/add-storage-facility-approval/:index", () => {
+
+  it("with storage approval number validates as error", async () => {
+    const data = {
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "UK/ABC/001UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00"
+      }],
+      addAnotherProduct: "notset",
+    };
+
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-approval/:index";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      params: { index: 0 },
+    });
+
+    const expectedErrors = {
+      "storageFacilities-0-facilityApproval": "sdAddStorageFacilityApprovalCharacterError",
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it("with storage approval number invalid characters validates as error", async () => {
+    const data = {
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "@£$@%@£"
+      }],
+      addAnotherProduct: "notset",
+    };
+
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-approval/:index";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      params: { index: 0 },
+    });
+
+    const expectedErrors = {
+      "storageFacilities-0-facilityApproval": "sdAddStorageFacilityApprovalInvalidError",
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+});
+
 describe("/create-storage-document/:documentNumber/add-document-type", () => {
   const data = {
     catches: [
@@ -2204,8 +2359,8 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
-        "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-        "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
     expect(errors).toEqual(expectedErrors);

@@ -48,6 +48,8 @@ export interface StorageFacility {
   facilityStreetName?      : string,
   facilityCounty?          : string,
   facilityCountry?         : string,
+  facilityApprovalNumber?  : string,
+  facilityStorage?         : string,
   _facilityUpdated?        : boolean
 }
 
@@ -94,7 +96,6 @@ const CatchSchema = new Schema({
 }, { _id : true } );
 
 const StorageFacilitySchema = new Schema({
-  facilityApprovalNumber    : { type: String },
   facilityName              : { type: String },
   facilityAddressOne        : { type: String },
   facilityTownCity          : { type: String },
@@ -104,7 +105,9 @@ const StorageFacilitySchema = new Schema({
   facilityBuildingName      : { type: String },
   facilityStreetName        : { type: String },
   facilityCounty            : { type: String },
-  facilityCountry           : { type: String }
+  facilityCountry           : { type: String },
+  facilityApprovalNumber    : { type: String, required: false },
+  facilityStorage           : { type: String, required: false }
 }, { _id : false } );
 
 const ExportDataSchema = new Schema({
