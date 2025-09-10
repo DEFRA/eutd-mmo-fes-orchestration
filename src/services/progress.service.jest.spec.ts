@@ -4478,7 +4478,16 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         arrivalTransportation: {
           vehicle: 'train',
-          railwayBillNumber: '0123456789'
+          railwayBillNumber: '0123456789',
+          freightBillNumber: 'a',
+          departurePort: 'Port',
+          departureDate: '09/01/2020',
+          departureCountry: {
+            officialCountryName: 'Equatorial Guinea',
+            isoCodeAlpha2: 'GQ',
+            isoCodeAlpha3: 'GNQ',
+            isoNumericCode: '226'
+          }
         },
       },
     });
@@ -4500,6 +4509,141 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.COMPLETED,
       },
       completedSections: 1,
+      requiredSections: 5,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`
+    );
+    expect(mockStorageDocumentDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return a completed arrival transportation section - truck', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        arrivalTransportation: {
+          vehicle: 'truck',
+          registrationNumber: '0123456789',
+          freightBillNumber: 'a',
+          departurePort: 'Port',
+          departureDate: '09/01/2020',
+          nationalityOfVehicle: 'UK',
+          departureCountry: {
+            officialCountryName: 'Equatorial Guinea',
+            isoCodeAlpha2: 'GQ',
+            isoCodeAlpha3: 'GNQ',
+            isoNumericCode: '226'
+          }
+        },
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        catches: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.COMPLETED,
+      },
+      completedSections: 1,
+      requiredSections: 5,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`
+    );
+    expect(mockStorageDocumentDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return a optional arrival transportation section', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        arrivalTransportation: {
+          vehicle: 'train',
+          railwayBillNumber: '0123456789'
+        },
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        catches: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+      },
+      completedSections: 0,
+      requiredSections: 5,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`
+    );
+    expect(mockStorageDocumentDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return a optional arrival transportation section - truck', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        arrivalTransportation: {
+          vehicle: 'truck',
+          nationalityOfVehicle: {
+            officialCountryName: '',
+          }
+        },
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        catches: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+      },
+      completedSections: 0,
       requiredSections: 5,
     };
 

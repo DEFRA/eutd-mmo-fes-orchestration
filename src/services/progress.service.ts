@@ -197,6 +197,26 @@ export default class ProgressService {
   public static readonly getTransportationStatus = (journey: string): ProgressStatus =>
     journey === "storageNotes" ? ProgressStatus.INCOMPLETE : ProgressStatus.CANNOT_START;
 
+  public static readonly getArrivalTransportCompleteStatus = (transportation: Transport, arrival?: boolean): ProgressStatus => {
+    if (arrival) {
+      let expected: string[];
+
+      if (transportation.vehicle === truck) {
+        expected = [
+          'vehicle', 'nationalityOfVehicle', 'registrationNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'
+        ];
+      } else if (transportation.vehicle === train) {
+        expected = [
+          'vehicle', 'railwayBillNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'
+        ];
+      }
+
+      return expected.every(prop => ProgressService.isEmptyAndTrimSpaces(transportation[prop])) ? ProgressStatus.COMPLETED : ProgressStatus.OPTIONAL;
+    }
+
+    return ProgressStatus.COMPLETED;
+  }
+
   public static readonly getTransportDetailsStatus = (transportation: Transport, journey?: string, arrival?: boolean) => {
     const isTruck = transportation.vehicle === 'truck';
     const hasCmr = isTruck && transportation.cmr === 'true';
@@ -233,7 +253,7 @@ export default class ProgressService {
       return this.getArrivalTransportStatus(arrival);
     }
 
-    return ProgressStatus.COMPLETED;
+    return this.getArrivalTransportCompleteStatus(transportation, arrival);
   }
 
   public static readonly getTransportDetails = (transportation: Transport, journey?: string, arrival?: boolean): ProgressStatus => {
@@ -338,8 +358,12 @@ export default class ProgressService {
       ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
-  public static isEmptyAndTrimSpaces(propertyValue: string): boolean {
-    return !isEmpty(propertyValue) && propertyValue.trim() !== '';
+  public static isEmptyAndTrimSpaces(propertyValue: any): boolean {
+    if (typeof propertyValue === 'string') {
+      return !isEmpty(propertyValue) && propertyValue.trim() !== '';
+    }
+
+    return !isEmpty(propertyValue) ? Object.keys(propertyValue).every(key => typeof propertyValue[key] === 'string' && propertyValue[key].trim() !== '') : false
   }
 
   public static readonly getSDCatchStatus = async (catches: StorageDocument.Catch[]): Promise<ProgressStatus> => {
