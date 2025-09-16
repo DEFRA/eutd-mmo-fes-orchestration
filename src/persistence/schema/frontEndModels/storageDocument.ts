@@ -52,7 +52,8 @@ export interface StorageFacility {
   facilityBuildingName?: string,
   facilityStreetName?: string,
   facilityCounty?: string,
-  facilityCountry?: string
+  facilityCountry?: string,
+  facilityArrivalDate?: string,
 }
 
 export interface StorageDocumentDraft {

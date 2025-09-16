@@ -99,6 +99,12 @@ export default {
   }
 };
 
+function checkFacilityArrivalDateError(storageFacility: any, index: number, errors){
+  if(!storageFacility.facilityArrivalDate || !validateDate(storageFacility.facilityArrivalDate)){
+    errors[`storageFacilities-${index}-facilityArrivalDate`] = `ccCommonDateLandedRealError`;
+  }
+}
+
 function validateStorageFacility(storageFacility: any, index: number, errors, isStorageFacilitiesPage: boolean = false) {
   if (!storageFacility.facilityName || validateWhitespace(storageFacility.facilityName)) {
     errors[`storageFacilities-${index}-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
@@ -118,6 +124,8 @@ function validateStorageFacility(storageFacility: any, index: number, errors, is
     }
   }
 
+  checkFacilityArrivalDateError(storageFacility, index, errors);
+  
   return { errors };
 }
 

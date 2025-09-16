@@ -1119,6 +1119,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
+      "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1159,11 +1160,51 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details/
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
+      "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
     expect(errors).toEqual(expectedErrors);
   });
+
+   it("with storage approval number invalid date validates as error", async () => {
+    const data = {
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "UK/ABC/001",
+        facilityArrivalDate: "123/03/2025"
+      }],
+      addAnotherProduct: "notset",
+    };
+
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-details/:index";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      params: { index: 0 },
+    });
+
+    const expectedErrors = {
+      "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
 });
 
 describe("/create-storage-document/:documentNumber/add-storage-facility-approval", () => {
@@ -1363,8 +1404,9 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
-      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-      "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+        "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
+        "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+        "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1385,8 +1427,9 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
-      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-      "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+        "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+        "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
+        "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1408,6 +1451,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1431,6 +1475,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+       "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1460,7 +1505,8 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       addAnotherStorageFacility:
-        "Select yes if you need to add another storage facility"
+        "Select yes if you need to add another storage facility",
+      "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1634,6 +1680,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       'storageFacilities-0-facilityAddressOne':
         "sdAddStorageFacilityDetailsErrorEnterTheBuilding",
+      "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
       "storageFacilities-0-facilityPostcode": "sdAddStorageFacilityDetailsErrorEnterThePostcode",
     };
 
@@ -1673,6 +1720,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       'storageFacilities-0-facilityAddressOne':
         "sdAddStorageFacilityDetailsErrorEnterTheBuilding",
+      "storageFacilities-0-facilityArrivalDate": "ccCommonDateLandedRealError",
       "storageFacilities-0-facilityTownCity": "sdAddStorageFacilityDetailsErrorEnterTheTown",
     };
 

@@ -50,7 +50,8 @@ export interface StorageFacility {
   facilityCountry?         : string,
   facilityApprovalNumber?  : string,
   facilityStorage?         : string,
-  _facilityUpdated?        : boolean
+  _facilityUpdated?        : boolean,
+  facilityArrivalDate?             : string,
 }
 
 export interface ExportData {
@@ -107,7 +108,8 @@ const StorageFacilitySchema = new Schema({
   facilityCounty            : { type: String },
   facilityCountry           : { type: String },
   facilityApprovalNumber    : { type: String, required: false },
-  facilityStorage           : { type: String, required: false }
+  facilityStorage           : { type: String, required: false },
+  facilityArrivalDate               : { type: String, required: false}
 }, { _id : false } );
 
 const ExportDataSchema = new Schema({
