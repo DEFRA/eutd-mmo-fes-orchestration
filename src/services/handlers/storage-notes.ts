@@ -101,7 +101,7 @@ export default {
 
 function checkFacilityArrivalDateError(storageFacility: any, index: number, errors){
   if(!storageFacility.facilityArrivalDate || !validateDate(storageFacility.facilityArrivalDate)){
-    errors[`storageFacilities-${index}-facilityArrivalDate`] = `ccCommonDateLandedRealError`;
+    errors[`storageFacilities-${index}-facilityArrivalDate`] = `sdArrivalDateValidationError`;
   }
 }
 
@@ -125,7 +125,7 @@ function validateStorageFacility(storageFacility: any, index: number, errors, is
   }
 
   checkFacilityArrivalDateError(storageFacility, index, errors);
-  
+
   return { errors };
 }
 
