@@ -62,7 +62,7 @@ export default class TransportController {
     if( payload.exportDate ) payload.exportDate = cleanDate(payload.exportDate);
     if( payload.departureDate ) payload.departureDate = cleanDate(payload.departureDate);
 
-    const data = await Services.addTransport(payload,documentNumber, contactId) as any;
+    const data = await Services.addTransport(payload, documentNumber, contactId) as any;
 
     if (acceptsHtml(req.headers)) {
       if (savingAsDraft) {

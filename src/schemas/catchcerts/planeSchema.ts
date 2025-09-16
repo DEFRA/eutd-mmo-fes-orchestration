@@ -7,8 +7,10 @@ const schema = Joi.object({
   arrival: Joi.boolean().optional(),
   exportedTo: Joi.any().optional(),
   flightNumber: Joi.string().trim().alphanum().max(15).required(),
+  airwayBillNumber: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9-./]+$/),
   departurePlace: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
   containerNumber: Joi.string().trim().alphanum().max(50).required(),
+  freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {
     is: 'storageNotes',

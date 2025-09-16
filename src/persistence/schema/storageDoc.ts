@@ -116,7 +116,7 @@ const ExportDataSchema = new Schema({
   exporterDetails           : { type: ExporterDetailsSchema },
   transportation            : { type: TransportSchema },
   arrivalTransportation     : { type: TransportSchema, required: false },
-  exportedTo                : { type: Country }
+  exportedTo                : { type: Country, required: false }
 }, { _id : false } );
 
 const StorageDocumentSchema = new Schema({

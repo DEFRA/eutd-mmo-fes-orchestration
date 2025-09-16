@@ -1258,7 +1258,13 @@ describe('catchCert - db related', () => {
         nationalityOfVehicle: 'UK',
         cmr: false,
         registrationNumber: 'REG Number',
-        vehicle: 'truck'
+        vehicle: 'truck',
+        exportedTo: {
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP",
+          officialCountryName: "SPAIN",
+        }
       };
 
       expect(result?.exportData.transportation).toStrictEqual(expected);

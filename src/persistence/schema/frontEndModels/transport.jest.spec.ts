@@ -15,7 +15,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -30,6 +30,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -49,7 +55,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : undefined
+      exportedTo: undefined
     };
 
 
@@ -77,7 +83,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -90,6 +96,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
       flightNumber: "Fl Number",
       containerNumber: "Cont Number",
       departurePlace: "here",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -108,7 +120,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : undefined
+      exportedTo: undefined
     };
 
     const expectedResult: BackEndModels.Transport = {
@@ -133,7 +145,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -145,6 +157,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.train,
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -162,7 +180,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : undefined
+      exportedTo: undefined
     };
 
     const expectedResult: BackEndModels.Transport = {
@@ -188,7 +206,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -199,9 +217,15 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
-      flagState : "UK",
-      containerNumber : "Cont Number",
+      flagState: "UK",
+      containerNumber: "Cont Number",
       departurePlace: "here",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -221,14 +245,14 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : undefined
+      exportedTo: undefined
     };
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
-      flagState : "UK",
-      containerNumber : "Cont Number",
+      flagState: "UK",
+      containerNumber: "Cont Number",
       departurePlace: "here"
     };
 
@@ -245,7 +269,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -255,6 +279,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.fishingVessel,
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -270,7 +300,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : undefined
+      exportedTo: undefined
     };
 
     const expectedResult: BackEndModels.Transport = {
@@ -290,7 +320,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -311,8 +341,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportDate : " some date ",
-      exportedTo : {
+      exportDate: " some date ",
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -324,7 +354,13 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.train,
       railwayBillNumber: "Rwy Number",
       departurePlace: "here",
-      exportDate : " some date ",
+      exportDate: " some date ",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -342,8 +378,8 @@ describe("When mapping from a front end transport to a backend transport", () =>
       journey: "Journey",
       currentUri: "some/uri",
       nextUri: "next/uri",
-      exportDate : " some date ",
-      exportedTo : {
+      exportDate: " some date ",
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -375,7 +411,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
   it("if CMR is not defined it should not be returned", () => {
     const input: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -387,6 +423,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     expect(result).toStrictEqual({
       vehicle: input.vehicle,
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     });
   });
 
@@ -394,7 +436,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const input: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
       cmr: 'yes',
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -407,6 +449,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
     expect(result).toStrictEqual({
       vehicle: input.vehicle,
       cmr: false,
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     });
   });
 
@@ -417,7 +465,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -429,6 +477,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.truck,
       cmr: true,
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     };
 
     const result = FrontEndTransport.toBackEndTransport(transport);
@@ -450,7 +504,8 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: '',
         isoCodeAlpha3: '',
         isoNumericCode: '',
-      }});
+      }
+    });
   });
 
   it("if vehicle is truck and cmr is true then it should contain all the relevant properties for a truck", () => {
@@ -458,7 +513,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.truck,
       exportedFrom: "United Kingdom",
       cmr: true,
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -469,7 +524,7 @@ describe("When mapping from a backend transport to front end transport", () => {
     const expectedResult: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
       cmr: "true",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -489,7 +544,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       departurePlace: "London",
       exportedFrom: "United Kingdom",
       cmr: false,
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -503,7 +558,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       nationalityOfVehicle: "British",
       registrationNumber: "WE78ERF",
       departurePlace: "London",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -522,7 +577,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       containerNumber: "123456",
       departurePlace: "London",
       exportedFrom: "United Kingdom",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -535,7 +590,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       flightNumber: "123456",
       containerNumber: "123456",
       departurePlace: "London",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -553,7 +608,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       railwayBillNumber: "12345",
       departurePlace: "London",
       exportedFrom: "United Kingdom",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -565,7 +620,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.train,
       railwayBillNumber: "12345",
       departurePlace: "London",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -585,7 +640,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       exportedFrom: "United Kingdom",
       vesselName: "Vessel Name",
       flagState: "UK",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -599,7 +654,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       flagState: "UK",
       containerNumber: "12345",
       departurePlace: "London",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -615,7 +670,7 @@ describe("When mapping from a backend transport to front end transport", () => {
     const transport: BackEndModels.Transport = {
       vehicle: FrontEndTransport.fishingVessel,
       exportedFrom: "somewhere",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -625,7 +680,7 @@ describe("When mapping from a backend transport to front end transport", () => {
 
     const expectedResult: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.fishingVessel,
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -655,7 +710,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vesselName: "Vessel Name",
       flagState: "UK",
       exportDate: "some date",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -670,7 +725,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       containerNumber: "12345",
       departurePlace: "London",
       exportDate: "some date",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -711,55 +766,55 @@ describe('checkTransportDataFrontEnd', () => {
     expect(FrontEndTransport.checkTransportDataFrontEnd({ vehicle: '' })).toBeNull()
   });
 
-  const shouldReturnFullObject = (fullObject : FrontEndTransport.Transport) =>
+  const shouldReturnFullObject = (fullObject: FrontEndTransport.Transport) =>
     it('should return full object when all data is valid', () => {
       expect(FrontEndTransport.checkTransportDataFrontEnd(fullObject)).toStrictEqual(fullObject)
-  });
+    });
 
-  const shouldReturnBaseValidObject = (baseValidObject : FrontEndTransport.Transport, incompleteObject : FrontEndTransport.Transport) =>
+  const shouldReturnBaseValidObject = (baseValidObject: FrontEndTransport.Transport, incompleteObject: FrontEndTransport.Transport) =>
     it('should return base valid object if data is incomplete', () => {
       expect(FrontEndTransport.checkTransportDataFrontEnd(incompleteObject)).toStrictEqual(baseValidObject)
     });
 
   describe('when vehicle type is Truck', () => {
 
-    const fullValidObjectNoCmr : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.truck,
+    const fullValidObjectNoCmr: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.truck,
       cmr: "false",
       nationalityOfVehicle: "British",
       registrationNumber: "WE78ERF",
       departurePlace: "London",
       exportDate: "some date",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
     };
-    const fullValidObjectWithCmr : FrontEndTransport.Transport= {
-      vehicle : FrontEndTransport.truck,
+    const fullValidObjectWithCmr: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.truck,
       cmr: "true",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
     };
-    const baseValidObject : FrontEndTransport.Transport= {
-      vehicle : FrontEndTransport.truck,
-      exportedTo : {
+    const baseValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.truck,
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
     };
-    const baseValidCmrObject : FrontEndTransport.Transport= {
-      vehicle : FrontEndTransport.truck,
+    const baseValidCmrObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.truck,
       cmr: "false",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -770,8 +825,8 @@ describe('checkTransportDataFrontEnd', () => {
     shouldReturnFullObject(fullValidObjectNoCmr);
     shouldReturnFullObject(fullValidObjectWithCmr);
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.truck,
-      exportedTo : {
+      vehicle: FrontEndTransport.truck,
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -779,12 +834,12 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidCmrObject, {
-      vehicle : FrontEndTransport.truck,
+      vehicle: FrontEndTransport.truck,
       cmr: "false",
       registrationNumber: "WE78ERF",
       departurePlace: "London",
       exportDate: "some date",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -792,12 +847,12 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidCmrObject, {
-      vehicle : FrontEndTransport.truck,
+      vehicle: FrontEndTransport.truck,
       cmr: "false",
       nationalityOfVehicle: "British",
       departurePlace: "London",
       exportDate: "some date",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -805,12 +860,12 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidCmrObject, {
-      vehicle : FrontEndTransport.truck,
+      vehicle: FrontEndTransport.truck,
       cmr: "false",
       nationalityOfVehicle: "British",
       registrationNumber: "WE78ERF",
       exportDate: "some date",
-      exportedTo : {
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -821,22 +876,22 @@ describe('checkTransportDataFrontEnd', () => {
 
   describe('when vehicle type is plane', () => {
 
-    const fullValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.plane,
-      flightNumber : 'flight number',
-      containerNumber : 'cont. number',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+    const fullValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: 'flight number',
+      containerNumber: 'cont. number',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
     };
-    const baseValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.plane,
-      exportedTo : {
+    const baseValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.plane,
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -846,11 +901,11 @@ describe('checkTransportDataFrontEnd', () => {
 
     shouldReturnFullObject(fullValidObject);
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.plane,
-      containerNumber : 'cont. number',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.plane,
+      containerNumber: 'cont. number',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -858,11 +913,11 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.plane,
-      flightNumber : 'flight number',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: 'flight number',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -870,11 +925,11 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.plane,
-      flightNumber : 'flight number',
-      containerNumber : 'cont. number',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: 'flight number',
+      containerNumber: 'cont. number',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -885,21 +940,21 @@ describe('checkTransportDataFrontEnd', () => {
 
   describe('when vehicle type is train', () => {
 
-    const fullValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.train,
-      railwayBillNumber : 'rail way num',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+    const fullValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: 'rail way num',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
     };
-    const baseValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.train,
-      exportedTo : {
+    const baseValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.train,
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -909,10 +964,10 @@ describe('checkTransportDataFrontEnd', () => {
 
     shouldReturnFullObject(fullValidObject);
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.train,
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.train,
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -920,10 +975,10 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.train,
-      railwayBillNumber : 'rail way num',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: 'rail way num',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -934,23 +989,23 @@ describe('checkTransportDataFrontEnd', () => {
 
   describe('when vehicle type is container vessel', () => {
 
-    const fullValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.containerVessel,
-      vesselName : 'vessel name',
-      flagState : 'some flag name',
-      containerNumber : 'container number',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+    const fullValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: 'vessel name',
+      flagState: 'some flag name',
+      containerNumber: 'container number',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
     };
-    const baseValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.containerVessel,
-      exportedTo : {
+    const baseValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -960,12 +1015,12 @@ describe('checkTransportDataFrontEnd', () => {
 
     shouldReturnFullObject(fullValidObject);
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.containerVessel,
-      flagState : 'some flag name',
-      containerNumber : 'container number',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.containerVessel,
+      flagState: 'some flag name',
+      containerNumber: 'container number',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -973,12 +1028,12 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.containerVessel,
-      vesselName : 'vessel name',
-      containerNumber : 'container number',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: 'vessel name',
+      containerNumber: 'container number',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -986,12 +1041,12 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.containerVessel,
-      vesselName : 'vessel name',
-      flagState : 'some flag name',
-      departurePlace : 'here or there',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: 'vessel name',
+      flagState: 'some flag name',
+      departurePlace: 'here or there',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -999,12 +1054,12 @@ describe('checkTransportDataFrontEnd', () => {
       }
     });
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.containerVessel,
-      vesselName : 'vessel name',
-      flagState : 'some flag name',
-      containerNumber : 'container number',
-      exportDate : 'some date',
-      exportedTo : {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: 'vessel name',
+      flagState: 'some flag name',
+      containerNumber: 'container number',
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -1015,19 +1070,19 @@ describe('checkTransportDataFrontEnd', () => {
 
   describe('when vehicle type is fishing vessel', () => {
 
-    const fullValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.fishingVessel,
-      exportDate : 'some date',
-      exportedTo : {
+    const fullValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.fishingVessel,
+      exportDate: 'some date',
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
     };
-    const baseValidObject : FrontEndTransport.Transport = {
-      vehicle : FrontEndTransport.fishingVessel,
-      exportedTo : {
+    const baseValidObject: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.fishingVessel,
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
@@ -1037,8 +1092,8 @@ describe('checkTransportDataFrontEnd', () => {
 
     shouldReturnFullObject(fullValidObject);
     shouldReturnBaseValidObject(baseValidObject, {
-      vehicle : FrontEndTransport.fishingVessel,
-      exportedTo : {
+      vehicle: FrontEndTransport.fishingVessel,
+      exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",

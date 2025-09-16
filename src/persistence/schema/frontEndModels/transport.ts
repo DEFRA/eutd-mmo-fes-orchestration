@@ -1,27 +1,28 @@
 import * as BackEndModels from "../../schema/common"
 import { toExportedTo, ICountry } from '../common';
 
-export const truck  = 'truck';
+export const truck = 'truck';
 export const plane = 'plane';
 export const train = 'train';
 export const containerVessel = 'containerVessel';
 export const fishingVessel = 'directLanding';
 
 export interface Transport {
-  vehicle : string;
-  cmr ? : string;
-  nationalityOfVehicle ? : string;
-  registrationNumber  ? : string;
-  departurePlace ? : string;
-  flightNumber ? : string;
-  containerNumber ? : string;
-  railwayBillNumber ? : string;
-  vesselName ? : string;
-  flagState ? : string;
-  user_id? : string;
-  journey? : string;
-  currentUri? : string;
-  nextUri? : string;
+  vehicle: string;
+  cmr?: string;
+  nationalityOfVehicle?: string;
+  registrationNumber?: string;
+  departurePlace?: string;
+  flightNumber?: string;
+  containerNumber?: string;
+  railwayBillNumber?: string;
+  airwayBillNumber?: string;
+  vesselName?: string;
+  flagState?: string;
+  user_id?: string;
+  journey?: string;
+  currentUri?: string;
+  nextUri?: string;
   exportDate?: string;
   exportedTo?: ICountry;
   arrival?: boolean;
@@ -31,9 +32,9 @@ export interface Transport {
   freightBillNumber?: string;
 }
 
-export const toBackEndTransport = (transport: Transport) : BackEndModels.Transport => {
+export const toBackEndTransport = (transport: Transport): BackEndModels.Transport => {
 
-  let backEndTransport : BackEndModels.Transport;
+  let backEndTransport: BackEndModels.Transport;
 
   switch (transport.vehicle) {
     case truck: {
@@ -42,19 +43,19 @@ export const toBackEndTransport = (transport: Transport) : BackEndModels.Transpo
       backEndTransport = getTruckBackEndTransport(transport, hasCmr, cmr);
       break;
     }
-    case  plane :
+    case plane:
       backEndTransport = getPlaneBackEndTransport(transport);
       break;
-    case train :
+    case train:
       backEndTransport = getTrainBackEndTransport(transport);
       break;
-    case containerVessel :
+    case containerVessel:
       backEndTransport = getContainerVesselBackEndTransport(transport);
       break;
-    case fishingVessel :
+    case fishingVessel:
       backEndTransport = getFishingVesselBackEndTransport(transport);
       break;
-    default :
+    default:
       return null;
   }
 
@@ -69,18 +70,22 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   registrationNumber: cmr ? undefined : transport.registrationNumber,
   freightBillNumber: transport.freightBillNumber,
   departurePlace: cmr ? undefined : transport.departurePlace,
-  exportDate: transport.exportDate,
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
-  departureDate: transport.departureDate
+  departureDate: transport.departureDate,
+  exportDate: transport.exportDate,
+  exportedTo: transport.exportedTo
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
   flightNumber: transport.flightNumber,
+  airwayBillNumber: transport.airwayBillNumber,
   containerNumber: transport.containerNumber,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate
+  freightBillNumber: transport.freightBillNumber,
+  exportDate: transport.exportDate,
+  exportedTo: transport.exportedTo
 });
 
 const getTrainBackEndTransport = (transport: Transport) => ({
@@ -88,25 +93,29 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   railwayBillNumber: transport.railwayBillNumber,
   freightBillNumber: transport.freightBillNumber,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate,
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
-  departureDate: transport.departureDate
+  departureDate: transport.departureDate,
+  exportDate: transport.exportDate,
+  exportedTo: transport.exportedTo
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
   vesselName: transport.vesselName,
   flagState: transport.flagState,
+  freightBillNumber: transport.freightBillNumber,
   containerNumber: transport.containerNumber,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate
+  exportDate: transport.exportDate,
+  exportedTo: transport.exportedTo
 });
 
 const getFishingVesselBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
   departurePlace: transport.departurePlace,
-  exportDate: transport.exportDate
+  exportDate: transport.exportDate,
+  exportedTo: transport.exportedTo
 });
 
 export const toFrontEndTransport = (
@@ -140,6 +149,8 @@ export const toFrontEndTransport = (
         frontEndTransport = {
           vehicle: model.vehicle,
           flightNumber: model.flightNumber,
+          airwayBillNumber: model.airwayBillNumber,
+          freightBillNumber: model.freightBillNumber,
           containerNumber: model.containerNumber,
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
@@ -168,6 +179,7 @@ export const toFrontEndTransport = (
           vehicle: model.vehicle,
           vesselName: model.vesselName,
           flagState: model.flagState,
+          freightBillNumber: model.freightBillNumber,
           containerNumber: model.containerNumber,
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,

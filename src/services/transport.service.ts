@@ -1,21 +1,21 @@
 import * as CatchCertService from '../persistence/services/catchCert';
 import * as StorageNotesService from '../persistence/services/storageDoc';
 import { withUserSessionDataStored, SessionData, getCurrentSessionData } from '../helpers/sessionManager';
-import {  Transport } from '../persistence/schema/frontEndModels/transport';
+import { Transport } from '../persistence/schema/frontEndModels/transport';
 
 export default class TransportService {
 
-  public static async addTransport(payload: any, documentNumber : string, contactId: string) {
+  public static async addTransport(payload: any, documentNumber: string, contactId: string) {
     const userPrincipal = payload.user_id;
 
     let transport = await TransportService.getTransportData(userPrincipal, payload.journey, documentNumber, contactId, payload.arrival);
 
-    transport = {...transport, ...payload};
+    transport = { ...transport, ...payload };
 
-    switch(payload.journey) {
-      case "catchCertificate" : {
-        const sessionData : SessionData = {
-          documentNumber : documentNumber,
+    switch (payload.journey) {
+      case "catchCertificate": {
+        const sessionData: SessionData = {
+          documentNumber: documentNumber,
           currentUri: payload.currentUri,
           nextUri: payload.nextUri
         };
@@ -24,9 +24,9 @@ export default class TransportService {
         });
         break;
       }
-      case "storageNotes" : {
-        const sessionData : SessionData = {
-          documentNumber : documentNumber,
+      case "storageNotes": {
+        const sessionData: SessionData = {
+          documentNumber: documentNumber,
           currentUri: payload.currentUri,
           nextUri: payload.nextUri
         };
@@ -37,7 +37,7 @@ export default class TransportService {
       }
     }
 
-    return  await this.getTransportDetails(userPrincipal,payload.journey,documentNumber, contactId);
+    return await this.getTransportDetails(userPrincipal, payload.journey, documentNumber, contactId);
   }
 
   public static async removeTransport(userPrincipal: string, documentNumber: string, contactId: string): Promise<void> {
@@ -46,8 +46,8 @@ export default class TransportService {
 
   public static async getTransportDetails(userPrincipal: string, journey: string, documentNumber: string, contactId: string, arrival?: boolean): Promise<Transport> {
 
-    const data = await TransportService.getTransportData(userPrincipal, journey,documentNumber, contactId, arrival);
-if (data) {
+    const data = await TransportService.getTransportData(userPrincipal, journey, documentNumber, contactId, arrival);
+    if (data) {
       const sessionData = await getCurrentSessionData(userPrincipal, documentNumber, contactId);
 
       if (sessionData) {
@@ -64,10 +64,10 @@ if (data) {
     }
   }
 
-  public static async getTransportData(userPrincipal: string, journey: string, documentNumber: string, contactId: string, arrival?:boolean): Promise<Transport> {
-    switch(journey) {
-      case "catchCertificate" : return await CatchCertService.getTransportDetails(userPrincipal,documentNumber, contactId);
-      case "storageNotes" : return await StorageNotesService.getTransportDetails(userPrincipal,documentNumber, contactId, arrival);
+  public static async getTransportData(userPrincipal: string, journey: string, documentNumber: string, contactId: string, arrival?: boolean): Promise<Transport> {
+    switch (journey) {
+      case "catchCertificate": return await CatchCertService.getTransportDetails(userPrincipal, documentNumber, contactId);
+      case "storageNotes": return await StorageNotesService.getTransportDetails(userPrincipal, documentNumber, contactId, arrival);
       default: throw new Error("Invalid arguments");
     }
   }
