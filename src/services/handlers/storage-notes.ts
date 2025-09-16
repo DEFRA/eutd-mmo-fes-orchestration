@@ -39,22 +39,9 @@ export default {
     return await validateProduct(product, index, errors, data.isNonJs);
   },
 
-  "/create-storage-document/:documentNumber/add-UK-entry-document": async ({ data, _nextUrl, _currentUrl, errors, documentNumber, userPrincipal, contactId }) => {
-    const index = 0;
-    const product = data.catches[index];
-    return await validateEntry(product, index, errors, documentNumber, userPrincipal, contactId);
-  },
-
-  "/create-storage-document/:documentNumber/add-UK-entry-document/:index": async ({ data, _nextUrl, _currentUrl, errors, params, documentNumber, userPrincipal, contactId }) => {
-    const index = +params.index;
-    const product = data.catches[index];
-    return await validateEntry(product, index, errors, documentNumber, userPrincipal, contactId);
-  },
-
-  "/create-storage-document/:documentNumber/you-have-added-a-product": async ({ data, _nextUrl, currentUrl, errors, documentNumber, userPrincipal, contactId }) => {
+  "/create-storage-document/:documentNumber/you-have-added-a-product": async ({ data, _nextUrl, currentUrl, errors }) => {
     for (const [index, ctch] of data.catches.entries()) {
       await validateProduct(ctch, index, errors);
-      await validateEntry(ctch, index, errors, documentNumber, userPrincipal, contactId);
     }
 
     const addAnotherProduct = data.addAnotherProduct;
@@ -91,18 +78,6 @@ export default {
     const index = +params.index;
     const storageFacility = data.storageFacilities[index];
     return validateStorageApproval(storageFacility, index, errors)
-  },
-
-  "/create-storage-document/:documentNumber/add-document-type/:productIndex": async ({ data, errors, params }) => {
-    const index = params.productIndex;
-    const ctch = data.catches[index];
-    return validateDocumentType(ctch, index, errors);
-  },
-
-  "/create-storage-document/:documentNumber/add-document-type": async ({ data, errors, _params }) => {
-    const index = 0;
-    const ctch = data.catches[index];
-    return validateDocumentType(ctch, index, errors);
   },
 
   "/create-storage-document/:documentNumber/you-have-added-a-storage-facility": ({ data, _nextUrl, currentUrl, errors }) => {
