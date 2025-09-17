@@ -1119,7 +1119,6 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1160,7 +1159,6 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details/
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1404,7 +1402,6 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
-        "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
         "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
         "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
@@ -1428,7 +1425,6 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
         "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-        "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
         "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1451,7 +1447,6 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1475,7 +1470,6 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-       "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1505,8 +1499,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       addAnotherStorageFacility:
-        "Select yes if you need to add another storage facility",
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
+        "Select yes if you need to add another storage facility"
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1678,9 +1671,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     });
 
     const expectedErrors = {
-      'storageFacilities-0-facilityAddressOne':
-        "sdAddStorageFacilityDetailsErrorEnterTheBuilding",
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
+      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheBuilding",
       "storageFacilities-0-facilityPostcode": "sdAddStorageFacilityDetailsErrorEnterThePostcode",
     };
 
@@ -1718,9 +1709,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     });
 
     const expectedErrors = {
-      'storageFacilities-0-facilityAddressOne':
-        "sdAddStorageFacilityDetailsErrorEnterTheBuilding",
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
+      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheBuilding",
       "storageFacilities-0-facilityTownCity": "sdAddStorageFacilityDetailsErrorEnterTheTown",
     };
 

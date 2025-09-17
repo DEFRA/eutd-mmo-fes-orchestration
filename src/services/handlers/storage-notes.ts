@@ -100,7 +100,7 @@ export default {
 };
 
 function checkFacilityArrivalDateError(storageFacility: any, index: number, errors){
-  if(!storageFacility.facilityArrivalDate || !validateDate(storageFacility.facilityArrivalDate)){
+  if (storageFacility.facilityArrivalDate && !validateDate(storageFacility.facilityArrivalDate)) {
     errors[`storageFacilities-${index}-facilityArrivalDate`] = `sdArrivalDateValidationError`;
   }
 }
