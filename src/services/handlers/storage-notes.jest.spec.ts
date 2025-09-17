@@ -414,43 +414,6 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     expect(errors).toEqual(expected);
   });
 
-  // Commeneted as per discussion with BA - export weight is not mandatory
-  // it("with missing export weight validates as error", async () => {
-  //   const currentUrl =
-  //     "/create-storage-document/:documentNumber/add-product-to-this-consignment";
-  //   const handler = StorageNotes[currentUrl];
-
-  //   const data = {
-  //     catches: [
-  //       {
-  //         weightOnCC: "2222",
-  //         product: "Atlantix",
-  //         commodityCode: "34234324",
-  //         certificateNumber: "CC-11111",
-  //         dateOfUnloading: "29/01/2019",
-  //         placeOfUnloading: "Dover",
-  //         transportUnloadedFrom: "TRANS-IN-001",
-  //       },
-  //     ],
-  //     storageFacilities: [{}],
-  //     addAnotherProduct: "notset",
-  //   };
-
-  //   const { errors } = await handler({
-  //     data: data,
-  //     _nextUrl: "",
-  //     _currentUrl: currentUrl,
-  //     errors: {},
-  //   });
-
-  //   const expected = {
-  //     "catches-0-productWeight": "sdAddProductToConsignmentExportWeightErrorNull",
-  //   };
-
-  //   expect(errors).toBeTruthy();
-  //   expect(errors).toEqual(expected);
-  // });
-
   it("with missing date product entered the UK validates as error", async () => {
     const currentUrl =
       "/create-storage-document/:documentNumber/add-product-to-this-consignment";
@@ -627,43 +590,6 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     expect(mockValidateSpeciesWithSuggestions).not.toHaveBeenCalled();
   });
 
-  // it("invalid (negative) numbers in productWeight validates as error", async () => {
-  //   const currentUrl =
-  //     "/create-storage-document/:documentNumber/add-product-to-this-consignment";
-  //   const handler = StorageNotes[currentUrl];
-
-  //   const data = {
-  //     catches: [
-  //       {
-  //         weightOnCC: "2222",
-  //         product: "Atlantix",
-  //         commodityCode: "34234324",
-  //         certificateNumber: "CC-11111",
-  //         productWeight: "-1",
-  //         dateOfUnloading: "29/01/2019",
-  //         placeOfUnloading: "Dover",
-  //         transportUnloadedFrom: "TRANS-IN-001",
-  //       },
-  //     ],
-  //     storageFacilities: [{}],
-  //     addAnotherProduct: "notset",
-  //   };
-
-  //   const { errors } = await handler({
-  //     data: data,
-  //     _nextUrl: "",
-  //     _currentUrl: currentUrl,
-  //     errors: {},
-  //   });
-
-  //   const expected = {
-  //     "catches-0-productWeight": "sdAddProductToConsignmentExportWeightErrorMax2DecimalLargerThan0",
-  //   };
-
-  //   expect(errors).toBeTruthy();
-  //   expect(errors).toEqual(expected);
-  // });
-
   it("invalid (negative) numbers in weightOnCC validates as error", async () => {
     const currentUrl =
       "/create-storage-document/:documentNumber/add-product-to-this-consignment";
@@ -698,43 +624,6 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
   });
-
-  // it("invalid (floating point) numbers in productWeight validates as error", async () => {
-  //   const currentUrl =
-  //     "/create-storage-document/:documentNumber/add-product-to-this-consignment";
-  //   const handler = StorageNotes[currentUrl];
-
-  //   const data = {
-  //     catches: [
-  //       {
-  //         weightOnCC: "2222",
-  //         product: "Atlantix",
-  //         commodityCode: "34234324",
-  //         certificateNumber: "CC-11111",
-  //         productWeight: "11.11345",
-  //         dateOfUnloading: "29/01/2019",
-  //         placeOfUnloading: "Dover",
-  //         transportUnloadedFrom: "TRANS-IN-001",
-  //       },
-  //     ],
-  //     storageFacilities: [{}],
-  //     addAnotherProduct: "notset",
-  //   };
-
-  //   const { errors } = await handler({
-  //     data: data,
-  //     _nextUrl: "",
-  //     _currentUrl: currentUrl,
-  //     errors: {},
-  //   });
-
-  //   const expected = {
-  //     "catches-0-productWeight": "sdAddProductToConsignmentExportWeightPositiveMax2Decimal",
-  //   };
-
-  //   expect(errors).toBeTruthy();
-  //   expect(errors).toEqual(expected);
-  // });
 
   it("invalid (floating point) numbers in weightOnCC validates as error", async () => {
     const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
