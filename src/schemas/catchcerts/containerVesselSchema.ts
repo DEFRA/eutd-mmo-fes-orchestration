@@ -4,7 +4,16 @@ const Joi = BaseJoi.extend(Extension);
 
 const containerVesselSchema = Joi.object({
   vehicle: Joi.string().optional(),
-  exportedTo: Joi.any().optional(),
+  exportedTo: Joi.when('arrival', {
+    is: true,
+    then: Joi.any().optional(),
+    otherwise: Joi.object({
+      officialCountryName: Joi.string().required(),
+      isoCodeAlpha2: Joi.string().optional(),
+      isoCodeAlpha3: Joi.string().optional(),
+      isoNumericCode: Joi.string().optional()
+    }).required()
+  }),
   vesselName: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/).required(),
   flagState: Joi.string().trim().required(),
   containerNumber: Joi.string().trim().regex(/^[a-zA-Z0-9 ]*$/).max(50).required(),

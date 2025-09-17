@@ -125,24 +125,33 @@ describe("transport routes", () => {
             {
                 url: '/v1/transport/truck/details',
                 otherRequiredFields: {
-                    "nationalityOfVehicle": "x",
-                    "registrationNumber": "x",
-                    "departurePlace": "x"
+                    nationalityOfVehicle: "x",
+                    registrationNumber: "x",
+                    departurePlace: "x",
+                    exportedTo: {
+                      officialCountryName: "Nigeria"
+                    }
                 }
             },
             {
                 url: '/v1/transport/plane/details',
                 otherRequiredFields: {
-                    "flightNumber": "x",
-                    "departurePlace": "x",
-                    "containerNumber": "x"
+                    flightNumber: "x",
+                    departurePlace: "x",
+                    containerNumber: "x",
+                    exportedTo: {
+                      officialCountryName: "Nigeria"
+                    }
                 }
             },
             {
                 url: '/v1/transport/train/details',
                 otherRequiredFields: {
-                    "departurePlace": "x",
-                    "railwayBillNumber": "x",
+                    departurePlace: "x",
+                    railwayBillNumber: "x",
+                    exportedTo: {
+                      officialCountryName: "Nigeria"
+                    }
                 }
             },
             {
@@ -152,6 +161,9 @@ describe("transport routes", () => {
                     flagState: "x",
                     containerNumber: "x",
                     departurePlace: "x",
+                    exportedTo: {
+                      officialCountryName: "Nigeria"
+                    }
                 }
             },
         ]

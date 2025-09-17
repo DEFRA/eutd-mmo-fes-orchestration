@@ -37,7 +37,6 @@ export interface Catch {
 export interface StorageDocumentProgress extends BaseProgress {
   catches: ProgressStatus;
   storageFacilities: ProgressStatus;
-  exportDestination: ProgressStatus;
   arrivalTransportationDetails?: ProgressStatus;
   transportDetails: ProgressStatus;
 }
@@ -45,15 +44,18 @@ export interface StorageDocumentProgress extends BaseProgress {
 export interface StorageFacility {
   facilityName: string;
   facilityAddressOne?: string;
+  facilityAddressTwo?: string;
   facilityTownCity?: string;
   facilityPostcode?: string;
-  facilitySubBuildingName?: string,
-  facilityBuildingNumber?: string,
-  facilityBuildingName?: string,
-  facilityStreetName?: string,
-  facilityCounty?: string,
-  facilityCountry?: string,
-  facilityArrivalDate?: string,
+  facilitySubBuildingName?: string;
+  facilityBuildingNumber?: string;
+  facilityBuildingName?: string;
+  facilityStreetName?: string;
+  facilityCounty?: string;
+  facilityCountry?: string;
+  facilityApprovalNumber?: string;
+  facilityStorage?: string;
+  facilityArrivalDate?: string;
 }
 
 export interface StorageDocumentDraft {
