@@ -23,22 +23,24 @@ export enum CertificateType {
   NON_UK = 'non_uk'
 }
 export interface Catch {
- product                        : string,
- id?                            : string,
- commodityCode                  : string,
- productWeight?                 : string,
- certificateNumber?             : string,
- weightOnCC?                    : string,
- dateOfUnloading?               : string,
- placeOfUnloading?              : string,
- transportUnloadedFrom?         : string,
- scientificName?                : string,
- speciesCode?                   : string,
- certificateType?               : 'uk' | 'non_uk'
- supportingDocuments?           : string[]
- productDescription?            : string
- netWeightProductArrival?       : string
- netWeightFisheryProductArrival?: string
+ product                            : string,
+ id?                                : string,
+ commodityCode                      : string,
+ productWeight?                     : string,
+ certificateNumber?                 : string,
+ weightOnCC?                        : string,
+ dateOfUnloading?                   : string,
+ placeOfUnloading?                  : string,
+ transportUnloadedFrom?             : string,
+ scientificName?                    : string,
+ speciesCode?                       : string,
+ certificateType?                   : 'uk' | 'non_uk',
+ supportingDocuments?               : string[],
+ productDescription?                : string,
+ netWeightProductArrival?           : string,
+ netWeightFisheryProductArrival?    : string,
+ netWeightProductDeparture?         : string,
+ netWeightFisheryProductDeparture?  : string,
 }
 
 export interface StorageFacility {
@@ -86,22 +88,24 @@ export interface StorageDocumentModel extends StorageDocument, Document {}
 
 
 const CatchSchema = new Schema({
-  product                 : { type: String },
-  id                      : { type: String, required: false },
-  commodityCode           : { type: String },
-  certificateNumber       : { type: String, required: false, uppercase: true },
-  productWeight           : { type: String, required: false },
-  dateOfUnloading         : { type: String, required: false },
-  placeOfUnloading        : { type: String, required: false },
-  transportUnloadedFrom   : { type: String, required: false },
-  weightOnCC              : { type: String, required: false },
-  scientificName          : { type: String, required: false},
-  speciesCode             : { type: String, required: false },
-  certificateType         : { type: String, required: false, enum: Object.values(CertificateType) },
-  supportingDocuments     : { type: [String], required: false },
-  productDescription      : { type: String, required: false },
-  netWeightProductArrival : { type: String, required: false },
-  netWeightFisheryProductArrival: { type: String, required: false },
+  product                           : { type: String },
+  id                                : { type: String, required: false },
+  commodityCode                     : { type: String },
+  certificateNumber                 : { type: String, required: false, uppercase: true },
+  productWeight                     : { type: String, required: false },
+  dateOfUnloading                   : { type: String, required: false },
+  placeOfUnloading                  : { type: String, required: false },
+  transportUnloadedFrom             : { type: String, required: false },
+  weightOnCC                        : { type: String, required: false },
+  scientificName                    : { type: String, required: false},
+  speciesCode                       : { type: String, required: false },
+  certificateType                   : { type: String, required: false, enum: Object.values(CertificateType) },
+  supportingDocuments               : { type: [String], required: false },
+  productDescription                : { type: String, required: false },
+  netWeightProductArrival           : { type: String, required: false },
+  netWeightFisheryProductArrival    : { type: String, required: false },
+  netWeightProductDeparture         : { type: String, required: false },
+  netWeightFisheryProductDeparture  : { type: String, required: false },
 }, { _id : true } );
 
 const StorageFacilitySchema = new Schema({
@@ -264,6 +268,8 @@ export const cloneCatches = (original: Catch): Catch => {
     productDescription,
     netWeightProductArrival,
     netWeightFisheryProductArrival,
+    netWeightProductDeparture,
+    netWeightFisheryProductDeparture,
   } = original;
 
   const result = {
@@ -281,7 +287,9 @@ export const cloneCatches = (original: Catch): Catch => {
     supportingDocuments,
     productDescription,       
     netWeightProductArrival,       
-    netWeightFisheryProductArrival
+    netWeightFisheryProductArrival,
+    netWeightProductDeparture,
+    netWeightFisheryProductDeparture,
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);

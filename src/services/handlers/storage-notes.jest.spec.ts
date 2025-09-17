@@ -233,6 +233,106 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     expect(errors).toEqual(expected);
   });
 
+  it("checks netWeightProductDeparture, netWeightProductDeparture and validates as zero", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const catches = [
+      {
+        weightOnCC: "2222",
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName'
+      },
+    ];
+
+    const { errors } = await handler({
+      catches: catches,
+      errors: {},
+    });
+
+    const expected = {
+      "catches-0-netWeightProductDeparture": "sdNetWeightProductDepartureErrorNull",
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDepartureErrorNull",
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it("checks netWeightProductDeparture, netWeightProductDeparture and validates as -1", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const catches = [
+      {
+        weightOnCC: "2222",
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName',
+        netWeightProductDeparture: -1,
+        netWeightFisheryProductDeparture: -1,
+      },
+    ];
+
+    const { errors } = await handler({
+      catches: catches,
+      errors: {},
+    });
+
+    const expected = {
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDepartureErrorMax2DecimalLargerThan0",
+      "catches-0-netWeightProductDeparture": "sdNetWeightProductDepartureErrorMax2DecimalLargerThan0",
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it("checks netWeightProductDeparture, netWeightProductDeparture and validates as Positive Max 2 Decimal", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const catches = [
+      {
+        weightOnCC: "2222",
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName',
+        netWeightProductDeparture: 99999999999.991,
+        netWeightFisheryProductDeparture: 99999999999.991,
+      },
+    ];
+
+    const { errors } = await handler({
+      catches: catches,
+      errors: {},
+    });
+
+    const expected = {
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDeparturePositiveMax2Decimal",
+      "catches-0-netWeightProductDeparture": "sdNetWeightProductDeparturePositiveMax2Decimal",
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
   it("checks species name and scientificName and validates as error", async () => {
     mockValidatorSpeciesName.mockResolvedValue({
       isError: true

@@ -38,6 +38,8 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
       productDescription: undefined,
       netWeightFisheryProductArrival: undefined,
       netWeightProductArrival: undefined,
+      netWeightFisheryProductDeparture: undefined,
+      netWeightProductDeparture: undefined,
     }];
 
     const result = FrontEndSD.toBackEndCatchSD(frontendCatch);
@@ -71,6 +73,8 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
       productDescription: undefined,
       netWeightFisheryProductArrival: undefined,
       netWeightProductArrival: undefined,
+      netWeightFisheryProductDeparture: undefined,
+      netWeightProductDeparture: undefined,
     }];
 
     const result = FrontEndSD.toBackEndCatchSD(frontendCatch);

@@ -39,6 +39,29 @@ export default {
     return await validateProduct(product, index, errors, data.isNonJs);
   },
 
+  "/create-storage-document/:documentNumber/departure-product-summary": async ({ catches, errors }) => {
+    for (const [index, ctch] of catches.entries()) {
+      await validateProduct(ctch, index, errors);
+      if (!ctch.netWeightProductDeparture) {
+        errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorNull';
+      } else if (ctch.netWeightProductDeparture && (+ctch.netWeightProductDeparture) <= 0) {
+        errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorMax2DecimalLargerThan0';
+      } else if (ctch.netWeightProductDeparture && !isPositiveNumberWithTwoDecimals(ctch.netWeightProductDeparture)) {
+        errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDeparturePositiveMax2Decimal';
+      }
+
+      if (!ctch.netWeightFisheryProductDeparture) {
+        errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorNull';
+      } else if (ctch.netWeightFisheryProductDeparture && (+ctch.netWeightFisheryProductDeparture) <= 0) {
+        errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorMax2DecimalLargerThan0';
+      } else if (ctch.netWeightFisheryProductDeparture && !isPositiveNumberWithTwoDecimals(ctch.netWeightFisheryProductDeparture)) {
+        errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDeparturePositiveMax2Decimal';
+      }
+    }
+
+    return { errors, next: `/create-storage-document/:documentNumber/progress` }
+  },
+
   "/create-storage-document/:documentNumber/you-have-added-a-product": async ({ data, _nextUrl, currentUrl, errors }) => {
     for (const [index, ctch] of data.catches.entries()) {
       await validateProduct(ctch, index, errors);

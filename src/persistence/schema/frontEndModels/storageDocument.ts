@@ -36,6 +36,8 @@ export interface Catch {
   productDescription?: string;
   netWeightProductArrival?: string;
   netWeightFisheryProductArrival?: string;
+  netWeightProductDeparture?: string;
+  netWeightFisheryProductDeparture?: string;
 }
 
 export interface StorageDocumentProgress extends BaseProgress {
@@ -89,6 +91,8 @@ export const toBackEndCatchSD = (catchDetails: Catch[]): BackEndSD.Catch[]=> {
         productDescription: cat.productDescription,
         netWeightProductArrival: cat.netWeightProductArrival,
         netWeightFisheryProductArrival: cat.netWeightFisheryProductArrival,
+        netWeightProductDeparture: cat.netWeightProductDeparture,
+        netWeightFisheryProductDeparture: cat.netWeightFisheryProductDeparture,
       }
     })
   : [];
