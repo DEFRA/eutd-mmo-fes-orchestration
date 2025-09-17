@@ -23,18 +23,22 @@ export enum CertificateType {
   NON_UK = 'non_uk'
 }
 export interface Catch {
- product               : string,
- id?                   : string,
- commodityCode         : string,
- productWeight         : string,
- certificateNumber?    : string,
- weightOnCC?           : string,
- dateOfUnloading?      : string,
- placeOfUnloading?     : string,
- transportUnloadedFrom?: string,
- scientificName?       : string,
- speciesCode?          : string,
- certificateType?      : 'uk' | 'non_uk'
+ product                        : string,
+ id?                            : string,
+ commodityCode                  : string,
+ productWeight?                 : string,
+ certificateNumber?             : string,
+ weightOnCC?                    : string,
+ dateOfUnloading?               : string,
+ placeOfUnloading?              : string,
+ transportUnloadedFrom?         : string,
+ scientificName?                : string,
+ speciesCode?                   : string,
+ certificateType?               : 'uk' | 'non_uk'
+ supportingDocuments?           : string[]
+ productDescription?            : string
+ netWeightProductArrival?       : string
+ netWeightFisheryProductArrival?: string
 }
 
 export interface StorageFacility {
@@ -51,7 +55,7 @@ export interface StorageFacility {
   facilityApprovalNumber?  : string,
   facilityStorage?         : string,
   _facilityUpdated?        : boolean,
-  facilityArrivalDate?             : string,
+  facilityArrivalDate?     : string,
 }
 
 export interface ExportData {
@@ -82,18 +86,22 @@ export interface StorageDocumentModel extends StorageDocument, Document {}
 
 
 const CatchSchema = new Schema({
-  product               : { type: String },
-  id                    : { type: String, required: false },
-  commodityCode         : { type: String },
-  certificateNumber     : { type: String, required: false, uppercase: true },
-  productWeight         : { type: String },
-  dateOfUnloading       : { type: String, required: false },
-  placeOfUnloading      : { type: String, required: false },
-  transportUnloadedFrom : { type: String, required: false },
-  weightOnCC            : { type: String, required: false },
-  scientificName        : { type: String, required: false},
-  speciesCode           : { type: String, required: false },
-  certificateType       : { type: String, required: false, enum: Object.values(CertificateType) }
+  product                 : { type: String },
+  id                      : { type: String, required: false },
+  commodityCode           : { type: String },
+  certificateNumber       : { type: String, required: false, uppercase: true },
+  productWeight           : { type: String, required: false },
+  dateOfUnloading         : { type: String, required: false },
+  placeOfUnloading        : { type: String, required: false },
+  transportUnloadedFrom   : { type: String, required: false },
+  weightOnCC              : { type: String, required: false },
+  scientificName          : { type: String, required: false},
+  speciesCode             : { type: String, required: false },
+  certificateType         : { type: String, required: false, enum: Object.values(CertificateType) },
+  supportingDocuments     : { type: [String], required: false },
+  productDescription      : { type: String, required: false },
+  netWeightProductArrival : { type: String, required: false },
+  netWeightFisheryProductArrival: { type: String, required: false },
 }, { _id : true } );
 
 const StorageFacilitySchema = new Schema({
@@ -109,7 +117,7 @@ const StorageFacilitySchema = new Schema({
   facilityCountry           : { type: String },
   facilityApprovalNumber    : { type: String, required: false },
   facilityStorage           : { type: String, required: false },
-  facilityArrivalDate               : { type: String, required: false}
+  facilityArrivalDate       : { type: String, required: false}
 }, { _id : false } );
 
 const ExportDataSchema = new Schema({
@@ -241,7 +249,22 @@ export const cloneExportData = (original: ExportData): ExportData => (
 );
 
 export const cloneCatches = (original: Catch): Catch => {
-  const { product, commodityCode, certificateNumber, productWeight, weightOnCC, dateOfUnloading, placeOfUnloading, transportUnloadedFrom,  scientificName, certificateType } = original;
+  const {
+    product,
+    commodityCode,
+    certificateNumber,
+    productWeight,
+    weightOnCC,
+    dateOfUnloading,
+    placeOfUnloading,
+    transportUnloadedFrom,
+    scientificName,
+    certificateType,
+    supportingDocuments,
+    productDescription,
+    netWeightProductArrival,
+    netWeightFisheryProductArrival,
+  } = original;
 
   const result = {
     id: certificateNumber + '-' + getRandomNumber(),
@@ -254,7 +277,11 @@ export const cloneCatches = (original: Catch): Catch => {
     placeOfUnloading,
     transportUnloadedFrom,
     scientificName,
-    certificateType
+    certificateType,
+    supportingDocuments,
+    productDescription,       
+    netWeightProductArrival,       
+    netWeightFisheryProductArrival
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);

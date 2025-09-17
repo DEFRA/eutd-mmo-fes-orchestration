@@ -18,7 +18,7 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
       placeOfUnloading : "there",
       transportUnloadedFrom : "here",
       scientificName : "some scientific name",
-      certificateType: "uk"
+      certificateType: "uk",
     }];
 
     const expected : BackEndSD.Catch[] = [{
@@ -33,7 +33,11 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
       placeOfUnloading : "there",
       transportUnloadedFrom : "here",
       scientificName : "some scientific name",
-      certificateType: "uk"
+      certificateType: "uk",
+      supportingDocuments: undefined,
+      productDescription: undefined,
+      netWeightFisheryProductArrival: undefined,
+      netWeightProductArrival: undefined,
     }];
 
     const result = FrontEndSD.toBackEndCatchSD(frontendCatch);
@@ -53,6 +57,7 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
     const expected : BackEndSD.Catch[] = [{
       certificateType: undefined,
       certificateNumber: undefined,
+      supportingDocuments: undefined,
       product: "COD",
       scientificName : "some scientific name",
       productWeight : "200",
@@ -62,7 +67,10 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
       placeOfUnloading: undefined,
       speciesCode: undefined,
       transportUnloadedFrom: undefined,
-      weightOnCC: undefined
+      weightOnCC: undefined,
+      productDescription: undefined,
+      netWeightFisheryProductArrival: undefined,
+      netWeightProductArrival: undefined,
     }];
 
     const result = FrontEndSD.toBackEndCatchSD(frontendCatch);

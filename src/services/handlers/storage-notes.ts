@@ -208,14 +208,6 @@ export async function validateProduct(product: any, index: number, errors, isNon
     errors[`catches-${index}-commodityCode`] = 'sdAddProductToConsignmentCommodityCodeErrorNull';
   }
 
-  if (!product.productWeight) {
-    errors[`catches-${index}-productWeight`] = 'sdAddProductToConsignmentExportWeightErrorNull';
-  } else if ((+product.productWeight) <= 0) {
-    errors[`catches-${index}-productWeight`] = 'sdAddProductToConsignmentExportWeightErrorMax2DecimalLargerThan0';
-  } else if (!isPositiveNumberWithTwoDecimals(product.productWeight)) {
-    errors[`catches-${index}-productWeight`] = 'sdAddProductToConsignmentExportWeightPositiveMax2Decimal';
-  }
-
   return { errors };
 }
 

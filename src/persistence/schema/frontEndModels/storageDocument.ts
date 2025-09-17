@@ -23,7 +23,7 @@ export interface Catch {
   id?: string;
   product: string;
   commodityCode: string;
-  productWeight: string;
+  productWeight?: string;
   dateOfUnloading?: string;
   placeOfUnloading?: string;
   transportUnloadedFrom?: string;
@@ -31,7 +31,11 @@ export interface Catch {
   weightOnCC?: string;
   scientificName?: string;
   speciesCode?: string;
-  certificateType?: 'uk' | 'non_uk'
+  certificateType?: 'uk' | 'non_uk';
+  supportingDocuments?: string[];
+  productDescription?: string;
+  netWeightProductArrival?: string;
+  netWeightFisheryProductArrival?: string;
 }
 
 export interface StorageDocumentProgress extends BaseProgress {
@@ -80,7 +84,11 @@ export const toBackEndCatchSD = (catchDetails: Catch[]): BackEndSD.Catch[]=> {
         transportUnloadedFrom : cat.transportUnloadedFrom,
         id: cat.id || cat.certificateNumber !== undefined ? `${cat.certificateNumber}-${moment.utc().unix()}-${index}` : undefined,
         scientificName: cat.scientificName,
-        certificateType: cat.certificateType
+        certificateType: cat.certificateType,
+        supportingDocuments: cat.supportingDocuments,
+        productDescription: cat.productDescription,
+        netWeightProductArrival: cat.netWeightProductArrival,
+        netWeightFisheryProductArrival: cat.netWeightFisheryProductArrival,
       }
     })
   : [];
