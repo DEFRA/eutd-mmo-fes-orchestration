@@ -163,7 +163,8 @@ describe("transport routes", () => {
                     departurePlace: "x",
                     exportedTo: {
                       officialCountryName: "Nigeria"
-                    }
+                    },
+                    freightBillNumber: "x",
                 }
             },
         ]
