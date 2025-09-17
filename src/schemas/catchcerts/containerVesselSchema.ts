@@ -15,9 +15,9 @@ const containerVesselSchema = Joi.object({
     then: Joi.any().optional(),
     otherwise: Joi.object({
       officialCountryName: Joi.string().required(),
-      isoCodeAlpha2: Joi.string().optional(),
-      isoCodeAlpha3: Joi.string().optional(),
-      isoNumericCode: Joi.string().optional()
+      isoCodeAlpha2: Joi.string().allow(null).allow('').optional(),
+      isoCodeAlpha3: Joi.string().allow(null).allow('').optional(),
+      isoNumericCode: Joi.string().allow(null).allow('').optional()
     }).required()
   }),
   vesselName: Joi.when('arrival', {

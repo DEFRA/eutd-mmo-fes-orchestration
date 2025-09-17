@@ -129,7 +129,10 @@ describe("transport routes", () => {
                     registrationNumber: "x",
                     departurePlace: "x",
                     exportedTo: {
-                      officialCountryName: "Nigeria"
+                      officialCountryName: "Nigeria",
+                      isoCodeAlpha2: null,
+                      isoCodeAlpha3: null,
+                      isoNumericCode: null
                     }
                 }
             },
@@ -150,7 +153,10 @@ describe("transport routes", () => {
                     departurePlace: "x",
                     railwayBillNumber: "x",
                     exportedTo: {
-                      officialCountryName: "Nigeria"
+                      officialCountryName: "Nigeria",
+                      isoCodeAlpha2: "",
+                      isoCodeAlpha3: "x",
+                      isoNumericCode: ""
                     }
                 }
             },
@@ -162,7 +168,10 @@ describe("transport routes", () => {
                     containerNumber: "x",
                     departurePlace: "x",
                     exportedTo: {
-                      officialCountryName: "Nigeria"
+                      officialCountryName: "Nigeria",
+                      isoCodeAlpha2: undefined,
+                      isoCodeAlpha3: undefined,
+                      isoNumericCode: undefined
                     },
                     freightBillNumber: "x",
                 }
