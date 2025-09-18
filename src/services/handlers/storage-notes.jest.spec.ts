@@ -237,8 +237,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const catches = [
-      {
+    const data = {
+      catches: [{
         weightOnCC: "2222",
         commodityCode: "34234324",
         certificateNumber: "CC-11111",
@@ -249,109 +249,15 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         transportUnloadedFrom: "TRANS-IN-001",
         scientificName: 'wrongScientificName',
         netWeightProductDeparture: "10"
-      },
-    ];
+      }]
+    };
 
     const { errors } = await handler({
-      catches: catches,
+      data,
       errors: {},
     });
 
     const expected = {};
-
-    expect(errors).toBeTruthy();
-    expect(errors).toEqual(expected);
-  });
-
-  it("Net weight on departure more than weight on document", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
-    const handler = StorageNotes[currentUrl];
-
-    const catches = [
-      {
-        weightOnCC: "2222",
-        commodityCode: "34234324",
-        certificateNumber: "CC-11111",
-        productWeight: "1111",
-        product: "a vessel",
-        dateOfUnloading: "29/01/2019",
-        placeOfUnloading: "Dover",
-        transportUnloadedFrom: "TRANS-IN-001",
-        scientificName: 'wrongScientificName',
-        netWeightProductDeparture: "2223"
-      },
-    ];
-
-    const { errors } = await handler({
-      catches: catches,
-      errors: {},
-    });
-
-    const expected = {
-      "catches-0-netWeightProductDeparture": "sdAddProductToConsignmentProductNameWeightError",
-    };
-
-    expect(errors).toBeTruthy();
-    expect(errors).toEqual(expected);
-  });
-
-  it("Fishery product weight on departure equal to or less than weight on document", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
-    const handler = StorageNotes[currentUrl];
-
-    const catches = [
-      {
-        weightOnCC: "2222",
-        commodityCode: "34234324",
-        certificateNumber: "CC-11111",
-        productWeight: "1111",
-        product: "a vessel",
-        dateOfUnloading: "29/01/2019",
-        placeOfUnloading: "Dover",
-        transportUnloadedFrom: "TRANS-IN-001",
-        scientificName: 'wrongScientificName',
-        netWeightFisheryProductDeparture: "10"
-      },
-    ];
-
-    const { errors } = await handler({
-      catches: catches,
-      errors: {},
-    });
-
-    const expected = {};
-
-    expect(errors).toBeTruthy();
-    expect(errors).toEqual(expected);
-  });
-
-  it("Fishery product weight on departure more than weight on document", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
-    const handler = StorageNotes[currentUrl];
-
-    const catches = [
-      {
-        weightOnCC: "2222",
-        commodityCode: "34234324",
-        certificateNumber: "CC-11111",
-        productWeight: "1111",
-        product: "a vessel",
-        dateOfUnloading: "29/01/2019",
-        placeOfUnloading: "Dover",
-        transportUnloadedFrom: "TRANS-IN-001",
-        scientificName: 'wrongScientificName',
-        netWeightFisheryProductDeparture: "2223"
-      },
-    ];
-
-    const { errors } = await handler({
-      catches: catches,
-      errors: {},
-    });
-
-    const expected = {
-      "catches-0-netWeightFisheryProductDeparture": "sdAddProductToConsignmentProductNameWeightError",
-    };
 
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
@@ -361,7 +267,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const catches = [
+    const data = {catches : [
       {
         weightOnCC: "2222",
         commodityCode: "34234324",
@@ -373,16 +279,15 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         transportUnloadedFrom: "TRANS-IN-001",
         scientificName: 'wrongScientificName'
       },
-    ];
+    ]};
 
     const { errors } = await handler({
-      catches: catches,
+      data: data,
       errors: {},
     });
 
     const expected = {
-      "catches-0-netWeightProductDeparture": "sdNetWeightProductDepartureErrorNull",
-      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDepartureErrorNull",
+      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture"
     };
 
     expect(errors).toBeTruthy();
@@ -393,7 +298,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const catches = [
+    const data = {catches : [
       {
         weightOnCC: "2222",
         commodityCode: "34234324",
@@ -407,10 +312,10 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         netWeightProductDeparture: -1,
         netWeightFisheryProductDeparture: -1,
       },
-    ];
+    ]};
 
     const { errors } = await handler({
-      catches: catches,
+      data: data,
       errors: {},
     });
 
@@ -427,7 +332,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const catches = [
+    const data = {catches : [
       {
         weightOnCC: "999999999999",
         commodityCode: "34234324",
@@ -441,16 +346,49 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         netWeightProductDeparture: "99999999999.991",
         netWeightFisheryProductDeparture: "99999999999.991",
       },
-    ];
+    ]};
 
     const { errors } = await handler({
-      catches: catches,
+      data: data,
       errors: {},
     });
 
     const expected = {
       "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDeparturePositiveMax2Decimal",
       "catches-0-netWeightProductDeparture": "sdNetWeightProductDeparturePositiveMax2Decimal",
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it("checks netWeightProductDeparture, netWeightProductDeparture and validates as exceed 100000000000", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {catches : [
+      {
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName',
+        netWeightProductDeparture: 100000000000,
+        netWeightFisheryProductDeparture: 100000000000,
+      },
+    ]};
+
+    const { errors } = await handler({
+      data,
+      errors: {},
+    });
+
+    const expected = {
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDepartureExceed12Digit",
+      "catches-0-netWeightProductDeparture": "sdNetWeightProductDepartureExceed12Digit",
     };
 
     expect(errors).toBeTruthy();
@@ -1566,7 +1504,6 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     expect(errors).toEqual(expectedErrors);
     expect(next).toEqual("/create-storage-document/:documentNumber/add-storage-facility-details/1");
-    data.addAnotherStorageFacility = "notset";
   });
 
   it("should set next to 'how-does-the-export-leave-the-uk' when addAnotherStorageFacility is set to 'no'", async () => {

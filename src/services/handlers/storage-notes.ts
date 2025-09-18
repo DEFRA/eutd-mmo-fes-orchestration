@@ -2,6 +2,7 @@ import {
   cleanDate,
   isApprovalNumberValid,
   isInvalidLength,
+  isNotExceed12Digit,
   isPlaceProductEntersUkValid,
   isPositiveNumberWithTwoDecimals,
   isTransportUnloadedFromFormatValid,
@@ -40,12 +41,11 @@ export default {
     return await validateProduct(product, index, errors, data.isNonJs);
   },
 
-  "/create-storage-document/:documentNumber/departure-product-summary": async ({ catches, errors }) => {
-    for (const [index, ctch] of catches.entries()) {
+  "/create-storage-document/:documentNumber/departure-product-summary": async ({ data, errors }) => {
+    for (const [index, ctch] of data.catches.entries()) {
       checkEitherNetWeightProductDepartureOrNetWeightFisheryProductDepartureIsPresent(ctch, index, errors);
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, errors);
-      checkEitherNetWeightProductDepartureOrNetWeightFishertProductDepartureAgainstWeightOnCC(ctch, index, errors);
 
       if (isEmpty(errors)) {
         ctch.productWeight = ctch.netWeightProductDeparture ? ctch.netWeightProductDeparture : ctch.netWeightFisheryProductDeparture
@@ -117,8 +117,7 @@ export default {
 
 function checkEitherNetWeightProductDepartureOrNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
   if (!ctch.netWeightProductDeparture && !ctch.netWeightFisheryProductDeparture) {
-    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorNull';
-    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorNull';
+    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
   }
 }
 
@@ -127,6 +126,8 @@ function checkNetWeightProductDepartureIsZeroPositive(ctch: any, index: number, 
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorMax2DecimalLargerThan0';
   } else if (ctch.netWeightProductDeparture && !isPositiveNumberWithTwoDecimals(ctch.netWeightProductDeparture)) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDeparturePositiveMax2Decimal';
+  } else if (ctch.netWeightProductDeparture && !isNotExceed12Digit(ctch.netWeightProductDeparture)) {
+    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceed12Digit';
   }
 }
 
@@ -135,14 +136,8 @@ function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, index: n
     errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorMax2DecimalLargerThan0';
   } else if (ctch.netWeightFisheryProductDeparture && !isPositiveNumberWithTwoDecimals(ctch.netWeightFisheryProductDeparture)) {
     errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDeparturePositiveMax2Decimal';
-  }
-}
-
-function checkEitherNetWeightProductDepartureOrNetWeightFishertProductDepartureAgainstWeightOnCC(ctch: any, index: number, errors: any) {
-  if (ctch.netWeightProductDeparture && (+ctch.netWeightProductDeparture > +ctch.weightOnCC)) {
-    errors[`catches-${index}-netWeightProductDeparture`] = 'sdAddProductToConsignmentProductNameWeightError';
-  } else if (ctch.netWeightFisheryProductDeparture && (+ctch.netWeightFisheryProductDeparture > +ctch.weightOnCC)) {
-    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdAddProductToConsignmentProductNameWeightError';
+  } else if (ctch.netWeightFisheryProductDeparture && !isNotExceed12Digit(ctch.netWeightFisheryProductDeparture)) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceed12Digit';
   }
 }
 

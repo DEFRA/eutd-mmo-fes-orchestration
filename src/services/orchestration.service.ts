@@ -752,6 +752,10 @@ export function isPositiveNumberWithTwoDecimals(num) {
   return !isNaN(+num) && +num >= 0 && regex.test(num);
 }
 
+export function isNotExceed12Digit(num) {
+  return !isNaN(+num) && +num >= 0 && +num < 100000000000;
+}
+
 export function isPositiveWholeNumber(num) {
   return +num % 1 === 0 && +num >= 1;
 }
