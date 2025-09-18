@@ -32,7 +32,8 @@ export interface Train extends BasicTransportDetails {
 export interface Plane extends BasicTransportDetails {
   flightNumber: string,
   containerNumber: string,
-  airwayBillNumber?: string
+  airwayBillNumber?: string,
+  containerNumbers?: string
 }
 
 export interface ContainerVessel extends BasicTransportDetails {
@@ -71,6 +72,7 @@ export const TransportSchema = new Schema({
   vesselName:           { type: String,  required: false },
   flagState:            { type: String,  required: false },
   containerNumber:      { type: String,  required: false },
+  containerNumbers:     { type: String,  required: false },
   exportDate:           { type: String,  required: false },
   airwayBillNumber:     { type: String,  required: false },
   freightBillNumber:    { type: String,  required: false },

@@ -15,22 +15,53 @@ const schema = Joi.object({
       isoNumericCode: Joi.string().allow(null).allow('').optional()
     }).required()
   }),
-  flightNumber: Joi.string().trim().alphanum().max(15).required(),
-  airwayBillNumber: Joi.string().allow('').trim().optional().max(50).regex(/^[a-zA-Z0-9-./]+$/),
-  departurePlace: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
-  containerNumber: Joi.string().trim().alphanum().max(50).required(),
+  airwayBillNumber: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9-./]+$/),
+    otherwise: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9-./]+$/)
+  }),
+  flightNumber: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().allow('').alphanum().max(15).optional(),
+    otherwise: Joi.string().trim().alphanum().max(15).required()
+  }),
+  departurePlace: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
+    otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
+  }),
+  containerNumber: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().allow('').alphanum().max(50).optional(),
+    otherwise: Joi.string().trim().alphanum().max(50).required()
+  }),
+  containerNumbers: Joi.array()
+    .items(Joi.string().trim().alphanum().max(50))
+    .max(5)
+    .optional(),
   freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {
     is: 'storageNotes',
-    then: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('exportDateTo')).required(),
+    then: Joi.when('arrival', {
+      is: true,
+      then: Joi.date().allow('').optional(),
+      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('exportDateTo')).required()
+    }),
     otherwise: Joi.any()
   }),
   exportDateTo: Joi.when('journey', {
     is: 'storageNotes',
-    then: Joi.date().required(),
+    then: Joi.when('arrival', {
+      is: true,
+      then: Joi.date().allow('').optional(),
+      otherwise: Joi.date().required()
+    }),
     otherwise: Joi.any()
-  })
+  }),
+  departureCountry: Joi.string().allow('').optional(),
+  departurePort: Joi.string().allow('').trim().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/).optional(),
+  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).optional(),
 });
 
 export default schema;

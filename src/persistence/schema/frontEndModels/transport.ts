@@ -15,6 +15,7 @@ export interface Transport {
   departurePlace?: string;
   flightNumber?: string;
   containerNumber?: string;
+  containerNumbers?: string[];
   railwayBillNumber?: string;
   airwayBillNumber?: string;
   vesselName?: string;
@@ -82,8 +83,12 @@ const getPlaneBackEndTransport = (transport: Transport) => ({
   flightNumber: transport.flightNumber,
   airwayBillNumber: transport.airwayBillNumber,
   containerNumber: transport.containerNumber,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
+  departureCountry: transport.departureCountry,
+  departurePort: transport.departurePort,
+  departureDate: transport.departureDate,
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo
 });
@@ -152,9 +157,13 @@ export const toFrontEndTransport = (
           airwayBillNumber: model.airwayBillNumber,
           freightBillNumber: model.freightBillNumber,
           containerNumber: model.containerNumber,
+          containerNumbers: model.containerNumbers ? model.containerNumbers.split(',').map(cn => cn.trim()) : undefined,
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
-          exportedTo: toExportedTo(model.exportedTo)
+          exportedTo: toExportedTo(model.exportedTo),
+          departureCountry: model.departureCountry,
+          departurePort: model.departurePort,
+          departureDate: model.departureDate
         };
         break;
       }

@@ -209,6 +209,8 @@ export default class ProgressService {
         expected = [
           'vehicle', 'railwayBillNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'
         ];
+      } else if (transportation.vehicle === plane) {
+        expected = ['vehicle', 'airwayBillNumber', 'flightNumber', 'containerNumbers', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
       }
 
       return expected.every(prop => ProgressService.isEmptyAndTrimSpaces(transportation[prop])) ? ProgressStatus.COMPLETED : ProgressStatus.OPTIONAL;

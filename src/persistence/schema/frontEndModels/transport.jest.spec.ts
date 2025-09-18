@@ -136,6 +136,87 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
   });
 
+  it("if vehicle is plane then it should contain all relevant fields when provided", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.plane,
+      airwayBillNumber: "AWB123456",
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      containerNumbers: ["CONT1", "CONT2", "CONT3"],
+      freightBillNumber: "FB789",
+      departurePlace: "here",
+      departureCountry: "United Kingdom",
+      departurePort: "London Heathrow",
+      departureDate: "01/09/2025",
+      user_id: "UID",
+      journey: "Journey",
+      currentUri: "some/uri",
+      nextUri: "next/uri",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.plane,
+      airwayBillNumber: "AWB123456",
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      containerNumbers: "CONT1,CONT2,CONT3",
+      freightBillNumber: "FB789",
+      departurePlace: "here",
+      departureCountry: "United Kingdom",
+      departurePort: "London Heathrow",
+      departureDate: "01/09/2025",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is plane and containerNumbers is empty array then it should not include containerNumbers in backend", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      containerNumbers: [],
+      departurePlace: "here",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "Fl Number",
+      containerNumber: "Cont Number",
+      departurePlace: "here",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
   it("if vehicle is train then it should contain all relevant properties for train", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.train,
@@ -596,6 +677,52 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is plane then it should contain all relevant fields when present", () => {
+
+    const transport: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "123456",
+      containerNumber: "123456",
+      containerNumbers: "CONT1,CONT2,CONT3",
+      departurePlace: "London",
+      departureCountry: "United Kingdom",
+      departurePort: "London Heathrow",
+      departureDate: "01/09/2025",
+      airwayBillNumber: "AWB123456",
+      freightBillNumber: "FB789",
+      exportDate: "02/09/2025",
+      exportedFrom: "United Kingdom",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const expectedResult: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "123456",
+      airwayBillNumber: "AWB123456",
+      freightBillNumber: "FB789",
+      containerNumber: "123456",
+      containerNumbers: ["CONT1", "CONT2", "CONT3"],
+      departurePlace: "London",
+      exportDate: "02/09/2025",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      },
+      departureCountry: "United Kingdom",
+      departurePort: "London Heathrow",
+      departureDate: "01/09/2025"
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);

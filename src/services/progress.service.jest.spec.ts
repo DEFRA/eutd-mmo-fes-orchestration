@@ -1813,6 +1813,66 @@ describe('getTransportDetails', () => {
       );
     });
 
+    it('should return COMPLETED when all arrival plane fields are filled out with valid values', () => {
+      const transport: Transport = {
+        vehicle: 'plane',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        airwayBillNumber: 'AWB123456',
+        flightNumber: 'FL123',
+        containerNumbers: ['CONT001', 'CONT002'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.COMPLETED
+      );
+    });
+
+    it('should return OPTIONAL when some arrival plane fields are missing', () => {
+      const transport: Transport = {
+        vehicle: 'plane',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        airwayBillNumber: 'AWB123456',
+        flightNumber: 'FL123',
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.OPTIONAL
+      );
+    });
+
+    it('should return OPTIONAL when some arrival plane fields have validation errors', () => {
+      const transport: Transport = {
+        vehicle: 'plane',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        airwayBillNumber: 'AWB123456',
+        flightNumber: 'FL123',
+        containerNumbers: ['CONT001', '@%&*'],
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.OPTIONAL
+      );
+    });
+
     it('should return INCOMPLETED for a container vessel with a departure place with validation errors', () => {
       const transport: Transport = {
         vehicle: 'containerVessel',
@@ -4529,6 +4589,53 @@ describe('getStorageDocumentProgress', () => {
           departurePort: 'Port',
           departureDate: '09/01/2020',
           nationalityOfVehicle: 'UK',
+          departureCountry: 'Equatorial Guinea'
+        },
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        catches: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.COMPLETED,
+      },
+      completedSections: 1,
+      requiredSections: 5,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`
+    );
+    expect(mockStorageDocumentDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return a completed arrival transportation section - plane', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        arrivalTransportation: {
+          vehicle: 'plane',
+          flightNumber: '0123456789',
+          airwayBillNumber: 'a',
+          containerNumbers: 'one, two',
+          freightBillNumber: 'a',
+          departurePort: 'airport',
+          departureDate: '01/09/2025',
           departureCountry: 'Equatorial Guinea'
         },
       },
