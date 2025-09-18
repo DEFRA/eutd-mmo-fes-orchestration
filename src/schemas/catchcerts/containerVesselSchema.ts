@@ -6,7 +6,11 @@ const containerVesselSchema = Joi.object({
   vehicle: Joi.string().optional(),
   exportDate: Joi.when('journey', {
     is: 'storageNotes',
-    then: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY','D/M/YYYY']).max(Joi.ref('exportDateTo')).required(),
+    then: Joi.when('arrival', {
+      is: true,
+      then: Joi.date().allow('').optional(),
+      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('exportDateTo')).required()
+    }),
     otherwise: Joi.any()
   }),
   arrival: Joi.boolean().optional(),
@@ -55,13 +59,13 @@ const containerVesselSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(60).regex(/^[a-zA-Z0-9\-./ ]+$/),
     otherwise: Joi.string().trim().required().max(60).regex(/^[a-zA-Z0-9\-./ ]+$/)
   }),
-  departurePort: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9\-']+$/),
+  departurePort: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'\s]+$/),
   journey: Joi.string(),
   departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY','D/M/YYYY']).optional(),
   exportDateTo: Joi.when('arrival', {
     is: true,
     then: Joi.date().optional(),
-    otherwise: Joi.date().iso().required(), // Allow ISO format
+    otherwise: Joi.date().iso().required(),
   }),
 });
 
