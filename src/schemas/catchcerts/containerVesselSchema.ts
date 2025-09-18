@@ -34,11 +34,7 @@ const containerVesselSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
     otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-' ]+$/)
   }),
-  containerNumber: Joi.when('arrival', {
-    is: true,
-    then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9 ]+$/),
-    otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9 ]+$/)
-  }),
+  containerNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.when('arrival', {
     is: true,
     then: Joi.array()
@@ -54,11 +50,7 @@ const containerVesselSchema = Joi.object({
     then: Joi.any(),
     otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/).required()
   }),
-  freightBillNumber: Joi.when('arrival', {
-    is: true,
-    then: Joi.string().trim().allow('').optional().max(60).regex(/^[a-zA-Z0-9\-./ ]+$/),
-    otherwise: Joi.string().trim().required().max(60).regex(/^[a-zA-Z0-9\-./ ]+$/)
-  }),
+  freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   departurePort: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'\s]+$/),
   journey: Joi.string(),
   departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY','D/M/YYYY']).optional(),

@@ -30,11 +30,7 @@ const schema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
     otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
   }),
-  containerNumber: Joi.when('arrival', {
-    is: true,
-    then: Joi.string().trim().allow('').alphanum().max(50).optional(),
-    otherwise: Joi.string().trim().alphanum().max(50).required()
-  }),
+  containerNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.array()
     .items(Joi.string().trim().alphanum().max(50))
     .max(5)
