@@ -233,6 +233,130 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     expect(errors).toEqual(expected);
   });
 
+  it("Net weight on departure  equal to or less than weight on document", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const catches = [
+      {
+        weightOnCC: "2222",
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName',
+        netWeightProductDeparture: "10"
+      },
+    ];
+
+    const { errors } = await handler({
+      catches: catches,
+      errors: {},
+    });
+
+    const expected = {};
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it("Net weight on departure more than weight on document", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const catches = [
+      {
+        weightOnCC: "2222",
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName',
+        netWeightProductDeparture: "2223"
+      },
+    ];
+
+    const { errors } = await handler({
+      catches: catches,
+      errors: {},
+    });
+
+    const expected = {
+      "catches-0-netWeightProductDeparture": "sdAddProductToConsignmentProductNameWeightError",
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it("Fishery product weight on departure equal to or less than weight on document", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const catches = [
+      {
+        weightOnCC: "2222",
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName',
+        netWeightFisheryProductDeparture: "10"
+      },
+    ];
+
+    const { errors } = await handler({
+      catches: catches,
+      errors: {},
+    });
+
+    const expected = {};
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it("Fishery product weight on departure more than weight on document", async () => {
+    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const catches = [
+      {
+        weightOnCC: "2222",
+        commodityCode: "34234324",
+        certificateNumber: "CC-11111",
+        productWeight: "1111",
+        product: "a vessel",
+        dateOfUnloading: "29/01/2019",
+        placeOfUnloading: "Dover",
+        transportUnloadedFrom: "TRANS-IN-001",
+        scientificName: 'wrongScientificName',
+        netWeightFisheryProductDeparture: "2223"
+      },
+    ];
+
+    const { errors } = await handler({
+      catches: catches,
+      errors: {},
+    });
+
+    const expected = {
+      "catches-0-netWeightFisheryProductDeparture": "sdAddProductToConsignmentProductNameWeightError",
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
   it("checks netWeightProductDeparture, netWeightProductDeparture and validates as zero", async () => {
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
@@ -305,7 +429,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
     const catches = [
       {
-        weightOnCC: "2222",
+        weightOnCC: "999999999999",
         commodityCode: "34234324",
         certificateNumber: "CC-11111",
         productWeight: "1111",
@@ -314,8 +438,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         placeOfUnloading: "Dover",
         transportUnloadedFrom: "TRANS-IN-001",
         scientificName: 'wrongScientificName',
-        netWeightProductDeparture: 99999999999.991,
-        netWeightFisheryProductDeparture: 99999999999.991,
+        netWeightProductDeparture: "99999999999.991",
+        netWeightFisheryProductDeparture: "99999999999.991",
       },
     ];
 
