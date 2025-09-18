@@ -227,6 +227,8 @@ async function validateNonJsSpeciesName(product: any, errors: any) {
 }
 
 export async function validateProduct(product: any, index: number, errors, isNonJs = false,) {
+  checkWeightOnCCErrors(product, errors, index);
+
   const isProductNotDefined = !product.product || validateWhitespace(product.product);
   if (isProductNotDefined) {
     errors[`catches-${index}-product`] = 'sdAddProductToConsignmentProductNameErrorNull'

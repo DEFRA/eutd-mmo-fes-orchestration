@@ -194,7 +194,9 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
 
     expect(errors).toBeTruthy();
-    expect(errors).toEqual({});
+    expect(errors).toEqual({
+      "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorNull",
+    });
   });
 
   it("with missing product validates as error", async () => {
@@ -267,19 +269,21 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const data = {catches : [
-      {
-        weightOnCC: "2222",
-        commodityCode: "34234324",
-        certificateNumber: "CC-11111",
-        productWeight: "1111",
-        product: "a vessel",
-        dateOfUnloading: "29/01/2019",
-        placeOfUnloading: "Dover",
-        transportUnloadedFrom: "TRANS-IN-001",
-        scientificName: 'wrongScientificName'
-      },
-    ]};
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          commodityCode: "34234324",
+          certificateNumber: "CC-11111",
+          productWeight: "1111",
+          product: "a vessel",
+          dateOfUnloading: "29/01/2019",
+          placeOfUnloading: "Dover",
+          transportUnloadedFrom: "TRANS-IN-001",
+          scientificName: 'wrongScientificName'
+        },
+      ]
+    };
 
     const { errors } = await handler({
       data: data,
@@ -298,21 +302,23 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const data = {catches : [
-      {
-        weightOnCC: "2222",
-        commodityCode: "34234324",
-        certificateNumber: "CC-11111",
-        productWeight: "1111",
-        product: "a vessel",
-        dateOfUnloading: "29/01/2019",
-        placeOfUnloading: "Dover",
-        transportUnloadedFrom: "TRANS-IN-001",
-        scientificName: 'wrongScientificName',
-        netWeightProductDeparture: -1,
-        netWeightFisheryProductDeparture: -1,
-      },
-    ]};
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          commodityCode: "34234324",
+          certificateNumber: "CC-11111",
+          productWeight: "1111",
+          product: "a vessel",
+          dateOfUnloading: "29/01/2019",
+          placeOfUnloading: "Dover",
+          transportUnloadedFrom: "TRANS-IN-001",
+          scientificName: 'wrongScientificName',
+          netWeightProductDeparture: -1,
+          netWeightFisheryProductDeparture: -1,
+        },
+      ]
+    };
 
     const { errors } = await handler({
       data: data,
@@ -332,21 +338,23 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const data = {catches : [
-      {
-        weightOnCC: "999999999999",
-        commodityCode: "34234324",
-        certificateNumber: "CC-11111",
-        productWeight: "1111",
-        product: "a vessel",
-        dateOfUnloading: "29/01/2019",
-        placeOfUnloading: "Dover",
-        transportUnloadedFrom: "TRANS-IN-001",
-        scientificName: 'wrongScientificName',
-        netWeightProductDeparture: "99999999999.991",
-        netWeightFisheryProductDeparture: "99999999999.991",
-      },
-    ]};
+    const data = {
+      catches: [
+        {
+          weightOnCC: "999999999999",
+          commodityCode: "34234324",
+          certificateNumber: "CC-11111",
+          productWeight: "1111",
+          product: "a vessel",
+          dateOfUnloading: "29/01/2019",
+          placeOfUnloading: "Dover",
+          transportUnloadedFrom: "TRANS-IN-001",
+          scientificName: 'wrongScientificName',
+          netWeightProductDeparture: "99999999999.991",
+          netWeightFisheryProductDeparture: "99999999999.991",
+        },
+      ]
+    };
 
     const { errors } = await handler({
       data: data,
@@ -366,20 +374,22 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
-    const data = {catches : [
-      {
-        commodityCode: "34234324",
-        certificateNumber: "CC-11111",
-        productWeight: "1111",
-        product: "a vessel",
-        dateOfUnloading: "29/01/2019",
-        placeOfUnloading: "Dover",
-        transportUnloadedFrom: "TRANS-IN-001",
-        scientificName: 'wrongScientificName',
-        netWeightProductDeparture: 100000000000,
-        netWeightFisheryProductDeparture: 100000000000,
-      },
-    ]};
+    const data = {
+      catches: [
+        {
+          commodityCode: "34234324",
+          certificateNumber: "CC-11111",
+          productWeight: "1111",
+          product: "a vessel",
+          dateOfUnloading: "29/01/2019",
+          placeOfUnloading: "Dover",
+          transportUnloadedFrom: "TRANS-IN-001",
+          scientificName: 'wrongScientificName',
+          netWeightProductDeparture: 100000000000,
+          netWeightFisheryProductDeparture: 100000000000,
+        },
+      ]
+    };
 
     const { errors } = await handler({
       data,
@@ -781,7 +791,9 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       errors: {},
     });
 
-    const expected = {};
+    const expected = {
+      "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorMax2DecimalLargerThan0",
+    };
 
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
@@ -815,7 +827,9 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       errors: {},
     });
 
-    const expected = {};
+    const expected = {
+      "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal",
+    };
 
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
@@ -856,7 +870,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal", "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -897,6 +911,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
     const expectedErrors = {
+      "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal",
       "catches-species-suggest": {
         translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
         possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
@@ -1001,7 +1016,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal", "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -1044,6 +1059,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
     const expectedErrors = {
+      "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal",
       "catches-species-suggest": {
         translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
         possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
@@ -1217,7 +1233,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details/
     expect(errors).toEqual(expectedErrors);
   });
 
-   it("with storage approval number invalid date validates as error", async () => {
+  it("with storage approval number invalid date validates as error", async () => {
     const data = {
       storageFacilities: [{
         facilityName: "name",
@@ -1454,8 +1470,8 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
-        "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-        "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1476,8 +1492,8 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const expectedErrors = {
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
-        "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
-        "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
     expect(errors).toEqual(expectedErrors);
