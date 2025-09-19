@@ -16,7 +16,7 @@ import * as ProcessingStatement from '../persistence/schema/processingStatement'
 import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
-import { validateProduct } from './handlers/storage-notes';
+import { validateEntry, validateProduct } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
@@ -375,18 +375,16 @@ export default class ProgressService {
       status = await Promise.all(catches.map(
         async (singleCatch, index) => {
           const productErrors: { errors: any } = await validateProduct(singleCatch, index, {});
+          const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {})
 
           return [
             'product',
             'id',
             'commodityCode',
             'certificateNumber',
-            'productWeight',
-            'weightOnCC',
-            'dateOfUnloading',
-            'placeOfUnloading',
-            'transportUnloadedFrom'
-          ].every(value => ProgressService.isEmptyAndTrimSpaces(singleCatch[value]) && Object.keys(productErrors.errors).length <= 0)
+            'certificateType',
+            'weightOnCC'
+          ].every(value => ProgressService.isEmptyAndTrimSpaces(singleCatch[value]) && Object.keys(productErrors.errors).length <= 0 && Object.keys(entryErrors.errors).length <= 0)
         }
       ));
     }

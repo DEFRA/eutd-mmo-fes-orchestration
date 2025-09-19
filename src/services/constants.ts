@@ -18,7 +18,7 @@ export const MAX_PERSON_RESPONSIBLE_LENGTH: number = 50;
 export const MAX_PLANT_NAME_LENGTH: number = 54;
 export const MAX_DOCUMENT_NUMBER_LENGTH: number = 54;
 export const MAX_TRANSPORT_UNLOADED_FROM_LENGTH: number = 60;
-export const MAX_PORT_NAME_LENGTH: number = 50;
+export const MAX_PRODUCT_DESCRIPTION: number = 50;
 
 export const JOURNEY: {
   catchCertificate: string,

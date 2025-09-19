@@ -1,14 +1,10 @@
 import {
-  cleanDate,
   isApprovalNumberValid,
   isInvalidLength,
   isNotExceed12Digit,
-  isPlaceProductEntersUkValid,
   isPositiveNumberWithTwoDecimals,
-  isTransportUnloadedFromFormatValid,
   validateCCNumberFormat,
   validateDate,
-  validateTodayOrInThePast,
   validateUKDocumentNumberFormat,
   validateWhitespace,
 } from "../orchestration.service";
@@ -16,7 +12,7 @@ import {
 import ApplicationConfig from '../../applicationConfig';
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
-import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_TRANSPORT_UNLOADED_FROM_LENGTH, MAX_PORT_NAME_LENGTH } from "../constants";
+import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_PRODUCT_DESCRIPTION } from "../constants";
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
 import { BusinessError, SpeciesSuggestionError } from "../../validators/validationErrors";
 import { isEmpty } from "lodash";
@@ -29,16 +25,18 @@ export const initialState = {
 };
 
 export default {
-  "/create-storage-document/:documentNumber/add-product-to-this-consignment": async ({ data, _nextUrl, _currentUrl, errors }) => {
+  "/create-storage-document/:documentNumber/add-product-to-this-consignment": async ({ data, _nextUrl, _currentUrl, errors, documentNumber, userPrincipal, contactId }) => {
     const index = 0;
     const product = data.catches[index];
-    return await validateProduct(product, index, errors, data.isNonJs);
+    const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
+    return await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
   },
 
-  "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index": async ({ data, _nextUrl, _currentUrl, errors, params }) => {
+  "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index": async ({ data, _nextUrl, _currentUrl, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = +params.index;
     const product = data.catches[index];
-    return await validateProduct(product, index, errors, data.isNonJs);
+    const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
+    return await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
   },
 
   "/create-storage-document/:documentNumber/departure-product-summary": async ({ data, errors }) => {
@@ -227,7 +225,6 @@ async function validateNonJsSpeciesName(product: any, errors: any) {
 }
 
 export async function validateProduct(product: any, index: number, errors, isNonJs = false,) {
-  checkWeightOnCCErrors(product, errors, index);
 
   const isProductNotDefined = !product.product || validateWhitespace(product.product);
   if (isProductNotDefined) {
@@ -256,11 +253,6 @@ export async function validateProduct(product: any, index: number, errors, isNon
 }
 
 export async function validateEntry(product: any, index: number, errors, documentNumber: string = "", userPrincipal: string = "", contactId: string = "") {
-  checkDateOfUnloadingErrors(product, errors, index);
-
-  checkPlaceOfUnloadingErrors(product, errors, index);
-
-  checkTransportUnloadedFromErrors(product, errors, index);
 
   if (!product.certificateNumber || validateWhitespace(product.certificateNumber)) {
     errors[`catches-${index}-certificateNumber`] = 'sdAddProductToConsignmentCertificateNumberErrorNull';
@@ -276,42 +268,13 @@ export async function validateEntry(product: any, index: number, errors, documen
     errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentSpeciesDoesNotExistError';
   }
 
+  checkSupportingDocuments(product, errors, index);
+  checkProductDescription(product, errors, index);
   checkWeightOnCCErrors(product, errors, index);
+  checkNetWeightArrival(product, errors, index);
+  checkNetFisheryWeightArrival(product, errors, index);
+
   return { errors };
-}
-
-function checkDateOfUnloadingErrors(product: any, errors: any, index: number) {
-  if (!product.dateOfUnloading || product.dateOfUnloading === "") {
-    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorNull`;
-  } else if (!validateDate(product.dateOfUnloading)) {
-    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorDateFormat`;
-  } else if (!validateTodayOrInThePast(product.dateOfUnloading)) {
-    errors[`catches-${index}-dateOfUnloading`] = `sdAddProductToConsignmentDateOfUnloadingErrorValidDate`;
-    product.dateOfUnloading = cleanDate(product.dateOfUnloading);
-  }
-  else {
-    product.dateOfUnloading = cleanDate(product.dateOfUnloading);
-  }
-}
-
-function checkPlaceOfUnloadingErrors(product: any, errors: any, index: number) {
-  if (!product.placeOfUnloading || validateWhitespace(product.placeOfUnloading)) {
-    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPlaceOfUnloadingErrorNull';
-  } else if (!isPlaceProductEntersUkValid(product.placeOfUnloading)) {
-    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPlaceOfUnloadingErrorInvalid';
-  } else if (product.placeOfUnloading.length > MAX_PORT_NAME_LENGTH) {
-    errors[`catches-${index}-placeOfUnloading`] = 'sdAddProductToConsignmentPortErrorMustNotExceed';
-  }
-}
-
-function checkTransportUnloadedFromErrors(product: any, errors: any, index: number) {
-  if (!product.transportUnloadedFrom || validateWhitespace(product.transportUnloadedFrom)) {
-    errors[`catches-${index}-transportUnloadedFrom`] = 'sdAddProductToConsignmentTransportDetailsErrorNull';
-  } else if (product.transportUnloadedFrom.length > MAX_TRANSPORT_UNLOADED_FROM_LENGTH) {
-    errors[`catches-${index}-transportUnloadedFrom`] = `sdAddProductToConsignmentTransportDetailsErrorMustNotExceed-${MAX_TRANSPORT_UNLOADED_FROM_LENGTH}`;
-  } else if (!isTransportUnloadedFromFormatValid(product.transportUnloadedFrom)) {
-    errors[`catches-${index}-transportUnloadedFrom`] = 'sdAddProductToConsignmentTransportDetailsErrorInValidFormat';
-  }
 }
 
 function checkWeightOnCCErrors(product: any, errors: any, index: number) {
@@ -321,5 +284,43 @@ function checkWeightOnCCErrors(product: any, errors: any, index: number) {
     errors[`catches-${index}-weightOnCC`] = 'sdAddProductToConsignmentWeightOnCCErrorMax2DecimalLargerThan0';
   } else if (!isPositiveNumberWithTwoDecimals(product.weightOnCC)) {
     errors[`catches-${index}-weightOnCC`] = 'sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal';
+  }
+}
+
+function checkSupportingDocuments(product: any, errors: any, index: number) {
+  for (const i in product.supportingDocuments) {
+    if (!validateCCNumberFormat(product.supportingDocuments[i])) {
+      errors[`catches-${index}-supportingDocuments-${i}`] = 'sdAddProductToConsignmentSupportingDocumentErrorInvalidFormat';
+    } else if (product.supportingDocuments[i].length > MAX_DOCUMENT_NUMBER_LENGTH) {
+      errors[`catches-${index}-supportingDocuments-${i}`] = `sdAddProductToConsignmentSupportingDocumentErrorMustNotExceed-${MAX_DOCUMENT_NUMBER_LENGTH}`;
+    }
+  }
+}
+
+function checkProductDescription(product: any, errors: any, index: number) {
+  if (product.productDescription?.length > MAX_PRODUCT_DESCRIPTION) {
+    errors[`catches-${index}-productDescription`] = `sdAddProductToConsignmentProductDescriptionErrorMustNotExceed-${MAX_PRODUCT_DESCRIPTION}`;
+  } else if (!validateCCNumberFormat(product.productDescription)) {
+    errors[`catches-${index}-productDescription`] = 'sdAddProductToConsignmentProductDescriptionErrorInvalidFormat';
+  }
+}
+
+function checkNetWeightArrival(product: any, errors: any, index: number) {
+  if (product.netWeightProductArrival && (+product.netWeightProductArrival) <= 0) {
+    errors[`catches-${index}-netWeightProductArrival`] = 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0';
+  } else if (product.netWeightProductArrival && !isPositiveNumberWithTwoDecimals(product.netWeightProductArrival)) {
+    errors[`catches-${index}-netWeightProductArrival`] = 'sdNetWeightProductArrivalPositiveMax2Decimal';
+  } else if (product.netWeightProductArrival && !isNotExceed12Digit(product.netWeightProductArrival)) {
+    errors[`catches-${index}-netWeightProductArrival`] = 'sdNetWeightProductArrivalExceed12Digit';
+  }
+}
+
+function checkNetFisheryWeightArrival(product: any, errors: any, index: number) {
+  if (product.netWeightFisheryProductArrival && (+product.netWeightFisheryProductArrival) <= 0) {
+    errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0';
+  } else if (product.netWeightFisheryProductArrival && !isPositiveNumberWithTwoDecimals(product.netWeightFisheryProductArrival)) {
+    errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal';
+  } else if (product.netWeightFisheryProductArrival && !isNotExceed12Digit(product.netWeightFisheryProductArrival)) {
+    errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalExceed12Digit';
   }
 }
