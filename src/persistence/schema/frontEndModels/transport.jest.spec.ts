@@ -315,6 +315,45 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
   });
 
+  it("if vehicle is container vessel then it should contain all relevant properties for container vessel and container numbers list", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      containerNumbers: ["Cont Number"],
+      departurePlace: "here",
+      user_id: "UID",
+      journey: "Journey",
+      currentUri: "some/uri",
+      nextUri: "next/uri",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      containerNumbers: "Cont Number",
+      departurePlace: "here",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+
+  });
+
   it("if vehicle is container vessel then it should contain all relevant properties for container vessel exportedTo", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.containerVessel,
@@ -780,6 +819,40 @@ describe("When mapping from a backend transport to front end transport", () => {
       vesselName: "Vessel Name",
       flagState: "UK",
       containerNumber: "12345",
+      departurePlace: "London",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is container vessel then it should contain all the relevant properties for a container vessel with container numbers", () => {
+
+    const transport: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      containerNumbers: "12345",
+      departurePlace: "London",
+      exportedFrom: "United Kingdom",
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
+    };
+
+    const expectedResult: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Vessel Name",
+      flagState: "UK",
+      containerNumbers: ["12345"],
       departurePlace: "London",
       exportedTo: {
         officialCountryName: "SPAIN",

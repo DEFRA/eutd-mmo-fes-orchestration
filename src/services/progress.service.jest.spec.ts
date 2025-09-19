@@ -1891,6 +1891,85 @@ describe('getTransportDetails', () => {
       );
     });
 
+    it('should return COMPLETED when all arrival container vessel fields are filled out with valid values', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['CONT001', 'CONT002'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.COMPLETED
+      );
+    });
+
+    it('should return OPTIONAL when some arrival container vessel fields are missing', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.OPTIONAL
+      );
+    });
+
+    it('should return OPTIONAL when some arrival container vessel fields have validation errors', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['CONT001', '@%&*'],
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.OPTIONAL
+      );
+    });
+
+    it('should return OPTIONAL when some arrival fields have validation errors', () => {
+      const transport: Transport = {
+        vehicle: 'not valid',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['CONT001', '@%&*'],
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.OPTIONAL
+      );
+    });
+
     it('should return INCOMPLETE if there is no valid transport type', () => {
       const transport: Transport = {
         vehicle: 'not valid',

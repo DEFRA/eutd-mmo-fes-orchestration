@@ -39,7 +39,8 @@ export interface Plane extends BasicTransportDetails {
 export interface ContainerVessel extends BasicTransportDetails {
   vesselName: string,
   flagState: string,
-  containerNumber: string
+  containerNumber: string,
+  containerNumbers?: string
 }
 
 export interface Truck extends BasicTransportDetails {

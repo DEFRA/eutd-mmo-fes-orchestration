@@ -59,6 +59,7 @@ const containerVesselSchema = Joi.object({
     then: Joi.date().optional(),
     otherwise: Joi.date().iso().optional(),
   }),
+  departureCountry: Joi.string().allow('').optional()
 });
 
 export default containerVesselSchema;

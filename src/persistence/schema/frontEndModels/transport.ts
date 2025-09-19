@@ -110,7 +110,11 @@ const getContainerVesselBackEndTransport = (transport: Transport) => ({
   vesselName: transport.vesselName,
   flagState: transport.flagState,
   freightBillNumber: transport.freightBillNumber,
+  departureCountry: transport.departureCountry,
+  departurePort: transport.departurePort,
+  departureDate: transport.departureDate,
   containerNumber: transport.containerNumber,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
   departurePlace: transport.departurePlace,
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo
@@ -122,6 +126,8 @@ const getFishingVesselBackEndTransport = (transport: Transport) => ({
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo
 });
+
+const getFrontEndContainerNumbers = (containerNumbers?: string) => containerNumbers ? containerNumbers.split(',').map(cn => cn.trim()) : undefined;
 
 export const toFrontEndTransport = (
   transport: BackEndModels.Transport
@@ -157,7 +163,7 @@ export const toFrontEndTransport = (
           airwayBillNumber: model.airwayBillNumber,
           freightBillNumber: model.freightBillNumber,
           containerNumber: model.containerNumber,
-          containerNumbers: model.containerNumbers ? model.containerNumbers.split(',').map(cn => cn.trim()) : undefined,
+          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
           exportedTo: toExportedTo(model.exportedTo),
@@ -190,9 +196,13 @@ export const toFrontEndTransport = (
           flagState: model.flagState,
           freightBillNumber: model.freightBillNumber,
           containerNumber: model.containerNumber,
+          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
           departurePlace: model.departurePlace,
           exportDate: model.exportDate,
-          exportedTo: toExportedTo(model.exportedTo)
+          exportedTo: toExportedTo(model.exportedTo),
+          departureCountry: model.departureCountry,
+          departurePort: model.departurePort,
+          departureDate: model.departureDate
         };
         break;
       }

@@ -197,23 +197,32 @@ export default class ProgressService {
   public static readonly getTransportationStatus = (journey: string): ProgressStatus =>
     journey === "storageNotes" ? ProgressStatus.INCOMPLETE : ProgressStatus.CANNOT_START;
 
+  public static readonly getRequiredArrivalExpectedValues = (vehicle: string): string[] => {
+    let expected: string[];
+
+    switch (vehicle) {
+      case truck:
+        expected = ['vehicle', 'nationalityOfVehicle', 'registrationNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
+        break;
+      case train:
+        expected = ['vehicle', 'railwayBillNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
+        break;
+      case plane:
+        expected = ['vehicle', 'airwayBillNumber', 'flightNumber', 'containerNumbers', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
+        break;
+      case containerVessel:
+        expected = ['vehicle', 'vesselName', 'flagState', 'freightBillNumber', 'containerNumbers', 'departurePort', 'departureDate', 'departureCountry'];
+        break;
+      default:
+        expected = []
+    }
+
+    return expected;
+  }
+
   public static readonly getArrivalTransportCompleteStatus = (transportation: Transport, arrival?: boolean): ProgressStatus => {
     if (arrival) {
-      let expected: string[];
-
-      if (transportation.vehicle === truck) {
-        expected = [
-          'vehicle', 'nationalityOfVehicle', 'registrationNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'
-        ];
-      } else if (transportation.vehicle === train) {
-        expected = [
-          'vehicle', 'railwayBillNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'
-        ];
-      } else if (transportation.vehicle === plane) {
-        expected = ['vehicle', 'airwayBillNumber', 'flightNumber', 'containerNumbers', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
-      }
-
-      return expected.every(prop => ProgressService.isEmptyAndTrimSpaces(transportation[prop])) ? ProgressStatus.COMPLETED : ProgressStatus.OPTIONAL;
+      return this.getRequiredArrivalExpectedValues(transportation.vehicle).every(prop => ProgressService.isEmptyAndTrimSpaces(transportation[prop])) ? ProgressStatus.COMPLETED : ProgressStatus.OPTIONAL;
     }
 
     return ProgressStatus.COMPLETED;
