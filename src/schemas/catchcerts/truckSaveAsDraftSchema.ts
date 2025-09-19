@@ -2,47 +2,43 @@ const BaseJoi = require('joi');
 const Extension = require('@joi/date');
 const Joi = BaseJoi.extend(Extension);
 
-const schema = Joi.object({
+const truckSaveAsDraftSchema = Joi.object({
   vehicle: Joi.string().optional(),
   arrival: Joi.boolean().optional(),
   exportedTo: Joi.when('arrival', {
     is: true,
     then: Joi.any().optional(),
     otherwise: Joi.object({
-      officialCountryName: Joi.string().required(),
+      officialCountryName: Joi.string().optional(),
       isoCodeAlpha2: Joi.string().allow(null).allow('').optional(),
       isoCodeAlpha3: Joi.string().allow(null).allow('').optional(),
       isoNumericCode: Joi.string().allow(null).allow('').optional()
-    }).required()
+    }).optional()
   }),
-  airwayBillNumber: Joi.when('arrival', {
+  cmr: Joi.string().optional(),
+  nationalityOfVehicle: Joi.when('arrival', {
     is: true,
-    then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9-./]+$/),
-    otherwise: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9-./]+$/)
+    then: Joi.string().trim().allow('').optional(),
+    otherwise: Joi.string().trim().optional()
   }),
-  flightNumber: Joi.when('arrival', {
+  registrationNumber: Joi.when('arrival', {
     is: true,
-    then: Joi.string().trim().allow('').alphanum().max(15).optional(),
-    otherwise: Joi.string().trim().alphanum().max(15).required()
+    then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
+    otherwise: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
   }),
+  freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
-    otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
+    otherwise: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
   }),
-  containerNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
-  containerNumbers: Joi.array()
-    .items(Joi.string().trim().alphanum().max(50))
-    .max(5)
-    .optional(),
-  freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {
     is: 'storageNotes',
     then: Joi.when('arrival', {
       is: true,
       then: Joi.date().allow('').optional(),
-      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('exportDateTo')).required()
+      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('exportDateTo')).optional()
     }),
     otherwise: Joi.any()
   }),
@@ -51,13 +47,13 @@ const schema = Joi.object({
     then: Joi.when('arrival', {
       is: true,
       then: Joi.date().allow('').optional(),
-      otherwise: Joi.date().required()
+      otherwise: Joi.date().optional()
     }),
     otherwise: Joi.any()
   }),
   departureCountry: Joi.string().allow('').optional(),
   departurePort: Joi.string().allow('').trim().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/).optional(),
-  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).optional(),
-});
+  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).optional()
+})
 
-export default schema;
+export default truckSaveAsDraftSchema;

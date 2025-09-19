@@ -178,7 +178,6 @@ describe("transport routes", () => {
             },
         ]
 
-        // testing save /v1/transport/{vehicle}/details and /v1/transport/{vehicle}/details/saveAsDraft
         for (const endpoint of saveVehicleEndpointTestCases) {
             const {url, otherRequiredFields} = endpoint;
 
@@ -238,12 +237,23 @@ describe("transport routes", () => {
             it(`returns 200 and doesnt fail when ${url}/saveAsDraft`, async () => {
 
                 const request = createRequestObj(url+'/saveAsDraft', {...otherRequiredFields,
-                    ...{dashboardUri: '/uri', exportDate:moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
+                    ...{exportDate: moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
                 })
                 const response = await server.inject(request);
                 expect(mockAddTransportSaveAsDraft).toHaveBeenCalled();
                 expect(response.statusCode).toBe(200);
                 expect(response.result).toEqual({some:'data'});
+            });
+
+            it(`returns 400 and does fail when ${url}/saveAsDraft`, async () => {
+
+                const request = createRequestObj(url+'/saveAsDraft', {...otherRequiredFields,
+                    ...{dashboardUrl: '/', exportDate: moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
+                })
+                const response = await server.inject(request);
+                expect(mockAddTransportSaveAsDraft).not.toHaveBeenCalled();
+                expect(response.statusCode).toBe(400);
+                expect(response.result).toEqual({"dashboardUrl": "error.dashboardUrl.object.unknown"});
             });
 
             it('returns 500 and fails when all required fields given and valid but is 500 Internal Error', async () => {
@@ -264,7 +274,7 @@ describe("transport routes", () => {
                 mockAddTransportSaveAsDraft.mockRejectedValue(new Error('an error'));
 
                 const request = createRequestObj(url+'/saveAsDraft', {...otherRequiredFields,
-                    ...{dashboardUri: '/uri', exportDate:moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
+                    ...{exportDate:moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
                 })
                 const response = await server.inject(request);
                 expect(mockAddTransportSaveAsDraft).toHaveBeenCalled();
