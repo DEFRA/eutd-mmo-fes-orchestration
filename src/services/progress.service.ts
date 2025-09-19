@@ -472,16 +472,18 @@ export default class ProgressService {
 
     const data = await StorageDocumentService.getDraft(userPrincipal, documentNumber, contactId);
     const catchesStatus: ProgressStatus = await ProgressService.getSDCatchStatus(data?.exportData?.catches);
+    const departureTransportation: ProgressStatus = ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data?.exportData?.transportation)), "storageNotes");
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
+    const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED && data?.exportData?.catches.every((ctch: StorageDocument.Catch) => !isEmpty(ctch.productWeight));
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       catches: catchesStatus,
       storageFacilities: ProgressService.getStorageFacilitiesStatus(data?.exportData?.storageFacilities),
       exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo),
-      transportDetails: ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data?.exportData?.transportation)), "storageNotes"),
+      transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
       arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.OPTIONAL
     };
 
