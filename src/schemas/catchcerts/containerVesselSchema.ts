@@ -38,12 +38,13 @@ const containerVesselSchema = Joi.object({
   containerNumbers: Joi.when('arrival', {
     is: true,
     then: Joi.array()
-      .items(
-        Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).allow('')
-      )
+      .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).allow(''))
       .max(5)
       .optional(),
-    otherwise: Joi.any()
+    otherwise: Joi.array()
+      .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/))
+      .max(5)
+      .required()
   }),
   departurePlace: Joi.when('arrival', {
     is: true,

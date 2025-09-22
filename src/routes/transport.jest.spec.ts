@@ -141,7 +141,7 @@ describe("transport routes", () => {
                 otherRequiredFields: {
                     flightNumber: "x",
                     departurePlace: "x",
-                    containerNumber: "x",
+                    containerNumbers: ["x"],
                     exportedTo: {
                       officialCountryName: "Nigeria"
                     }
@@ -165,7 +165,7 @@ describe("transport routes", () => {
                 otherRequiredFields: {
                     vesselName: "x",
                     flagState: "x",
-                    containerNumber: "x",
+                    containerNumbers: ["x"],
                     departurePlace: "x",
                     exportedTo: {
                       officialCountryName: "Nigeria",

@@ -4564,7 +4564,7 @@ describe('getStorageDocumentProgress', () => {
         transportation: {
           vehicle: 'plane',
           flightNumber: 'BA078',
-          containerNumber: '0123456789',
+          containerNumbers: '0123456789',
           exportedFrom: 'United Kingdom',
           exportDate: '26/05/2023',
           exportedTo: {

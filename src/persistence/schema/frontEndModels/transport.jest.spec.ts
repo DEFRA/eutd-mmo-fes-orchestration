@@ -1080,6 +1080,7 @@ describe('checkTransportDataFrontEnd', () => {
       vehicle: FrontEndTransport.plane,
       flightNumber: 'flight number',
       containerNumber: 'cont. number',
+      containerNumbers: ['cont. number'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1128,6 +1129,7 @@ describe('checkTransportDataFrontEnd', () => {
       vehicle: FrontEndTransport.plane,
       flightNumber: 'flight number',
       containerNumber: 'cont. number',
+      containerNumbers: ['cont. number'],
       exportDate: 'some date',
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -1194,6 +1196,7 @@ describe('checkTransportDataFrontEnd', () => {
       vesselName: 'vessel name',
       flagState: 'some flag name',
       containerNumber: 'container number',
+      containerNumbers: ['cont. number'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1218,6 +1221,7 @@ describe('checkTransportDataFrontEnd', () => {
       vehicle: FrontEndTransport.containerVessel,
       flagState: 'some flag name',
       containerNumber: 'container number',
+      containerNumbers: ['cont. number'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1231,6 +1235,7 @@ describe('checkTransportDataFrontEnd', () => {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: 'vessel name',
       containerNumber: 'container number',
+      containerNumbers: ['cont. number'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1258,6 +1263,7 @@ describe('checkTransportDataFrontEnd', () => {
       vesselName: 'vessel name',
       flagState: 'some flag name',
       containerNumber: 'container number',
+      containerNumbers: ['cont. number'],
       exportDate: 'some date',
       exportedTo: {
         officialCountryName: "SPAIN",

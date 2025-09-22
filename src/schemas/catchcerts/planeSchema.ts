@@ -31,10 +31,17 @@ const schema = Joi.object({
     otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
   }),
   containerNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
-  containerNumbers: Joi.array()
-    .items(Joi.string().trim().alphanum().max(50))
-    .max(5)
-    .optional(),
+  containerNumbers: Joi.when('arrival', {
+    is: true,
+    then: Joi.array()
+      .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).allow(''))
+      .max(5)
+      .optional(),
+    otherwise: Joi.array()
+      .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/))
+      .max(5)
+      .required()
+  }),
   freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {
