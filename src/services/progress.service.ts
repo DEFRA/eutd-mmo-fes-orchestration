@@ -491,7 +491,6 @@ export default class ProgressService {
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       catches: catchesStatus,
       storageFacilities: ProgressService.getStorageFacilitiesStatus(data?.exportData?.storageFacilities),
-      exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo),
       transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
       arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.OPTIONAL
     };
