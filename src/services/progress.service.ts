@@ -377,14 +377,14 @@ export default class ProgressService {
     return !isEmpty(propertyValue) ? Object.keys(propertyValue).every(key => typeof propertyValue[key] === 'string' && propertyValue[key].trim() !== '') : false
   }
 
-  public static readonly getSDCatchStatus = async (catches: StorageDocument.Catch[]): Promise<ProgressStatus> => {
+  public static readonly getSDCatchStatus = async (catches: StorageDocument.Catch[], userPrincipal: string, documentNumber: string, contactId: string): Promise<ProgressStatus> => {
     let status: boolean[] = [];
 
     if (catches !== undefined && catches.length > 0) {
       status = await Promise.all(catches.map(
         async (singleCatch, index) => {
           const productErrors: { errors: any } = await validateProduct(singleCatch, index, {});
-          const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {})
+          const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {}, documentNumber, userPrincipal, contactId);
 
           return [
             'product',
@@ -480,7 +480,7 @@ export default class ProgressService {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`);
 
     const data = await StorageDocumentService.getDraft(userPrincipal, documentNumber, contactId);
-    const catchesStatus: ProgressStatus = await ProgressService.getSDCatchStatus(data?.exportData?.catches);
+    const catchesStatus: ProgressStatus = await ProgressService.getSDCatchStatus(data?.exportData?.catches, userPrincipal, documentNumber, contactId);
     const departureTransportation: ProgressStatus = ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data?.exportData?.transportation)), "storageNotes");
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
