@@ -14,6 +14,7 @@ export interface StorageDocument {
   addAnotherProduct?: string;
   addAnotherStorageFacility?: string;
   transport?: Transport.Transport;
+  arrivalTransport?: Transport.Transport;
   exportedTo?: ICountry,
   errors?: {};
   errorsUrl?: string;
@@ -108,6 +109,7 @@ export const toBackEndExportDataSD = (storageDocument: StorageDocument, exporter
     catches: toBackEndCatchSD(storageDocument.catches),
     storageFacilities: storageDocument.storageFacilities,
     transportation : storageDocument.transport ? Transport.toBackEndTransport(storageDocument.transport) : undefined,
+    arrivalTransportation : storageDocument.arrivalTransport ? Transport.toBackEndTransport(storageDocument.arrivalTransport) : undefined,
     exportedTo : storageDocument.exportedTo
   }
 };

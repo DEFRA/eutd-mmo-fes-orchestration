@@ -195,8 +195,7 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
       storageFacilities: [],
       validationErrors: [{}],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
-      transport: undefined
+      addAnotherStorageFacility: "No"
     }
   }
 
@@ -209,6 +208,7 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
     addAnotherProduct: "No",
     addAnotherStorageFacility: "No",
     transport: exportData.transportation ? toFrontEndTransport(exportData.transportation) : undefined,
+    arrivalTransport: exportData.arrivalTransportation ? toFrontEndTransport(exportData.arrivalTransportation) : undefined,
     exportedTo: toExportedTo(exportData.exportedTo)
   };
 }
@@ -285,8 +285,8 @@ export const cloneCatches = (original: Catch): Catch => {
     scientificName,
     certificateType,
     supportingDocuments,
-    productDescription,       
-    netWeightProductArrival,       
+    productDescription,
+    netWeightProductArrival,
     netWeightFisheryProductArrival,
     netWeightProductDeparture,
     netWeightFisheryProductDeparture,

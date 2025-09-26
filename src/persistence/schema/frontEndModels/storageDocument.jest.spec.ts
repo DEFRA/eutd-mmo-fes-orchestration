@@ -216,6 +216,7 @@ describe('when mapping frontend  to backend exportData for statementDocument', (
       catches : frontEndCatches,
       storageFacilities: frontendStorageFacilities,
       transport: frontEndTransportation,
+      arrivalTransport: frontEndTransportation,
       exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
@@ -233,6 +234,7 @@ describe('when mapping frontend  to backend exportData for statementDocument', (
     expect(result.exporterDetails.buildingNumber).toBeUndefined();
     expect(result.exporterDetails.subBuildingName).toBeUndefined();
     expect(result.exporterDetails.county).toBeUndefined();
+    expect(result.arrivalTransportation).toBeDefined();
   });
 
   it('should contain return an empty exporter details section', ()=> {

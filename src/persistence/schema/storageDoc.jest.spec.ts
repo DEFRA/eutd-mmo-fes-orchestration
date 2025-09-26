@@ -8,18 +8,18 @@ import { ExporterDetails, Transport, ICountry } from './common';
 import * as Utils from '../../helpers/utils/utils';
 
 describe('When newing up a new storage document', () => {
-    it ('Will uppercase its document number',() => {
-        const schema = {
-            documentNumber:   "aaa",
-            status:           "test",
-            createdAt:        "2019-01-01",
-            createdBy:        "John",
-            createdByEmail:   "test@test.com",
-            exportData:       { catches : [{certificateNumber: "aaa"}], storageFacilities: []},
-            documentUri:      "test"
-          };
+  it('Will uppercase its document number', () => {
+    const schema = {
+      documentNumber: "aaa",
+      status: "test",
+      createdAt: "2019-01-01",
+      createdBy: "John",
+      createdByEmail: "test@test.com",
+      exportData: { catches: [{ certificateNumber: "aaa" }], storageFacilities: [] },
+      documentUri: "test"
+    };
 
-        const mySchema = new  BackEndStorageDocument.StorageDocumentModel(schema);
+    const mySchema = new BackEndStorageDocument.StorageDocumentModel(schema);
 
     expect(mySchema.exportData.catches[0].certificateNumber).toEqual('AAA')
   });
@@ -40,7 +40,7 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
       createdByEmail: "foo@foo.com",
       documentNumber: "GBR-2020-SD-272B300C3",
       documentUri: "_1d1e7128-2b8a-404b-b842-f0303a1218ef.pdf",
-      requestByAdmin:true,
+      requestByAdmin: true,
       status: "DRAFT",
       draftData: {},
       exportData: {
@@ -72,14 +72,14 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
           }
         ],
         exporterDetails: {
-          contactId : 'a contact Id',
-          accountId  : 'an account id',
+          contactId: 'a contact Id',
+          accountId: 'an account id',
           exporterCompanyName: "Exporter Fish Ltd",
           addressOne: "London",
           addressTwo: "London",
           townCity: "London",
           postcode: "SE37 6YH",
-          _dynamicsAddress: {someData: 'original data'},
+          _dynamicsAddress: { someData: 'original data' },
           _dynamicsUser: {
             firstName: "John",
             lastName: "Doe"
@@ -103,8 +103,8 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
 
 describe('toFrontEndStorageFacility mapping back end to front end', () => {
 
-  it('should return a valid frontEnd Storage Facilities object',  () => {
-    const backEndStorageFacility : BackEndStorageDocument.StorageFacility = {
+  it('should return a valid frontEnd Storage Facilities object', () => {
+    const backEndStorageFacility: BackEndStorageDocument.StorageFacility = {
       facilityName: "exporter facility",
       facilityAddressOne: "London",
       facilityTownCity: "London",
@@ -117,7 +117,7 @@ describe('toFrontEndStorageFacility mapping back end to front end', () => {
       facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
     };
 
-    const expected : FrontEndStorageDocument.StorageFacility = {
+    const expected: FrontEndStorageDocument.StorageFacility = {
       facilityName: "exporter facility",
       facilityAddressOne: "London",
       facilityTownCity: "London",
@@ -178,6 +178,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         departurePlace: "London",
         exportDate: "25/11/2019"
       },
+      arrivalTransport: undefined,
       exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
@@ -187,54 +188,54 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
     };
 
     const catches: Catch[] = [{
-        product: "Atlantic herring (HER)",
-        id: '34RWR-1610018899',
-        commodityCode: "34567",
-        productWeight: "45",
-        dateOfUnloading: "11/02/2020",
-        placeOfUnloading: "London",
-        transportUnloadedFrom: "12345",
-        certificateNumber: "34RWR",
-        weightOnCC: "45"
-      }];
+      product: "Atlantic herring (HER)",
+      id: '34RWR-1610018899',
+      commodityCode: "34567",
+      productWeight: "45",
+      dateOfUnloading: "11/02/2020",
+      placeOfUnloading: "London",
+      transportUnloadedFrom: "12345",
+      certificateNumber: "34RWR",
+      weightOnCC: "45"
+    }];
 
     const storageFacilities: StorageFacility[] = [{
-        facilityName: "Facility Name",
-        facilityAddressOne: "London",
-        facilityTownCity: "London",
-        facilityPostcode: "SE37 6YH",
-        facilitySubBuildingName: "Sub building name",
-        facilityBuildingNumber: null,
-        facilityBuildingName: "Building name",
-        facilityStreetName: "Street name",
-        facilityCounty: "Ealing",
-        facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-      }
+      facilityName: "Facility Name",
+      facilityAddressOne: "London",
+      facilityTownCity: "London",
+      facilityPostcode: "SE37 6YH",
+      facilitySubBuildingName: "Sub building name",
+      facilityBuildingNumber: null,
+      facilityBuildingName: "Building name",
+      facilityStreetName: "Street name",
+      facilityCounty: "Ealing",
+      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
+    }
     ];
 
     const exporterDetails: ExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: "Exporter Fish Ltd",
       addressOne: "London",
       addressTwo: "London",
       townCity: "London",
       postcode: "SE37 6YH",
-      _dynamicsAddress: {someData: 'original data'},
+      _dynamicsAddress: { someData: 'original data' },
       _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       }
     };
 
-    const transport : Transport = {
+    const transport: Transport = {
       vehicle: "truck",
       cmr: false,
       nationalityOfVehicle: "British",
       registrationNumber: "WE78ERF",
       departurePlace: "London",
       exportDate: "25/11/2019"
-  }
+    }
 
     const exportData: BackEndStorageDocument.ExportData = {
       catches: catches,
@@ -298,51 +299,62 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       },
       exportedTo: {
         officialCountryName: "SPAIN"
+      },
+      arrivalTransport: {
+        vehicle: "truck",
+        cmr: "false",
+        exportedTo: {
+          officialCountryName: "SPAIN"
+        },
+        nationalityOfVehicle: "British",
+        registrationNumber: "WE78ERF",
+        departurePlace: "London",
+        exportDate: "25/11/2019"
       }
     };
 
     const catches: Catch[] = [{
-        product: "Atlantic herring (HER)",
-        id: '34RWR-1610018899',
-        commodityCode: "34567",
-        productWeight: "45",
-        dateOfUnloading: "11/02/2020",
-        placeOfUnloading: "London",
-        transportUnloadedFrom: "12345",
-        certificateNumber: "34RWR",
-        weightOnCC: "45"
-      }];
+      product: "Atlantic herring (HER)",
+      id: '34RWR-1610018899',
+      commodityCode: "34567",
+      productWeight: "45",
+      dateOfUnloading: "11/02/2020",
+      placeOfUnloading: "London",
+      transportUnloadedFrom: "12345",
+      certificateNumber: "34RWR",
+      weightOnCC: "45"
+    }];
 
     const storageFacilities: StorageFacility[] = [{
-        facilityName: "Facility Name",
-        facilityAddressOne: "London",
-        facilityTownCity: "London",
-        facilityPostcode: "SE37 6YH",
-        facilitySubBuildingName: "Sub building name",
-        facilityBuildingNumber: null,
-        facilityBuildingName: "Building name",
-        facilityStreetName: "Street name",
-        facilityCounty: "Ealing",
-        facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-      }
+      facilityName: "Facility Name",
+      facilityAddressOne: "London",
+      facilityTownCity: "London",
+      facilityPostcode: "SE37 6YH",
+      facilitySubBuildingName: "Sub building name",
+      facilityBuildingNumber: null,
+      facilityBuildingName: "Building name",
+      facilityStreetName: "Street name",
+      facilityCounty: "Ealing",
+      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
+    }
     ];
 
     const exporterDetails: ExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: "Exporter Fish Ltd",
       addressOne: "London",
       addressTwo: "London",
       townCity: "London",
       postcode: "SE37 6YH",
-      _dynamicsAddress: {someData: 'original data'},
+      _dynamicsAddress: { someData: 'original data' },
       _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       }
     };
 
-    const transport : any = {
+    const transport: any = {
       vehicle: "truck",
       cmr: false,
       exportedTo: "SPAIN",
@@ -350,13 +362,24 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       registrationNumber: "WE78ERF",
       departurePlace: "London",
       exportDate: "25/11/2019"
-  }
+    }
+
+    const arrivalTransport: any = {
+      vehicle: "truck",
+      cmr: false,
+      exportedTo: "SPAIN",
+      nationalityOfVehicle: "British",
+      registrationNumber: "WE78ERF",
+      departurePlace: "London",
+      exportDate: "25/11/2019"
+    }
 
     const exportData: any = {
       catches: catches,
       storageFacilities: storageFacilities,
       exporterDetails: exporterDetails,
       transportation: transport,
+      arrivalTransportation: arrivalTransport,
       exportedTo: "SPAIN"
     };
 
@@ -369,19 +392,18 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       storageFacilities: [],
       validationErrors: [{}],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
-      transport: undefined
+      addAnotherStorageFacility: "No"
     };
 
     const exporterDetails: ExporterDetails = {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: "Exporter Fish Ltd",
       addressOne: "London",
       addressTwo: "London",
       townCity: "London",
       postcode: "SE37 6YH",
-      _dynamicsAddress: {someData: 'original data'},
+      _dynamicsAddress: { someData: 'original data' },
       _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
@@ -401,8 +423,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       storageFacilities: [],
       validationErrors: [{}],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
-      transport: undefined
+      addAnotherStorageFacility: "No"
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(undefined)).toStrictEqual(expected);
@@ -451,6 +472,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       validationErrors: [],
       addAnotherProduct: "No",
       addAnotherStorageFacility: "No",
+      arrivalTransport: undefined,
       transport: undefined,
       exportedTo: undefined
     });
@@ -565,7 +587,7 @@ describe('When saving a storage document', () => {
   beforeAll(async () => {
     mongoServer = new MongoMemoryServer();
     const mongoUri = await mongoServer.getConnectionString();
-    await mongoose.connect(mongoUri).catch(err => {console.log(err)});
+    await mongoose.connect(mongoUri).catch(err => { console.log(err) });
   });
 
   afterEach(async () => {
@@ -579,19 +601,19 @@ describe('When saving a storage document', () => {
 
   it('should generate a unique _id for each catch', async () => {
     const data = {
-      documentNumber:   "aaa",
-      status:           "test",
-      createdAt:        "2019-01-01",
-      createdBy:        "John",
-      createdByEmail:   "test@test.com",
-      exportData:       {
-        catches : [
-          {certificateNumber: "aaa"},
-          {certificateNumber: "bbb"}
+      documentNumber: "aaa",
+      status: "test",
+      createdAt: "2019-01-01",
+      createdBy: "John",
+      createdByEmail: "test@test.com",
+      exportData: {
+        catches: [
+          { certificateNumber: "aaa" },
+          { certificateNumber: "bbb" }
         ],
         storageFacilities: []
       },
-      documentUri:      "test"
+      documentUri: "test"
     };
 
     const sd = await new BackEndStorageDocument.StorageDocumentModel(data).save();
@@ -759,7 +781,7 @@ describe('When cloning a storage document', () => {
     }
 
     it('will copy and map exportedTo into the currently supported format', () => {
-      const expected: ICountry  = {
+      const expected: ICountry = {
         officialCountryName: "Australia"
       };
 
