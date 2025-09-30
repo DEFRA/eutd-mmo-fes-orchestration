@@ -29,14 +29,18 @@ export default {
     const index = 0;
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
-    return await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    
+    return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
   "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index": async ({ data, _nextUrl, _currentUrl, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = +params.index;
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
-    return await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    
+    return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
   "/create-storage-document/:documentNumber/departure-product-summary": async ({ data, errors }) => {
@@ -184,6 +188,30 @@ function validateStorageApproval(storageFacility: any, index: number, errors) {
 function getFacilityAddressOneError(isStorageFacilitiesPage: boolean) {
   return isStorageFacilitiesPage ? 'sdAddStorageFacilityDetailsErrorEditTheStorageFacility'
     : 'sdAddStorageFacilityDetailsErrorEnterTheAddress';
+}
+
+function getOrderedErrorListForProductConsignmentPage(errors, index) {
+  const orderedErrors = {};
+  [
+    `catches-${index}-certificateNumber`,
+    `catches-${index}-weightOnCC`,
+    `catches-${index}-supportingDocuments-0`,
+    `catches-${index}-supportingDocuments-1`,
+    `catches-${index}-supportingDocuments-2`,
+    `catches-${index}-supportingDocuments-3`,
+    `catches-${index}-supportingDocuments-4`,
+    `catches-${index}-product`,
+    `catches-${index}-commodityCode`,
+    `catches-${index}-productDescription`,
+    `catches-${index}-netWeightProductArrival`,
+    `catches-${index}-netWeightFisheryProductArrival`,
+  ].forEach((val) => {
+    if (errors[val] !== undefined) {
+      orderedErrors[val] = errors[val];
+      delete errors[val];
+    }
+  });
+  return { errors: { ...orderedErrors, ...errors } };
 }
 
 export async function isSpeciesNameValid(productName, scientificName) {
