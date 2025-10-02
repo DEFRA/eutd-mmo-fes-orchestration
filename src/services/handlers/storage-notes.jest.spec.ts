@@ -3,9 +3,9 @@ import * as FishValidator from "../../validators/fish.validator";
 import * as CommodityCodeValidator from "../../validators/pssdCommodityCode.validator";
 
 describe("/create-storage-document/:documentNumber/add-product-to-this-consignment", () => {
-  let mockValidatorSpeciesName;
-  let mockValidatorCommodityCode;
-  let mockValidateSpeciesWithSuggestions;
+  let mockValidatorSpeciesName: jest.SpyInstance;
+  let mockValidatorCommodityCode: jest.SpyInstance;
+  let mockValidateSpeciesWithSuggestions: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidatorSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
@@ -41,6 +41,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -82,6 +83,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -104,6 +106,88 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
   });
 
+  it("with no certificate type", async () => {
+    
+
+    const currentUrl =
+      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          product: "Arctic char (ACH)",
+          commodityCode: "commodity code is invalid",
+          certificateNumber: "CC-11111",
+          productWeight: "1111",
+          dateOfUnloading: "29/01/2019",
+          placeOfUnloading: "Dover",
+          transportUnloadedFrom: "TRANS-IN-001",
+          scientificName: 'Salvelinus alpinus'
+        },
+      ],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data: data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual({
+      'catches-0-certificateType': 'sdAddCatchTypeErrorSelectCertificateType'
+    });
+  });
+
+  it("with an invalid certificate type", async () => {
+    
+    const currentUrl =
+      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          product: "Arctic char (ACH)",
+          commodityCode: "commodity code is invalid",
+          certificateNumber: "CC-11111",
+          productWeight: "1111",
+          dateOfUnloading: "29/01/2019",
+          placeOfUnloading: "Dover",
+          transportUnloadedFrom: "TRANS-IN-001",
+          scientificName: 'Salvelinus alpinus',
+          certificateType: 'invalid_type',
+        },
+      ],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data: data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual({
+      'catches-0-certificateType': 'sdAddCatchTypeErrorCertificateTypeInvalid'
+    });
+  });
+
   it("with bad date for date of unloading", async () => {
     const currentUrl =
       "/create-storage-document/:documentNumber/add-product-to-this-consignment";
@@ -120,6 +204,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/20199090",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -156,6 +241,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/3010",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -192,6 +278,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2010",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -229,6 +316,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -272,7 +360,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          scientificName: 'wrongScientificName'
+          scientificName: 'wrongScientificName',
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -312,6 +401,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -352,6 +442,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -389,7 +480,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          certificateNumber: 'CERTIFICATENUMBERCERTIFICATENUMBERCERTIFICATENUMBERCERTIFICATENUMBER'
+          certificateNumber: 'CERTIFICATENUMBERCERTIFICATENUMBERCERTIFICATENUMBERCERTIFICATENUMBER',
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -429,7 +521,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          certificateNumber: 'DOCUMENTNUMBER; R*1'
+          certificateNumber: 'DOCUMENTNUMBER; R*1',
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -469,6 +562,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           productWeight: "1111",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -506,6 +600,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -543,7 +638,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           transportUnloadedFrom: "TRANS-IN-001",
-          placeOfUnloading: "!Dover"
+          placeOfUnloading: "!Dover",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -581,6 +677,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -619,6 +716,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: " ",
           transportUnloadedFrom: " ",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -662,6 +760,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -701,6 +800,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -740,6 +840,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         }
       ],
       storageFacilities: [{}],
@@ -782,6 +883,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -832,7 +934,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          supportingDocuments: ["@@$@$"]
+          supportingDocuments: ["@@$@$"],
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -873,7 +976,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          supportingDocuments: ["supportingDocumentsupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocuments"]
+          supportingDocuments: ["supportingDocumentsupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocuments"],
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -914,7 +1018,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          productDescription: "@@$@$"
+          productDescription: "@@$@$",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -955,7 +1060,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          productDescription: "supportingDocumentsupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocuments"
+          productDescription: "supportingDocumentsupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocuments",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -996,7 +1102,8 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'wrongScientificName',
-          netWeightProductArrival: "0"
+          netWeightProductArrival: "0",
+          certificateType: 'non_uk',
         },
       ]
     };
@@ -1037,6 +1144,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           scientificName: 'wrongScientificName',
           netWeightProductArrival: -1,
           netWeightFisheryProductArrival: -1,
+          certificateType: 'non_uk',
         },
       ]
     };
@@ -1078,6 +1186,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           scientificName: 'wrongScientificName',
           netWeightProductArrival: "99999999999.991",
           netWeightFisheryProductArrival: "99999999999.991",
+          certificateType: 'non_uk',
         },
       ]
     };
@@ -1119,6 +1228,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           scientificName: 'wrongScientificName',
           netWeightProductArrival: 100000000000,
           netWeightFisheryProductArrival: 100000000000,
+          certificateType: 'non_uk',
         },
       ]
     };
@@ -1183,6 +1293,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -1220,6 +1331,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         }
       ],
       storageFacilities: [{}],
@@ -1264,6 +1376,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -1992,6 +2105,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           commodityCode: "A2345-:/.4\\",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -2026,7 +2140,8 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
-          transportUnloadedFrom: "the name of a container ship, flight number or vehicle registration"
+          transportUnloadedFrom: "the name of a container ship, flight number or vehicle registration",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -2064,7 +2179,8 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
-          transportUnloadedFrom: "flight number; (!23)"
+          transportUnloadedFrom: "flight number; (!23)",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],
@@ -2102,7 +2218,8 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
-          transportUnloadedFrom: "flight number: 23-12, 12/34"
+          transportUnloadedFrom: "flight number: 23-12, 12/34",
+          certificateType: 'non_uk',
         },
       ],
       storageFacilities: [{}],

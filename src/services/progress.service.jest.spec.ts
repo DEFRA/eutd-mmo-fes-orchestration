@@ -4422,7 +4422,7 @@ describe('getStorageDocumentProgress', () => {
             productWeight: "100",
             weightOnCC: "100",
             scientificName: "Haliotis rufescens",
-            certificateType: "No",
+            certificateType: "non_uk",
             supportingDocuments: [],
             productDescription: "",
             netWeightProductArrival: "",
