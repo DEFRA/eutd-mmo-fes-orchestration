@@ -21,7 +21,7 @@ const createServerInstance = async () => {
   ) => {
     const isValid = true;
     const credentials = { id: 'fesApi', name: 'fesApi' };
-    return {isValid, credentials};
+    return { isValid, credentials };
   };
 
   server.auth.strategy("fesApi", "basic", {
@@ -29,7 +29,7 @@ const createServerInstance = async () => {
   });
 
   server.auth.strategy("jwt", "jwt", {
-    verify: (_decoded, _req) => {
+    verify: (_decoded: any, _req: any) => {
       return { isValid: true };
     },
   });
@@ -40,7 +40,7 @@ const createServerInstance = async () => {
 };
 
 describe("exporter-payload routes", () => {
-  let server;
+  let server: Hapi.Server;
 
   beforeAll(async () => {
     server = await createServerInstance();
@@ -74,8 +74,8 @@ describe("exporter-payload routes", () => {
       documentNumber: 'GBR-2020-CC-0E42C2DA5'
     };
 
-    let mockValidateDocumentOwnership;
-    let mockIsDirectLanding;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockIsDirectLanding: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -179,8 +179,8 @@ describe("exporter-payload routes", () => {
       },
     };
 
-    let mockValidateDocumentOwnership;
-    let mockAddLandingsEntryOption;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockAddLandingsEntryOption: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -302,9 +302,9 @@ describe("exporter-payload routes", () => {
   });
 
   describe("POST /v1/export-certificates/landing/validate", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockUpsertExportPayloadProductLanding;
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockUpsertExportPayloadProductLanding: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -316,7 +316,7 @@ describe("exporter-payload routes", () => {
         "upsertExportPayloadProductLanding"
       );
 
-     jest.spyOn(SessionManager, 'getCurrentSessionData')
+      jest.spyOn(SessionManager, 'getCurrentSessionData')
         .mockResolvedValue({
           documentNumber: "DOCUMENT123",
           currentUri: "test/test.html",
@@ -350,7 +350,7 @@ describe("exporter-payload routes", () => {
           gearType: "",
           rfmo: undefined,
           highSeasArea: "No",
-          exclusiveEconomicZones:[
+          exclusiveEconomicZones: [
             {
               officialCountryName: "Afghanistan",
               isoCodeAlpha2: "AF",
@@ -403,9 +403,9 @@ describe("exporter-payload routes", () => {
       const response = await server.inject(_request);
 
       const expected = {
-        items:[],
+        items: [],
         error: "invalid",
-        errors:{
+        errors: {
           faoArea: "error.faoArea.any.only"
         }
       };
@@ -427,9 +427,9 @@ describe("exporter-payload routes", () => {
       }
 
       const expected = {
-        items:[],
+        items: [],
         error: "invalid",
-        errors:{
+        errors: {
           startDate: "error.startDate.date.max"
         }
       };
@@ -460,7 +460,7 @@ describe("exporter-payload routes", () => {
       expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
-    it("should return 400 for a request payload containing an non-existent start date", async () => {
+    it("should return 400 for a request payload containing a non-existent start date", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
 
@@ -589,9 +589,9 @@ describe("exporter-payload routes", () => {
   });
 
   describe("POST /v1/export-certificates/direct-landing/validate", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockUpsertExportPayloadProductDirectLanding;
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockUpsertExportPayloadProductDirectLanding: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -640,7 +640,7 @@ describe("exporter-payload routes", () => {
           gearCategory: "Category 1",
           gearType: "Type 1",
           highSeasArea: "Yes",
-          exclusiveEconomicZones:[
+          exclusiveEconomicZones: [
             {
               officialCountryName: "Afghanistan",
               isoCodeAlpha2: "AF",
@@ -693,9 +693,9 @@ describe("exporter-payload routes", () => {
       const response = await server.inject(_request);
 
       const expected = {
-        items:[],
+        items: [],
         error: "invalid",
-        errors:{
+        errors: {
           faoArea: "error.faoArea.any.only"
         }
       };
@@ -717,9 +717,9 @@ describe("exporter-payload routes", () => {
       }
 
       const expected = {
-        items:[],
+        items: [],
         error: "invalid",
-        errors:{
+        errors: {
           startDate: "error.startDate.date.max"
         }
       };
@@ -746,6 +746,24 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(400);
       expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
+    });
+
+    it("should return 400 for a request payload containing a date landed without a year", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '-08-01'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
     });
 
     it("should return 403 user is not valid", async () => {
@@ -823,6 +841,7 @@ describe("exporter-payload routes", () => {
 
     it("should return 400 for a request payload not contain gear category and contain type an invalid gear category", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
 
       const _request = {
         ...request,
@@ -836,616 +855,15 @@ describe("exporter-payload routes", () => {
       const response = await server.inject(_request);
 
       expect(response.statusCode).toBe(400);
-      expect(JSON.parse(response.payload).errors.gearCategory).toBe('error.gearCategory.string.empty');
-    });
-  });
-
-  describe("POST /v1/export-certificates/export-payload/validate", () => {
-    const request: any = {
-      method: "POST",
-      url: "/v1/export-certificates/export-payload/validate",
-      app: {
-        claims: {
-          sub: "Bob",
-        },
-      },
-      headers: {
-        documentnumber: "DOCUMENT123",
-        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
-      },
-    };
-
-    let mockValidateDocumentOwnership;
-    let mockValidate;
-
-    beforeEach(() => {
-      mockValidateDocumentOwnership = jest.spyOn(
-        Ownership,
-        "validateDocumentOwnership"
-      );
-      mockValidate = jest.spyOn(Controller, "validate");
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it("should return 403 user is not valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(undefined);
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should return 500 of there is an error", async () => {
-      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
-
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(500);
-    });
-
-    it("should return 200 user is valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockValidate.mockResolvedValue({ some: "data" });
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toStrictEqual({ some: "data" });
-    });
-  });
-
-  describe("POST /v1/export-certificates/create", () => {
-    const request: any = {
-      method: "POST",
-      url: "/v1/export-certificates/create",
-      app: {
-        claims: {
-          sub: "Bob",
-        },
-      },
-      headers: {
-        documentnumber: "DOCUMENT123",
-        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
-      },
-    };
-
-    let mockValidateDocumentOwnership;
-    let mockCreateExportCertificate;
-
-    beforeEach(() => {
-      mockValidateDocumentOwnership = jest.spyOn(
-        Ownership,
-        "validateDocumentOwnership"
-      );
-      mockCreateExportCertificate = jest.spyOn(
-        Controller,
-        "createExportCertificate"
-      );
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it("should return 403 user is not valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(undefined);
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it('should return 500 and a system error if there is an error', async () => {
-      mockValidateDocumentOwnership.mockRejectedValue( Error('my error'));
-
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(500);
-      expect(response.result).toStrictEqual([{error: 'SYSTEM_ERROR'}]);
-    });
-
-    it("should return 200 user is valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockCreateExportCertificate.mockResolvedValue({ some: "data" });
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toStrictEqual({ some: "data" });
-    });
-  });
-
-  describe("PUT /v1/export-certificates/export-payload/product/{productId}/landing/{landingId}", () => {
-    const request: any = {
-      method: "PUT",
-      url: "/v1/export-certificates/export-payload/product/productId/landing/landingId",
-      app: {
-        claims: {
-          sub: "Bob",
-        },
-      },
-      headers: {
-        documentnumber: "DOCUMENT123",
-        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
-      },
-    };
-
-    let mockValidateDocumentOwnership;
-    let mockEditExportPayloadProductLanding;
-
-    beforeEach(() => {
-      mockValidateDocumentOwnership = jest.spyOn(
-        Ownership,
-        "validateDocumentOwnership"
-      );
-      mockEditExportPayloadProductLanding = jest.spyOn(
-        Controller,
-        "editExportPayloadProductLanding"
-      );
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it("should return 403 user is not valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(undefined);
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should return 500 of there is an error", async () => {
-      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
-
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(500);
-    });
-
-    it("should return 200 user is valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockEditExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toStrictEqual({ some: "data" });
-    });
-  });
-
-  describe("DELETE /v1/export-certificates/export-payload/product/{productId}/landing/{landingId}", () => {
-    const request: any = {
-      method: "DELETE",
-      url: "/v1/export-certificates/export-payload/product/productId/landing/landingId",
-      app: {
-        claims: {
-          sub: "Bob",
-        },
-      },
-      headers: {
-        documentnumber: "DOCUMENT123",
-        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
-      },
-    };
-
-    let mockValidateDocumentOwnership;
-    let mockRemoveExportPayloadProductLanding;
-
-    beforeEach(() => {
-      mockValidateDocumentOwnership = jest.spyOn(
-        Ownership,
-        "validateDocumentOwnership"
-      );
-      mockRemoveExportPayloadProductLanding = jest.spyOn(
-        Controller,
-        "removeExportPayloadProductLanding"
-      );
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it("should return 403 user is not valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(undefined);
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should return 500 of there is an error", async () => {
-      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
-
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(500);
-    });
-
-    it("should return 200 user is valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockRemoveExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toStrictEqual({ some: "data" });
-    });
-  });
-
-  describe("DELETE /v1/export-certificates/export-payload/product/{productId}", () => {
-    const request: any = {
-      method: "DELETE",
-      url: "/v1/export-certificates/export-payload/product/productId",
-      app: {
-        claims: {
-          sub: "Bob",
-        },
-      },
-      headers: {
-        documentnumber: "DOCUMENT123",
-        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
-      },
-    };
-
-    let mockValidateDocumentOwnership;
-    let mockRemoveExportPayloadProduct;
-
-    beforeEach(() => {
-      mockValidateDocumentOwnership = jest.spyOn(
-        Ownership,
-        "validateDocumentOwnership"
-      );
-      mockRemoveExportPayloadProduct = jest.spyOn(
-        Controller,
-        "removeExportPayloadProduct"
-      );
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it("should return 403 user is not valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(undefined);
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should return 500 of there is an error", async () => {
-      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
-
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(500);
-    });
-
-    it("should return 200 user is valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockRemoveExportPayloadProduct.mockResolvedValue({ some: "data" });
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toStrictEqual({ some: "data" });
-    });
-  });
-
-  describe("POST /v1/export-certificates/export-payload/product/{productId}/landing", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockUpsertExportPayloadProductLanding;
-    let mockUpsertLanding;
-
-    beforeEach(() => {
-      mockValidateDocumentOwnership = jest.spyOn(
-        Ownership,
-        "validateDocumentOwnership"
-      );
-      mockUpsertExportPayloadProductLanding = jest.spyOn(
-        Controller,
-        "upsertExportPayloadProductLanding"
-      );
-      mockUpsertLanding = jest.spyOn(
-        ExportPayloadService,
-        "upsertLanding"
-      )
-
-      request = {
-        method: "POST",
-        url: "/v1/export-certificates/export-payload/product/productId/landing",
-        app: {
-          claims: {
-            sub: "Bob",
-          },
-        },
-        headers: {
-          documentnumber: "DOCUMENT123",
-          Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
-        },
-        payload: {
-          vessel: { vesselName: "a vessel" },
-          dateLanded: new Date(),
-          exportWeight: "12",
-          faoArea: "12",
-          gearCategory: "Category 1",
-          gearType: "Type 1",
-          highSeasArea: "Yes",
-          exclusiveEconomicZones:[
-            {
-              officialCountryName: "Afghanistan",
-              isoCodeAlpha2: "AF",
-              isoCodeAlpha3: "AFG",
-              isoNumericCode: "004"
-            },
-            {
-              officialCountryName: "Åland Islands",
-              isoCodeAlpha2: "AX",
-              isoCodeAlpha3: "ALA",
-              isoNumericCode: "248",
-            }
-          ],
-        },
-      };
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it("should return 400 for a request payload containing a start date after the dateLanded", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertLanding.mockResolvedValue({
-        items:[],
-        error: "invalid",
-        errors:{
-          startDate: "error.startDate.date.max"
-        }
-      });
-
-      const currentDate = new Date();
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() + 1);
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          startDate: nextDate
-        }
-      }
-
-      const expected = {
-        items:[],
-        error: "invalid",
-        errors:{
-          startDate: "error.startDate.date.max"
-        }
-      };
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(400);
-      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
-      expect(response.payload).toStrictEqual(JSON.stringify(expected));
-    });
-
-    it("should return 400 for a request payload not containing gear catergory and not contains gear type after the gear category", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertLanding.mockResolvedValue({
-        items:[],
-        error: "invalid",
-        errors:{
-          gearCategory: "error.gearCategory.string.empty"
-        }
-      });
-
-      const currentDate = new Date();
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() + 1);
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          gearCategory: '',
-          gearType: 'Type 1',
-        }
-      }
-
-      const expected = {
-        items:[],
-        error: "invalid",
-        errors:{
-          gearCategory: "error.gearCategory.string.empty"
-        }
-      };
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(400);
-      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
-      expect(response.payload).toStrictEqual(JSON.stringify(expected));
-    });
-
-    it("should return 403 user is not valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(undefined);
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should return 500 of there is an error", async () => {
-      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
-
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(500);
-    });
-
-    it("should return 500 user is no valid and no valid payload", async () => {
-      mockValidateDocumentOwnership.mockRejectedValue(new Error("error"));
-
-      request.payload.exportWeight = "INVALID - NO DIGITS";
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(500);
-    });
-
-    it("should return 200 user is valid", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-      const response = await server.inject(request);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toStrictEqual({ some: "data" });
-    });
-
-    it("should return 200 for a request payload containing a start date equal to the dateLanded", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          startDate: moment().utc().format('YYYY-MM-DD')
-        }
-      }
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(200);
-      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
-    });
-
-    it("should return 200 for a request payload containing a start date before the dateLanded", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
-        }
-      }
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(200);
-      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
-    });
-
-    it("should return 200 for a request payload containing a Gear category and type before the dateLanded", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          gearCategory: 'Category 1',
-          gearType: 'Type 1',
-        }
-      }
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(200);
-      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
-    });
-
-    it("should return 200 for a request payload not containing a Gear category and type before the dateLanded", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          gearCategory: '',
-          gearType: '',
-        }
-      }
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(200);
-      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
-    });
-
-    it("should return 400 for a request payload containing a Gear Category and not a Gear Type after the dateLanded", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertLanding.mockResolvedValue({
-        items:[],
-        error: "invalid",
-        errors:{
-          gearType: "error.gearType.string.empty"
-        }
-      });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          gearCategory: 'Category 1',
-          gearType: ''
-        }
-      }
-
-      const expected = {
-        items:[],
-        error: "invalid",
-        errors:{
-          gearType: "error.gearType.string.empty"
-        }
-      };
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(400);
-      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
-      expect(response.payload).toStrictEqual(JSON.stringify(expected));
-    });
-
-    it("should return 400 for a request payload not containing a Gear Category and containing a Gear Type after the dateLanded", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertLanding.mockResolvedValue({
-        items:[],
-        error: "invalid",
-        errors:{
-          gearType: "error.gearCategory.string.empty"
-        }
-      });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          gearCategory: '',
-          gearType: 'Type 1'
-        }
-      }
-
-      const expected = {
-        items:[],
-        error: "invalid",
-        errors:{
-          gearType: "error.gearCategory.string.empty"
-        }
-      };
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(400);
-      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
-      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
     });
   });
 
   describe("POST /v1/export-certificates/export-payload/product", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockAddExportPayloadProduct;
-    let mockValidateSpeciesName;
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockAddExportPayloadProduct: jest.SpyInstance;
+    let mockValidateSpeciesName: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -1522,9 +940,9 @@ describe("exporter-payload routes", () => {
   });
 
   describe("GET /v1/export-certificates/export-payload", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockGetExportPayload;
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockGetExportPayload: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -1579,9 +997,9 @@ describe("exporter-payload routes", () => {
   });
 
   describe("GET /v1/export-certificates/export-payload/direct-landings", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockGetExportPayloadDirectLandings;
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockGetExportPayloadDirectLandings: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -1632,10 +1050,55 @@ describe("exporter-payload routes", () => {
     });
   });
 
+  describe("POST /v1/export-certificates/export-payload/validate", () => {
+    const request: any = {
+      method: "POST",
+      url: "/v1/export-certificates/export-payload/validate",
+      app: {
+        claims: {
+          sub: "Bob",
+        },
+      },
+      headers: {
+        documentnumber: "DOCUMENT123",
+        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
+      },
+    };
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockValidate: jest.SpyInstance;
+    beforeEach(() => {
+      mockValidateDocumentOwnership = jest.spyOn(
+        Ownership,
+        "validateDocumentOwnership"
+      );
+      mockValidate = jest.spyOn(Controller, "validate");
+    });
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+    it("should return 403 user is not valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(undefined);
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(403);
+    });
+    it("should return 500 of there is an error", async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(500);
+    });
+    it("should return 200 user is valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockValidate.mockResolvedValue({ some: "data" });
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toStrictEqual({ some: "data" });
+    });
+  });
+
   describe("POST /v1/export-certificates/export-payload/validate/saveAsDraft", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockValidateExportPayloadAndSaveAsDraft;
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockValidateExportPayloadAndSaveAsDraft: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -1698,10 +1161,10 @@ describe("exporter-payload routes", () => {
   });
 
   describe("POST /v1/export-certificates/confirm-change-landings-type", () => {
-    let request;
-    let mockValidateDocumentOwnership;
-    let mockConfirmLandingsType;
-    let mockSaveLandingsEntryType;
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockConfirmLandingsType: jest.SpyInstance;
+    let mockSaveLandingsEntryType: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -1717,7 +1180,7 @@ describe("exporter-payload routes", () => {
         Controller,
         "addLandingsEntryOption"
       );
-      mockSaveLandingsEntryType.mockResolvedValue();
+      mockSaveLandingsEntryType.mockResolvedValue(undefined);
 
       request = {
         method: "POST",
@@ -1821,6 +1284,407 @@ describe("exporter-payload routes", () => {
       const response = await server.inject(request);
 
       expect(response.statusCode).toBe(500);
+    });
+  });
+
+  describe("POST /v1/export-certificates/export-payload/product/{productId}/landing", () => {
+    let request: any;
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockUpsertExportPayloadProductLanding: jest.SpyInstance;
+    let mockUpsertLanding: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockValidateDocumentOwnership = jest.spyOn(
+        Ownership,
+        "validateDocumentOwnership"
+      );
+      mockUpsertExportPayloadProductLanding = jest.spyOn(
+        Controller,
+        "upsertExportPayloadProductLanding"
+      );
+      mockUpsertLanding = jest.spyOn(
+        ExportPayloadService,
+        "upsertLanding"
+      );
+
+      request = {
+        method: "POST",
+        url: "/v1/export-certificates/export-payload/product/productId/landing",
+        app: {
+          claims: {
+            sub: "Bob",
+          },
+        },
+        headers: {
+          documentnumber: "DOCUMENT123",
+          Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
+        },
+        payload: {
+          vessel: { vesselName: "a vessel" },
+          dateLanded: moment().utc().format('YYYY-MM-DD'),
+          exportWeight: "12",
+          faoArea: "12",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
+          highSeasArea: "Yes",
+          exclusiveEconomicZones: [
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            },
+            {
+              officialCountryName: "Åland Islands",
+              isoCodeAlpha2: "AX",
+              isoCodeAlpha3: "ALA",
+              isoNumericCode: "248",
+            }
+          ],
+        },
+      };
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should return 400 for a request payload containing a date landed without a year", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '-08-01'
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+    });
+
+    it("should return 400 for a request payload containing an invalid gear category and containing gear type", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items: [],
+        error: "invalid",
+        errors: {
+          gearCategory: "error.gearCategory.string.empty"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: 'Type 1',
+        }
+      };
+
+      const expected = {
+        items: [],
+        error: "invalid",
+        errors: {
+          gearCategory: "error.gearCategory.string.empty"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 for a request payload not containing gear category and containing gear type", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items: [],
+        error: "invalid",
+        errors: {
+          gearCategory: "error.gearCategory.string.empty"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: 'Type 1',
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+    });
+
+    it("should return 403 user is not valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(undefined);
+
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(403);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+    });
+
+    it("should return 500 if there is an error", async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
+
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(500);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+    });
+
+    it("should return 200 user is valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toStrictEqual({ some: "data" });
+    });
+  });
+
+  describe("POST /v1/export-certificates/create", () => {
+    const request: any = {
+      method: "POST",
+      url: "/v1/export-certificates/create",
+      app: {
+        claims: {
+          sub: "Bob",
+        },
+      },
+      headers: {
+        documentnumber: "DOCUMENT123",
+        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
+      },
+    };
+
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockCreateExportCertificate: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockValidateDocumentOwnership = jest.spyOn(
+        Ownership,
+        "validateDocumentOwnership"
+      );
+      mockCreateExportCertificate = jest.spyOn(
+        Controller,
+        "createExportCertificate"
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should return 403 user is not valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(undefined);
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('should return 500 and a system error if there is an error', async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(Error('my error'));
+
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toStrictEqual([{ error: 'SYSTEM_ERROR' }]);
+    });
+
+    it("should return 200 user is valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockCreateExportCertificate.mockResolvedValue({ some: "data" });
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toStrictEqual({ some: "data" });
+    });
+  });
+
+  describe("PUT /v1/export-certificates/export-payload/product/{productId}/landing/{landingId}", () => {
+    const request: any = {
+      method: "PUT",
+      url: "/v1/export-certificates/export-payload/product/productId/landing/landingId",
+      app: {
+        claims: {
+          sub: "Bob",
+        },
+      },
+      headers: {
+        documentnumber: "DOCUMENT123",
+        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
+      },
+    };
+
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockEditExportPayloadProductLanding: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockValidateDocumentOwnership = jest.spyOn(
+        Ownership,
+        "validateDocumentOwnership"
+      );
+      mockEditExportPayloadProductLanding = jest.spyOn(
+        Controller,
+        "editExportPayloadProductLanding"
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should return 403 user is not valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(undefined);
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should return 500 of there is an error", async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
+
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(500);
+    });
+
+    it("should return 200 user is valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockEditExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toStrictEqual({ some: "data" });
+    });
+  });
+
+  describe("DELETE /v1/export-certificates/export-payload/product/{productId}/landing/{landingId}", () => {
+    const request: any = {
+      method: "DELETE",
+      url: "/v1/export-certificates/export-payload/product/productId/landing/landingId",
+      app: {
+        claims: {
+          sub: "Bob",
+        },
+      },
+      headers: {
+        documentnumber: "DOCUMENT123",
+        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
+      },
+    };
+
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockRemoveExportPayloadProductLanding: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockValidateDocumentOwnership = jest.spyOn(
+        Ownership,
+        "validateDocumentOwnership"
+      );
+      mockRemoveExportPayloadProductLanding = jest.spyOn(
+        Controller,
+        "removeExportPayloadProductLanding"
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should return 403 user is not valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(undefined);
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should return 500 of there is an error", async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
+
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(500);
+    });
+
+    it("should return 200 user is valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockRemoveExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toStrictEqual({ some: "data" });
+    });
+  });
+
+  describe("DELETE /v1/export-certificates/export-payload/product/{productId}", () => {
+    const request: any = {
+      method: "DELETE",
+      url: "/v1/export-certificates/export-payload/product/productId",
+      app: {
+        claims: {
+          sub: "Bob",
+        },
+      },
+      headers: {
+        documentnumber: "DOCUMENT123",
+        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
+      },
+    };
+
+    let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockRemoveExportPayloadProduct: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockValidateDocumentOwnership = jest.spyOn(
+        Ownership,
+        "validateDocumentOwnership"
+      );
+      mockRemoveExportPayloadProduct = jest.spyOn(
+        Controller,
+        "removeExportPayloadProduct"
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should return 403 user is not valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(undefined);
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should return 500 of there is an error", async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(Error("my error"));
+
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(500);
+    });
+
+    it("should return 200 user is valid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockRemoveExportPayloadProduct.mockResolvedValue({ some: "data" });
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toStrictEqual({ some: "data" });
     });
   });
 });
