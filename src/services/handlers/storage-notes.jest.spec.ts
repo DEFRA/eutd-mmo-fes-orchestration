@@ -107,8 +107,6 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it("with no certificate type", async () => {
-    
-
     const currentUrl =
       "/create-storage-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
@@ -119,7 +117,6 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
           commodityCode: "commodity code is invalid",
-          certificateNumber: "CC-11111",
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
@@ -143,12 +140,13 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
     expect(errors).toBeTruthy();
     expect(errors).toEqual({
-      'catches-0-certificateType': 'sdAddCatchTypeErrorSelectCertificateType'
+      'catches-0-certificateType': 'sdAddCatchTypeErrorSelectCertificateType',
+      'catches-0-certificateNumber': 'sdAddProductToConsignmentCertificateNumberErrorNull',
     });
   });
 
   it("with an invalid certificate type", async () => {
-    
+
     const currentUrl =
       "/create-storage-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];

@@ -30,7 +30,7 @@ export default {
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
-    
+
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
@@ -39,7 +39,7 @@ export default {
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
-    
+
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
@@ -284,9 +284,11 @@ export async function validateProduct(product: any, index: number, errors, isNon
 export async function validateEntry(product: any, index: number, errors, documentNumber: string = "", userPrincipal: string = "", contactId: string = "") {
   if (!product.certificateType) {
     errors[`catches-${index}-certificateType`] = 'sdAddCatchTypeErrorSelectCertificateType';
-  } else if(!['uk', 'non_uk'].includes(product.certificateType)) {
+  } else if (!['uk', 'non_uk'].includes(product.certificateType)) {
     errors[`catches-${index}-certificateType`] = 'sdAddCatchTypeErrorCertificateTypeInvalid';
-  } else if(!product.certificateNumber || validateWhitespace(product.certificateNumber)) {
+  }
+
+  if (!product.certificateNumber || validateWhitespace(product.certificateNumber)) {
     errors[`catches-${index}-certificateNumber`] = 'sdAddProductToConsignmentCertificateNumberErrorNull';
   } else if (product.certificateNumber.length > MAX_DOCUMENT_NUMBER_LENGTH) {
     errors[`catches-${index}-certificateNumber`] = `sdAddProductToConsignmentWeightOnCCErrorMustNotExceed-${MAX_DOCUMENT_NUMBER_LENGTH}`;
