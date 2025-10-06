@@ -64,14 +64,16 @@ export default {
   "/create-processing-statement/:documentNumber/add-catch-details/:speciesCode": async ({ data, errors, documentNumber, userPrincipal, contactId }) => {
     const index = 0;
     const ctch = data.catches[index];
-    const catchDetails = await validateCatchDetails(ctch, index, errors, documentNumber, userPrincipal, contactId);
+    const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
+    const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
 
   "/create-processing-statement/:documentNumber/add-catch-details/:speciesCode/:catchIndex": async ({ data, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = params.catchIndex;
     const ctch = data.catches[index];
-    const catchDetails = await validateCatchDetails(ctch, index, errors, documentNumber, userPrincipal, contactId);
+    const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
+    const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
   "/create-processing-statement/:documentNumber/add-catch-weights": async ({ data, errors }) => {

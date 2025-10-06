@@ -2861,7 +2861,7 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
-  it('will return COMPLETED catches even if scientific name is missing', async () => {
+  it('will return INCOMPLETE catches even if scientific name is missing', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
         catches: [
@@ -2898,13 +2898,13 @@ describe('getProcessingStatementProgress', () => {
         exporter: ProgressStatus.INCOMPLETE,
         reference: ProgressStatus.OPTIONAL,
         consignmentDescription: ProgressStatus.INCOMPLETE,
-        catches: ProgressStatus.COMPLETED,
+        catches: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
         processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 1,
+      completedSections: 0,
       requiredSections: 7,
     };
 
@@ -2919,7 +2919,7 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
-  it('will return COMPLETED catches if all of these properties species, id, catchCertificateNumber, totalWeightLanded, exportWeightBeforeProcessing, exportWeightAfterProcessing and scientificName are present in every catch object', async () => {
+  it('will return INCOMPLETE catches if all of these properties species, id, catchCertificateNumber, totalWeightLanded, exportWeightBeforeProcessing, exportWeightAfterProcessing and scientificName are present in every catch object', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
         catches: [
@@ -2941,6 +2941,7 @@ describe('getProcessingStatementProgress', () => {
             exportWeightBeforeProcessing: '156',
             exportWeightAfterProcessing: '160',
             scientificName: 'scientificName',
+            catchCertificateType: 'uk',
           },
           {
             species: 'Atlantic herring (COD)',
@@ -2967,13 +2968,13 @@ describe('getProcessingStatementProgress', () => {
         exporter: ProgressStatus.INCOMPLETE,
         reference: ProgressStatus.OPTIONAL,
         consignmentDescription: ProgressStatus.INCOMPLETE,
-        catches: ProgressStatus.COMPLETED,
+        catches: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
         processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 1,
+      completedSections: 0,
       requiredSections: 7,
     };
 
@@ -3850,6 +3851,7 @@ describe('getProcessingStatementProgress', () => {
             exportWeightBeforeProcessing: '34',
             exportWeightAfterProcessing: '45',
             scientificName: 'scientificName',
+            catchCertificateType: 'non_uk',
           },
         ],
         exporterDetails: {
