@@ -1,14 +1,13 @@
 import * as Hapi from '@hapi/hapi';
 import Controller from '../controllers/export-payload.controller';
 import * as Joi from 'joi';
-import {withDocumentLegitimatelyOwned} from '../helpers/withDocumentLegitimatelyOwned';
+import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimatelyOwned';
 import logger from '../logger';
 import { decimalPlacesValidator } from '../helpers/customValidators';
 import ApplicationConfig from "../applicationConfig";
 import * as moment from 'moment';
 
 const extendedJoi = Joi.extend(require('@joi/date'));
-const allowDaysInTheFuture = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate();
 
 export default class ExportPayloadNonjsRoutes {
   public async register(server: Hapi.Server): Promise<any> {
@@ -21,9 +20,9 @@ export default class ExportPayloadNonjsRoutes {
           options: {
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal, documentNumber, contactId) => {
-                return await Controller.addAnotherExportPayloadProductLandingNonjs(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.addAnotherExportPayloadProductLandingNonjs(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[ADD-LANDING-NONJS][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -39,9 +38,9 @@ export default class ExportPayloadNonjsRoutes {
           options: {
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.upsertExportPayloadProductLandingNonjs(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.upsertExportPayloadProductLandingNonjs(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[UPSERT-LANDING-NONJS][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -52,8 +51,8 @@ export default class ExportPayloadNonjsRoutes {
             validate: {
               options: { abortEarly: false },
               failAction: async function (req, h, error) {
-                return await withDocumentLegitimatelyOwned(req,h,async (userPrincipal,documentNumber, contactId) => {
-                  return await Controller.upsertExportPayloadInvalidNonJs(req,h,error,userPrincipal,documentNumber, contactId);
+                return await withDocumentLegitimatelyOwned(req, h, async (userPrincipal, documentNumber, contactId) => {
+                  return await Controller.upsertExportPayloadInvalidNonJs(req, h, error, userPrincipal, documentNumber, contactId);
                 }).catch(err => {
                   logger.error(`[UPSERT-INVALID-LANDING-NONJS][ERROR][${err.stack || err}`);
                   return h.response().code(500).takeover();
@@ -61,7 +60,21 @@ export default class ExportPayloadNonjsRoutes {
               },
               payload: Joi.object({
                 'vessel.label': Joi.string().trim().label("Vessel").required(),
-                dateLanded: extendedJoi.date().format(['YYYY-MM-DD']).max(allowDaysInTheFuture).utc().required(),
+                dateLanded: Joi.string()
+                  .pattern(/^\d{4}-\d{2}-\d{2}$/)
+                  .required()
+                  .custom((value, helpers) => {
+
+                    if (!moment(value, "YYYY-MM-DD", true).isValid()) {
+                      return helpers.error('date.base');
+                    }
+                    const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
+                    if (moment(value).isAfter(maxDate, 'day')) {
+                      return helpers.error('date.max');
+                    }
+
+                    return value;
+                  }, 'Strict YYYY-MM-DD date format'),
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
                   const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
@@ -84,7 +97,7 @@ export default class ExportPayloadNonjsRoutes {
                   if (!gearCategory && gearType) {
                     return helpers.error('string.empty');
                   }
-                  
+
                   return value;
                 }, 'Gear Category Validator').optional(),
                 gearType: Joi.custom((value: string, helpers: any) => {
@@ -110,9 +123,9 @@ export default class ExportPayloadNonjsRoutes {
           options: {
             security: true,
             cors: true,
-            handler: async(request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async(userPrincipal,documentNumber, contactId)=>{
-                return await Controller.editExportPayloadProductLandingNonjs(request,h,userPrincipal,documentNumber, contactId)
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.editExportPayloadProductLandingNonjs(request, h, userPrincipal, documentNumber, contactId)
               }).catch(error => {
                 logger.error(`[EDIT-LANDING-NONJS][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -128,9 +141,9 @@ export default class ExportPayloadNonjsRoutes {
           options: {
             security: true,
             cors: true,
-            handler: async(request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async(userPrincipal,documentNumber, contactId)=>{
-                return await Controller.removeExportPayloadProductLanding(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.removeExportPayloadProductLanding(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[REMOVE-LANDING-NONJS][ERROR][${error.stack || error}`);
                 return h.response().code(500);

@@ -35,9 +35,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.upsertExportPayloadProductLanding(request,h,userPrincipal,documentNumber,(request.payload as any).product, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.upsertExportPayloadProductLanding(request, h, userPrincipal, documentNumber, (request.payload as any).product, contactId);
               }).catch(error => {
                 logger.error(`[VALIDATING-LANDINGS][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -48,7 +48,7 @@ export default class ExportPayloadRoutes {
             validate: {
               options: { abortEarly: false },
               failAction: async function (req, h, error) {
-                return await withDocumentLegitimatelyOwned(req,h,async(userPrincipal, documentNumber, contactId) => {
+                return await withDocumentLegitimatelyOwned(req, h, async (userPrincipal, documentNumber, contactId) => {
                   return await Controller.getExportPayloadInvalidRequest(req, h, error, userPrincipal, documentNumber, contactId);
                 }).catch(err => {
                   logger.error(`[UPSERTING-FAILED-LANDING][ERROR][${err.stack || err}`);
@@ -60,7 +60,21 @@ export default class ExportPayloadRoutes {
                 vessel: Joi.object().keys({
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
-                dateLanded: extendedJoi.date().max(Joi.ref('maxDate', { adjust : () => moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days').toDate()})).utc().required(),
+                dateLanded: Joi.string()
+                  .pattern(/^\d{4}-\d{2}-\d{2}$/)
+                  .required()
+                  .custom((value, helpers) => {
+
+                    if (!moment(value, "YYYY-MM-DD", true).isValid()) {
+                      return helpers.error('date.base');
+                    }
+                    const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
+                    if (moment(value).isAfter(maxDate, 'day')) {
+                      return helpers.error('date.max');
+                    }
+
+                    return value;
+                  }, 'Strict YYYY-MM-DD date format'),
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
                   const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
@@ -107,9 +121,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.upsertExportPayloadProductDirectLanding(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.upsertExportPayloadProductDirectLanding(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[VALIDATING-DIRECT-LANDINGS][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -120,7 +134,7 @@ export default class ExportPayloadRoutes {
             validate: {
               options: { abortEarly: false },
               failAction: async function (req, h, error) {
-                return await withDocumentLegitimatelyOwned(req,h,async(userPrincipal, documentNumber, contactId) => {
+                return await withDocumentLegitimatelyOwned(req, h, async (userPrincipal, documentNumber, contactId) => {
                   return await Controller.getExportPayloadInvalidRequest(req, h, error, userPrincipal, documentNumber, contactId);
                 }).catch(err => {
                   logger.error(`[UPSERTING-FAILED-DIRECT-LANDING][ERROR][${err.stack || err}`);
@@ -138,9 +152,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.validate(request,h,false,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.validate(request, h, false, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[VALIDATING-LANDINGS][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -157,12 +171,12 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h)  => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.createExportCertificate(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.createExportCertificate(request, h, userPrincipal, documentNumber, contactId);
               }, [DocumentStatuses.Draft, DocumentStatuses.Locked]).catch(error => {
                 logger.error(`[CREATING-CC][ERROR][${error.stack || error}`);
-                return h.response([{error: SYSTEM_ERROR}]).code(500);
+                return h.response([{ error: SYSTEM_ERROR }]).code(500);
               })
             },
             description: 'submit catches',
@@ -176,9 +190,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async(request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async(userPrincipal,documentNumber, contactId) => {
-                return await Controller.editExportPayloadProductLanding(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.editExportPayloadProductLanding(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[UPDATING-LANDING][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -195,9 +209,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.removeExportPayloadProductLanding(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.removeExportPayloadProductLanding(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[DELETING-LANDING][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -214,9 +228,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.upsertExportPayloadProductLanding(request,h,userPrincipal,documentNumber,request.params.productId, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.upsertExportPayloadProductLanding(request, h, userPrincipal, documentNumber, request.params.productId, contactId);
               }).catch(error => {
                 logger.error(`[UPSERTING-LANDING][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -227,7 +241,7 @@ export default class ExportPayloadRoutes {
             validate: {
               options: { abortEarly: false },
               failAction: async function (req, h, error) {
-                return await withDocumentLegitimatelyOwned(req,h,async(userPrincipal, documentNumber, contactId) => {
+                return await withDocumentLegitimatelyOwned(req, h, async (userPrincipal, documentNumber, contactId) => {
                   return await Controller.upsertExportPayloadInvalidRequest(req, h, error, userPrincipal, documentNumber, contactId);
                 }).catch(err => {
                   logger.error(`[UPSERTING-FAILED-LANDING][ERROR][${err.stack || err}`);
@@ -238,19 +252,19 @@ export default class ExportPayloadRoutes {
                 vessel: Joi.object().keys({
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
-              dateLanded: Joi.string()
-                .pattern(/^\d{4}-\d{2}-\d{2}$/)
-                .required()
-                .custom((value, helpers) => {
-                  if (!moment(value, "YYYY-MM-DD", true).isValid()) {
-                    return helpers.error('date.base');
-                  }
-                  const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
-                  if (moment(value).isAfter(maxDate, 'day')) {
-                    return helpers.error('date.max');
-                  }
-                  return value;
-                }, 'Strict YYYY-MM-DD date format'),
+                dateLanded: Joi.string()
+                  .pattern(/^\d{4}-\d{2}-\d{2}$/)
+                  .required()
+                  .custom((value, helpers) => {
+                    if (!moment(value, "YYYY-MM-DD", true).isValid()) {
+                      return helpers.error('date.base');
+                    }
+                    const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
+                    if (moment(value).isAfter(maxDate, 'day')) {
+                      return helpers.error('date.max');
+                    }
+                    return value;
+                  }, 'Strict YYYY-MM-DD date format'),
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
                   const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
@@ -294,7 +308,7 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async(request,h) => {
+            handler: async (request, h) => {
               return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
                 return await Controller.addExportPayloadProduct(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
@@ -316,7 +330,7 @@ export default class ExportPayloadRoutes {
               payload: async function (value: any) {
                 const { species, scientificName } = value;
                 const refUrl = ApplicationConfig.getReferenceServiceUrl();
-                const anyError = await validateSpeciesName(species.label, scientificName , refUrl);
+                const anyError = await validateSpeciesName(species.label, scientificName, refUrl);
                 if (anyError.isError) {
                   throw anyError.error;
                 }
@@ -331,9 +345,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId)=>{
-                return await Controller.removeExportPayloadProduct(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.removeExportPayloadProduct(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[DELETING-PRODUCT][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -350,9 +364,9 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.getExportPayload(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.getExportPayload(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[GETTING-LANDINGS][ERROR][${error.stack || error}]`);
                 return h.response().code(500);
@@ -369,8 +383,8 @@ export default class ExportPayloadRoutes {
             auth: defineAuthStrategies(),
             security: true,
             cors: true,
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
                 return await Controller.getDirectLandingExportPayload(userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[GETTING-DIRECT-LANDINGS][ERROR][${error.stack || error}]`);
@@ -389,9 +403,9 @@ export default class ExportPayloadRoutes {
             security: true,
             cors: true,
             description: 'Validate landings and save current URI to track progress',
-            handler: async (request,h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal,documentNumber, contactId) => {
-                return await Controller.validateExportPayloadAndSaveAsDraft(request,h,userPrincipal,documentNumber, contactId);
+            handler: async (request, h) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.validateExportPayloadAndSaveAsDraft(request, h, userPrincipal, documentNumber, contactId);
               }).catch(error => {
                 logger.error(`[SAVING-LANDINGS-AS-DRAFT][ERROR][${error.stack || error}]`);
                 return h.response().code(500);
@@ -402,10 +416,10 @@ export default class ExportPayloadRoutes {
               options: {
                 abortEarly: false
               },
-              failAction: function(req, h, error) {
+              failAction: function (req, h, error) {
                 const errorObject = errorExtractor(error);
                 if (acceptsHtml(req.headers)) {
-                    return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
+                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
                 }
                 return h.response(errorObject).code(400).takeover();
               },
@@ -424,10 +438,10 @@ export default class ExportPayloadRoutes {
               return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
                 const service = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
                 if (service === ServiceNames.CC) {
-                  return await Controller.getLandingsType(userPrincipal,documentNumber, contactId);
+                  return await Controller.getLandingsType(userPrincipal, documentNumber, contactId);
                 }
                 return h.response(['error.landingsEntryOption.any.invalid']).code(400);
-              }).catch(error =>  {
+              }).catch(error => {
                 logger.error(`[LANDINGS-TYPE][ERROR][${error.stack || error}`);
                 return h.response().code(500);
               });
@@ -461,8 +475,8 @@ export default class ExportPayloadRoutes {
             description: 'add the landings entry option',
             tags: ['api', 'entry', 'validate'],
             validate: {
-              options: {abortEarly: false},
-              failAction: function(req, h, error) {
+              options: { abortEarly: false },
+              failAction: function (req, h, error) {
                 const errorObject = errorExtractor(error);
                 if (acceptsHtml(req.headers)) {
                   return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
@@ -484,7 +498,7 @@ export default class ExportPayloadRoutes {
             security: true,
             cors: true,
             handler: async (request, h) => {
-              return await withDocumentLegitimatelyOwned(request,h,async (userPrincipal, documentNumber, contactId) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
                 const payload = request.payload as any;
                 const landingsEntryOption: LandingsEntryOptions = validateLandingsEntryOption(payload.landingsEntryOption);
                 if (landingsEntryOption && payload.landingsEntryConfirmation === 'Yes') {
@@ -506,8 +520,8 @@ export default class ExportPayloadRoutes {
             description: 'Confirm landings type change',
             tags: ['api', 'confirm-change-landings-type'],
             validate: {
-              options: {abortEarly: false},
-              failAction: function(req, h, error) {
+              options: { abortEarly: false },
+              failAction: function (req, h, error) {
                 const errorObject = errorExtractor(error);
                 if (acceptsHtml(req.headers)) {
                   return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
@@ -526,7 +540,7 @@ export default class ExportPayloadRoutes {
   }
 }
 
-const validateLandingsEntryOption = (landingsEntryOption: string): LandingsEntryOptions  => {
+const validateLandingsEntryOption = (landingsEntryOption: string): LandingsEntryOptions => {
   switch (landingsEntryOption) {
     case 'directLanding':
       return LandingsEntryOptions.DirectLanding;
