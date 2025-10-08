@@ -20,7 +20,7 @@ const trainSchema = Joi.object({
     then: Joi.string().trim().allow('').alphanum().max(15).optional(),
     otherwise: Joi.string().trim().alphanum().max(15).required()
   }),
-  freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
+  freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),

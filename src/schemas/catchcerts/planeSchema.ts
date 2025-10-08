@@ -42,7 +42,7 @@ const schema = Joi.object({
       .max(5)
       .required()
   }),
-  freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
+  freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {
     is: 'storageNotes',
