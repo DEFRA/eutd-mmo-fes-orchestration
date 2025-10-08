@@ -61,11 +61,16 @@ export default class ExportPayloadRoutes {
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
                 dateLanded: Joi.string()
-                  .pattern(/^\d{4}-\d{2}-\d{2}$/)
-                  .required()
                   .custom((value, helpers) => {
+                    const parts = value.split('-');
+                    if (parts.length !== 3)
+                      return helpers.error('date.base');
 
-                    if (!moment(value, "YYYY-MM-DD", true).isValid()) {
+                    const year = parts[0];
+                    const month = parts[1].padStart(2, '0');
+                    const day = parts[2].padStart(2, '0');
+                    const isoDate = `${year}-${month}-${day}`;
+                    if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
                       return helpers.error('date.base');
                     }
                     const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
@@ -74,7 +79,8 @@ export default class ExportPayloadRoutes {
                     }
 
                     return value;
-                  }, 'Strict YYYY-MM-DD date format'),
+                  }, 'Strict YYYY-MM-DD date format')
+                  .required(),
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
                   const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
@@ -253,10 +259,16 @@ export default class ExportPayloadRoutes {
                   vesselName: Joi.string().trim().label("Vessel").required()
                 }),
                 dateLanded: Joi.string()
-                  .pattern(/^\d{4}-\d{2}-\d{2}$/)
-                  .required()
                   .custom((value, helpers) => {
-                    if (!moment(value, "YYYY-MM-DD", true).isValid()) {
+                    const parts = value.split('-');
+                    if (parts.length !== 3)
+                      return helpers.error('date.base');
+
+                    const year = parts[0];
+                    const month = parts[1].padStart(2, '0');
+                    const day = parts[2].padStart(2, '0');
+                    const isoDate = `${year}-${month}-${day}`;
+                    if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
                       return helpers.error('date.base');
                     }
                     const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
@@ -264,7 +276,8 @@ export default class ExportPayloadRoutes {
                       return helpers.error('date.max');
                     }
                     return value;
-                  }, 'Strict YYYY-MM-DD date format'),
+                  }, 'Strict YYYY-MM-DD date format')
+                  .required(),
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
                   const dateLanded = moment(helpers.state.ancestors[0].dateLanded);

@@ -8,18 +8,26 @@ const extendedJoi = Joi.extend(require('@joi/date'));
 
 const directLandingsSchema = Joi.object({
   dateLanded: Joi.string()
-    .pattern(/^\d{4}-\d{2}-\d{2}$/)
-    .required()
     .custom((value, helpers) => {
-      if (!moment(value, "YYYY-MM-DD", true).isValid()) {
+      const parts = value.split('-');
+      if (parts.length !== 3)
+        return helpers.error('date.base');
+
+      const year = parts[0];
+      const month = parts[1].padStart(2, '0');
+      const day = parts[2].padStart(2, '0');
+      const isoDate = `${year}-${month}-${day}`;
+      if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
         return helpers.error('date.base');
       }
       const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
       if (moment(value).isAfter(maxDate, 'day')) {
         return helpers.error('date.max');
       }
+
       return value;
-    }, 'Strict YYYY-MM-DD date format'),
+    }, 'Strict YYYY-MM-DD date format')
+    .required(),
   startDate: extendedJoi.date().custom((value: string, helpers: any) => {
     const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
     const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
@@ -44,7 +52,7 @@ const directLandingsSchema = Joi.object({
     const gearType = helpers.state.ancestors[0].gearType;
     if (!gearCategory && gearType) {
       return helpers.error('string.empty');
-    }        
+    }
     return value;
   }, 'Gear Category Validator').optional(),
   gearType: Joi.custom((value: string, helpers: any) => {
