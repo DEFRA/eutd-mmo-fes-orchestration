@@ -1942,47 +1942,6 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     expect(errors).toEqual(expected);
   });
 
-  it('with missing plantName validates as error', async () => {
-    const currentUrl =
-      '/create-processing-statement/:documentNumber/add-processing-plant-address';
-    const handler = SUT[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
-        }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA'
-    };
-
-    const { errors } = await handler({
-      data: data,
-      errors: {}
-    });
-
-    const expected = {
-      plantName: 'psAddProcessingPlantAddressErrorNullPlantName'
-    };
-    expect(errors).toBeTruthy();
-    expect(errors).toEqual(expected);
-  });
-
   it('with missing plantAddressOne validates as error', async () => {
     const currentUrl =
       '/create-processing-statement/:documentNumber/add-processing-plant-address';
@@ -2016,90 +1975,6 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
 
     const expected = {
       plantAddressOne: 'psAddProcessingPlantAddressErrorAddress'
-    };
-    expect(errors).toBeTruthy();
-    expect(errors).toEqual(expected);
-  });
-
-  it('with incorrect plantName validates as error', async () => {
-    const currentUrl =
-      '/create-processing-statement/:documentNumber/add-processing-plant-address';
-    const handler = SUT[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
-        }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA',
-      plantName: '!M&S'
-    };
-
-    const { errors } = await handler({
-      data: data,
-      errors: {}
-    });
-
-    const expected = {
-      plantName: 'psAddProcessingPlantAddressErrorFormatPlantName'
-    };
-    expect(errors).toBeTruthy();
-    expect(errors).toEqual(expected);
-  });
-
-  it('with plantName validates on exceed length limit as error', async () => {
-    const currentUrl =
-      '/create-processing-statement/:documentNumber/add-processing-plant-address';
-    const handler = SUT[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
-        }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA',
-      plantName: 'Hw99zXbw0YqZ9RY8SaIxpVs4xm1t30zj6vC LxKmH3fcKJjiSnWJKax'
-    };
-
-    const { errors } = await handler({
-      data: data,
-      errors: {}
-    });
-
-    const expected = {
-      plantName: 'psAddProcessingPlantAddressErrorMaxLimitPlantName'
     };
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);

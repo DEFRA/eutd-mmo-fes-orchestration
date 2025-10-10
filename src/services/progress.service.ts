@@ -445,12 +445,6 @@ export default class ProgressService {
         data.exportData.personResponsibleForConsignment?.trim()
         ? ProgressStatus.COMPLETED
         : ProgressStatus.INCOMPLETE;
-    const processingPlantAddress =
-      data?.exportData?.plantPostcode &&
-        data.exportData.plantAddressOne &&
-        ProgressService.isEmptyAndTrimSpaces(data.exportData.plantName)
-        ? ProgressStatus.COMPLETED
-        : ProgressStatus.INCOMPLETE;
     const exportHealthCertificate =
       hasValidHealthCertificate(data?.exportData?.healthCertificateNumber) &&
         hasValidHeathCertificateDate(data?.exportData?.healthCertificateDate)
@@ -463,7 +457,6 @@ export default class ProgressService {
       catches: await ProgressService.getPSCatchStatus(data?.exportData?.catches, documentNumber, userPrincipal, contactId),
       consignmentDescription: ProgressService.getConsignmentDescriptionStatus(data?.exportData),
       processingPlant,
-      processingPlantAddress,
       exportHealthCertificate,
       exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo)
     };

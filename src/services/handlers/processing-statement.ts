@@ -2,7 +2,6 @@ import applicationConfig from "../../applicationConfig";
 import {
   MAX_PERSON_RESPONSIBLE_LENGTH,
   MIN_PERSON_RESPONSIBLE_LENGTH,
-  MAX_PLANT_NAME_LENGTH
 } from "../../services/constants";
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
@@ -16,7 +15,6 @@ import {
   validateExportHealthCertificateFormat,
   validateCCNumberFormat,
   validateUKCCNumberFormat,
-  isPsPlantNameValid,
   isInvalidLength,
   validatePersonResponsibleForConsignmentFormat,
   validateMaximumFutureDate,
@@ -141,7 +139,6 @@ export default {
   },
 
   "/create-processing-statement/:documentNumber/add-processing-plant-address": ({ data, errors }) => {
-    addProcessingPlantAddressErrors(data, errors);
 
     if (!data.plantAddressOne && !data.plantAddressTwo && !data.plantTownCity && !data.plantPostcode) errors['plantAddressOne'] = "psAddProcessingPlantAddressErrorAddress";
     else {
@@ -153,15 +150,6 @@ export default {
     data.dateOfAcceptance = today();
     return { errors };
   },
-}
-function addProcessingPlantAddressErrors(data, errors) {
-  if (!data.plantName || validateWhitespace(data.plantName)) {
-    errors['plantName'] = "psAddProcessingPlantAddressErrorNullPlantName";
-  } else if (data.plantName.length > MAX_PLANT_NAME_LENGTH) {
-    errors['plantName'] = "psAddProcessingPlantAddressErrorMaxLimitPlantName";
-  } else if (!isPsPlantNameValid(data.plantName)) {
-    errors['plantName'] = "psAddProcessingPlantAddressErrorFormatPlantName";
-  }
 }
 
 export function validateCatchType(ctch: any, index: number, errors: any) {
@@ -176,7 +164,7 @@ export function validateCatchType(ctch: any, index: number, errors: any) {
 
 export async function validateSpeciesWithinCatchDetails(ctch: any, index: number, isNonJs: boolean, errors: any) {
   const refUrl = applicationConfig.getReferenceServiceUrl();
-  
+
   if (isNonJs && isEmpty(ctch.species)) {
     errors = addCommonCatchDetailsError(errors);
     setCatchFieldsUndefined(ctch);
@@ -203,7 +191,7 @@ export async function validateSpeciesWithinCatchDetails(ctch: any, index: number
       setCatchFieldsUndefined(ctch);
     }
   }
-  
+
   return { errors };
 }
 
