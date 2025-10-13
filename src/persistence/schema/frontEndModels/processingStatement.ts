@@ -58,8 +58,7 @@ export interface Product {
 }
 
 export interface ProcessingStatementProgress extends BaseProgress {
-  consignmentDescription: ProgressStatus;
-  catches: ProgressStatus;
+  processedProductDetails: ProgressStatus;
   processingPlant: ProgressStatus;
   exportHealthCertificate: ProgressStatus;
   exportDestination: ProgressStatus;

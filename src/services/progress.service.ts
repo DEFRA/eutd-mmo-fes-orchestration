@@ -448,11 +448,13 @@ export default class ProgressService {
         ? ProgressStatus.COMPLETED
         : ProgressStatus.INCOMPLETE;
 
+    const hasCompletedAllProducts: boolean = ProgressService.getConsignmentDescriptionStatus(data?.exportData) === ProgressStatus.COMPLETED;
+    const hasCompletedAllCatches: boolean = await ProgressService.getPSCatchStatus(data?.exportData?.catches, documentNumber, userPrincipal, contactId) === ProgressStatus.COMPLETED;
+
     const psProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
-      catches: await ProgressService.getPSCatchStatus(data?.exportData?.catches, documentNumber, userPrincipal, contactId),
-      consignmentDescription: ProgressService.getConsignmentDescriptionStatus(data?.exportData),
+      processedProductDetails: hasCompletedAllProducts && hasCompletedAllCatches ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
       processingPlant,
       exportHealthCertificate,
       exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo)
