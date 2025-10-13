@@ -164,7 +164,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-c
 });
 
 describe('calling handler for /create-processing-statement/:documentNumber/add-consignment-details/:productIndex', () => {
-  let mockValidateCommodityCode;
+  let mockValidateCommodityCode: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidateCommodityCode = jest.spyOn(CommodityCodes, 'validateCommodityCode');
@@ -919,8 +919,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-type', () => {
-  let mockValidateSpeciesName;
-  let mockValidateSpeciesWithSuggestions;
+  let mockValidateSpeciesName: jest.SpyInstance;
+  let mockValidateSpeciesWithSuggestions: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
@@ -1127,8 +1127,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-type/:catchIndex', () => {
-  let mockValidateSpeciesName;
-  let mockValidateSpeciesWithSuggestions;
+  let mockValidateSpeciesName: jest.SpyInstance;
+  let mockValidateSpeciesWithSuggestions: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
@@ -1716,6 +1716,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
     const data = {
       catches: [{}],
       consignmentDescription: ' ',
+      plantName: 'name'
     };
 
     const { errors } = await handler({
@@ -1747,7 +1748,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
         }
       ],
       personResponsibleForConsignment: 'Ivina The first of her name mother of the cats and the coffee lover',
-      plantApprovalNumber: 'plant approval number'
+      plantApprovalNumber: 'plant approval number',
+      plantName: 'name'
     };
 
     const { errors } = await handler({
@@ -1761,7 +1763,6 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
 
     expect(errors).toEqual(expectedErrors);
   });
-
 
   it('should return errors to personResponsibleForConsignment when there are invalid characters', async () => {
     const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-details';
@@ -1779,7 +1780,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
         }
       ],
       personResponsibleForConsignment: 'Ivin@ The f1rst 0f her n@m£',
-      plantApprovalNumber: 'plant approval number'
+      plantApprovalNumber: 'plant approval number',
+      plantName: 'name'
     };
 
     const { errors } = await handler({
@@ -1792,6 +1794,104 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
     };
 
     expect(errors).toEqual(expectedErrors);
+  });
+
+  it('with missing plantName validates as error', async () => {
+    const currentUrl =
+      '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'CT-111111',
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110',
+          catchesCertificateType: 'uk'
+        }
+      ],
+      personResponsibleForConsignment: 'Personal Responsible',
+      plantApprovalNumber: 'plant approval number'
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    const expected = {
+      plantName: 'psAddProcessingPlantAddressErrorNullPlantName'
+    };
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it('with incorrect plantName validates as error', async () => {
+    const currentUrl =
+      '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'CT-111111',
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110',
+          catchesCertificateType: 'uk'
+        }
+      ],
+      personResponsibleForConsignment: 'Personal Responsible',
+      plantApprovalNumber: 'plant approval number',
+      plantName: '!M&S'
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    const expected = {
+      plantName: 'psAddProcessingPlantAddressErrorFormatPlantName'
+    };
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
+  it('with plantName validates on exceed length limit as error', async () => {
+    const currentUrl =
+      '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'CT-111111',
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110',
+          catchesCertificateType: 'uk'
+        }
+      ],
+      personResponsibleForConsignment: 'Personal Responsible',
+      plantApprovalNumber: 'plant approval number',
+      plantName: 'Hw99zXbw0YqZ9RY8SaIxpVs4xm1t30zj6vC LxKmH3fcKJjiSnWJKax'
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    const expected = {
+      plantName: 'psAddProcessingPlantAddressErrorMaxLimitPlantName'
+    };
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
   });
 });
 
@@ -2087,6 +2187,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
       dateOfAcceptance: '03/03/2019',
       personResponsibleForConsignment: ' ',
       plantApprovalNumber: ' ',
+      plantName: 'name'
     };
 
     const { errors } = await handler({
@@ -2112,7 +2213,7 @@ describe('validateCatchDetails', () => {
   const userPrincipal = 'bob';
   const contactId = 'contactId';
 
-  let mockValidateSpeciesName;
+  let mockValidateSpeciesName: jest.SpyInstance
 
   beforeEach(() => {
     mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');

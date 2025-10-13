@@ -437,9 +437,14 @@ export default class ProgressService {
     const hasValidHealthCertificate = (exportHealthCertificate: string): boolean =>
       /^\d{2}\/\d\/\d{6}$/.test(exportHealthCertificate);
 
-    const processingPlant =
+    const processingPlant = data?.exportData?.plantName?.trim() &&
       data?.exportData?.plantApprovalNumber?.trim() &&
         data.exportData.personResponsibleForConsignment?.trim()
+        ? ProgressStatus.COMPLETED
+        : ProgressStatus.INCOMPLETE;
+    const processingPlantAddress =
+      data?.exportData?.plantPostcode &&
+        data.exportData.plantAddressOne
         ? ProgressStatus.COMPLETED
         : ProgressStatus.INCOMPLETE;
     const exportHealthCertificate =
@@ -456,6 +461,7 @@ export default class ProgressService {
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       processedProductDetails: hasCompletedAllProducts && hasCompletedAllCatches ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
       processingPlant,
+      processingPlantAddress,
       exportHealthCertificate,
       exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo)
     };

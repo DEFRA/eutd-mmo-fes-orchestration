@@ -1,6 +1,7 @@
 import applicationConfig from "../../applicationConfig";
 import {
   MAX_PERSON_RESPONSIBLE_LENGTH,
+  MAX_PLANT_NAME_LENGTH,
   MIN_PERSON_RESPONSIBLE_LENGTH,
 } from "../../services/constants";
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
@@ -19,7 +20,8 @@ import {
   validatePersonResponsibleForConsignmentFormat,
   validateMaximumFutureDate,
   validateNonUKCCNumberCharLimit,
-  validateProductDescriptions
+  validateProductDescriptions,
+  isPsPlantNameValid
 } from "../orchestration.service";
 import { isEmpty } from "lodash";
 
@@ -126,6 +128,8 @@ export default {
   },
 
   "/create-processing-statement/:documentNumber/add-processing-plant-details": ({ data, errors }) => {
+    addProcessingPlantAddressErrors(data, errors);
+
     if (!data.personResponsibleForConsignment || validateWhitespace(data.personResponsibleForConsignment)) errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignment";
     else if (data.personResponsibleForConsignment && isInvalidLength(data.personResponsibleForConsignment, MIN_PERSON_RESPONSIBLE_LENGTH, MAX_PERSON_RESPONSIBLE_LENGTH)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignmentLength";
@@ -150,6 +154,16 @@ export default {
     data.dateOfAcceptance = today();
     return { errors };
   },
+}
+
+function addProcessingPlantAddressErrors(data, errors) {
+  if (!data.plantName || validateWhitespace(data.plantName)) {
+    errors['plantName'] = "psAddProcessingPlantAddressErrorNullPlantName";
+  } else if (data.plantName.length > MAX_PLANT_NAME_LENGTH) {
+    errors['plantName'] = "psAddProcessingPlantAddressErrorMaxLimitPlantName";
+  } else if (!isPsPlantNameValid(data.plantName)) {
+    errors['plantName'] = "psAddProcessingPlantAddressErrorFormatPlantName";
+  }
 }
 
 export function validateCatchType(ctch: any, index: number, errors: any) {

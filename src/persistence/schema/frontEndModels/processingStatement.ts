@@ -3,34 +3,34 @@ import { DocumentNumber } from "./documentNumber";
 import { Exporter, toBackEndPsAndSdExporterDetails } from "./exporterDetails";
 import * as moment from 'moment';
 import { ICountry, ProgressStatus } from '../common';
-import {  BaseProgress } from './payload';
+import { BaseProgress } from './payload';
 
 export interface ProcessingStatement {
-    catches : Catch[];
-    validationErrors ? : {}[];
-    products?: Product[],
-    consignmentDescription?: string;
-    error: string;
-    addAnotherCatch ? : string;
-    personResponsibleForConsignment ? : string;
-    plantApprovalNumber ? : string;
-    plantAddressOne ? : string;
-    plantBuildingNumber?: string;
-    plantSubBuildingName?: string;
-    plantBuildingName?: string;
-    plantStreetName?: string;
-    plantCounty?: string;
-    plantCountry?: string;
-    plantTownCity ? : string;
-    plantPostcode?  : string;
-    dateOfAcceptance ? : string;
-    plantName ? : string;
-    healthCertificateNumber ? : string;
-    healthCertificateDate ? : string;
-    errors ? : {};
-    errorsUrl ? : string;
-    exportedTo: ICountry;
-    _plantDetailsUpdated ? : boolean;
+  catches: Catch[];
+  validationErrors?: {}[];
+  products?: Product[],
+  consignmentDescription?: string;
+  error: string;
+  addAnotherCatch?: string;
+  personResponsibleForConsignment?: string;
+  plantApprovalNumber?: string;
+  plantAddressOne?: string;
+  plantBuildingNumber?: string;
+  plantSubBuildingName?: string;
+  plantBuildingName?: string;
+  plantStreetName?: string;
+  plantCounty?: string;
+  plantCountry?: string;
+  plantTownCity?: string;
+  plantPostcode?: string;
+  dateOfAcceptance?: string;
+  plantName?: string;
+  healthCertificateNumber?: string;
+  healthCertificateDate?: string;
+  errors?: {};
+  errorsUrl?: string;
+  exportedTo: ICountry;
+  _plantDetailsUpdated?: boolean;
 }
 export interface ProcessingStatementDraft {
   documentNumber: string,
@@ -40,15 +40,15 @@ export interface ProcessingStatementDraft {
 }
 
 export interface Catch {
-    id?: string;
-    species?: string;
-    speciesCode?: string;
-    catchCertificateNumber?: string;
-    catchCertificateType?: 'uk' | 'non_uk',
-    totalWeightLanded?: string
-    exportWeightBeforeProcessing?: string;
-    exportWeightAfterProcessing?: string;
-    scientificName?: string
+  id?: string;
+  species?: string;
+  speciesCode?: string;
+  catchCertificateNumber?: string;
+  catchCertificateType?: 'uk' | 'non_uk',
+  totalWeightLanded?: string
+  exportWeightBeforeProcessing?: string;
+  exportWeightAfterProcessing?: string;
+  scientificName?: string
 }
 
 export interface Product {
@@ -60,14 +60,14 @@ export interface Product {
 export interface ProcessingStatementProgress extends BaseProgress {
   processedProductDetails: ProgressStatus;
   processingPlant: ProgressStatus;
+  processingPlantAddress: ProgressStatus;
   exportHealthCertificate: ProgressStatus;
   exportDestination: ProgressStatus;
 }
 
-export const toBackEndCatchProcessingStatement = (catches: Catch[]) : BackEndProcessingStatement.Catch[] =>
-{
+export const toBackEndCatchProcessingStatement = (catches: Catch[]): BackEndProcessingStatement.Catch[] => {
   return catches
-  ? catches.map<BackEndProcessingStatement.Catch>((cat: Catch, index: number) => {
+    ? catches.map<BackEndProcessingStatement.Catch>((cat: Catch, index: number) => {
       return {
         species: cat.species,
         speciesCode: cat.speciesCode,
@@ -80,7 +80,7 @@ export const toBackEndCatchProcessingStatement = (catches: Catch[]) : BackEndPro
         scientificName: cat.scientificName
       }
     })
-  : [];
+    : [];
 }
 
 export const toBackEndProductProcessingStatement = (products: Product[], documentNumber: string): BackEndProcessingStatement.Product[] => {
@@ -94,25 +94,25 @@ export const toBackEndProductProcessingStatement = (products: Product[], documen
 }
 
 export const toBackEndProcessingStatement = (
-    documentNumber: DocumentNumber,
-    processingStatement: ProcessingStatement,
-    exporterDetails: Exporter,
-    userReference: string,
-    requestedByAdmin: boolean
-) : BackEndProcessingStatement.ProcessingStatement => {
-    return {
-        createdAt: documentNumber.startedAt,
-        createdBy: "User Id to be done",
-        createdByEmail: "User email to be done",
-        documentNumber: documentNumber.documentNumber,
-        status: documentNumber.status,
-        documentUri: "",
-        draftData: {},
-        exportData: toBackEndProcessingStatementExportData(processingStatement, exporterDetails, documentNumber.documentNumber),
-        audit: [],
-        userReference: userReference,
-        requestByAdmin: requestedByAdmin
-    }
+  documentNumber: DocumentNumber,
+  processingStatement: ProcessingStatement,
+  exporterDetails: Exporter,
+  userReference: string,
+  requestedByAdmin: boolean
+): BackEndProcessingStatement.ProcessingStatement => {
+  return {
+    createdAt: documentNumber.startedAt,
+    createdBy: "User Id to be done",
+    createdByEmail: "User email to be done",
+    documentNumber: documentNumber.documentNumber,
+    status: documentNumber.status,
+    documentUri: "",
+    draftData: {},
+    exportData: toBackEndProcessingStatementExportData(processingStatement, exporterDetails, documentNumber.documentNumber),
+    audit: [],
+    userReference: userReference,
+    requestByAdmin: requestedByAdmin
+  }
 }
 
 export const toBackEndProcessingStatementExportData = (
