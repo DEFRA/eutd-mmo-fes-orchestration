@@ -5,6 +5,7 @@ import {
   isPositiveNumberWithTwoDecimals,
   validateCCNumberFormat,
   validateDate,
+  validateDateBefore,
   validateUKDocumentNumberFormat,
   validateWhitespace,
 } from "../orchestration.service";
@@ -77,13 +78,15 @@ export default {
   "/create-storage-document/:documentNumber/add-storage-facility-details": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
     const index = 0;
     const storageFacility = data.storageFacilities[index];
-    return validateStorageFacility(storageFacility, index, errors)
+    const departureDate = data.arrivalTransport?.departureDate;
+    return validateStorageFacility(storageFacility, departureDate, index, errors)
   },
 
   "/create-storage-document/:documentNumber/add-storage-facility-details/:index": ({ data, _nextUrl, _currentUrl, errors, params }) => {
     const index = +params.index;
     const storageFacility = data.storageFacilities[index];
-    return validateStorageFacility(storageFacility, index, errors)
+    const departureDate = data.arrivalTransport?.departureDate;
+    return validateStorageFacility(storageFacility, departureDate, index, errors)
   },
 
   "/create-storage-document/:documentNumber/add-storage-facility-approval": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
@@ -99,8 +102,9 @@ export default {
   },
 
   "/create-storage-document/:documentNumber/you-have-added-a-storage-facility": ({ data, _nextUrl, currentUrl, errors }) => {
+    const departureDate = data.arrivalTransportation?.departureDate;
     data.storageFacilities.forEach((storageFacility, index) => {
-      validateStorageFacility(storageFacility, index, errors, true);
+      validateStorageFacility(storageFacility, departureDate, index, errors, true);
     });
 
     const addAnotherStorageFacility = data.addAnotherStorageFacility;
@@ -143,13 +147,18 @@ function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, index: n
   }
 }
 
-function checkFacilityArrivalDateError(storageFacility: any, index: number, errors) {
-  if (storageFacility.facilityArrivalDate && !validateDate(storageFacility.facilityArrivalDate)) {
-    errors[`storageFacilities-${index}-facilityArrivalDate`] = `sdArrivalDateValidationError`;
+function checkFacilityArrivalDateError(storageFacility: any, departureDate: string, index: number, errors) {
+  console.log("storageFacility.facilityArrivalDate", storageFacility.facilityArrivalDate, "departureDate", departureDate )
+  if (storageFacility.facilityArrivalDate) {
+    if (!validateDate(storageFacility.facilityArrivalDate)) {
+      errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateValidationError";
+    } else if (validateDateBefore(storageFacility.facilityArrivalDate, departureDate)) {
+      errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateBeforeDepatureDateValidationError";
+    }
   }
 }
 
-function validateStorageFacility(storageFacility: any, index: number, errors, isStorageFacilitiesPage: boolean = false) {
+function validateStorageFacility(storageFacility: any, departureDate: string, index: number, errors, isStorageFacilitiesPage: boolean = false) {
   if (!storageFacility.facilityName || validateWhitespace(storageFacility.facilityName)) {
     errors[`storageFacilities-${index}-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
   }
@@ -168,7 +177,7 @@ function validateStorageFacility(storageFacility: any, index: number, errors, is
     }
   }
 
-  checkFacilityArrivalDateError(storageFacility, index, errors);
+  checkFacilityArrivalDateError(storageFacility, departureDate, index, errors);
 
   return { errors };
 }

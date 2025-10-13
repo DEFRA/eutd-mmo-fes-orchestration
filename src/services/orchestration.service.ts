@@ -734,6 +734,10 @@ export function validateTodayOrInThePast(date) {
   return parseDate(date).isBefore(moment(new Date()));
 }
 
+export function validateDateBefore(date, beforeDate) {
+  return parseDate(date).isBefore(parseDate(beforeDate));
+}
+
 export function validateMaximumFutureDate(date) {
   const maxSubmissionDate = moment(Date.now()).add(8, 'days');    // Todays date + 7 days advance as FI0-4667
   return parseDate(date).isBefore(maxSubmissionDate, 'day');

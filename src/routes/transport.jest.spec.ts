@@ -24,7 +24,7 @@ const createServerInstance = async () => {
     });
 
     server.auth.strategy("jwt", "jwt", {
-        verify: (_decoded, _req) => {
+        verify: (_decoded: any, _req: any) => {
             return { isValid: true };
         },
     });
@@ -36,7 +36,7 @@ const createServerInstance = async () => {
 
 describe("transport routes", () => {
 
-    let server;
+    let server: Hapi.Server<Hapi.ServerApplicationState>;
 
     const DOCUMENT_NUMBER = "DOCUMENT-NUMBER";
 
@@ -46,7 +46,7 @@ describe("transport routes", () => {
 
     beforeAll(async () => {
         server = await createServerInstance()
-        const routes = await new TransportRoutes();
+        const routes = new TransportRoutes();
         await routes.register(server);
         await server.initialize();
         await server.start();
@@ -58,14 +58,14 @@ describe("transport routes", () => {
 
     describe("Transport endpoints", () => {
 
-        let mockWithDocumentLegitimatelyOwned;
-        let mockAddTransport;
-        let mockAddTransportSaveAsDraft;
-        let mockGetTransportDetails;
-        let mockSelectTransport;
-        let mockSelectTransportSaveAsDraft;
-        let mockAddTruckCMR;
-        let mockAddTruckCMRSaveAsDraft;
+        let mockWithDocumentLegitimatelyOwned: jest.SpyInstance;
+        let mockAddTransport: jest.SpyInstance;
+        let mockAddTransportSaveAsDraft: jest.SpyInstance;
+        let mockGetTransportDetails: jest.SpyInstance;
+        let mockSelectTransport: jest.SpyInstance;
+        let mockSelectTransportSaveAsDraft: jest.SpyInstance;
+        let mockAddTruckCMR: jest.SpyInstance;
+        let mockAddTruckCMRSaveAsDraft: jest.SpyInstance;
 
         beforeEach(() => {
             mockWithDocumentLegitimatelyOwned = jest.spyOn(DocumentOwnershipValidator, 'validateDocumentOwnership');
@@ -98,7 +98,7 @@ describe("transport routes", () => {
             jest.restoreAllMocks();
         });
 
-        function createRequestObj(url, additionalPayloadParams = {}, method = 'POST', acceptHtml = false) {
+        function createRequestObj(url: string, additionalPayloadParams = {}, method = 'POST', acceptHtml = false) {
             const request: any = {
                 method,
                 url,
@@ -584,6 +584,178 @@ describe("transport routes", () => {
             const response = await server.inject(request);
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
+        });
+
+        it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/truck/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              nationalityOfVehicle: "",
+              registrationNumber: "",
+              freightBillNumber: "",
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
+              vehicle:"truck",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/truck/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+              departureDate: "error.departureDate.date.max"
+            });
+        });
+
+        it('returns 200 when we POST an arrival when departureDate is before or equal to today\'s date /v1/transport/truck/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              nationalityOfVehicle: "",
+              registrationNumber: "",
+              freightBillNumber: "",
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"truck",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/truck/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(200);
+            expect(mockAddTransport).toHaveBeenCalled();
+            expect(response.result).toEqual({ some: 'data' });
+        });
+
+        it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/train/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              railwayBillNumber: "",
+              freightBillNumber: "",
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
+              vehicle:"train",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/train/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+              departureDate: "error.departureDate.date.max"
+            });
+        });
+
+        it('returns 200 when we POST an arrival when departureDate is before or equal to today\'s date /v1/transport/train/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              railwayBillNumber: "",
+              freightBillNumber: "",
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"train",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/train/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(200);
+            expect(mockAddTransport).toHaveBeenCalled();
+            expect(response.result).toEqual({ some: 'data' });
+        });
+
+        it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "",
+              flagState: "",
+              freightBillNumber: "",
+              containerNumbers: [],
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+              departureDate: "error.departureDate.date.max"
+            });
+        });
+
+        it('returns 200 when we POST an arrival when departureDate is before or equal to today\'s date /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "",
+              flagState: "",
+              freightBillNumber: "",
+              containerNumbers: [],
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(200);
+            expect(mockAddTransport).toHaveBeenCalled();
+            expect(response.result).toEqual({ some: 'data' });
+        });
+
+        it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/plane/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              airwayBillNumber: "",
+              flightNumber: "",
+              freightBillNumber: "",
+              containerNumbers: [],
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
+              departurePlace: "",
+              vehicle:"plane",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+              departureDate: "error.departureDate.date.max"
+            });
+        });
+
+        it('returns 200 when we POST an arrival when departureDate is before or equal to today\'s date /v1/transport/plane/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              airwayBillNumber: "",
+              flightNumber: "",
+              freightBillNumber: "",
+              containerNumbers: [],
+              departureCountry: "",
+              departurePort: "",
+              departureDate: moment().format('DD/MM/YYYY'),
+              departurePlace: "",
+              vehicle:"plane",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(200);
+            expect(mockAddTransport).toHaveBeenCalled();
+            expect(response.result).toEqual({ some: 'data' });
         });
     });
 });

@@ -1252,9 +1252,9 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 });
 
 describe("/create-storage-document/:documentNumber/add-product-to-this-consignment/:index", () => {
-  let mockValidatorSpeciesName;
-  let mockValidatorCommodityCode;
-  let mockValidateSpeciesWithSuggestions;
+  let mockValidatorSpeciesName: jest.SpyInstance;
+  let mockValidatorCommodityCode: jest.SpyInstance;
+  let mockValidateSpeciesWithSuggestions: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidatorSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
@@ -1429,7 +1429,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-product", ()
     addAnotherProduct: "notset",
   };
 
-  let mockValidatorSpeciesName;
+  let mockValidatorSpeciesName: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidatorSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
@@ -1706,6 +1706,166 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
 
     expect(errors).toEqual(expectedErrors);
   });
+
+  it("with storage approval number invalid date validates as error", async () => {
+    const data = {
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "UK/ABC/001",
+        facilityArrivalDate: "123/03/2025"
+      }],
+      addAnotherProduct: "notset",
+    };
+
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-details";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      _params: {},
+    });
+
+    const expectedErrors = {
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it("with storage arrival date before departure date validates as error", async () => {
+    const data = {
+      arrivalTransport: {
+        vehicle: "plane",
+        departureDate: "09/10/2025"
+      },
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "UK/ABC/001",
+        facilityArrivalDate: "08/10/2025"
+      }],
+      addAnotherProduct: "notset",
+    };
+
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-details";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      _params: {},
+    });
+
+    const expectedErrors = {
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateBeforeDepatureDateValidationError",
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it("with storage arrival date equal to departure date validates successfully", async () => {
+    const data = {
+      arrivalTransportation: {
+        vehicle: "plane",
+        departureDate: "09/11/2025"
+      },
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "UK/ABC/001",
+        facilityArrivalDate: "09/11/2025"
+      }],
+      addAnotherProduct: "notset",
+    };
+
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-details";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      _params: {},
+    });
+
+    const expectedErrors = {};
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it("with storage arrival date after to departure date validates successfully", async () => {
+    const data = {
+      arrivalTransportation: {
+        vehicle: "plane",
+        departureDate: "09/11/2025"
+      },
+      storageFacilities: [{
+        facilityName: "name",
+        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+        facilityTownCity: "NEWCASTLE UPON TYNE",
+        facilityPostcode: "NE4 7YH",
+        facilitySubBuildingName: "MMO SUB",
+        facilityBuildingNumber: "",
+        facilityBuildingName: "LANCASTER HOUSE",
+        facilityStreetName: "HAMPSHIRE COURT",
+        facilityCounty: "TYNESIDE",
+        facilityCountry: "ENGLAND",
+        facilityApprovalNumber: "UK/ABC/001",
+        facilityArrivalDate: "10/11/2025"
+      }],
+      addAnotherProduct: "notset",
+    };
+
+    const _currentUrl =
+      "/create-storage-document/:documentNumber/add-storage-facility-details";
+    const handler = StorageNotes[_currentUrl];
+
+    const { errors } = handler({
+      data: data,
+      _currentUrl,
+      _nextUrl: "",
+      errors: {},
+      _params: {},
+    });
+
+    const expectedErrors = {};
+
+    expect(errors).toEqual(expectedErrors);
+  });
 });
 
 describe("/create-storage-document/:documentNumber/add-storage-facility-details/:index", () => {
@@ -1939,7 +2099,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
 });
 
 describe("/create-storage-document/:documentNumber/you-have-added-a-storage-facility", () => {
-  let mockValidatorSpeciesName;
+  let mockValidatorSpeciesName: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidatorSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');

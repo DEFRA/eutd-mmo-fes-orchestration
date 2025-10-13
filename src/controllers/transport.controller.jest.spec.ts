@@ -2,6 +2,7 @@ import * as Hapi from "@hapi/hapi";
 import Services from "../services/transport.service";
 
 import TransportController from "./transport.controller";
+import OrchestrationService from "../services/orchestration.service";
 
 describe("TransportController", () => {
   const USER_ID = "ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12";
@@ -32,19 +33,54 @@ describe("TransportController", () => {
     redirect: () => jest.fn(),
   } as unknown as Hapi.ResponseToolkit<Hapi.ReqRefDefaults>;
   const data = {};
+  const storageDocument = {
+    arrivalTransportation: {
+      vehicle: "plane",
+      departureDate: "09/11/2025"
+    },
+    storageFacilities: [{
+      facilityName: "name",
+      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+      facilityTownCity: "NEWCASTLE UPON TYNE",
+      facilityPostcode: "NE4 7YH",
+      facilitySubBuildingName: "MMO SUB",
+      facilityBuildingNumber: "",
+      facilityBuildingName: "LANCASTER HOUSE",
+      facilityStreetName: "HAMPSHIRE COURT",
+      facilityCounty: "TYNESIDE",
+      facilityCountry: "ENGLAND",
+      facilityApprovalNumber: "UK/ABC/001",
+      facilityArrivalDate: "09/11/2025"
+    }],
+    addAnotherProduct: "notset",
+  };
 
+  let mockResponse: jest.SpyInstance;
   let mockRedirect: jest.SpyInstance;
   let mockAddTransport: jest.SpyInstance;
   let mockGetTransportDetails: jest.SpyInstance;
+  let mockGet: jest.SpyInstance;
 
-  beforeAll(() => {
+  beforeEach(() => {
+    mockResponse = jest.spyOn(h, "response");
+    mockResponse.mockReturnValue({
+      code: () => ({
+        takeover: () => jest.fn()
+      })
+    });
     mockRedirect = jest.spyOn(h, "redirect");
     mockRedirect.mockReturnValue(null);
     mockAddTransport = jest.spyOn(Services, "addTransport");
     mockAddTransport.mockReturnValue(data);
     mockGetTransportDetails = jest.spyOn(Services, "getTransportDetails");
     mockGetTransportDetails.mockReturnValue(data);
+    mockGet = jest.spyOn(OrchestrationService, "getFromMongo");
+    mockGet.mockResolvedValue(storageDocument);
   });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  })
 
   describe("nextVehicleUri() should return a valid nextUri", () => {
     it("case truck", () => {
@@ -112,50 +148,8 @@ describe("TransportController", () => {
     });
   });
 
-  describe("addTransport()", () => {
-    it("should redirect to dashboardUri when savingAsDraft is true", async () => {
-      await TransportController.addTransport(
-        mockReq,
-        h,
-        true,
-        USER_ID,
-        DOCUMENT_NUMBER,
-        contactId
-      );
-
-      expect(mockRedirect).toHaveBeenCalledWith(mockReq.payload.dashboardUri);
-    });
-
-    it("should redirect to summaryUri when savingAsDraft is false", async () => {
-      await TransportController.addTransport(
-        mockReq,
-        h,
-        false,
-        USER_ID,
-        DOCUMENT_NUMBER,
-        contactId
-      );
-
-      expect(mockRedirect).toHaveBeenCalledWith(mockReq.payload.summaryUri);
-    });
-
-    it("should return a result object when accept header is not text/html", async () => {
-      mockReq.headers.accept = "application/pdf";
-      const result = await TransportController.addTransport(
-        mockReq,
-        h,
-        true,
-        USER_ID,
-        DOCUMENT_NUMBER,
-        contactId
-      );
-
-      expect(result).toEqual(data);
-      mockReq.headers.accept = "text/html";
-    });
-  });
-
   describe("addTransportDetails()", () => {
+
     it("should redirect to dashboardUri when savingAsDraft is true", async () => {
       await TransportController.addTransportDetails(
         mockReq,
@@ -195,6 +189,66 @@ describe("TransportController", () => {
 
       expect(result).toEqual(data);
       mockReq.headers.accept = "text/html";
+    });
+
+    it("should error when export date is earlier than the facilityArrivalDate", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          exportDate: "08/11/2025"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).toHaveBeenCalledWith({ exportDate: 'error.directLanding.exportDate.any.min' });
+    });
+
+    it("should not error when export date is equal to the facilityArrivalDate", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          exportDate: "09/11/2025"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ exportDate: 'error.directLanding.exportDate.any.min' });
+    });
+
+    it("should not error when export date is after the facilityArrivalDate", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          exportDate: "10/11/2025"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ exportDate: 'error.directLanding.exportDate.any.min' });
     });
   });
 
