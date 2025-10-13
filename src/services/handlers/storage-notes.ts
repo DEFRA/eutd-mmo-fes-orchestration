@@ -262,14 +262,15 @@ async function validateNonJsSpeciesName(product: any, errors: any) {
   return errors;
 }
 
-export async function validateProduct(product: any, index: number, errors, isNonJs = false,) {
+const isProductDefined = (product: any) => product.product && !validateWhitespace(product.product);
 
-  const isProductNotDefined = !product.product || validateWhitespace(product.product);
-  if (isProductNotDefined) {
+export async function validateProduct(product: any, index: number, errors, isNonJs = false) {
+
+  if (!isProductDefined(product)) {
     errors[`catches-${index}-product`] = 'sdAddProductToConsignmentProductNameErrorNull'
   }
 
-  if (isNonJs && !isProductNotDefined) {
+  if (isNonJs && isProductDefined(product)) {
     errors = await validateNonJsSpeciesName(product, errors);
   } else if (!await isSpeciesNameValid(product.product, product.scientificName)) {
     errors[`catches-${index}-product`] = 'sdAddProductToConsignmentSpeciesNameErrorInValid';
@@ -307,7 +308,7 @@ export async function validateEntry(product: any, index: number, errors, documen
     errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentErrorUKDocumentNumberFormatInvalid';
   } else if (product.certificateType === 'uk' && !await validateCompletedDocument(product.certificateNumber, userPrincipal, contactId, documentNumber)) {
     errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentDoesNotExistError';
-  } else if (product.certificateType === 'uk' && !await validateSpecies(product.certificateNumber, product.product, null, userPrincipal, contactId, documentNumber)) {
+  } else if (product.certificateType === 'uk' && isProductDefined(product) && !await validateSpecies(product.certificateNumber, product.product, product.speciesCode, userPrincipal, contactId, documentNumber)) {
     errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentSpeciesDoesNotExistError';
   }
 

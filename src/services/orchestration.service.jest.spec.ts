@@ -49,7 +49,7 @@ describe('get', () => {
     };
 
     const res = jest.fn();
-    let mockGetDraftData;
+    let mockGetDraftData: jest.SpyInstance;
 
     beforeAll(() => {
       mockGetDraftData = jest.spyOn(ProcessingStatementService, 'getDraft');
@@ -131,7 +131,7 @@ describe('get', () => {
   });
 
   describe('for storage document', () => {
-    let mockGetDraftData;
+    let mockGetDraftData: jest.SpyInstance;
 
     const redisKey = 'storageNotes';
 
@@ -229,14 +229,14 @@ describe('get', () => {
 
   describe('for any other journey', () => {
 
-    let mockGetSessionStore;
+    let mockGetSessionStore: jest.SpyInstance;
     const mockSessionStore = {
       readAllFor: jest.fn(),
       writeAllFor: jest.fn()
     };
 
-    let mockGetDraftDataFromProcessingStatement;
-    let mockGetDraftDataFromStorageDocument;
+    let mockGetDraftDataFromProcessingStatement: jest.SpyInstance;
+    let mockGetDraftDataFromStorageDocument: jest.SpyInstance;
 
     const redisKey = 'otherJourney';
 
@@ -285,7 +285,7 @@ describe('saveAndValidate', () => {
     push: ()=>{}
   };
 
-  let mockGetSessionStore;
+  let mockGetSessionStore: jest.SpyInstance;
   const mockSessionStore = {
     readAllFor: jest.fn(),
     writeAllFor: jest.fn()
@@ -322,8 +322,8 @@ describe('saveAndValidate', () => {
 
   describe('Processing statement', () => {
 
-    let mockGetDraftData;
-    let mockUpsertDraftData;
+    let mockGetDraftData: jest.SpyInstance;
+    let mockUpsertDraftData: jest.SpyInstance;
 
     const exporterDetails: ExporterDetails = {
       contactId: "a contact Id",
@@ -433,8 +433,8 @@ describe('saveAndValidate', () => {
 
   describe('Storage Notes', () => {
 
-    let mockGetDraftData;
-    let mockUpsertDraftData;
+    let mockGetDraftData: jest.SpyInstance;
+    let mockUpsertDraftData: jest.SpyInstance;
 
     const exporterDetails: ExporterDetails = {
       contactId: "a contact Id",
@@ -556,7 +556,7 @@ describe('saveAndValidate', () => {
 
   describe('Anything else', () => {
 
-    let mockGetSessionStore;
+    let mockGetSessionStore: jest.SpyInstance;
     const mockSessionStore = {
       readAllFor: jest.fn(),
       writeAllFor: jest.fn()
@@ -689,18 +689,18 @@ describe('generatePdf', () => {
 
     const res = jest.fn();
     let mockReportDocumentSubmitted: jest.SpyInstance;
-    let mockLoadRequiredData;
-    let mockGetBlockingStatus;
-    let mockClearSessionDataForCurrentJourney;
-    let mockInvalidateDraftCache;
-    let mockDeleteDraftLink;
-    let mockPostEventData;
-    let mockGeneratePdfAndUpload;
-    let mockCompleteDraft;
-    let mockLoggerError;
-    let mockValidateCompletedDocument;
-    let mockValidateSpecies;
-    let mockLoggerInfo;
+    let mockLoadRequiredData: jest.SpyInstance;
+    let mockGetBlockingStatus: jest.SpyInstance;
+    let mockClearSessionDataForCurrentJourney: jest.SpyInstance;
+    let mockInvalidateDraftCache: jest.SpyInstance;
+    let mockDeleteDraftLink: jest.SpyInstance;
+    let mockPostEventData: jest.SpyInstance;
+    let mockGeneratePdfAndUpload: jest.SpyInstance;
+    let mockCompleteDraft: jest.SpyInstance;
+    let mockLoggerError: jest.SpyInstance;
+    let mockValidateCompletedDocument: jest.SpyInstance;
+    let mockValidateSpecies: jest.SpyInstance;
+    let mockLoggerInfo: jest.SpyInstance;
 
     beforeEach(() => {
       mockReportDocumentSubmitted = jest.spyOn(ReferenceDataService, 'reportDocumentSubmitted');
@@ -1262,19 +1262,19 @@ describe('generatePdf', () => {
     };
 
     const res = jest.fn();
-    let mockReportDocumentSubmitted;
-    let mockLoadRequiredData;
-    let mockGetBlockingStatus;
-    let mockClearSessionDataForCurrentJourney;
-    let mockInvalidateDraftCache;
-    let mockDeleteDraftLink;
-    let mockPostEventData;
-    let mockGeneratePdfAndUpload;
-    let mockCompleteDraft;
-    let mockLoggerError;
-    let mockValidateCompletedDocument;
-    let mockValidateSpecies;
-    let mockLoggerInfo;
+    let mockReportDocumentSubmitted: jest.SpyInstance;
+    let mockLoadRequiredData: jest.SpyInstance;
+    let mockGetBlockingStatus: jest.SpyInstance;
+    let mockClearSessionDataForCurrentJourney: jest.SpyInstance;
+    let mockInvalidateDraftCache: jest.SpyInstance;
+    let mockDeleteDraftLink: jest.SpyInstance;
+    let mockPostEventData: jest.SpyInstance;
+    let mockGeneratePdfAndUpload: jest.SpyInstance;
+    let mockCompleteDraft: jest.SpyInstance;
+    let mockLoggerError: jest.SpyInstance;
+    let mockValidateCompletedDocument: jest.SpyInstance;
+    let mockValidateSpecies: jest.SpyInstance;
+    let mockLoggerInfo: jest.SpyInstance;
 
     beforeEach(() => {
       mockReportDocumentSubmitted = jest.spyOn(ReferenceDataService, 'reportDocumentSubmitted');
@@ -1780,11 +1780,11 @@ it('orchestration.service isPsPlantNameValid() validates correctly', () => {
 });
 
 describe('getFromMongo', () => {
-  let mockGetDraftData;
-  let mockToFrontEndProcessingStatementExportData;
-  let mockAddTotalWeightLandedProcessingStatement;
-  let mockIsOldProcessingPlantAddress;
-  let mockClearOldProcessingPlantAddress;
+  let mockGetDraftData: jest.SpyInstance;
+  let mockToFrontEndProcessingStatementExportData: jest.SpyInstance;
+  let mockAddTotalWeightLandedProcessingStatement: jest.SpyInstance;
+  let mockIsOldProcessingPlantAddress: jest.SpyInstance;
+  let mockClearOldProcessingPlantAddress: jest.SpyInstance;
 
   const sessionSampleExportData = {
     exportData : {
