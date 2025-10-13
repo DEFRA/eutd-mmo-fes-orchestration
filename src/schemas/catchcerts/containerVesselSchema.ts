@@ -24,11 +24,7 @@ const containerVesselSchema = Joi.object({
       isoNumericCode: Joi.string().allow(null).allow('').optional()
     }).required()
   }),
-  vesselName: Joi.when('arrival', {
-    is: true,
-    then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/),
-    otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/)
-  }),
+  vesselName: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/),
   flagState: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
@@ -52,15 +48,20 @@ const containerVesselSchema = Joi.object({
     otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/).required()
   }),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
-  departurePort: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'\s]+$/),
+  departurePort: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\-'\s]+$/),
+  placeOfUnloading: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
+    otherwise: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
+  }),
   journey: Joi.string(),
-  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max("now").optional(),
+  departureDate: Joi.date().allow('').allow(null).format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max("now").optional(),
   exportDateTo: Joi.when('arrival', {
     is: true,
     then: Joi.date().optional(),
     otherwise: Joi.date().iso().required(),
   }),
-  departureCountry: Joi.string().allow('').optional()
+  departureCountry: Joi.string().allow('').allow(null).optional()
 });
 
 export default containerVesselSchema;

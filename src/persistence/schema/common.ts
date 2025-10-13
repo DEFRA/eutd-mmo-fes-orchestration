@@ -23,6 +23,7 @@ export interface BasicTransportDetails {
   departureCountry?: string;
   departurePort?: string;
   departureDate?: string;
+  placeOfUnloading?: string;
 }
 
 export interface Train extends BasicTransportDetails {
@@ -79,7 +80,8 @@ export const TransportSchema = new Schema({
   freightBillNumber:    { type: String,  required: false },
   departureCountry:     { type: String,  required: false },
   departurePort:        { type: String,  required: false },
-  departureDate:        { type: String,  required: false }
+  departureDate:        { type: String,  required: false },
+  placeOfUnloading:     { type: String,  required: false },
 }, { _id : false });
 
 export interface ExporterDetails {

@@ -31,6 +31,7 @@ export interface Transport {
   departurePort?: string;
   departureDate?: string;
   freightBillNumber?: string;
+  placeOfUnloading?: string;
 }
 
 export const toBackEndTransport = (transport: Transport): BackEndModels.Transport => {
@@ -75,7 +76,8 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
   exportDate: transport.exportDate,
-  exportedTo: transport.exportedTo
+  exportedTo: transport.exportedTo,
+  placeOfUnloading: transport.placeOfUnloading,
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
@@ -90,7 +92,8 @@ const getPlaneBackEndTransport = (transport: Transport) => ({
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
   exportDate: transport.exportDate,
-  exportedTo: transport.exportedTo
+  exportedTo: transport.exportedTo,
+  placeOfUnloading: transport.placeOfUnloading,
 });
 
 const getTrainBackEndTransport = (transport: Transport) => ({
@@ -102,7 +105,8 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
   exportDate: transport.exportDate,
-  exportedTo: transport.exportedTo
+  exportedTo: transport.exportedTo,
+  placeOfUnloading: transport.placeOfUnloading,
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
@@ -117,7 +121,8 @@ const getContainerVesselBackEndTransport = (transport: Transport) => ({
   containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
   departurePlace: transport.departurePlace,
   exportDate: transport.exportDate,
-  exportedTo: transport.exportedTo
+  exportedTo: transport.exportedTo,
+  placeOfUnloading: transport.placeOfUnloading,
 });
 
 const getFishingVesselBackEndTransport = (transport: Transport) => ({
@@ -150,7 +155,8 @@ export const toFrontEndTransport = (
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate
+          departureDate: model.departureDate,
+          placeOfUnloading: model.placeOfUnloading,
         };
 
         break;
@@ -169,7 +175,8 @@ export const toFrontEndTransport = (
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate
+          departureDate: model.departureDate,
+          placeOfUnloading: model.placeOfUnloading,
         };
         break;
       }
@@ -184,7 +191,8 @@ export const toFrontEndTransport = (
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate
+          departureDate: model.departureDate,
+          placeOfUnloading: model.placeOfUnloading,
         };
         break;
       }
@@ -202,7 +210,8 @@ export const toFrontEndTransport = (
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate
+          departureDate: model.departureDate,
+          placeOfUnloading: model.placeOfUnloading,
         };
         break;
       }

@@ -194,37 +194,6 @@ export default class ProgressService {
   public static readonly getTransportationStatus = (journey: string): ProgressStatus =>
     journey === "storageNotes" ? ProgressStatus.INCOMPLETE : ProgressStatus.CANNOT_START;
 
-  public static readonly getRequiredArrivalExpectedValues = (vehicle: string): string[] => {
-    let expected: string[];
-
-    switch (vehicle) {
-      case truck:
-        expected = ['vehicle', 'nationalityOfVehicle', 'registrationNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
-        break;
-      case train:
-        expected = ['vehicle', 'railwayBillNumber', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
-        break;
-      case plane:
-        expected = ['vehicle', 'airwayBillNumber', 'flightNumber', 'containerNumbers', 'freightBillNumber', 'departurePort', 'departureDate', 'departureCountry'];
-        break;
-      case containerVessel:
-        expected = ['vehicle', 'vesselName', 'flagState', 'freightBillNumber', 'containerNumbers', 'departurePort', 'departureDate', 'departureCountry'];
-        break;
-      default:
-        expected = []
-    }
-
-    return expected;
-  }
-
-  public static readonly getArrivalTransportCompleteStatus = (transportation: Transport, arrival?: boolean): ProgressStatus => {
-    if (arrival) {
-      return this.getRequiredArrivalExpectedValues(transportation.vehicle).every(prop => ProgressService.isEmptyAndTrimSpaces(transportation[prop])) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
-    }
-
-    return ProgressStatus.COMPLETED;
-  }
-
   public static readonly getTransportDetailsStatus = (transportation: Transport, journey?: string, arrival?: boolean) => {
     const isTruck = transportation.vehicle === 'truck';
     const hasCmr = isTruck && transportation.cmr === 'true';
@@ -261,16 +230,12 @@ export default class ProgressService {
       return ProgressStatus.INCOMPLETE;
     }
 
-    return this.getArrivalTransportCompleteStatus(transportation, arrival);
+    return ProgressStatus.COMPLETED;
   }
 
   public static readonly getTransportDetails = (transportation: Transport, journey?: string, arrival?: boolean): ProgressStatus => {
     if (ProgressService.isEmptyAndTrimSpaces(transportation?.vehicle)) {
       return this.getTransportDetailsStatus(transportation, journey, arrival);
-    }
-
-    if (arrival) {
-      return ProgressStatus.INCOMPLETE;
     }
 
     return this.getTransportationStatus(journey)
@@ -489,9 +454,9 @@ export default class ProgressService {
       reference: ProgressService.getUserReference(data?.userReference),
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       catches: catchesStatus,
+      arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.INCOMPLETE,
       storageFacilities: ProgressService.getStorageFacilitiesStatus(data?.exportData?.storageFacilities),
       transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
-      arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.INCOMPLETE
     };
 
     const requiredSectionsLength = Object.keys(sdProgress).filter((key) => key !== "reference" && key !== "arrivalTransportationDetails").length;

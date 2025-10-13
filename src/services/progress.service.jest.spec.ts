@@ -1828,7 +1828,8 @@ describe('getTransportDetails', () => {
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom'
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
@@ -1906,7 +1907,8 @@ describe('getTransportDetails', () => {
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom'
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
@@ -4608,7 +4610,8 @@ describe('getStorageDocumentProgress', () => {
           freightBillNumber: 'a',
           departurePort: 'Port',
           departureDate: '09/01/2020',
-          departureCountry: 'Equatorial Guinea'
+          departureCountry: 'Equatorial Guinea',
+          placeOfUnloading: 'place',
         },
       },
     });
@@ -4653,7 +4656,8 @@ describe('getStorageDocumentProgress', () => {
           departurePort: 'Port',
           departureDate: '09/01/2020',
           nationalityOfVehicle: 'UK',
-          departureCountry: 'Equatorial Guinea'
+          departureCountry: 'Equatorial Guinea',
+          placeOfUnloading: 'place'
         },
       },
     });
@@ -4699,7 +4703,8 @@ describe('getStorageDocumentProgress', () => {
           freightBillNumber: 'a',
           departurePort: 'airport',
           departureDate: '01/09/2025',
-          departureCountry: 'Equatorial Guinea'
+          departureCountry: 'Equatorial Guinea',
+          placeOfUnloading: 'place'
         },
       },
     });
