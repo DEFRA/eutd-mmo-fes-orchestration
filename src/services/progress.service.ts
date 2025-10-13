@@ -191,9 +191,6 @@ export default class ProgressService {
     return ProgressStatus.INCOMPLETE;
   }
 
-  public static readonly getArrivalTransportStatus = (arrival?: boolean): ProgressStatus =>
-    arrival ? ProgressStatus.OPTIONAL : ProgressStatus.INCOMPLETE;
-
   public static readonly getTransportationStatus = (journey: string): ProgressStatus =>
     journey === "storageNotes" ? ProgressStatus.INCOMPLETE : ProgressStatus.CANNOT_START;
 
@@ -222,7 +219,7 @@ export default class ProgressService {
 
   public static readonly getArrivalTransportCompleteStatus = (transportation: Transport, arrival?: boolean): ProgressStatus => {
     if (arrival) {
-      return this.getRequiredArrivalExpectedValues(transportation.vehicle).every(prop => ProgressService.isEmptyAndTrimSpaces(transportation[prop])) ? ProgressStatus.COMPLETED : ProgressStatus.OPTIONAL;
+      return this.getRequiredArrivalExpectedValues(transportation.vehicle).every(prop => ProgressService.isEmptyAndTrimSpaces(transportation[prop])) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
     }
 
     return ProgressStatus.COMPLETED;
@@ -256,12 +253,12 @@ export default class ProgressService {
     }
 
     if (!schema) {
-      return this.getArrivalTransportStatus(arrival);
+      return ProgressStatus.INCOMPLETE;
     }
 
     const { error } = schema.validate({ ...transportation, journey, exportDateTo: journey === "storageNotes" && moment().startOf("day").add(1, "day").toISOString(), arrival });
     if (error) {
-      return this.getArrivalTransportStatus(arrival);
+      return ProgressStatus.INCOMPLETE;
     }
 
     return this.getArrivalTransportCompleteStatus(transportation, arrival);
@@ -273,7 +270,7 @@ export default class ProgressService {
     }
 
     if (arrival) {
-      return ProgressStatus.OPTIONAL;
+      return ProgressStatus.INCOMPLETE;
     }
 
     return this.getTransportationStatus(journey)
@@ -486,7 +483,7 @@ export default class ProgressService {
       catches: catchesStatus,
       storageFacilities: ProgressService.getStorageFacilitiesStatus(data?.exportData?.storageFacilities),
       transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
-      arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.OPTIONAL
+      arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.INCOMPLETE
     };
 
     const requiredSectionsLength = Object.keys(sdProgress).filter((key) => key !== "reference" && key !== "arrivalTransportationDetails").length;

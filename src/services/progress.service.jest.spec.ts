@@ -1836,7 +1836,7 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return OPTIONAL when some arrival plane fields are missing', () => {
+    it('should return INCOMPLETE when some arrival plane fields are missing', () => {
       const transport: Transport = {
         vehicle: 'plane',
         exportedTo: {
@@ -1850,11 +1850,11 @@ describe('getTransportDetails', () => {
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.OPTIONAL
+        ProgressStatus.INCOMPLETE
       );
     });
 
-    it('should return OPTIONAL when some arrival plane fields have validation errors', () => {
+    it('should return INCOMPLETE when some arrival plane fields have validation errors', () => {
       const transport: Transport = {
         vehicle: 'plane',
         exportedTo: {
@@ -1869,7 +1869,7 @@ describe('getTransportDetails', () => {
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.OPTIONAL
+        ProgressStatus.INCOMPLETE
       );
     });
 
@@ -1914,7 +1914,7 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return OPTIONAL when some arrival container vessel fields are missing', () => {
+    it('should return INCOMPLETE when some arrival container vessel fields are missing', () => {
       const transport: Transport = {
         vehicle: 'containerVessel',
         exportedTo: {
@@ -1928,11 +1928,11 @@ describe('getTransportDetails', () => {
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.OPTIONAL
+        ProgressStatus.INCOMPLETE
       );
     });
 
-    it('should return OPTIONAL when some arrival container vessel fields have validation errors', () => {
+    it('should return INCOMPLETE when some arrival container vessel fields have validation errors', () => {
       const transport: Transport = {
         vehicle: 'containerVessel',
         exportedTo: {
@@ -1947,11 +1947,11 @@ describe('getTransportDetails', () => {
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.OPTIONAL
+        ProgressStatus.INCOMPLETE
       );
     });
 
-    it('should return OPTIONAL when some arrival fields have validation errors', () => {
+    it('should return INCOMPLETE when some arrival fields have validation errors', () => {
       const transport: Transport = {
         vehicle: 'not valid',
         exportedTo: {
@@ -1966,7 +1966,7 @@ describe('getTransportDetails', () => {
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.OPTIONAL
+        ProgressStatus.INCOMPLETE
       );
     });
 
@@ -3933,7 +3933,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -3984,7 +3984,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
       requiredSections: 4
@@ -4034,7 +4034,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4085,7 +4085,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
       requiredSections: 4
@@ -4134,7 +4134,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4184,7 +4184,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.COMPLETED,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
       requiredSections: 4
@@ -4230,7 +4230,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4272,7 +4272,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4326,7 +4326,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4359,7 +4359,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4428,7 +4428,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.COMPLETED,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.COMPLETED,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 2,
       requiredSections: 4
@@ -4478,7 +4478,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4584,7 +4584,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.COMPLETED,
         storageFacilities: ProgressStatus.COMPLETED,
         transportDetails: ProgressStatus.COMPLETED,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 4,
       requiredSections: 4
@@ -4759,7 +4759,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4799,7 +4799,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
@@ -4838,7 +4838,7 @@ describe('getStorageDocumentProgress', () => {
         catches: ProgressStatus.INCOMPLETE,
         storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.INCOMPLETE,
-        arrivalTransportationDetails: ProgressStatus.OPTIONAL,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
       requiredSections: 4
