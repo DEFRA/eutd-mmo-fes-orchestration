@@ -326,6 +326,17 @@ describe("transport routes", () => {
             expect(response.payload).toStrictEqual(JSON.stringify(error));
         });
 
+        it(`returns 400 and FAILS when we POST /v1/transport/add without a vehicle with arrival=true`, async () => {
+
+            const request = createRequestObj('/v1/transport/add', { arrival: true })
+
+            const response = await server.inject(request);
+            expect(mockSelectTransport).not.toHaveBeenCalled();
+            expect(response.statusCode).toBe(400);
+            const error = { vehicle: 'error.arrivalVehicle.any.required' }
+            expect(response.payload).toStrictEqual(JSON.stringify(error));
+        });
+
         it(`returns 200 and doesnt fail when we POST /v1/transport/add/saveAsDraft`, async () => {
 
             const request = createRequestObj('/v1/transport/add/saveAsDraft', {

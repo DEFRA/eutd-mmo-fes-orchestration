@@ -61,7 +61,11 @@ export default class TransportRoutes {
                 abortEarly: false
               },
               failAction: function (req, h, error) {
-                const errorObject = errorExtractor(error);
+                const errorObject = errorExtractor(error) as any;
+                
+                if (errorObject.vehicle && req.payload && (req.payload as any).arrival === true) {
+                   errorObject.vehicle = 'error.arrivalVehicle.any.required';
+                }
 
                 if (acceptsHtml(req.headers)) {
                   return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
