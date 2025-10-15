@@ -280,14 +280,14 @@ function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
 }
 
 export async function validateProductDescription(product: any, errors: any) {
-  if (!product.commodityCode || validateWhitespace(product.commodityCode) || (await validateCommodityCode(product.commodityCode, applicationConfig.getReferenceServiceUrl())).isError === true) {
-    errors['commodityCode'] = 'psAddProductCommodityCodeError'
-  }
-
   if (!product.description || validateWhitespace(product.description)) {
     errors['consignmentDescription'] = 'psAddProductDescriptionError'
   } else if (isInvalidLength(product.description, 0, 50)) {
     errors['consignmentDescription'] = 'psAddProductDescriptionCharacterError'
+  }
+
+  if (!product.commodityCode || validateWhitespace(product.commodityCode) || (await validateCommodityCode(product.commodityCode, applicationConfig.getReferenceServiceUrl())).isError === true) {
+    errors['commodityCode'] = 'psAddProductCommodityCodeError'
   }
 
   return { errors };
