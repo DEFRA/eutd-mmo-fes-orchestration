@@ -47,4 +47,15 @@ describe("errorExtractor", () => {
     };
     expect(result).toEqual(expectedResult);
   });
+
+  it("buildErrorObject() should handle containerNumbers array.min validation", () => {
+    const data = {
+      details: [{ type: "array.min", path: ["containerNumbers"] }],
+    };
+
+    const result = buildErrorObject(data);
+
+    const expectedResult = { "containerNumbers.0": "error.containerNumbers.array.min" };
+    expect(result).toEqual(expectedResult);
+  });
 });

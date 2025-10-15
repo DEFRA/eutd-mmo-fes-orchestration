@@ -39,6 +39,7 @@ const containerVesselSchema = Joi.object({
       .optional(),
     otherwise: Joi.array()
       .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/))
+      .min(1)
       .max(5)
       .required()
   }),

@@ -23,6 +23,10 @@ export default function buildErrorObject(data)  {
   details.forEach((detail) => {
     if (detail.path.length > 0) {
       const errorKey = detail.path.join().replace(/,/gi,'.');
+      if(detail.path[0] === 'containerNumbers' && detail.type === 'array.min'){
+        errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`
+        return;
+      }
       errorObject[errorKey] = `error.${errorKey}.${detail.type}`
     } else if (detail.context.label) {
       errorObject[detail.context.label] = `error.${detail.context.label}.${detail.type}`
