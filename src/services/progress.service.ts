@@ -459,7 +459,7 @@ export default class ProgressService {
       transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
     };
 
-    const requiredSectionsLength = Object.keys(sdProgress).filter((key) => key !== "reference" && key !== "arrivalTransportationDetails").length;
+    const requiredSectionsLength = Object.keys(sdProgress).filter((key) => key !== "reference").length;
 
     return {
       progress: sdProgress,

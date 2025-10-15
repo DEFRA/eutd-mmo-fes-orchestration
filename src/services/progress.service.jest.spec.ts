@@ -3936,7 +3936,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -3987,7 +3987,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4037,7 +4037,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4088,7 +4088,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4137,7 +4137,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4187,7 +4187,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4233,7 +4233,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4275,7 +4275,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4329,7 +4329,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4362,7 +4362,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4431,7 +4431,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 2,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4481,7 +4481,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4587,7 +4587,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 4,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4632,7 +4632,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.COMPLETED,
       },
       completedSections: 1,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4678,7 +4678,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.COMPLETED,
       },
       completedSections: 1,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4725,7 +4725,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.COMPLETED,
       },
       completedSections: 1,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4765,7 +4765,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4805,7 +4805,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
@@ -4844,7 +4844,7 @@ describe('getStorageDocumentProgress', () => {
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 4
+      requiredSections: 5
     };
 
     expect(result).toStrictEqual(expected);
