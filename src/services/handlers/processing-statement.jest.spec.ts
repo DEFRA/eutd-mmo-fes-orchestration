@@ -422,7 +422,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     });
 
     const expectedErrors = {
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
       'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorEnterTheCatchCertificateNumber',
       "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
       "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
@@ -467,7 +467,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
 
     const expectedErrors = {
       'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorCCNumberMustOnlyContain',
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
     };
     expect(errors).toEqual(expectedErrors);
     expect(data.catches[0].catchCertificateType).toBeUndefined();
@@ -619,7 +619,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     });
 
     const expectedErrors = {
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType"
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType"
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -874,7 +874,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
 
     const expectedErrors = {
       'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorEnterTheCatchCertificateNumber',
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
       "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
       "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
       "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
@@ -912,7 +912,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     const expectedErrors = {
       'catches-0-species': 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
       'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorCCNumberMustOnlyContain',
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
     };
     expect(errors).toEqual(expectedErrors);
   });
@@ -946,7 +946,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
     });
 
     const expectedErrors = {
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
       "catches-species": "psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName",
     }
 
@@ -971,7 +971,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
     });
 
     const expectedErrors = {
-      "catches-catchCertificateType": "psAddCatchTypeErrorCatchCertificateTypeInvalid",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorCatchCertificateTypeInvalid",
       "catches-species": "psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName"
     };
     expect(mockValidateSpeciesName).toHaveBeenCalled();
@@ -1154,7 +1154,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
     });
 
     const expectedErrors = {
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
       "catches-species": "psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName"
     }
 
@@ -1180,7 +1180,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
     });
 
     const expectedErrors = {
-      "catches-catchCertificateType": "psAddCatchTypeErrorCatchCertificateTypeInvalid",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorCatchCertificateTypeInvalid",
       "catches-species": "psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName"
     };
     expect(mockValidateSpeciesName).toHaveBeenCalled();
@@ -1221,7 +1221,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
     });
 
     const expectedErrors = {
-      "catches-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-1-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
       "catches-species": "psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName"
     };
     expect(mockValidateSpeciesName).toHaveBeenCalled();

@@ -168,9 +168,9 @@ function addProcessingPlantAddressErrors(data, errors) {
 
 export function validateCatchType(ctch: any, index: number, errors: any) {
   if (ctch.catchCertificateType === undefined) {
-    errors[`catches-catchCertificateType`] = 'psAddCatchTypeErrorSelectCatchCertificateType';
+    errors[`catches-${index}-catchCertificateType`] = 'psAddCatchTypeErrorSelectCatchCertificateType';
   } else if (!['uk', 'non_uk'].includes(ctch.catchCertificateType)) {
-    errors[`catches-catchCertificateType`] = 'psAddCatchTypeErrorCatchCertificateTypeInvalid';
+    errors[`catches-${index}-catchCertificateType`] = 'psAddCatchTypeErrorCatchCertificateTypeInvalid';
   }
 
   return { errors };
