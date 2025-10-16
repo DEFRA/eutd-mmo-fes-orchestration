@@ -48,7 +48,9 @@ export interface Catch {
   totalWeightLanded?: string
   exportWeightBeforeProcessing?: string;
   exportWeightAfterProcessing?: string;
-  scientificName?: string
+  scientificName?: string;
+  productId?: string;
+  productDescription?: string;
 }
 
 export interface Product {
@@ -77,7 +79,9 @@ export const toBackEndCatchProcessingStatement = (catches: Catch[]): BackEndProc
         exportWeightBeforeProcessing: cat.exportWeightBeforeProcessing,
         exportWeightAfterProcessing: cat.exportWeightAfterProcessing,
         id: cat.id || cat.catchCertificateNumber !== undefined ? `${cat.catchCertificateNumber}-${moment.utc().unix()}-${index}` : undefined,
-        scientificName: cat.scientificName
+        scientificName: cat.scientificName,
+        productId: cat.productId,
+        productDescription: cat.productDescription,
       }
     })
     : [];

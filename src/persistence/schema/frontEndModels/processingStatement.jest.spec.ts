@@ -16,7 +16,9 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       totalWeightLanded: "totalWeightLanded",
       exportWeightBeforeProcessing: "11",
       exportWeightAfterProcessing: "9",
-      scientificName: "some scientific name"
+      scientificName: "some scientific name",
+      productId: undefined,
+      productDescription: undefined
     }];
 
     const catches : FrontEndProcessingStatement.Catch[] = [{
@@ -27,7 +29,9 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       totalWeightLanded: "totalWeightLanded",
       exportWeightBeforeProcessing: "11",
       exportWeightAfterProcessing: "9",
-      scientificName : "some scientific name"
+      scientificName : "some scientific name",
+      productId: undefined,
+      productDescription: undefined
     }];
 
     const result = FrontEndProcessingStatement.toBackEndCatchProcessingStatement(catches);
@@ -45,6 +49,8 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       species: undefined,
       speciesCode: undefined,
       totalWeightLanded: undefined,
+      productId: undefined,
+      productDescription: undefined
     }];
 
     const catches : FrontEndProcessingStatement.Catch[] = [{
@@ -77,6 +83,8 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
             exportWeightBeforeProcessing: "34",
             exportWeightAfterProcessing: "45",
             scientificName: "some scientific name",
+            productId: undefined,
+            productDescription: undefined
           },
         ],
         exporterDetails: {
@@ -173,7 +181,9 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       totalWeightLanded: "34",
       exportWeightBeforeProcessing: "34",
       exportWeightAfterProcessing: "45",
-      scientificName : "some scientific name"
+      scientificName : "some scientific name",
+      productId: undefined,
+      productDescription: undefined
     }];
 
     const processingStatement: FrontEndProcessingStatement.ProcessingStatement = {
@@ -263,7 +273,9 @@ describe('toFrontEndProcessing mapping Processing Statement front end to back en
       totalWeightLanded: "34",
       exportWeightBeforeProcessing: "45",
       exportWeightAfterProcessing: "34",
-      scientificName: 'scientificName'
+      scientificName: 'scientificName',
+      productId: undefined,
+      productDescription: undefined
     }];
 
     const catches : BackEndProcessingStatement.Catch[] = [{
@@ -273,7 +285,9 @@ describe('toFrontEndProcessing mapping Processing Statement front end to back en
       totalWeightLanded: "34",
       exportWeightBeforeProcessing: "45",
       exportWeightAfterProcessing: "34",
-      scientificName: 'scientificName'
+      scientificName: 'scientificName',
+      productId: undefined,
+      productDescription: undefined
     }];
 
     const result = BackEndProcessingStatement.toFrontEndCatchProcessingStatement(catches);

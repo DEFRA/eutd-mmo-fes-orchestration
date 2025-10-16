@@ -37,7 +37,9 @@ export interface Catch {
   totalWeightLanded?            : string,
   exportWeightBeforeProcessing? : string,
   exportWeightAfterProcessing?  : string,
-  scientificName?               : string
+  scientificName?               : string,
+  productId?                    : string,
+  productDescription?           : string;
 }
 
 export interface Product {
@@ -104,7 +106,9 @@ const CatchesSchema = new Schema({
   totalWeightLanded             : { type: String },
   exportWeightBeforeProcessing  : { type: String },
   exportWeightAfterProcessing   : { type: String },
-  scientificName                : { type: String }
+  scientificName                : { type: String },
+  productId                     : { type: String },
+  productDescription            : { type: String },
 }, { _id : true });
 
 const ProductsSchema = new Schema({
