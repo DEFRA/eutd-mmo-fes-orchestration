@@ -63,6 +63,20 @@ export interface StorageFacility {
 export interface ExportData {
   catches                 ? : Catch[],
   storageFacilities       ? : StorageFacility[],
+  facilityName?             : string,
+  facilityAddressOne?       : string,
+  facilityTownCity?         : string,
+  facilityPostcode?         : string,
+  facilitySubBuildingName?  : string,
+  facilityBuildingNumber?   : string,
+  facilityBuildingName?     : string,
+  facilityStreetName?       : string,
+  facilityCounty?           : string,
+  facilityCountry?          : string,
+  facilityApprovalNumber?   : string,
+  facilityStorage?          : string,
+  _facilityUpdated?         : boolean,
+  facilityArrivalDate?      : string,
   exporterDetails           : ExporterDetails,
   transportation          ? : Transport,
   arrivalTransportation   ? : Transport,
@@ -130,7 +144,21 @@ const ExportDataSchema = new Schema({
   exporterDetails           : { type: ExporterDetailsSchema },
   transportation            : { type: TransportSchema },
   arrivalTransportation     : { type: TransportSchema, required: false },
-  exportedTo                : { type: Country, required: false }
+  exportedTo                : { type: Country, required: false },
+  facilityName              : { type: String, required: false },
+  facilityAddressOne        : { type: String, required: false},
+  facilityTownCity          : { type: String, required: false},
+  facilityPostcode          : { type: String, required: false},
+  facilitySubBuildingName   : { type: String, required: false},
+  facilityBuildingNumber    : { type: String, required: false},
+  facilityBuildingName      : { type: String, required: false},
+  facilityStreetName        : { type: String, required: false},
+  facilityCounty            : { type: String, required: false},
+  facilityCountry           : { type: String, required: false},
+  facilityApprovalNumber    : { type: String, required: false},
+  facilityStorage           : { type: String, required: false},
+  _facilityUpdated          : { type: String, required: false},
+  facilityArrivalDate       : { type: String, required: false},
 }, { _id : false } );
 
 const StorageDocumentSchema = new Schema({
@@ -195,7 +223,20 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
       storageFacilities: [],
       validationErrors: [{}],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No"
+      addAnotherStorageFacility: "No",
+      facilityName: '',
+      facilityAddressOne: '',
+      facilityTownCity: '',
+      facilityPostcode: '',
+      facilitySubBuildingName: '',
+      facilityBuildingNumber: '',
+      facilityBuildingName: '',
+      facilityStreetName: '',
+      facilityCounty: '',
+      facilityCountry: '',
+      facilityApprovalNumber: '',
+      facilityStorage: '',
+      facilityArrivalDate: ''
     }
   }
 
@@ -209,7 +250,20 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
     addAnotherStorageFacility: "No",
     transport: exportData.transportation ? toFrontEndTransport(exportData.transportation) : undefined,
     arrivalTransport: exportData.arrivalTransportation ? toFrontEndTransport(exportData.arrivalTransportation) : undefined,
-    exportedTo: toExportedTo(exportData.exportedTo)
+    exportedTo: toExportedTo(exportData.exportedTo),
+    facilityName: exportData.facilityName,
+    facilityAddressOne: exportData.facilityAddressOne,
+    facilityTownCity: exportData.facilityTownCity,
+    facilityPostcode: exportData.facilityPostcode,
+    facilitySubBuildingName: exportData.facilitySubBuildingName,
+    facilityBuildingNumber: exportData.facilityBuildingNumber,
+    facilityBuildingName: exportData.facilityBuildingName,
+    facilityStreetName: exportData.facilityStreetName,
+    facilityCounty: exportData.facilityCounty,
+    facilityCountry: exportData.facilityCountry,
+    facilityApprovalNumber: exportData.facilityApprovalNumber,
+    facilityStorage: exportData.facilityStorage,
+    facilityArrivalDate: exportData.facilityArrivalDate
   };
 }
 

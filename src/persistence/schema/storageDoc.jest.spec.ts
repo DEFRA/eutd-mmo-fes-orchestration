@@ -91,7 +91,22 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
           registrationNumber: "WE78ERF",
           departurePlace: "London",
           exportDate: "25/11/2019"
-        }
+        },
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
+
       },
       "audit": []
     };
@@ -184,7 +199,20 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      facilityAddressOne: "",
+      facilityApprovalNumber: "",
+      facilityArrivalDate: "",
+      facilityBuildingName: "",
+      facilityBuildingNumber: "",
+      facilityCountry: "",
+      facilityCounty: "",
+      facilityName: "",
+      facilityPostcode: "",
+      facilityStorage: "",
+      facilityStreetName: "",
+      facilitySubBuildingName: "",
+      facilityTownCity: "",
     };
 
     const catches: Catch[] = [{
@@ -247,7 +275,20 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      facilityAddressOne: "",
+      facilityApprovalNumber: "",
+      facilityArrivalDate: "",
+      facilityBuildingName: "",
+      facilityBuildingNumber: "",
+      facilityCountry: "",
+      facilityCounty: "",
+      facilityName: "",
+      facilityPostcode: "",
+      facilityStorage: "",
+      facilityStreetName: "",
+      facilitySubBuildingName: "",
+      facilityTownCity: "",
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(exportData)).toStrictEqual(expected);
@@ -310,7 +351,20 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         registrationNumber: "WE78ERF",
         departurePlace: "London",
         exportDate: "25/11/2019"
-      }
+      },
+      facilityAddressOne: "",
+      facilityApprovalNumber: "",
+      facilityArrivalDate: "",
+      facilityBuildingName: "",
+      facilityBuildingNumber: "",
+      facilityCountry: "",
+      facilityCounty: "",
+      facilityName: "",
+      facilityPostcode: "",
+      facilityStorage: "",
+      facilityStreetName: "",
+      facilitySubBuildingName: "",
+      facilityTownCity: "",
     };
 
     const catches: Catch[] = [{
@@ -380,7 +434,20 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       exporterDetails: exporterDetails,
       transportation: transport,
       arrivalTransportation: arrivalTransport,
-      exportedTo: "SPAIN"
+      exportedTo: "SPAIN",
+      facilityAddressOne: "",
+      facilityApprovalNumber: "",
+      facilityArrivalDate: "",
+      facilityBuildingName: "",
+      facilityBuildingNumber: "",
+      facilityCountry: "",
+      facilityCounty: "",
+      facilityName: "",
+      facilityPostcode: "",
+      facilityStorage: "",
+      facilityStreetName: "",
+      facilitySubBuildingName: "",
+      facilityTownCity: "",
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(exportData)).toStrictEqual(expected);
@@ -392,7 +459,20 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       storageFacilities: [],
       validationErrors: [{}],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No"
+      addAnotherStorageFacility: "No",
+      facilityAddressOne: "",
+      facilityApprovalNumber: "",
+      facilityArrivalDate: "",
+      facilityBuildingName: "",
+      facilityBuildingNumber: "",
+      facilityCountry: "",
+      facilityCounty: "",
+      facilityName: "",
+      facilityPostcode: "",
+      facilityStorage: "",
+      facilityStreetName: "",
+      facilitySubBuildingName: "",
+      facilityTownCity: "",
     };
 
     const exporterDetails: ExporterDetails = {
@@ -423,7 +503,20 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       storageFacilities: [],
       validationErrors: [{}],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No"
+      addAnotherStorageFacility: "No",
+      facilityAddressOne: "",
+      facilityApprovalNumber: "",
+      facilityArrivalDate: "",
+      facilityBuildingName: "",
+      facilityBuildingNumber: "",
+      facilityCountry: "",
+      facilityCounty: "",
+      facilityName: "",
+      facilityPostcode: "",
+      facilityStorage: "",
+      facilityStreetName: "",
+      facilitySubBuildingName: "",
+      facilityTownCity: "",
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(undefined)).toStrictEqual(expected);
@@ -474,7 +567,20 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       addAnotherStorageFacility: "No",
       arrivalTransport: undefined,
       transport: undefined,
-      exportedTo: undefined
+      exportedTo: undefined,
+      facilityAddressOne: undefined,
+      facilityApprovalNumber: undefined,
+      facilityArrivalDate: undefined,
+      facilityBuildingName: undefined,
+      facilityBuildingNumber: undefined,
+      facilityCountry: undefined,
+      facilityCounty: undefined,
+      facilityName: undefined,
+      facilityPostcode: undefined,
+      facilityStorage: undefined,
+      facilityStreetName: undefined,
+      facilitySubBuildingName: undefined,
+      facilityTownCity: undefined,
     });
   });
 

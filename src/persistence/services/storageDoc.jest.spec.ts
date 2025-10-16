@@ -71,7 +71,21 @@ describe('getDraft', () => {
           firstName: "John",
           lastName: "Doe"
         }
-      }
+      },
+      facilityName: 'ssss',
+      facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+      facilityTownCity: 'asdads',
+      facilityPostcode: '12343',
+      facilitySubBuildingName: 'sdsa',
+      facilityBuildingNumber: 'sadsad',
+      facilityBuildingName: 'ewr',
+      facilityStreetName: 'sadasd',
+      facilityCounty: 'england',
+      facilityCountry: 'Afghanistan',
+      facilityApprovalNumber: 'TSF001',
+      facilityStorage: 'chilled, frozen',
+      facilityArrivalDate: '17/10/2025',
+      _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
     const result : any = await StorageDocumentService.getDraft('Bob','GBR-34344-3444-344', 'contactBob');
@@ -447,6 +461,7 @@ describe('completeDraft', () => {
       transportation: {
         exportDate: "12/02/2020",
       },
+      faciltyName: 'Facility',
     });
 
     await StorageDocumentService.completeDraft('GBR-2020-CC-0E42C2DA5', 'documentUri', 'bob@bob.bob');
@@ -468,7 +483,7 @@ describe('completeDraft', () => {
         storageFacilities: [],
         transportation: {
           exportDate: "12/02/2020",
-        },
+        }
       },
       userReference: 'User Reference'
     });
@@ -625,7 +640,21 @@ describe('GetExporterDetails', () => {
           departurePlace: 'Essex',
           exportDate: '18/11/2019'
         },
-        exporterDetails: null
+        exporterDetails: null,
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
       });
 
       mockGet.mockResolvedValue(draft);
@@ -657,7 +686,21 @@ describe('GetExporterDetails', () => {
             firstName: "John",
             lastName: "Doe"
           }
-        }
+        },
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
       });
 
       mockGet.mockResolvedValue(draft);
@@ -695,7 +738,21 @@ describe('UpsertDraftData',() => {
           firstName: "John",
           lastName: "Doe"
         }
-      }
+      },
+      facilityName: 'ssss',
+      facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+      facilityTownCity: 'asdads',
+      facilityPostcode: '12343',
+      facilitySubBuildingName: 'sdsa',
+      facilityBuildingNumber: 'sadsad',
+      facilityBuildingName: 'ewr',
+      facilityStreetName: 'sadasd',
+      facilityCounty: 'england',
+      facilityCountry: 'Afghanistan',
+      facilityApprovalNumber: 'TSF001',
+      facilityStorage: 'chilled, frozen',
+      facilityArrivalDate: '17/10/2025',
+      _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
     await StorageDocumentService.upsertDraftData("Bob",'GBR-34344-3444-344',       {
@@ -736,7 +793,21 @@ describe('UpsertDraftData',() => {
           firstName: "John",
           lastName: "Doe"
         }
-      }
+      },
+      facilityName: 'ssss',
+      facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+      facilityTownCity: 'asdads',
+      facilityPostcode: '12343',
+      facilitySubBuildingName: 'sdsa',
+      facilityBuildingNumber: 'sadsad',
+      facilityBuildingName: 'ewr',
+      facilityStreetName: 'sadasd',
+      facilityCounty: 'england',
+      facilityCountry: 'Afghanistan',
+      facilityApprovalNumber: 'TSF001',
+      facilityStorage: 'chilled, frozen',
+      facilityArrivalDate: '17/10/2025',
+      _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
     await StorageDocumentService.upsertDraftData('Bob','ZZZ-3423-234',        {
@@ -797,7 +868,21 @@ describe('Upsert Exporter Details', () => {
           firstName: "John",
           lastName: "Doe"
         }
-      }
+      },
+      facilityName: 'ssss',
+      facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+      facilityTownCity: 'asdads',
+      facilityPostcode: '12343',
+      facilitySubBuildingName: 'sdsa',
+      facilityBuildingNumber: 'sadsad',
+      facilityBuildingName: 'ewr',
+      facilityStreetName: 'sadasd',
+      facilityCounty: 'england',
+      facilityCountry: 'Afghanistan',
+      facilityApprovalNumber: 'TSF001',
+      facilityStorage: 'chilled, frozen',
+      facilityArrivalDate: '17/10/2025',
+      _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
     await StorageDocumentService.upsertExporterDetails("Bob",'GBR-34344-3444-344', payload, defaultContact);
@@ -998,7 +1083,8 @@ describe('getExportLocation', () => {
       catches: null,
       storageFacilities: null,
       exporterDetails: null,
-      transportation: null
+      transportation: null,
+      facilityName: '',
     });
 
     mockGetDraft.mockResolvedValue(draft);
@@ -1016,7 +1102,8 @@ describe('getExportLocation', () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      facilityName: 'Facility',
     });
 
     mockGetDraft.mockResolvedValue(draft);
@@ -1152,7 +1239,21 @@ describe('cloneStorageDocument', () => {
           isoNumericCode: "752"
         },
         cmr: true
-      }
+      },
+      facilityName: 'ssss',
+      facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+      facilityTownCity: 'asdads',
+      facilityPostcode: '12343',
+      facilitySubBuildingName: 'sdsa',
+      facilityBuildingNumber: 'sadsad',
+      facilityBuildingName: 'ewr',
+      facilityStreetName: 'sadasd',
+      facilityCounty: 'england',
+      facilityCountry: 'Afghanistan',
+      facilityApprovalNumber: 'TSF001',
+      facilityStorage: 'chilled, frozen',
+      facilityArrivalDate: '17/10/2025',
+      _facilityUpdated: false
     }
 
   }

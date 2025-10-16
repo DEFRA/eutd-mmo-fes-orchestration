@@ -18,6 +18,20 @@ export interface StorageDocument {
   exportedTo?: ICountry,
   errors?: {};
   errorsUrl?: string;
+  facilityName?: string;
+  facilityAddressOne?: string;
+  facilityTownCity?: string;
+  facilityPostcode?: string;
+  facilitySubBuildingName?: string;
+  facilityBuildingNumber?: string;
+  facilityBuildingName?: string;
+  facilityStreetName?: string;
+  facilityCounty?: string;
+  facilityCountry?: string;
+  facilityApprovalNumber?: string;
+  facilityStorage?: string;
+  _facilityUpdated?: boolean;
+  facilityArrivalDate?: string;
 }
 
 export interface Catch {
@@ -110,7 +124,20 @@ export const toBackEndExportDataSD = (storageDocument: StorageDocument, exporter
     storageFacilities: storageDocument.storageFacilities,
     transportation : storageDocument.transport ? Transport.toBackEndTransport(storageDocument.transport) : undefined,
     arrivalTransportation : storageDocument.arrivalTransport ? Transport.toBackEndTransport(storageDocument.arrivalTransport) : undefined,
-    exportedTo : storageDocument.exportedTo
+    exportedTo : storageDocument.exportedTo,
+    facilityName : storageDocument.facilityName,
+    facilityAddressOne : storageDocument.facilityAddressOne,
+    facilityTownCity : storageDocument.facilityTownCity,
+    facilityPostcode : storageDocument.facilityPostcode,
+    facilitySubBuildingName : storageDocument.facilitySubBuildingName,
+    facilityBuildingNumber : storageDocument.facilityBuildingNumber,
+    facilityBuildingName : storageDocument.facilityBuildingName,
+    facilityStreetName : storageDocument.facilityStreetName,
+    facilityCounty : storageDocument.facilityCounty,
+    facilityCountry : storageDocument.facilityCountry,
+    facilityApprovalNumber : storageDocument.facilityApprovalNumber,
+    facilityStorage : storageDocument.facilityStorage,
+    facilityArrivalDate : storageDocument.facilityArrivalDate
   }
 };
 

@@ -885,6 +885,20 @@ describe('document validator', () => {
           scientificName: "Brachysomophis crocodilinus",
           certificateType: "non_uk"
         }],
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
       };
 
       await new StorageDocSchema.StorageDocumentModel(sampleDocument('GBR-2022-SD-1', 'COMPLETE', undefined, undefined, undefined, undefined, exportData)).save();
@@ -940,6 +954,20 @@ describe('document validator', () => {
           scientificName: "Gadus morhua",
           certificateType: "non_uk"
         }],
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
       };
 
       await new StorageDocSchema.StorageDocumentModel(sampleDocument('GBR-2022-SD-1', 'COMPLETE', undefined, undefined, undefined, undefined, exportData)).save();
@@ -971,7 +999,21 @@ describe('document validator', () => {
           postcode: 'some postcode',
           _dynamicsAddress: {},
           _dynamicsUser: {}
-        }
+        },
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
       };
 
       await new StorageDocSchema.StorageDocumentModel(sampleDocument('GBR-2022-SD-1', 'COMPLETE', undefined, undefined, undefined, undefined, exportData)).save();
@@ -1000,7 +1042,21 @@ describe('document validator', () => {
           postcode: 'some postcode',
           _dynamicsAddress: {},
           _dynamicsUser: {}
-        }
+        },
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
       };
 
       await new StorageDocSchema.StorageDocumentModel(sampleDocument('GBR-2022-SD-1', 'COMPLETE', undefined, undefined, undefined, undefined, exportData)).save();
@@ -1029,7 +1085,21 @@ describe('document validator', () => {
           postcode: 'some postcode',
           _dynamicsAddress: {},
           _dynamicsUser: {}
-        }
+        },
+        facilityName: 'ssss',
+        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+        facilityTownCity: 'asdads',
+        facilityPostcode: '12343',
+        facilitySubBuildingName: 'sdsa',
+        facilityBuildingNumber: 'sadsad',
+        facilityBuildingName: 'ewr',
+        facilityStreetName: 'sadasd',
+        facilityCounty: 'england',
+        facilityCountry: 'Afghanistan',
+        facilityApprovalNumber: 'TSF001',
+        facilityStorage: 'chilled, frozen',
+        facilityArrivalDate: '17/10/2025',
+        _facilityUpdated: false
       };
 
       await new StorageDocSchema.StorageDocumentModel(sampleDocument('GBR-2022-SD-1', 'COMPLETE', undefined, undefined, undefined, undefined, exportData)).save();

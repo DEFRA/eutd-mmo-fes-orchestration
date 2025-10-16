@@ -197,7 +197,6 @@ describe('get', () => {
           facilityStreetName: "Street name",
           facilityCounty: "Ealing",
           facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-
         }],
         transportation : {
           vehicle: 'plane',
@@ -206,7 +205,20 @@ describe('get', () => {
           departurePlace: 'Essex',
           exportDate: '18/11/2019'
         },
-        exporterDetails: exporterDetails
+        exporterDetails: exporterDetails,
+        facilityAddressOne: "Build and Street",
+        facilityApprovalNumber: undefined,
+        facilityArrivalDate: "20/11/2023",
+        facilityBuildingName: undefined,
+        facilityBuildingNumber: undefined,
+        facilityCountry: undefined,
+        facilityCounty: undefined,
+        facilityName: "Storage Facilities",
+        facilityPostcode: "ES8 7UJ",
+        facilityStorage: undefined,
+        facilityStreetName: "Street",
+        facilitySubBuildingName: undefined,
+        facilityTownCity: "Essex",
       }
     };
 
@@ -482,7 +494,14 @@ describe('saveAndValidate', () => {
         exporterDetails: exporterDetails,
         exportedTo: {
           officialCountryName: "some-exported-to"
-        }
+        },
+        facilityName: "Storage Facilities",
+        facilityAddressOne: "Build and Street",
+        facilityStreetName: "Street",
+        facilityTownCity: "Essex",
+        facilityPostcode: "ES8 7UJ",
+        _facilityUpdated: false,
+        facilityArrivalDate: "20/11/2023",
       }
     };
 
@@ -549,7 +568,20 @@ describe('saveAndValidate', () => {
         exporterDetails: exporterDetails,
         exportedTo: {
           officialCountryName: "some-exported-to"
-        }
+        },
+        facilityAddressOne: "Build and Street",
+        facilityApprovalNumber: undefined,
+        facilityArrivalDate: "20/11/2023",
+        facilityBuildingName: undefined,
+        facilityBuildingNumber: undefined,
+        facilityCountry: undefined,
+        facilityCounty: undefined,
+        facilityName: "Storage Facilities",
+        facilityPostcode: "ES8 7UJ",
+        facilityStorage: undefined,
+        facilityStreetName: "Street",
+        facilitySubBuildingName: undefined,
+        facilityTownCity: "Essex",
       }}}, 'contactBob');
     });
   });
