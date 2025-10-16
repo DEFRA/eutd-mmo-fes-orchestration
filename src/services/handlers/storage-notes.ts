@@ -148,17 +148,16 @@ function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, index: n
 }
 
 function checkFacilityArrivalDateError(storageFacility: any, departureDate: string, index: number, errors) {
-  console.log("storageFacility.facilityArrivalDate", storageFacility.facilityArrivalDate, "departureDate", departureDate )
-  if (storageFacility.facilityArrivalDate) {
-    if (!validateDate(storageFacility.facilityArrivalDate)) {
-      errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateValidationError";
-    } else if (validateDateBefore(storageFacility.facilityArrivalDate, departureDate)) {
-      errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateBeforeDepatureDateValidationError";
-    }
+  if (!validateDate(storageFacility.facilityArrivalDate)) {
+    errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateValidationError";
+  } else if (validateDateBefore(storageFacility.facilityArrivalDate, departureDate)) {
+    errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateBeforeDepatureDateValidationError";
   }
 }
 
 function validateStorageFacility(storageFacility: any, departureDate: string, index: number, errors, isStorageFacilitiesPage: boolean = false) {
+  checkFacilityArrivalDateError(storageFacility, departureDate, index, errors);
+
   if (!storageFacility.facilityName || validateWhitespace(storageFacility.facilityName)) {
     errors[`storageFacilities-${index}-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
   }
@@ -176,8 +175,6 @@ function validateStorageFacility(storageFacility: any, departureDate: string, in
       errors[`storageFacilities-${index}-facilityPostcode`] = `sdAddStorageFacilityDetailsErrorEnterThePostcode`;
     }
   }
-
-  checkFacilityArrivalDateError(storageFacility, departureDate, index, errors);
 
   return { errors };
 }

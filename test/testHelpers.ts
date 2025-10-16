@@ -40,8 +40,6 @@ const startServer = async (): Promise<Hapi.Server> => {
 
 export const stopServer = async (): Promise<void> => {
   try {
-    // await MongoConnection.cleanUp();
-    // console.log('Closed connection to DB');
     await Server.stop();
 
   } catch(e) {
@@ -84,10 +82,8 @@ export const addTransportDetails = async(sessionStore: IStorage<TransportDetails
 };
 
 test.onFinish(async() => {
-  console.log('Cleaning up session store');
   const sessionStore = await SessionStoreFactory.getSessionStore({});
   sessionStore.cleanUp();
 
   await mongod.stop();
-  console.log('Stopped mongod');
 });

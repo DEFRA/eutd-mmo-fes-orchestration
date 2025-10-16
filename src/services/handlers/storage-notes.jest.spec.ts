@@ -1701,6 +1701,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -1901,6 +1902,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details/
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -2145,6 +2147,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -2167,6 +2170,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
       addAnotherStorageFacility:
         "Select yes if you need to add another storage facility",
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -2189,6 +2193,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -2211,6 +2216,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
 
     const expectedErrors = {
       "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEditTheStorageFacility",
+      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
@@ -2225,6 +2231,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
     const handler = StorageNotes[currentUrl];
 
     data.storageFacilities[0] = {
+      facilityArrivalDate: "10/10/2020",
       facilityName: "facility-name",
       facilityAddressOne: "facility-address-one",
       facilityTownCity: "facility-town-city",
@@ -2416,6 +2423,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
           },
         ],
         storageFacilities: [{
+          facilityArrivalDate: "10/10/2020",
           facilityTownCity: 'some-facilityTownCity',
           facilityName: "Joe bloggs"
         }],
@@ -2454,6 +2462,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-storage-faci
           },
         ],
         storageFacilities: [{
+          facilityArrivalDate: "10/10/2020",
           facilityPostcode: "NE4 7YH",
           facilityName: "Joe bloggs"
         }],

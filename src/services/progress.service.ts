@@ -367,7 +367,7 @@ export default class ProgressService {
 
   public static readonly getStorageFacilitiesStatus = (storageFacilities: StorageDocument.StorageFacility[]): ProgressStatus => {
     const storageFacilitiesStatusCheck: (sf: StorageDocument.StorageFacility) => boolean = (sf: StorageDocument.StorageFacility) =>
-      ProgressService.isEmptyAndTrimSpaces(sf['facilityName']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityAddressOne']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityTownCity']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityPostcode'])
+      ProgressService.isEmptyAndTrimSpaces(sf['facilityArrivalDate']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityName']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityAddressOne']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityTownCity']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityPostcode'])
 
     return (storageFacilities !== undefined && storageFacilities.length > 0) && storageFacilities.every(storageFacilitiesStatusCheck)
       ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
