@@ -2171,69 +2171,62 @@ describe('getTransportDetails', () => {
   });
 });
 
-describe('getStorageFacilitiesStatus', () => {
+describe('getStorageFacilityStatus', () => {
   it('should return INCOMPLETE for incomplete storage facilities', () => {
-    const storageFacilities = [
-      {
-        facilityName: '',
-        facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
-        facilityBuildingName: 'LANCASTER HOUSE',
-        facilityBuildingNumber: '',
-      },
-    ];
+    const storageFacilities = {
+      facilityName: '',
+      facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
+      facilityTownCity: 'LANCASTER HOUSE',
+      facilityPostcode: '',
+      facilityArrivalDate: '04/07/2024'
+    };
 
     expect(
-      ProgressService.getStorageFacilitiesStatus(storageFacilities)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
     ).toBe(ProgressStatus.INCOMPLETE);
   });
 
   it('should return INCOMPLETE for storage facilities with no address details', () => {
-    const storageFacilities = [
-      {
-        facilityName: 'FACILITY',
-        facilityAddressOne: '',
-        facilityBuildingName: '',
-        facilityBuildingNumber: '',
-      },
-    ];
+    const storageFacilities = {
+      facilityName: 'FACILITY',
+      facilityAddressOne: '',
+      facilityTownCity: '',
+      facilityPostcode: '',
+      facilityArrivalDate: '04/07/2024'
+    };
 
     expect(
-      ProgressService.getStorageFacilitiesStatus(storageFacilities)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
     ).toBe(ProgressStatus.INCOMPLETE);
   });
 
   it('should return INCOMPLETE for incomplete storage facilities with no arrival date', () => {
-    const storageFacilities = [
-      {
-        facilityName: 'FACILITY',
-        facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
-        facilityBuildingName: 'LANCASTER HOUSE',
-        facilityBuildingNumber: '',
-        facilityPostcode: 'NE7 4BY',
-        facilityTownCity: 'NEWCASTLE UPON TYNE'
-      },
-    ];
+    const storageFacilities = {
+      facilityName: 'FACILITY',
+      facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
+      facilityBuildingName: 'LANCASTER HOUSE',
+      facilityBuildingNumber: '',
+      facilityPostcode: 'NE7 4BY',
+      facilityTownCity: 'NEWCASTLE UPON TYNE',
+      facilityArrivalDate: ''
+    };
 
     expect(
-      ProgressService.getStorageFacilitiesStatus(storageFacilities)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
     ).toBe(ProgressStatus.INCOMPLETE);
   });
 
   it('should return COMPLETED for incomplete storage facilities', () => {
-    const storageFacilities = [
-      {
-        facilityArrivalDate: "10/10/2020",
-        facilityName: 'FACILITY',
-        facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
-        facilityBuildingName: 'LANCASTER HOUSE',
-        facilityBuildingNumber: '',
-        facilityPostcode: 'NE7 4BY',
-        facilityTownCity: 'NEWCASTLE UPON TYNE'
-      },
-    ];
+    const storageFacilities = {
+      facilityName: 'FACILITY',
+      facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
+      facilityTownCity: 'LANCASTER HOUSE',
+      facilityPostcode: 'NE7 4BY',
+      facilityArrivalDate: '04/07/2024'
+    };
 
     expect(
-      ProgressService.getStorageFacilitiesStatus(storageFacilities)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
     ).toBe(ProgressStatus.COMPLETED);
   });
 });
@@ -4584,6 +4577,17 @@ describe('getStorageDocumentProgress', () => {
           },
           departurePlace: 'London Heathrow'
         },
+        facilityName: 'dora',
+        facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
+        facilityBuildingName: 'LANCASTER HOUSE',
+        facilityBuildingNumber: '',
+        facilitySubBuildingName: 'MMO',
+        facilityStreetName: 'HAMPSHIRE COURT',
+        facilityTownCity: 'NEWCASTLE UPON TYNE',
+        facilityCounty: 'TYNESIDE',
+        facilityCountry: 'ENGLAND',
+        facilityPostcode: 'NE4 7YH',
+        facilityArrivalDate: '20/09/2023',
       },
       requestByAdmin: false,
       documentUri: '',

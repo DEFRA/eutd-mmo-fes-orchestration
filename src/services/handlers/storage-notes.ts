@@ -82,43 +82,11 @@ export default {
     return validateStorageFacility(storageFacility, departureDate, index, errors)
   },
 
-  "/create-storage-document/:documentNumber/add-storage-facility-details/:index": ({ data, _nextUrl, _currentUrl, errors, params }) => {
-    const index = +params.index;
-    const storageFacility = data.storageFacilities[index];
-    const departureDate = data.arrivalTransport?.departureDate;
-    return validateStorageFacility(storageFacility, departureDate, index, errors)
-  },
-
   "/create-storage-document/:documentNumber/add-storage-facility-approval": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
     const index = 0;
     const storageFacility = data.storageFacilities[index];
     return validateStorageApproval(storageFacility, index, errors)
   },
-
-  "/create-storage-document/:documentNumber/add-storage-facility-approval/:index": ({ data, _nextUrl, _currentUrl, errors, params }) => {
-    const index = +params.index;
-    const storageFacility = data.storageFacilities[index];
-    return validateStorageApproval(storageFacility, index, errors)
-  },
-
-  "/create-storage-document/:documentNumber/you-have-added-a-storage-facility": ({ data, _nextUrl, currentUrl, errors }) => {
-    const departureDate = data.arrivalTransportation?.departureDate;
-    data.storageFacilities.forEach((storageFacility, index) => {
-      validateStorageFacility(storageFacility, departureDate, index, errors, true);
-    });
-
-    const addAnotherStorageFacility = data.addAnotherStorageFacility;
-    if (!addAnotherStorageFacility || addAnotherStorageFacility === "" || addAnotherStorageFacility === "notset") {
-      errors.addAnotherStorageFacility = 'Select yes if you need to add another storage facility';
-      return { errors, next: currentUrl };
-    }
-
-    if (addAnotherStorageFacility.toLowerCase() === 'yes') {
-      return { errors, next: `/create-storage-document/:documentNumber/add-storage-facility-details/${data.storageFacilities.length}` };
-    }
-
-    return { errors, next: `/create-storage-document/:documentNumber/how-does-the-export-leave-the-uk` }
-  }
 };
 
 function checkEitherNetWeightProductDepartureOrNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {

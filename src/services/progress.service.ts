@@ -365,13 +365,14 @@ export default class ProgressService {
       ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
-  public static readonly getStorageFacilitiesStatus = (storageFacilities: StorageDocument.StorageFacility[]): ProgressStatus => {
-    const storageFacilitiesStatusCheck: (sf: StorageDocument.StorageFacility) => boolean = (sf: StorageDocument.StorageFacility) =>
-      ProgressService.isEmptyAndTrimSpaces(sf['facilityArrivalDate']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityName']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityAddressOne']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityTownCity']) && ProgressService.isEmptyAndTrimSpaces(sf['facilityPostcode'])
-
-    return (storageFacilities !== undefined && storageFacilities.length > 0) && storageFacilities.every(storageFacilitiesStatusCheck)
+  public static readonly getStorageFacilityStatus = (
+    facilityName: StorageDocument.ExportData["facilityName"],
+    facilityAddressOne: StorageDocument.ExportData["facilityAddressOne"],
+    facilityTownCity: StorageDocument.ExportData["facilityTownCity"],
+    facilityPostcode: StorageDocument.ExportData["facilityPostcode"],
+    facilityArrivalDate: StorageDocument.ExportData["facilityArrivalDate"],
+  ): ProgressStatus => [facilityName, facilityAddressOne, facilityTownCity, facilityPostcode, facilityArrivalDate].every(value => ProgressService.isEmptyAndTrimSpaces(value))
       ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
-  }
 
   public static readonly getUserReference = (userReference: string): ProgressStatus => {
     return ProgressService.isEmptyAndTrimSpaces(userReference)
@@ -455,7 +456,7 @@ export default class ProgressService {
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       catches: catchesStatus,
       arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.INCOMPLETE,
-      storageFacilities: ProgressService.getStorageFacilitiesStatus(data?.exportData?.storageFacilities),
+      storageFacilities: ProgressService.getStorageFacilityStatus(data?.exportData.facilityName, data?.exportData.facilityAddressOne, data?.exportData.facilityTownCity, data?.exportData.facilityPostcode, data?.exportData.facilityArrivalDate),
       transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
     };
 
