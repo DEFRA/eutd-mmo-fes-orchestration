@@ -64,17 +64,9 @@ export default class TransportController {
       payload.exportDate = cleanDate(payload.exportDate);
 
       const storageDocument = await OrchestrationService.getFromMongo(userPrincipal, documentNumber, storageNote, contactId);
-      if (storageDocument && Array.isArray(storageDocument.storageFacilities)) {
-        // when we update NMD to having just one storageFacility obtain facilityArrivalDate from storageDocument.facilityArrivalDate
-        // as opposed to storageDocument.storageFacilities.facilityArrivalDate;
-        const hasFacilityArrivalDateError = storageDocument.storageFacilities.some(
-          (storageFacility) => storageFacility.facilityArrivalDate && moment(payload.exportDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]).isBefore(moment(storageFacility.facilityArrivalDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]))
-        );
-
-        if (hasFacilityArrivalDateError) {
-          const errorObject = { exportDate: `error.${payload.vehicle}.exportDate.any.min` };
-          return h.response(errorObject).code(400).takeover();
-        }
+      if (storageDocument?.facilityArrivalDate && moment(payload.exportDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]).isBefore(moment(storageDocument.facilityArrivalDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]))) {
+        const errorObject = { exportDate: `error.${payload.vehicle}.exportDate.any.min` };
+        return h.response(errorObject).code(400).takeover();
       }
     }
 

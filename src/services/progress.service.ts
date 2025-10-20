@@ -456,7 +456,7 @@ export default class ProgressService {
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       catches: catchesStatus,
       arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.INCOMPLETE,
-      storageFacilities: ProgressService.getStorageFacilityStatus(data?.exportData.facilityName, data?.exportData.facilityAddressOne, data?.exportData.facilityTownCity, data?.exportData.facilityPostcode, data?.exportData.facilityArrivalDate),
+      storageFacilities: ProgressService.getStorageFacilityStatus(data?.exportData?.facilityName, data?.exportData?.facilityAddressOne, data?.exportData?.facilityTownCity, data?.exportData?.facilityPostcode, data?.exportData?.facilityArrivalDate),
       transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
     };
 

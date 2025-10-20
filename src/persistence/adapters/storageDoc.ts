@@ -8,7 +8,7 @@ export interface UserDetails {
 
 export interface TransientData {
   catches                   : object[],
-  storageFacilities         : object[],
+  storageFacilities?        : object[],
   exporter                  : object,
   documentNumber            : string,
   status                    : string,

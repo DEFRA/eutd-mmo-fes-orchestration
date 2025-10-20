@@ -1,38 +1,38 @@
 import * as FrontEndSD from './storageDocument';
 import * as BackEndSD from '../storageDoc'
-import * as ExporterDetails  from "./exporterDetails";
+import * as ExporterDetails from "./exporterDetails";
 import * as Transport from "./transport";
 import * as moment from "moment";
 
 describe('when mapping frontend catch to backend catch for statementDocument', () => {
-  it('should contain the relevant properties for mongo Catch type', ()=> {
-    const frontendCatch : FrontEndSD.Catch[] = [{
+  it('should contain the relevant properties for mongo Catch type', () => {
+    const frontendCatch: FrontEndSD.Catch[] = [{
       product: "Atlantic cod (COD)",
       speciesCode: "COD",
       id: '200-' + moment.utc().unix() + '-0',
       commodityCode: "the cod code",
-      certificateNumber : "200",
-      productWeight : "200",
-      weightOnCC : "159",
-      dateOfUnloading : "soon",
-      placeOfUnloading : "there",
-      transportUnloadedFrom : "here",
-      scientificName : "some scientific name",
+      certificateNumber: "200",
+      productWeight: "200",
+      weightOnCC: "159",
+      dateOfUnloading: "soon",
+      placeOfUnloading: "there",
+      transportUnloadedFrom: "here",
+      scientificName: "some scientific name",
       certificateType: "uk",
     }];
 
-    const expected : BackEndSD.Catch[] = [{
+    const expected: BackEndSD.Catch[] = [{
       product: "Atlantic cod (COD)",
       speciesCode: "COD",
       id: '200-' + moment.utc().unix() + '-0',
       commodityCode: "the cod code",
-      certificateNumber : "200",
-      productWeight : "200",
-      weightOnCC : "159",
-      dateOfUnloading : "soon",
-      placeOfUnloading : "there",
-      transportUnloadedFrom : "here",
-      scientificName : "some scientific name",
+      certificateNumber: "200",
+      productWeight: "200",
+      weightOnCC: "159",
+      dateOfUnloading: "soon",
+      placeOfUnloading: "there",
+      transportUnloadedFrom: "here",
+      scientificName: "some scientific name",
       certificateType: "uk",
       supportingDocuments: undefined,
       productDescription: undefined,
@@ -48,21 +48,21 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
 
   });
 
-  it('should not contain an id in back end SD catch', ()=> {
-    const frontendCatch : FrontEndSD.Catch[] = [{
+  it('should not contain an id in back end SD catch', () => {
+    const frontendCatch: FrontEndSD.Catch[] = [{
       product: "COD",
-      scientificName : "some scientific name",
-      productWeight : "200",
+      scientificName: "some scientific name",
+      productWeight: "200",
       commodityCode: "the cod code"
     }];
 
-    const expected : BackEndSD.Catch[] = [{
+    const expected: BackEndSD.Catch[] = [{
       certificateType: undefined,
       certificateNumber: undefined,
       supportingDocuments: undefined,
       product: "COD",
-      scientificName : "some scientific name",
-      productWeight : "200",
+      scientificName: "some scientific name",
+      productWeight: "200",
       commodityCode: "the cod code",
       dateOfUnloading: undefined,
       id: undefined,
@@ -81,41 +81,6 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
 
     expect(result).toStrictEqual(expected);
   });
-});
-
-describe('when mapping frontend storage facilities to backend storage facilities for statementDocument', () => {
-  it('should contain the relevant properties for mongo storageFacilities type', ()=> {
-    const frontendStorageFacility : FrontEndSD.StorageFacility = {
-      facilityName: "Facility name",
-      facilityAddressOne: "some address ",
-      facilityTownCity : "myTown",
-      facilityPostcode: "HP89 9LP",
-      facilitySubBuildingName: "Sub building name",
-      facilityBuildingNumber: undefined,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    };
-
-    const expected : BackEndSD.StorageFacility = {
-      facilityName: "Facility name",
-      facilityAddressOne: "some address ",
-      facilityTownCity : "myTown",
-      facilityPostcode: "HP89 9LP",
-      facilitySubBuildingName: "Sub building name",
-      facilityBuildingNumber: undefined,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    };
-
-    const result = FrontEndSD.toBackEndStorageFacilitySD(frontendStorageFacility);
-
-    expect(result).toStrictEqual(expected);
-
-  })
 });
 
 describe('Maps the catches from back end to front end', () => {
@@ -171,23 +136,23 @@ describe('when mapping frontend  to backend exportData for statementDocument', (
     },
   };
 
-  const frontEndCatches : [FrontEndSD.Catch] = [{
-    "product" : "Atlantic cod (COD)",
+  const frontEndCatches: [FrontEndSD.Catch] = [{
+    "product": "Atlantic cod (COD)",
     "id": '1234123525-' + moment.utc().unix(),
-    "commodityCode" : "231412412354125",
-    "productWeight" : "200",
-    "dateOfUnloading" : "27/01/2020",
-    "placeOfUnloading" : "dover",
-    "transportUnloadedFrom" : "21341325125",
-    "certificateNumber" : "1234123525",
-    "weightOnCC" : "200",
-    "scientificName" : "some scientific name"
+    "commodityCode": "231412412354125",
+    "productWeight": "200",
+    "dateOfUnloading": "27/01/2020",
+    "placeOfUnloading": "dover",
+    "transportUnloadedFrom": "21341325125",
+    "certificateNumber": "1234123525",
+    "weightOnCC": "200",
+    "scientificName": "some scientific name"
   }];
 
-  const frontendStorageFacilities : [FrontEndSD.StorageFacility] = [{
-    "facilityName" : "juan testing",
-    "facilityAddressOne" : "23 Prince Rupert",
-    "facilityTownCity" : "Aylesbury",
+  const frontendStorageFacilities: [FrontEndSD.StorageFacility] = [{
+    "facilityName": "juan testing",
+    "facilityAddressOne": "23 Prince Rupert",
+    "facilityTownCity": "Aylesbury",
     "facilityPostcode": "HP19 9rb",
     "facilitySubBuildingName": "Sub building name",
     "facilityBuildingNumber": undefined,
@@ -198,22 +163,22 @@ describe('when mapping frontend  to backend exportData for statementDocument', (
 
   }];
 
-  const frontEndTransportation : Transport.Transport = {
-    vehicle : "truck",
+  const frontEndTransportation: Transport.Transport = {
+    vehicle: "truck",
     cmr: "false",
-    nationalityOfVehicle : "adsf",
-    registrationNumber : "asdsfsd",
-    departurePlace : "Aylesbury",
-    exportDate : "27/01/2020",
-    user_id : "",
-    journey : "storageNotes",
+    nationalityOfVehicle: "adsf",
+    registrationNumber: "asdsfsd",
+    departurePlace: "Aylesbury",
+    exportDate: "27/01/2020",
+    user_id: "",
+    journey: "storageNotes",
     currentUri: "",
-    nextUri : ""
+    nextUri: ""
   };
 
-  it('should contain the relevant properties for mongo exportData type', ()=> {
-    const sd : FrontEndSD.StorageDocument = {
-      catches : frontEndCatches,
+  it('should contain the relevant properties for mongo exportData type', () => {
+    const sd: FrontEndSD.StorageDocument = {
+      catches: frontEndCatches,
       storageFacilities: frontendStorageFacilities,
       transport: frontEndTransportation,
       arrivalTransport: frontEndTransportation,
@@ -225,7 +190,7 @@ describe('when mapping frontend  to backend exportData for statementDocument', (
       }
     };
 
-    const result = FrontEndSD.toBackEndExportDataSD(sd,frontEndExporterDetails);
+    const result = FrontEndSD.toBackEndExportDataSD(sd, frontEndExporterDetails);
 
     expect(result.exporterDetails.addressOne).toBeTruthy();
     expect(result.exporterDetails.townCity).toBeTruthy();
@@ -237,9 +202,9 @@ describe('when mapping frontend  to backend exportData for statementDocument', (
     expect(result.arrivalTransportation).toBeDefined();
   });
 
-  it('should contain return an empty exporter details section', ()=> {
-    const sd : FrontEndSD.StorageDocument = {
-      catches : frontEndCatches,
+  it('should contain return an empty exporter details section', () => {
+    const sd: FrontEndSD.StorageDocument = {
+      catches: frontEndCatches,
       storageFacilities: frontendStorageFacilities,
       transport: frontEndTransportation,
       exportedTo: {
@@ -258,13 +223,13 @@ describe('when mapping frontend  to backend exportData for statementDocument', (
 
 describe('when using sdDataToSave', () => {
 
-  let backEndExportData :  BackEndSD.ExportData;
-  let frontEndStorageDocument : FrontEndSD.StorageDocument ;
-  let mockToBackEndExportDataSD ;
-  let mockToFrontEndPsAndSdExporterDetails;
+  let backEndExportData: BackEndSD.ExportData;
+  let frontEndStorageDocument: FrontEndSD.StorageDocument;
+  let mockToBackEndExportDataSD: jest.SpyInstance;
+  let mockToFrontEndPsAndSdExporterDetails: jest.SpyInstance;
 
-  beforeEach( () => {
-    backEndExportData  = {
+  beforeEach(() => {
+    backEndExportData = {
       catches: [
         {
           product: "Atlantic cod (COD)",
@@ -279,32 +244,16 @@ describe('when using sdDataToSave', () => {
           scientificName: "some scientific name",
         },
       ],
-      storageFacilities: [
-        {
-          facilityName: "back 0 juan testing",
-          facilityAddressOne: "23 Prince Rupert",
-          facilityTownCity: "Aylesbury",
-          facilityPostcode: "HP19 9rb",
-          facilitySubBuildingName: "Sub building name",
-          facilityBuildingNumber: undefined,
-          facilityBuildingName: "Building name",
-          facilityStreetName: "Street name",
-          facilityCounty: "Ealing",
-          facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-        },
-        {
-          facilityName: "back 1 juan testing",
-          facilityAddressOne: "23 Prince Rupert",
-          facilityTownCity: "Aylesbury",
-          facilityPostcode: "HP19 9rb",
-          facilitySubBuildingName: "Sub building name",
-          facilityBuildingNumber: undefined,
-          facilityBuildingName: "Building name",
-          facilityStreetName: "Street name",
-          facilityCounty: "Ealing",
-          facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-        }
-      ],
+      facilityName: "back 0 juan testing",
+      facilityAddressOne: "23 Prince Rupert",
+      facilityTownCity: "Aylesbury",
+      facilityPostcode: "HP19 9rb",
+      facilitySubBuildingName: "Sub building name",
+      facilityBuildingNumber: undefined,
+      facilityBuildingName: "Building name",
+      facilityStreetName: "Street name",
+      facilityCounty: "Ealing",
+      facilityCountry: "United Kingdom of Great Britain and Northern Ireland",
       exporterDetails: {
         contactId: "a contact Id",
         accountId: "an account id",
@@ -335,30 +284,29 @@ describe('when using sdDataToSave', () => {
     };
 
     frontEndStorageDocument = {
-      catches : [{
-        "product" : "Atlantic cod (COD)",
+      catches: [{
+        "product": "Atlantic cod (COD)",
         "id": '1234123525-' + moment.utc().unix(),
-        "commodityCode" : "231412412354125",
-        "productWeight" : "200",
-        "dateOfUnloading" : "27/01/2020",
-        "placeOfUnloading" : "dover",
-        "transportUnloadedFrom" : "21341325125",
-        "certificateNumber" : "1234123525",
-        "weightOnCC" : "200",
-        "scientificName" : "some scientific name"
+        "commodityCode": "231412412354125",
+        "productWeight": "200",
+        "dateOfUnloading": "27/01/2020",
+        "placeOfUnloading": "dover",
+        "transportUnloadedFrom": "21341325125",
+        "certificateNumber": "1234123525",
+        "weightOnCC": "200",
+        "scientificName": "some scientific name"
       }],
-      storageFacilities: [],
       transport: {
-        vehicle : "truck",
+        vehicle: "truck",
         cmr: "false",
-        nationalityOfVehicle : "adsf",
-        registrationNumber : "asdsfsd",
-        departurePlace : "Aylesbury",
-        exportDate : "27/01/2020",
-        user_id : "",
-        journey : "storageNotes",
+        nationalityOfVehicle: "adsf",
+        registrationNumber: "asdsfsd",
+        departurePlace: "Aylesbury",
+        exportDate: "27/01/2020",
+        user_id: "",
+        journey: "storageNotes",
         currentUri: "",
-        nextUri : ""
+        nextUri: ""
       },
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -368,47 +316,31 @@ describe('when using sdDataToSave', () => {
       },
     };
 
-    mockToBackEndExportDataSD = jest.spyOn(FrontEndSD , 'toBackEndExportDataSD');
+    mockToBackEndExportDataSD = jest.spyOn(FrontEndSD, 'toBackEndExportDataSD');
     mockToBackEndExportDataSD.mockReturnValue(backEndExportData);
 
     mockToFrontEndPsAndSdExporterDetails = jest.spyOn(ExporterDetails, 'toFrontEndPsAndSdExporterDetails');
     mockToFrontEndPsAndSdExporterDetails.mockReturnValue({});
   });
 
-  afterEach(()=>{
+  afterEach(() => {
     mockToBackEndExportDataSD.mockRestore();
     mockToFrontEndPsAndSdExporterDetails.mockRestore();
   });
 
   it('should call toBackEndExportDataSD once with full frontEndStorageDocument if none of storageFacilities is empty', () => {
+    frontEndStorageDocument.facilityName = "juan testing",
+    frontEndStorageDocument.facilityAddressOne = "23 Prince Rupert",
+    frontEndStorageDocument.facilityTownCity = "Aylesbury",
+    frontEndStorageDocument.facilityPostcode = "HP19 9rb",
+    frontEndStorageDocument.facilitySubBuildingName = "Sub building name",
+    frontEndStorageDocument.facilityBuildingNumber = undefined,
+    frontEndStorageDocument.facilityBuildingName = "Building name",
+    frontEndStorageDocument.facilityStreetName = "Street name",
+    frontEndStorageDocument.facilityCounty = "Ealing",
+    frontEndStorageDocument.facilityCountry = "United Kingdom of Great Britain and Northern Ireland"
 
-    frontEndStorageDocument.storageFacilities = [
-      {
-        "facilityName" : "juan testing",
-        "facilityAddressOne" : "23 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      },
-      {
-        "facilityName" : "juan 22 testing",
-        "facilityAddressOne" : "45 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      }
-    ];
-    FrontEndSD.sdDataToSave(frontEndStorageDocument,backEndExportData);
+    FrontEndSD.sdDataToSave(frontEndStorageDocument, backEndExportData);
 
 
     expect(mockToBackEndExportDataSD).toHaveBeenCalledTimes(1);
@@ -416,183 +348,68 @@ describe('when using sdDataToSave', () => {
   });
 
   it('should call toBackEndExportDataSD once with the keeping original storageFacilities for the ones in FE that are empty', () => {
-    frontEndStorageDocument.storageFacilities = [
-      {
-        "facilityName" : "juan fe testing",
-        "facilityAddressOne" : "23 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      },
-      {
-        "facilityName" : "juan testing",
-      }
-    ];
+    frontEndStorageDocument.facilityName = "juan fe testing",
+    frontEndStorageDocument.facilityAddressOne = "23 Prince Rupert",
+    frontEndStorageDocument.facilityTownCity = "Aylesbury",
+    frontEndStorageDocument.facilityPostcode = "HP19 9rb",
+    frontEndStorageDocument.facilitySubBuildingName = "Sub building name",
+    frontEndStorageDocument.facilityBuildingNumber = undefined,
+    frontEndStorageDocument.facilityBuildingName = "Building name",
+    frontEndStorageDocument.facilityStreetName = "Street name",
+    frontEndStorageDocument.facilityCounty = "Ealing",
+    frontEndStorageDocument.facilityCountry = "United Kingdom of Great Britain and Northern Ireland"
 
-    FrontEndSD.sdDataToSave(frontEndStorageDocument,backEndExportData);
+    FrontEndSD.sdDataToSave(frontEndStorageDocument, backEndExportData);
 
-    const storageDocumentToBeSaved = {...frontEndStorageDocument};
-    storageDocumentToBeSaved.storageFacilities = [
-      {
-        "facilityName" : "juan fe testing",
-        "facilityAddressOne" : "23 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      },
-      {
-        facilityName: "back 1 juan testing",
-        facilityAddressOne: "23 Prince Rupert",
-        facilityTownCity: "Aylesbury",
-        facilityPostcode: "HP19 9rb",
-        facilitySubBuildingName: "Sub building name",
-        facilityBuildingNumber: undefined,
-        facilityBuildingName: "Building name",
-        facilityStreetName: "Street name",
-        facilityCounty: "Ealing",
-        facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-      }
-    ];
+    const storageDocumentToBeSaved = { ...frontEndStorageDocument };
+    storageDocumentToBeSaved.facilityName = "juan fe testing",
+    storageDocumentToBeSaved.facilityAddressOne = "23 Prince Rupert",
+    storageDocumentToBeSaved.facilityTownCity = "Aylesbury",
+    storageDocumentToBeSaved.facilityPostcode = "HP19 9rb",
+    storageDocumentToBeSaved.facilitySubBuildingName = "Sub building name",
+    storageDocumentToBeSaved.facilityBuildingNumber = undefined,
+    storageDocumentToBeSaved.facilityBuildingName = "Building name",
+    storageDocumentToBeSaved.facilityStreetName = "Street name",
+    storageDocumentToBeSaved.facilityCounty = "Ealing",
+    storageDocumentToBeSaved.facilityCountry = "United Kingdom of Great Britain and Northern Ireland"
 
 
     expect(mockToBackEndExportDataSD).toHaveBeenCalledTimes(1);
-    expect(mockToBackEndExportDataSD).toHaveBeenCalledWith(storageDocumentToBeSaved,{});
+    expect(mockToBackEndExportDataSD).toHaveBeenCalledWith(storageDocumentToBeSaved, {});
   });
 
   it('should call toBackEndExportDataSD once with the incomplete front end storage facility', () => {
 
-    frontEndStorageDocument.storageFacilities = [
-      {
-        "facilityName" : "juan testing",
-        "facilityAddressOne" : "23 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      },
-      {
-        "facilityName" : "juan none testing",
-      }
-    ];
-
-    backEndExportData.storageFacilities = [];
-
-    FrontEndSD.sdDataToSave(frontEndStorageDocument,backEndExportData);
-
-    const storageDocumentToBeSaved = {...frontEndStorageDocument};
-    storageDocumentToBeSaved.storageFacilities = [
-      {
-        "facilityName" : "juan testing",
-        "facilityAddressOne" : "23 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      },
-      {
-        "facilityName": "juan none testing",
-      }
-    ];
-
-    expect(mockToBackEndExportDataSD).toHaveBeenCalledTimes(1);
-    expect(mockToBackEndExportDataSD).toHaveBeenCalledWith(storageDocumentToBeSaved,{});
-  });
-
-  it('should call toBackEndExportDataSD once removing empty facilities if there is no original available', () => {
-
-    frontEndStorageDocument.storageFacilities = [
-      {
-        "facilityName": "juan testing",
-        "facilityAddressOne": "23 Prince Rupert",
-        "facilityTownCity": "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      },
-      {
-        "facilityName": "",
-      }
-    ];
+    frontEndStorageDocument.facilityName = "juan testing",
+    frontEndStorageDocument.facilityAddressOne = "23 Prince Rupert",
+    frontEndStorageDocument.facilityTownCity = "Aylesbury",
+    frontEndStorageDocument.facilityPostcode = "HP19 9rb",
+    frontEndStorageDocument.facilitySubBuildingName = "Sub building name",
+    frontEndStorageDocument.facilityBuildingNumber = undefined,
+    frontEndStorageDocument.facilityBuildingName = "Building name",
+    frontEndStorageDocument.facilityStreetName = "Street name",
+    frontEndStorageDocument.facilityCounty = "Ealing",
+    frontEndStorageDocument.facilityCountry = "United Kingdom of Great Britain and Northern Ireland"
 
     backEndExportData.storageFacilities = [];
 
     FrontEndSD.sdDataToSave(frontEndStorageDocument, backEndExportData);
 
     const storageDocumentToBeSaved = { ...frontEndStorageDocument };
-    storageDocumentToBeSaved.storageFacilities = [
-      {
-        "facilityName": "juan testing",
-        "facilityAddressOne": "23 Prince Rupert",
-        "facilityTownCity": "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      }
-    ];
+    storageDocumentToBeSaved.facilityName = "juan testing",
+    storageDocumentToBeSaved.facilityAddressOne = "23 Prince Rupert",
+    storageDocumentToBeSaved.facilityTownCity = "Aylesbury",
+    storageDocumentToBeSaved.facilityPostcode = "HP19 9rb",
+    storageDocumentToBeSaved.facilitySubBuildingName = "Sub building name",
+    storageDocumentToBeSaved.facilityBuildingNumber = undefined,
+    storageDocumentToBeSaved.facilityBuildingName = "Building name",
+    storageDocumentToBeSaved.facilityStreetName = "Street name",
+    storageDocumentToBeSaved.facilityCounty = "Ealing",
+    storageDocumentToBeSaved.facilityCountry = "United Kingdom of Great Britain and Northern Ireland"
 
     expect(mockToBackEndExportDataSD).toHaveBeenCalledTimes(1);
     expect(mockToBackEndExportDataSD).toHaveBeenCalledWith(storageDocumentToBeSaved, {});
   });
 
-  it('should call toBackEndExportDataSD once with full frontEndStorageDocument exportData is undefined', () => {
-
-    frontEndStorageDocument.storageFacilities = [
-      {
-        "facilityName" : "juan testing",
-        "facilityAddressOne" : "23 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      },
-      {
-        "facilityName" : "juan 22 testing",
-        "facilityAddressOne" : "45 Prince Rupert",
-        "facilityTownCity" : "Aylesbury",
-        "facilityPostcode": "HP19 9rb",
-        "facilitySubBuildingName": "Sub building name",
-        "facilityBuildingNumber": undefined,
-        "facilityBuildingName": "Building name",
-        "facilityStreetName": "Street name",
-        "facilityCounty": "Ealing",
-        "facilityCountry": "United Kingdom of Great Britain and Northern Ireland"
-      }
-    ];
-    FrontEndSD.sdDataToSave(frontEndStorageDocument, undefined);
-
-
-    expect(mockToBackEndExportDataSD).toHaveBeenCalledTimes(1);
-    expect(mockToBackEndExportDataSD).toHaveBeenCalledWith(frontEndStorageDocument, {});
-  });
 });
 

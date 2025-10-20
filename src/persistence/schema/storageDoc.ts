@@ -16,7 +16,6 @@ import {
 } from './common';
 import { toFrontEndTransport } from './frontEndModels/transport';
 import * as FrontEndStorageDocument from './frontEndModels/storageDocument';
-import { isEmpty } from 'lodash';
 
 export enum CertificateType {
   UK = 'uk',
@@ -140,7 +139,7 @@ const StorageFacilitySchema = new Schema({
 
 const ExportDataSchema = new Schema({
   catches                   : { type: [CatchSchema] },
-  storageFacilities         : { type: [StorageFacilitySchema] },
+  storageFacilities         : { type: [StorageFacilitySchema], required: false, default: undefined },
   exporterDetails           : { type: ExporterDetailsSchema },
   transportation            : { type: TransportSchema },
   arrivalTransportation     : { type: TransportSchema, required: false },
@@ -184,43 +183,19 @@ export const toFrontEndCatchStorageDocument = (catchSD: Catch): Catch => {
   return catchSD as FrontEndStorageDocument.Catch;
 };
 
-export const toFrontEndStorageFacility = (storageFacility : StorageFacility): FrontEndStorageDocument.StorageFacility => {
-  return storageFacility as FrontEndStorageDocument.StorageFacility;
-}
-
-export const isOldStorageFacilityAddress = (storageFacility: StorageFacility) => (
-  !isEmpty(storageFacility)
-  && storageFacility.facilityAddressOne && storageFacility.facilityAddressOne !== ''
-  && storageFacility.facilityBuildingName === undefined
-  && storageFacility.facilitySubBuildingName === undefined
-  && storageFacility.facilityBuildingNumber === undefined
-  && storageFacility.facilityStreetName === undefined
-  && storageFacility.facilityCounty === undefined
-  && storageFacility.facilityCountry === undefined
-)
-
-export const clearOldAddress = (storageFacility: StorageFacility): StorageFacility => {
-  const update = isOldStorageFacilityAddress(storageFacility);
-
-  return (update)
-    ? {facilityName: storageFacility.facilityName, _facilityUpdated: update}
-    : {...storageFacility, _facilityUpdated: update};
-}
-
 export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : FrontEndStorageDocument.StorageDocument => {
   const isEmpty = (
     exportData == undefined ||
     (
       exportData.catches == undefined &&
-      exportData.transportation == undefined &&
-      exportData.storageFacilities == undefined
+      exportData.transportation == undefined
     )
   );
 
   if (isEmpty) {
     return {
       catches: [],
-      storageFacilities: [],
+      storageFacilities: undefined,
       validationErrors: [{}],
       addAnotherProduct: "No",
       addAnotherStorageFacility: "No",
@@ -240,11 +215,9 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
     }
   }
 
-  const storageFacilities = exportData.storageFacilities?.map(facility => toFrontEndStorageFacility(clearOldAddress(facility))) || [];
-
   return {
     catches: exportData && exportData.catches ? exportData.catches.map(catchSD => toFrontEndCatchStorageDocument(catchSD)) : [],
-    storageFacilities: storageFacilities,
+    storageFacilities: undefined,
     validationErrors: [],
     addAnotherProduct: "No",
     addAnotherStorageFacility: "No",

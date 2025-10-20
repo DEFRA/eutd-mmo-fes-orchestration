@@ -26,7 +26,7 @@ describe('When newing up a new processing statement', () => {
       createdAt: "2019-01-01",
       createdBy: "John",
       createdByEmail: "test@test.com",
-      exportData: { catches: [{ catchCertificateNumber: "aaa", catchCertificateType: "uk" }], storageFacilities: [] },
+      exportData: { catches: [{ catchCertificateNumber: "aaa", catchCertificateType: "uk" }] },
       documentUri: "test"
     }
 
@@ -720,7 +720,6 @@ describe('When saving a Processing Statement', () => {
           { catchCertificateNumber: "aaa" },
           { catchCertificateNumber: "bbb" }
         ],
-        storageFacilities: []
       },
       documentUri: "test"
     }

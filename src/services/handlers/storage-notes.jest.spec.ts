@@ -1682,7 +1682,9 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
         transportUnloadedFrom: "TRANS-IN-001",
       },
     ],
-    storageFacilities: [{}],
+    facilityAddressOne: "",
+    facilityArrivalDate: "",
+    facilityName: "",
     addAnotherProduct: "notset",
   };
 
@@ -1700,9 +1702,9 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
     });
 
     const expectedErrors = {
-      "storageFacilities-0-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
-      "storageFacilities-0-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+      "storageFacilities-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
+      "storageFacilities-facilityArrivalDate": "sdArrivalDateValidationError",
+      "storageFacilities-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1710,20 +1712,18 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
 
   it("with storage approval number invalid date validates as error", async () => {
     const data = {
-      storageFacilities: [{
-        facilityName: "name",
-        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
-        facilityTownCity: "NEWCASTLE UPON TYNE",
-        facilityPostcode: "NE4 7YH",
-        facilitySubBuildingName: "MMO SUB",
-        facilityBuildingNumber: "",
-        facilityBuildingName: "LANCASTER HOUSE",
-        facilityStreetName: "HAMPSHIRE COURT",
-        facilityCounty: "TYNESIDE",
-        facilityCountry: "ENGLAND",
-        facilityApprovalNumber: "UK/ABC/001",
-        facilityArrivalDate: "123/03/2025"
-      }],
+      facilityName: "name",
+      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+      facilityTownCity: "NEWCASTLE UPON TYNE",
+      facilityPostcode: "NE4 7YH",
+      facilitySubBuildingName: "MMO SUB",
+      facilityBuildingNumber: "",
+      facilityBuildingName: "LANCASTER HOUSE",
+      facilityStreetName: "HAMPSHIRE COURT",
+      facilityCounty: "TYNESIDE",
+      facilityCountry: "ENGLAND",
+      facilityApprovalNumber: "UK/ABC/001",
+      facilityArrivalDate: "123/03/2025",
       addAnotherProduct: "notset",
     };
 
@@ -1740,7 +1740,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
     });
 
     const expectedErrors = {
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateValidationError",
+      "storageFacilities-facilityArrivalDate": "sdArrivalDateValidationError",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1752,20 +1752,18 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
         vehicle: "plane",
         departureDate: "09/10/2025"
       },
-      storageFacilities: [{
-        facilityName: "name",
-        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
-        facilityTownCity: "NEWCASTLE UPON TYNE",
-        facilityPostcode: "NE4 7YH",
-        facilitySubBuildingName: "MMO SUB",
-        facilityBuildingNumber: "",
-        facilityBuildingName: "LANCASTER HOUSE",
-        facilityStreetName: "HAMPSHIRE COURT",
-        facilityCounty: "TYNESIDE",
-        facilityCountry: "ENGLAND",
-        facilityApprovalNumber: "UK/ABC/001",
-        facilityArrivalDate: "08/10/2025"
-      }],
+      facilityName: "name",
+      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+      facilityTownCity: "NEWCASTLE UPON TYNE",
+      facilityPostcode: "NE4 7YH",
+      facilitySubBuildingName: "MMO SUB",
+      facilityBuildingNumber: "",
+      facilityBuildingName: "LANCASTER HOUSE",
+      facilityStreetName: "HAMPSHIRE COURT",
+      facilityCounty: "TYNESIDE",
+      facilityCountry: "ENGLAND",
+      facilityApprovalNumber: "UK/ABC/001",
+      facilityArrivalDate: "08/10/2025",
       addAnotherProduct: "notset",
     };
 
@@ -1782,7 +1780,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
     });
 
     const expectedErrors = {
-      "storageFacilities-0-facilityArrivalDate": "sdArrivalDateBeforeDepatureDateValidationError",
+      "storageFacilities-facilityArrivalDate": "sdArrivalDateBeforeDepatureDateValidationError",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1794,20 +1792,18 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
         vehicle: "plane",
         departureDate: "09/11/2025"
       },
-      storageFacilities: [{
-        facilityName: "name",
-        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
-        facilityTownCity: "NEWCASTLE UPON TYNE",
-        facilityPostcode: "NE4 7YH",
-        facilitySubBuildingName: "MMO SUB",
-        facilityBuildingNumber: "",
-        facilityBuildingName: "LANCASTER HOUSE",
-        facilityStreetName: "HAMPSHIRE COURT",
-        facilityCounty: "TYNESIDE",
-        facilityCountry: "ENGLAND",
-        facilityApprovalNumber: "UK/ABC/001",
-        facilityArrivalDate: "09/11/2025"
-      }],
+      facilityName: "name",
+      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+      facilityTownCity: "NEWCASTLE UPON TYNE",
+      facilityPostcode: "NE4 7YH",
+      facilitySubBuildingName: "MMO SUB",
+      facilityBuildingNumber: "",
+      facilityBuildingName: "LANCASTER HOUSE",
+      facilityStreetName: "HAMPSHIRE COURT",
+      facilityCounty: "TYNESIDE",
+      facilityCountry: "ENGLAND",
+      facilityApprovalNumber: "UK/ABC/001",
+      facilityArrivalDate: "09/11/2025",
       addAnotherProduct: "notset",
     };
 
@@ -1834,20 +1830,18 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
         vehicle: "plane",
         departureDate: "09/11/2025"
       },
-      storageFacilities: [{
-        facilityName: "name",
-        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
-        facilityTownCity: "NEWCASTLE UPON TYNE",
-        facilityPostcode: "NE4 7YH",
-        facilitySubBuildingName: "MMO SUB",
-        facilityBuildingNumber: "",
-        facilityBuildingName: "LANCASTER HOUSE",
-        facilityStreetName: "HAMPSHIRE COURT",
-        facilityCounty: "TYNESIDE",
-        facilityCountry: "ENGLAND",
-        facilityApprovalNumber: "UK/ABC/001",
-        facilityArrivalDate: "10/11/2025"
-      }],
+      facilityName: "name",
+      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+      facilityTownCity: "NEWCASTLE UPON TYNE",
+      facilityPostcode: "NE4 7YH",
+      facilitySubBuildingName: "MMO SUB",
+      facilityBuildingNumber: "",
+      facilityBuildingName: "LANCASTER HOUSE",
+      facilityStreetName: "HAMPSHIRE COURT",
+      facilityCounty: "TYNESIDE",
+      facilityCountry: "ENGLAND",
+      facilityApprovalNumber: "UK/ABC/001",
+      facilityArrivalDate: "10/11/2025",
       addAnotherProduct: "notset",
     };
 
@@ -1872,20 +1866,19 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
 describe("/create-storage-document/:documentNumber/add-storage-facility-approval", () => {
   it("with storage approval number validates as error", async () => {
     const data = {
-      storageFacilities: [{
-        facilityName: "name",
-        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
-        facilityTownCity: "NEWCASTLE UPON TYNE",
-        facilityPostcode: "NE4 7YH",
-        facilitySubBuildingName: "MMO SUB",
-        facilityBuildingNumber: "",
-        facilityBuildingName: "LANCASTER HOUSE",
-        facilityStreetName: "HAMPSHIRE COURT",
-        facilityCounty: "TYNESIDE",
-        facilityCountry: "ENGLAND",
-        facilityApprovalNumber: "UK/ABC/001UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00"
-      }],
       addAnotherProduct: "notset",
+      facilityName: "name",
+      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+      facilityTownCity: "NEWCASTLE UPON TYNE",
+      facilityPostcode: "NE4 7YH",
+      facilitySubBuildingName: "MMO SUB",
+      facilityBuildingNumber: "",
+      facilityBuildingName: "LANCASTER HOUSE",
+      facilityStreetName: "HAMPSHIRE COURT",
+      facilityCounty: "TYNESIDE",
+      facilityCountry: "ENGLAND",
+      facilityApprovalNumber: "UK/ABC/001UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00"
+    
     };
     const _currentUrl =
       "/create-storage-document/:documentNumber/add-storage-facility-approval";
@@ -1900,7 +1893,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
     });
 
     const expectedErrors = {
-      "storageFacilities-0-facilityApproval": "sdAddStorageFacilityApprovalCharacterError",
+      "storageFacilities-facilityApproval": "sdAddStorageFacilityApprovalCharacterError",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1908,19 +1901,17 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
 
   it("with storage approval number invalid characters validates as error", async () => {
     const data = {
-      storageFacilities: [{
-        facilityName: "name",
-        facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
-        facilityTownCity: "NEWCASTLE UPON TYNE",
-        facilityPostcode: "NE4 7YH",
-        facilitySubBuildingName: "MMO SUB",
-        facilityBuildingNumber: "",
-        facilityBuildingName: "LANCASTER HOUSE",
-        facilityStreetName: "HAMPSHIRE COURT",
-        facilityCounty: "TYNESIDE",
-        facilityCountry: "ENGLAND",
-        facilityApprovalNumber: "@£$%^&*(@£"
-      }],
+      facilityName: "name",
+      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+      facilityTownCity: "NEWCASTLE UPON TYNE",
+      facilityPostcode: "NE4 7YH",
+      facilitySubBuildingName: "MMO SUB",
+      facilityBuildingNumber: "",
+      facilityBuildingName: "LANCASTER HOUSE",
+      facilityStreetName: "HAMPSHIRE COURT",
+      facilityCounty: "TYNESIDE",
+      facilityCountry: "ENGLAND",
+      facilityApprovalNumber: "@£$%^&*(@£",
       addAnotherProduct: "notset",
     };
     const _currentUrl =
@@ -1936,7 +1927,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
     });
 
     const expectedErrors = {
-      "storageFacilities-0-facilityApproval": "sdAddStorageFacilityApprovalInvalidError",
+      "storageFacilities-facilityApproval": "sdAddStorageFacilityApprovalInvalidError",
     };
 
     expect(errors).toEqual(expectedErrors);

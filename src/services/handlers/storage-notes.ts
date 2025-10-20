@@ -76,16 +76,12 @@ export default {
   },
 
   "/create-storage-document/:documentNumber/add-storage-facility-details": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
-    const index = 0;
-    const storageFacility = data.storageFacilities[index];
     const departureDate = data.arrivalTransport?.departureDate;
-    return validateStorageFacility(storageFacility, departureDate, index, errors)
+    return validateStorageFacility(data, departureDate, errors)
   },
 
   "/create-storage-document/:documentNumber/add-storage-facility-approval": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
-    const index = 0;
-    const storageFacility = data.storageFacilities[index];
-    return validateStorageApproval(storageFacility, index, errors)
+    return validateStorageApproval(data, errors)
   },
 };
 
@@ -115,45 +111,45 @@ function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, index: n
   }
 }
 
-function checkFacilityArrivalDateError(storageFacility: any, departureDate: string, index: number, errors) {
-  if (!validateDate(storageFacility.facilityArrivalDate)) {
-    errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateValidationError";
-  } else if (validateDateBefore(storageFacility.facilityArrivalDate, departureDate)) {
-    errors[`storageFacilities-${index}-facilityArrivalDate`] = "sdArrivalDateBeforeDepatureDateValidationError";
+function checkFacilityArrivalDateError(exportData: any, departureDate: string, errors) {
+  if (!validateDate(exportData.facilityArrivalDate)) {
+    errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateValidationError";
+  } else if (validateDateBefore(exportData.facilityArrivalDate, departureDate)) {
+    errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateBeforeDepatureDateValidationError";
   }
 }
 
-function validateStorageFacility(storageFacility: any, departureDate: string, index: number, errors, isStorageFacilitiesPage: boolean = false) {
-  checkFacilityArrivalDateError(storageFacility, departureDate, index, errors);
+function validateStorageFacility(exportData: any, departureDate: string, errors, isStorageFacilitiesPage: boolean = false) {
+  checkFacilityArrivalDateError(exportData, departureDate, errors);
 
-  if (!storageFacility.facilityName || validateWhitespace(storageFacility.facilityName)) {
-    errors[`storageFacilities-${index}-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
+  if (!exportData.facilityName || validateWhitespace(exportData.facilityName)) {
+    errors[`storageFacilities-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
   }
 
-  if (!storageFacility.facilityAddressOne && !storageFacility.facilityTownCity && !storageFacility.facilityPostcode) {
-    errors[`storageFacilities-${index}-facilityAddressOne`] = getFacilityAddressOneError(isStorageFacilitiesPage)
+  if (!exportData.facilityAddressOne && !exportData.facilityTownCity && !exportData.facilityPostcode) {
+    errors[`storageFacilities-facilityAddressOne`] = getFacilityAddressOneError(isStorageFacilitiesPage)
   } else {
-    if (!storageFacility.facilityAddressOne || validateWhitespace(storageFacility.facilityAddressOne)) {
-      errors[`storageFacilities-${index}-facilityAddressOne`] = `sdAddStorageFacilityDetailsErrorEnterTheBuilding`;
+    if (!exportData.facilityAddressOne || validateWhitespace(exportData.facilityAddressOne)) {
+      errors[`storageFacilities-facilityAddressOne`] = `sdAddStorageFacilityDetailsErrorEnterTheBuilding`;
     }
-    if (!storageFacility.facilityTownCity || validateWhitespace(storageFacility.facilityTownCity)) {
-      errors[`storageFacilities-${index}-facilityTownCity`] = `sdAddStorageFacilityDetailsErrorEnterTheTown`;
+    if (!exportData.facilityTownCity || validateWhitespace(exportData.facilityTownCity)) {
+      errors[`storageFacilities-facilityTownCity`] = `sdAddStorageFacilityDetailsErrorEnterTheTown`;
     }
-    if (!storageFacility.facilityPostcode || validateWhitespace(storageFacility.facilityPostcode)) {
-      errors[`storageFacilities-${index}-facilityPostcode`] = `sdAddStorageFacilityDetailsErrorEnterThePostcode`;
+    if (!exportData.facilityPostcode || validateWhitespace(exportData.facilityPostcode)) {
+      errors[`storageFacilities-facilityPostcode`] = `sdAddStorageFacilityDetailsErrorEnterThePostcode`;
     }
   }
 
   return { errors };
 }
 
-function validateStorageApproval(storageFacility: any, index: number, errors) {
-  if (storageFacility.facilityApprovalNumber && isInvalidLength(storageFacility.facilityApprovalNumber, 0, 50)) {
-    errors[`storageFacilities-${index}-facilityApproval`] = 'sdAddStorageFacilityApprovalCharacterError';
+function validateStorageApproval(exportData: any, errors) {
+  if (exportData.facilityApprovalNumber && isInvalidLength(exportData.facilityApprovalNumber, 0, 50)) {
+    errors[`storageFacilities-facilityApproval`] = 'sdAddStorageFacilityApprovalCharacterError';
   }
 
-  if (storageFacility.facilityApprovalNumber && !isApprovalNumberValid(storageFacility.facilityApprovalNumber)) {
-    errors[`storageFacilities-${index}-facilityApproval`] = 'sdAddStorageFacilityApprovalInvalidError';
+  if (exportData.facilityApprovalNumber && !isApprovalNumberValid(exportData.facilityApprovalNumber)) {
+    errors[`storageFacilities-facilityApproval`] = 'sdAddStorageFacilityApprovalInvalidError';
   }
 
   return { errors }

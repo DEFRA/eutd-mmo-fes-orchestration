@@ -1,9 +1,8 @@
 import * as mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as BackEndStorageDocument from './storageDoc';
-import * as FrontEndStorageDocument from './frontEndModels/storageDocument';
 import { DocumentNumber } from './frontEndModels/documentNumber';
-import { Catch, StorageFacility } from './frontEndModels/storageDocument';
+import { Catch } from './frontEndModels/storageDocument';
 import { ExporterDetails, Transport, ICountry } from './common';
 import * as Utils from '../../helpers/utils/utils';
 
@@ -15,7 +14,7 @@ describe('When newing up a new storage document', () => {
       createdAt: "2019-01-01",
       createdBy: "John",
       createdByEmail: "test@test.com",
-      exportData: { catches: [{ certificateNumber: "aaa" }], storageFacilities: [] },
+      exportData: { catches: [{ certificateNumber: "aaa" }] },
       documentUri: "test"
     };
 
@@ -55,20 +54,6 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
             transportUnloadedFrom: "12345",
             certificateNumber: "34RWR",
             weightOnCC: "45"
-          }
-        ],
-        storageFacilities: [
-          {
-            facilityName: "exporter facility",
-            facilityAddressOne: "London",
-            facilityTownCity: "London",
-            facilityPostcode: "SE37 6YH",
-            facilitySubBuildingName: 'sub building name',
-            facilityBuildingNumber: 'sub building number',
-            facilityBuildingName: 'building name',
-            facilityStreetName: 'street name',
-            facilityCounty: 'county',
-            facilityCountry: 'UK'
           }
         ],
         exporterDetails: {
@@ -116,40 +101,6 @@ describe('toFrontEndDocumentNumber mapping back end to front end', () => {
 
 });
 
-describe('toFrontEndStorageFacility mapping back end to front end', () => {
-
-  it('should return a valid frontEnd Storage Facilities object', () => {
-    const backEndStorageFacility: BackEndStorageDocument.StorageFacility = {
-      facilityName: "exporter facility",
-      facilityAddressOne: "London",
-      facilityTownCity: "London",
-      facilityPostcode: "SE37 6YH",
-      facilitySubBuildingName: "Sub building name",
-      facilityBuildingNumber: null,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    };
-
-    const expected: FrontEndStorageDocument.StorageFacility = {
-      facilityName: "exporter facility",
-      facilityAddressOne: "London",
-      facilityTownCity: "London",
-      facilityPostcode: "SE37 6YH",
-      facilitySubBuildingName: "Sub building name",
-      facilityBuildingNumber: null,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    };
-
-    expect(BackEndStorageDocument.toFrontEndStorageFacility(backEndStorageFacility)).toStrictEqual(expected);
-  });
-
-});
-
 describe('toFrontEndStorageDocumentExportData mapping back end to front end', () => {
 
   it('should return a valid front end export data object for storage document', () => {
@@ -167,21 +118,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
           weightOnCC: "45"
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: "Facility Name",
-          facilityAddressOne: "London",
-          facilityTownCity: "London",
-          facilityPostcode: "SE37 6YH",
-          facilitySubBuildingName: "Sub building name",
-          facilityBuildingNumber: null,
-          facilityBuildingName: "Building name",
-          facilityStreetName: "Street name",
-          facilityCounty: "Ealing",
-          facilityCountry: "United Kingdom of Great Britain and Northern Ireland",
-          _facilityUpdated: false
-        }
-      ],
+      storageFacilities: undefined,
       validationErrors: [],
       addAnotherProduct: "No",
       addAnotherStorageFacility: "No",
@@ -227,20 +164,6 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       weightOnCC: "45"
     }];
 
-    const storageFacilities: StorageFacility[] = [{
-      facilityName: "Facility Name",
-      facilityAddressOne: "London",
-      facilityTownCity: "London",
-      facilityPostcode: "SE37 6YH",
-      facilitySubBuildingName: "Sub building name",
-      facilityBuildingNumber: null,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    }
-    ];
-
     const exporterDetails: ExporterDetails = {
       contactId: 'a contact Id',
       accountId: 'an account id',
@@ -267,7 +190,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
 
     const exportData: BackEndStorageDocument.ExportData = {
       catches: catches,
-      storageFacilities: storageFacilities,
+      storageFacilities: undefined,
       exporterDetails: exporterDetails,
       transportation: transport,
       exportedTo: {
@@ -309,21 +232,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
           weightOnCC: "45"
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: "Facility Name",
-          facilityAddressOne: "London",
-          facilityTownCity: "London",
-          facilityPostcode: "SE37 6YH",
-          facilitySubBuildingName: "Sub building name",
-          facilityBuildingNumber: null,
-          facilityBuildingName: "Building name",
-          facilityStreetName: "Street name",
-          facilityCounty: "Ealing",
-          facilityCountry: "United Kingdom of Great Britain and Northern Ireland",
-          _facilityUpdated: false
-        }
-      ],
+      storageFacilities: undefined,
       validationErrors: [],
       addAnotherProduct: "No",
       addAnotherStorageFacility: "No",
@@ -379,20 +288,6 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       weightOnCC: "45"
     }];
 
-    const storageFacilities: StorageFacility[] = [{
-      facilityName: "Facility Name",
-      facilityAddressOne: "London",
-      facilityTownCity: "London",
-      facilityPostcode: "SE37 6YH",
-      facilitySubBuildingName: "Sub building name",
-      facilityBuildingNumber: null,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    }
-    ];
-
     const exporterDetails: ExporterDetails = {
       contactId: 'a contact Id',
       accountId: 'an account id',
@@ -430,7 +325,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
 
     const exportData: any = {
       catches: catches,
-      storageFacilities: storageFacilities,
+      storageFacilities: undefined,
       exporterDetails: exporterDetails,
       transportation: transport,
       arrivalTransportation: arrivalTransport,
@@ -456,7 +351,6 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
   it('should return empty if only exporter details are available in the backend', () => {
     const expected = {
       catches: [],
-      storageFacilities: [],
       validationErrors: [{}],
       addAnotherProduct: "No",
       addAnotherStorageFacility: "No",
@@ -473,6 +367,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
+      storageFacilities: undefined
     };
 
     const exporterDetails: ExporterDetails = {
@@ -500,7 +395,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
   it('should return default property values if there is no exporter deta', () => {
     const expected = {
       catches: [],
-      storageFacilities: [],
+      storageFacilities: undefined,
       validationErrors: [{}],
       addAnotherProduct: "No",
       addAnotherStorageFacility: "No",
@@ -525,170 +420,47 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
   it('should clear the address from and flag any facilities where the address is in the old format', () => {
     const input: BackEndStorageDocument.ExportData = {
       catches: [],
-      storageFacilities: [
-        {
-          facilityName: "Old format",
-          facilityAddressOne: "Building, Street",
-          facilityTownCity: "London",
-          facilityPostcode: "SE37 6YH"
-        },
-        {
-          facilityName: "New format",
-          facilityAddressOne: "Building, Street",
-          facilityBuildingName: "Building",
-          facilityStreetName: "Street",
-          facilityTownCity: "London",
-          facilityPostcode: "SE37 6YH"
-        }
-      ],
+      facilityName: "New format",
+      facilityAddressOne: "Building, Street",
+      facilityBuildingName: "Building",
+      facilityStreetName: "Street",
+      facilityTownCity: "London",
+      facilityPostcode: "SE37 6YH",
       exporterDetails: null,
       transportation: null
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(input)).toStrictEqual({
       catches: [],
-      storageFacilities: [
-        {
-          facilityName: "Old format",
-          _facilityUpdated: true
-        },
-        {
-          facilityName: "New format",
-          facilityAddressOne: "Building, Street",
-          facilityBuildingName: "Building",
-          facilityStreetName: "Street",
-          facilityTownCity: "London",
-          facilityPostcode: "SE37 6YH",
-          _facilityUpdated: false
-        }
-      ],
+      facilityName: "New format",
+      facilityAddressOne: "Building, Street",
+      facilityBuildingName: "Building",
+      facilityStreetName: "Street",
+      facilityTownCity: "London",
+      facilityPostcode: "SE37 6YH",
       validationErrors: [],
       addAnotherProduct: "No",
       addAnotherStorageFacility: "No",
       arrivalTransport: undefined,
       transport: undefined,
       exportedTo: undefined,
-      facilityAddressOne: undefined,
       facilityApprovalNumber: undefined,
       facilityArrivalDate: undefined,
-      facilityBuildingName: undefined,
       facilityBuildingNumber: undefined,
       facilityCountry: undefined,
       facilityCounty: undefined,
-      facilityName: undefined,
-      facilityPostcode: undefined,
       facilityStorage: undefined,
-      facilityStreetName: undefined,
       facilitySubBuildingName: undefined,
-      facilityTownCity: undefined,
+      storageFacilities: undefined
     });
   });
 
 });
 
-describe('isOldStorageFacilityAddress', () => {
-
-  it('should return true for addresses in the old format', () => {
-
-    const storageFacility: StorageFacility = {
-      facilityName: "Facility Name",
-      facilityAddressOne: "London",
-      facilityTownCity: "London",
-      facilityPostcode: "SE37 6YH"
-    };
-
-    expect(BackEndStorageDocument.isOldStorageFacilityAddress(storageFacility)).toBe(true);
-
-  });
-
-  it('should return false for addresses in the new format', () => {
-
-    const storageFacility: StorageFacility = {
-      facilityName: "Facility Name",
-      facilityAddressOne: "London",
-      facilityTownCity: "London",
-      facilityPostcode: "SE37 6YH",
-      facilitySubBuildingName: "Sub building name",
-      facilityBuildingNumber: null,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    };
-
-    expect(BackEndStorageDocument.isOldStorageFacilityAddress(storageFacility)).toBe(false);
-
-  });
-
-  it('should return false for empty addresses', () => {
-
-    const empty = {} as StorageFacility;
-
-    expect(BackEndStorageDocument.isOldStorageFacilityAddress(empty)).toBe(false);
-
-  });
-
-});
-
-describe('clearOldAddress', () => {
-
-  describe('for an address in the old format', () => {
-
-    const address = {
-      facilityName: 'Facility 1',
-      facilityAddressOne: 'Address one',
-      facilityAddressTwo: 'Address two',
-      facilityTownCity: 'Town city',
-      facilityPostcode: 'Postcode'
-    };
-
-    const result = BackEndStorageDocument.clearOldAddress(address);
-
-    it('will remove all the address fields and add _facilityUpdated: true', () => {
-      expect(result).toStrictEqual({
-        facilityName: 'Facility 1',
-        _facilityUpdated: true
-      });
-    });
-
-  });
-
-  describe('for an address in the new format', () => {
-
-    const address = {
-      facilityName: 'Facility 1',
-      facilityAddressOne: 'Address one',
-      facilityBuildingName: 'Building',
-      facilityStreetName: 'Street',
-      facilityTownCity: 'Town city',
-      facilityCounty: 'County',
-      facilityPostcode: 'Postcode',
-      facilityCountry: 'UK'
-    };
-
-    const result = BackEndStorageDocument.clearOldAddress(address);
-
-    it('will keep all the address fields and add _facilityUpdated: false', () => {
-      expect(result).toStrictEqual({
-        facilityName: 'Facility 1',
-        facilityAddressOne: 'Address one',
-        facilityBuildingName: 'Building',
-        facilityStreetName: 'Street',
-        facilityTownCity: 'Town city',
-        facilityCounty: 'County',
-        facilityPostcode: 'Postcode',
-        facilityCountry: 'UK',
-        _facilityUpdated: false
-      });
-    });
-
-  });
-
-});
 
 describe('When saving a storage document', () => {
 
-  let mongoServer;
+  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
     mongoServer = new MongoMemoryServer();
@@ -716,8 +488,7 @@ describe('When saving a storage document', () => {
         catches: [
           { certificateNumber: "aaa" },
           { certificateNumber: "bbb" }
-        ],
-        storageFacilities: []
+        ]
       },
       documentUri: "test"
     };
@@ -783,18 +554,16 @@ describe('When cloning a storage document', () => {
   const originalExportData: BackEndStorageDocument.ExportData = {
     catches: [originalCatch, originalCatch2],
     exporterDetails: originalExporterDetails,
-    storageFacilities: [{
-      facilityName: "fi",
-      facilityAddressOne: "The cat is flat, Building name, street name ",
-      facilityTownCity: "Ealing",
-      facilityPostcode: "W3 0ab",
-      facilitySubBuildingName: "The cat is flat",
-      facilityBuildingNumber: null,
-      facilityBuildingName: "Building name",
-      facilityStreetName: "Street name",
-      facilityCounty: "Ealing",
-      facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-    }],
+    facilityName: "fi",
+    facilityAddressOne: "The cat is flat, Building name, street name ",
+    facilityTownCity: "Ealing",
+    facilityPostcode: "W3 0ab",
+    facilitySubBuildingName: "The cat is flat",
+    facilityBuildingNumber: null,
+    facilityBuildingName: "Building name",
+    facilityStreetName: "Street name",
+    facilityCounty: "Ealing",
+    facilityCountry: "United Kingdom of Great Britain and Northern Ireland",
     exportedTo: {
       officialCountryName: "Sweden",
       isoCodeAlpha2: "SE",

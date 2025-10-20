@@ -2,13 +2,13 @@ import * as mongoose from 'mongoose';
 import * as StorageDocumentService from "./storageDoc";
 import * as FrontEndExporterSchema from "../schema/frontEndModels/exporterDetails";
 import * as FrontEndTransportSchema from '../schema/frontEndModels/transport';
-import { StorageDocument , ExportData } from "../schema/storageDoc";
+import { StorageDocument, ExportData } from "../schema/storageDoc";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { StorageDocumentModel } from "../schema/storageDoc";
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
 
-let mongoServer;
+let mongoServer: MongoMemoryServer;
 const defaultUserReference = 'User Reference';
 const defaultUser = 'Bob';
 const defaultContact = 'contactBob';
@@ -16,10 +16,10 @@ const defaultContact = 'contactBob';
 beforeAll(async () => {
   mongoServer = new MongoMemoryServer();
   const mongoUri = await mongoServer.getConnectionString();
-  await mongoose.connect(mongoUri).catch(err => {console.log(err)});
+  await mongoose.connect(mongoUri).catch(err => { console.log(err) });
 });
 
-afterEach(async() => {
+afterEach(async () => {
   await StorageDocumentModel.deleteMany({});
 });
 
@@ -50,7 +50,6 @@ describe('getDraft', () => {
   it('should return draft data if it exists with a document number', async () => {
     await new StorageDocumentModel(createDraft({
       catches: [],
-      storageFacilities: [],
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
@@ -58,16 +57,16 @@ describe('getDraft', () => {
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
-      exporterDetails                   : {
-        contactId : 'a contact Id',
-        accountId  : 'an account id',
+      exporterDetails: {
+        contactId: 'a contact Id',
+        accountId: 'an account id',
         exporterCompanyName: 'Exporter Co Ltd',
         addressOne: 'Building',
         addressTwo: 'Street',
         townCity: 'Town',
         postcode: 'NE1 1NE',
-        _dynamicsAddress : {someData: 'original data'},
-        _dynamicsUser : {
+        _dynamicsAddress: { someData: 'original data' },
+        _dynamicsUser: {
           firstName: "John",
           lastName: "Doe"
         }
@@ -88,7 +87,7 @@ describe('getDraft', () => {
       _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
-    const result : any = await StorageDocumentService.getDraft('Bob','GBR-34344-3444-344', 'contactBob');
+    const result: any = await StorageDocumentService.getDraft('Bob', 'GBR-34344-3444-344', 'contactBob');
 
     expect(result.exportData.transportation.vehicle).toEqual('plane')
   });
@@ -98,7 +97,7 @@ describe('createDraft', () => {
   it('will create a new draft in the system', async () => {
     await StorageDocumentService.createDraft('Bob', 'bob@test.com', true, 'contactBob');
 
-    const result = await StorageDocumentModel.find({createdBy: 'Bob', createdByEmail: 'bob@test.com', status: 'DRAFT'});
+    const result = await StorageDocumentModel.find({ createdBy: 'Bob', createdByEmail: 'bob@test.com', status: 'DRAFT' });
 
     expect(result.length).toBe(1);
   });
@@ -161,14 +160,14 @@ describe('upsertDraftDataForStorageDocuments', () => {
   const testContact = 'contactBob';
   const year = new Date().getFullYear();
   const path = "path";
-  const payload = {"data": "test"};
+  const payload = { "data": "test" };
 
   describe('if no drafts already exist', () => {
 
     it('should create a new draft document if no path or payload are provided', async () => {
       await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact);
 
-      const result = await StorageDocumentModel.find({createdBy: testUser, status: 'DRAFT'});
+      const result = await StorageDocumentModel.find({ createdBy: testUser, status: 'DRAFT' });
 
       expect(result.length).toBe(1);
 
@@ -182,13 +181,13 @@ describe('upsertDraftDataForStorageDocuments', () => {
     it('should create and populate a new draft document if a path and payload are provided', async () => {
       await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, path, payload);
 
-      const result = await StorageDocumentModel.find({createdBy: testUser, status: 'DRAFT'});
+      const result = await StorageDocumentModel.find({ createdBy: testUser, status: 'DRAFT' });
 
       expect(result.length).toBe(1);
 
       const draft = result[0];
 
-      expect(draft.draftData).toStrictEqual({path: payload});
+      expect(draft.draftData).toStrictEqual({ path: payload });
       expect(draft.createdBy).toStrictEqual(testUser);
       expect(draft.documentNumber).toMatch(new RegExp(`^GBR-${year}-SD-[A-Z0-9]{9}$`));
     });
@@ -198,27 +197,27 @@ describe('upsertDraftDataForStorageDocuments', () => {
   describe('if a draft already exists', () => {
 
     it('should be able to add to the draft data', async () => {
-      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, 'test-1', {item: 'test 1'});
-      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, 'test-2', {item: 'test 2'});
+      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, 'test-1', { item: 'test 1' });
+      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, 'test-2', { item: 'test 2' });
 
-      const result = await StorageDocumentModel.find({createdBy: testUser, status: 'DRAFT'});
+      const result = await StorageDocumentModel.find({ createdBy: testUser, status: 'DRAFT' });
 
       expect(result.length).toBe(1);
       expect(result[0].draftData).toStrictEqual({
-        'test-1': {item: 'test 1'},
-        'test-2': {item: 'test 2'}
+        'test-1': { item: 'test 1' },
+        'test-2': { item: 'test 2' }
       });
     });
 
     it('should be able to overwrite the draft data', async () => {
-      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, path, {item: 'test 1'});
-      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, path, {item: 'test 2'});
+      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, path, { item: 'test 1' });
+      await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, path, { item: 'test 2' });
 
-      const result = await StorageDocumentModel.find({createdBy: testUser, status: 'DRAFT'});
+      const result = await StorageDocumentModel.find({ createdBy: testUser, status: 'DRAFT' });
 
       expect(result.length).toBe(1);
       expect(result[0].draftData).toStrictEqual({
-        path: {item: 'test 2'}
+        path: { item: 'test 2' }
       });
     });
 
@@ -237,12 +236,12 @@ describe('upsertDraftDataForStorageDocuments', () => {
   });
 
   it('should omit any undefined values', async () => {
-    await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, path, {item: 'test 2', ok: undefined});
+    await StorageDocumentService.upsertDraftDataForStorageDocuments(testUser, testContact, path, { item: 'test 2', ok: undefined });
 
-    const result = await StorageDocumentModel.findOne({createdBy: testUser, status: 'DRAFT'});
+    const result = await StorageDocumentModel.findOne({ createdBy: testUser, status: 'DRAFT' });
 
     expect(result.draftData).toStrictEqual({
-      path: {item: 'test 2'}
+      path: { item: 'test 2' }
     });
   });
 
@@ -327,28 +326,28 @@ describe('getDraftDocumentHeaders', () => {
     await createDocument('Foo', 'DRAFT', 'test4', new Date(2020, 0, 27), 'User Reference 4');
 
     const expected = [{
-      "documentNumber":"test1",
-      "status":"DRAFT",
-      "startedAt":"27 Jan 2020",
-      "userReference":'User Reference 1'
+      "documentNumber": "test1",
+      "status": "DRAFT",
+      "startedAt": "27 Jan 2020",
+      "userReference": 'User Reference 1'
     },
     {
-      "documentNumber":"test2",
-      "status":"DRAFT",
-      "startedAt":"27 Jan 2020",
-      "userReference":'User Reference 2'
+      "documentNumber": "test2",
+      "status": "DRAFT",
+      "startedAt": "27 Jan 2020",
+      "userReference": 'User Reference 2'
     },
     {
-      "documentNumber":"test3",
-      "status":"DRAFT",
-      "startedAt":"27 Jan 2020",
-      "userReference":'User Reference 3'
+      "documentNumber": "test3",
+      "status": "DRAFT",
+      "startedAt": "27 Jan 2020",
+      "userReference": 'User Reference 3'
     },
     {
-      "documentNumber":"test4",
-      "status":"DRAFT",
-      "startedAt":"27 Jan 2020",
-      "userReference":'User Reference 4'
+      "documentNumber": "test4",
+      "status": "DRAFT",
+      "startedAt": "27 Jan 2020",
+      "userReference": 'User Reference 4'
     }];
 
     const result = await StorageDocumentService.getDraftDocumentHeaders('Foo', testContact);
@@ -406,8 +405,8 @@ describe('getAllStorageDocsForUserByYearAndMonth', () => {
   });
 
   it('should return all completed storage documents within the specified month and year with user references', async () => {
-    await createDocument('Bob', 'DRAFT',  'test 1', new Date(2020, 0, 20), 'User Reference 1');
-    await createDocument('Bob', 'VOID',   'test 3', new Date(2020, 1, 20), 'User Reference 2');
+    await createDocument('Bob', 'DRAFT', 'test 1', new Date(2020, 0, 20), 'User Reference 1');
+    await createDocument('Bob', 'VOID', 'test 3', new Date(2020, 1, 20), 'User Reference 2');
     await createDocument('Bob', 'COMPLETE', 'test 2', new Date(2020, 0, 20), 'User Reference 1');
     await createDocument('Bob', 'COMPLETE', 'test 4', new Date(2020, 0, 20), 'User Reference 2');
 
@@ -435,7 +434,7 @@ describe('getAllStorageDocsForUserByYearAndMonth', () => {
 
 describe('completeDraft', () => {
 
-  let mockDate;
+  let mockDate: jest.SpyInstance;
 
   beforeAll(() => {
     mockDate = jest.spyOn(Date, 'now');
@@ -446,9 +445,9 @@ describe('completeDraft', () => {
   });
 
   const getDraft = async (documentNumber: string) => {
-    const query = {documentNumber: documentNumber};
+    const query = { documentNumber: documentNumber };
     const projection = ['-_id', '-__t', '-__v', '-audit'];
-    const options = {lean: true};
+    const options = { lean: true };
 
     return StorageDocumentModel.findOne(query, projection, options);
   };
@@ -457,7 +456,7 @@ describe('completeDraft', () => {
     const testDate = '2020-02-12';
     mockDate.mockReturnValue(testDate);
 
-    await createDocument('Bob','DRAFT','GBR-2020-CC-0E42C2DA5', new Date(2020, 0, 20), "User Reference", {
+    await createDocument('Bob', 'DRAFT', 'GBR-2020-CC-0E42C2DA5', new Date(2020, 0, 20), "User Reference", {
       transportation: {
         exportDate: "12/02/2020",
       },
@@ -475,12 +474,11 @@ describe('completeDraft', () => {
       createdBy: "Bob",
       createdByEmail: 'bob@bob.bob',
       status: 'COMPLETE',
-      draftData : {
+      draftData: {
         name: "Bob"
       },
       exportData: {
         catches: [],
-        storageFacilities: [],
         transportation: {
           exportDate: "12/02/2020",
         }
@@ -490,7 +488,7 @@ describe('completeDraft', () => {
   });
 
   it('should do nothing to a complete certificate', async () => {
-    await createDocument('Bob','COMPLETE','GBR-2020-CC-0E42C2DA5');
+    await createDocument('Bob', 'COMPLETE', 'GBR-2020-CC-0E42C2DA5');
 
     const original = await getDraft('ZZZ-2020-CC-0E42C2DA5');
 
@@ -525,7 +523,7 @@ describe('deleteDraft', () => {
   });
 
   it('will delete a users draft if they have one', async () => {
-    await StorageDocumentService.deleteDraft('John','test 3', testContact);
+    await StorageDocumentService.deleteDraft('John', 'test 3', testContact);
 
     const statements = await StorageDocumentModel.find();
     const docNumbers = statements.map(ps => ps.documentNumber);
@@ -538,7 +536,7 @@ describe('deleteDraft', () => {
   });
 
   it('will not delete a users draft if they do not have one', async () => {
-    await StorageDocumentService.deleteDraft('Ron','test', testContact);
+    await StorageDocumentService.deleteDraft('Ron', 'test', testContact);
 
     expect(await StorageDocumentModel.countDocuments()).toBe(5);
   });
@@ -589,12 +587,12 @@ describe('checkDocument', () => {
 });
 
 const createDocument = async (
-  userPrincipal:string,
-  status:string = 'DRAFT',
-  documentNumber:string = 'test',
-  createdAt:Date = new Date(2020, 0, 20),
-  userReference:String = defaultUserReference,
-  exportData?:any
+  userPrincipal: string,
+  status: string = 'DRAFT',
+  documentNumber: string = 'test',
+  createdAt: Date = new Date(2020, 0, 20),
+  userReference: String = defaultUserReference,
+  exportData?: any
 ) => {
   await new StorageDocumentModel({
     documentNumber: documentNumber,
@@ -610,114 +608,28 @@ const createDocument = async (
 };
 
 describe('GetExporterDetails', () => {
-    let mockGet;
-    let mockMap;
+  let mockGet: jest.SpyInstance;
+  let mockMap: jest.SpyInstance;
 
-    beforeAll(() => {
-      mockGet = jest.spyOn(StorageDocumentService, 'getDraft');
-      mockMap = jest.spyOn(FrontEndExporterSchema, 'toFrontEndPsAndSdExporterDetails');
-    });
+  beforeAll(() => {
+    mockGet = jest.spyOn(StorageDocumentService, 'getDraft');
+    mockMap = jest.spyOn(FrontEndExporterSchema, 'toFrontEndPsAndSdExporterDetails');
+  });
 
-    afterAll(() => {
-      mockGet.mockRestore();
-      mockMap.mockRestore();
-    });
+  afterAll(() => {
+    mockGet.mockRestore();
+    mockMap.mockRestore();
+  });
 
-    it("will return null if no draft is found", async () => {
-      mockGet.mockResolvedValue(null);
+  it("will return null if no draft is found", async () => {
+    mockGet.mockResolvedValue(null);
 
-      expect(await StorageDocumentService.getExporterDetails("Bob",undefined, defaultContact)).toBeNull();
-    });
+    expect(await StorageDocumentService.getExporterDetails("Bob", undefined, defaultContact)).toBeNull();
+  });
 
-    it("will return null if the draft has no exporter", async () => {
-      const draft = createDraft({
-        catches: [],
-        storageFacilities: [],
-        transportation: {
-          vehicle: 'plane',
-          flightNumber: 'BA078',
-          containerNumber: '12345',
-          departurePlace: 'Essex',
-          exportDate: '18/11/2019'
-        },
-        exporterDetails: null,
-        facilityName: 'ssss',
-        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
-        facilityTownCity: 'asdads',
-        facilityPostcode: '12343',
-        facilitySubBuildingName: 'sdsa',
-        facilityBuildingNumber: 'sadsad',
-        facilityBuildingName: 'ewr',
-        facilityStreetName: 'sadasd',
-        facilityCounty: 'england',
-        facilityCountry: 'Afghanistan',
-        facilityApprovalNumber: 'TSF001',
-        facilityStorage: 'chilled, frozen',
-        facilityArrivalDate: '17/10/2025',
-        _facilityUpdated: false
-      });
-
-      mockGet.mockResolvedValue(draft);
-
-      expect(await StorageDocumentService.getExporterDetails("Bob",undefined, defaultContact)).toBeNull();
-    });
-
-    it("will return a mapped exporter if the draft has an exporter", async () => {
-      const draft = createDraft({
-        catches: [],
-        storageFacilities: [],
-        transportation: {
-          vehicle: 'plane',
-          flightNumber: 'BA078',
-          containerNumber: '12345',
-          departurePlace: 'Essex',
-          exportDate: '18/11/2019'
-        },
-        exporterDetails                   : {
-          contactId : 'a contact Id',
-          accountId  : 'an account id',
-          exporterCompanyName: 'Exporter Co Ltd',
-          addressOne: 'Building',
-          addressTwo: 'Street',
-          townCity: 'Town',
-          postcode: 'NE1 1NE',
-          _dynamicsAddress : {someData : 'original data'},
-          _dynamicsUser : {
-            firstName: "John",
-            lastName: "Doe"
-          }
-        },
-        facilityName: 'ssss',
-        facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
-        facilityTownCity: 'asdads',
-        facilityPostcode: '12343',
-        facilitySubBuildingName: 'sdsa',
-        facilityBuildingNumber: 'sadsad',
-        facilityBuildingName: 'ewr',
-        facilityStreetName: 'sadasd',
-        facilityCounty: 'england',
-        facilityCountry: 'Afghanistan',
-        facilityApprovalNumber: 'TSF001',
-        facilityStorage: 'chilled, frozen',
-        facilityArrivalDate: '17/10/2025',
-        _facilityUpdated: false
-      });
-
-      mockGet.mockResolvedValue(draft);
-      mockMap.mockReturnValue({mapped: true});
-
-      const res = await StorageDocumentService.getExporterDetails("Bob",undefined, defaultContact);
-
-      expect(mockMap).toHaveBeenCalledWith(draft.exportData.exporterDetails);
-      expect(res).toStrictEqual({mapped: true});
-    });
-});
-
-describe('UpsertDraftData',() => {
-  it('will upsert details based on a document number', async() => {
-    await new StorageDocumentModel(createDraft({
+  it("will return null if the draft has no exporter", async () => {
+    const draft = createDraft({
       catches: [],
-      storageFacilities: [],
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
@@ -725,16 +637,99 @@ describe('UpsertDraftData',() => {
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
-      exporterDetails                   : {
-        contactId : 'a contact Id',
-        accountId  : 'an account id',
+      exporterDetails: null,
+      facilityName: 'ssss',
+      facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+      facilityTownCity: 'asdads',
+      facilityPostcode: '12343',
+      facilitySubBuildingName: 'sdsa',
+      facilityBuildingNumber: 'sadsad',
+      facilityBuildingName: 'ewr',
+      facilityStreetName: 'sadasd',
+      facilityCounty: 'england',
+      facilityCountry: 'Afghanistan',
+      facilityApprovalNumber: 'TSF001',
+      facilityStorage: 'chilled, frozen',
+      facilityArrivalDate: '17/10/2025',
+      _facilityUpdated: false
+    });
+
+    mockGet.mockResolvedValue(draft);
+
+    expect(await StorageDocumentService.getExporterDetails("Bob", undefined, defaultContact)).toBeNull();
+  });
+
+  it("will return a mapped exporter if the draft has an exporter", async () => {
+    const draft = createDraft({
+      catches: [],
+      transportation: {
+        vehicle: 'plane',
+        flightNumber: 'BA078',
+        containerNumber: '12345',
+        departurePlace: 'Essex',
+        exportDate: '18/11/2019'
+      },
+      exporterDetails: {
+        contactId: 'a contact Id',
+        accountId: 'an account id',
         exporterCompanyName: 'Exporter Co Ltd',
         addressOne: 'Building',
         addressTwo: 'Street',
         townCity: 'Town',
         postcode: 'NE1 1NE',
-        _dynamicsAddress : {someData : 'original data'},
-        _dynamicsUser : {
+        _dynamicsAddress: { someData: 'original data' },
+        _dynamicsUser: {
+          firstName: "John",
+          lastName: "Doe"
+        }
+      },
+      facilityName: 'ssss',
+      facilityAddressOne: 'sadsad, sdsa, ewr, sadasd',
+      facilityTownCity: 'asdads',
+      facilityPostcode: '12343',
+      facilitySubBuildingName: 'sdsa',
+      facilityBuildingNumber: 'sadsad',
+      facilityBuildingName: 'ewr',
+      facilityStreetName: 'sadasd',
+      facilityCounty: 'england',
+      facilityCountry: 'Afghanistan',
+      facilityApprovalNumber: 'TSF001',
+      facilityStorage: 'chilled, frozen',
+      facilityArrivalDate: '17/10/2025',
+      _facilityUpdated: false
+    });
+
+    mockGet.mockResolvedValue(draft);
+    mockMap.mockReturnValue({ mapped: true });
+
+    const res = await StorageDocumentService.getExporterDetails("Bob", undefined, defaultContact);
+
+    expect(mockMap).toHaveBeenCalledWith(draft.exportData.exporterDetails);
+    expect(res).toStrictEqual({ mapped: true });
+  });
+});
+
+describe('UpsertDraftData', () => {
+  it('will upsert details based on a document number', async () => {
+    await new StorageDocumentModel(createDraft({
+      catches: [],
+      transportation: {
+        vehicle: 'plane',
+        flightNumber: 'BA078',
+        containerNumber: '12345',
+        departurePlace: 'Essex',
+        exportDate: '18/11/2019'
+      },
+      exporterDetails: {
+        contactId: 'a contact Id',
+        accountId: 'an account id',
+        exporterCompanyName: 'Exporter Co Ltd',
+        addressOne: 'Building',
+        addressTwo: 'Street',
+        townCity: 'Town',
+        postcode: 'NE1 1NE',
+        _dynamicsAddress: { someData: 'original data' },
+        _dynamicsUser: {
           firstName: "John",
           lastName: "Doe"
         }
@@ -755,7 +750,7 @@ describe('UpsertDraftData',() => {
       _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
-    await StorageDocumentService.upsertDraftData("Bob",'GBR-34344-3444-344',       {
+    await StorageDocumentService.upsertDraftData("Bob", 'GBR-34344-3444-344', {
       '$set': {
         'exportData.exporterDetails.exporterCompanyName': "MMO 2"
       }
@@ -772,7 +767,6 @@ describe('UpsertDraftData',() => {
   it("should not create a new certificate", async () => {
     await new StorageDocumentModel(createDraft({
       catches: [],
-      storageFacilities: [],
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
@@ -781,15 +775,15 @@ describe('UpsertDraftData',() => {
         exportDate: '18/11/2019'
       },
       exporterDetails: {
-        contactId : 'a contact Id',
-        accountId  : 'an account id',
+        contactId: 'a contact Id',
+        accountId: 'an account id',
         exporterCompanyName: 'Exporter Co Ltd',
         addressOne: 'Building',
         addressTwo: 'Street',
         townCity: 'Town',
         postcode: 'NE1 1NE',
-        _dynamicsAddress: { someData: 'original data'},
-        _dynamicsUser : {
+        _dynamicsAddress: { someData: 'original data' },
+        _dynamicsUser: {
           firstName: "John",
           lastName: "Doe"
         }
@@ -810,13 +804,13 @@ describe('UpsertDraftData',() => {
       _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
-    await StorageDocumentService.upsertDraftData('Bob','ZZZ-3423-234',        {
+    await StorageDocumentService.upsertDraftData('Bob', 'ZZZ-3423-234', {
       '$set': {
         'exportData.transportation.exportedFrom': 'New York'
       }
     }, defaultContact);
 
-    const drafts = await StorageDocumentModel.find({},['exportData'],{lean:true})
+    const drafts = await StorageDocumentModel.find({}, ['exportData'], { lean: true })
 
     expect(drafts.length).toEqual(1)
   });
@@ -826,14 +820,14 @@ describe('Upsert Exporter Details', () => {
 
   const payload: FrontEndExporterSchema.Exporter = {
     model: {
-      contactId : 'a contact Id',
-      accountId  : 'an account id',
+      contactId: 'a contact Id',
+      accountId: 'an account id',
       exporterCompanyName: 'MMO',
       addressOne: 'Building',
       townCity: 'Town',
       postcode: 'NE1 1NE',
-      _dynamicsAddress: {someData: 'original data'},
-      _dynamicsUser : {
+      _dynamicsAddress: { someData: 'original data' },
+      _dynamicsUser: {
         firstName: "John",
         lastName: "Doe"
       },
@@ -847,7 +841,6 @@ describe('Upsert Exporter Details', () => {
   it("will convert to a back end exporter details model", async () => {
     await new StorageDocumentModel(createDraft({
       catches: [],
-      storageFacilities: [],
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
@@ -855,16 +848,16 @@ describe('Upsert Exporter Details', () => {
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
-      exporterDetails                   : {
-        contactId : 'a contact Id',
-        accountId  : 'an account id',
+      exporterDetails: {
+        contactId: 'a contact Id',
+        accountId: 'an account id',
         exporterCompanyName: 'Exporter Co Ltd',
         addressOne: 'Building',
         addressTwo: 'Street',
         townCity: 'Town',
         postcode: 'NE1 1NE',
         _dynamicsAddress: { someData: 'original data' },
-        _dynamicsUser : {
+        _dynamicsUser: {
           firstName: "John",
           lastName: "Doe"
         }
@@ -885,7 +878,7 @@ describe('Upsert Exporter Details', () => {
       _facilityUpdated: false
     }, 'GBR-34344-3444-344')).save();
 
-    await StorageDocumentService.upsertExporterDetails("Bob",'GBR-34344-3444-344', payload, defaultContact);
+    await StorageDocumentService.upsertExporterDetails("Bob", 'GBR-34344-3444-344', payload, defaultContact);
 
     const result = await StorageDocumentModel.findOne({
       createdBy: 'Bob',
@@ -924,7 +917,7 @@ describe('getStorageNotesDraftNumber', () => {
   });
 });
 
-const createDraft = (exportData: ExportData,documentNumber : string = 'X') : StorageDocument  => {
+const createDraft = (exportData: ExportData, documentNumber: string = 'X'): StorageDocument => {
   return {
     documentNumber: documentNumber,
     status: 'DRAFT',
@@ -946,97 +939,97 @@ describe('upsertTransportDetails', () => {
     cmr: 'true',
   };
 
-    let spy;
+  let spy;
 
-    beforeEach(() => {
-      spy = jest.spyOn(StorageDocumentService, 'upsertDraftData');
-      spy.mockResolvedValue(null);
-    });
+  beforeEach(() => {
+    spy = jest.spyOn(StorageDocumentService, 'upsertDraftData');
+    spy.mockResolvedValue(null);
+  });
 
-    afterEach(() => {
-      spy.mockRestore();
-    });
+  afterEach(() => {
+    spy.mockRestore();
+  });
 
-    it('should call upsertDraftData to export transportation', async () => {
-      await StorageDocumentService.upsertTransportDetails('Bob', transport, 'GBR-234234-234234-23424', defaultContact);
+  it('should call upsertDraftData to export transportation', async () => {
+    await StorageDocumentService.upsertTransportDetails('Bob', transport, 'GBR-234234-234234-23424', defaultContact);
 
-      expect(spy).toHaveBeenCalledWith(
-        'Bob',
-        'GBR-234234-234234-23424',
-        {
-          '$set': {
-            'exportData.transportation': {
-              "cmr": true,
-              "vehicle": "truck"
-            }
+    expect(spy).toHaveBeenCalledWith(
+      'Bob',
+      'GBR-234234-234234-23424',
+      {
+        '$set': {
+          'exportData.transportation': {
+            "cmr": true,
+            "vehicle": "truck"
           }
-        },
-        'contactBob'
-      )
-    });
-    it('should call upsertDraftData to arrival transportation', async () => {
-      transport.arrival = true;
-      await StorageDocumentService.upsertTransportDetails('Bob', transport, 'GBR-234234-234234-23424', defaultContact);
+        }
+      },
+      'contactBob'
+    )
+  });
+  it('should call upsertDraftData to arrival transportation', async () => {
+    transport.arrival = true;
+    await StorageDocumentService.upsertTransportDetails('Bob', transport, 'GBR-234234-234234-23424', defaultContact);
 
-      expect(spy).toHaveBeenCalledWith(
-        'Bob',
-        'GBR-234234-234234-23424',
-        {
-          '$set': {
-            'exportData.arrivalTransportation': {
-              "cmr": true,
-              "vehicle": "truck"
-            }
+    expect(spy).toHaveBeenCalledWith(
+      'Bob',
+      'GBR-234234-234234-23424',
+      {
+        '$set': {
+          'exportData.arrivalTransportation': {
+            "cmr": true,
+            "vehicle": "truck"
           }
-        },
-        'contactBob'
-      )
-    });
+        }
+      },
+      'contactBob'
+    )
+  });
 });
 
 describe('getTransportDetails', () => {
 
-    let mockGetDraft;
-    let mockToFrontEndTransport;
+  let mockGetDraft;
+  let mockToFrontEndTransport;
 
-    beforeEach(() => {
-      mockGetDraft = jest.spyOn(StorageDocumentService, 'getDraft');
-      mockToFrontEndTransport = jest.spyOn(FrontEndTransportSchema, 'toFrontEndTransport');
-      mockToFrontEndTransport.mockResolvedValue(null);
-    });
+  beforeEach(() => {
+    mockGetDraft = jest.spyOn(StorageDocumentService, 'getDraft');
+    mockToFrontEndTransport = jest.spyOn(FrontEndTransportSchema, 'toFrontEndTransport');
+    mockToFrontEndTransport.mockResolvedValue(null);
+  });
 
-    afterEach(() => {
-      mockGetDraft.mockRestore();
-      mockToFrontEndTransport.mockRestore();
-    });
+  afterEach(() => {
+    mockGetDraft.mockRestore();
+    mockToFrontEndTransport.mockRestore();
+  });
 
-    it('should map the mongo transport data if it exists', async () => {
-      const draft = {
-        exportData: {
-          transportation: {'test': 'test'}
-        }
+  it('should map the mongo transport data if it exists', async () => {
+    const draft = {
+      exportData: {
+        transportation: { 'test': 'test' }
       }
+    }
 
-      mockGetDraft.mockResolvedValue(draft);
-      mockToFrontEndTransport.mockReturnValue(draft.exportData.transportation);
+    mockGetDraft.mockResolvedValue(draft);
+    mockToFrontEndTransport.mockReturnValue(draft.exportData.transportation);
 
-      const res = await StorageDocumentService.getTransportDetails('Bob','GBR-3442-2344', defaultContact);
+    const res = await StorageDocumentService.getTransportDetails('Bob', 'GBR-3442-2344', defaultContact);
 
-      expect(mockGetDraft).toHaveBeenCalledWith('Bob','GBR-3442-2344', defaultContact);
-      expect(mockToFrontEndTransport).toHaveBeenCalledWith(draft.exportData.transportation);
-      expect(res).toStrictEqual(draft.exportData.transportation);
-    });
+    expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-3442-2344', defaultContact);
+    expect(mockToFrontEndTransport).toHaveBeenCalledWith(draft.exportData.transportation);
+    expect(res).toStrictEqual(draft.exportData.transportation);
+  });
 
-    it('should return null if no transport data exists in mongo', async () => {
-      mockGetDraft.mockResolvedValue(null);
-      mockToFrontEndTransport.mockReturnValue(null);
+  it('should return null if no transport data exists in mongo', async () => {
+    mockGetDraft.mockResolvedValue(null);
+    mockToFrontEndTransport.mockReturnValue(null);
 
-      const res = await StorageDocumentService.getTransportDetails('Bob','GBR-3442-2344', defaultContact);
+    const res = await StorageDocumentService.getTransportDetails('Bob', 'GBR-3442-2344', defaultContact);
 
-      expect(mockGetDraft).toHaveBeenCalledWith('Bob','GBR-3442-2344', defaultContact);
-      expect(mockToFrontEndTransport).not.toHaveBeenCalled();
-      expect(res).toBeNull();
-    });
+    expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-3442-2344', defaultContact);
+    expect(mockToFrontEndTransport).not.toHaveBeenCalled();
+    expect(res).toBeNull();
+  });
 
 });
 
@@ -1049,7 +1042,7 @@ describe('upsertUserReference', () => {
     spy.mockResolvedValue(null);
   });
 
-  afterEach(()=> {
+  afterEach(() => {
     spy.mockRestore();
   })
 
@@ -1075,7 +1068,7 @@ describe('getExportLocation', () => {
   it('should return null if there is no draft', async () => {
     mockGetDraft.mockResolvedValue(null);
 
-    expect(await StorageDocumentService.getExportLocation('Bob',undefined, defaultContact)).toBeNull();
+    expect(await StorageDocumentService.getExportLocation('Bob', undefined, defaultContact)).toBeNull();
   });
 
   it('should return null if the draft has no transportation', async () => {
@@ -1089,7 +1082,7 @@ describe('getExportLocation', () => {
 
     mockGetDraft.mockResolvedValue(draft);
 
-    expect(await StorageDocumentService.getExportLocation(defaultUser,undefined, defaultContact)).toBeNull();
+    expect(await StorageDocumentService.getExportLocation(defaultUser, undefined, defaultContact)).toBeNull();
   });
 
   it('should return export location if exportedTo exists', async () => {
@@ -1108,9 +1101,9 @@ describe('getExportLocation', () => {
 
     mockGetDraft.mockResolvedValue(draft);
 
-    const res = await StorageDocumentService.getExportLocation(defaultUser,'GBR-3442-2344-23444', defaultContact);
+    const res = await StorageDocumentService.getExportLocation(defaultUser, 'GBR-3442-2344-23444', defaultContact);
 
-    expect(mockGetDraft).toHaveBeenCalledWith('Bob','GBR-3442-2344-23444', defaultContact);
+    expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-3442-2344-23444', defaultContact);
     expect(res).toEqual({
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -1123,45 +1116,45 @@ describe('getExportLocation', () => {
 });
 
 describe('upsertExportLocation', () => {
-    it('should update exportData.exportedTo', async () => {
-      await new StorageDocumentModel({
-        documentNumber: 'RJH-2020-SD-0E42C2DA5',
-        status: 'DRAFT',
-        createdAt: new Date(2020, 1, 20),
-        createdBy: 'Bob',
-        draftData: {
-          name: 'Bob'
-        }
-      }).save();
+  it('should update exportData.exportedTo', async () => {
+    await new StorageDocumentModel({
+      documentNumber: 'RJH-2020-SD-0E42C2DA5',
+      status: 'DRAFT',
+      createdAt: new Date(2020, 1, 20),
+      createdBy: 'Bob',
+      draftData: {
+        name: 'Bob'
+      }
+    }).save();
 
-      await StorageDocumentService.upsertExportLocation(
-        defaultUser,
-        {
-          exportedTo: {
-            officialCountryName: "SPAIN",
-            isoCodeAlpha2: "A1",
-            isoCodeAlpha3: "A3",
-            isoNumericCode: "SP"
-          }
-        },
-        'RJH-2020-SD-0E42C2DA5',
-        defaultContact);
-
-       const storageDoc = await StorageDocumentModel.findOne(
-        {createdBy: 'Bob', status: 'DRAFT', documentNumber:'RJH-2020-SD-0E42C2DA5'},
-        ['exportData'],
-        {lean: true}
-      );
-
-      expect(storageDoc.exportData).toStrictEqual({
+    await StorageDocumentService.upsertExportLocation(
+      defaultUser,
+      {
         exportedTo: {
           officialCountryName: "SPAIN",
           isoCodeAlpha2: "A1",
           isoCodeAlpha3: "A3",
-          isoNumericCode: "SP",
-        },
-      });
+          isoNumericCode: "SP"
+        }
+      },
+      'RJH-2020-SD-0E42C2DA5',
+      defaultContact);
+
+    const storageDoc = await StorageDocumentModel.findOne(
+      { createdBy: 'Bob', status: 'DRAFT', documentNumber: 'RJH-2020-SD-0E42C2DA5' },
+      ['exportData'],
+      { lean: true }
+    );
+
+    expect(storageDoc.exportData).toStrictEqual({
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP",
+      },
     });
+  });
 });
 
 describe('cloneStorageDocument', () => {
@@ -1171,59 +1164,46 @@ describe('cloneStorageDocument', () => {
   const voidOriginal = false;
 
   const original: StorageDocument = {
-      createdAt: new Date('2020-01-01').toISOString(),
-      createdBy: "Bob",
-      createdByEmail: "hi@ivinapontes.com",
-      status: "DRAFT",
-      documentNumber: originalDocNumber,
-      requestByAdmin: false,
-      userReference: "this is a reference",
-      exportData: {
-        catches: [{
-          product: "Mola rock crab (CWE)",
-          commodityCode: "12",
-          certificateNumber: "12",
-          productWeight: "12",
-          weightOnCC: "12",
-          placeOfUnloading: "12",
-          dateOfUnloading: "26/05/2021",
-          transportUnloadedFrom: "12",
-          id: "12-1622029341",
-          scientificName: "Cancer edwardsii"
-        }],
-        exporterDetails: {
-          contactId: "70676bc6-295e-ea11-a811-000d3a20f8d4",
-          accountId: "7d676bc6-295e-ea11-a811-000d3a20f8d4",
-          exporterCompanyName: "Fish trader",
-          addressOne: "The cat is flat, Building name, street name",
-          buildingNumber: null,
-          subBuildingName: "The cat is flat",
-          buildingName: "Building name",
-          streetName: "Street name",
-          county: "Ealing",
-          country: "United Kingdom of Great Britain and Northern Ireland",
-          townCity: "LONDON",
-          postcode: "W3 0ab",
-          _dynamicsAddress: {
-          },
-          _dynamicsUser: {
-            firstName: "Ivina",
-            lastName: "Pontes"
-          }
-        },
-      storageFacilities: [{
-        facilityName: "fi",
-        facilityAddressOne: "The cat is flat, Building name, street name ",
-        facilityTownCity: "Ealing",
-        facilityPostcode: "W3 0ab",
-        facilitySubBuildingName: "Sub building name",
-        facilityBuildingNumber: null,
-        facilityBuildingName: "Building name",
-        facilityStreetName: "Street name",
-        facilityCounty: "Ealing",
-        facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-
+    createdAt: new Date('2020-01-01').toISOString(),
+    createdBy: "Bob",
+    createdByEmail: "hi@ivinapontes.com",
+    status: "DRAFT",
+    documentNumber: originalDocNumber,
+    requestByAdmin: false,
+    userReference: "this is a reference",
+    exportData: {
+      catches: [{
+        product: "Mola rock crab (CWE)",
+        commodityCode: "12",
+        certificateNumber: "12",
+        productWeight: "12",
+        weightOnCC: "12",
+        placeOfUnloading: "12",
+        dateOfUnloading: "26/05/2021",
+        transportUnloadedFrom: "12",
+        id: "12-1622029341",
+        scientificName: "Cancer edwardsii"
       }],
+      exporterDetails: {
+        contactId: "70676bc6-295e-ea11-a811-000d3a20f8d4",
+        accountId: "7d676bc6-295e-ea11-a811-000d3a20f8d4",
+        exporterCompanyName: "Fish trader",
+        addressOne: "The cat is flat, Building name, street name",
+        buildingNumber: null,
+        subBuildingName: "The cat is flat",
+        buildingName: "Building name",
+        streetName: "Street name",
+        county: "Ealing",
+        country: "United Kingdom of Great Britain and Northern Ireland",
+        townCity: "LONDON",
+        postcode: "W3 0ab",
+        _dynamicsAddress: {
+        },
+        _dynamicsUser: {
+          firstName: "Ivina",
+          lastName: "Pontes"
+        }
+      },
       exportedTo: {
         officialCountryName: "Sweden",
         isoCodeAlpha2: "SE",

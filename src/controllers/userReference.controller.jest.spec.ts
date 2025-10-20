@@ -126,7 +126,7 @@ describe('get', () => {
           accountId: "7d676bc6-295e-ea11-a811-000d3a20f8d4",
           exporterCompanyName: "Fish trader",
           addressOne: "The cat is flat, Building name, street name",
-          buildingNumber: null,
+          buildingNumber: undefined,
           subBuildingName: "The cat is flat",
           buildingName: "Building name",
           streetName: "Street name",
@@ -141,19 +141,16 @@ describe('get', () => {
             lastName: "Pontes"
           }
         },
-        storageFacilities: [{
-          facilityName: "fi",
-          facilityAddressOne: "The cat is flat, Building name, street name ",
-          facilityTownCity: "Ealing",
-          facilityPostcode: "W3 0ab",
-          facilitySubBuildingName: "Sub building name",
-          facilityBuildingNumber: null,
-          facilityBuildingName: "Building name",
-          facilityStreetName: "Street name",
-          facilityCounty: "Ealing",
-          facilityCountry: "United Kingdom of Great Britain and Northern Ireland"
-
-        }],
+        facilityName: "fi",
+        facilityAddressOne: "The cat is flat, Building name, street name ",
+        facilityTownCity: "Ealing",
+        facilityPostcode: "W3 0ab",
+        facilitySubBuildingName: "Sub building name",
+        facilityBuildingNumber: undefined,
+        facilityBuildingName: "Building name",
+        facilityStreetName: "Street name",
+        facilityCounty: "Ealing",
+        facilityCountry: "United Kingdom of Great Britain and Northern Ireland",
         exportedTo: {
           officialCountryName: "Sweden",
           isoCodeAlpha2: "SE",
@@ -201,15 +198,15 @@ describe('get', () => {
           scientificName: 'scientificName'
         }],
         exporterDetails: {
-          contactId : 'a contact Id',
-          accountId  : 'an account id',
+          contactId: 'a contact Id',
+          accountId: 'an account id',
           exporterCompanyName: "Exporter Fish Ltd",
           addressOne: "London",
           addressTwo: "London",
           townCity: "London",
           postcode: "SE37 6YH",
           _dynamicsAddress: {},
-          _dynamicsUser : {
+          _dynamicsUser: {
             firstName: "John",
             lastName: "Doe"
           }
@@ -387,7 +384,7 @@ describe('Post user reference', () => {
     const userPrincipal = 'Ivina';
     const userReference = 'This is a reference';
 
-    await UserReferenceController.addUserReference(userPrincipal, documentNumber,userReference, contactId);
+    await UserReferenceController.addUserReference(userPrincipal, documentNumber, userReference, contactId);
 
     expect(mockSDUpsertUserReference).toHaveBeenCalled();
   });

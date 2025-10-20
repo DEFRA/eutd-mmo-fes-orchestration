@@ -557,14 +557,6 @@ describe('saveAndValidate', () => {
           weightOnCC: "45",
           scientificName: "some scientific name"
         }],
-        storageFacilities: [{
-          facilityName: "Storage Facilities",
-          facilityAddressOne: "Build and Street",
-          facilityStreetName: "Street",
-          facilityTownCity: "Essex",
-          facilityPostcode: "ES8 7UJ",
-          _facilityUpdated: false
-        }],
         exporterDetails: exporterDetails,
         exportedTo: {
           officialCountryName: "some-exported-to"
@@ -1665,9 +1657,7 @@ describe('generatePdf', () => {
             scientificName: 'some scientific name',
             certificateType: 'uk'
           }],
-          storageFacilities: [{
-            facilityName: 'storage facility name'
-          }],
+          facilityName: 'storage facility name',
           validationErrors: [],
           addAnotherProduct: "No",
           addAnotherStorageFacility: "No",

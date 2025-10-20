@@ -23,11 +23,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -60,11 +59,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -101,11 +99,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -142,11 +139,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -183,11 +179,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -224,11 +219,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -265,11 +259,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -306,11 +299,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           placeOfUnloading: 'Dover'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -348,11 +340,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
           transportUnloadedFrom: ' '
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -394,11 +385,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment i
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -437,11 +427,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment i
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -479,11 +468,10 @@ test('/create-storage-document/you-have-added-a-product with selected another pr
           placeOfUnloading: 'Dover'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'No'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -516,11 +504,10 @@ test('/create-storage-document/you-have-added-a-product with unselected another 
           placeOfUnloading: 'Dover'
         }
       ],
-      storageFacilities: [{}],
       addAnotherProduct: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -558,21 +545,17 @@ test('/create-storage-document/add-storage-facility-details with all mandatory f
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: 'Hank Marvin',
-          facilityAddressOne: 'Fish Quay',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: 'Seaham',
-          facilityPostcode: 'SE11EA',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: 'Seaham',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -606,20 +589,16 @@ test('/create-storage-document/add-storage-facility-details with missing facilit
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityAddressOne: 'Fish Quay',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: 'Seaham',
-          facilityPostcode: 'SE11EA',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: 'Seaham',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -628,7 +607,7 @@ test('/create-storage-document/add-storage-facility-details with missing facilit
     });
 
     const expected = {
-      'storageFacilities-0-facilityName': 'Enter the facility name'
+      'storageFacilities-facilityName': 'Enter the facility name'
     };
 
     t.true(errors);
@@ -657,21 +636,17 @@ test('/create-storage-document/add-storage-facility-details with missing address
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: 'Hank Marvin',
-          facilityAddressOne: '',
-          facilityAddressTwo: '',
-          facilityTownCity: '',
-          facilityPostcode: '',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: '',
+      facilityAddressTwo: '',
+      facilityTownCity: '',
+      facilityPostcode: '',
+      facilttyStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -680,7 +655,7 @@ test('/create-storage-document/add-storage-facility-details with missing address
     });
 
     const expected = {
-      'storageFacilities-0-facilityAddressOne': 'Enter the address'
+      'storageFacilities-facilityAddressOne': 'Enter the address'
     };
 
     t.true(errors);
@@ -709,21 +684,17 @@ test('/create-storage-document/add-storage-facility-details with missing town or
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: 'Hank Marvin',
-          facilityAddressOne: 'Fish Quay',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: '',
-          facilityPostcode: 'SE11EA',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: '',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -732,7 +703,7 @@ test('/create-storage-document/add-storage-facility-details with missing town or
     });
 
     const expected = {
-      'storageFacilities-0-facilityTownCity': 'Enter the town or city'
+      'storageFacilities-facilityTownCity': 'Enter the town or city'
     };
 
     t.true(errors);
@@ -761,21 +732,17 @@ test('/create-storage-document/add-storage-facility-details with missing buildin
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: 'Hank Marvin',
-          facilityAddressOne: '',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: '',
-          facilityPostcode: 'SE11EA',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: '',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: '',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -784,8 +751,8 @@ test('/create-storage-document/add-storage-facility-details with missing buildin
     });
 
     const expected = {
-      'storageFacilities-0-facilityAddressOne': 'Enter the building and street (address line 1 of 2)',
-      'storageFacilities-0-facilityTownCity': 'Enter the town or city'
+      'storageFacilities-facilityAddressOne': 'Enter the building and street (address line 1 of 2)',
+      'storageFacilities-facilityTownCity': 'Enter the town or city'
     };
 
     t.true(errors);
@@ -814,20 +781,16 @@ test('/create-storage-document/add-storage-facility-details with missing Stored 
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: 'Hank Marvin',
-          facilityAddressOne: 'Fish Quay',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: 'Seaham',
-          facilityPostcode: 'SE11EA'
-        }
-      ],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: 'Seaham',
+      facilityPostcode: 'SE11EA',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -836,7 +799,7 @@ test('/create-storage-document/add-storage-facility-details with missing Stored 
     });
 
     const expected = {
-      'storageFacilities-0-storedAs': 'Select how the products are stored'
+      'storageFacilities-facilityStorage': 'Select how the products are stored'
     };
 
     t.true(errors);
@@ -865,21 +828,17 @@ test('/create-storage-document/add-storage-facility-details with whitespace faci
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: ' ',
-          facilityAddressOne: ' ',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: ' ',
-          facilityPostcode: 'SE11EA',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityName: ' ',
+      facilityAddressOne: ' ',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: ' ',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -888,9 +847,9 @@ test('/create-storage-document/add-storage-facility-details with whitespace faci
     });
 
     const expected = {
-      'storageFacilities-0-facilityName': 'Enter the facility name',
-      'storageFacilities-0-facilityAddressOne': 'Enter the building and street (address line 1 of 2)',
-      'storageFacilities-0-facilityTownCity': 'Enter the town or city'
+      'storageFacilities-facilityName': 'Enter the facility name',
+      'storageFacilities-facilityAddressOne': 'Enter the building and street (address line 1 of 2)',
+      'storageFacilities-facilityTownCity': 'Enter the town or city'
     };
 
     t.true(errors);
@@ -921,21 +880,17 @@ test('/create-storage-document/you-have-added-a-storage-facility with unselected
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: 'Hank Marvin',
-          facilityAddressOne: 'Fish Quay',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: 'Seaham',
-          facilityPostcode: 'SE11EA',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: 'Seaham',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -974,21 +929,17 @@ test('/create-storage-document/you-have-added-a-storage-facility with unselected
           transportUnloadedFrom: 'TRANS-IN-001'
         }
       ],
-      storageFacilities: [
-        {
-          facilityName: 'Hank Marvin',
-          facilityAddressOne: 'Fish Quay',
-          facilityAddressTwo: 'Fishy Way',
-          facilityTownCity: 'Seaham',
-          facilityPostcode: 'SE11EA',
-          storedAs: 'chilled'
-        }
-      ],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: 'Seaham',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
       addAnotherProduct: 'notset',
       addAnotherStorageFacility: 'No'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,

@@ -38,20 +38,18 @@ describe("TransportController", () => {
       vehicle: "plane",
       departureDate: "09/11/2025"
     },
-    storageFacilities: [{
-      facilityName: "name",
-      facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
-      facilityTownCity: "NEWCASTLE UPON TYNE",
-      facilityPostcode: "NE4 7YH",
-      facilitySubBuildingName: "MMO SUB",
-      facilityBuildingNumber: "",
-      facilityBuildingName: "LANCASTER HOUSE",
-      facilityStreetName: "HAMPSHIRE COURT",
-      facilityCounty: "TYNESIDE",
-      facilityCountry: "ENGLAND",
-      facilityApprovalNumber: "UK/ABC/001",
-      facilityArrivalDate: "09/11/2025"
-    }],
+    facilityName: "name",
+    facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+    facilityTownCity: "NEWCASTLE UPON TYNE",
+    facilityPostcode: "NE4 7YH",
+    facilitySubBuildingName: "MMO SUB",
+    facilityBuildingNumber: "",
+    facilityBuildingName: "LANCASTER HOUSE",
+    facilityStreetName: "HAMPSHIRE COURT",
+    facilityCounty: "TYNESIDE",
+    facilityCountry: "ENGLAND",
+    facilityApprovalNumber: "UK/ABC/001",
+    facilityArrivalDate: "09/11/2025",
     addAnotherProduct: "notset",
   };
 
