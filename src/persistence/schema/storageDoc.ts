@@ -195,32 +195,15 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
   if (isEmpty) {
     return {
       catches: [],
-      storageFacilities: undefined,
       validationErrors: [{}],
-      addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
-      facilityName: '',
-      facilityAddressOne: '',
-      facilityTownCity: '',
-      facilityPostcode: '',
-      facilitySubBuildingName: '',
-      facilityBuildingNumber: '',
-      facilityBuildingName: '',
-      facilityStreetName: '',
-      facilityCounty: '',
-      facilityCountry: '',
-      facilityApprovalNumber: '',
-      facilityStorage: '',
-      facilityArrivalDate: ''
+      addAnotherProduct: "No"
     }
   }
 
   return {
     catches: exportData && exportData.catches ? exportData.catches.map(catchSD => toFrontEndCatchStorageDocument(catchSD)) : [],
-    storageFacilities: undefined,
     validationErrors: [],
     addAnotherProduct: "No",
-    addAnotherStorageFacility: "No",
     transport: exportData.transportation ? toFrontEndTransport(exportData.transportation) : undefined,
     arrivalTransport: exportData.arrivalTransportation ? toFrontEndTransport(exportData.arrivalTransportation) : undefined,
     exportedTo: toExportedTo(exportData.exportedTo),

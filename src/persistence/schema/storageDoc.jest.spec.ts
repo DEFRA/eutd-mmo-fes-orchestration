@@ -118,10 +118,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
           weightOnCC: "45"
         }
       ],
-      storageFacilities: undefined,
       validationErrors: [],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
       transport: {
         vehicle: "truck",
         cmr: "false",
@@ -137,19 +135,19 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       },
-      facilityAddressOne: "",
-      facilityApprovalNumber: "",
-      facilityArrivalDate: "",
-      facilityBuildingName: "",
-      facilityBuildingNumber: "",
-      facilityCountry: "",
-      facilityCounty: "",
-      facilityName: "",
-      facilityPostcode: "",
-      facilityStorage: "",
-      facilityStreetName: "",
-      facilitySubBuildingName: "",
-      facilityTownCity: "",
+        facilityAddressOne: "",
+        facilityApprovalNumber: "",
+        facilityArrivalDate: "",
+        facilityBuildingName: "",
+        facilityBuildingNumber: "",
+        facilityCountry: "",
+        facilityCounty: "",
+        facilityName: "",
+        facilityPostcode: "",
+        facilityStorage: "",
+        facilityStreetName: "",
+        facilitySubBuildingName: "",
+        facilityTownCity: "",
     };
 
     const catches: Catch[] = [{
@@ -190,7 +188,6 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
 
     const exportData: BackEndStorageDocument.ExportData = {
       catches: catches,
-      storageFacilities: undefined,
       exporterDetails: exporterDetails,
       transportation: transport,
       exportedTo: {
@@ -232,10 +229,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
           weightOnCC: "45"
         }
       ],
-      storageFacilities: undefined,
       validationErrors: [],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
       transport: {
         vehicle: "truck",
         cmr: "false",
@@ -325,7 +320,6 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
 
     const exportData: any = {
       catches: catches,
-      storageFacilities: undefined,
       exporterDetails: exporterDetails,
       transportation: transport,
       arrivalTransportation: arrivalTransport,
@@ -352,22 +346,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
     const expected = {
       catches: [],
       validationErrors: [{}],
-      addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
-      facilityAddressOne: "",
-      facilityApprovalNumber: "",
-      facilityArrivalDate: "",
-      facilityBuildingName: "",
-      facilityBuildingNumber: "",
-      facilityCountry: "",
-      facilityCounty: "",
-      facilityName: "",
-      facilityPostcode: "",
-      facilityStorage: "",
-      facilityStreetName: "",
-      facilitySubBuildingName: "",
-      facilityTownCity: "",
-      storageFacilities: undefined
+      addAnotherProduct: "No"
     };
 
     const exporterDetails: ExporterDetails = {
@@ -395,23 +374,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
   it('should return default property values if there is no exporter deta', () => {
     const expected = {
       catches: [],
-      storageFacilities: undefined,
       validationErrors: [{}],
-      addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
-      facilityAddressOne: "",
-      facilityApprovalNumber: "",
-      facilityArrivalDate: "",
-      facilityBuildingName: "",
-      facilityBuildingNumber: "",
-      facilityCountry: "",
-      facilityCounty: "",
-      facilityName: "",
-      facilityPostcode: "",
-      facilityStorage: "",
-      facilityStreetName: "",
-      facilitySubBuildingName: "",
-      facilityTownCity: "",
+      addAnotherProduct: "No"
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(undefined)).toStrictEqual(expected);
@@ -426,8 +390,16 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityStreetName: "Street",
       facilityTownCity: "London",
       facilityPostcode: "SE37 6YH",
-      exporterDetails: null,
-      transportation: null
+      exporterDetails: {
+        _dynamicsAddress: {},
+        _dynamicsUser: {},
+        addressOne: '',
+        exporterCompanyName: '',
+        postcode: ''
+      },
+      transportation: {
+        vehicle: ''
+      }
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(input)).toStrictEqual({
@@ -440,9 +412,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityPostcode: "SE37 6YH",
       validationErrors: [],
       addAnotherProduct: "No",
-      addAnotherStorageFacility: "No",
       arrivalTransport: undefined,
-      transport: undefined,
+      transport: null,
       exportedTo: undefined,
       facilityApprovalNumber: undefined,
       facilityArrivalDate: undefined,
@@ -450,8 +421,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityCountry: undefined,
       facilityCounty: undefined,
       facilityStorage: undefined,
-      facilitySubBuildingName: undefined,
-      storageFacilities: undefined
+      facilitySubBuildingName: undefined
     });
   });
 

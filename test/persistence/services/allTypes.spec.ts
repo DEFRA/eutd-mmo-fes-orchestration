@@ -392,7 +392,6 @@ test('Should persist storage doc data', async (t) => {
      facilityPostcode: 'aa11aa',
      facilityStorage: 'Chilled',
      addAnotherProduct: 'notset',
-     addAnotherStorageFacility: 'notset',
      transport:
       { vehicle: 'truck',
         currentUri: '/create-storage-document/do-you-have-a-road-transport-document',
@@ -442,7 +441,6 @@ test('Should not display void Storage Docs', async (t) => {
           facilityPostcode: 'aa11aa',
           storedAs: 'chilled' } ],
      addAnotherProduct: 'notset',
-     addAnotherStorageFacility: 'notset',
      transport:
       { vehicle: 'truck',
         currentUri: '/create-storage-document/do-you-have-a-road-transport-document',

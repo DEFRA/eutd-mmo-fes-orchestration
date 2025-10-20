@@ -1498,7 +1498,6 @@ describe('generatePdf', () => {
           }],
           validationErrors: [],
           addAnotherProduct: "No",
-          addAnotherStorageFacility: "No",
           transport: {
             vehicle: 'truck',
             cmr: 'true',
@@ -1564,7 +1563,6 @@ describe('generatePdf', () => {
           }],
           validationErrors: [],
           addAnotherProduct: "No",
-          addAnotherStorageFacility: "No",
           transport: {
             vehicle: 'truck',
             cmr: 'true',
@@ -1660,7 +1658,6 @@ describe('generatePdf', () => {
           facilityName: 'storage facility name',
           validationErrors: [],
           addAnotherProduct: "No",
-          addAnotherStorageFacility: "No",
           transport: {
             vehicle: 'truck',
             cmr: 'true',
