@@ -135,19 +135,19 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       },
-        facilityAddressOne: "",
-        facilityApprovalNumber: "",
-        facilityArrivalDate: "",
-        facilityBuildingName: "",
-        facilityBuildingNumber: "",
-        facilityCountry: "",
-        facilityCounty: "",
-        facilityName: "",
-        facilityPostcode: "",
-        facilityStorage: "",
-        facilityStreetName: "",
-        facilitySubBuildingName: "",
-        facilityTownCity: "",
+      facilityAddressOne: "",
+      facilityApprovalNumber: "",
+      facilityArrivalDate: "",
+      facilityBuildingName: "",
+      facilityBuildingNumber: "",
+      facilityCountry: "",
+      facilityCounty: "",
+      facilityName: "",
+      facilityPostcode: "",
+      facilityStorage: "",
+      facilityStreetName: "",
+      facilitySubBuildingName: "",
+      facilityTownCity: "",
     };
 
     const catches: Catch[] = [{
@@ -633,7 +633,16 @@ describe('When cloning a storage document', () => {
       const clone = BackEndStorageDocument.cloneExportData(original);
 
       expect(clone.exportedTo).toStrictEqual(expected);
-      expect(clone.transportation.exportedTo).toStrictEqual(expected);
+      expect(clone.transportation?.exportedTo).toStrictEqual(expected);
+    });
+
+    it('will spread first storage facility into top level exportData fields', () => {
+      const clone = BackEndStorageDocument.cloneExportData(original);
+
+      expect(clone.facilityName).toBe("fi");
+      expect(clone.facilityAddressOne).toBe("The cat is flat, Building name, street name ");
+      expect(clone.facilityTownCity).toBe("Ealing");
+      expect(clone.facilityPostcode).toBe("W3 0ab");
     });
   });
 

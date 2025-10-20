@@ -244,23 +244,29 @@ export const cloneStorageDocument = (original: StorageDocument, newDocumentNumbe
   return result;
 };
 
-export const cloneExportData = (original: ExportData): ExportData => (
-  {
+export const cloneExportData = (original: ExportData): ExportData => {
+  const firstStorage = (original.storageFacilities && original.storageFacilities.length)
+    ? original.storageFacilities[0]
+    : undefined;
+
+  return {
     ...original,
     exportedTo: toExportedTo(original.exportedTo),
     catches: (original.catches && original.catches.length)
       ? original.catches.map((ctch: Catch) => cloneCatches(ctch))
       : original.catches,
     transportation: (original.transportation && typeof original.transportation.exportedTo === 'string')
-    ? {
-      ...original.transportation,
-      exportedTo: {
-        officialCountryName: original.transportation.exportedTo
+      ? {
+        ...original.transportation,
+        exportedTo: {
+          officialCountryName: original.transportation.exportedTo
+        }
       }
-    }
-    : original.transportation,
-  }
-);
+      : original.transportation,
+    storageFacilities: undefined,
+    ...(firstStorage ? { ...firstStorage } : {})
+  };
+};
 
 export const cloneCatches = (original: Catch): Catch => {
   const {
