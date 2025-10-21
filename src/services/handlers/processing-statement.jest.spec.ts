@@ -397,8 +397,9 @@ it('calling handler for /create-processing-statement/:documentNumber/catch-added
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-details', () => {
+
   it('should return errors when required props are missing', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -418,7 +419,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {
@@ -434,9 +436,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     expect(data.catches[0].catchCertificateType).toBeUndefined();
   });
 
-
   it('should return errors when certificate number has invalid characters', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -462,7 +463,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {
@@ -474,7 +476,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   it('should return errors when a uk certificate number is invalid', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -501,7 +503,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {
@@ -513,7 +516,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   it('should not return a psAddCatchDetailsErrorUKCCNumberFormatInvalid error for a non uk certificate number', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -540,7 +543,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {};
@@ -550,7 +554,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   it('should return a psAddCatchDetailsErrorNonUKCCNumberCharLimit error if a non UK catch certificate number exceeds 52 characters', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -577,7 +581,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {
@@ -589,7 +594,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   it('should not return a psAddCatchDetailsErrorUKCCNumberFormatInvalid error for an unspecified certificate number', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -615,7 +620,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {
@@ -627,7 +633,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   it('should return a psAddCatchDetailsErrorUKCCNumberFormatInvalid error for a valid uk PS certificate number', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -654,7 +660,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {
@@ -666,7 +673,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   it('should return a psAddCatchDetailsErrorUKCCNumberFormatInvalid error for a valid uk SD certificate number', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data: ProcessingStatement = {
@@ -693,7 +700,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       errors: {},
       documentNumber: 'GBR-2023-PS-01234ABCD',
       userPrincipal: 'bob',
-      contactId: 'contactId'
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
     });
 
     const expectedErrors = {
@@ -705,9 +713,9 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   describe('when validating a correctly formatted catch certificate', () => {
-    let mockValidateCatchCertificate;
-    let mockValidateSpeciesName;
-    let mockValidateSpecies;
+    let mockValidateCatchCertificate: jest.SpyInstance;
+    let mockValidateSpeciesName: jest.SpyInstance;
+    let mockValidateSpecies: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateCatchCertificate = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
@@ -727,7 +735,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       mockValidateCatchCertificate.mockResolvedValue(false);
       mockValidateSpecies.mockResolvedValue(true);
 
-      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
       const handler = SUT[currentUrl];
 
       const data: ProcessingStatement = {
@@ -754,7 +762,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         errors: {},
         documentNumber: 'GBR-2023-PS-01234ABCD',
         userPrincipal: 'bob',
-        contactId: 'contactId'
+        contactId: 'contactId',
+      params: { catchIndex: 0 }
       });
 
       const expectedErrors = {
@@ -770,7 +779,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       mockValidateCatchCertificate.mockResolvedValue(true);
       mockValidateSpecies.mockResolvedValue(false);
 
-      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
       const handler = SUT[currentUrl];
 
       const data: ProcessingStatement = {
@@ -798,7 +807,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         errors: {},
         documentNumber: 'GBR-2023-PS-01234ABCD',
         userPrincipal: 'bob',
-        contactId: 'contactId'
+        contactId: 'contactId',
+      params: { catchIndex: 0 }
       });
 
       const expectedErrors = {
@@ -814,7 +824,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       mockValidateCatchCertificate.mockResolvedValue(true);
       mockValidateSpecies.mockResolvedValue(true);
 
-      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode';
+      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
       const handler = SUT[currentUrl];
 
       const data: ProcessingStatement = {
@@ -841,7 +851,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         errors: {},
         documentNumber: 'GBR-2023-PS-01234ABCD',
         userPrincipal: 'bob',
-        contactId: 'contactId'
+        contactId: 'contactId',
+      params: { catchIndex: 0 }
       });
 
       const expectedErrors = {};
@@ -850,12 +861,33 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       expect(data.catches[0].catchCertificateType).toBe('uk');
     });
   });
-
 });
 
-describe('handler for /create-processing-statement/:documentNumber/add-catch-details/:speciesCode/:catchIndex', () => {
+describe('/create-processing-statement/:documentNumber/add-catch-details/:productId', () => {
+  const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId';
+  const handler = SUT[currentUrl];
+
+  it('adds error when catches missing', async () => {
+    const result = await handler({ data: {}, errors: {}, params: { productId: 'prod-1' } });
+    expect(result.errors).toEqual({ 'catches-0-catchCertificateType': 'psCatchCertificateDescription' });
+  });
+
+  it('adds error when no catch matches productId', async () => {
+    const data = { catches: [{ productId: 'other' }] };
+    const result = await handler({ data, errors: {}, params: { productId: 'prod-1' } });
+    expect(result.errors).toEqual({ 'catches-0-catchCertificateType': 'psCatchCertificateDescription' });
+  });
+
+  it('does not add error when first catch exists and productId matches', async () => {
+    const data = { catches: [{ productId: 'prod-1' }] };
+    const result = await handler({ data, errors: {}, params: { productId: 'prod-1' } });
+    expect(result.errors).toEqual({});
+  });
+});
+
+describe('handler for /create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex', () => {
   it('should return errors when required props are missing', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode/:catchIndex';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data = {
@@ -884,7 +916,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
   });
 
   it('should return errors when required props are missing also checking catchCertificateNumber regex', async () => {
-    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:speciesCode/:catchIndex';
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
     const handler = SUT[currentUrl];
 
     const data = {
@@ -2204,7 +2236,6 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     expect(errors).toEqual(expected);
   });
 });
-
 
 describe('validateCatchDetails', () => {
   const index = 0;

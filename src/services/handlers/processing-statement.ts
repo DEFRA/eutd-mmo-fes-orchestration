@@ -61,21 +61,28 @@ export default {
     return validateCatchType(ctch, index, speciesValidation.errors);
   },
 
-  "/create-processing-statement/:documentNumber/add-catch-details/:speciesCode": async ({ data, errors, documentNumber, userPrincipal, contactId }) => {
+  "/create-processing-statement/:documentNumber/add-catch-details/:productId": async ({ data, errors, params }) => {
     const index = 0;
-    const ctch = data.catches[index];
-    const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
-    const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
-    return validateCatchWeights(ctch, index, catchDetails.errors);
+    const productId = params.productId;
+
+    if (!data.catches?.[index]) {
+      errors[`catches-${index}-catchCertificateType`] = 'psCatchCertificateDescription';
+      return { errors };
+    } else if (data.catches.filter((c) => c.productId === productId).length <= 0) {
+       errors[`catches-${index}-catchCertificateType`] = 'psCatchCertificateDescription';
+    }
+
+    return { errors }
   },
 
-  "/create-processing-statement/:documentNumber/add-catch-details/:speciesCode/:catchIndex": async ({ data, errors, params, documentNumber, userPrincipal, contactId }) => {
+  "/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex": async ({ data, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = params.catchIndex;
     const ctch = data.catches[index];
     const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
     const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
+
   "/create-processing-statement/:documentNumber/add-catch-weights": async ({ data, errors }) => {
     const index = 0;
     const ctch = data.catches[index];
