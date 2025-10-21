@@ -66,10 +66,10 @@ export default {
     const productId = params.productId;
 
     if (!data.catches?.[index]) {
-      errors[`catches-${index}-catchCertificateType`] = 'psCatchCertificateDescription';
+      errors[`catches-${index}-species`] = 'psCatchCertificateDescription';
       return { errors };
     } else if (data.catches.filter((c) => c.productId === productId).length <= 0) {
-       errors[`catches-${index}-catchCertificateType`] = 'psCatchCertificateDescription';
+       errors[`catches-${index}-species`] = 'psCatchCertificateDescription';
     }
 
     return { errors }

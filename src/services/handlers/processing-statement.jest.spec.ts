@@ -869,13 +869,13 @@ describe('/create-processing-statement/:documentNumber/add-catch-details/:produc
 
   it('adds error when catches missing', async () => {
     const result = await handler({ data: {}, errors: {}, params: { productId: 'prod-1' } });
-    expect(result.errors).toEqual({ 'catches-0-catchCertificateType': 'psCatchCertificateDescription' });
+    expect(result.errors).toEqual({ 'catches-0-species': 'psCatchCertificateDescription' });
   });
 
   it('adds error when no catch matches productId', async () => {
     const data = { catches: [{ productId: 'other' }] };
     const result = await handler({ data, errors: {}, params: { productId: 'prod-1' } });
-    expect(result.errors).toEqual({ 'catches-0-catchCertificateType': 'psCatchCertificateDescription' });
+    expect(result.errors).toEqual({ 'catches-0-species': 'psCatchCertificateDescription' });
   });
 
   it('does not add error when first catch exists and productId matches', async () => {
