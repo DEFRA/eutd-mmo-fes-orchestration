@@ -34,12 +34,14 @@ export interface Catch {
   id?                           : string,
   catchCertificateNumber?       : string,
   catchCertificateType?         : 'uk' | 'non_uk',
+  issuingCountry?               : ICountry,
   totalWeightLanded?            : string,
   exportWeightBeforeProcessing? : string,
   exportWeightAfterProcessing?  : string,
   scientificName?               : string,
   productId?                    : string,
   productDescription?           : string;
+  productCommodityCode?         : string;
 }
 
 export interface Product {
@@ -100,6 +102,7 @@ export interface IProcessingStatementModel extends ProcessingStatement, Document
 const CatchesSchema = new Schema({
   catchCertificateNumber        : { type: String, uppercase: true },
   catchCertificateType          : { type: String, required: false, enum: Object.values(CatchCertificateType) },
+  issuingCountry                : { type: Country, required: false },
   species                       : { type: String },
   speciesCode                   : { type: String, required: false },
   id                            : { type: String },
@@ -109,6 +112,7 @@ const CatchesSchema = new Schema({
   scientificName                : { type: String },
   productId                     : { type: String },
   productDescription            : { type: String },
+  productCommodityCode          : { type: String },
 }, { _id : true });
 
 const ProductsSchema = new Schema({
@@ -279,10 +283,14 @@ export const cloneCatch = (original: Catch): Catch => {
     speciesCode,
     catchCertificateNumber,
     catchCertificateType,
+    issuingCountry,
     totalWeightLanded,
     exportWeightBeforeProcessing,
     exportWeightAfterProcessing,
     scientificName,
+    productDescription,
+    productId,
+    productCommodityCode
   } = original;
 
   const result = {
@@ -291,10 +299,14 @@ export const cloneCatch = (original: Catch): Catch => {
     speciesCode,
     catchCertificateNumber,
     catchCertificateType,
+    issuingCountry,
     totalWeightLanded,
     exportWeightBeforeProcessing,
     exportWeightAfterProcessing,
-    scientificName
+    scientificName,
+    productDescription,
+    productCommodityCode,
+    productId
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);

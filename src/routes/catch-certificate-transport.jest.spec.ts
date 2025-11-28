@@ -1130,7 +1130,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumber: "error.containerNumber.string.alphanum" };
+      const error = { containerNumber: "error.containerNumber.string.pattern.base" };
       expect(response.result).toEqual(error);
     });
 
@@ -1197,7 +1197,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumber: "error.containerNumber.string.alphanum", };
+      const error = { containerNumber: "error.containerNumber.string.pattern.base", };
       expect(response.result).toEqual(error);
     });
 

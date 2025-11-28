@@ -610,6 +610,76 @@ describe("When mapping from a front end transport to a backend transport", () =>
     expect(result).toStrictEqual(expectedResult);
   });
 
+  it("if vehicle is truck with containerIdentificationNumber then it should be included in backend transport", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.truck,
+      cmr: "false",
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG123",
+      containerIdentificationNumber: "ABCD1234567",
+      departurePlace: "Dover",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "ES",
+        isoCodeAlpha3: "ESP",
+        isoNumericCode: "724"
+      }
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.truck,
+      cmr: false,
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG123",
+      containerIdentificationNumber: "ABCD1234567",
+      departurePlace: "Dover",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "ES",
+        isoCodeAlpha3: "ESP",
+        isoNumericCode: "724"
+      }
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
+  it("if vehicle is truck without containerIdentificationNumber then it should not be in backend transport", () => {
+    const transport: FrontEndTransport.Transport = {
+      vehicle: FrontEndTransport.truck,
+      cmr: "false",
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG123",
+      departurePlace: "Dover",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "ES",
+        isoCodeAlpha3: "ESP",
+        isoNumericCode: "724"
+      }
+    };
+
+    const expectedResult: BackEndModels.Transport = {
+      vehicle: FrontEndTransport.truck,
+      cmr: false,
+      nationalityOfVehicle: "UK",
+      registrationNumber: "REG123",
+      departurePlace: "Dover",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "ES",
+        isoCodeAlpha3: "ESP",
+        isoNumericCode: "724"
+      }
+    };
+
+    const result = FrontEndTransport.toBackEndTransport(transport);
+
+    expect(result).toStrictEqual(expectedResult);
+    expect(result).not.toHaveProperty('containerIdentificationNumber');
+  });
 });
 
 describe("When mapping from a backend transport to front end transport", () => {
@@ -1071,6 +1141,46 @@ describe('checkTransportDataFrontEnd', () => {
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
       }
+    });
+
+    it('should return base valid object when cmr is undefined and required fields are complete', () => {
+      const fullValidObjectNoCmrUndefined: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.truck,
+        nationalityOfVehicle: "British",
+        registrationNumber: "WE78ERF",
+        departurePlace: "London",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
+      };
+      expect(FrontEndTransport.checkTransportDataFrontEnd(fullValidObjectNoCmrUndefined)).toStrictEqual(fullValidObjectNoCmrUndefined);
+    });
+
+    it('should return base valid object when cmr is undefined and some required fields are missing', () => {
+      const incompleteObjectNoCmrUndefined: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.truck,
+        nationalityOfVehicle: "British",
+        registrationNumber: "WE78ERF",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
+      };
+      const expectedBaseObject: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.truck,
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP"
+        }
+      };
+      expect(FrontEndTransport.checkTransportDataFrontEnd(incompleteObjectNoCmrUndefined)).toStrictEqual(expectedBaseObject);
     });
   });
 

@@ -17,7 +17,7 @@ import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
 import { validateEntry, validateProduct } from './handlers/storage-notes';
-import { isInvalidLength, validateWhitespace } from './orchestration.service';
+import { isInvalidLength, validateWhitespace, isPositiveNumberWithTwoDecimals, isNotExceed12Digit } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
 import truckSchema from "../schemas/catchcerts/truckSchema";
@@ -348,7 +348,7 @@ export default class ProgressService {
         async (singleCatch, index) => {
           const productErrors: { errors: any } = await validateProduct(singleCatch, index, {});
           const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {}, documentNumber, userPrincipal, contactId);
-
+          const weightsErrors: { [key: string]: any } = {};
           return [
             'product',
             'id',
@@ -356,7 +356,7 @@ export default class ProgressService {
             'certificateNumber',
             'certificateType',
             'weightOnCC'
-          ].every(value => ProgressService.isEmptyAndTrimSpaces(singleCatch[value]) && Object.keys(productErrors.errors).length <= 0 && Object.keys(entryErrors.errors).length <= 0)
+          ].every(value => ProgressService.isEmptyAndTrimSpaces(singleCatch[value]) && Object.keys(productErrors.errors).length <= 0 && Object.keys(entryErrors.errors).length <= 0 && Object.keys(weightsErrors).length <= 0);
         }
       ));
     }
@@ -371,7 +371,8 @@ export default class ProgressService {
     facilityTownCity: StorageDocument.ExportData["facilityTownCity"],
     facilityPostcode: StorageDocument.ExportData["facilityPostcode"],
     facilityArrivalDate: StorageDocument.ExportData["facilityArrivalDate"],
-  ): ProgressStatus => [facilityName, facilityAddressOne, facilityTownCity, facilityPostcode, facilityArrivalDate].every(value => ProgressService.isEmptyAndTrimSpaces(value))
+    facilityStorage: StorageDocument.ExportData["facilityStorage"],
+  ): ProgressStatus => [facilityName, facilityAddressOne, facilityTownCity, facilityPostcode, facilityArrivalDate, facilityStorage].every(value => ProgressService.isEmptyAndTrimSpaces(value))
       ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
 
   public static readonly getUserReference = (userReference: string): ProgressStatus => {
@@ -405,9 +406,9 @@ export default class ProgressService {
 
     const processingPlant = data?.exportData?.plantName?.trim() &&
       data?.exportData?.plantApprovalNumber?.trim() &&
-        data.exportData.personResponsibleForConsignment?.trim()
-        ? ProgressStatus.COMPLETED
-        : ProgressStatus.INCOMPLETE;
+      data.exportData.personResponsibleForConsignment?.trim()
+      ? ProgressStatus.COMPLETED
+      : ProgressStatus.INCOMPLETE;
     const processingPlantAddress =
       data?.exportData?.plantPostcode &&
         data.exportData.plantAddressOne
@@ -450,13 +451,17 @@ export default class ProgressService {
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
-    const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED && data?.exportData?.catches.every((ctch: StorageDocument.Catch) => !isEmpty(ctch.productWeight));
+    const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED &&
+      data?.exportData?.catches.every((ctch: StorageDocument.Catch, index: number) =>
+        this.validateCatch(ctch, index)
+      );
+
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       catches: catchesStatus,
       arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.INCOMPLETE,
-      storageFacilities: ProgressService.getStorageFacilityStatus(data?.exportData?.facilityName, data?.exportData?.facilityAddressOne, data?.exportData?.facilityTownCity, data?.exportData?.facilityPostcode, data?.exportData?.facilityArrivalDate),
+      storageFacilities: ProgressService.getStorageFacilityStatus(data?.exportData?.facilityName, data?.exportData?.facilityAddressOne, data?.exportData?.facilityTownCity, data?.exportData?.facilityPostcode, data?.exportData?.facilityArrivalDate, data?.exportData?.facilityStorage),
       transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
     };
 
@@ -468,4 +473,61 @@ export default class ProgressService {
       completedSections: ProgressService.getCompletedSectionsNumber(sdProgress),
     };
   }
+
+  public static validateNetWeightProductDeparture(ctch: StorageDocument.Catch, index: number, errors: { [key: string]: string }): void {
+    if (!ctch.netWeightProductDeparture) {
+      return;
+    }
+
+    if (+ctch.netWeightProductDeparture <= 0) {
+      errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorMax2DecimalLargerThan0';
+    } else if (!isPositiveNumberWithTwoDecimals(ctch.netWeightProductDeparture)) {
+      errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDeparturePositiveMax2Decimal';
+    } else if (!isNotExceed12Digit(ctch.netWeightProductDeparture)) {
+      errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceed12Digit';
+    }
+  }
+
+  public static validateNetWeightFisheryProductDeparture(ctch: StorageDocument.Catch, index: number, errors: { [key: string]: string }): void {
+    if (!ctch.netWeightFisheryProductDeparture) {
+      return;
+    }
+
+    if (+ctch.netWeightFisheryProductDeparture <= 0) {
+      errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorMax2DecimalLargerThan0';
+    } else if (!isPositiveNumberWithTwoDecimals(ctch.netWeightFisheryProductDeparture)) {
+      errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDeparturePositiveMax2Decimal';
+    } else if (!isNotExceed12Digit(ctch.netWeightFisheryProductDeparture)) {
+      errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceed12Digit';
+    }
+  }
+
+  public static isValidNetWeightProductDeparture(ctch: StorageDocument.Catch): boolean {
+    return ctch.netWeightProductDeparture &&
+      (+ctch.netWeightProductDeparture) > 0 &&
+      isPositiveNumberWithTwoDecimals(ctch.netWeightProductDeparture) &&
+      isNotExceed12Digit(ctch.netWeightProductDeparture);
+  }
+
+  public static isValidNetWeightFisheryProductDeparture(ctch: StorageDocument.Catch): boolean {
+    return ctch.netWeightFisheryProductDeparture &&
+      (+ctch.netWeightFisheryProductDeparture) > 0 &&
+      isPositiveNumberWithTwoDecimals(ctch.netWeightFisheryProductDeparture) &&
+      isNotExceed12Digit(ctch.netWeightFisheryProductDeparture);
+  }
+
+  public static validateCatch(ctch: StorageDocument.Catch, index: number): boolean {
+    const errors: { [key: string]: string } = {};
+
+    this.validateNetWeightProductDeparture(ctch, index, errors);
+    this.validateNetWeightFisheryProductDeparture(ctch, index, errors);
+
+    const isNetWeightProductDepartureValid = this.isValidNetWeightProductDeparture(ctch);
+    const isNetWeightFisheryProductDepartureValid = this.isValidNetWeightFisheryProductDeparture(ctch);
+
+    return Object.keys(errors).length === 0 &&
+      (!isEmpty(ctch.productWeight)) &&
+      (isNetWeightProductDepartureValid || isNetWeightFisheryProductDepartureValid);
+  }
+
 }

@@ -9,6 +9,7 @@ interface TransportDetails extends IStoreable {
     flightNumber? : string,
     nationalityOfVehicle? : string,
     registrationNumber? : string,
+    containerIdentificationNumber? : string,
     flagState? : string,
     vesselName? : string,
     cmr? : string

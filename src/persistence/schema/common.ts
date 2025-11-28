@@ -27,7 +27,8 @@ export interface BasicTransportDetails {
 }
 
 export interface Train extends BasicTransportDetails {
-  railwayBillNumber: string
+  railwayBillNumber: string,
+  containerNumbers?: string
 }
 
 export interface Plane extends BasicTransportDetails {
@@ -47,7 +48,9 @@ export interface ContainerVessel extends BasicTransportDetails {
 export interface Truck extends BasicTransportDetails {
   cmr?: boolean,
   nationalityOfVehicle?: string,
-  registrationNumber?: string
+  registrationNumber?: string,
+  containerNumbers?: string
+  containerIdentificationNumber?: string
 }
 
 type FishingVessel = BasicTransportDetails;
@@ -62,26 +65,27 @@ export const Country = new Schema({
 }, { _id: false });
 
 export const TransportSchema = new Schema({
-  exportedFrom:         { type: String },
-  exportedTo:           { type: Country, required: false },
-  vehicle:              { type: String,  required: false },
-  departurePlace:       { type: String,  required: false },
-  cmr:                  { type: Boolean, required: false },
-  nationalityOfVehicle: { type: String,  required: false },
-  registrationNumber:   { type: String,  required: false },
-  railwayBillNumber:    { type: String,  required: false },
-  flightNumber:         { type: String,  required: false },
-  vesselName:           { type: String,  required: false },
-  flagState:            { type: String,  required: false },
-  containerNumber:      { type: String,  required: false },
-  containerNumbers:     { type: String,  required: false },
-  exportDate:           { type: String,  required: false },
-  airwayBillNumber:     { type: String,  required: false },
-  freightBillNumber:    { type: String,  required: false },
-  departureCountry:     { type: String,  required: false },
-  departurePort:        { type: String,  required: false },
-  departureDate:        { type: String,  required: false },
-  placeOfUnloading:     { type: String,  required: false },
+  exportedFrom:                   { type: String },
+  exportedTo:                     { type: Country, required: false },
+  vehicle:                        { type: String,  required: false },
+  departurePlace:                 { type: String,  required: false },
+  cmr:                            { type: Boolean, required: false },
+  nationalityOfVehicle:           { type: String,  required: false },
+  registrationNumber:             { type: String,  required: false },
+  containerIdentificationNumber:  { type: String,  required: false },
+  railwayBillNumber:              { type: String,  required: false },
+  flightNumber:                   { type: String,  required: false },
+  vesselName:                     { type: String,  required: false },
+  flagState:                      { type: String,  required: false },
+  containerNumber:                { type: String,  required: false },
+  containerNumbers:               { type: String,  required: false },
+  exportDate:                     { type: String,  required: false },
+  airwayBillNumber:               { type: String,  required: false },
+  freightBillNumber:              { type: String,  required: false },
+  departureCountry:               { type: String,  required: false },
+  departurePort:                  { type: String,  required: false },
+  departureDate:                  { type: String,  required: false },
+  placeOfUnloading:               { type: String,  required: false },
 }, { _id : false });
 
 export interface ExporterDetails {

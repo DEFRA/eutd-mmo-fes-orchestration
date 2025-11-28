@@ -34,6 +34,7 @@ export interface Catch {
  scientificName?                    : string,
  speciesCode?                       : string,
  certificateType?                   : 'uk' | 'non_uk',
+ issuingCountry?                    : ICountry,
  supportingDocuments?               : string[],
  productDescription?                : string,
  netWeightProductArrival?           : string,
@@ -113,10 +114,11 @@ const CatchSchema = new Schema({
   scientificName                    : { type: String, required: false},
   speciesCode                       : { type: String, required: false },
   certificateType                   : { type: String, required: false, enum: Object.values(CertificateType) },
+  issuingCountry                    : { type: Country, required: false },
   supportingDocuments               : { type: [String], required: false },
   productDescription                : { type: String, required: false },
-  netWeightProductArrival           : { type: String, required: false },
-  netWeightFisheryProductArrival    : { type: String, required: false },
+  netWeightProductArrival           : { type: String },
+  netWeightFisheryProductArrival    : { type: String },
   netWeightProductDeparture         : { type: String, required: false },
   netWeightFisheryProductDeparture  : { type: String, required: false },
 }, { _id : true } );
@@ -133,7 +135,7 @@ const StorageFacilitySchema = new Schema({
   facilityCounty            : { type: String },
   facilityCountry           : { type: String },
   facilityApprovalNumber    : { type: String, required: false },
-  facilityStorage           : { type: String, required: false },
+  facilityStorage           : { type: String }, 
   facilityArrivalDate       : { type: String, required: false}
 }, { _id : false } );
 
@@ -155,7 +157,7 @@ const ExportDataSchema = new Schema({
   facilityCounty            : { type: String, required: false},
   facilityCountry           : { type: String, required: false},
   facilityApprovalNumber    : { type: String, required: false},
-  facilityStorage           : { type: String, required: false},
+  facilityStorage           : { type: String },
   _facilityUpdated          : { type: String, required: false},
   facilityArrivalDate       : { type: String, required: false},
 }, { _id : false } );
@@ -280,6 +282,7 @@ export const cloneCatches = (original: Catch): Catch => {
     transportUnloadedFrom,
     scientificName,
     certificateType,
+    issuingCountry,
     supportingDocuments,
     productDescription,
     netWeightProductArrival,
@@ -300,6 +303,7 @@ export const cloneCatches = (original: Catch): Catch => {
     transportUnloadedFrom,
     scientificName,
     certificateType,
+    issuingCountry,
     supportingDocuments,
     productDescription,
     netWeightProductArrival,

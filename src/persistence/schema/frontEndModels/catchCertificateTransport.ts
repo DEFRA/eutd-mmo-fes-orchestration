@@ -19,6 +19,7 @@ export interface CatchCertificateTransport {
   departurePlace?: string;
   flightNumber?: string;
   containerNumber?: string;
+  containerIdentificationNumber?: string;
   railwayBillNumber?: string;
   vesselName?: string;
   flagState?: string;
@@ -27,7 +28,7 @@ export interface CatchCertificateTransport {
 }
 
 export const toBackEndTransport = (transport: CatchCertificateTransport): BackEndModels.CatchCertificateTransport => {
-  
+
   let backEndTransport: BackEndModels.CatchCertificateTransport;
 
   switch (transport.vehicle) {
@@ -62,6 +63,7 @@ const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEnd
     registrationNumber: cmrIsSet && hasCmr ? undefined : transport.registrationNumber,
     departurePlace: cmrIsSet && hasCmr ? undefined : transport.departurePlace,
     freightBillNumber: cmrIsSet && hasCmr ? undefined : transport.freightBillNumber,
+    containerIdentificationNumber: cmrIsSet && hasCmr ? undefined : transport.containerIdentificationNumber,
     transportDocuments: cmrIsSet && hasCmr ? undefined : transport.documents,
   };
   return result;
@@ -81,6 +83,7 @@ const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
   id: parseInt(transport.id),
   vehicle: transport.vehicle,
   railwayBillNumber: transport.railwayBillNumber,
+  containerIdentificationNumber: transport.containerIdentificationNumber,
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
   transportDocuments: transport.documents,
@@ -111,6 +114,7 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         registrationNumber: valueOrDefault(model.registrationNumber, !model.cmr),
         departurePlace: valueOrDefault(model.departurePlace, !model.cmr),
         freightBillNumber: valueOrDefault(model.freightBillNumber, !model.cmr),
+        containerIdentificationNumber: valueOrDefault(model.containerIdentificationNumber, !model.cmr),
         documents: valueOrDefault(model.transportDocuments, !model.cmr)
       };
       break;
@@ -134,6 +138,7 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         id: transport.id.toString(),
         vehicle: model.vehicle,
         railwayBillNumber: model.railwayBillNumber,
+        containerIdentificationNumber: model.containerIdentificationNumber,
         departurePlace: model.departurePlace,
         freightBillNumber: model.freightBillNumber,
         documents: model.transportDocuments

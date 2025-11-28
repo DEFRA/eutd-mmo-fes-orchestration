@@ -848,3 +848,7 @@ export const validateProductDescriptions = (products: any[], consignmentDescript
 
   return Array.isArray(products) && products.some(p => !validateWhitespace(p.description) || !validateWhitespace(p.commodityCode));
 }
+
+export function validateDateIsSameOrBefore(arrivalDate: string, transportDepartureDate: string): boolean {
+  return parseDate(arrivalDate).isSameOrBefore(parseDate(transportDepartureDate), 'days');
+}

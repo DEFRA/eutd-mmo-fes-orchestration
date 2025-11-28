@@ -13,12 +13,14 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       id: 'Cert Number-' + moment.utc().unix() + '-0',
       catchCertificateNumber: "Cert Number",
       catchCertificateType: undefined,
+      issuingCountry: undefined,
       totalWeightLanded: "totalWeightLanded",
       exportWeightBeforeProcessing: "11",
       exportWeightAfterProcessing: "9",
       scientificName: "some scientific name",
       productId: undefined,
-      productDescription: undefined
+      productDescription: undefined,
+      productCommodityCode: undefined
     }];
 
     const catches : FrontEndProcessingStatement.Catch[] = [{
@@ -31,7 +33,8 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       exportWeightAfterProcessing: "9",
       scientificName : "some scientific name",
       productId: undefined,
-      productDescription: undefined
+      productDescription: undefined,
+      productCommodityCode: undefined
     }];
 
     const result = FrontEndProcessingStatement.toBackEndCatchProcessingStatement(catches);
@@ -45,12 +48,14 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       exportWeightAfterProcessing: undefined,
       exportWeightBeforeProcessing: undefined,
       id: undefined,
+      issuingCountry: undefined,
       scientificName: undefined,
       species: undefined,
       speciesCode: undefined,
       totalWeightLanded: undefined,
       productId: undefined,
-      productDescription: undefined
+      productDescription: undefined,
+      productCommodityCode: undefined
     }];
 
     const catches : FrontEndProcessingStatement.Catch[] = [{
@@ -79,12 +84,14 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
             id: "12345-" + moment.utc().unix() + '-0',
             catchCertificateNumber: "12345",
             catchCertificateType: undefined,
+            issuingCountry: undefined,
             totalWeightLanded: "34",
             exportWeightBeforeProcessing: "34",
             exportWeightAfterProcessing: "45",
             scientificName: "some scientific name",
             productId: undefined,
-            productDescription: undefined
+            productDescription: undefined,
+            productCommodityCode: undefined
           },
         ],
         exporterDetails: {

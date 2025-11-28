@@ -47,6 +47,7 @@ export interface Catch {
   scientificName?: string;
   speciesCode?: string;
   certificateType?: 'uk' | 'non_uk';
+  issuingCountry?: ICountry;
   supportingDocuments?: string[];
   productDescription?: string;
   netWeightProductArrival?: string;
@@ -102,6 +103,7 @@ export const toBackEndCatchSD = (catchDetails: Catch[]): BackEndSD.Catch[] => {
         id: cat.id || cat.certificateNumber !== undefined ? `${cat.certificateNumber}-${moment.utc().unix()}-${index}` : undefined,
         scientificName: cat.scientificName,
         certificateType: cat.certificateType,
+        issuingCountry: cat.issuingCountry,
         supportingDocuments: cat.supportingDocuments,
         productDescription: cat.productDescription,
         netWeightProductArrival: cat.netWeightProductArrival,

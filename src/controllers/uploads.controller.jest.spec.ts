@@ -24,10 +24,10 @@ describe("UploadsController", () => {
 
     const userPrincipal = 'Bob';
     const contactId = 'Bob';
-    let mockValidateLandings;
-    let mockParseRows;
-    let originalMaxLimitLandings;
-    let mockCacheUploadRows;
+    let mockValidateLandings: jest.SpyInstance;
+    let mockParseRows: jest.SpyInstance;
+    let originalMaxLimitLandings: number;
+    let mockCacheUploadRows: jest.SpyInstance;
 
     beforeAll(() => {
       ApplicationConfig.loadProperties();
@@ -59,20 +59,25 @@ describe("UploadsController", () => {
     });
 
     it("will parse a single landing with madatory fields only", async () => {
-      const csv = "PRD001,19/07/2021,FAO27,PLN1,100\n";
+      const csv = "PRD123,01/01/2021,01/01/2021,FAO27,Yes,GBR,IOTC,PH1100,PS,50.95\n";
 
       const output = await UploadsController.parseLandingsFile(csv, userPrincipal, contactId);
       expect(mockCacheUploadRows).not.toHaveBeenCalled();
       expect(output).toEqual([
         {
           rowNumber: 1,
-          originalRow: "PRD001,19/07/2021,FAO27,PLN1,100",
-          productId: "PRD001",
-          landingDate: "19/07/2021",
+          originalRow: "PRD123,01/01/2021,01/01/2021,FAO27,YES,GBR,IOTC,PH1100,PS,50.95",
+          eezCode: "GBR",
+          errors: [],
+          exportWeight: "50.95",
           faoArea: "FAO27",
-          vesselPln: "PLN1",
-          exportWeight: "100",
-          errors: []
+          gearCode: "PS",
+          highSeasArea: "YES",
+          landingDate: "01/01/2021",
+          productId: "PRD123",
+          rfmoCode: "IOTC",
+          startDate: "01/01/2021",
+          vesselPln: "PH1100",
         }
       ]);
     });
@@ -486,6 +491,10 @@ describe("UploadsController", () => {
         startDate: 'some-start-date',
         landingDate: 'some-landing-date',
         faoArea: 'faoArea',
+        highSeasArea: 'some-high-seas',
+        eezCode: 'some-eez',
+        rfmoCode: 'some-rfmo',
+        gearCode: 'some-gear',
         vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
@@ -1043,8 +1052,13 @@ describe("UploadsController", () => {
           commodity_code: 'some-commidity-code',
           commodity_code_description: 'some-commmodity-description',
         },
+        startDate: 'some-start-date',
         landingDate: '10/10/2020',
         faoArea: 'FAO18',
+        highSeasArea: 'some-high-seas',
+        eezCode: 'some-eez',
+        rfmoCode: 'some-rfmo',
+        gearCode: 'some-gear',
         vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
@@ -1065,8 +1079,13 @@ describe("UploadsController", () => {
           commodity_code: 'some-commidity-code',
           commodity_code_description: 'some-commmodity-description',
         },
+        startDate: 'some-start-date',
         landingDate: '10/10/2020',
         faoArea: 'FAO18',
+        highSeasArea: 'some-high-seas',
+        eezCode: 'some-eez',
+        rfmoCode: 'some-rfmo',
+        gearCode: 'some-gear',
         vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
@@ -1177,8 +1196,13 @@ describe("UploadsController", () => {
               commodity_code: 'some-commidity-code',
               commodity_code_description: 'some-commmodity-description',
             },
+            startDate: 'some-start-date',
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
+            highSeasArea: 'some-high-seas',
+            eezCode: 'some-eez',
+            rfmoCode: 'some-rfmo',
+            gearCode: 'some-gear',
             vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
@@ -1210,6 +1234,10 @@ describe("UploadsController", () => {
         startDate: 'some-start-date',
         landingDate: 'some-landing-date',
         faoArea: 'faoArea',
+        highSeasArea: 'some-high-seas',
+        eezCode: 'some-eez',
+        rfmoCode: 'some-rfmo',
+        gearCode: 'some-gear',
         vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
@@ -1233,8 +1261,13 @@ describe("UploadsController", () => {
           commodity_code: 'some-commidity-code',
           commodity_code_description: 'some-commmodity-description',
         },
+        startDate: 'some-start-date',
         landingDate: '10/10/2020',
         faoArea: 'FAO18',
+        highSeasArea: 'some-high-seas',
+        eezCode: 'some-eez',
+        rfmoCode: 'some-rfmo',
+        gearCode: 'some-gear',
         vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
@@ -1273,6 +1306,10 @@ describe("UploadsController", () => {
             startDate: '10/10/2020',
             landingDate: '10/10/2020',
             faoArea: 'FAO18',
+            highSeasArea: 'some-high-seas',
+            eezCode: 'some-eez',
+            rfmoCode: 'some-rfmo',
+            gearCode: 'some-gear',
             vessel: vessel,
             vesselPln: 'some-pln',
             exportWeight: 10,
@@ -1304,6 +1341,10 @@ describe("UploadsController", () => {
         startDate: 'some-start-date',
         landingDate: 'some-landing-date',
         faoArea: 'faoArea',
+        highSeasArea: 'some-high-seas',
+        eezCode: 'some-eez',
+        rfmoCode: 'some-rfmo',
+        gearCode: 'some-gear',
         vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
@@ -1330,6 +1371,10 @@ describe("UploadsController", () => {
         startDate: '10/10/2020',
         landingDate: '10/10/2020',
         faoArea: 'FAO18',
+        highSeasArea: 'some-high-seas',
+        eezCode: 'some-eez',
+        rfmoCode: 'some-rfmo',
+        gearCode: 'some-gear',
         vessel: vessel,
         vesselPln: 'some-pln',
         exportWeight: 10,
@@ -2834,8 +2879,13 @@ describe("UploadsController", () => {
                 commodity_code: 'some-commidity-code',
                 commodity_code_description: 'some-commmodity-description',
               },
+              startDate: 'some-start-date',
               landingDate: undefined,
               faoArea: 'FAO18',
+              highSeasArea: 'some-high-seas',
+              eezCode: 'some-eez',
+              rfmoCode: 'some-rfmo',
+              gearCode: 'some-gear',
               vessel: vessel,
               vesselPln: 'some-pln',
               exportWeight: 10,
@@ -2856,8 +2906,15 @@ describe("UploadsController", () => {
                 commodity_code: 'some-commidity-code',
                 commodity_code_description: 'some-commmodity-description',
               },
+              startDate: '09/10/2020',
               landingDate: '10/10/2020',
               faoArea: 'FAO18',
+              highSeasArea: 'no',
+              eezCode: '',
+              eezData: undefined,
+              rfmoCode: '',
+              rfmoName: undefined,
+              gearCode: 'some-gear',
               vessel: vessel,
               vesselPln: 'some-pln',
               exportWeight: 2000,
@@ -2874,12 +2931,13 @@ describe("UploadsController", () => {
                   dateLanded: "2020-10-10",
                   exportWeight: 2000,
                   faoArea: "FAO18",
-                  startDate: undefined,
+                  startDate: "2020-10-09",
                   exclusiveEconomicZones: [],
-                  highSeasArea: undefined,
+                  highSeasArea: "No",
                   rfmo: undefined,
                   gearCategory: undefined,
-                  gearType: undefined,
+                  gearCode: "some-gear",
+                  gearType: "undefined (some-gear)",
                   id: "123Document-CC-123-random-number",
                   vessel: {
                     cfr: "some-cfr",
@@ -2898,19 +2956,23 @@ describe("UploadsController", () => {
             ],
             product: {
               commodityCode: "some-commidity-code",
+              commodityCodeAdmin: undefined,
               commodityCodeDescription: "some-commmodity-description",
               factor: undefined,
               id: "123Document-CC-123-some-uuid",
               presentation: {
+                admin: undefined,
                 code: "some-presentation",
                 label: "some-presentation-label",
               },
               scientificName: "some-scientic-name",
               species: {
+                admin: undefined,
                 code: "species-code",
                 label: "species",
               },
               state: {
+                admin: undefined,
                 code: "some-state",
                 label: "some-label",
               },
@@ -2937,6 +2999,10 @@ describe("UploadsController", () => {
           startDate: 'some-start-date',
           landingDate: 'some-landing-date',
           faoArea: 'faoArea',
+          highSeasArea: 'some-high-seas',
+          eezCode: 'some-eez',
+          rfmoCode: 'some-rfmo',
+          gearCode: 'some-gear',
           vessel: vessel,
           vesselPln: 'some-pln',
           exportWeight: 10,
@@ -2957,8 +3023,13 @@ describe("UploadsController", () => {
             commodity_code: 'some-commidity-code',
             commodity_code_description: 'some-commmodity-description',
           },
+          startDate: 'some-start-date',
           landingDate: undefined,
           faoArea: 'FAO18',
+          highSeasArea: 'some-high-seas',
+          eezCode: 'some-eez',
+          rfmoCode: 'some-rfmo',
+          gearCode: 'some-gear',
           vessel: vessel,
           vesselPln: 'some-pln',
           exportWeight: 10,
@@ -2979,8 +3050,15 @@ describe("UploadsController", () => {
             commodity_code: 'some-commidity-code',
             commodity_code_description: 'some-commmodity-description',
           },
+          startDate: '09/10/2020',
           landingDate: '10/10/2020',
           faoArea: 'FAO18',
+          highSeasArea: 'no',
+          eezCode: '',
+          eezData: undefined,
+          rfmoCode: '',
+          rfmoName: undefined,
+          gearCode: 'some-gear',
           vessel: vessel,
           vesselPln: 'some-pln',
           exportWeight: 2000,
@@ -3215,8 +3293,13 @@ describe("UploadsController", () => {
         commodity_code: '0123456',
         commodity_code_description: 'some commodity code description'
       },
+      startDate: '01-10-2020',
       landingDate: '10-10-2020',
       faoArea: 'FAO018',
+      highSeasArea: 'N/A',
+      eezCode: 'GBR',
+      rfmoCode: 'NEAFC',
+      gearCode: 'GNS',
       vessel: {
         pln: 'PH1100',
         vesselName: 'WIRON 5'
@@ -3274,8 +3357,13 @@ describe("UploadsController", () => {
         commodity_code: '0123456',
         commodity_code_description: 'some commodity code description'
       },
+      startDate: '01-10-2020',
       landingDate: '10-10-2020',
       faoArea: 'FAO018',
+      highSeasArea: 'N/A',
+      eezCode: 'GBR',
+      rfmoCode: 'NEAFC',
+      gearCode: 'GNS',
       vessel: {
         pln: 'PH1100',
         vesselName: 'WIRON 5'

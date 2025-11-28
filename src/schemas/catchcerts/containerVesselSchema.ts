@@ -25,44 +25,45 @@ const containerVesselSchema = Joi.object({
     }).required()
   }),
   vesselName: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/),
-  flagState: Joi.when('arrival', {
-    is: true,
-    then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
-    otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-' ]+$/)
-  }),
+  flagState: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
   containerNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
-  containerNumbers: Joi.when('arrival', {
-    is: true,
-    then: Joi.array()
-      .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).allow(''))
-      .max(5)
-      .optional(),
-    otherwise: Joi.array()
-      .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/))
-      .min(1)
-      .max(5)
-      .required()
-  }),
+  containerNumbers: Joi.array()
+    .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/))
+    .min(1)
+    .max(5)
+    .required(),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.any(),
     otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/).required()
   }),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
-  departurePort: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\-'\s]+$/),
   placeOfUnloading: Joi.when('arrival', {
     is: true,
-    then: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
+    then: Joi.string().trim().empty('').required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
     otherwise: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
   }),
   journey: Joi.string(),
-  departureDate: Joi.date().allow('').allow(null).format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max("now").optional(),
   exportDateTo: Joi.when('arrival', {
     is: true,
     then: Joi.date().optional(),
     otherwise: Joi.date().iso().required(),
   }),
-  departureCountry: Joi.string().allow('').allow(null).optional()
+  departureCountry: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().empty('').required(),
+    otherwise: Joi.string().allow('').allow(null).optional()
+  }),
+  departurePort: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().empty('').required().max(50).regex(/^[a-zA-Z0-9\-'\s]+$/),
+    otherwise: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\-'\s]+$/)
+  }),
+  departureDate: Joi.when('arrival', {
+    is: true,
+    then: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).empty('').max('now').required(),
+    otherwise: Joi.date().allow('').allow(null).format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max("now").optional()
+  })
 });
 
 export default containerVesselSchema;
