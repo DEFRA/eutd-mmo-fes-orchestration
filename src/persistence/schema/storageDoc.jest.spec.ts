@@ -144,7 +144,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityCounty: "",
       facilityName: "",
       facilityPostcode: "",
-      facilityStorage: "",
+      facilityStorage: "Chilled",
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
@@ -205,7 +205,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityCounty: "",
       facilityName: "",
       facilityPostcode: "",
-      facilityStorage: "",
+      facilityStorage: "Chilled",
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
@@ -265,7 +265,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityCounty: "",
       facilityName: "",
       facilityPostcode: "",
-      facilityStorage: "",
+      facilityStorage: "Chilled",
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
@@ -333,7 +333,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityCounty: "",
       facilityName: "",
       facilityPostcode: "",
-      facilityStorage: "",
+      facilityStorage: "Chilled",
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
@@ -390,6 +390,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityStreetName: "Street",
       facilityTownCity: "London",
       facilityPostcode: "SE37 6YH",
+      facilityStorage: "Chilled",
       exporterDetails: {
         _dynamicsAddress: {},
         _dynamicsUser: {},
@@ -420,7 +421,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityBuildingNumber: undefined,
       facilityCountry: undefined,
       facilityCounty: undefined,
-      facilityStorage: undefined,
+      facilityStorage: "Chilled",
       facilitySubBuildingName: undefined
     });
   });

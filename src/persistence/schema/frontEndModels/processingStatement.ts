@@ -45,12 +45,14 @@ export interface Catch {
   speciesCode?: string;
   catchCertificateNumber?: string;
   catchCertificateType?: 'uk' | 'non_uk',
+  issuingCountry?: ICountry;
   totalWeightLanded?: string
   exportWeightBeforeProcessing?: string;
   exportWeightAfterProcessing?: string;
   scientificName?: string;
   productId?: string;
   productDescription?: string;
+  productCommodityCode?: string;
 }
 
 export interface Product {
@@ -75,6 +77,7 @@ export const toBackEndCatchProcessingStatement = (catches: Catch[]): BackEndProc
         speciesCode: cat.speciesCode,
         catchCertificateNumber: cat.catchCertificateNumber,
         catchCertificateType: cat.catchCertificateType,
+        issuingCountry: cat.issuingCountry,
         totalWeightLanded: cat.totalWeightLanded,
         exportWeightBeforeProcessing: cat.exportWeightBeforeProcessing,
         exportWeightAfterProcessing: cat.exportWeightAfterProcessing,
@@ -82,6 +85,7 @@ export const toBackEndCatchProcessingStatement = (catches: Catch[]): BackEndProc
         scientificName: cat.scientificName,
         productId: cat.productId,
         productDescription: cat.productDescription,
+        productCommodityCode: cat.productCommodityCode,
       }
     })
     : [];

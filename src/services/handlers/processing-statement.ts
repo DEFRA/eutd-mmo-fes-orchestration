@@ -5,7 +5,9 @@ import {
   MIN_PERSON_RESPONSIBLE_LENGTH,
 } from "../../services/constants";
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
+import { validateCountriesName } from "../../validators/countries.validator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
+import { ICountry } from "../../persistence/schema/common";
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
 import { SpeciesSuggestionError } from "../../validators/validationErrors";
 import {
@@ -116,12 +118,7 @@ export default {
     return { errors };
   },
 
-  "/create-processing-statement/:documentNumber/catch-added": async ({ data, currentUrl, errors, documentNumber, userPrincipal, contactId }) => {
-    for (const index in data.catches) {
-      await validateCatchDetails(data.catches[index], parseInt(index), errors, documentNumber, userPrincipal, contactId);
-      validateCatchWeights(data.catches[index], parseInt(index), errors);
-    }
-
+  "/create-processing-statement/:documentNumber/catch-added": async ({ data, currentUrl, errors }) => {
     const addAnotherCatch = data.addAnotherCatch;
     if (!addAnotherCatch || addAnotherCatch === "" || addAnotherCatch === "notset") {
       errors.addAnotherCatch = 'psCatchAddedErrorAddAnotherCatch';
@@ -227,24 +224,72 @@ function setCatchFieldsUndefined(ctch: any) {
 }
 
 export async function validateCatchDetails(ctch: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
+  validateSpeciesInput(ctch, index, errors);
+  await validateIssuingCountryForNonUKCatch(ctch, index, errors);
+  await validateCatchCertificateNumber(ctch, index, errors, documentNumber, userPrincipal, contactId);
+
+  return { errors };
+}
+
+function validateSpeciesInput(ctch: any, index: number, errors: any) {
   if (!ctch.species || validateWhitespace(ctch.species)) {
     errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
   }
+}
 
+async function validateIssuingCountryForNonUKCatch(ctch: any, index: number, errors: any) {
+  if (ctch.catchCertificateType !== 'non_uk') {
+    return;
+  }
+  const country: ICountry = typeof ctch.issuingCountry === 'string'
+    ? { officialCountryName: ctch.issuingCountry, isoCodeAlpha2: undefined, isoCodeAlpha3: undefined, isoNumericCode: undefined }
+    : ctch.issuingCountry;
+  const countryValidation = await validateCountriesName(country, applicationConfig.getReferenceServiceUrl(), 'issuingCountry');
+  if (countryValidation.isError) {
+    errors[`catches-${index}-issuingCountry`] = 'psAddCatchDetailsErrorEnterIssuingCountry';
+  }
+}
+
+async function validateCatchCertificateNumber(ctch: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
   if (!ctch.catchCertificateNumber || validateWhitespace(ctch.catchCertificateNumber)) {
     errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorEnterTheCatchCertificateNumber';
-  } else if (!validateCCNumberFormat(ctch.catchCertificateNumber)) {
+    return;
+  }
+
+  if (!validateCCNumberFormat(ctch.catchCertificateNumber)) {
     errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorCCNumberMustOnlyContain';
-  } else if (ctch.catchCertificateType === 'uk' && !validateUKCCNumberFormat(ctch.catchCertificateNumber)) {
+    return;
+  }
+
+  if (ctch.catchCertificateType === 'uk') {
+    await validateUKCatchCertificateNumber(ctch, index, errors, documentNumber, userPrincipal, contactId);
+  } else if (ctch.catchCertificateType === 'non_uk') {
+    validateNonUKCatchCertificateNumber(ctch, index, errors);
+  }
+}
+
+async function validateUKCatchCertificateNumber(ctch: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
+  if (!validateUKCCNumberFormat(ctch.catchCertificateNumber)) {
     errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCNumberFormatInvalid';
-  } else if (ctch.catchCertificateType === 'uk' && !await validateCompletedDocument(ctch.catchCertificateNumber, userPrincipal, contactId, documentNumber)) {
+    return;
+  }
+
+  const isDocumentValid = await validateCompletedDocument(ctch.catchCertificateNumber, userPrincipal, contactId, documentNumber);
+  if (!isDocumentValid) {
     errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCNumberNotExist';
-  } else if (ctch.catchCertificateType === 'uk' && !await validateSpecies(ctch.catchCertificateNumber, ctch.species, ctch.speciesCode, userPrincipal, contactId, documentNumber)) {
+    return;
+  }
+
+  const isSpeciesValid = await validateSpecies(ctch.catchCertificateNumber, ctch.species, ctch.speciesCode, userPrincipal, contactId, documentNumber);
+  if (!isSpeciesValid) {
     errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCSpeciesMissing';
-  } else if (ctch.catchCertificateType === 'non_uk' && !validateNonUKCCNumberCharLimit(ctch.catchCertificateNumber)) {
+  }
+}
+
+function validateNonUKCatchCertificateNumber(ctch: any, index: number, errors: any) {
+  if (!validateNonUKCCNumberCharLimit(ctch.catchCertificateNumber)) {
     errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorNonUKCCNumberCharLimit';
   }
-  return { errors };
 }
 
 export function validateCatchWeights(ctch: any, index: number, errors: any) {

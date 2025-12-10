@@ -12,6 +12,7 @@ export interface Transport {
   cmr?: string;
   nationalityOfVehicle?: string;
   registrationNumber?: string;
+  containerIdentificationNumber?: string;
   departurePlace?: string;
   flightNumber?: string;
   containerNumber?: string;
@@ -70,6 +71,7 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   cmr: hasCmr ? cmr : undefined,
   nationalityOfVehicle: cmr ? undefined : transport.nationalityOfVehicle,
   registrationNumber: cmr ? undefined : transport.registrationNumber,
+  containerIdentificationNumber: cmr ? undefined : transport.containerIdentificationNumber,
   freightBillNumber: transport.freightBillNumber,
   departurePlace: cmr ? undefined : transport.departurePlace,
   departureCountry: transport.departureCountry,
@@ -78,6 +80,7 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
@@ -107,6 +110,7 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
@@ -157,6 +161,7 @@ export const toFrontEndTransport = (
           departurePort: model.departurePort,
           departureDate: model.departureDate,
           placeOfUnloading: model.placeOfUnloading,
+          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
         };
 
         break;
@@ -193,6 +198,7 @@ export const toFrontEndTransport = (
           departurePort: model.departurePort,
           departureDate: model.departureDate,
           placeOfUnloading: model.placeOfUnloading,
+          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
         };
         break;
       }
@@ -303,17 +309,21 @@ const checkTruckDataFrontEnd = (transport: Transport) => {
         exportedTo: transport.exportedTo
       }
     } else {
-      data = {
-        vehicle: transport.vehicle,
-        cmr: transport.cmr,
-        exportedTo: transport.exportedTo
-      }
+        data = {
+          vehicle: transport.vehicle,
+          cmr: transport.cmr,
+          exportedTo: transport.exportedTo
+        }
     }
   } else {
-    data = {
-      vehicle: transport.vehicle,
-      exportedTo: transport.exportedTo
-    }
+      data = (
+        transport.nationalityOfVehicle
+        && transport.registrationNumber
+        && transport.departurePlace
+      ) ? transport : {
+        vehicle: transport.vehicle,
+        exportedTo: transport.exportedTo
+      }
   }
   return data;
 }

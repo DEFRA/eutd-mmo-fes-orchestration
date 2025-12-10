@@ -17,6 +17,10 @@ const trainSchema = Joi.object({
   }),
   railwayBillNumber: Joi.string().trim().alphanum().max(15).required(),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
+  containerNumbers: Joi.array()
+    .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).allow(''))
+    .max(5)
+    .optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
@@ -24,7 +28,7 @@ const trainSchema = Joi.object({
   }),
   placeOfUnloading: Joi.when('arrival', {
     is: true,
-    then: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
+    then: Joi.string().empty('').trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
     otherwise: Joi.string().trim().allow('').allow(null).allow(null).optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
   }),
   journey: Joi.string(),
@@ -46,9 +50,21 @@ const trainSchema = Joi.object({
     }),
     otherwise: Joi.any()
   }),
-  departureCountry: Joi.string().allow('').allow(null).optional(),
-  departurePort: Joi.string().allow('').allow(null).trim().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/).optional(),
-  departureDate: Joi.date().allow('').allow(null).format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max('now').optional()
+  departureCountry: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().empty('').required(),
+    otherwise: Joi.string().allow('').allow(null).optional()
+  }),
+  departurePort: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().empty('').trim().required().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/),
+    otherwise: Joi.string().allow('').allow(null).trim().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/).optional()
+  }),
+  departureDate: Joi.when('arrival', {
+    is: true,
+    then: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).empty('').max('now').required(),
+    otherwise: Joi.date().allow('').allow(null).format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max('now').optional()
+  })
 });
 
 export default trainSchema;

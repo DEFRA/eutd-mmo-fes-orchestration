@@ -29,16 +29,25 @@ const directLandingsSchema = Joi.object({
     }, 'Strict YYYY-MM-DD date format')
     .required(),
   startDate: extendedJoi.date().custom((value: string, helpers: any) => {
-    const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
-    const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
-    if (!startDate.isValid()) {
+    const parts = helpers.original.split('-');
+
+    if (parts.length !== 3)
+      return helpers.error('date.base');
+
+    const year = parts[0];
+    const month = parts[1].padStart(2, '0');
+    const day = parts[2].padStart(2, '0');
+    const startDate = `${year}-${month}-${day}`;
+
+    if (!moment(startDate, "YYYY-MM-DD", true).isValid()) {
       return helpers.error('date.base');
     }
+    const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
     if (dateLanded.isBefore(startDate, 'day')) {
       return helpers.error('date.max');
     }
     return value;
-  }, 'Start Date Validator').optional(),
+  }, 'Start Date Validator').required(),
   faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
   vessel: Joi.object().keys({
     vesselName: Joi.string().trim().label("vessel.vesselName").required()
@@ -54,7 +63,7 @@ const directLandingsSchema = Joi.object({
       return helpers.error('string.empty');
     }
     return value;
-  }, 'Gear Category Validator').optional(),
+  }, 'Gear Category Validator').required(),
   gearType: Joi.custom((value: string, helpers: any) => {
     const gearType = helpers.original;
     const gearCategory = helpers.state.ancestors[0].gearCategory;
@@ -62,9 +71,13 @@ const directLandingsSchema = Joi.object({
       return helpers.error('string.empty');
     }
     return value;
-  }, 'Gear Type Validator').optional(),
-  highSeasArea: Joi.string().optional(),
-  exclusiveEconomicZones: Joi.array().items(Joi.object()).optional(),
+  }, 'Gear Type Validator').required(),
+  highSeasArea: Joi.string().required(),
+  exclusiveEconomicZones: Joi.alternatives().conditional('highSeasArea', {
+    is: 'No',
+    then: Joi.array().items(Joi.object()).min(1).required(),
+    otherwise: Joi.array().items(Joi.object()).optional()
+  }),
   rfmo: Joi.string().optional(),
 });
 

@@ -5,6 +5,7 @@ import * as OrchestrationService from "../orchestration.service";
 import * as FishValidator from "../..//validators/fish.validator";
 import * as DocumentValidator from "../../validators/documentValidator"
 import * as CommodityCodes from "../../validators/pssdCommodityCode.validator";
+import * as CountriesValidator from "../../validators/countries.validator";
 import { ProcessingStatement } from "../../persistence/schema/frontEndModels/processingStatement";
 
 describe('calling handler for /create-processing-statement/:documentNumber/add-consignment-details', () => {
@@ -382,21 +383,27 @@ it('calling handler for /create-processing-statement/:documentNumber/catch-added
     const {errors} = await handler({
       data: data,
       currentUrl: currentUrl,
-      errors: {},
-      documentNumber: 'GBR-2023-PS-01234ABCD',
-      userPrincipal: 'bob',
-      contactId: 'contactId'
+      errors: {}
     });
 
     const expected = {
-      addAnotherCatch: 'psCatchAddedErrorAddAnotherCatch',
-      "catches-0-catchCertificateNumber": "psAddCatchDetailsErrorUKCCNumberFormatInvalid",
+      addAnotherCatch: 'psCatchAddedErrorAddAnotherCatch'
     };
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-details', () => {
+  let mockValidateCountriesName: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
+    mockValidateCountriesName.mockResolvedValue({ isError: false, error: null });
+  });
+
+  afterEach(() => {
+    mockValidateCountriesName.mockRestore();
+  });
 
   it('should return errors when required props are missing', async () => {
     const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
@@ -526,6 +533,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           species: 'Atlantic Cod',
           catchCertificateNumber: 'NOT-A-UK-CATCH-CERTIFICATE',
           catchCertificateType: 'non_uk',
+          issuingCountry: { officialCountryName: '' },
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110'
@@ -564,6 +572,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           species: 'Atlantic Cod',
           catchCertificateNumber: 'NOT-A-UK-CATCH-CERTIFICATE-WITH-MORE-THAN-52-CHARACTERS',
           catchCertificateType: 'non_uk',
+          issuingCountry: { officialCountryName: '' },
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110'
@@ -592,6 +601,136 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     expect(errors).toEqual(expectedErrors);
     expect(data.catches[0].catchCertificateType).toBe('non_uk');
   });
+
+  it('should handle issuingCountry as string and return invalid country error', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
+    const handler = SUT[currentUrl];
+
+    mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Error('Invalid country') });
+
+    const data: any = {
+      catches: [
+        {
+          id: '',
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'VALID-CERTIFICATE-123',
+          catchCertificateType: 'non_uk',
+          issuingCountry: 'InvalidCountryName',  // String format to simulate browser input
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110'
+        }
+      ],
+      consignmentDescription: '',
+      exportedTo: {
+        officialCountryName: ''
+      },
+      error: ''
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {},
+      documentNumber: 'GBR-2023-PS-01234ABCD',
+      userPrincipal: 'bob',
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
+    });
+
+    const expectedErrors = {
+      'catches-0-issuingCountry': 'psAddCatchDetailsErrorEnterIssuingCountry',
+    };
+
+    expect(errors).toEqual(expectedErrors);
+    expect(data.catches[0].catchCertificateType).toBe('non_uk');
+  });
+
+  it('should return psAddCatchDetailsErrorEnterIssuingCountry error for non_uk certificate with empty issuingCountry', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
+    const handler = SUT[currentUrl];
+
+    mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Error('Invalid country') });
+
+    const data: ProcessingStatement = {
+      catches: [
+        {
+          id: '',
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'VALID-CERTIFICATE-123',
+          catchCertificateType: 'non_uk',
+          issuingCountry: { officialCountryName: '' },  // Empty country name
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110'
+        }
+      ],
+      consignmentDescription: '',
+      exportedTo: {
+        officialCountryName: ''
+      },
+      error: ''
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {},
+      documentNumber: 'GBR-2023-PS-01234ABCD',
+      userPrincipal: 'bob',
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
+    });
+
+    const expectedErrors = {
+      'catches-0-issuingCountry': 'psAddCatchDetailsErrorEnterIssuingCountry',
+    };
+
+    expect(errors).toEqual(expectedErrors);
+    expect(data.catches[0].catchCertificateType).toBe('non_uk');
+  });
+
+  it('should return psAddCatchDetailsErrorEnterIssuingCountry error for non_uk certificate with undefined issuingCountry', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
+    const handler = SUT[currentUrl];
+
+    mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Error('Invalid country') });
+
+    const data: ProcessingStatement = {
+      catches: [
+        {
+          id: '',
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'VALID-CERTIFICATE-123',
+          catchCertificateType: 'non_uk',
+          // issuingCountry: undefined (not set)
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110'
+        }
+      ],
+      consignmentDescription: '',
+      exportedTo: {
+        officialCountryName: ''
+      },
+      error: ''
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {},
+      documentNumber: 'GBR-2023-PS-01234ABCD',
+      userPrincipal: 'bob',
+      contactId: 'contactId',
+      params: { catchIndex: 0 }
+    });
+
+    const expectedErrors = {
+      'catches-0-issuingCountry': 'psAddCatchDetailsErrorEnterIssuingCountry',
+    };
+
+    expect(errors).toEqual(expectedErrors);
+    expect(data.catches[0].catchCertificateType).toBe('non_uk');
+  });
+
 
   it('should not return a psAddCatchDetailsErrorUKCCNumberFormatInvalid error for an unspecified certificate number', async () => {
     const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';

@@ -8,6 +8,9 @@ import * as FishValidator from "../validators/fish.validator";
 import * as SessionManager from "../helpers/sessionManager";
 import * as CatchCertService from "../persistence/services/catchCert";
 import { LandingsEntryOptions } from "../persistence/schema/catchCert";
+import * as CountriesValidator from "../validators/countries.validator";
+
+const Joi = require('joi');
 
 const createServerInstance = async () => {
   const server = Hapi.server();
@@ -305,6 +308,7 @@ describe("exporter-payload routes", () => {
     let request: any;
     let mockValidateDocumentOwnership: jest.SpyInstance;
     let mockUpsertExportPayloadProductLanding: jest.SpyInstance;
+    let mockValidateCountriesName: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -315,6 +319,14 @@ describe("exporter-payload routes", () => {
         Controller,
         "upsertExportPayloadProductLanding"
       );
+
+      mockValidateCountriesName = jest.spyOn(
+        CountriesValidator,
+        "validateCountriesName"
+      );
+      mockValidateCountriesName.mockResolvedValue({
+        isError: false,
+      });
 
       jest.spyOn(SessionManager, 'getCurrentSessionData')
         .mockResolvedValue({
@@ -327,6 +339,13 @@ describe("exporter-payload routes", () => {
         .mockResolvedValue({
           items: []
         });
+
+      jest.spyOn(ExportPayloadService, 'get')
+        .mockResolvedValue({
+          items: [],
+          error: undefined,
+          errors: undefined
+        } as any);
 
       request = {
         method: "POST",
@@ -346,10 +365,11 @@ describe("exporter-payload routes", () => {
           dateLanded: moment().utc().format('YYYY-MM-DD'),
           exportWeight: "123",
           faoArea: "FAO18",
-          gearCategory: "",
-          gearType: "",
+          gearCategory: "Category 1",
+          gearType: "Type 1",
           rfmo: undefined,
           highSeasArea: "No",
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD'),
           exclusiveEconomicZones: [
             {
               officialCountryName: "Afghanistan",
@@ -586,12 +606,247 @@ describe("exporter-payload routes", () => {
       expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
     });
+
+    it("should return 400 when startDate is missing (required field)", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: undefined
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.any.required');
+    });
+
+    it("should return 400 when gearCategory is missing (required field)", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: undefined,
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.gearCategory).toBe('error.gearCategory.any.required');
+    });
+
+    it("should return 400 when gearCategory is empty string (required field)", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: '',
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.gearCategory).toBe('error.gearCategory.string.empty');
+    });
+
+    it("should return 400 when gearType is missing (required field)", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: undefined,
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.gearType).toBe('error.gearType.any.required');
+    });
+
+    it("should return 400 when gearType is empty string (required field)", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: '',
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.gearType).toBe('error.gearType.string.empty');
+    });
+
+    it("should return 400 when highSeasArea is missing (required field)", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: 'Type 1',
+          highSeasArea: undefined,
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.highSeasArea).toBe('error.highSeasArea.any.required');
+    });
+
+    it("should return 400 when highSeasArea has invalid value (must be Yes or No)", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: 'Type 1',
+          highSeasArea: 'Maybe',
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.highSeasArea).toBe('error.highSeasArea.any.only');
+    });
+
+    it("should return 400 when highSeasArea is No but exclusiveEconomicZones is missing", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: 'Type 1',
+          highSeasArea: 'No',
+          exclusiveEconomicZones: undefined,
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.exclusiveEconomicZones).toBe('error.exclusiveEconomicZones.any.required');
+    });
+
+    it("should return 400 when highSeasArea is No but exclusiveEconomicZones is empty array", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: 'Type 1',
+          highSeasArea: 'No',
+          exclusiveEconomicZones: [],
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.exclusiveEconomicZones).toBe('error.exclusiveEconomicZones.array.min');
+    });
+
+    it("should return 200 when highSeasArea is Yes and exclusiveEconomicZones is not provided", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: 'Type 1',
+          highSeasArea: 'Yes',
+          exclusiveEconomicZones: undefined,
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD')
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it("should return 200 when all required fields are provided correctly", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: 'Type 1',
+          highSeasArea: 'No',
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD'),
+          exclusiveEconomicZones: [
+            {
+              officialCountryName: "Afghanistan",
+              isoCodeAlpha2: "AF",
+              isoCodeAlpha3: "AFG",
+              isoNumericCode: "004"
+            }
+          ]
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
   });
 
   describe("POST /v1/export-certificates/direct-landing/validate", () => {
     let request: any;
     let mockValidateDocumentOwnership: jest.SpyInstance;
     let mockUpsertExportPayloadProductDirectLanding: jest.SpyInstance;
+    let mockValidateCountriesName: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -602,6 +857,14 @@ describe("exporter-payload routes", () => {
         Controller,
         "upsertExportPayloadProductDirectLanding"
       );
+
+      mockValidateCountriesName = jest.spyOn(
+        CountriesValidator,
+        "validateCountriesName"
+      );
+      mockValidateCountriesName.mockResolvedValue({
+        isError: false,
+      });
 
       jest.spyOn(SessionManager, 'getCurrentSessionData')
         .mockResolvedValue({
@@ -630,6 +893,7 @@ describe("exporter-payload routes", () => {
         payload: {
           vessel: { vesselName: "a vessel" },
           dateLanded: moment().utc().format('YYYY-MM-DD'),
+          startDate: moment().utc().format('YYYY-MM-DD'),
           faoArea: "FAO18",
           weights: [
             {
@@ -679,9 +943,181 @@ describe("exporter-payload routes", () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it("should return 400 for a request payload containing a FAO area not on the list of areas", async () => {
+    it("should return 400 for a request payload missing a start date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: undefined
+        }
+      }
+
+      const expected = {
+        items: [],
+        error: "invalid",
+        errors: {
+          startDate: "error.startDate.any.required"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 for a request payload missing high seas", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          highSeasArea: undefined
+        }
+      }
+
+      const expected = {
+        items: [],
+        error: "invalid",
+        errors: {
+          highSeasArea: "error.highSeasArea.any.required"
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 for a request payload when high seas 'no' and exclusive economic zones are empty", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          highSeasArea: 'No',
+          exclusiveEconomicZones: []
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors).toStrictEqual({"exclusiveEconomicZones":"error.exclusiveEconomicZones.array.min"});
+    });
+
+    it("should return 200 for a request payload when high seas 'yes' and exclusive economic zones are empty", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          highSeasArea: 'Yes',
+          exclusiveEconomicZones: []
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductDirectLanding).toHaveBeenCalled();
+    });
+
+    it("should return 200 for a request payload when high seas 'no' and exclusive economic zones has an empty official country name", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductDirectLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          highSeasArea: 'No',
+          exclusiveEconomicZones: [{ officialCountryName: 'Nigeria' }]
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductDirectLanding).toHaveBeenCalled();
+    });
+
+    it("should return 400 for a request payload when high seas 'no' and exclusive economic zones has an empty official country name", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          highSeasArea: 'No',
+          exclusiveEconomicZones: [{ officialCountryName: undefined }]
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors).toStrictEqual({"eez.0":"error.eez.0.any.required"});
+    });
+
+    it("should return 400 for a request payload when high seas 'no' and exclusive economic zones is invalid", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Joi.ValidationError('invalid country', [
+        { message: 'error.eez.0.any.invalid', path: ['exclusiveEconomicZones', 0], type: 'any.invalid', context: { label: 'exclusiveEconomicZones[0].officialCountryName', key: 'officialCountryName' } }
+      ], null) });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          highSeasArea: 'No',
+          exclusiveEconomicZones: [{ officialCountryName: "Invalid Country" }]
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors).toStrictEqual({"exclusiveEconomicZones.0":"error.exclusiveEconomicZones.0.any.invalid"});
+    });
+
+    it("should return 400 for a request payload when high seas 'no' and exclusive economic zones is invalid and missing st", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Joi.ValidationError('invalid country', [
+        { message: 'error.exclusiveEconomicZones.array.invalidCountry', path: ['exclusiveEconomicZones', 0], type: 'any.invalid', context: { label: 'exclusiveEconomicZones[0].officialCountryName', key: 'officialCountryName' } }
+      ], null) });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          startDate: undefined,
+          highSeasArea: 'No',
+          exclusiveEconomicZones: [{ officialCountryName: "Invalid Country" }]
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors).toStrictEqual({"exclusiveEconomicZones.0":"error.exclusiveEconomicZones.0.any.invalid", "startDate": "error.startDate.any.required"});
+    });
+
+    it("should return 400 for a request payload containing a FAO area not on the list of areas", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
 
       const _request = {
         ...request,
@@ -856,6 +1292,44 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(400);
       expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+    });
+
+    it("should return 400 for a request payload not containing gear type", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: 'Category 1',
+          gearType: '',
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors).toStrictEqual({"gearType":"error.gearType.string.empty"});
+    });
+
+    it("should return 400 for a request payload not containing gear category", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          gearCategory: '',
+          gearType: 'Type 1',
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors).toStrictEqual({"gearCategory":"error.gearCategory.string.empty"});
     });
   });
 
@@ -1322,6 +1796,7 @@ describe("exporter-payload routes", () => {
         payload: {
           vessel: { vesselName: "a vessel" },
           dateLanded: moment().utc().format('YYYY-MM-DD'),
+          startDate: moment().subtract(1, 'day').format('YYYY-MM-DD'),
           exportWeight: "12",
           faoArea: "12",
           gearCategory: "Category 1",

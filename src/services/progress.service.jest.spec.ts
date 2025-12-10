@@ -5,12 +5,13 @@ import * as StorageDocumentService from '../persistence/services/storageDoc';
 import * as DocumentValidator from '../validators/documentValidator';
 import * as FishValidator from '../validators/fish.validator';
 import * as CommodityCodeValidator from '../validators/pssdCommodityCode.validator';
+import * as CountriesValidator from '../validators/countries.validator';
 import SummaryErrorsService from './summaryErrors.service';
 import { ProgressStatus } from '../persistence/schema/common';
 import { Progress } from '../persistence/schema/frontEndModels/payload';
 import logger from '../logger';
 import { Transport } from '../persistence/schema/frontEndModels/transport';
-
+import { StorageDocumentProgress } from '../persistence/schema/frontEndModels/storageDocument';
 describe('get', () => {
   const documentNumber = 'document123';
   const userPrincipal = 'Bob';
@@ -1751,7 +1752,10 @@ describe('getTransportDetails', () => {
         registrationNumber: 'OP98Y89',
         departurePlace: 'Hull',
         exportDate: '04/07/2024',
-        exportDateTo: '04/07/2024'
+        exportDateTo: '04/07/2024',
+        departureCountry: 'United Kingdom',
+        departurePort: 'Lucis Port',
+        departureDate: '04/07/2024',
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
@@ -1953,6 +1957,300 @@ describe('getTransportDetails', () => {
       );
     });
 
+    // FI0-10290: Container vessel arrival transport flagState validation tests
+    it('should return INCOMPLETE when arrival container vessel is missing flagState', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        containerNumbers: ['CONT001', 'CONT002'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel is missing departureCountry', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['CONT001', 'CONT002'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel is missing departurePort', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['CONT001', 'CONT002'],
+        freightBillNumber: 'FB789',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel is missing departureDate', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['CONT001', 'CONT002'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel has invalid flagState format', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: '@#$%^',
+        containerNumbers: ['CONT001', 'CONT002'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['CONT001', ''],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    // FI0-10289: Train arrival transport validation tests
+    it('should return COMPLETED when all arrival train fields are filled out with valid values', () => {
+      const transport: Transport = {
+        vehicle: 'train',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        railwayBillNumber: 'RB123456',
+        freightBillNumber: 'FB789',
+        departurePort: 'Calais port',
+        departureDate: '15/11/2023',
+        departureCountry: 'France',
+        placeOfUnloading: 'Dover'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.COMPLETED
+      );
+    });
+
+    it('should return INCOMPLETE when arrival train is missing departureCountry', () => {
+      const transport: Transport = {
+        vehicle: 'train',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        railwayBillNumber: 'RB123456',
+        freightBillNumber: 'FB789',
+        departurePort: 'Calais port',
+        departureDate: '15/11/2023',
+        placeOfUnloading: 'Dover'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival train is missing departurePort', () => {
+      const transport: Transport = {
+        vehicle: 'train',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        railwayBillNumber: 'RB123456',
+        freightBillNumber: 'FB789',
+        departureDate: '15/11/2023',
+        departureCountry: 'France',
+        placeOfUnloading: 'Dover'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival train is missing departureDate', () => {
+      const transport: Transport = {
+        vehicle: 'train',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        railwayBillNumber: 'RB123456',
+        freightBillNumber: 'FB789',
+        departurePort: 'Calais port',
+        departureCountry: 'France',
+        placeOfUnloading: 'Dover'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival train has invalid departurePort format', () => {
+      const transport: Transport = {
+        vehicle: 'train',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        railwayBillNumber: 'RB123456',
+        freightBillNumber: 'FB789',
+        departurePort: '@@@invalid',
+        departureDate: '15/11/2023',
+        departureCountry: 'France',
+        placeOfUnloading: 'Dover'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival train has invalid departureDate format', () => {
+      const transport: Transport = {
+        vehicle: 'train',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        railwayBillNumber: 'RB123456',
+        freightBillNumber: 'FB789',
+        departurePort: 'Calais port',
+        departureDate: 'invalid-date',
+        departureCountry: 'France',
+        placeOfUnloading: 'Dover'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
     it('should return INCOMPLETE when some arrival fields have validation errors', () => {
       const transport: Transport = {
         vehicle: 'not valid',
@@ -2054,7 +2352,10 @@ describe('getTransportDetails', () => {
       cmr: 'false',
       nationalityOfVehicle: 'UK',
       registrationNumber: 'OP98Y89',
-      departurePlace: 'Hull'
+      departurePlace: 'Hull',
+      departureCountry: 'United Kingdom',
+      departurePort: 'Lexis Port',
+      departureDate: '04/07/2024',
     };
 
     expect(ProgressService.getTransportDetails(transport)).toBe(
@@ -2178,11 +2479,12 @@ describe('getStorageFacilityStatus', () => {
       facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
       facilityTownCity: 'LANCASTER HOUSE',
       facilityPostcode: '',
-      facilityArrivalDate: '04/07/2024'
+      facilityArrivalDate: '04/07/2024',
+      facilityStorage: 'Chilled'
     };
 
     expect(
-      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate, storageFacilities.facilityStorage)
     ).toBe(ProgressStatus.INCOMPLETE);
   });
 
@@ -2192,11 +2494,12 @@ describe('getStorageFacilityStatus', () => {
       facilityAddressOne: '',
       facilityTownCity: '',
       facilityPostcode: '',
-      facilityArrivalDate: '04/07/2024'
+      facilityArrivalDate: '04/07/2024',
+      facilityStorage: 'Chilled'
     };
 
     expect(
-      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate, storageFacilities.facilityStorage)
     ).toBe(ProgressStatus.INCOMPLETE);
   });
 
@@ -2208,25 +2511,27 @@ describe('getStorageFacilityStatus', () => {
       facilityBuildingNumber: '',
       facilityPostcode: 'NE7 4BY',
       facilityTownCity: 'NEWCASTLE UPON TYNE',
-      facilityArrivalDate: ''
+      facilityArrivalDate: '',
+      facilityStorage: 'Chilled'
     };
 
     expect(
-      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate, storageFacilities.facilityStorage)
     ).toBe(ProgressStatus.INCOMPLETE);
   });
 
-  it('should return COMPLETED for incomplete storage facilities', () => {
+  it('should return COMPLETED for complete storage facilities', () => {
     const storageFacilities = {
       facilityName: 'FACILITY',
       facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
       facilityTownCity: 'LANCASTER HOUSE',
       facilityPostcode: 'NE7 4BY',
-      facilityArrivalDate: '04/07/2024'
+      facilityArrivalDate: '04/07/2024',
+      facilityStorage: 'Chilled'
     };
 
     expect(
-      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate)
+      ProgressService.getStorageFacilityStatus(storageFacilities.facilityName, storageFacilities.facilityAddressOne, storageFacilities.facilityTownCity, storageFacilities.facilityPostcode, storageFacilities.facilityArrivalDate, storageFacilities.facilityStorage)
     ).toBe(ProgressStatus.COMPLETED);
   });
 });
@@ -2253,6 +2558,7 @@ describe('getProcessingStatementProgress', () => {
   let mockProcessingStatementDraft: jest.SpyInstance;
   let mockValidateCompletedDocument: jest.SpyInstance;
   let mockValidateSpeciesMissing: jest.SpyInstance;
+  let mockValidateCountriesName: jest.SpyInstance;
   let mockLoggerInfo: jest.SpyInstance;
 
   beforeEach(() => {
@@ -2260,6 +2566,8 @@ describe('getProcessingStatementProgress', () => {
     mockValidateCompletedDocument.mockResolvedValue(true);
     mockValidateSpeciesMissing = jest.spyOn(DocumentValidator, 'validateSpecies');
     mockValidateSpeciesMissing.mockResolvedValue(true);
+    mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
+    mockValidateCountriesName.mockResolvedValue({ isError: false });
     mockProcessingStatementDraft = jest.spyOn(
       ProcessingStatementService,
       'getDraft'
@@ -3828,6 +4136,12 @@ describe('getProcessingStatementProgress', () => {
             exportWeightAfterProcessing: '45',
             scientificName: 'scientificName',
             catchCertificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'A1',
+              isoCodeAlpha3: 'A3',
+              isoNumericCode: 'SP',
+            },
           },
         ],
         exporterDetails: {
@@ -3915,6 +4229,7 @@ describe('getStorageDocumentProgress', () => {
   let mockLoggerInfo: jest.SpyInstance;
   let mockSpeciesNameValid: jest.SpyInstance;
   let mockCommodityCodeValid: jest.SpyInstance;
+  let mockValidateCountriesName: jest.SpyInstance;
 
   beforeEach(() => {
     mockStorageDocumentDraft = jest.spyOn(StorageDocumentService, 'getDraft');
@@ -3923,6 +4238,8 @@ describe('getStorageDocumentProgress', () => {
     mockSpeciesNameValid.mockResolvedValue({ isError: false });
     mockCommodityCodeValid = jest.spyOn(CommodityCodeValidator, 'validateCommodityCode');
     mockCommodityCodeValid.mockResolvedValue({ isError: false });
+    mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
+    mockValidateCountriesName.mockResolvedValue({ isError: false });
     mockLoggerInfo = jest.spyOn(logger, 'info');
   });
 
@@ -4171,12 +4488,21 @@ describe('getStorageDocumentProgress', () => {
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
             productWeight: '5',
             weightOnCC: '5',
             placeOfUnloading: 'sdfdf',
             dateOfUnloading: '24/01/2022',
             transportUnloadedFrom: 'sfdfd',
             id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            netWeightProductDeparture: '700',
           },
         ],
       },
@@ -4400,10 +4726,16 @@ describe('getStorageDocumentProgress', () => {
             weightOnCC: "100",
             scientificName: "Haliotis rufescens",
             certificateType: "non_uk",
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
             supportingDocuments: [],
             productDescription: "",
-            netWeightProductArrival: "",
-            netWeightFisheryProductArrival: "",
+            netWeightProductArrival: "1",
+            netWeightFisheryProductArrival: "1",
             netWeightProductDeparture: "100",
             netWeightFisheryProductDeparture: ""
           }
@@ -4519,12 +4851,21 @@ describe('getStorageDocumentProgress', () => {
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
             productWeight: '5',
             weightOnCC: '5',
             placeOfUnloading: 'sdfdf',
             dateOfUnloading: '24/01/2022',
             transportUnloadedFrom: 'sfdfd',
             id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            netWeightProductDeparture: '700'
           },
         ],
         exporterDetails: {
@@ -4588,6 +4929,7 @@ describe('getStorageDocumentProgress', () => {
         facilityCountry: 'ENGLAND',
         facilityPostcode: 'NE4 7YH',
         facilityArrivalDate: '20/09/2023',
+        facilityStorage: 'Chilled',
       },
       requestByAdmin: false,
       documentUri: '',
@@ -4879,5 +5221,387 @@ describe('getStorageDocumentProgress', () => {
       documentNumber,
       contactId
     );
+  });
+  it('should return INCOMPLETE transport details when product departure weight is zero', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '100',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '0',
+          netWeightFisheryProductDeparture: '20.75'
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('should return INCOMPLETE transport details when fishery product departure weight is zero', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '100',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '10.50',
+          netWeightFisheryProductDeparture: '0'
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('should return INCOMPLETE transport details when weights exceed 2 decimals', async () => {
+   mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '100',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '10.5011',
+          netWeightFisheryProductDeparture: '20.7522'
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('should return INCOMPLETE transport details when weights exceed 12 digits', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '100',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '1234567890123',
+          netWeightFisheryProductDeparture: '1234567890445'
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('should return INCOMPLETE transport details when productWeight is empty', async () => {
+     mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '1234567890123',
+          netWeightFisheryProductDeparture: '1234567890445'
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('should return INCOMPLETE transport details when both weight types are invalid', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '100',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '-90',
+          netWeightFisheryProductDeparture: 'abcc'
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+  });
+  it('should return COMPLETED transport details when weights are valid', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '100',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '10.50',
+          netWeightFisheryProductDeparture: '20.75'
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+  });
+
+  it('should return COMPLETED transport details when at least one weight type is valid', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [{
+          product: 'Atlantic cod (COD)',
+          commodityCode: '45345454354',
+          certificateNumber: 'DSFDSF',
+          certificateType: 'non_uk',
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          productWeight: '100',
+          weightOnCC: '100',
+          placeOfUnloading: 'London',
+          dateOfUnloading: '24/01/2022',
+          transportUnloadedFrom: 'vessel',
+          id: 'catch-id-123',
+          netWeightProductArrival: '90',
+          netWeightFisheryProductArrival: '90',
+          netWeightProductDeparture: '10.50',
+          netWeightFisheryProductDeparture: '' // Empty fishery weight is okay if product weight is valid
+        }],
+        transportation: {
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
+          },
+          vehicle: "containerVessel",
+          departurePlace: "port",
+          vesselName: "Felicity Ace",
+          flagState: "Greece",
+          containerNumbers: "Test1,Test2",
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        },
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
   });
 });

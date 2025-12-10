@@ -6,6 +6,7 @@ import {
   validateCCNumberFormat,
   validateDate,
   validateDateBefore,
+  validateDateIsSameOrBefore,
   validateUKDocumentNumberFormat,
   validateWhitespace,
 } from "../orchestration.service";
@@ -13,9 +14,11 @@ import {
 import ApplicationConfig from '../../applicationConfig';
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
+import { validateCountriesName } from "../../validators/countries.validator";
 import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_PRODUCT_DESCRIPTION } from "../constants";
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
 import { BusinessError, SpeciesSuggestionError } from "../../validators/validationErrors";
+import { ICountry } from "../../persistence/schema/common";
 import { isEmpty } from "lodash";
 
 export const initialState = {
@@ -85,13 +88,13 @@ export default {
   },
 };
 
-function checkEitherNetWeightProductDepartureOrNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
+export function checkEitherNetWeightProductDepartureOrNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
   if (!ctch.netWeightProductDeparture && !ctch.netWeightFisheryProductDeparture) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
   }
 }
 
-function checkNetWeightProductDepartureIsZeroPositive(ctch: any, index: number, errors: any) {
+export function checkNetWeightProductDepartureIsZeroPositive(ctch: any, index: number, errors: any) {
   if (ctch.netWeightProductDeparture && (+ctch.netWeightProductDeparture) <= 0) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorMax2DecimalLargerThan0';
   } else if (ctch.netWeightProductDeparture && !isPositiveNumberWithTwoDecimals(ctch.netWeightProductDeparture)) {
@@ -101,7 +104,7 @@ function checkNetWeightProductDepartureIsZeroPositive(ctch: any, index: number, 
   }
 }
 
-function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, index: number, errors: any) {
+export function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, index: number, errors: any) {
   if (ctch.netWeightFisheryProductDeparture && (+ctch.netWeightFisheryProductDeparture) <= 0) {
     errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorMax2DecimalLargerThan0';
   } else if (ctch.netWeightFisheryProductDeparture && !isPositiveNumberWithTwoDecimals(ctch.netWeightFisheryProductDeparture)) {
@@ -116,6 +119,9 @@ function checkFacilityArrivalDateError(exportData: any, departureDate: string, e
     errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateValidationError";
   } else if (validateDateBefore(exportData.facilityArrivalDate, departureDate)) {
     errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateBeforeDepatureDateValidationError";
+  }
+   else if (exportData.transport?.exportDate && !validateDateIsSameOrBefore(exportData.facilityArrivalDate,  exportData.transport.exportDate)) {
+    errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateSameOrOneDayBeforeDepartureDateValidationError";
   }
 }
 
@@ -150,6 +156,10 @@ function validateStorageApproval(exportData: any, errors) {
 
   if (exportData.facilityApprovalNumber && !isApprovalNumberValid(exportData.facilityApprovalNumber)) {
     errors[`storageFacilities-facilityApproval`] = 'sdAddStorageFacilityApprovalInvalidError';
+  }
+
+  if (!exportData.facilityStorage || validateWhitespace(exportData.facilityStorage)) {
+    errors[`storageFacilities-facilityStorage`] = 'sdAddStorageFacilityProductStoredNullError';
   }
 
   return { errors }
@@ -253,26 +263,9 @@ export async function validateProduct(product: any, index: number, errors, isNon
 }
 
 export async function validateEntry(product: any, index: number, errors, documentNumber: string = "", userPrincipal: string = "", contactId: string = "") {
-  if (!product.certificateType) {
-    errors[`catches-${index}-certificateType`] = 'sdAddCatchTypeErrorSelectCertificateType';
-  } else if (!['uk', 'non_uk'].includes(product.certificateType)) {
-    errors[`catches-${index}-certificateType`] = 'sdAddCatchTypeErrorCertificateTypeInvalid';
-  }
-
-  if (!product.certificateNumber || validateWhitespace(product.certificateNumber)) {
-    errors[`catches-${index}-certificateNumber`] = 'sdAddProductToConsignmentCertificateNumberErrorNull';
-  } else if (product.certificateNumber.length > MAX_DOCUMENT_NUMBER_LENGTH) {
-    errors[`catches-${index}-certificateNumber`] = `sdAddProductToConsignmentWeightOnCCErrorMustNotExceed-${MAX_DOCUMENT_NUMBER_LENGTH}`;
-  } else if (!validateCCNumberFormat(product.certificateNumber)) {
-    errors[`catches-${index}-certificateNumber`] = `sdAddProductToConsignmentCertificateNumberErrorInvalidFormat`;
-  } else if (product.certificateType === 'uk' && !validateUKDocumentNumberFormat(product.certificateNumber)) {
-    errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentErrorUKDocumentNumberFormatInvalid';
-  } else if (product.certificateType === 'uk' && !await validateCompletedDocument(product.certificateNumber, userPrincipal, contactId, documentNumber)) {
-    errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentDoesNotExistError';
-  } else if (product.certificateType === 'uk' && isProductDefined(product) && !await validateSpecies(product.certificateNumber, product.product, product.speciesCode, userPrincipal, contactId, documentNumber)) {
-    errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentSpeciesDoesNotExistError';
-  }
-
+  validateCertificateType(product, index, errors);
+  await validateCertificateNumber(product, index, errors, documentNumber, userPrincipal, contactId);
+  await validateIssuingCountryForNonUK(product, index, errors);
   checkSupportingDocuments(product, errors, index);
   checkProductDescription(product, errors, index);
   checkWeightOnCCErrors(product, errors, index);
@@ -280,6 +273,70 @@ export async function validateEntry(product: any, index: number, errors, documen
   checkNetFisheryWeightArrival(product, errors, index);
 
   return { errors };
+}
+
+function validateCertificateType(product: any, index: number, errors: any) {
+  if (!product.certificateType) {
+    errors[`catches-${index}-certificateType`] = 'sdAddCatchTypeErrorSelectCertificateType';
+  } else if (!['uk', 'non_uk'].includes(product.certificateType)) {
+    errors[`catches-${index}-certificateType`] = 'sdAddCatchTypeErrorCertificateTypeInvalid';
+  }
+}
+
+async function validateIssuingCountryForNonUK(product: any, index: number, errors: any) {
+  if (product.certificateType !== 'non_uk') {
+    return;
+  }
+
+  const country: ICountry = typeof product.issuingCountry === 'string'
+    ? { officialCountryName: product.issuingCountry, isoCodeAlpha2: undefined, isoCodeAlpha3: undefined, isoNumericCode: undefined }
+    : product.issuingCountry;
+
+  const countryValidation = await validateCountriesName(country, ApplicationConfig.getReferenceServiceUrl(), 'issuingCountry');
+  if (countryValidation.isError) {
+    errors[`catches-${index}-issuingCountry`] = 'sdAddCatchDetailsErrorEnterIssuingCountry';
+  }
+}
+
+async function validateCertificateNumber(product: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
+  if (!product.certificateNumber || validateWhitespace(product.certificateNumber)) {
+    errors[`catches-${index}-certificateNumber`] = 'sdAddProductToConsignmentCertificateNumberErrorNull';
+    return;
+  }
+
+  if (product.certificateNumber.length > MAX_DOCUMENT_NUMBER_LENGTH) {
+    errors[`catches-${index}-certificateNumber`] = `sdAddProductToConsignmentWeightOnCCErrorMustNotExceed-${MAX_DOCUMENT_NUMBER_LENGTH}`;
+    return;
+  }
+
+  if (!validateCCNumberFormat(product.certificateNumber)) {
+    errors[`catches-${index}-certificateNumber`] = `sdAddProductToConsignmentCertificateNumberErrorInvalidFormat`;
+    return;
+  }
+
+  if (product.certificateType === 'uk') {
+    await validateUKCertificateNumber(product, index, errors, documentNumber, userPrincipal, contactId);
+  }
+}
+
+async function validateUKCertificateNumber(product: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
+  if (!validateUKDocumentNumberFormat(product.certificateNumber)) {
+    errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentErrorUKDocumentNumberFormatInvalid';
+    return;
+  }
+
+  const isDocumentValid = await validateCompletedDocument(product.certificateNumber, userPrincipal, contactId, documentNumber);
+  if (!isDocumentValid) {
+    errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentDoesNotExistError';
+    return;
+  }
+
+  if (isProductDefined(product)) {
+    const isSpeciesValid = await validateSpecies(product.certificateNumber, product.product, product.speciesCode, userPrincipal, contactId, documentNumber);
+    if (!isSpeciesValid) {
+      errors[`catches-${index}-certificateNumber`] = 'sdAddUKEntryDocumentSpeciesDoesNotExistError';
+    }
+  }
 }
 
 function checkWeightOnCCErrors(product: any, errors: any, index: number) {
@@ -311,21 +368,25 @@ function checkProductDescription(product: any, errors: any, index: number) {
 }
 
 function checkNetWeightArrival(product: any, errors: any, index: number) {
-  if (product.netWeightProductArrival && (+product.netWeightProductArrival) <= 0) {
+  if (!product.netWeightProductArrival) {
+    errors[`catches-${index}-netWeightProductArrival`] = 'sdAddProductToConsignmentNetWeightOfProductErrorNull';
+  } else if ((+product.netWeightProductArrival) <= 0) {
     errors[`catches-${index}-netWeightProductArrival`] = 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0';
-  } else if (product.netWeightProductArrival && !isPositiveNumberWithTwoDecimals(product.netWeightProductArrival)) {
+  } else if (!isPositiveNumberWithTwoDecimals(product.netWeightProductArrival)) {
     errors[`catches-${index}-netWeightProductArrival`] = 'sdNetWeightProductArrivalPositiveMax2Decimal';
-  } else if (product.netWeightProductArrival && !isNotExceed12Digit(product.netWeightProductArrival)) {
+  } else if (!isNotExceed12Digit(product.netWeightProductArrival)) {
     errors[`catches-${index}-netWeightProductArrival`] = 'sdNetWeightProductArrivalExceed12Digit';
   }
 }
 
 function checkNetFisheryWeightArrival(product: any, errors: any, index: number) {
-  if (product.netWeightFisheryProductArrival && (+product.netWeightFisheryProductArrival) <= 0) {
+  if (!product.netWeightFisheryProductArrival) {
+    errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdAddProductToConsignmentNetWeightOfFisheryProductErrorNull';
+  } else if ((+product.netWeightFisheryProductArrival) <= 0) {
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0';
-  } else if (product.netWeightFisheryProductArrival && !isPositiveNumberWithTwoDecimals(product.netWeightFisheryProductArrival)) {
+  } else if (!isPositiveNumberWithTwoDecimals(product.netWeightFisheryProductArrival)) {
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal';
-  } else if (product.netWeightFisheryProductArrival && !isNotExceed12Digit(product.netWeightFisheryProductArrival)) {
+  } else if (!isNotExceed12Digit(product.netWeightFisheryProductArrival)) {
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalExceed12Digit';
   }
 }

@@ -291,6 +291,7 @@ export interface CatchCertificateBasicTransportDetails {
 }
 export interface CatchCertificateTrain extends CatchCertificateBasicTransportDetails {
   railwayBillNumber: string,
+  containerIdentificationNumber?: string
 }
 
 export interface CatchCertificatePlane extends CatchCertificateBasicTransportDetails {
@@ -307,7 +308,8 @@ export interface CatchCertificateContainerVessel extends CatchCertificateBasicTr
 export interface CatchCertificateTruck extends CatchCertificateBasicTransportDetails {
   cmr?: boolean;
   nationalityOfVehicle?: string,
-  registrationNumber?: string
+  registrationNumber?: string,
+  containerIdentificationNumber?: string
 }
 
 export type CatchCertificateTransport = CatchCertificateTrain | CatchCertificatePlane | CatchCertificateContainerVessel | CatchCertificateTruck;
@@ -424,6 +426,7 @@ export const CatchCertificateTransportSchema = new Schema({
   departurePlace:       { type: String,  required: false },
   nationalityOfVehicle: { type: String,  required: false },
   registrationNumber:   { type: String,  required: false },
+  containerIdentificationNumber: { type: String, required: false },
   railwayBillNumber:    { type: String,  required: false },
   flightNumber:         { type: String,  required: false },
   vesselName:           { type: String,  required: false },

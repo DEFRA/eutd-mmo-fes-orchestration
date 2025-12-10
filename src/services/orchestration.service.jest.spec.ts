@@ -215,7 +215,7 @@ describe('get', () => {
         facilityCounty: undefined,
         facilityName: "Storage Facilities",
         facilityPostcode: "ES8 7UJ",
-        facilityStorage: undefined,
+        facilityStorage: "Chilled",
         facilityStreetName: "Street",
         facilitySubBuildingName: undefined,
         facilityTownCity: "Essex",
@@ -500,6 +500,7 @@ describe('saveAndValidate', () => {
         facilityStreetName: "Street",
         facilityTownCity: "Essex",
         facilityPostcode: "ES8 7UJ",
+        facilityStorage: "Chilled",
         _facilityUpdated: false,
         facilityArrivalDate: "20/11/2023",
       }
@@ -570,7 +571,7 @@ describe('saveAndValidate', () => {
         facilityCounty: undefined,
         facilityName: "Storage Facilities",
         facilityPostcode: "ES8 7UJ",
-        facilityStorage: undefined,
+        facilityStorage: "Chilled",
         facilityStreetName: "Street",
         facilitySubBuildingName: undefined,
         facilityTownCity: "Essex",
@@ -2052,6 +2053,11 @@ describe('get verifiy remaining methods', () => {
 
   it('should call today', async () => {
     const result = Service.today();
+    expect(result).toBeTruthy();
+  })
+
+    it('should call validateDateIsSameOrBefore', async () => {
+    const result = Service.validateDateIsSameOrBefore("09/10/2023", "10/10/2023");
     expect(result).toBeTruthy();
   })
 

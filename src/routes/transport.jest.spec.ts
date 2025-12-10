@@ -128,6 +128,9 @@ describe("transport routes", () => {
                     nationalityOfVehicle: "x",
                     registrationNumber: "x",
                     departurePlace: "x",
+                    departurePort: "x",
+                    departureCountry: "x",
+                    departureDate: '04/07/2024',
                     exportedTo: {
                       officialCountryName: "Nigeria",
                       isoCodeAlpha2: null,
@@ -529,18 +532,18 @@ describe("transport routes", () => {
         });
 
         it('returns 200 when we POST an arrival /v1/transport/train/details', async () => {
-            const request = createRequestObj(`/v1/transport/train/details`, { arrival: true, railwayBillNumber: "RAIL123", placeOfUnloading: "UK" }, 'POST')
+            const request = createRequestObj(`/v1/transport/train/details`, { arrival: true, railwayBillNumber: "RAIL123", placeOfUnloading: "UK", departurePort: "Lexis Port", departureDate: "04/07/2024", departureCountry: "United Kingdom",  }, 'POST')
             const response = await server.inject(request);
             expect(response.statusCode).toBe(200);
             expect(mockAddTransport).toHaveBeenCalled();
             expect(response.result).toEqual({some: 'data'});
         });
 
-        it('returns 200 when we POST an arrival with empty strings /v1/transport/train/details', async () => {
+        it('returns 400 when we POST an arrival with empty required strings /v1/transport/train/details', async () => {
             const body = {
               journey: "storageNotes",
-              railwayBillNumber: "RAIL123", // required field
-              placeOfUnloading: "UK", // required field
+              railwayBillNumber: "RAIL123",
+              placeOfUnloading: "UK",
               freightBillNumber: "",
               departureCountry: "",
               departurePort: "",
@@ -551,9 +554,13 @@ describe("transport routes", () => {
 
             const request = createRequestObj(`/v1/transport/train/details`, body, 'POST')
             const response = await server.inject(request);
-            expect(response.statusCode).toBe(200);
-            expect(mockAddTransport).toHaveBeenCalled();
-            expect(response.result).toEqual({some: 'data'});
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                "departureCountry": "error.departureCountry.any.required",
+                "departurePort": "error.departurePort.any.required",
+                "departureDate": "error.departureDate.any.required"
+            });
         });
 
         it('returns 400 when we POST an arrival /v1/transport/train/details', async () => {
@@ -564,23 +571,23 @@ describe("transport routes", () => {
         });
 
         it('returns 200 when we POST an arrival /v1/transport/truck/details', async () => {
-            const request = createRequestObj(`/v1/transport/truck/details`, { arrival: true, registrationNumber: "Reg123", placeOfUnloading: "UK" }, 'POST')
+            const request = createRequestObj(`/v1/transport/truck/details`, { arrival: true, nationalityOfVehicle: "UK", departurePort: "Lexis Port", departureDate: "04/07/2024", departureCountry: "United Kingdom", registrationNumber: "Reg123", placeOfUnloading: "UK" }, 'POST')
             const response = await server.inject(request);
             expect(response.statusCode).toBe(200);
             expect(mockAddTransport).toHaveBeenCalled();
             expect(response.result).toEqual({some: 'data'});
         });
 
-        it('returns 200 when we POST an arrival with empty strings /v1/transport/truck/details', async () => {
+        it('returns 200 when we POST an arrival with all required fields /v1/transport/truck/details', async () => {
             const body = {
               journey: "storageNotes",
-              nationalityOfVehicle: "",
-              registrationNumber: "REG123", // required field
-              placeOfUnloading: "UK", // required field
+              nationalityOfVehicle: "UK",
+              registrationNumber: "REG123",
+              placeOfUnloading: "UK",
               freightBillNumber: "",
-              departureCountry: "",
-              departurePort: "",
-              departureDate: "",
+              departureCountry: "United Kingdom",
+              departurePort: "Lexis Port",
+              departureDate: "04/07/2024",
               vehicle:"truck",
               arrival: true
             };
@@ -602,11 +609,11 @@ describe("transport routes", () => {
         it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/truck/details', async () => {
             const body = {
               journey: "storageNotes",
-              nationalityOfVehicle: "",
+              nationalityOfVehicle: "UK",
               registrationNumber: "ACA122", // required field
               freightBillNumber: "",
-              departureCountry: "",
-              departurePort: "",
+              departureCountry: "United Kingdom",
+              departurePort: "Lucis Port",
               placeOfUnloading: "UK", // required field
               departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
               vehicle:"truck",
@@ -618,7 +625,7 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "departureDate": "error.departureDate.date.max"
+                "departureDate": "error.departureDate.date.max",
             });
         });
 
@@ -641,19 +648,23 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "placeOfUnloading": "error.placeOfUnloading.string.empty",
+                "placeOfUnloading": "error.placeOfUnloading.any.required",
                 "registrationNumber": "error.registrationNumber.string.empty",
+                "departureCountry": "error.departureCountry.any.required",
+                "departureDate": "error.departureDate.any.required",
+                "departurePort": "error.departurePort.any.required",
+                "nationalityOfVehicle": "error.nationalityOfVehicle.string.empty",
             });
         });
 
         it('returns 200 when we POST an arrival when departureDate is before or equal to today\'s date /v1/transport/truck/details', async () => {
             const body = {
               journey: "storageNotes",
-              nationalityOfVehicle: "",
+              nationalityOfVehicle: "UK", // required field
               registrationNumber: "Ax2222", // required field
               freightBillNumber: "",
-              departureCountry: "",
-              departurePort: "",
+              departureCountry: "United Kingdom", // required field
+              departurePort: "Lexis Port", // required field
               placeOfUnloading: "UK", // required field
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"truck",
@@ -670,11 +681,11 @@ describe("transport routes", () => {
         it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/train/details', async () => {
             const body = {
               journey: "storageNotes",
-              railwayBillNumber: "RAIL1111", // required field
+              railwayBillNumber: "RAIL1111",
               freightBillNumber: "",
-              departureCountry: "",
-              departurePort: "",
-              placeOfUnloading: "UK", // required field
+              departureCountry: "United Kingdom",
+              departurePort: "London Port",
+              placeOfUnloading: "UK",
               departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
               vehicle:"train",
               arrival: true
@@ -689,14 +700,14 @@ describe("transport routes", () => {
             });
         });
 
-        it('returns 400 when we POST an arrival when placeOfUnloading, railwayBillNumber are empty to pass /v1/transport/train/details', async () => {
+        it('returns 400 when we POST an arrival when placeOfUnloading, railwayBillNumber and required arrival fields are empty /v1/transport/train/details', async () => {
             const body = {
               journey: "storageNotes",
-              railwayBillNumber: "", // required field
+              railwayBillNumber: "",
               freightBillNumber: "",
               departureCountry: "",
               departurePort: "",
-              placeOfUnloading: "", // required field
+              placeOfUnloading: "",
               departureDate: "",
               vehicle:"train",
               arrival: true
@@ -707,19 +718,22 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "placeOfUnloading": "error.placeOfUnloading.string.empty",
+                "placeOfUnloading": "error.placeOfUnloading.any.required",
                 "railwayBillNumber": "error.railwayBillNumber.string.empty",
+                "departureCountry": "error.departureCountry.any.required",
+                "departurePort": "error.departurePort.any.required",
+                "departureDate": "error.departureDate.any.required"
             });
         });
 
         it('returns 200 when we POST an arrival when departureDate is before or equal to today\'s date /v1/transport/train/details', async () => {
             const body = {
               journey: "storageNotes",
-              railwayBillNumber: "RAIL1111", // required field
+              railwayBillNumber: "RAIL1111",
               freightBillNumber: "",
-              departureCountry: "",
-              departurePort: "",
-              placeOfUnloading: "UK", // required field
+              departureCountry: "United Kingdom",
+              departurePort: "London Port",
+              placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"train",
               arrival: true
@@ -732,16 +746,16 @@ describe("transport routes", () => {
             expect(response.result).toEqual({ some: 'data' });
         });
 
-        it('returns 400 when we POST an arrival when departureDate is past today\'s date and vessel and place of unloading are empty /v1/transport/containerVessel/details', async () => {
+                it('returns 400 when we POST an arrival when departureDate is past today\'s date and vessel and place of unloading are empty /v1/transport/containerVessel/details', async () => {
             const body = {
               journey: "storageNotes",
-              vesselName: "", // required field
+              vesselName: "",
               flagState: "",
               freightBillNumber: "",
               containerNumbers: [],
               departureCountry: "",
               departurePort: "",
-              placeOfUnloading: "", // required field
+              placeOfUnloading: "",
               departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
               vehicle:"containerVessel",
               arrival: true
@@ -753,8 +767,12 @@ describe("transport routes", () => {
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
                 departureDate: "error.departureDate.date.max",
-                placeOfUnloading: "error.placeOfUnloading.string.empty",
+                departureCountry: "error.departureCountry.any.required",
+                departurePort: "error.departurePort.any.required",
+                placeOfUnloading: "error.placeOfUnloading.any.required",
                 vesselName: "error.vesselName.string.empty",
+                flagState: "error.flagState.string.empty",
+                "containerNumbers.0": "error.containerNumbers.array.min",
             });
         });
 
@@ -762,15 +780,15 @@ describe("transport routes", () => {
             const body = {
               journey: "storageNotes",
               vesselName: "Vessel1111", // required field
-              flagState: "",
+              flagState: "UK", // required field
               freightBillNumber: "",
-              containerNumbers: [],
-              departureCountry: "",
-              departurePort: "",
+              containerNumbers: ["CONT001"], // required field
               placeOfUnloading: "UK", // required field
-              departureDate: moment().format('DD/MM/YYYY'),
+              departureDate: moment().format('DD/MM/YYYY'), // required field
               vehicle:"containerVessel",
-              arrival: true
+              arrival: true,
+              departurePort: "Lexis Port", // required field
+              departureCountry: "United Kingdom",  // required field
             };
 
             const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
@@ -780,17 +798,138 @@ describe("transport routes", () => {
             expect(response.result).toEqual({ some: 'data' });
         });
 
+        // FI0-10290: Container vessel arrival transport flagState and containerNumbers validation tests
+        it('returns 400 when flagState is empty for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "Vessel1111",
+              flagState: "",
+              freightBillNumber: "",
+              containerNumbers: ["CONT001"],
+              placeOfUnloading: "UK",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true,
+              departurePort: "Lexis Port",
+              departureCountry: "United Kingdom",
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                flagState: "error.flagState.string.empty",
+            });
+        });
+
+        it('returns 400 when containerNumbers is empty for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "Vessel1111",
+              flagState: "UK",
+              freightBillNumber: "",
+              containerNumbers: [],
+              placeOfUnloading: "UK",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true,
+              departurePort: "Lexis Port",
+              departureCountry: "United Kingdom",
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                "containerNumbers.0": "error.containerNumbers.array.min",
+            });
+        });
+
+        it('returns 400 when flagState has invalid characters for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "Vessel1111",
+              flagState: "@#$%^",
+              freightBillNumber: "",
+              containerNumbers: ["CONT001"],
+              placeOfUnloading: "UK",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true,
+              departurePort: "Lexis Port",
+              departureCountry: "United Kingdom",
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                flagState: "error.flagState.string.pattern.base",
+            });
+        });
+
+        it('returns 400 when containerNumbers contains invalid characters for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "Vessel1111",
+              flagState: "UK",
+              freightBillNumber: "",
+              containerNumbers: ["CONT@#$"],
+              placeOfUnloading: "UK",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true,
+              departurePort: "Lexis Port",
+              departureCountry: "United Kingdom",
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                "containerNumbers.0": "error.containerNumbers.0.string.pattern.base",
+            });
+        });
+
+        it('returns 400 when containerNumbers contains empty string for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "Vessel1111",
+              flagState: "UK",
+              freightBillNumber: "",
+              containerNumbers: ["CONT001", ""],
+              placeOfUnloading: "UK",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true,
+              departurePort: "Lexis Port",
+              departureCountry: "United Kingdom",
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                "containerNumbers.1": "error.containerNumbers.1.string.empty",
+            });
+        });
+
         it('returns 400 when we POST an arrival when departureDate is past today\'s date and flight number and place of unloading are empty /v1/transport/plane/details', async () => {
             const body = {
               journey: "storageNotes",
               airwayBillNumber: "",
-              flightNumber: "", // required field
+              flightNumber: "",
               freightBillNumber: "",
               containerNumbers: [],
               departureCountry: "",
               departurePort: "",
               departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
-              placeOfUnloading: "", // required field
+              placeOfUnloading: "",
               departurePlace: "",
               vehicle:"plane",
               arrival: true
@@ -801,9 +940,12 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                departureDate: "error.departureDate.date.max",
-                placeOfUnloading: "error.placeOfUnloading.string.empty",
                 flightNumber: "error.flightNumber.string.empty",
+                "containerNumbers.0": "error.containerNumbers.array.min",
+                departureCountry: "error.departureCountry.string.empty",
+                departurePort: "error.departurePort.string.empty",
+                placeOfUnloading: "error.placeOfUnloading.any.required",
+                departureDate: "error.departureDate.date.max",
             });
         });
 
@@ -811,13 +953,12 @@ describe("transport routes", () => {
             const body = {
               journey: "storageNotes",
               airwayBillNumber: "",
-              flightNumber: "FLIGHT1111", // required field
+              flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: [],
-              departureCountry: "",
-              departurePort: "",
-              departureDate: moment().format('DD/MM/YYYY'),
-              departurePlace: "",
+              containerNumbers: ["CONT001"], // required field
+              departureCountry: "France", // required field
+              departurePort: "Calais", // required field
+              departureDate: moment().format('DD/MM/YYYY'), // required field
               placeOfUnloading: "UK", // required field
               vehicle:"plane",
               arrival: true
@@ -828,6 +969,102 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(200);
             expect(mockAddTransport).toHaveBeenCalled();
             expect(response.result).toEqual({ some: 'data' });
+        });
+
+        it('returns 400 when containerNumbers is empty for arrival plane transport /v1/transport/plane/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              airwayBillNumber: "",
+              flightNumber: "FLIGHT1111",
+              freightBillNumber: "",
+              containerNumbers: [],
+              departureCountry: "France",
+              departurePort: "Calais",
+              departureDate: moment().format('DD/MM/YYYY'),
+              placeOfUnloading: "UK",
+              vehicle:"plane",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                "containerNumbers.0": "error.containerNumbers.array.min"
+            });
+        });
+
+        it('returns 400 when departureCountry is empty for arrival plane transport /v1/transport/plane/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              airwayBillNumber: "",
+              flightNumber: "FLIGHT1111",
+              freightBillNumber: "",
+              containerNumbers: ["CONT001"],
+              departureCountry: "",
+              departurePort: "Calais",
+              departureDate: moment().format('DD/MM/YYYY'),
+              placeOfUnloading: "UK",
+              vehicle:"plane",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                departureCountry: "error.departureCountry.string.empty"
+            });
+        });
+
+        it('returns 400 when departurePort is empty for arrival plane transport /v1/transport/plane/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              airwayBillNumber: "",
+              flightNumber: "FLIGHT1111",
+              freightBillNumber: "",
+              containerNumbers: ["CONT001"],
+              departureCountry: "France",
+              departurePort: "",
+              departureDate: moment().format('DD/MM/YYYY'),
+              placeOfUnloading: "UK",
+              vehicle:"plane",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                departurePort: "error.departurePort.string.empty"
+            });
+        });
+
+        it('returns 400 when departureDate is empty for arrival plane transport /v1/transport/plane/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              airwayBillNumber: "",
+              flightNumber: "FLIGHT1111",
+              freightBillNumber: "",
+              containerNumbers: ["CONT001"],
+              departureCountry: "France",
+              departurePort: "Calais",
+              departureDate: "",
+              placeOfUnloading: "UK",
+              vehicle:"plane",
+              arrival: true
+            };
+
+            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                departureDate: "error.departureDate.date.format"
+            });
         });
     });
 });

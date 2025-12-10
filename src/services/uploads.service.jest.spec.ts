@@ -23,8 +23,13 @@ describe('save uploaded rows to redis', () => {
       commodity_code: '0123456',
       commodity_code_description: 'some commodity code description'
     },
+    startDate: '01-10-2020',
     landingDate: '10-10-2020',
     faoArea: 'FAO018',
+    highSeasArea: 'N/A',
+    eezCode: 'GBR',
+    rfmoCode: 'NEAFC',
+    gearCode: 'GNS',
     vessel: {
       pln: 'PH1100',
       vesselName: 'WIRON 5'
@@ -75,8 +80,13 @@ describe('get uploaded rows from redis', () => {
       commodity_code: '0123456',
       commodity_code_description: 'some commodity code description'
     },
+    startDate: '01-10-2020',
     landingDate: '10-10-2020',
     faoArea: 'FAO018',
+    highSeasArea: 'N/A',
+    eezCode: 'GBR',
+    rfmoCode: 'NEAFC',
+    gearCode: 'GNS',
     vessel: {
       pln: 'PH1100',
       vesselName: 'WIRON 5'
@@ -180,8 +190,13 @@ describe('parseAndValidateData for uploadedLandings', () => {
       commodity_code: 'some-commidity-code',
       commodity_code_description: 'some-commmodity-description',
     },
+    startDate: 'some-start-date',
     landingDate: 'some-landing-date',
     faoArea: 'faoArea',
+    highSeasArea: 'some-high-seas',
+    eezCode: 'some-eez',
+    rfmoCode: 'some-rfmo',
+    gearCode: 'some-gear',
     vessel: vessel,
     vesselPln: 'some-pln',
     exportWeight: 10,
@@ -209,6 +224,10 @@ describe('parseAndValidateData for uploadedLandings', () => {
       startDate: 'some-start-date',
       landingDate: 'some-landing-date',
       faoArea: 'faoArea',
+      highSeasArea: 'some-high-seas',
+      eezCode: 'some-eez',
+      rfmoCode: 'some-rfmo',
+      gearCode: 'some-gear',
       vessel: vessel,
       vesselPln: 'some-pln',
       exportWeight: 10,

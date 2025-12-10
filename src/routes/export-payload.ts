@@ -10,15 +10,16 @@ import ApplicationConfig from "../applicationConfig";
 import saveAsDraftSchema from '../schemas/catchcerts/saveAsDraftSchema';
 import landingsTypeChangeSchema from '../schemas/catchcerts/landingsTypeChangeSchema';
 import directLandingsSchema from "../schemas/catchcerts/directLandingsSchema";
+import manualLandingsSchema from "../schemas/catchcerts/manualLandingsSchema";
 import { DocumentStatuses, LandingsEntryOptions } from "../persistence/schema/catchCert";
 import { withDocumentLegitimatelyOwned } from "../helpers/withDocumentLegitimatelyOwned";
-import { decimalPlacesValidator } from '../helpers/customValidators';
+import { decimalPlacesValidator, validateExclusiveEconomicZones } from '../helpers/customValidators';
 import DocumentNumberService from '../services/documentNumber.service';
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import logger from "../logger";
 import { SYSTEM_ERROR } from '../services/constants';
 import { defineAuthStrategies } from '../helpers/auth';
-import { getFAOAreaList } from '../helpers/utils/utils';
+import { mergeSchemaAndValidationErrors } from '../validators/validationErrors';
 
 const extendedJoi = Joi.extend(require('@joi/date'));
 
@@ -55,68 +56,20 @@ export default class ExportPayloadRoutes {
                   return h.response().code(500).takeover();
                 });
               },
-              payload: Joi.object({
-                product: Joi.string().trim().required(),
-                vessel: Joi.object().keys({
-                  vesselName: Joi.string().trim().label("Vessel").required()
-                }),
-                dateLanded: Joi.string()
-                  .custom((value, helpers) => {
-                    const parts = value.split('-');
-                    if (parts.length !== 3)
-                      return helpers.error('date.base');
+              payload: async function (value: any) {
+                const errors = manualLandingsSchema.validate(value, { abortEarly: false, allowUnknown: true });
+                
+                // Validate each exclusiveEconomicZone country
+                const eezValidationErrors = await validateExclusiveEconomicZones(value);
 
-                    const year = parts[0];
-                    const month = parts[1].padStart(2, '0');
-                    const day = parts[2].padStart(2, '0');
-                    const isoDate = `${year}-${month}-${day}`;
-                    if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
-                      return helpers.error('date.base');
-                    }
-                    const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
-                    if (moment(value).isAfter(maxDate, 'day')) {
-                      return helpers.error('date.max');
-                    }
+                // Merge and throw all errors (schema + EEZ validation)
+                const combinedError = mergeSchemaAndValidationErrors(errors.error, eezValidationErrors);
+                if (combinedError) {
+                  throw combinedError;
+                }
 
-                    return value;
-                  }, 'Strict YYYY-MM-DD date format')
-                  .required(),
-                startDate: extendedJoi.date().custom((value: string, helpers: any) => {
-                  const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
-                  const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
-
-                  if (!startDate.isValid()) {
-                    return helpers.error('date.base');
-                  }
-
-                  if (dateLanded.isBefore(startDate, 'day')) {
-                    return helpers.error('date.max');
-                  }
-
-                  return value;
-                }, 'Start Date Validator').optional(),
-                exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
-                gearCategory: Joi.custom((value: string, helpers: any) => {
-                  const gearCategory = helpers.original;
-                  const gearType = helpers.state.ancestors[0].gearType;
-                  if (!gearCategory && gearType) {
-                    return helpers.error('string.empty');
-                  }
-                  return value;
-                }, 'Gear Category Validator').optional(),
-                gearType: Joi.custom((value: string, helpers: any) => {
-                  const gearType = helpers.original;
-                  const gearCategory = helpers.state.ancestors[0].gearCategory;
-                  if (gearCategory && !gearType) {
-                    return helpers.error('string.empty');
-                  }
-                  return value;
-                }, 'Gear Type Validator').optional(),
-                highSeasArea: Joi.string().optional(),
-                exclusiveEconomicZones: Joi.array().items(Joi.object()).optional(),
-                faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
-                rfmo: Joi.string().optional(),
-              })
+                return value;
+              }
             }
           }
         },
@@ -147,7 +100,20 @@ export default class ExportPayloadRoutes {
                   return h.response().code(500).takeover();
                 });
               },
-              payload: directLandingsSchema
+              payload: async function (value: any) {
+                const errors = directLandingsSchema.validate(value, { abortEarly: false, allowUnknown: true });
+
+                // Validate each exclusiveEconomicZone country
+                const eezValidationErrors = await validateExclusiveEconomicZones(value);
+
+                // Merge and throw all errors (schema + EEZ validation)
+                const combinedError = mergeSchemaAndValidationErrors(errors.error, eezValidationErrors);
+                if (combinedError) {
+                  throw combinedError;
+                }
+
+                return value;
+              }
             }
           }
         },
@@ -288,27 +254,34 @@ export default class ExportPayloadRoutes {
                     return helpers.error('date.max');
                   }
                   return value;
-                }, 'Start Date Validator').optional(),
+                }, 'Start Date Validator').required().messages({
+                  'any.required': 'error.startDate.any.required',
+                  'date.base': 'error.startDate.date.base',
+                  'date.max': 'error.startDate.date.max'
+                }),
                 exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required(),
-                gearCategory: Joi.custom((value: string, helpers: any) => {
-                  const gearCategory = helpers.original;
-                  const gearType = helpers.state.ancestors[0].gearType;
-                  if (!gearCategory && gearType) {
-                    return helpers.error('string.empty');
-                  }
-                  return value;
-                }, 'Gear Category Validator').optional(),
-                gearType: Joi.custom((value: string, helpers: any) => {
-                  const gearType = helpers.original;
-                  const gearCategory = helpers.state.ancestors[0].gearCategory;
-                  if (gearCategory && !gearType) {
-                    return helpers.error('string.empty');
-                  }
-                  return value;
-                }, 'Gear Type Validator').optional(),
+                gearCategory: Joi.string().required().messages({
+                  'any.required': 'error.gearCategory.any.required',
+                  'string.empty': 'error.gearCategory.string.empty'
+                }),
+                gearType: Joi.string().required().messages({
+                  'any.required': 'error.gearType.any.required',
+                  'string.empty': 'error.gearType.string.empty'
+                }),
                 faoArea: Joi.string().trim().label("Catch area").required(),
-                highSeasArea: Joi.string().optional(),
-                exclusiveEconomicZones: Joi.array().items(Joi.object()).optional(),
+                highSeasArea: Joi.string().valid('Yes', 'No').required().messages({
+                  'any.required': 'error.highSeasArea.any.required',
+                  'any.only': 'error.highSeasArea.any.only'
+                }),
+                exclusiveEconomicZones: Joi.alternatives().conditional('highSeasArea', {
+                  is: 'No',
+                  then: Joi.array().items(Joi.object()).min(1).required().messages({
+                    'any.required': 'error.exclusiveEconomicZones.any.required',
+                    'array.min': 'error.exclusiveEconomicZones.array.min',
+                    'array.base': 'error.exclusiveEconomicZones.array.base'
+                  }),
+                  otherwise: Joi.array().items(Joi.object()).optional()
+                }),
                 rfmo: Joi.string().optional()
               })
             }

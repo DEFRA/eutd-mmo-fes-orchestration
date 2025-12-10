@@ -43,16 +43,7 @@ export default class UploadsController {
     let rowNumber = 1;
 
     const landings: IUploadedLanding[] = await Promise.all(rows.map(async (originalRow) => {
-      const numCellsMandatory = 5;
-      const cells = originalRow.split(',');
-      const hasMadatoryFieldsOnly = cells.length === numCellsMandatory
-      const headers = hasMadatoryFieldsOnly ? [
-        'productId',
-        'landingDate',
-        'faoArea',
-        'vesselPln',
-        'exportWeight'
-      ] : [
+      const headers = [
         'productId',
         'startDate',
         'landingDate',
@@ -81,7 +72,6 @@ export default class UploadsController {
       };
 
       rowNumber++;
-
       return landing;
     }));
 

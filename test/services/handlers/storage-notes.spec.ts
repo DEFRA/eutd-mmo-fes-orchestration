@@ -551,8 +551,7 @@ test('/create-storage-document/add-storage-facility-details with all mandatory f
       facilityTownCity: 'Seaham',
       facilityPostcode: 'SE11EA',
       facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
+      addAnotherProduct: 'notset'
     };
 
     let { errors } = await handler({
@@ -594,8 +593,7 @@ test('/create-storage-document/add-storage-facility-details with missing facilit
       facilityTownCity: 'Seaham',
       facilityPostcode: 'SE11EA',
       facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
+      addAnotherProduct: 'notset'
     };
 
     let { errors } = await handler({
@@ -642,8 +640,7 @@ test('/create-storage-document/add-storage-facility-details with missing address
       facilityTownCity: '',
       facilityPostcode: '',
       facilttyStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
+      addAnotherProduct: 'notset'
     };
 
     let { errors } = await handler({
@@ -690,8 +687,7 @@ test('/create-storage-document/add-storage-facility-details with missing town or
       facilityTownCity: '',
       facilityPostcode: 'SE11EA',
       facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
+      addAnotherProduct: 'notset'
     };
 
     let { errors } = await handler({
@@ -738,8 +734,7 @@ test('/create-storage-document/add-storage-facility-details with missing buildin
       facilityTownCity: '',
       facilityPostcode: 'SE11EA',
       facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
+      addAnotherProduct: 'notset'
     };
 
     let { errors } = await handler({
@@ -786,8 +781,7 @@ test('/create-storage-document/add-storage-facility-details with missing Stored 
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: 'Seaham',
       facilityPostcode: 'SE11EA',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
+      addAnotherProduct: 'notset'
     };
 
     let { errors } = await handler({
@@ -834,8 +828,7 @@ test('/create-storage-document/add-storage-facility-details with whitespace faci
       facilityTownCity: ' ',
       facilityPostcode: 'SE11EA',
       facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
+      addAnotherProduct: 'notset'
     };
 
     let { errors } = await handler({
@@ -854,100 +847,6 @@ test('/create-storage-document/add-storage-facility-details with whitespace faci
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.end();
-  } catch (e) {
-    t.end(e);
-  }
-});
-
-//------ TESTS FOR /create-storage-document/you-have-added-a-storage-facility -----
-test('/create-storage-document/you-have-added-a-storage-facility with unselected add another storage facility choice validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-storage-document/you-have-added-a-storage-facility';
-    const handler = StorageNotes[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix ',
-          commodityCode: '34234324',
-          certificateNumber: '32423434',
-          productWeight: '23',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      facilityName: 'Hank Marvin',
-      facilityAddressOne: 'Fish Quay',
-      facilityAddressTwo: 'Fishy Way',
-      facilityTownCity: 'Seaham',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'notset'
-    };
-
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
-    });
-
-    const expected = {
-      addAnotherStorageFacility:
-        'Select yes if you need to add another storage facility'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.end();
-  } catch (e) {
-    t.end(e);
-  }
-});
-
-test('/create-storage-document/you-have-added-a-storage-facility with unselected add another storage facility choice validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-storage-document/you-have-added-a-storage-facility';
-    const handler = StorageNotes[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix ',
-          commodityCode: '34234324',
-          certificateNumber: '32423434',
-          productWeight: '23',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      facilityName: 'Hank Marvin',
-      facilityAddressOne: 'Fish Quay',
-      facilityAddressTwo: 'Fishy Way',
-      facilityTownCity: 'Seaham',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset',
-      addAnotherStorageFacility: 'No'
-    };
-
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
-    });
-
-    t.true(errors);
-    t.deepEquals(errors, {});
     t.end();
   } catch (e) {
     t.end(e);
