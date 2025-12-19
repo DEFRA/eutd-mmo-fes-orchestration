@@ -192,4 +192,74 @@ describe("Export location service", () => {
 
     expect(mockSaveExportLocationDataCC).toHaveBeenCalledWith("User 1", exportLocation, "GBR-3444-CC-3444-3533", contactId);
   });
+
+  it("Will retrieve PS export location with pointOfDestination from mongo", async () => {
+    const mockExportLocation = {
+      exportedTo: {
+        officialCountryName: 'France',
+        isoCodeAlpha2: 'FR'
+      },
+      pointOfDestination: 'Port of Rotterdam'
+    };
+    mockGetExportLocationDataPS.mockResolvedValue(mockExportLocation);
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
+
+    const result = await ExportLocationService.get("User 1", "GBR-2020-PS-12345", contactId);
+
+    expect(mockGetExportLocationDataPS).toHaveBeenCalledWith('User 1', "GBR-2020-PS-12345", contactId);
+    expect(result).toEqual(mockExportLocation);
+    expect(result.pointOfDestination).toBe('Port of Rotterdam');
+  });
+
+  it("Will save PS export location with pointOfDestination in mongo", async () => {
+    mockSaveExportLocationDataPS.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
+
+    const exportLocation: ExportLocation = {
+      exportedTo: {
+        officialCountryName: 'France',
+        isoCodeAlpha2: 'FR'
+      },
+      pointOfDestination: 'Port of Marseille'
+    }
+
+    await ExportLocationService.save("User 1", exportLocation, "GBR-2020-PS-12345", contactId);
+
+    expect(mockSaveExportLocationDataPS).toHaveBeenCalledWith("User 1", exportLocation, "GBR-2020-PS-12345", contactId);
+  });
+
+  it("Will retrieve SD export location with pointOfDestination from mongo", async () => {
+    const mockExportLocation = {
+      exportedTo: {
+        officialCountryName: 'Spain',
+        isoCodeAlpha2: 'ES'
+      },
+      pointOfDestination: 'Port of Barcelona'
+    };
+    mockGetExportLocationDataSD.mockResolvedValue(mockExportLocation);
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
+
+    const result = await ExportLocationService.get("User 1", "GBR-2020-SD-12345", contactId);
+
+    expect(mockGetExportLocationDataSD).toHaveBeenCalledWith('User 1', "GBR-2020-SD-12345", contactId);
+    expect(result).toEqual(mockExportLocation);
+    expect(result.pointOfDestination).toBe('Port of Barcelona');
+  });
+
+  it("Will save SD export location with pointOfDestination in mongo", async () => {
+    mockSaveExportLocationDataSD.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
+
+    const exportLocation: ExportLocation = {
+      exportedTo: {
+        officialCountryName: 'Spain',
+        isoCodeAlpha2: 'ES'
+      },
+      pointOfDestination: 'Port of Valencia'
+    }
+
+    await ExportLocationService.save("User 1", exportLocation, "GBR-2020-SD-12345", contactId);
+
+    expect(mockSaveExportLocationDataSD).toHaveBeenCalledWith("User 1", exportLocation, "GBR-2020-SD-12345", contactId);
+  });
 });

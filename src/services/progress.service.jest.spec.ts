@@ -12,6 +12,9 @@ import { Progress } from '../persistence/schema/frontEndModels/payload';
 import logger from '../logger';
 import { Transport } from '../persistence/schema/frontEndModels/transport';
 import { StorageDocumentProgress } from '../persistence/schema/frontEndModels/storageDocument';
+import axios from 'axios';
+
+jest.mock('axios');
 describe('get', () => {
   const documentNumber = 'document123';
   const userPrincipal = 'Bob';
@@ -203,7 +206,8 @@ describe('get', () => {
           isoCodeAlpha2: 'AF',
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
-        }
+        },
+        pointOfDestination: 'Port of Kabul'
       }
     });
 
@@ -243,6 +247,50 @@ describe('get', () => {
         landingsEntryOption: 'directLanding',
         exportedFrom: 'United Kingdom',
         exportedTo: {
+        }
+      },
+    });
+
+    const result = await ProgressService.get(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    expect(result).toStrictEqual({
+      progress: {
+        reference: 'OPTIONAL',
+        exporter: 'COMPLETED',
+        products: 'INCOMPLETE',
+        landings: 'CANNOT START',
+        conservation: 'INCOMPLETE',
+        exportJourney: 'INCOMPLETE',
+      },
+      requiredSections: 5,
+      completedSections: 1,
+    });
+    expect(mockGetDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will show exportJourney as INCOMPLETE when pointOfDestination is missing', async () => {
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        products: [],
+        exporterDetails,
+        transportation: {
+          vehicle: 'directLanding'
+        },
+        landingsEntryOption: 'directLanding',
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
         }
       },
     });
@@ -450,6 +498,7 @@ describe('get', () => {
             isoCodeAlpha3: 'AFG',
             isoNumericCode: '004',
           },
+          pointOfDestination: 'Port of Kabul',
         },
         conservation: {
           conservationReference: 'UK Fisheries Policy',
@@ -508,6 +557,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -561,6 +611,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -607,6 +658,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -657,6 +709,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -710,6 +763,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -763,6 +817,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -814,6 +869,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -845,6 +901,18 @@ describe('get', () => {
   });
 
   it('will return COMPLETE transportationDetails if the user adds a vehicle and the transport details for transportation with no CMR', async () => {
+    // Mock axios to return countries list including 'UK'
+    (axios.get as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          officialCountryName: 'UK',
+          isoCodeAlpha2: 'GB',
+          isoCodeAlpha3: 'GBR',
+          isoNumericCode: '826'
+        }
+      ]
+    });
+
     mockGetDraft.mockResolvedValue({
       exportData: {
         transportation: undefined,
@@ -866,6 +934,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -920,6 +989,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -973,6 +1043,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -1026,6 +1097,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -1080,6 +1152,7 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
+        pointOfDestination: 'Port of Kabul',
       },
     });
 
@@ -1159,7 +1232,8 @@ describe('get', () => {
           isoCodeAlpha3: 'AFG',
           isoNumericCode: '004',
         },
-        exportedFrom: 'United Kingdom'
+        exportedFrom: 'United Kingdom',
+        pointOfDestination: 'Port of Kabul'
       },
     });
 
@@ -1747,6 +1821,7 @@ describe('getTransportDetails', () => {
           isoCodeAlpha3: 'BRA',
           isoNumericCode: '076',
         },
+        pointOfDestination: 'Rio de Janeiro',
         cmr: 'false',
         nationalityOfVehicle: 'UK',
         registrationNumber: 'OP98Y89',
@@ -1756,6 +1831,7 @@ describe('getTransportDetails', () => {
         departureCountry: 'United Kingdom',
         departurePort: 'Lucis Port',
         departureDate: '04/07/2024',
+        facilityArrivalDate: '03/07/2024'
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
@@ -2349,6 +2425,7 @@ describe('getTransportDetails', () => {
         isoCodeAlpha3: 'BRA',
         isoNumericCode: '076',
       },
+      pointOfDestination: 'Rio de Janeiro',
       cmr: 'false',
       nationalityOfVehicle: 'UK',
       registrationNumber: 'OP98Y89',
@@ -3713,7 +3790,7 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
-  it('will return COMPLETED exportDestination if there is exportedTo in exportData', async () => {
+  it('will return COMPLETED exportDestination if there is exportedTo and pointOfDestination in exportData', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
         exportedTo: {
@@ -3722,6 +3799,7 @@ describe('getProcessingStatementProgress', () => {
           isoCodeAlpha3: 'A3',
           isoNumericCode: 'SP',
         },
+        pointOfDestination: 'Calais port',
       },
     });
 
@@ -3764,6 +3842,93 @@ describe('getProcessingStatementProgress', () => {
           isoCodeAlpha3: 'A3',
           isoNumericCode: 'SP',
         },
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`
+    );
+    expect(mockProcessingStatementDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return INCOMPLETE exportDestination if exportedTo is present but pointOfDestination is missing', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        exportedTo: {
+          officialCountryName: 'SPAIN',
+          isoCodeAlpha2: 'A1',
+          isoCodeAlpha3: 'A3',
+          isoNumericCode: 'SP',
+        },
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`
+    );
+    expect(mockProcessingStatementDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return INCOMPLETE exportDestination if pointOfDestination is empty string', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        exportedTo: {
+          officialCountryName: 'SPAIN',
+          isoCodeAlpha2: 'A1',
+          isoCodeAlpha3: 'A3',
+          isoNumericCode: 'SP',
+        },
+        pointOfDestination: '',
       },
     });
 
@@ -4181,6 +4346,7 @@ describe('getProcessingStatementProgress', () => {
           isoCodeAlpha3: 'A3',
           isoNumericCode: 'SP',
         },
+        pointOfDestination: 'Calais port',
       },
       requestByAdmin: false,
       documentUri: '',
@@ -4485,6 +4651,7 @@ describe('getStorageDocumentProgress', () => {
         catches: [
           {
             product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'non_uk',
@@ -4544,6 +4711,7 @@ describe('getStorageDocumentProgress', () => {
         catches: [
           {
             product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'non_uk',
@@ -4586,6 +4754,7 @@ describe('getStorageDocumentProgress', () => {
         catches: [
           {
             product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'uk',
@@ -4636,6 +4805,7 @@ describe('getStorageDocumentProgress', () => {
           },
           {
             product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'non_uk',
@@ -4733,11 +4903,11 @@ describe('getStorageDocumentProgress', () => {
               isoNumericCode: '724',
             },
             supportingDocuments: [],
-            productDescription: "",
+            productDescription: 'Some product description',
             netWeightProductArrival: "1",
             netWeightFisheryProductArrival: "1",
             netWeightProductDeparture: "100",
-            netWeightFisheryProductDeparture: ""
+            netWeightFisheryProductDeparture: "100"
           }
         ],
         transportation: {
@@ -4747,6 +4917,7 @@ describe('getStorageDocumentProgress', () => {
             isoCodeAlpha3: "DZA",
             isoNumericCode: "012"
           },
+          pointOfDestination: "Algiers Port",
           vehicle: "containerVessel",
           departurePlace: "port",
           vesselName: "Felicity Ace",
@@ -4847,7 +5018,8 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [
           {
-            product: 'Atlantic cod (COD)',
+          product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'non_uk',
@@ -4865,7 +5037,8 @@ describe('getStorageDocumentProgress', () => {
             id: 'dsfdsf-1643629199',
             netWeightProductArrival: '1',
             netWeightFisheryProductArrival: '1',
-            netWeightProductDeparture: '700'
+            netWeightProductDeparture: '700',
+            netWeightFisheryProductDeparture: '700'
           },
         ],
         exporterDetails: {
@@ -4909,13 +5082,14 @@ describe('getStorageDocumentProgress', () => {
           flightNumber: 'BA078',
           containerNumbers: '0123456789',
           exportedFrom: 'United Kingdom',
-          exportDate: '26/05/2023',
+          exportDate: '25/09/2023',
           exportedTo: {
             officialCountryName: 'Afghanistan',
             isoCodeAlpha2: 'AF',
             isoCodeAlpha3: 'AFG',
             isoNumericCode: '004',
           },
+          pointOfDestination: 'Kabul Airport',
           departurePlace: 'London Heathrow'
         },
         facilityName: 'dora',
@@ -5227,6 +5401,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5275,6 +5450,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5323,6 +5499,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5371,6 +5548,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5419,6 +5597,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5467,6 +5646,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5514,6 +5694,7 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5541,6 +5722,7 @@ describe('getStorageDocumentProgress', () => {
             isoCodeAlpha3: "DZA",
             isoNumericCode: "012"
           },
+          pointOfDestination: "Algiers Port",
           vehicle: "containerVessel",
           departurePlace: "port",
           vesselName: "Felicity Ace",
@@ -5557,11 +5739,12 @@ describe('getStorageDocumentProgress', () => {
     expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
   });
 
-  it('should return COMPLETED transport details when at least one weight type is valid', async () => {
+  it('should return INCOMPLETE transport details when at least one weight type is valid', async () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
+          productDescription: 'Some product description',
           commodityCode: '45345454354',
           certificateNumber: 'DSFDSF',
           certificateType: 'non_uk',
@@ -5580,7 +5763,7 @@ describe('getStorageDocumentProgress', () => {
           netWeightProductArrival: '90',
           netWeightFisheryProductArrival: '90',
           netWeightProductDeparture: '10.50',
-          netWeightFisheryProductDeparture: '' // Empty fishery weight is okay if product weight is valid
+          netWeightFisheryProductDeparture: ''
         }],
         transportation: {
           exportedTo: {
@@ -5589,6 +5772,7 @@ describe('getStorageDocumentProgress', () => {
             isoCodeAlpha3: "DZA",
             isoNumericCode: "012"
           },
+          pointOfDestination: "Algiers Port",
           vehicle: "containerVessel",
           departurePlace: "port",
           vesselName: "Felicity Ace",
@@ -5602,6 +5786,6 @@ describe('getStorageDocumentProgress', () => {
 
     const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
 
-    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
   });
 });

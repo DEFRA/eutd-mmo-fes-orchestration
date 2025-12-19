@@ -140,7 +140,7 @@ export default class TransportRoutes {
                 const errorObject = errorExtractor(error);
 
                 if (isHtml) {
-                  const inputFields = ["registrationNumber", "nationalityOfVehicle", "departurePlace", "exportDate"];
+                  const inputFields = ["registrationNumber", "nationalityOfVehicle", "departurePlace", "exportDate","facilityArrivalDate"];
                   const result = nonJSInputHistory(req.payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
@@ -183,7 +183,7 @@ export default class TransportRoutes {
                 const isHtml = acceptsHtml(req.headers);
 
                 if (isHtml) {
-                  const inputFields = ["flightNumber", "containerNumber", "departurePlace", "exportDate"];
+                  const inputFields = ["flightNumber", "containerNumber", "departurePlace", "exportDate","facilityArrivalDate"];
                   const result = nonJSInputHistory(req.payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
@@ -227,7 +227,7 @@ export default class TransportRoutes {
                 }
 
                 if (isHtml) {
-                  const inputFields = ["railwayBillNumber", "departurePlace", "exportDate"];
+                  const inputFields = ["railwayBillNumber", "departurePlace", "exportDate", "facilityArrivalDate"];
                   const result = nonJSInputHistory(req.payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
@@ -483,7 +483,7 @@ export default class TransportRoutes {
                 }
 
                 if (isHtml) {
-                  const inputFields = ["railwayBillNumber", "departurePlace", "exportDate"];
+                  const inputFields = ["railwayBillNumber", "departurePlace", "exportDate", "facilityArrivalDate"];
                   const result = nonJSInputHistory(req.payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 

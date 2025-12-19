@@ -1796,9 +1796,12 @@ describe('createExportCerticate', () => {
     const mockGetCatchCertificateTransportDetails = jest.spyOn(CatchCertificateTransportation, 'getTransportationDetails');
     const mockGetConvservation = jest.spyOn(CatchCertService, 'getConservation');
     const mockCompleteDraft = jest.spyOn(CatchCertService, 'completeDraft');
+    const mockInvalidateDraftCache = jest.spyOn(CatchCertService, 'invalidateDraftCache');
 
     const mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
     const mockRefresh = jest.spyOn(VesselLandingsRefresher, 'refresh');
+
+    mockInvalidateDraftCache.mockResolvedValue(undefined);
 
     mockIsOfflineValidation = jest.spyOn(applicationConfig, 'isOfflineValidation');
     mockRefreshParallel = jest.spyOn(ExportPayloadService, 'performParallelRefresh');
@@ -1853,6 +1856,11 @@ describe('createExportCerticate', () => {
       id: "0",
       vehicle: "directLanding"
     })
+
+    jest.spyOn(CatchCertificateTransportation, 'getTransportations').mockResolvedValue([{
+      id: "0",
+      vehicle: "directLanding"
+    }]);
 
     mockCompleteDraft.mockResolvedValue(null);
 
@@ -2505,6 +2513,70 @@ describe('createExportCerticate', () => {
 
     expect(mockLoggerError).toHaveBeenCalledTimes(1);
     expect(mockLoggerError).toHaveBeenCalledWith(`[CREATE-EXPORT-CERTIFICATE][GBR-2020-CC-F9F69D192][SERVICE][ERROR][${e.stack || e}]`);
+  });
+
+  it('should use empty object when exporter.model is null', async () => {
+    const mockGetExporterDetails = jest.spyOn(CatchCertService, 'getExporterDetails');
+    
+    mockGetExporterDetails.mockResolvedValueOnce({
+      model: null as any
+    });
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    const result = await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    expect(result).toBeDefined();
+    expect(result.documentNumber).toBe('GBR-2020-CC-F9F69D192');
+  });
+
+  it('should use empty object when exporter.model is undefined', async () => {
+    const mockGetExporterDetails = jest.spyOn(CatchCertService, 'getExporterDetails');
+    
+    mockGetExporterDetails.mockResolvedValueOnce({
+      model: undefined as any
+    });
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    const result = await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    expect(result).toBeDefined();
+    expect(result.documentNumber).toBe('GBR-2020-CC-F9F69D192');
+  });
+
+  it('should use empty array when transportations is not an array (null)', async () => {
+    const mockGetTransportations = jest.spyOn(CatchCertificateTransportation, 'getTransportations');
+    
+    mockGetTransportations.mockResolvedValueOnce(null as any);
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    const result = await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    expect(result).toBeDefined();
+    expect(result.documentNumber).toBe('GBR-2020-CC-F9F69D192');
+  });
+
+  it('should use empty array when transportations is a non-array object', async () => {
+    const mockGetTransportations = jest.spyOn(CatchCertificateTransportation, 'getTransportations');
+    
+    mockGetTransportations.mockResolvedValueOnce({ invalid: 'data' } as any);
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    const result = await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    expect(result).toBeDefined();
+    expect(result.documentNumber).toBe('GBR-2020-CC-F9F69D192');
   });
 });
 

@@ -125,12 +125,14 @@ describe("transport routes", () => {
             {
                 url: '/v1/transport/truck/details',
                 otherRequiredFields: {
+                    arrival: false,
                     nationalityOfVehicle: "x",
                     registrationNumber: "x",
                     departurePlace: "x",
                     departurePort: "x",
                     departureCountry: "x",
                     departureDate: '04/07/2024',
+                    pointOfDestination: "Calais Port",
                     exportedTo: {
                       officialCountryName: "Nigeria",
                       isoCodeAlpha2: null,
@@ -142,9 +144,11 @@ describe("transport routes", () => {
             {
                 url: '/v1/transport/plane/details',
                 otherRequiredFields: {
+                    arrival: false,
                     flightNumber: "x",
                     departurePlace: "x",
                     containerNumbers: ["x"],
+                    pointOfDestination: "Paris Airport",
                     exportedTo: {
                       officialCountryName: "Nigeria"
                     }
@@ -153,8 +157,10 @@ describe("transport routes", () => {
             {
                 url: '/v1/transport/train/details',
                 otherRequiredFields: {
+                    arrival: false,
                     departurePlace: "x",
                     railwayBillNumber: "x",
+                    pointOfDestination: "Brussels Station",
                     exportedTo: {
                       officialCountryName: "Nigeria",
                       isoCodeAlpha2: "",
@@ -166,10 +172,12 @@ describe("transport routes", () => {
             {
                 url: '/v1/transport/containerVessel/details',
                 otherRequiredFields: {
+                    arrival: false,
                     vesselName: "x",
                     flagState: "x",
                     containerNumbers: ["x"],
                     departurePlace: "x",
+                    pointOfDestination: "Lagos Port",
                     exportedTo: {
                       officialCountryName: "Nigeria",
                       isoCodeAlpha2: undefined,
@@ -210,6 +218,7 @@ describe("transport routes", () => {
                         ...exportDateFields
                     })
                     const response = await server.inject(request);
+                    // pointOfDestination is always provided from otherRequiredFields, so only expect exportDate error
                     const error = { exportDate: exportDateErrorText };
                     expect(mockAddTransport).not.toHaveBeenCalled();
                     expect(response.statusCode).toBe(400);
@@ -228,8 +237,11 @@ describe("transport routes", () => {
 
             it('returns 200 and doesnt fail when export date given in right format and within range of 1 day in future', async () => {
 
+                const today = moment().format('DD/MM/YYYY');
+                const tomorrowIso = moment().add(1, 'day').toISOString();
+                
                 const request = createRequestObj(url, {...otherRequiredFields,
-                    ...{exportDate:moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
+                    ...{facilityArrivalDate: today, exportDate: today, exportDateTo: tomorrowIso}
                 })
                 const response = await server.inject(request);
                 expect(mockAddTransport).toHaveBeenCalled();
@@ -263,8 +275,11 @@ describe("transport routes", () => {
 
                 mockAddTransport.mockRejectedValue(new Error('an error'));
 
+                const today = moment().format('DD/MM/YYYY');
+                const tomorrowIso = moment().add(1, 'day').toISOString();
+                
                 const request = createRequestObj(url, {...otherRequiredFields,
-                    ...{exportDate:moment().utc().format('DD/MM/YYYY'), exportDateTo: moment().startOf('day').add(1, "day").toISOString()}
+                    ...{facilityArrivalDate: today, exportDate: today, exportDateTo: tomorrowIso}
                 })
                 const response = await server.inject(request);
                 expect(mockAddTransport).toHaveBeenCalled();

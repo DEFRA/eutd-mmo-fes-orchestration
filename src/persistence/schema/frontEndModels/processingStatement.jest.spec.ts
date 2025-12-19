@@ -269,6 +269,62 @@ describe('toBackEndProcessingStatementExportData', () => {
 
     expect(result).toStrictEqual(expected);
   });
+
+  it('should include pointOfDestination when provided', () => {
+    const expected = {
+      "consignmentDescription": "Commodity code",
+      "catches": [],
+      exportedTo : {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      },
+      plantPostcode: "AB12 3CD",
+      pointOfDestination: "Madrid Port"
+    };
+
+    const processingStatement: FrontEndProcessingStatement.ProcessingStatement = {
+      catches: [],
+      consignmentDescription: "Commodity code",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      },
+      plantPostcode: "AB12 3CD",
+      pointOfDestination: "Madrid Port",
+      error: ""
+    };
+
+    const result = FrontEndProcessingStatement.toBackEndProcessingStatementExportData(processingStatement, null, 'some-document-number');
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('should omit undefined fields from plant details', () => {
+    const processingStatement: FrontEndProcessingStatement.ProcessingStatement = {
+      catches: [],
+      consignmentDescription: "Commodity code",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      },
+      plantName: "Test Plant",
+      plantPostcode: "AB12 3CD",
+      plantApprovalNumber: undefined,
+      error: ""
+    };
+
+    const result = FrontEndProcessingStatement.toBackEndProcessingStatementExportData(processingStatement, null, 'some-document-number');
+
+    expect(result.plantName).toBe("Test Plant");
+    expect(result.plantPostcode).toBe("AB12 3CD");
+    expect(result).not.toHaveProperty('plantApprovalNumber');
+  });
 });
 
 describe('toFrontEndProcessing mapping Processing Statement front end to back end', () => {

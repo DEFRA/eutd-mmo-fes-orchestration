@@ -8,7 +8,10 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().required(),
+      otherwise: Joi.string().trim().required().messages({
+        'any.required': 'error.nationalityOfVehicle.any.required',
+        'string.empty': 'error.nationalityOfVehicle.string.empty',
+      }),
     }),
     otherwise: Joi.forbidden(),
   }),

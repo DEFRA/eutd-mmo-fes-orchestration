@@ -30,6 +30,7 @@ export interface ProcessingStatement {
   errors?: {};
   errorsUrl?: string;
   exportedTo: ICountry;
+  pointOfDestination?: string;
   _plantDetailsUpdated?: boolean;
 }
 export interface ProcessingStatementDraft {
@@ -123,6 +124,28 @@ export const toBackEndProcessingStatement = (
   }
 }
 
+const getOptionalField = <T, K extends keyof T>(obj: T, key: K): T[K] | undefined => {
+  return obj?.[key] ? obj[key] : undefined;
+};
+
+const mapPlantDetails = (processingStatement: ProcessingStatement) => ({
+  personResponsibleForConsignment: getOptionalField(processingStatement, 'personResponsibleForConsignment'),
+  plantApprovalNumber: getOptionalField(processingStatement, 'plantApprovalNumber'),
+  plantName: getOptionalField(processingStatement, 'plantName'),
+  plantAddressOne: getOptionalField(processingStatement, 'plantAddressOne'),
+  plantBuildingName: getOptionalField(processingStatement, 'plantBuildingName'),
+  plantBuildingNumber: getOptionalField(processingStatement, 'plantBuildingNumber'),
+  plantSubBuildingName: getOptionalField(processingStatement, 'plantSubBuildingName'),
+  plantStreetName: getOptionalField(processingStatement, 'plantStreetName'),
+  plantCounty: getOptionalField(processingStatement, 'plantCounty'),
+  plantCountry: getOptionalField(processingStatement, 'plantCountry'),
+  plantTownCity: getOptionalField(processingStatement, 'plantTownCity'),
+  plantPostcode: getOptionalField(processingStatement, 'plantPostcode'),
+  dateOfAcceptance: getOptionalField(processingStatement, 'dateOfAcceptance'),
+  exportedTo: getOptionalField(processingStatement, 'exportedTo'),
+  pointOfDestination: getOptionalField(processingStatement, 'pointOfDestination'),
+});
+
 export const toBackEndProcessingStatementExportData = (
   processingStatement: ProcessingStatement,
   exporterDetails: Exporter | null,
@@ -134,23 +157,14 @@ export const toBackEndProcessingStatementExportData = (
     consignmentDescription: processingStatement.consignmentDescription,
     healthCertificateNumber: getHealthCertificateNumber(processingStatement),
     healthCertificateDate: getHealthCertificateDate(processingStatement),
-    personResponsibleForConsignment: processingStatement?.personResponsibleForConsignment ? processingStatement.personResponsibleForConsignment : undefined,
-    plantApprovalNumber: processingStatement?.plantApprovalNumber ? processingStatement.plantApprovalNumber : undefined,
-    plantName: processingStatement?.plantName ? processingStatement.plantName : undefined,
-    plantAddressOne: processingStatement?.plantAddressOne ? processingStatement.plantAddressOne : undefined,
-    plantBuildingName: processingStatement?.plantBuildingName ? processingStatement.plantBuildingName : undefined,
-    plantBuildingNumber: processingStatement?.plantBuildingNumber ? processingStatement.plantBuildingNumber : undefined,
-    plantSubBuildingName: processingStatement?.plantSubBuildingName ? processingStatement.plantSubBuildingName : undefined,
-    plantStreetName: processingStatement?.plantStreetName ? processingStatement.plantStreetName : undefined,
-    plantCounty: processingStatement?.plantCounty ? processingStatement.plantCounty : undefined,
-    plantCountry: processingStatement?.plantCountry ? processingStatement.plantCountry : undefined,
-    plantTownCity: processingStatement?.plantTownCity ? processingStatement.plantTownCity : undefined,
-    plantPostcode: processingStatement?.plantPostcode ? processingStatement.plantPostcode : undefined,
-    dateOfAcceptance: processingStatement?.dateOfAcceptance ? processingStatement.dateOfAcceptance : undefined,
-    exportedTo: processingStatement?.exportedTo ? processingStatement.exportedTo : undefined
+    ...mapPlantDetails(processingStatement)
   };
 
-  Object.keys(mappedProperties).forEach(key => mappedProperties[key] === undefined && delete mappedProperties[key]);
+  for (const key of Object.keys(mappedProperties)) {
+    if (mappedProperties[key] === undefined) {
+      delete mappedProperties[key];
+    }
+  }
 
   return mappedProperties;
 }

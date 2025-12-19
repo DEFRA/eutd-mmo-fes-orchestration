@@ -260,11 +260,11 @@ export const upsertUserReference = async (userPrincipal: string, documentNumber:
 
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
-  return (draft && draft.exportData) ? { exportedTo: draft.exportData.exportedTo } : null
+  return (draft && draft.exportData) ? { exportedTo: draft.exportData.exportedTo, pointOfDestination: draft.exportData.pointOfDestination } : null
 };
 
 export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber: string, contactId: string) => {
-  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedTo': payload.exportedTo } }, contactId);
+  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedTo': payload.exportedTo, 'exportData.pointOfDestination': payload.pointOfDestination } }, contactId);
 };
 
 export const cloneProcessingStatement = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal:boolean): Promise<string> => {

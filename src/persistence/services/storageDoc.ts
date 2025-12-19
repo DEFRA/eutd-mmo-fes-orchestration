@@ -302,7 +302,7 @@ export const getTransportDetails = async (userPrincipal: string, documentNumber:
 };
 
 export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber:string, contactId: string) => {
-  await upsertDraftData(userPrincipal, documentNumber, {'$set': {'exportData.exportedTo': payload.exportedTo}}, contactId);
+  await upsertDraftData(userPrincipal, documentNumber, {'$set': {'exportData.exportedTo': payload.exportedTo, 'exportData.pointOfDestination': payload.pointOfDestination}}, contactId);
 };
 
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<ExportLocation> => {

@@ -71,6 +71,7 @@ export interface ExportData {
   dateOfAcceptance?                  : string,
   exporterDetails?                   : ExporterDetails,
   exportedTo                         : ICountry,
+  pointOfDestination?                : string,
 }
 
 export interface ProcessingStatement {
@@ -141,7 +142,8 @@ const ExportDataSchema = new Schema({
   plantTownCity                     : { type: String },
   plantPostcode                     : { type: String },
   dateOfAcceptance                  : { type: String },
-  exportedTo                        : { type: Country }
+  exportedTo                        : { type: Country },
+  pointOfDestination                : { type: String, required: false }
 }, { _id : false } );
 
 const ProcessingStatementSchema = new Schema({
@@ -207,6 +209,7 @@ export const toFrontEndProcessingStatementExportData = (exportData: ExportData) 
     plantPostcode: getDatafromExportData(exportData, 'plantPostcode'),
     dateOfAcceptance: getDatafromExportData(exportData, 'dateOfAcceptance'),
     exportedTo: exportData?.exportedTo ? toExportedTo(exportData.exportedTo) : null,
+    pointOfDestination: getDatafromExportData(exportData, 'pointOfDestination'),
     _plantDetailsUpdated : !!plantDetailsUpdated
   };
 }

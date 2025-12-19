@@ -510,7 +510,7 @@ export const getExportLocation = async (userPrincipal: string, documentNumber: s
 };
 
 export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber: string, contactId: string) => {
-  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedFrom': payload.exportedFrom, 'exportData.exportedTo': payload.exportedTo } }, contactId);
+  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedFrom': payload.exportedFrom, 'exportData.exportedTo': payload.exportedTo, 'exportData.pointOfDestination': payload.pointOfDestination } }, contactId);
 };
 
 export const upsertConservation = async (userPrincipal: string, payload: FrontEndConservation.Conservation, documentNumber: string, contactId: string) => {

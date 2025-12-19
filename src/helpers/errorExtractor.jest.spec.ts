@@ -58,4 +58,25 @@ describe("errorExtractor", () => {
     const expectedResult = { "containerNumbers.0": "error.containerNumbers.array.min" };
     expect(result).toEqual(expectedResult);
   });
+
+  it("buildErrorObject() should handle exportDate date.min validation for different transport types", () => {
+    const testCases = [
+      { transportType: "plane", expectedError: "error.plane.exportDate.any.min" },
+      { transportType: "truck", expectedError: "error.truck.exportDate.any.min" },
+      { transportType: "train", expectedError: "error.train.exportDate.any.min" },
+      { transportType: "containerVessel", expectedError: "error.containerVessel.exportDate.any.min" },
+    ];
+
+    testCases.forEach(({ transportType, expectedError }) => {
+      const data = {
+        details: [{ type: "date.min", path: ["exportDate"] }],
+        _original: { vehicle: transportType },
+      };
+
+      const result = buildErrorObject(data);
+
+      const expectedResult = { exportDate: expectedError };
+      expect(result).toEqual(expectedResult);
+    });
+  });
 });

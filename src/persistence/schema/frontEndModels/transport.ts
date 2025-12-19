@@ -14,6 +14,7 @@ export interface Transport {
   registrationNumber?: string;
   containerIdentificationNumber?: string;
   departurePlace?: string;
+  pointOfDestination?: string;
   flightNumber?: string;
   containerNumber?: string;
   containerNumbers?: string[];
@@ -33,6 +34,7 @@ export interface Transport {
   departureDate?: string;
   freightBillNumber?: string;
   placeOfUnloading?: string;
+  facilityArrivalDate?: string;
 }
 
 export const toBackEndTransport = (transport: Transport): BackEndModels.Transport => {
@@ -74,6 +76,7 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   containerIdentificationNumber: cmr ? undefined : transport.containerIdentificationNumber,
   freightBillNumber: transport.freightBillNumber,
   departurePlace: cmr ? undefined : transport.departurePlace,
+  pointOfDestination: transport.pointOfDestination,
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
@@ -90,6 +93,7 @@ const getPlaneBackEndTransport = (transport: Transport) => ({
   containerNumber: transport.containerNumber,
   containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
   departurePlace: transport.departurePlace,
+  pointOfDestination: transport.pointOfDestination,
   freightBillNumber: transport.freightBillNumber,
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
@@ -104,6 +108,7 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   railwayBillNumber: transport.railwayBillNumber,
   freightBillNumber: transport.freightBillNumber,
   departurePlace: transport.departurePlace,
+  pointOfDestination: transport.pointOfDestination,
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
@@ -124,6 +129,7 @@ const getContainerVesselBackEndTransport = (transport: Transport) => ({
   containerNumber: transport.containerNumber,
   containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
   departurePlace: transport.departurePlace,
+  pointOfDestination: transport.pointOfDestination,
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
@@ -155,6 +161,7 @@ export const toFrontEndTransport = (
           registrationNumber: model.registrationNumber,
           freightBillNumber: model.freightBillNumber,
           departurePlace: model.departurePlace,
+          pointOfDestination: model.pointOfDestination,
           exportDate: transport.exportDate,
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
@@ -176,6 +183,7 @@ export const toFrontEndTransport = (
           containerNumber: model.containerNumber,
           containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
           departurePlace: model.departurePlace,
+          pointOfDestination: model.pointOfDestination,
           exportDate: model.exportDate,
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
@@ -192,6 +200,7 @@ export const toFrontEndTransport = (
           railwayBillNumber: model.railwayBillNumber,
           freightBillNumber: model.freightBillNumber,
           departurePlace: model.departurePlace,
+          pointOfDestination: model.pointOfDestination,
           exportDate: model.exportDate,
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
@@ -212,6 +221,7 @@ export const toFrontEndTransport = (
           containerNumber: model.containerNumber,
           containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
           departurePlace: model.departurePlace,
+          pointOfDestination: model.pointOfDestination,
           exportDate: model.exportDate,
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,

@@ -108,7 +108,8 @@ const backEndCc: BackEnd.CatchCertificate = {
       isoCodeAlpha2: "A1",
       isoCodeAlpha3: "A3",
       isoNumericCode: "SP"
-    }
+    },
+    pointOfDestination: "Seville Port"
   },
   draftData: {},
   documentUri: 'some document uri',
@@ -197,7 +198,8 @@ const backEndCcAdmin: BackEnd.CatchCertificate = {
       isoCodeAlpha2: "A1",
       isoCodeAlpha3: "A3",
       isoNumericCode: "SP"
-    }
+    },
+    pointOfDestination: "Seville Port"
   },
   draftData: {},
   documentUri: 'some document uri',
@@ -337,7 +339,8 @@ describe('Certificate Controller', () => {
             isoCodeAlpha2: "A1",
             isoCodeAlpha3: "A3",
             isoNumericCode: "SP"
-          }
+          },
+          pointOfDestination: "Seville Port"
         },
         validationErrors: [{
           state: "ALI",
@@ -461,7 +464,8 @@ describe('Certificate Controller', () => {
             isoCodeAlpha2: "A1",
             isoCodeAlpha3: "A3",
             isoNumericCode: "SP"
-          }
+          },
+          pointOfDestination: "Seville Port"
         },
         validationErrors: [{
           state: "ALI",
@@ -594,7 +598,8 @@ describe('Certificate Controller', () => {
             isoCodeAlpha2: "A1",
             isoCodeAlpha3: "A3",
             isoNumericCode: "SP"
-          }
+          },
+          pointOfDestination: "Seville Port"
         },
         validationErrors: null,
         landingsEntryOption: BackEnd.LandingsEntryOptions.ManualEntry

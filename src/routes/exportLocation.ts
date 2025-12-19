@@ -1,4 +1,5 @@
 import * as Hapi from '@hapi/hapi';
+import * as Joi from 'joi';
 import Controller from '../controllers/exportLocation.controller';
 import logger from '../logger';
 import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimatelyOwned';
@@ -39,15 +40,25 @@ export default class ExportLocationRoutes {
                 }
                 return h.response(errorDetailsObj).code(400).takeover();
               },
-              payload: async function(value, _options) {
+              payload: Joi.object({
+                exportDestination: Joi.string().required().messages({
+                  'any.required': 'error.exportDestination.any.required',
+                  'string.empty': 'error.exportDestination.any.required'
+                }),
+                pointOfDestination: Joi.string().required().max(100).regex(/^[a-zA-Z0-9\-'\s/]+$/).messages({
+                  'any.required': 'error.pointOfDestination.any.required',
+                  'string.empty': 'error.pointOfDestination.any.required',
+                  'string.max': 'error.pointOfDestination.string.max',
+                  'string.pattern.base': 'error.pointOfDestination.string.pattern.base'
+                })
+              }).unknown(true).external(async (value) => {
                 const refUrl = ApplicationConfig.getReferenceServiceUrl();
-                const anyError = await validateCountriesName((value as any).exportedTo, refUrl);
+                const anyError = await validateCountriesName(value.exportedTo, refUrl);
                 if (anyError.isError) {
                   throw anyError.error;
                 }
-
                 return value;
-              }
+              })
             }
           }
         },
@@ -65,6 +76,20 @@ export default class ExportLocationRoutes {
                     logger.error(`[POST-EXPORT-LOCATION-SAVE-AS-DRAFT][${error.stack || error}]`);
                     return h.response().code(500);
                   })
+              })
+            },
+            validate: {
+              options: { abortEarly: false },
+              failAction: function(req, h, error) {
+                const errorDetailsObj = errorExtractor(error);
+                if (acceptsHtml(req.headers)) {
+                  const url = buildRedirectUrlWithErrorStringInQueryParam(errorDetailsObj, (req.payload as any).redirect);
+                  return h.redirect(url);
+                }
+                return h.response(errorDetailsObj).code(400).takeover();
+              },
+              payload: Joi.object({
+                pointOfDestination: Joi.string().trim().allow('').allow(null).optional().max(100).regex(/^[a-zA-Z0-9\-' /]+$/)
               })
             }
           }

@@ -13,7 +13,8 @@ describe("When mapping basic transport details to a front end model", () => {
             isoCodeAlpha2: "A1",
             isoCodeAlpha3: "A3",
             isoNumericCode: "SP"
-          }
+          },
+          pointOfDestination: "Barcelona Port Terminal"
         }
 
         const exportData: CatchCertificateBackEndModels.ExportData = {
@@ -34,6 +35,7 @@ describe("When mapping basic transport details to a front end model", () => {
             }
           ],
           transportation: basicTransport,
+          pointOfDestination: "Barcelona Port Terminal"
         }
 
         const expectedResult : FrontEndModels.ExportLocation = {
@@ -43,7 +45,8 @@ describe("When mapping basic transport details to a front end model", () => {
               isoCodeAlpha2: "A1",
               isoCodeAlpha3: "A3",
               isoNumericCode: "SP"
-            }
+            },
+            pointOfDestination: "Barcelona Port Terminal"
         }
 
         const result = CatchCertificateFrontEndModels.toFrontEndExportLocation(exportData);
@@ -51,10 +54,11 @@ describe("When mapping basic transport details to a front end model", () => {
         expect(result).toStrictEqual(expectedResult);
     });
 
-    it("will handle undefined exportedFrom and exportedTo", async() => {
+    it("will handle undefined exportedFrom, exportedTo and pointOfDestination", async() => {
         const expectedResult : FrontEndModels.ExportLocation = {
           exportedFrom : "",
-          exportedTo: undefined
+          exportedTo: undefined,
+          pointOfDestination: undefined
         }
 
         const result = CatchCertificateFrontEndModels.toFrontEndExportLocation(undefined);
@@ -71,7 +75,8 @@ describe("When mapping basic transport details to a front end model", () => {
           isoCodeAlpha2: "A1",
           isoCodeAlpha3: "A3",
           isoNumericCode: "SP"
-        }
+        },
+        pointOfDestination: "Lagos Port Complex"
       }
 
       const catchCertificateTransport: CatchCertificateBackEndModels.CatchCertificateBasicTransportDetails = {
@@ -104,7 +109,8 @@ describe("When mapping basic transport details to a front end model", () => {
           isoCodeAlpha2: "N1",
           isoCodeAlpha3: "N3",
           isoNumericCode: "NG"
-        }
+        },
+        pointOfDestination: "Lagos Port Complex"
       }
 
       const expectedResult : FrontEndModels.ExportLocation = {
@@ -114,7 +120,8 @@ describe("When mapping basic transport details to a front end model", () => {
             isoCodeAlpha2: "N1",
             isoCodeAlpha3: "N3",
             isoNumericCode: "NG"
-          }
+          },
+          pointOfDestination: "Lagos Port Complex"
       }
 
       const result = CatchCertificateFrontEndModels.toFrontEndExportLocation(exportData);

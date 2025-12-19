@@ -10,6 +10,8 @@ import catchCertificateTransportSchema, { catchCertificateTransportCmrSchema } f
 import catchCertificateTransportDetailsSchema from '../schemas/catchcerts/catchCertificateTransportDetailsSchema';
 import catchCertificateTransportDocumentsSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSchema';
 import catchCertificateTransportDocumentsSaveAndContinueSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSaveAndContinueSchema';
+import { mergeSchemaAndValidationErrors } from '../validators/validationErrors';
+import { validateTruckNationality } from '../helpers/transportValidation';
 
 export default class CatchCertificateTransportRoutes {
 
@@ -160,15 +162,39 @@ export default class CatchCertificateTransportRoutes {
             options: {
               abortEarly: false
             },
-            failAction: function (req, h, error) {
-              const errorObject = errorExtractor(error);
-
+            failAction: async function (req, h, error) {
+              const errorObject: any = errorExtractor(error);
+              
               return h.response(errorObject).code(400).takeover();
             },
             query: Joi.object({
               draft: Joi.boolean(),
             }),
-            payload: catchCertificateTransportDetailsSchema
+            payload: async function (value: any, options: any) {
+              // Get draft mode from query parameter
+              const isDraft = options?.context?.query?.draft === true || options?.context?.query?.draft === 'true';
+              
+              const { error } = catchCertificateTransportDetailsSchema.validate(value, { 
+                abortEarly: false, 
+                allowUnknown: true,
+                context: { query: options?.context?.query || {} }
+              });
+              
+              // Validate truck nationality
+              const countryValidationErrors = await validateTruckNationality(
+                value.vehicle,
+                value.nationalityOfVehicle,
+                isDraft
+              );
+              
+              // Merge and throw all errors (schema + country validation)
+              const combinedError = mergeSchemaAndValidationErrors(error, countryValidationErrors);
+              if (combinedError) {
+                throw combinedError;
+              }
+
+              return value;
+            }
           }
         }
       },

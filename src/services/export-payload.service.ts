@@ -250,10 +250,12 @@ export default class ExportPayloadService {
       const exporter = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId));
       const exportedFrom = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId));
       const exporterModel: CcExportedDetailModel = exporter?.model ? exporter.model : {} as CcExportedDetailModel;
-      const transport: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId));
+      const transportations: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportations(userPrincipal, documentNumber, contactId));
+      const transportData = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId));
 
       const catchCertificate = {
-        transport: { ...transport, ...exportedFrom }
+        transportations: Array.isArray(transportations) ? transportations.map(t => ({ ...t, ...exportedFrom })) : [],
+        transport: { ...transportData, ...exportedFrom }
       }
 
       await addIsLegallyDue(documentNumber);
@@ -272,7 +274,6 @@ export default class ExportPayloadService {
       }
 
       const conservationData = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId));
-      const transportData = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId));
       const validationPayload = {
         exportPayload: exportPayload,
         documentNumber: documentNumber,
@@ -318,6 +319,7 @@ export default class ExportPayloadService {
           {
             exporter: exporterModel,
             exportPayload: exportPayload,
+            transportations: catchCertificate.transportations,
             transport: catchCertificate.transport,
             documentNumber: documentNumber,
             status: STATUS_COMPLETE,

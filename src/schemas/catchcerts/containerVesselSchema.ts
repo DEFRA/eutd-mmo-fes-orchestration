@@ -4,12 +4,24 @@ const Joi = BaseJoi.extend(Extension);
 
 const containerVesselSchema = Joi.object({
   vehicle: Joi.string().optional(),
+  facilityArrivalDate: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).optional(),
   exportDate: Joi.when('journey', {
     is: 'storageNotes',
     then: Joi.when('arrival', {
       is: true,
       then: Joi.date().allow('').optional(),
-      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('exportDateTo')).required()
+      otherwise: Joi.when('facilityArrivalDate', {
+        is: Joi.exist(),
+        then: Joi.date()
+          .format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY'])
+          .max(Joi.ref('exportDateTo'))
+          .min(Joi.ref('facilityArrivalDate'))
+          .required(),
+        otherwise: Joi.date()
+          .format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY'])
+          .max(Joi.ref('exportDateTo'))
+          .required()
+      })
     }),
     otherwise: Joi.any()
   }),
@@ -23,6 +35,11 @@ const containerVesselSchema = Joi.object({
       isoCodeAlpha3: Joi.string().allow(null).allow('').optional(),
       isoNumericCode: Joi.string().allow(null).allow('').optional()
     }).required()
+  }),
+  pointOfDestination: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().allow('').allow(null).optional().max(100).regex(/^[a-zA-Z0-9\-' /]+$/),
+    otherwise: Joi.string().empty('').trim().required().max(100).regex(/^[a-zA-Z0-9\-' /]+$/)
   }),
   vesselName: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/),
   flagState: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
