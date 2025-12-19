@@ -17,9 +17,9 @@ export const buildRedirectUrlWithErrorStringInQueryParam = (errorDetailsObj, red
 }
 
 export default function buildErrorObject(data)  {
-  const { details } = data;
+  const { details,_original } = data;
+  const transportType = _original?.vehicle;
   const errorObject = {};
-
   details.forEach((detail) => {
     if (detail.path.length > 0) {
       const errorKey = detail.path.join().replace(/,/gi,'.');
@@ -27,12 +27,15 @@ export default function buildErrorObject(data)  {
         errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`
         return;
       }
+      if(detail.path[0] === 'exportDate' && detail.type === 'date.min'){
+        errorObject[errorKey] = `error.${transportType}.exportDate.any.min`
+        return
+      }
       errorObject[errorKey] = `error.${errorKey}.${detail.type}`
     } else if (detail.context.label) {
       errorObject[detail.context.label] = `error.${detail.context.label}.${detail.type}`
     }
   });
-
   return errorObject;
 }
 

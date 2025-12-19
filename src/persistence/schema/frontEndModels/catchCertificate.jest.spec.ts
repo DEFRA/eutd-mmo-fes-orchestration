@@ -72,7 +72,8 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
           isoCodeAlpha2: "A1",
           isoCodeAlpha3: "A3",
           isoNumericCode: "SP"
-        }
+        },
+        pointOfDestination: "Valencia Port"
       },
       draftData: {},
       documentUri: 'some document uri'
@@ -171,7 +172,8 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
           isoCodeAlpha2: "A1",
           isoCodeAlpha3: "A3",
           isoNumericCode: "SP"
-        }
+        },
+        pointOfDestination: "Valencia Port"
       },
       landingsEntryOption: LandingsEntryOptions.ManualEntry
     };
@@ -260,7 +262,8 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
           isoCodeAlpha2: "A1",
           isoCodeAlpha3: "A3",
           isoNumericCode: "SP"
-        }
+        },
+        pointOfDestination: "Madrid Port Terminal"
       },
       draftData: {},
       documentUri: 'some document uri'
@@ -357,7 +360,8 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
           isoCodeAlpha2: "A1",
           isoCodeAlpha3: "A3",
           isoNumericCode: "SP"
-        }
+        },
+        pointOfDestination: "Madrid Port Terminal"
       },
       landingsEntryOption: LandingsEntryOptions.ManualEntry
     };

@@ -62,12 +62,14 @@ export const toFrontEndExportLocation = (exportData: BackEndCertificate.ExportDa
   if (exportData?.exportedFrom || exportData?.exportedTo) {
     return {
       exportedFrom: exportData.exportedFrom,
-      exportedTo: exportData.exportedTo
+      exportedTo: exportData.exportedTo,
+      pointOfDestination: exportData.pointOfDestination
     }
   }
 
   return {
     exportedFrom: exportData?.transportation ? exportData.transportation.exportedFrom : '',
-    exportedTo: exportData?.transportation ? exportData.transportation.exportedTo : undefined
+    exportedTo: exportData?.transportation ? exportData.transportation.exportedTo : undefined,
+    pointOfDestination: exportData?.pointOfDestination
   }
 };

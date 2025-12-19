@@ -15,6 +15,7 @@ const planeSaveAsDraftSchema = Joi.object({
       isoNumericCode: Joi.string().allow(null).allow('').optional()
     }).optional()
   }),
+  pointOfDestination: Joi.string().trim().allow('').allow(null).optional().max(100).regex(/^[a-zA-Z0-9\-' /]+$/),
   airwayBillNumber: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9-./]+$/),

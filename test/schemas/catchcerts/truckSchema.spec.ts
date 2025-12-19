@@ -114,3 +114,134 @@ describe('truckSchema - departureDate empty handling', () => {
     expect(ddErr.type).toBe('date.max');
   });
 });
+
+describe('truckSchema - pointOfDestination validation', () => {
+  const validPayload = {
+    ...basePayload,
+    departureDate: '01/01/2020'
+  };
+
+  describe('when arrival is false (save-and-continue)', () => {
+    it('returns any.required error when pointOfDestination is missing', () => {
+      const payload = { ...validPayload, arrival: false };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const podErr = error.details.find((d: any) => d.path.join('.') === 'pointOfDestination');
+      expect(podErr).toBeDefined();
+      expect(podErr.type).toBe('any.required');
+    });
+
+    it('returns any.empty error when pointOfDestination is empty string', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: '' };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const podErr = error.details.find((d: any) => d.path.join('.') === 'pointOfDestination');
+      expect(podErr).toBeDefined();
+      expect(podErr.type).toBe('any.empty');
+    });
+
+    it('passes validation with valid pointOfDestination (50 chars)', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'Port of Rotterdam' };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('passes validation with pointOfDestination at 100 char boundary', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'A'.repeat(100) };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('returns string.max error when pointOfDestination exceeds 100 chars', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'A'.repeat(101) };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const podErr = error.details.find((d: any) => d.path.join('.') === 'pointOfDestination');
+      expect(podErr).toBeDefined();
+      expect(podErr.type).toBe('string.max');
+    });
+
+    it('passes validation with valid characters (letters, numbers, hyphen, apostrophe, space, slash)', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: "Port-of-Le Havre ABC123 O'Connor's Bay/Terminal" };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('returns string.pattern.base error with special characters (@)', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'Port@Rotterdam' };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const podErr = error.details.find((d: any) => d.path.join('.') === 'pointOfDestination');
+      expect(podErr).toBeDefined();
+      expect(podErr.type).toBe('string.pattern.base');
+    });
+
+    it('returns string.pattern.base error with special characters (#$%)', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'Port#Rotterdam$%' };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const podErr = error.details.find((d: any) => d.path.join('.') === 'pointOfDestination');
+      expect(podErr).toBeDefined();
+      expect(podErr.type).toBe('string.pattern.base');
+    });
+
+    it('returns string.pattern.base error with unicode characters', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'Port of Göteborg' };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const podErr = error.details.find((d: any) => d.path.join('.') === 'pointOfDestination');
+      expect(podErr).toBeDefined();
+      expect(podErr.type).toBe('string.pattern.base');
+    });
+  });
+
+  describe('when arrival is true (direct landing)', () => {
+    it('passes validation when pointOfDestination is missing', () => {
+      const payload = { ...validPayload, arrival: true };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('passes validation when pointOfDestination is empty string', () => {
+      const payload = { ...validPayload, arrival: true, pointOfDestination: '' };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('passes validation when pointOfDestination has valid value', () => {
+      const payload = { ...validPayload, arrival: true, pointOfDestination: 'Rotterdam' };
+      const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+  });
+
+  describe('nonJS error mode', () => {
+    it('returns correct error key when pointOfDestination is missing (arrival=false)', () => {
+      const payload = { ...validPayload, arrival: false };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).pointOfDestination).toBe('error.pointOfDestination.any.required');
+    });
+
+    it('returns correct error key when pointOfDestination is empty string (arrival=false)', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: '' };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).pointOfDestination).toBe('error.pointOfDestination.any.empty');
+    });
+
+    it('returns correct error key when pointOfDestination exceeds max length', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'A'.repeat(101) };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).pointOfDestination).toBe('error.pointOfDestination.string.max');
+    });
+
+    it('returns correct error key when pointOfDestination has invalid characters', () => {
+      const payload = { ...validPayload, arrival: false, pointOfDestination: 'Port@Rotterdam' };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).pointOfDestination).toBe('error.pointOfDestination.string.pattern.base');
+    });
+  });
+});

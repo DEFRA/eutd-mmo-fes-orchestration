@@ -49,6 +49,7 @@ export default class ExportLocationService {
       const load: ExportLocation = await this.get(userPrincipal, documentNumber, contactId) as any || {};
       load.exportedFrom = payload.exportedFrom;
       load.exportedTo = payload.exportedTo;
+      load.pointOfDestination = payload.pointOfDestination;
       await this.save(userPrincipal, load, documentNumber, contactId);
       return load;
     } catch(e) {

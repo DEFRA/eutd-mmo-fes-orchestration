@@ -19,6 +19,7 @@ export interface BasicTransportDetails {
   departurePlace? : string,
   exportDate? : string,
   exportedTo? : ICountry,
+  pointOfDestination?: string,
   freightBillNumber?: string,
   departureCountry?: string;
   departurePort?: string;
@@ -69,6 +70,7 @@ export const TransportSchema = new Schema({
   exportedTo:                     { type: Country, required: false },
   vehicle:                        { type: String,  required: false },
   departurePlace:                 { type: String,  required: false },
+  pointOfDestination:             { type: String,  required: false },
   cmr:                            { type: Boolean, required: false },
   nationalityOfVehicle:           { type: String,  required: false },
   registrationNumber:             { type: String,  required: false },

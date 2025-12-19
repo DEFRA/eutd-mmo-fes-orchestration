@@ -1,10 +1,13 @@
 
 import * as Hapi from "@hapi/hapi";
+import axios from 'axios';
 import * as DocumentOwnershipValidator from "../validators/documentOwnershipValidator";
 import CatchCertificateTransportRoutes from "./catch-certificate-transport";
 import Controller from '../controllers/catch-certificate-transport.controller';
 import { CatchCertificateTransport } from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import { AddTransportation } from "../persistence/schema/catchCert";
+
+jest.mock('axios');
 
 const createServerInstance = async () => {
   const server = Hapi.server();
@@ -112,6 +115,24 @@ describe("Transport endpoints", () => {
 
     mockGetTransportationCheck = jest.spyOn(Controller, 'getTransportationCheck');
     mockGetTransportationCheck.mockResolvedValue({ addTransportation: AddTransportation.Yes });
+
+    // Mock axios for nationality validation (re-mock after jest.restoreAllMocks in afterEach)
+    (axios.get as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          officialCountryName: 'United Kingdom',
+          isoCodeAlpha2: 'GB',
+          isoCodeAlpha3: 'GBR',
+          isoNumericCode: '826'
+        },
+        {
+          officialCountryName: 'UK',
+          isoCodeAlpha2: 'GB',
+          isoCodeAlpha3: 'GBR',
+          isoNumericCode: '826'
+        }
+      ]
+    });
   })
 
   afterEach(() => {
@@ -800,13 +821,24 @@ describe("Transport endpoints", () => {
 
   describe('/v1/catch-certificate/transport-details', () => {
     it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete truck details', async () => {
+      // Mock axios to return countries list with valid country
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            officialCountryName: 'United Kingdom',
+            isoCodeAlpha2: 'GB',
+            isoCodeAlpha3: 'GBR',
+            isoNumericCode: '826'
+          }
+        ]
+      });
 
       const request = createRequestObj(
         '/v1/catch-certificate/transport-details/0',
         {
           id: '0',
           vehicle: 'truck',
-          nationalityOfVehicle: 'UK',
+          nationalityOfVehicle: 'United Kingdom',
           registrationNumber: 'UI90UXB',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -818,6 +850,7 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).toHaveBeenCalled();
       expect(response.statusCode).toBe(200);
       expect(response.result).toEqual(transport);
+      expect(axios.get).toHaveBeenCalled(); // Verify reference service called
     });
 
     it('returns 200 when we PUT /v1/catch-certificate/transport-details/0 with complete plane details', async () => {
@@ -1090,6 +1123,81 @@ describe("Transport endpoints", () => {
       expect(response.result).toEqual(error);
     });
 
+    it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with invalid truck nationality', async () => {
+      // Mock axios to return countries list
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            officialCountryName: 'United Kingdom',
+            isoCodeAlpha2: 'GB',
+            isoCodeAlpha3: 'GBR',
+            isoNumericCode: '826'
+          },
+          {
+            officialCountryName: 'Afghanistan',
+            isoCodeAlpha2: 'AF',
+            isoCodeAlpha3: 'AFG',
+            isoNumericCode: '004'
+          }
+        ]
+      });
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'fdsdfs', // Invalid country name
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { nationalityOfVehicle: "error.nationalityOfVehicle.any.invalid" };
+      expect(response.result).toEqual(error);
+      expect(axios.get).toHaveBeenCalled(); // Verify reference service called
+    });
+
+    it('returns 400 with nationality error even when other fields are empty', async () => {
+      // Mock axios to return countries list
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            officialCountryName: 'United Kingdom',
+            isoCodeAlpha2: 'GB',
+            isoCodeAlpha3: 'GBR',
+            isoNumericCode: '826'
+          }
+        ]
+      });
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'InvalidCountry', // Invalid country name
+          registrationNumber: '', // Empty
+          departurePlace: '', // Empty
+          freightBillNumber: ''
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      // Should have errors for ALL invalid fields including nationality
+      expect(response.result).toHaveProperty('nationalityOfVehicle', 'error.nationalityOfVehicle.any.invalid');
+      expect(response.result).toHaveProperty('registrationNumber');
+      expect(response.result).toHaveProperty('departurePlace');
+    });
+
     it('returns 400 when we PUT /v1/catch-certificate/transport-details/0 with incomplete plane details', async () => {
 
       const request = createRequestObj(
@@ -1248,6 +1356,18 @@ describe("Transport endpoints", () => {
     });
 
     it('returns 500 when we PUT /v1/catch-certificate/transport-details/0 when the controller throws an error', async () => {
+      // Mock axios to return countries list
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            officialCountryName: 'United Kingdom',
+            isoCodeAlpha2: 'GB',
+            isoCodeAlpha3: 'GBR',
+            isoNumericCode: '826'
+          }
+        ]
+      });
+
       mockUpdateTransport.mockRejectedValue(new Error("something has gone wrong"));
 
       const request = createRequestObj(
@@ -1255,7 +1375,7 @@ describe("Transport endpoints", () => {
         {
           id: '0',
           vehicle: 'truck',
-          nationalityOfVehicle: 'UK',
+          nationalityOfVehicle: 'United Kingdom',
           registrationNumber: 'UI90UXB',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1270,6 +1390,18 @@ describe("Transport endpoints", () => {
     });
 
     it('returns 500 when we PUT /v1/catch-certificate/transport-details/0 when the controller throws an error with no stack', async () => {
+      // Mock axios to return countries list
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            officialCountryName: 'United Kingdom',
+            isoCodeAlpha2: 'GB',
+            isoCodeAlpha3: 'GBR',
+            isoNumericCode: '826'
+          }
+        ]
+      });
+
       const error = new Error("something has gone wrong");
       error.stack = undefined;
 
@@ -1280,7 +1412,7 @@ describe("Transport endpoints", () => {
         {
           id: '0',
           vehicle: 'truck',
-          nationalityOfVehicle: 'UK',
+          nationalityOfVehicle: 'United Kingdom',
           registrationNumber: 'UI90UXB',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1292,6 +1424,124 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).toHaveBeenCalled();
       expect(response.statusCode).toBe(500);
       expect(response.result).toEqual(null);
+    });
+
+    it('returns 400 when reference service fails and nationality is provided for truck', async () => {
+      // Mock axios to throw error (reference service failure)
+      (axios.get as jest.Mock).mockRejectedValue(new Error('Reference service unavailable'));
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'United Kingdom',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      const error = { nationalityOfVehicle: "error.nationalityOfVehicle.any.invalid" };
+      expect(response.result).toEqual(error);
+      expect(axios.get).toHaveBeenCalled(); // Verify attempt to call reference service
+    });
+
+    it('returns 200 when truck nationality is valid and matches country in reference service', async () => {
+      // Mock axios with multiple countries including the one we're testing
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            officialCountryName: 'Afghanistan',
+            isoCodeAlpha2: 'AF',
+            isoCodeAlpha3: 'AFG',
+            isoNumericCode: '004'
+          },
+          {
+            officialCountryName: 'Central African Republic',
+            isoCodeAlpha2: 'CF',
+            isoCodeAlpha3: 'CAF',
+            isoNumericCode: '140'
+          },
+          {
+            officialCountryName: 'United Kingdom',
+            isoCodeAlpha2: 'GB',
+            isoCodeAlpha3: 'GBR',
+            isoNumericCode: '826'
+          }
+        ]
+      });
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'Central African Republic',
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+      expect(axios.get).toHaveBeenCalled();
+    });
+
+    it('returns 200 when truck nationality validation is skipped in draft mode', async () => {
+      // Don't mock axios - it shouldn't be called in draft mode
+      const axiosSpy = jest.spyOn(axios, 'get');
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0?draft=true',
+        {
+          id: '0',
+          vehicle: 'truck',
+          nationalityOfVehicle: 'InvalidCountryName', // Invalid but should be ignored in draft
+          registrationNumber: 'UI90UXB',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+      expect(axiosSpy).not.toHaveBeenCalled(); // Verify reference service NOT called in draft mode
+    });
+
+    it('returns 200 when truck has no nationalityOfVehicle field (validation skipped)', async () => {
+      // Validation should be skipped if nationalityOfVehicle is not provided
+      const axiosSpy = jest.spyOn(axios, 'get');
+
+      const request = createRequestObj(
+        '/v1/catch-certificate/transport-details/0',
+        {
+          id: '0',
+          vehicle: 'plane', // Different vehicle type
+          flightNumber: 'BA123',
+          containerNumber: 'CONT123',
+          departurePlace: 'Hull',
+          freightBillNumber: 'AA1234567'
+        },
+        'PUT'
+      );
+
+      const response = await server.inject(request);
+      expect(mockUpdateTransport).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual(transport);
+      expect(axiosSpy).not.toHaveBeenCalled(); // Verify reference service NOT called for non-truck
     });
   });
 });

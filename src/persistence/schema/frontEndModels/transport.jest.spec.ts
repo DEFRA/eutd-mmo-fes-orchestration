@@ -1418,3 +1418,288 @@ describe('checkTransportDataFrontEnd', () => {
     });
   })
 });
+
+describe("When mapping transport with pointOfDestination field", () => {
+
+  describe("truck transport", () => {
+    it("should include pointOfDestination in backend transport when provided", () => {
+      const transport: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.truck,
+        cmr: "false",
+        nationalityOfVehicle: "UK",
+        registrationNumber: "REG123",
+        departurePlace: "London",
+        pointOfDestination: "Port of Rotterdam",
+        user_id: "UID",
+        journey: "Journey",
+        currentUri: "some/uri",
+        nextUri: "next/uri",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "ES",
+          isoCodeAlpha3: "ESP",
+          isoNumericCode: "724"
+        }
+      };
+
+      const expectedResult: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.truck,
+        cmr: false,
+        nationalityOfVehicle: "UK",
+        registrationNumber: "REG123",
+        departurePlace: "London",
+        pointOfDestination: "Port of Rotterdam",
+        exportedTo: {
+          officialCountryName: "SPAIN",
+          isoCodeAlpha2: "ES",
+          isoCodeAlpha3: "ESP",
+          isoNumericCode: "724"
+        }
+      };
+
+      const result = FrontEndTransport.toBackEndTransport(transport);
+      expect(result).toStrictEqual(expectedResult);
+    });
+
+    it("should omit pointOfDestination from backend transport when not provided", () => {
+      const transport: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.truck,
+        cmr: "true",
+        nationalityOfVehicle: "FR",
+        registrationNumber: "FR456",
+        departurePlace: "Paris",
+        user_id: "UID",
+        journey: "Journey",
+        currentUri: "some/uri",
+        nextUri: "next/uri"
+      };
+
+      const result = FrontEndTransport.toBackEndTransport(transport);
+      expect(result.pointOfDestination).toBeUndefined();
+    });
+  });
+
+  describe("plane transport", () => {
+    it("should include pointOfDestination in backend transport when provided", () => {
+      const transport: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.plane,
+        flightNumber: "FL123",
+        containerNumber: "CONT456",
+        departurePlace: "London Heathrow",
+        pointOfDestination: "Charles de Gaulle Airport",
+        user_id: "UID",
+        journey: "Journey",
+        currentUri: "some/uri",
+        nextUri: "next/uri",
+        exportedTo: {
+          officialCountryName: "FRANCE",
+          isoCodeAlpha2: "FR",
+          isoCodeAlpha3: "FRA",
+          isoNumericCode: "250"
+        }
+      };
+
+      const expectedResult: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.plane,
+        flightNumber: "FL123",
+        containerNumber: "CONT456",
+        departurePlace: "London Heathrow",
+        pointOfDestination: "Charles de Gaulle Airport",
+        exportedTo: {
+          officialCountryName: "FRANCE",
+          isoCodeAlpha2: "FR",
+          isoCodeAlpha3: "FRA",
+          isoNumericCode: "250"
+        }
+      };
+
+      const result = FrontEndTransport.toBackEndTransport(transport);
+      expect(result).toStrictEqual(expectedResult);
+    });
+  });
+
+  describe("train transport", () => {
+    it("should include pointOfDestination in backend transport when provided", () => {
+      const transport: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.train,
+        railwayBillNumber: "RB789",
+        departurePlace: "London St Pancras",
+        pointOfDestination: "Gare du Nord Paris",
+        user_id: "UID",
+        journey: "Journey",
+        currentUri: "some/uri",
+        nextUri: "next/uri",
+        exportedTo: {
+          officialCountryName: "FRANCE",
+          isoCodeAlpha2: "FR",
+          isoCodeAlpha3: "FRA",
+          isoNumericCode: "250"
+        }
+      };
+
+      const expectedResult: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.train,
+        railwayBillNumber: "RB789",
+        departurePlace: "London St Pancras",
+        pointOfDestination: "Gare du Nord Paris",
+        exportedTo: {
+          officialCountryName: "FRANCE",
+          isoCodeAlpha2: "FR",
+          isoCodeAlpha3: "FRA",
+          isoNumericCode: "250"
+        }
+      };
+
+      const result = FrontEndTransport.toBackEndTransport(transport);
+      expect(result).toStrictEqual(expectedResult);
+    });
+  });
+
+  describe("containerVessel transport", () => {
+    it("should include pointOfDestination in backend transport when provided", () => {
+      const transport: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.containerVessel,
+        vesselName: "MS Maersk",
+        flagState: "Denmark",
+        containerNumber: "CONT123",
+        departurePlace: "Port of Southampton",
+        pointOfDestination: "Port of Le Havre",
+        user_id: "UID",
+        journey: "Journey",
+        currentUri: "some/uri",
+        nextUri: "next/uri",
+        exportedTo: {
+          officialCountryName: "FRANCE",
+          isoCodeAlpha2: "FR",
+          isoCodeAlpha3: "FRA",
+          isoNumericCode: "250"
+        }
+      };
+
+      const expectedResult: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.containerVessel,
+        vesselName: "MS Maersk",
+        flagState: "Denmark",
+        containerNumber: "CONT123",
+        departurePlace: "Port of Southampton",
+        pointOfDestination: "Port of Le Havre",
+        exportedTo: {
+          officialCountryName: "FRANCE",
+          isoCodeAlpha2: "FR",
+          isoCodeAlpha3: "FRA",
+          isoNumericCode: "250"
+        }
+      };
+
+      const result = FrontEndTransport.toBackEndTransport(transport);
+      expect(result).toStrictEqual(expectedResult);
+    });
+  });
+
+  describe("fishingVessel transport", () => {
+    it("should not include pointOfDestination (not applicable to fishing vessels)", () => {
+      const transport: FrontEndTransport.Transport = {
+        vehicle: FrontEndTransport.fishingVessel,
+        exportDate: '01/01/2020',
+        exportedTo: {
+          officialCountryName: "FRANCE",
+          isoCodeAlpha2: "FR",
+          isoCodeAlpha3: "FRA",
+          isoNumericCode: "250"
+        }
+      };
+
+      const result = FrontEndTransport.toBackEndTransport(transport);
+      expect(result.pointOfDestination).toBeUndefined();
+    });
+  });
+});
+
+describe("When mapping from backend to frontend transport with pointOfDestination", () => {
+
+  describe("truck backend model", () => {
+    it("should include pointOfDestination in frontend transport when present in backend", () => {
+      const backendTransport: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.truck,
+        cmr: false,
+        nationalityOfVehicle: "UK",
+        registrationNumber: "REG123",
+        departurePlace: "London",
+        pointOfDestination: "Port of Rotterdam"
+      };
+
+      const result = FrontEndTransport.toFrontEndTransport(backendTransport);
+      expect(result).toMatchObject({
+        vehicle: FrontEndTransport.truck,
+        pointOfDestination: "Port of Rotterdam"
+      });
+    });
+
+    it("should handle missing pointOfDestination in backend transport", () => {
+      const backendTransport: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.truck,
+        cmr: true,
+        nationalityOfVehicle: "FR",
+        registrationNumber: "FR456",
+        departurePlace: "Paris"
+      };
+
+      const result = FrontEndTransport.toFrontEndTransport(backendTransport);
+      expect(result?.pointOfDestination).toBeUndefined();
+    });
+  });
+
+  describe("plane backend model", () => {
+    it("should include pointOfDestination in frontend transport when present in backend", () => {
+      const backendTransport: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.plane,
+        flightNumber: "FL123",
+        containerNumber: "CONT456",
+        departurePlace: "London Heathrow",
+        pointOfDestination: "Charles de Gaulle Airport"
+      };
+
+      const result = FrontEndTransport.toFrontEndTransport(backendTransport);
+      expect(result).toMatchObject({
+        vehicle: FrontEndTransport.plane,
+        pointOfDestination: "Charles de Gaulle Airport"
+      });
+    });
+  });
+
+  describe("train backend model", () => {
+    it("should include pointOfDestination in frontend transport when present in backend", () => {
+      const backendTransport: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.train,
+        railwayBillNumber: "RB789",
+        departurePlace: "London St Pancras",
+        pointOfDestination: "Gare du Nord Paris"
+      };
+
+      const result = FrontEndTransport.toFrontEndTransport(backendTransport);
+      expect(result).toMatchObject({
+        vehicle: FrontEndTransport.train,
+        pointOfDestination: "Gare du Nord Paris"
+      });
+    });
+  });
+
+  describe("containerVessel backend model", () => {
+    it("should include pointOfDestination in frontend transport when present in backend", () => {
+      const backendTransport: BackEndModels.Transport = {
+        vehicle: FrontEndTransport.containerVessel,
+        vesselName: "MS Maersk",
+        flagState: "Denmark",
+        containerNumber: "CONT123",
+        departurePlace: "Port of Southampton",
+        pointOfDestination: "Port of Le Havre"
+      };
+
+      const result = FrontEndTransport.toFrontEndTransport(backendTransport);
+      expect(result).toMatchObject({
+        vehicle: FrontEndTransport.containerVessel,
+        pointOfDestination: "Port of Le Havre"
+      });
+    });
+  });
+});

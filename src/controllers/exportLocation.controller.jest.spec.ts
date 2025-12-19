@@ -106,5 +106,32 @@ describe("ExportLocationController", () => {
         CONTACT_ID
       );
     });
+
+    it("should pass saveAsDraft flag as true when saving as draft", async () => {
+      const mockAddExportLocation = jest.spyOn(
+        ExportLocationController,
+        "addExportLocation"
+      );
+      mockAddExportLocation.mockReturnValue(null);
+      await ExportLocationController.addExportLocationAndSaveAsDraft(
+        mockReq,
+        h,
+        true,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        CONTACT_ID
+      );
+      
+      // Verify the saveAsDraft flag (3rd parameter) is true
+      expect(mockAddExportLocation).toHaveBeenCalledWith(
+        mockReq,
+        h,
+        true,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        CONTACT_ID
+      );
+      mockAddExportLocation.mockRestore();
+    });
   });
 });

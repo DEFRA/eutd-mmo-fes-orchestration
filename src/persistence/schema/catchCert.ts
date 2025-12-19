@@ -324,6 +324,7 @@ export interface ExportData {
   landingsEntryOption?: LandingsEntryOptions;
   exportedTo?: ICountry;
   exportedFrom?: string;
+  pointOfDestination?: string;
 }
 
 export interface CatchCertificate {
@@ -446,6 +447,7 @@ const ExportDataSchema = new Schema({
   landingsEntryOption:  { type: String,  required: false, enum: Object.values(LandingsEntryOptions) },
   exportedFrom:         { type: String,  required: false },
   exportedTo:           { type: Country, required: false },
+  pointOfDestination:   { type: String,  required: false },
 }, { _id : false } );
 
 const CatchCertSchema = new Schema({

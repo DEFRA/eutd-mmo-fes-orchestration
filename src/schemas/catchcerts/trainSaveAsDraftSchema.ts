@@ -15,6 +15,7 @@ const trainSaveAsDraftSchema = Joi.object({
       isoNumericCode: Joi.string().allow(null).allow('').optional()
     }).optional()
   }),
+  pointOfDestination: Joi.string().trim().allow('').allow(null).optional().max(100).regex(/^[a-zA-Z0-9\-' /]+$/),
   railwayBillNumber: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').alphanum().max(15).optional(),

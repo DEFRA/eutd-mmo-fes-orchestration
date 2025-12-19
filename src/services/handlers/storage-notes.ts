@@ -49,7 +49,7 @@ export default {
 
   "/create-storage-document/:documentNumber/departure-product-summary": async ({ data, errors }) => {
     for (const [index, ctch] of data.catches.entries()) {
-      checkEitherNetWeightProductDepartureOrNetWeightFisheryProductDepartureIsPresent(ctch, index, errors);
+      checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, errors);
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, errors);
 
@@ -88,9 +88,11 @@ export default {
   },
 };
 
-export function checkEitherNetWeightProductDepartureOrNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
-  if (!ctch.netWeightProductDeparture && !ctch.netWeightFisheryProductDeparture) {
+export function checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
+  if (!ctch.netWeightProductDeparture) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
+  } else if (!ctch.netWeightFisheryProductDeparture) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
   }
 }
 
@@ -360,6 +362,10 @@ function checkSupportingDocuments(product: any, errors: any, index: number) {
 }
 
 function checkProductDescription(product: any, errors: any, index: number) {
+    if (!product.productDescription || validateWhitespace(product.productDescription)) {
+      errors[`catches-${index}-productDescription`] = 'sdAddProductToConsignmentProductDescriptionErrorNull';
+      return;
+    }
   if (product.productDescription?.length > MAX_PRODUCT_DESCRIPTION) {
     errors[`catches-${index}-productDescription`] = `sdAddProductToConsignmentProductDescriptionErrorMustNotExceed-${MAX_PRODUCT_DESCRIPTION}`;
   } else if (!validateCCNumberFormat(product.productDescription)) {

@@ -149,6 +149,7 @@ describe('When mapping a back end Processing statement to front end', () => {
       dateOfAcceptance: "12/02/2020",
       healthCertificateNumber: "567567",
       healthCertificateDate: "27/10/2019",
+      pointOfDestination: null,
       exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
@@ -238,6 +239,7 @@ describe('When mapping a back end Processing statement to front end', () => {
       plantName: null,
       plantPostcode: 'fake post code',
       plantTownCity: null,
+      pointOfDestination: null,
       validationErrors: [],
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -284,6 +286,7 @@ describe('When mapping a back end Processing statement to front end', () => {
       plantName: null,
       plantPostcode: 'fake post code',
       plantTownCity: null,
+      pointOfDestination: null,
       validationErrors: [],
       exportedTo: {
         officialCountryName: "SPAIN"

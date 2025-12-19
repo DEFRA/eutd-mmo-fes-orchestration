@@ -39,6 +39,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -89,6 +90,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "commodity code is invalid",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -133,6 +135,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -178,6 +181,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -223,6 +227,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -266,6 +271,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "commodity code is invalid",
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
@@ -308,6 +314,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "commodity code is invalid",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -350,6 +357,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -389,6 +397,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -428,6 +437,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -469,6 +479,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -509,6 +520,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -549,6 +561,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -590,6 +603,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -630,6 +644,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       catches: [
         {
           weightOnCC: "2222",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -675,6 +690,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       catches: [
         {
           weightOnCC: "2222",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -720,6 +736,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           certificateNumber: "CC-11111",
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
@@ -763,6 +780,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
           certificateNumber: "SD",
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
@@ -803,6 +821,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
@@ -846,6 +865,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           productWeight: "1111",
           dateOfUnloading: "29/01/2019",
@@ -889,6 +909,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -929,6 +950,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -969,6 +991,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1010,6 +1033,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1050,6 +1074,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: " ",
+          productDescription: 'Some product description',
           commodityCode: " ",
           certificateNumber: " ",
           productWeight: "1111",
@@ -1096,6 +1121,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "-22",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "10",
@@ -1138,6 +1164,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "22.345",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "11.11",
@@ -1180,6 +1207,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "22.345",
           product: "Cod",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "11.11",
@@ -1225,6 +1253,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "22.345",
           product: "Cod",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "11.11",
@@ -1278,6 +1307,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           product: 'Atlantic Cod (COD)',
           weightOnCC: "2222",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1322,6 +1352,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           product: 'Atlantic Cod (COD)',
           weightOnCC: "2222",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1444,6 +1475,50 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     expect(errors).toEqual(expected);
   });
 
+  it("with missing product description validates as error", async () => {
+    const currentUrl =
+      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          product: 'Atlantic Cod (COD)',
+          weightOnCC: "2222",
+          commodityCode: "34234324",
+          certificateNumber: "CC-11111",
+          productWeight: "1111",
+          dateOfUnloading: "29/01/2019",
+          placeOfUnloading: "Dover",
+          transportUnloadedFrom: "TRANS-IN-001",
+          // productDescription intentionally missing
+          certificateType: 'non_uk',
+          netWeightProductArrival: "1",
+          netWeightFisheryProductArrival: "1",
+        },
+      ],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data: data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    const expected = {
+      'catches-0-productDescription': 'sdAddProductToConsignmentProductDescriptionErrorNull'
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
+
   it("checks netWeightProductArrival, netWeightFisheryProductArrival and validates as zero", async () => {
     const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
@@ -1452,6 +1527,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       catches: [
         {
           weightOnCC: "2222",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1494,6 +1570,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       catches: [
         {
           weightOnCC: "2222",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1536,6 +1613,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       catches: [
         {
           weightOnCC: "999999999999",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1578,6 +1656,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       catches: [
         {
           weightOnCC: "100000000001",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1621,6 +1700,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "INVALID-FORMAT",
           productWeight: "1111",
@@ -1668,6 +1748,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "GBR-2023-CC-123456789",
           productWeight: "1111",
@@ -1716,6 +1797,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "GBR-2023-CC-987654321",
           productWeight: "1111",
@@ -1791,6 +1873,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "2222",
           product: "Atlantix",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "1111",
@@ -1835,18 +1918,19 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const data = {
       catches: [
         {
-          weightOnCC: "22.345",
-          product: "Cod",
+          weightOnCC: "2222",
+          product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
-          certificateNumber: "CC-11111",
-          productWeight: "11.11",
+          productWeight: "1111",
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
-          certificateType: 'non_uk',
+          scientificName: 'Salvelinus alpinus',
+          certificateType: 'uk',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
-        }
+        },
       ],
       storageFacilities: [{}],
       addAnotherProduct: "notset",
@@ -1872,7 +1956,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal", "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies", "catches-0-issuingCountry": "sdAddCatchDetailsErrorEnterIssuingCountry" };
+    const expectedErrors = { "catches-0-certificateNumber": "sdAddProductToConsignmentCertificateNumberErrorNull", "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -1886,6 +1970,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
         {
           weightOnCC: "22.345",
           product: "Cod",
+          productDescription: 'Some product description',
           commodityCode: "34234324",
           certificateNumber: "CC-11111",
           productWeight: "11.11",
@@ -1941,6 +2026,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-product", ()
       {
         weightOnCC: "2222",
         product: "Atlantix",
+        productDescription: 'Some product description',
         commodityCode: "34234324",
         certificateNumber: "CC-11111",
         productWeight: "1111",
@@ -2021,7 +2107,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-product", ()
 });
 
 describe("/create-storage-document/:documentNumber/departure-product-summary", () => {
-  it("Net weight on departure  equal to or less than weight on document", async () => {
+  it("Net weight on departure equal to or less than weight on document", async () => {
     const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
@@ -2036,7 +2122,8 @@ describe("/create-storage-document/:documentNumber/departure-product-summary", (
         placeOfUnloading: "Dover",
         transportUnloadedFrom: "TRANS-IN-001",
         scientificName: 'wrongScientificName',
-        netWeightProductDeparture: "10"
+        netWeightProductDeparture: "10",
+        netWeightFisheryProductDeparture: "10"
       }]
     };
 

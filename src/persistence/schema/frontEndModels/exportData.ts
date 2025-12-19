@@ -20,6 +20,7 @@ export const toBackEndCcExportData = (
     exporterDetails: toBackEndCcExporterDetails(exporterDetails),
     landingsEntryOption: landingsEntryOption,
     exportedFrom: exportLocation.exportedFrom,
-    exportedTo: exportLocation.exportedTo
+    exportedTo: exportLocation.exportedTo,
+    pointOfDestination: exportLocation.pointOfDestination
   }
 };

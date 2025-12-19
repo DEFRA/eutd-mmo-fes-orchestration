@@ -15,6 +15,11 @@ const trainSchema = Joi.object({
       isoNumericCode: Joi.string().allow(null).allow('').optional()
     }).required()
   }),
+  pointOfDestination: Joi.when('arrival', {
+    is: true,
+    then: Joi.string().trim().allow('').allow(null).optional().max(100).regex(/^[a-zA-Z0-9\-' /]+$/),
+    otherwise: Joi.string().empty('').trim().required().max(100).regex(/^[a-zA-Z0-9\-' /]+$/)
+  }),
   railwayBillNumber: Joi.string().trim().alphanum().max(15).required(),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   containerNumbers: Joi.array()
@@ -32,12 +37,24 @@ const trainSchema = Joi.object({
     otherwise: Joi.string().trim().allow('').allow(null).allow(null).optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
   }),
   journey: Joi.string(),
+  facilityArrivalDate: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).optional(),
   exportDate: Joi.when('journey', {
     is: 'storageNotes',
     then: Joi.when('arrival', {
       is: true,
       then: Joi.date().allow('').optional(),
-      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('exportDateTo')).required()
+      otherwise: Joi.when('facilityArrivalDate', {
+        is: Joi.exist(),
+        then: Joi.date()
+          .format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY'])
+          .max(Joi.ref('exportDateTo'))
+          .min(Joi.ref('facilityArrivalDate'))
+          .required(),
+        otherwise: Joi.date()
+          .format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY'])
+          .max(Joi.ref('exportDateTo'))
+          .required()
+      })
     }),
     otherwise: Joi.any()
   }),

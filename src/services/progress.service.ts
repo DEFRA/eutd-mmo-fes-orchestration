@@ -16,14 +16,16 @@ import * as ProcessingStatement from '../persistence/schema/processingStatement'
 import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
-import { validateEntry, validateProduct } from './handlers/storage-notes';
-import { isInvalidLength, validateWhitespace, isPositiveNumberWithTwoDecimals, isNotExceed12Digit } from './orchestration.service';
+import { checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent, checkNetWeightFisheryProductDepartureIsZeroPositive, checkNetWeightProductDepartureIsZeroPositive, validateEntry, validateProduct } from './handlers/storage-notes';
+import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
 import truckSchema from "../schemas/catchcerts/truckSchema";
 import trainSchema from "../schemas/catchcerts/trainSchema";
 import planeSchema from "../schemas/catchcerts/planeSchema";
 import containerVesselSchema from "../schemas/catchcerts/containerVesselSchema";
+import ServiceNames from "../validators/interfaces/service.name.enum";
+import { validateTruckNationality } from '../helpers/transportValidation';
 
 export default class ProgressService {
 
@@ -33,12 +35,12 @@ export default class ProgressService {
     const data: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
 
     if (data?.exportData?.landingsEntryOption) {
-      const { landingsEntryOption, exporterDetails, products, conservation, transportation, transportations, exportedFrom, exportedTo } = data.exportData;
+      const { landingsEntryOption, exporterDetails, products, conservation, transportation, transportations, exportedFrom, exportedTo, pointOfDestination } = data.exportData;
 
       logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-CC-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
       const transportType = ProgressService.getTransportType(transportation, transportations);
-      const exportJourney = ProgressService.getExportJourney(transportation, exportedFrom, exportedTo);
+      const exportJourney = ProgressService.getExportJourney(transportation, exportedFrom, exportedTo, pointOfDestination);
 
       const progressObject: CatchCertificateProgress = {
         reference: ProgressService.getUserReference(data.userReference),
@@ -54,7 +56,7 @@ export default class ProgressService {
         delete progressObject.dataUpload;
       }
 
-      const progressSections: CatchCertificateProgress = ProgressService.getProgressSections(landingsEntryOption, progressObject, transportType, data);
+      const progressSections: CatchCertificateProgress = await ProgressService.getProgressSections(landingsEntryOption, progressObject, transportType, data);
 
       return {
         progress: progressSections,
@@ -69,21 +71,30 @@ export default class ProgressService {
   static readonly getTransportType = (transportation: BackEndTransport, transportations?: CatchCertificateTransport[]) =>
     transportation?.vehicle || Array.isArray(transportations) && transportations.length > 0 && transportations.every((t: CatchCertificateTransport) => !isEmpty(t.vehicle)) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
 
-  static readonly getExportJourney = (transportation: BackEndTransport, exportedFrom: string, exportedTo: ICountry) => {
-    if (exportedFrom && ProgressService.getExportDestinationStatus(exportedTo) === ProgressStatus.COMPLETED) {
+  static readonly getExportJourney = (transportation: BackEndTransport, exportedFrom: string, exportedTo: ICountry, pointOfDestination?: string) => {
+    const hasExportedFrom = exportedFrom || transportation?.exportedFrom;
+    const countryToCheck = exportedTo || transportation?.exportedTo;
+    // pointOfDestination can be at exportData level or within transportation object
+    const destinationToCheck = pointOfDestination || transportation?.pointOfDestination;
+
+    if (hasExportedFrom &&
+      ProgressService.getExportDestinationStatus(countryToCheck) === ProgressStatus.COMPLETED &&
+      ProgressService.isEmptyAndTrimSpaces(destinationToCheck)) {
       return ProgressStatus.COMPLETED;
     }
 
-    return transportation?.exportedFrom && ProgressService.getExportDestinationStatus(transportation?.exportedTo) === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+    return ProgressStatus.INCOMPLETE;
   }
 
-  static readonly getProgressSections = (landingsEntryOption: string, progressObject: CatchCertificateProgress, transportType: ProgressStatus, data: CatchCertificate) => {
+  static readonly getProgressSections = async (landingsEntryOption: string, progressObject: CatchCertificateProgress, transportType: ProgressStatus, data: CatchCertificate) => {
     if (landingsEntryOption === 'directLanding') {
       return progressObject;
     }
 
     const transportations: CatchCertificateTransport[] = data.exportData.transportations;
-    const transportDetails: ProgressStatus = (Array.isArray(transportations) && transportations.length > 0) ? ProgressService.getCatchCertificateTransportDetails(transportations) : ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data.exportData.transportation)));
+    const transportDetails: ProgressStatus = (Array.isArray(transportations) && transportations.length > 0)
+      ? await ProgressService.getCatchCertificateTransportDetails(transportations)
+      : ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data.exportData.transportation)));
 
     return {
       ...progressObject,
@@ -241,9 +252,9 @@ export default class ProgressService {
     return this.getTransportationStatus(journey)
   }
 
-  public static readonly getCatchCertificateTransportDetails = (
+  public static readonly getCatchCertificateTransportDetails = async (
     transportations: CatchCertificateTransport[]
-  ): ProgressStatus => {
+  ): Promise<ProgressStatus> => {
     const allHaveVehicles = transportations.every((transportation: CatchCertificateTransport) =>
       ProgressService.isEmptyAndTrimSpaces(
         FrontEndCatchCertificateTransport.toFrontEndTransport(transportation)?.vehicle
@@ -255,18 +266,26 @@ export default class ProgressService {
       const isValidTransportDocument = (doc: FrontEndCatchCertificateTransport.CatchCertificateTransportDocument) =>
         ProgressService.isEmptyAndTrimSpaces(doc.name) && ProgressService.isEmptyAndTrimSpaces(doc.reference);
 
-      const transportationIsIncomplete: boolean = transportations.some((transportation: CatchCertificateTransport) => {
+      const transportationIsIncomplete: boolean = (await Promise.all(transportations.map(async (transportation: CatchCertificateTransport) => {
         const frontEndTransportation: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
         const bypassForTruckCMR = frontEndTransportation.cmr === 'false' || !frontEndTransportation.cmr;
         const payload = { ...frontEndTransportation };
         delete payload.cmr;
         const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-        const hasValidationError = bypassForTruckCMR && error;
+
+        // Check if the vehicle is truck, if so, check if Nationality of vehicle is a valid country
+        const nationalityErrors = await validateTruckNationality(
+          frontEndTransportation.vehicle,
+          frontEndTransportation.nationalityOfVehicle,
+          false // Not draft mode - we need to check for errors
+        );
+
+        const hasValidationError = bypassForTruckCMR && (error || nationalityErrors.length > 0);
         const missingTransportationDetails = bypassForTruckCMR && !frontEndTransportation.departurePlace
         const transportationDocumentIncomplete = bypassForTruckCMR && Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);
 
         return hasValidationError || missingTransportationDetails || transportationDocumentIncomplete;
-      })
+      }))).some(incomplete => incomplete);
 
       if (transportationIsIncomplete) {
         return ProgressStatus.INCOMPLETE;
@@ -381,8 +400,17 @@ export default class ProgressService {
       : ProgressStatus.OPTIONAL;
   }
 
-  public static readonly getExportDestinationStatus = (exportedTo: ICountry): ProgressStatus => {
-    return ['officialCountryName'].every((key: string) => ProgressService.isEmptyAndTrimSpaces(exportedTo?.[key])) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+  public static readonly getExportDestinationStatus = (exportedTo: ICountry, pointOfDestination?: string, journey?: ServiceNames): ProgressStatus => {
+    const hasCountry = ['officialCountryName'].every((key: string) => ProgressService.isEmptyAndTrimSpaces(exportedTo?.[key]));
+
+    // For Processing Statements, pointOfDestination parameter is passed (even if undefined)
+    if (journey === ServiceNames.PS) {
+      // For Processing Statements, both country and pointOfDestination are required
+      return hasCountry && ProgressService.isEmptyAndTrimSpaces(pointOfDestination) ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+    }
+
+    // For other document types (Catch Certificate, Storage Document), only country is required
+    return hasCountry ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
   public static async getProcessingStatementProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
@@ -430,7 +458,7 @@ export default class ProgressService {
       processingPlant,
       processingPlantAddress,
       exportHealthCertificate,
-      exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo)
+      exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo, data?.exportData?.pointOfDestination, ServiceNames.PS),
     };
 
     const requiredSectionsLength = Object.keys(psProgress).filter((key) => key !== "reference").length;
@@ -451,10 +479,18 @@ export default class ProgressService {
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
-    const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED &&
-      data?.exportData?.catches.every((ctch: StorageDocument.Catch, index: number) =>
-        this.validateCatch(ctch, index)
-      );
+    const hasAtLeastOneCatch = data?.exportData?.catches?.length > 0
+    const catchErrors = hasAtLeastOneCatch ? {} : { "catches": "at least one catch is required" };
+
+    if (hasAtLeastOneCatch) {
+      for (const [index, ctch] of data.exportData.catches.entries()) {
+        checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, catchErrors);
+        checkNetWeightProductDepartureIsZeroPositive(ctch, index, catchErrors);
+        checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, catchErrors);
+      }
+    }
+
+    const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED && isEmpty(catchErrors);
 
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
@@ -472,62 +508,6 @@ export default class ProgressService {
       requiredSections: requiredSectionsLength,
       completedSections: ProgressService.getCompletedSectionsNumber(sdProgress),
     };
-  }
-
-  public static validateNetWeightProductDeparture(ctch: StorageDocument.Catch, index: number, errors: { [key: string]: string }): void {
-    if (!ctch.netWeightProductDeparture) {
-      return;
-    }
-
-    if (+ctch.netWeightProductDeparture <= 0) {
-      errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorMax2DecimalLargerThan0';
-    } else if (!isPositiveNumberWithTwoDecimals(ctch.netWeightProductDeparture)) {
-      errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDeparturePositiveMax2Decimal';
-    } else if (!isNotExceed12Digit(ctch.netWeightProductDeparture)) {
-      errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceed12Digit';
-    }
-  }
-
-  public static validateNetWeightFisheryProductDeparture(ctch: StorageDocument.Catch, index: number, errors: { [key: string]: string }): void {
-    if (!ctch.netWeightFisheryProductDeparture) {
-      return;
-    }
-
-    if (+ctch.netWeightFisheryProductDeparture <= 0) {
-      errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorMax2DecimalLargerThan0';
-    } else if (!isPositiveNumberWithTwoDecimals(ctch.netWeightFisheryProductDeparture)) {
-      errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDeparturePositiveMax2Decimal';
-    } else if (!isNotExceed12Digit(ctch.netWeightFisheryProductDeparture)) {
-      errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceed12Digit';
-    }
-  }
-
-  public static isValidNetWeightProductDeparture(ctch: StorageDocument.Catch): boolean {
-    return ctch.netWeightProductDeparture &&
-      (+ctch.netWeightProductDeparture) > 0 &&
-      isPositiveNumberWithTwoDecimals(ctch.netWeightProductDeparture) &&
-      isNotExceed12Digit(ctch.netWeightProductDeparture);
-  }
-
-  public static isValidNetWeightFisheryProductDeparture(ctch: StorageDocument.Catch): boolean {
-    return ctch.netWeightFisheryProductDeparture &&
-      (+ctch.netWeightFisheryProductDeparture) > 0 &&
-      isPositiveNumberWithTwoDecimals(ctch.netWeightFisheryProductDeparture) &&
-      isNotExceed12Digit(ctch.netWeightFisheryProductDeparture);
-  }
-
-  public static validateCatch(ctch: StorageDocument.Catch, index: number): boolean {
-    const errors: { [key: string]: string } = {};
-
-    this.validateNetWeightProductDeparture(ctch, index, errors);
-    this.validateNetWeightFisheryProductDeparture(ctch, index, errors);
-
-    const isNetWeightProductDepartureValid = this.isValidNetWeightProductDeparture(ctch);
-    const isNetWeightFisheryProductDepartureValid = this.isValidNetWeightFisheryProductDeparture(ctch);
-
-    return Object.keys(errors).length === 0 &&
-      (!isEmpty(ctch.productWeight)) &&
-      (isNetWeightProductDepartureValid || isNetWeightFisheryProductDepartureValid);
   }
 
 }
