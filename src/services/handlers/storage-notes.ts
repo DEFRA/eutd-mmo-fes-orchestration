@@ -7,6 +7,7 @@ import {
   validateDate,
   validateDateBefore,
   validateDateIsSameOrBefore,
+  validateMaximumFutureDate,
   validateUKDocumentNumberFormat,
   validateWhitespace,
 } from "../orchestration.service";
@@ -118,6 +119,9 @@ export function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, i
 
 function checkFacilityArrivalDateError(exportData: any, departureDate: string, errors) {
   if (!validateDate(exportData.facilityArrivalDate)) {
+    errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateValidationError";
+  } else if (!validateMaximumFutureDate(exportData.facilityArrivalDate)) {
+    // Reject dates that are too far in the future (DEFECT-469 fix)
     errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateValidationError";
   } else if (validateDateBefore(exportData.facilityArrivalDate, departureDate)) {
     errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateBeforeDepatureDateValidationError";
@@ -290,10 +294,10 @@ async function validateIssuingCountryForNonUK(product: any, index: number, error
     return;
   }
 
-  const country: ICountry = typeof product.issuingCountry === 'string'
+  const country: ICountry = typeof product.issuingCountry === 'string' 
     ? { officialCountryName: product.issuingCountry, isoCodeAlpha2: undefined, isoCodeAlpha3: undefined, isoNumericCode: undefined }
     : product.issuingCountry;
-
+  
   const countryValidation = await validateCountriesName(country, ApplicationConfig.getReferenceServiceUrl(), 'issuingCountry');
   if (countryValidation.isError) {
     errors[`catches-${index}-issuingCountry`] = 'sdAddCatchDetailsErrorEnterIssuingCountry';

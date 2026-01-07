@@ -112,7 +112,6 @@ export default class FishRoutes {
                   throw errors.error;
                 }
 
-                // validate whether species is valid only when adding species
                 logger.info(`[ADDING-SPECIES][PAYLOAD][validate whether species is valid only when adding species][${JSON.stringify(value)}]`);
                 const refUrl = ApplicationConfig.getReferenceServiceUrl();
                 const anyError = await validateSpeciesWithReferenceData(value, refUrl);
@@ -187,7 +186,6 @@ export default class FishRoutes {
                   throw errors.error;
                 }
 
-                // validate whether species is valid only when adding species
                 const refUrl = ApplicationConfig.getReferenceServiceUrl();
                 const anyError = await validateSpeciesWithReferenceData(value as Product, refUrl);
                 if (anyError.isError) {

@@ -218,10 +218,10 @@ const summaryErrors: ValidationFailure[] = [{
 
 describe('Certificate Controller', () => {
 
-  let mockError;
-  let mockInfo;
-  let mockGetDocument;
-  let mockGetSummaryErrors;
+  let mockError: jest.SpyInstance;
+  let mockInfo: jest.SpyInstance;
+  let mockGetDocument: jest.SpyInstance;
+  let mockGetSummaryErrors: jest.SpyInstance;
 
   beforeEach(() => {
     mockError = jest.spyOn(logger, 'error');
@@ -634,6 +634,142 @@ describe('Certificate Controller', () => {
       expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
       expect(mockGetSummaryErrors).toHaveBeenCalledWith('Bob', documentNumber, contactId);
       expect(mockError).toHaveBeenCalledWith(`[GET-SUMMARY-CERTIFICATE][GET-SUMMARY-ERRORS][ERROR][${error}]`);
+    });
+
+  });
+
+  describe('getEuDataIntegrationStatus', () => {
+
+    it('will return null if the document cannot be found', async () => {
+      mockGetDocument.mockResolvedValue(null);
+
+      const result = await CertificateController.getEuDataIntegrationStatus(req, 'Bob', documentNumber);
+
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(result).toBeNull();
+      expect(mockInfo).toHaveBeenCalledWith('[GET-EU-DATA-INTEGRATION-STATUS][GBR-X-CC-1][NOT-FOUND]');
+    });
+
+    it('will return null if the document has no catchSubmission', async () => {
+      const docWithoutEuRef = { ...backEndCc };
+      delete docWithoutEuRef.catchSubmission;
+      mockGetDocument.mockResolvedValue(docWithoutEuRef);
+
+      const result = await CertificateController.getEuDataIntegrationStatus(req, 'Bob', documentNumber);
+
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(result).toBeNull();
+      expect(mockInfo).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${documentNumber}][NOT-FOUND]`);
+    });
+
+    it('will return null if catchSubmission status does not match params status', async () => {
+      const docWithEuRef: BackEnd.CatchCertificate = {
+        ...backEndCc,
+        catchSubmission: { status: 'SUCCESS', reference: 'EU-CATCH-2024-12345' }
+      };
+      mockGetDocument.mockResolvedValue(docWithEuRef);
+
+      const reqWithDifferentStatus = {
+        ...req,
+        params: { status: 'FAILURE' }
+      };
+
+      const result = await CertificateController.getEuDataIntegrationStatus(reqWithDifferentStatus, 'Bob', documentNumber);
+
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(result).toBeNull();
+      expect(mockInfo).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${documentNumber}][NOT-FOUND]`);
+    });
+
+    it('will return catchSubmission when available and status matches', async () => {
+      const docWithEuRef: BackEnd.CatchCertificate = {
+        ...backEndCc,
+        catchSubmission: { status: 'SUCCESS', reference: 'EU-CATCH-2024-12345' }
+      };
+      mockGetDocument.mockResolvedValue(docWithEuRef);
+
+      const reqWithMatchingStatus = {
+        ...req,
+        params: { status: 'SUCCESS' }
+      };
+
+      const result = await CertificateController.getEuDataIntegrationStatus(reqWithMatchingStatus, 'Bob', documentNumber);
+
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(result).toEqual({
+        reference: 'EU-CATCH-2024-12345',
+        status: "SUCCESS"
+      });
+    });
+
+    it('will return catchSubmission with FAILURE status when status matches', async () => {
+      const docWithFailure: BackEnd.CatchCertificate = {
+        ...backEndCc,
+        catchSubmission: {
+          status: 'FAILURE',
+          faultCode: 'S:Client',
+          faultString: 'Validation error',
+          validationErrors: [{
+            id: 'ERR-001',
+            message: 'Invalid field',
+            field: '/field/path'
+          }]
+        }
+      };
+      mockGetDocument.mockResolvedValue(docWithFailure);
+
+      const reqWithFailureStatus = {
+        ...req,
+        params: { status: 'FAILURE' }
+      };
+
+      const result = await CertificateController.getEuDataIntegrationStatus(reqWithFailureStatus, 'Bob', documentNumber);
+
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(result).toEqual({
+        status: 'FAILURE',
+        faultCode: 'S:Client',
+        faultString: 'Validation error',
+        validationErrors: [{
+          id: 'ERR-001',
+          message: 'Invalid field',
+          field: '/field/path'
+        }]
+      });
+    });
+
+    it('will return catchSubmission with IN_PROGRESS status when status matches', async () => {
+      const docWithInProgress: BackEnd.CatchCertificate = {
+        ...backEndCc,
+        catchSubmission: {
+          status: 'IN_PROGRESS',
+          reasonInformation: 'Processing certificate'
+        }
+      };
+      mockGetDocument.mockResolvedValue(docWithInProgress);
+
+      const reqWithInProgressStatus = {
+        ...req,
+        params: { status: 'IN_PROGRESS' }
+      };
+
+      const result = await CertificateController.getEuDataIntegrationStatus(reqWithInProgressStatus, 'Bob', documentNumber);
+
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(result).toEqual({
+        status: 'IN_PROGRESS',
+        reasonInformation: 'Processing certificate'
+      });
+    });
+
+    it('will catch and log errors when getting the document', async () => {
+      const error = new Error('Database error');
+      mockGetDocument.mockRejectedValue(error);
+
+      await expect(CertificateController.getEuDataIntegrationStatus(req, 'Bob', documentNumber)).rejects.toThrow('Database error');
+
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(mockError).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][GBR-X-CC-1][ERROR][${error}]`);
     });
 
   });

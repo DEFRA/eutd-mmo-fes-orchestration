@@ -6,6 +6,7 @@ import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/c
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
 import ProgressService from '../services/progress.service';
+import * as ProcessingStatementService from '../persistence/services/processingStatement';
 import logger from '../logger';
 import { DocumentStatuses } from '../persistence/schema/catchCert';
 
@@ -87,6 +88,29 @@ export default class ProgressRoutes {
                         documentNumber,
                         contactId
                       );
+
+                      // FI0-10647: Validate products have catches details, not just description
+                      const psData = await ProcessingStatementService.getDraft(userPrincipal, documentNumber, contactId);
+                      const products = psData?.exportData?.products || [];
+                      const catches = psData?.exportData?.catches || [];
+                      
+                      const hasDescriptionOnlyProduct = products.some((product: any) => {
+                        if (!product || typeof product !== 'object') return false;
+                        
+                        // Check if product has at least a description
+                        const hasDescription = product.description || product.productDescription;
+                        
+                        // Check if product has catches by looking for catches with matching productId
+                        const productCatches = catches.filter((c: any) => c.productId === product.id);
+                        const hasCatches = productCatches.length > 0;
+                        
+                        // Product is invalid if it has description but no catches
+                        return hasDescription && !hasCatches;
+                      });
+
+                      if (hasDescriptionOnlyProduct) {
+                        return h.response({ products: 'error.products.incomplete' }).code(400);
+                      }
 
                       return completeProgressHandler(progress, completedSections, requiredSections, h);
                     }

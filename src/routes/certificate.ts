@@ -32,6 +32,30 @@ export default class CertificateRoutes {
             description: 'Get certificate summary information',
             tags: ['api', 'certificate']
           }
+        },
+        {
+          method: 'GET',
+          path: '/v1/certificate/eu-data-integration/{status}',
+          options: {
+            security: true,
+            cors: true,
+            handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber) => {
+                const euIntegrationData = await Controller.getEuDataIntegrationStatus(request, userPrincipal, documentNumber);
+
+                if (!euIntegrationData) {
+                  return h.response().code(403);
+                }
+
+                return euIntegrationData;
+              }, [DocumentStatuses.Complete]).catch(e => {
+                logger.error(`[GET-EU-DATA-INTEGRATION-STATUS][ERROR][${e.stack || e}]`);
+                return h.response().code(500);
+              });
+            },
+            description: 'Get EU data integration status with CATCH reference number',
+            tags: ['api', 'certificate', 'eu-integration']
+          }
         }
       ]);
       resolve(null);
