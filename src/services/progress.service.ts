@@ -359,29 +359,54 @@ export default class ProgressService {
     return !isEmpty(propertyValue) ? Object.keys(propertyValue).every(key => typeof propertyValue[key] === 'string' && propertyValue[key].trim() !== '') : false
   }
 
-  public static readonly getSDCatchStatus = async (catches: StorageDocument.Catch[], userPrincipal: string, documentNumber: string, contactId: string): Promise<ProgressStatus> => {
-    let status: boolean[] = [];
+  private static readonly hasRequiredSDCatchProperties = (singleCatch: StorageDocument.Catch): boolean => {
+    const requiredProperties = [
+      'product',
+      'id',
+      'commodityCode',
+      'certificateNumber',
+      'certificateType',
+      'weightOnCC'
+    ];
+    return requiredProperties.every(value => ProgressService.isEmptyAndTrimSpaces(singleCatch[value]));
+  }
 
-    if (catches !== undefined && catches.length > 0) {
-      status = await Promise.all(catches.map(
-        async (singleCatch, index) => {
-          const productErrors: { errors: any } = await validateProduct(singleCatch, index, {});
-          const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {}, documentNumber, userPrincipal, contactId);
-          const weightsErrors: { [key: string]: any } = {};
-          return [
-            'product',
-            'id',
-            'commodityCode',
-            'certificateNumber',
-            'certificateType',
-            'weightOnCC'
-          ].every(value => ProgressService.isEmptyAndTrimSpaces(singleCatch[value]) && Object.keys(productErrors.errors).length <= 0 && Object.keys(entryErrors.errors).length <= 0 && Object.keys(weightsErrors).length <= 0);
-        }
-      ));
+  private static readonly hasNoValidationErrors = (productErrors: { errors: any }, entryErrors: { errors: any }, weightsErrors: { [key: string]: any }): boolean => {
+    return Object.keys(productErrors.errors).length <= 0 &&
+      Object.keys(entryErrors.errors).length <= 0 &&
+      Object.keys(weightsErrors).length <= 0;
+  }
+
+  private static readonly validateSingleCatch = async (
+    singleCatch: StorageDocument.Catch,
+    index: number,
+    documentNumber: string,
+    userPrincipal: string,
+    contactId: string
+  ): Promise<boolean> => {
+    const productErrors: { errors: any } = await validateProduct(singleCatch, index, {});
+    const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {}, documentNumber, userPrincipal, contactId);
+    const weightsErrors: { [key: string]: any } = {};
+
+    const hasRequiredProperties = ProgressService.hasRequiredSDCatchProperties(singleCatch);
+    const hasNoErrors = ProgressService.hasNoValidationErrors(productErrors, entryErrors, weightsErrors);
+
+    return hasRequiredProperties && hasNoErrors;
+  }
+
+  public static readonly getSDCatchStatus = async (catches: StorageDocument.Catch[], userPrincipal: string, documentNumber: string, contactId: string): Promise<ProgressStatus> => {
+    if (!catches || catches.length === 0) {
+      return ProgressStatus.INCOMPLETE;
     }
 
-    return status.length > 0 && status.every(isValid => isValid === true) ?
-      ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+    const validationResults = await Promise.all(
+      catches.map((singleCatch, index) =>
+        ProgressService.validateSingleCatch(singleCatch, index, documentNumber, userPrincipal, contactId)
+      )
+    );
+
+    const allValid = validationResults.every(isValid => isValid === true);
+    return allValid ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
   public static readonly getStorageFacilityStatus = (

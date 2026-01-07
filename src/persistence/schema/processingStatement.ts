@@ -292,8 +292,7 @@ export const cloneCatch = (original: Catch): Catch => {
     exportWeightAfterProcessing,
     scientificName,
     productDescription,
-    productId,
-    productCommodityCode
+    productId
   } = original;
 
   const result = {
@@ -308,7 +307,6 @@ export const cloneCatch = (original: Catch): Catch => {
     exportWeightAfterProcessing,
     scientificName,
     productDescription,
-    productCommodityCode,
     productId
   }
 

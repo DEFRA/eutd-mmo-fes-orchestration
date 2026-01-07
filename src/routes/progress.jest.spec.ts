@@ -2,6 +2,7 @@ import * as Hapi from "@hapi/hapi";
 import * as DocumentOwnershipValidator from "../validators/documentOwnershipValidator";
 import ProgressRoutes from "./progress";
 import ProgressService from "../services/progress.service";
+import * as ProcessingStatementService from "../persistence/services/processingStatement";
 import { Progress } from "../persistence/schema/frontEndModels/payload";
 import { ProgressStatus } from "../persistence/schema/common";
 import logger from "../logger";
@@ -479,6 +480,7 @@ describe("Progress routes", () => {
     let mockGetProgress;
     let mockValidateDocumentOwnership;
     let mockLogError;
+    let mockGetDraft;
 
     beforeEach(() => {
       mockGetProgress = jest.spyOn(ProgressService, "getProcessingStatementProgress");
@@ -486,6 +488,19 @@ describe("Progress routes", () => {
       mockLogError = jest.spyOn(logger, "error");
       mockValidateDocumentOwnership = jest.spyOn(DocumentOwnershipValidator, "validateDocumentOwnership");
       mockValidateDocumentOwnership.mockResolvedValue(true);
+      
+      // Mock getDraft to return valid products with catches
+      mockGetDraft = jest.spyOn(ProcessingStatementService, "getDraft");
+      mockGetDraft.mockResolvedValue({
+        exportData: {
+          products: [
+            { id: 'product-1', description: 'Product 1' }
+          ],
+          catches: [
+            { productId: 'product-1', species: 'COD' }
+          ]
+        }
+      } as any);
     });
 
     afterEach(() => {

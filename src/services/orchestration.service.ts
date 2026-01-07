@@ -412,85 +412,81 @@ export default class OrchestrationService {
         return { error: `unsupported ${redisKey}` };
       }
 
-      const pdf = await pdfService.generatePdfAndUpload(
-        BLOB_STORAGE_CONTAINER_NAME,
-        pdfId,
-        data,
-        !ApplicationConfig._enablePdfGen,
-        { getStream: pdfService.getAzureBlobStream },
-        documentNumber
-      );
-
-      await OrchestrationService.clearDataFromJourney(redisKey, userPrincipal, documentNumber, pdf, user, contactId);
-
-      void invalidateDraftCache(userPrincipal, documentNumber, contactId);
-      await SaveAsDraftService.deleteDraftLink(
-        userPrincipal,
-        documentNumber,
+      const pdf = await OrchestrationService.createPdfAndProcess(pdfId, data, documentNumber, {
         redisKey,
-        contactId
-      );
-
-      data.documentUri = pdf.uri;
-
-      const message = `User successfully created a ${JOURNEY[redisKey]}`;
-      const monitoringInfo = `completed/${JOURNEY[redisKey]}/dn:${documentNumber}`;
-      const priority = PROTECTIVE_MONITORING_PRIORITY_NORMAL;
-      const sessionId = `${req.app.claims.auth_time}:${req.app.claims.contactId}`;
-      const transaction = `${PROTECTIVE_MONITORING_COMPLETED_TRANSACTION}-${DocumentNumberService.getServiceNameFromDocumentNumber(
-        documentNumber
-      )}`;
-
-      await postEventData(
         userPrincipal,
-        message,
-        monitoringInfo,
+        user,
+        contactId,
         clientip,
-        priority,
-        sessionId,
-        transaction
-      ).catch((error) => `post monitoring event data error: ${error}`);
-
-      // axios put to BC service.
-      const payload = {
-        certNumber: documentNumber,
-        timestamp: new Date().toISOString().toString(),
-        status: 'COMPLETE',
-      };
-
-      const agent = new https.Agent({
-        secureOptions: SSL_OP_LEGACY_SERVER_CONNECT
+        req,
+        h,
+        validationStatus,
+        reportUrl
       });
-
-      const config = {
-        headers: {
-          'X-API-KEY': ApplicationConfig._businessContinuityKey,
-          accept: 'application/json',
-        },
-        httpsAgent: agent
-      };
-
-      axios
-        .put(
-          `${ApplicationConfig._businessContinuityUrl}/api/certificates/${documentNumber}`,
-          payload,
-          config
-        )
-        .then(() => logger.info(`Submit Data for ${documentNumber} sent to BC server`))
-        .catch((err) =>
-          logger.error(`Submit Error - Data for ${documentNumber} not sent to BC server: ${err}`)
-        );
-
-      void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch(
-        (e) =>
-          logger.error(
-            `[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`
-          )
-      );
 
       const uri = encodeURIComponent(pdf.uri);
       return getRedirectionData(req, h.redirect(`${nextUrl}?uri=${uri}&documentNumber=${documentNumber}`), { uri: pdf.uri, documentNumber });
     }
+  }
+
+  private static async createPdfAndProcess(pdfId: string, data: any, documentNumber: string, options: {
+    redisKey: string,
+    userPrincipal: string,
+    user: any,
+    contactId: string,
+    clientip: any,
+    req: any,
+    h: any,
+    validationStatus: any,
+    reportUrl: string
+  }) {
+    const { redisKey, userPrincipal, user, contactId, clientip, req, validationStatus, reportUrl } = options;
+
+    const pdf = await pdfService.generatePdfAndUpload(
+      BLOB_STORAGE_CONTAINER_NAME,
+      pdfId,
+      data,
+      !ApplicationConfig._enablePdfGen,
+      { getStream: pdfService.getAzureBlobStream },
+      documentNumber
+    );
+
+    await OrchestrationService.clearDataFromJourney(redisKey, userPrincipal, documentNumber, pdf, user, contactId);
+
+    void invalidateDraftCache(userPrincipal, documentNumber, contactId);
+    await SaveAsDraftService.deleteDraftLink(userPrincipal, documentNumber, redisKey, contactId);
+
+    data.documentUri = pdf.uri;
+
+    const message = `User successfully created a ${JOURNEY[redisKey]}`;
+    const monitoringInfo = `completed/${JOURNEY[redisKey]}/dn:${documentNumber}`;
+    const priority = PROTECTIVE_MONITORING_PRIORITY_NORMAL;
+    const sessionId = `${req.app.claims.auth_time}:${req.app.claims.contactId}`;
+    const transaction = `${PROTECTIVE_MONITORING_COMPLETED_TRANSACTION}-${DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber)}`;
+
+    await postEventData(userPrincipal, message, monitoringInfo, clientip, priority, sessionId, transaction).catch((error) => `post monitoring event data error: ${error}`);
+
+    // axios put to BC service.
+    OrchestrationService.sendBusinessContinuityEvent(documentNumber);
+
+    void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch((e) => logger.error(`[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
+
+    return pdf;
+  }
+
+  private static sendBusinessContinuityEvent(documentNumber: string) {
+    const payload = {
+      certNumber: documentNumber,
+      timestamp: new Date().toISOString().toString(),
+      status: 'COMPLETE',
+    };
+
+    const agent = new https.Agent({ secureOptions: SSL_OP_LEGACY_SERVER_CONNECT });
+    const config = { headers: { 'X-API-KEY': ApplicationConfig._businessContinuityKey, accept: 'application/json' }, httpsAgent: agent };
+
+    axios.put(`${ApplicationConfig._businessContinuityUrl}/api/certificates/${documentNumber}`, payload, config)
+      .then(() => logger.info(`Submit Data for ${documentNumber} sent to BC server`))
+      .catch((err) => logger.error(`Submit Error - Data for ${documentNumber} not sent to BC server: ${err}`));
   }
 
   static readonly checkValidationStorageNotes = async (data, userPrincipal: string, contactId: string, documentNumber: string) => {

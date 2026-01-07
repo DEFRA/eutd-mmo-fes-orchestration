@@ -9,6 +9,8 @@ import * as SessionManager from "../helpers/sessionManager";
 import * as CatchCertService from "../persistence/services/catchCert";
 import { LandingsEntryOptions } from "../persistence/schema/catchCert";
 import * as CountriesValidator from "../validators/countries.validator";
+import VesselValidator from "../services/vesselValidator.service";
+import * as ProductValidator from "../validators/ccProductValidator";
 
 const Joi = require('joi');
 
@@ -1937,26 +1939,96 @@ describe("exporter-payload routes", () => {
       app: {
         claims: {
           sub: "Bob",
+          email: "bob@example.com",
+          auth_time: 123456789,
+          contactId: "contactBob"
         },
       },
       headers: {
         documentnumber: "DOCUMENT123",
         Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
       },
+      payload: {
+        data: "127.0.0.1",
+        completeUri: "/complete",
+        submittedUri: "/submitted"
+      }
     };
 
     let mockValidateDocumentOwnership: jest.SpyInstance;
+    let mockExportPayloadServiceGet: jest.SpyInstance;
+    let mockInvalidateDraftCache: jest.SpyInstance;
+    let mockGetCertificateStatus: jest.SpyInstance;
     let mockCreateExportCertificate: jest.SpyInstance;
+    let mockIsSubmissionFailure: jest.SpyInstance;
+    let mockClearErrors: jest.SpyInstance;
+    let mockClearSystemError: jest.SpyInstance;
+    let mockVesselsNotFound: jest.SpyInstance;
+    let mockInvalidLandingDates: jest.SpyInstance;
+    let mockVesselsAreValid: jest.SpyInstance;
+    let mockProductsAreValid: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
         Ownership,
         "validateDocumentOwnership"
       );
+      mockExportPayloadServiceGet = jest.spyOn(
+        ExportPayloadService,
+        "get"
+      );
+      mockInvalidateDraftCache = jest.spyOn(
+        CatchCertService,
+        "invalidateDraftCache"
+      );
+      mockGetCertificateStatus = jest.spyOn(
+        ExportPayloadService,
+        "getCertificateStatus"
+      );
       mockCreateExportCertificate = jest.spyOn(
-        Controller,
+        ExportPayloadService,
         "createExportCertificate"
       );
+      mockIsSubmissionFailure = jest.spyOn(
+        ExportPayloadService,
+        "isSubmissionFailure"
+      );
+      mockClearErrors = jest.spyOn(
+        require("../services/summaryErrors.service").default,
+        "clearErrors"
+      );
+      mockClearSystemError = jest.spyOn(
+        require("../services/summaryErrors.service").default,
+        "clearSystemError"
+      );
+      mockVesselsNotFound = jest.spyOn(
+        VesselValidator,
+        "vesselsNotFound"
+      );
+      mockInvalidLandingDates = jest.spyOn(
+        VesselValidator,
+        "invalidLandingDates"
+      );
+      mockVesselsAreValid = jest.spyOn(
+        VesselValidator,
+        "vesselsAreValid"
+      );
+      mockProductsAreValid = jest.spyOn(
+        ProductValidator,
+        "productsAreValid"
+      );
+
+      // Default mocks
+      mockInvalidateDraftCache.mockResolvedValue(undefined);
+      mockExportPayloadServiceGet.mockResolvedValue({ items: [] });
+      mockGetCertificateStatus.mockResolvedValue("DRAFT");
+      mockClearErrors.mockResolvedValue(undefined);
+      mockClearSystemError.mockResolvedValue(undefined);
+      mockIsSubmissionFailure.mockReturnValue(false);
+      mockVesselsNotFound.mockReturnValue([]);
+      mockInvalidLandingDates.mockReturnValue([]);
+      mockVesselsAreValid.mockResolvedValue(true);
+      mockProductsAreValid.mockResolvedValue([]);
     });
 
     afterEach(() => {
@@ -1981,11 +2053,21 @@ describe("exporter-payload routes", () => {
 
     it("should return 200 user is valid", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockCreateExportCertificate.mockResolvedValue({ some: "data" });
+      mockCreateExportCertificate.mockResolvedValue({ 
+        documentNumber: "DOCUMENT123", 
+        uri: "some-uri",
+        report: [],
+        isBlockingEnabled: false
+      });
+      
       const response = await server.inject(request);
 
       expect(response.statusCode).toBe(200);
-      expect(response.result).toStrictEqual({ some: "data" });
+      expect(response.result).toEqual({
+        offlineValidation: false,
+        documentNumber: "DOCUMENT123",
+        uri: "some-uri"
+      });
     });
   });
 
