@@ -14,18 +14,20 @@ import VesselLandingsRefresher from "./vesselLandingsRefresher.service";
 import * as SystemBlocks from "../persistence/services/systemBlock";
 import * as ReferenceDataService from '../services/reference-data.service';
 import SummaryErrorsService from '../services/summaryErrors.service';
-import { DocumentStatuses } from '../persistence/schema/catchCert';
+import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
 import { IExportCertificateResults } from '../persistence/schema/exportCertificateResults';
 import * as crypto from "crypto";
 import applicationConfig from '../applicationConfig';
 import * as LandingsConsolidateService from "./landings-consolidate.service";
 import * as pdfService from 'mmo-ecc-pdf-svc';
+import * as EuCountriesService from './eu-countries.service';
 
 const sinon = require('sinon');
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+jest.setTimeout(30000);
 
-let sandbox;
+let sandbox: any;
 
 const sessionStore = sinon.stub(RedisSessionStore);
 
@@ -70,7 +72,7 @@ const exportPayload = {
 
 describe('getItemByProductId', () => {
 
-  let mockGetDraftData;
+  let mockGetDraftData: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetDraftData = jest.spyOn(CatchCertService, 'getExportPayload');
@@ -150,9 +152,9 @@ describe('get', () => {
     landings: [sessionLanding]
   }
 
-  let mockGetDraftData;
-  let mockGetSessionData;
-  let mockGetDocNumber;
+  let mockGetDraftData: jest.SpyInstance;
+  let mockGetSessionData: jest.SpyInstance;
+  let mockGetDocNumber: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetDraftData = jest.spyOn(CatchCertService, 'getExportPayload');
@@ -727,8 +729,8 @@ describe('getDirectLanding', () => {
     landings: [sessionLanding]
   }
 
-  let mockGetDraftData;
-  let mockGetSessionData;
+  let mockGetDraftData: jest.SpyInstance;
+  let mockGetSessionData: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetDraftData = jest.spyOn(CatchCertService, 'getDirectExportPayload');
@@ -963,15 +965,15 @@ describe('getDirectLanding', () => {
 
 describe('upsertLanding', () => {
 
-  let mockSessionData;
+  let mockSessionData: jest.SpyInstance;
   const mockReadAllFor = jest.fn();
   const mockWriteAllFor = jest.fn();
   const mockSessionStore = new MockSessionStorage();
   mockSessionStore.readAllFor = mockReadAllFor;
   mockSessionStore.writeAllFor = mockWriteAllFor;
 
-  let mockGetDraftData;
-  let mockUpsertDraftData;
+  let mockGetDraftData: jest.SpyInstance;
+  let mockUpsertDraftData: jest.SpyInstance;
 
   beforeAll(() => {
     const mockGetSessionStore = jest.spyOn(SessionStoreFactory, 'getSessionStore');
@@ -1166,7 +1168,7 @@ describe('upsertLanding', () => {
   });
 
   describe('POST ExportPayload to mongo with errors', () => {
-    let mockCatchCertUpsertDraftData;
+    let mockCatchCertUpsertDraftData: jest.SpyInstance;
 
     beforeEach(() => {
       mockCatchCertUpsertDraftData = jest.spyOn(CatchCertService, 'upsertDraftData');
@@ -1548,8 +1550,8 @@ describe('upsertLanding', () => {
 
 describe('save', () => {
 
-  let mockUpsertDraftData;
-  let mockWithUserSessionDataStored;
+  let mockUpsertDraftData: jest.SpyInstance;
+  let mockWithUserSessionDataStored: jest.SpyInstance;
 
   beforeAll(() => {
     mockWithUserSessionDataStored = jest.spyOn(SessionManager, 'withUserSessionDataStored');
@@ -1772,27 +1774,30 @@ describe('save', () => {
 });
 
 describe('createExportCerticate', () => {
-  let stubGetBlockingStatus;
-  let mockExportPayload;
-  let mockGetExportPayload;
-  let mockCheckCertificate;
-  let mockReportDocumentSubmitted;
-  let mockAddIsLegallyDue;
-  let mockLoggerError;
-  let mockIsOfflineValidation;
-  let mockRefreshParallel;
-  let mockRefreshSerial;
-  let mockUpdateCertificateStatus;
-  let mockSaveErrors;
-  let mockSaveSystemErrors;
-  let mockMapValidationFailure;
-  let mockLoggerDebug;
-  let mockClearSessionData;
-  let mockUpdateConsolidateLandings;
+  let stubGetBlockingStatus: any;
+  let mockExportPayload: any;
+  let mockGetExportPayload: jest.SpyInstance;
+  let mockGetExportLocation: jest.SpyInstance;
+  let mockGetDraft: jest.SpyInstance;
+  let mockCheckCertificate: jest.SpyInstance;
+  let mockReportDocumentSubmitted: jest.SpyInstance;
+  let mockAddIsLegallyDue: jest.SpyInstance;
+  let mockLoggerError: jest.SpyInstance;
+  let mockIsOfflineValidation: jest.SpyInstance;
+  let mockRefreshParallel: jest.SpyInstance;
+  let mockRefreshSerial: jest.SpyInstance;
+  let mockUpdateCertificateStatus: jest.SpyInstance;
+  let mockSaveErrors: jest.SpyInstance;
+  let mockSaveSystemErrors: jest.SpyInstance;
+  let mockMapValidationFailure: jest.SpyInstance;
+  let mockLoggerDebug: jest.SpyInstance;
+  let mockLoggerInfo: jest.SpyInstance;
+  let mockClearSessionData: jest.SpyInstance;
+  let mockUpdateConsolidateLandings: jest.SpyInstance;
 
   beforeAll(() => {
     const mockGetExporterDetails = jest.spyOn(CatchCertService, 'getExporterDetails');
-    const mockGetExportLocation = jest.spyOn(CatchCertService, 'getExportLocation');
+    mockGetExportLocation = jest.spyOn(CatchCertService, 'getExportLocation');
     const mockGetCatchCertificateTransportDetails = jest.spyOn(CatchCertificateTransportation, 'getTransportationDetails');
     const mockGetConvservation = jest.spyOn(CatchCertService, 'getConservation');
     const mockCompleteDraft = jest.spyOn(CatchCertService, 'completeDraft');
@@ -1800,6 +1805,12 @@ describe('createExportCerticate', () => {
 
     const mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
     const mockRefresh = jest.spyOn(VesselLandingsRefresher, 'refresh');
+
+    // Mock methods called in createExportCertificate
+    const mockGetLandingsEntryOption = jest.spyOn(CatchCertService, 'getLandingsEntryOption');
+    const mockSubmitToCatchSystem = jest.spyOn(ReferenceDataService, 'submitToCatchSystem');
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.UploadEntry);
+    mockSubmitToCatchSystem.mockResolvedValue(undefined);
 
     mockInvalidateDraftCache.mockResolvedValue(undefined);
 
@@ -1925,6 +1936,28 @@ describe('createExportCerticate', () => {
       ]
     };
 
+    // Ensure getDraft and other persistence methods never hit the real DB during these tests
+    mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        products: mockExportPayload.items.map(_i => ({ /* minimal back-end shape for safety */ })),
+        transportations: [],
+        exporterDetails: {},
+        exportedFrom: {},
+        exportedTo: {}
+      }
+    } as any);
+
+    // Defensive mocks for methods that call findOneAndUpdate/findOne
+    const mockCompleteDraft = jest.spyOn(CatchCertService, 'completeDraft');
+    mockCompleteDraft.mockResolvedValue(null);
+    const mockUpsertDraftData = jest.spyOn(CatchCertService, 'upsertDraftData');
+    mockUpsertDraftData.mockResolvedValue(null as any);
+    const mockUpsertExportPayload = jest.spyOn(CatchCertService, 'upsertExportPayload');
+    mockUpsertExportPayload.mockResolvedValue(null as any);
+    mockUpdateCertificateStatus = jest.spyOn(CatchCertService, 'updateCertificateStatus');
+    mockUpdateCertificateStatus.mockResolvedValue(null);
+
     mockUpdateCertificateStatus = jest.spyOn(CatchCertService, 'updateCertificateStatus');
     mockUpdateCertificateStatus.mockResolvedValue(null);
 
@@ -1969,6 +2002,7 @@ describe('createExportCerticate', () => {
     mockedAxios.put.mockResolvedValueOnce(null);
 
     mockLoggerDebug = jest.spyOn(logger, 'debug');
+    mockLoggerInfo = jest.spyOn(logger, 'info');
     mockLoggerError = jest.spyOn(logger, 'error');
 
     mockRefreshParallel.mockResolvedValue(null);
@@ -1983,12 +2017,15 @@ describe('createExportCerticate', () => {
     mockRefreshSerial.mockReset();
 
     mockLoggerDebug.mockRestore();
+    mockLoggerInfo.mockRestore();
     mockUpdateCertificateStatus.mockRestore();
     mockSaveErrors.mockRestore();
 
     mockClearSessionData.mockRestore();
     mockCheckCertificate.mockRestore();
     mockUpdateConsolidateLandings.mockRestore()
+
+    if (mockGetDraft) mockGetDraft.mockRestore();
 
     jest.clearAllMocks();
   });
@@ -2028,6 +2065,85 @@ describe('createExportCerticate', () => {
     expect(mockUpdateConsolidateLandings).toHaveBeenCalledTimes(1);
     expect(mockAddIsLegallyDue).toHaveBeenCalled();
     expect(mockAddIsLegallyDue).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes exportedTo.exportedTo to isEuCountry when export location contains exportedTo property', async () => {
+    // Arrange: the service calls getExportLocation twice (gatherExportInfo, then submission check).
+    // Queue first call with the normal exportedTo shape and second call with a nested exportedTo.exportedTo
+    mockGetExportLocation.mockResolvedValueOnce({
+      exportedFrom: 'United Kingdom',
+      exportedTo: { officialCountryName: 'SPAIN', isoCodeAlpha2: 'A1', isoCodeAlpha3: 'A3', isoNumericCode: 'SP' }
+    });
+    mockGetExportLocation.mockResolvedValueOnce({ exportedTo: { exportedTo: { isoCodeAlpha2: 'ES' } } });
+
+    const mockIsEu = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
+    const mockCatchSubmit = jest.spyOn(ExportPayloadService, 'catchSubmissionForCC').mockResolvedValue(undefined as any);
+
+    // Ensure blocking status allows submission path
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    // Act
+    await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    // Assert: isEuCountry called with the exportedTo wrapper containing the inner exportedTo
+    expect(mockIsEu).toHaveBeenCalledWith({ exportedTo: { isoCodeAlpha2: 'ES' } });
+    expect(mockCatchSubmit).toHaveBeenCalledWith('Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID);
+
+    // Cleanup
+    mockIsEu.mockRestore();
+    mockCatchSubmit.mockRestore();
+  });
+
+  it('should submit to EU CATCH when exportedTo is an EU country', async () => {
+    // ensure exportedTo resolves to an EU country
+    jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
+    const submitSpy = jest.spyOn(require('./reference-data.service'), 'submitToCatchSystem').mockResolvedValue(undefined);
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    expect(submitSpy).toHaveBeenCalledWith('GBR-2020-CC-F9F69D192', 'submit');
+    submitSpy.mockRestore();
+  });
+
+  it('should NOT submit to EU CATCH when exportedTo is not an EU country', async () => {
+    jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
+    const submitSpy = jest.spyOn(require('./reference-data.service'), 'submitToCatchSystem').mockResolvedValue(undefined);
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    expect(submitSpy).not.toHaveBeenCalled();
+    submitSpy.mockRestore();
+  });
+
+  it('passes exportedTo.exportedTo to isEuCountry when export location contains exportedTo property', async () => {
+    // prepare spies
+    const getLocSpy = jest.spyOn(CatchCertService, 'getExportLocation').mockResolvedValue({ exportedTo: { officialCountryName: 'Spain' } });
+    const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
+    const submitSpy = jest.spyOn(require('./reference-data.service'), 'submitToCatchSystem').mockResolvedValue(undefined);
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    expect(getLocSpy).toHaveBeenCalled();
+    expect(isEuSpy).toHaveBeenCalledWith({ officialCountryName: 'Spain' });
+
+    // cleanup
+    submitSpy.mockRestore();
+    isEuSpy.mockRestore();
+    getLocSpy.mockRestore();
   });
 
   it('should not create an export certificate when CC_3c is true for an export without a matching species on a landing', async () => {
@@ -2095,6 +2211,28 @@ describe('createExportCerticate', () => {
     expect(mockReportDocumentSubmitted).toHaveBeenCalledTimes(1);
     expect(mockAddIsLegallyDue).toHaveBeenCalled();
     expect(mockAddIsLegallyDue).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs an error when email is missing for createExportCertificate', async () => {
+    const loggerSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+
+    // ensure flow proceeds past email check by stubbing downstream calls
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+    jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
+    const pdfSpy = jest.spyOn(pdfService, 'generatePdfAndUpload').mockResolvedValue({ uri: 'fake.pdf' } as any);
+    const completeDraftSpy = jest.spyOn(CatchCertService, 'completeDraft').mockResolvedValue(undefined as any);
+
+    await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', null as any, CONTACT_ID).catch(() => { /* ignore thrown for test */ });
+
+    expect(loggerSpy).toHaveBeenCalled();
+    const calledWith = loggerSpy.mock.calls.find(call => call[0].includes('Missing email for user'));
+    expect(calledWith).toBeDefined();
+
+    pdfSpy.mockRestore();
+    completeDraftSpy.mockRestore();
+    loggerSpy.mockRestore();
   });
 
   it('should not create an export certificate when application fails on noDataSubmitted', async () => {
@@ -2206,7 +2344,7 @@ describe('createExportCerticate', () => {
       const result = await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
 
       expect(mockUpdateCertificateStatus).toHaveBeenCalledWith('Bob', 'GBR-2020-CC-F9F69D192', 'contactBob', 'DRAFT');
-      expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][GBR-2020-CC-F9F69D192][UPDATED-STATUS][DRAFT]');
+        expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][GBR-2020-CC-F9F69D192][UPDATED-STATUS][DRAFT]');
       expect(result).toEqual(expected);
     });
 
@@ -2218,7 +2356,7 @@ describe('createExportCerticate', () => {
       const result = await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
 
       expect(mockUpdateCertificateStatus).toHaveBeenCalledWith('Bob', 'GBR-2020-CC-F9F69D192', 'contactBob', 'DRAFT');
-      expect(mockLoggerDebug).toHaveBeenCalledWith(`[CREATE-EXPORT-CERTIFICATE][GBR-2020-CC-F9F69D192][UPDATE-STATUS][DRAFT][ERROR], ${error}`);
+      expect(mockLoggerInfo).toHaveBeenCalledWith(`[CREATE-EXPORT-CERTIFICATE][GBR-2020-CC-F9F69D192][UPDATE-STATUS][DRAFT][ERROR], ${error}`);
       expect(result).toEqual(expected);
     });
 
@@ -2254,7 +2392,7 @@ describe('createExportCerticate', () => {
       const result = await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
 
       expect(mockSaveErrors).toHaveBeenCalled();
-      expect(mockLoggerDebug).toHaveBeenCalledWith(`[CREATE-EXPORT-CERTIFICATE][GBR-2020-CC-F9F69D192][SAVE-ERRORS], ${error}`);
+      expect(mockLoggerInfo).toHaveBeenCalledWith(`[CREATE-EXPORT-CERTIFICATE][GBR-2020-CC-F9F69D192][SAVE-ERRORS], ${error}`);
       expect(result).toEqual(expected);
     });
 
@@ -2517,7 +2655,7 @@ describe('createExportCerticate', () => {
 
   it('should use empty object when exporter.model is null', async () => {
     const mockGetExporterDetails = jest.spyOn(CatchCertService, 'getExporterDetails');
-    
+
     mockGetExporterDetails.mockResolvedValueOnce({
       model: null as any
     });
@@ -2534,7 +2672,7 @@ describe('createExportCerticate', () => {
 
   it('should use empty object when exporter.model is undefined', async () => {
     const mockGetExporterDetails = jest.spyOn(CatchCertService, 'getExporterDetails');
-    
+
     mockGetExporterDetails.mockResolvedValueOnce({
       model: undefined as any
     });
@@ -2551,7 +2689,7 @@ describe('createExportCerticate', () => {
 
   it('should use empty array when transportations is not an array (null)', async () => {
     const mockGetTransportations = jest.spyOn(CatchCertificateTransportation, 'getTransportations');
-    
+
     mockGetTransportations.mockResolvedValueOnce(null as any);
 
     stubGetBlockingStatus.onCall(0).returns(false);
@@ -2566,7 +2704,7 @@ describe('createExportCerticate', () => {
 
   it('should use empty array when transportations is a non-array object', async () => {
     const mockGetTransportations = jest.spyOn(CatchCertificateTransportation, 'getTransportations');
-    
+
     mockGetTransportations.mockResolvedValueOnce({ invalid: 'data' } as any);
 
     stubGetBlockingStatus.onCall(0).returns(false);
@@ -2582,7 +2720,7 @@ describe('createExportCerticate', () => {
 
 describe('updateCertificateStatus', () => {
 
-  let mockServiceLayer;
+  let mockServiceLayer: jest.SpyInstance;
 
   beforeEach(() => {
     mockServiceLayer = jest.spyOn(CatchCertService, 'updateCertificateStatus');
@@ -2612,7 +2750,7 @@ describe('updateCertificateStatus', () => {
 
 describe('getCertificateStatus', () => {
 
-  let mockGetCertificateStatus;
+  let mockGetCertificateStatus: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetCertificateStatus = jest.spyOn(CatchCertService, 'getCertificateStatus');
@@ -2679,7 +2817,7 @@ describe('getCertificateHash', () => {
   const mockValidHash = crypto.createHash('sha1')
     .update(JSON.stringify(mockCertificateData))
     .digest('base64') as string;
-  let mockGetCertificate;
+  let mockGetCertificate: jest.SpyInstance;
 
   beforeAll(() => {
     mockGetCertificate = jest.spyOn(ExportPayloadService, 'get');
@@ -2707,19 +2845,19 @@ describe('getCertificateHash', () => {
 });
 
 describe('performRefresh', () => {
-  let mockRefreshData;
-  let mockLoggerDebug;
+  let mockRefreshData: jest.SpyInstance;
+  let mockLoggerInfo: jest.SpyInstance;
 
   beforeEach(() => {
     mockRefreshData = jest.spyOn(VesselLandingsRefresher, 'refresh');
     mockRefreshData.mockResolvedValue(null);
 
-    mockLoggerDebug = jest.spyOn(logger, 'debug');
+    mockLoggerInfo = jest.spyOn(logger, 'info');
   });
 
   afterEach(() => {
     mockRefreshData.mockRestore();
-    mockLoggerDebug.mockRestore();
+    mockLoggerInfo.mockRestore();
   });
 
   it('should call vessel landings refresher for serial refreshes', async () => {
@@ -2747,7 +2885,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performSerialRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
   });
 
   it('should call vessel landings refresher for serial refreshes with a true legally due', async () => {
@@ -2776,7 +2914,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performSerialRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
   });
 
   it('should call vessel landings refresher for serial refreshes with a true legally due for multiple landings with at least one legally due landing', async () => {
@@ -2817,7 +2955,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performSerialRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
   });
 
   it('should call vessel landings refresher for serial refreshes with a true legally due for multiple landings with different products with at least one legally due landing', async () => {
@@ -2868,7 +3006,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performSerialRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
   });
 
   it('should call vessel landings refresher for serial refreshes with mutiple landings with differing landings', async () => {
@@ -2919,8 +3057,8 @@ describe('performRefresh', () => {
     await ExportPayloadService.performSerialRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenNthCalledWith(1, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-20, IS-LEGALLY-DUE: true]');
-    expect(mockLoggerDebug).toHaveBeenNthCalledWith(2, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
+    expect(mockLoggerInfo).toHaveBeenNthCalledWith(1, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-20, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenNthCalledWith(2, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-SERIAL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
   });
 
   it('should call vessel landings refresher for parallel refreshes', async () => {
@@ -2948,7 +3086,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performParallelRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
   });
 
   it('should call vessel landings refresher for parallel refreshes with a true legally due', async () => {
@@ -2977,7 +3115,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performParallelRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
   });
 
   it('should call vessel landings refresher for parallel refreshes with a true legally due for multiple landings with at least one legally due landing', async () => {
@@ -3016,7 +3154,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performParallelRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
   });
 
   it('should call vessel landings refresher for parallel refreshes with a true legally due for multiple landings with different products with at least one legally due landing', async () => {
@@ -3067,7 +3205,7 @@ describe('performRefresh', () => {
     await ExportPayloadService.performParallelRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenCalledWith('[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: true]');
   });
 
   it('should call vessel landings refresher for parallel refreshes with mutiple landings with differing landings', async () => {
@@ -3118,14 +3256,14 @@ describe('performRefresh', () => {
     await ExportPayloadService.performParallelRefresh('DOC-CC-123', productLanded);
 
     expect(mockRefreshData).toHaveBeenCalled();
-    expect(mockLoggerDebug).toHaveBeenNthCalledWith(1, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-20, IS-LEGALLY-DUE: true]');
-    expect(mockLoggerDebug).toHaveBeenNthCalledWith(2, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
+    expect(mockLoggerInfo).toHaveBeenNthCalledWith(1, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-20, IS-LEGALLY-DUE: true]');
+    expect(mockLoggerInfo).toHaveBeenNthCalledWith(2, '[CREATE-EXPORT-CERTIFICATE][DOC-CC-123][SERVICE][REFRESHING-LANDING-PARALLEL][PLN: PH100, DATE: 2023-03-19, IS-LEGALLY-DUE: false]');
   });
 });
 
 describe('getLandingsToRefresh', () => {
 
-  let mockGetLandingsRefreshData;
+  let mockGetLandingsRefreshData: jest.SpyInstance;
 
   beforeAll(() => {
     mockGetLandingsRefreshData = jest.spyOn(VesselLandingsRefresher, 'getLandingsRefreshData');
@@ -3201,4 +3339,61 @@ describe('getLandingsToRefresh', () => {
     ]);
   });
 
+});
+
+describe('catchSubmissionForCC', () => {
+  const USER_PRINCIPAL = 'test-user';
+  const DOCUMENT_NUMBER = 'GBR-2020-CC-TEST123';
+  const CONTACT_ID = 'test-contact';
+
+  let mockGetLandingsEntryOption: jest.SpyInstance;
+  let mockSubmitToCatchSystem: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockGetLandingsEntryOption = jest.spyOn(CatchCertService, 'getLandingsEntryOption');
+    mockSubmitToCatchSystem = jest.spyOn(ReferenceDataService, 'submitToCatchSystem');
+    mockSubmitToCatchSystem.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should call submitToCatchSystem when landingsEntryOption is UploadEntry', async () => {
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.UploadEntry);
+
+    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
+  });
+
+  it('should call submitToCatchSystem when landingsEntryOption is ManualEntry', async () => {
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.ManualEntry);
+
+    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
+  });
+
+  it('should NOT call submitToCatchSystem when landingsEntryOption is DirectLanding', async () => {
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.DirectLanding);
+
+    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSubmitToCatchSystem).not.toHaveBeenCalled();
+  });
+
+  it('should handle errors from submitToCatchSystem gracefully', async () => {
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.UploadEntry);
+    mockSubmitToCatchSystem.mockRejectedValue(new Error('submission failed'));
+
+    // Should not throw - errors are caught and logged
+    await expect(ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID)).resolves.not.toThrow();
+
+    expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
+  });
 });

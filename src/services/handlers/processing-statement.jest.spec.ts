@@ -2501,3 +2501,159 @@ describe('validateCatchDetails', () => {
     expect(mockValidateSpeciesName).toHaveBeenCalledWith(ctch.species, ctch.scientificName, refUrl);
   });
 });
+
+describe('calling handler for /create-processing-statement/:documentNumber/progress (FI0-10647)', () => {
+  it('should return no errors when all products have catches array', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/progress';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      products: [
+        {
+          id: 'product-1',
+          description: 'Product with catches'
+        },
+        {
+          id: 'product-2',
+          description: 'Product with catches'
+        }
+      ],
+      catches: [
+        {
+          productId: 'product-1',
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'GBR-2024-CC-123'
+        },
+        {
+          productId: 'product-2',
+          species: 'Pacific Cod',
+          catchCertificateNumber: 'GBR-2024-CC-456'
+        }
+      ]
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors).toEqual({});
+  });
+
+  it('should return error when product has description but no catches or caughtBy', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/progress';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      products: [
+        {
+          id: 'product-1',
+          description: 'Valid product'
+        },
+        {
+          id: 'product-2',
+          description: 'Description only product'
+          // No catches with productId = 'product-2'
+        }
+      ],
+      catches: [
+        {
+          productId: 'product-1',
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'GBR-2024-CC-123'
+        }
+        // Missing catch for product-2
+      ]
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors).toEqual({
+      products: 'ccProgressPageProductDetailsRequired'
+    });
+  });
+
+  it('should return error when all products have description but no catches', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/progress';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      products: [
+        {
+          id: 'product-1',
+          description: 'First description only'
+        },
+        {
+          id: 'product-2',
+          productDescription: 'Second description only'
+        }
+      ],
+      catches: [] // No catches at all
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors).toEqual({
+      products: 'ccProgressPageProductDetailsRequired'
+    });
+  });
+
+  it('should return no errors when products array is empty', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/progress';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      products: []
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors).toEqual({});
+  });
+
+  it('should return no errors when products is undefined', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/progress';
+    const handler = SUT[currentUrl];
+
+    const data = {};
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors).toEqual({});
+  });
+
+  it('should return error when product has productDescription but no catches', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/progress';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      products: [
+        {
+          productDescription: 'Using productDescription field',
+          // No catches or caughtBy
+        }
+      ]
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors).toEqual({
+      products: 'ccProgressPageProductDetailsRequired'
+    });
+  });
+});

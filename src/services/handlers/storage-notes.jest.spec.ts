@@ -1960,7 +1960,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     expect(errors).toEqual(expectedErrors);
   });
 
-  it('should return catches-species-suggest error if there in nonjs and an incorrect search with possible results', async () => {
+    it('should return catches-species-suggest error if there in nonjs and an incorrect search with possible results', async () => {
     const currentUrl =
       "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index";
     const handler = StorageNotes[currentUrl];
@@ -2623,103 +2623,102 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
 
     expect(errors).toEqual(expectedErrors);
   });
-
   describe("Facility Arrival Date vs Transport Export Date", () => {
-    const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
+  const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
 
-    it("should NOT set error if arrival date is before export date", () => {
-      const data = {
-        facilityArrivalDate: "08/10/2025",
-        transport: { exportDate: "09/10/2025" },
-        facilityName: "name",
-        facilityAddressOne: "address",
-        facilityTownCity: "city",
-        facilityPostcode: "postcode",
-      };
-      const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
-    });
-
-    it("should NOT set error if arrival date is same as export date", () => {
-      const data = {
-        facilityArrivalDate: "09/10/2025",
-        transport: { exportDate: "09/10/2025" },
-        facilityName: "name",
-        facilityAddressOne: "address",
-        facilityTownCity: "city",
-        facilityPostcode: "postcode",
-      };
-      const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
-    });
-
-    it("should set error if arrival date is after export date", () => {
-      const data = {
-        facilityArrivalDate: "10/10/2025",
-        transport: { exportDate: "09/10/2025" },
-        facilityName: "name",
-        facilityAddressOne: "address",
-        facilityTownCity: "city",
-        facilityPostcode: "postcode",
-      };
-      const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateSameOrOneDayBeforeDepartureDateValidationError");
-    });
-
-    it("should NOT set error if transport.exportDate is missing", () => {
-      const data = {
-        facilityArrivalDate: "10/10/2025",
-        facilityName: "name",
-        facilityAddressOne: "address",
-        facilityTownCity: "city",
-        facilityPostcode: "postcode",
-      };
-      const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
-    });
+  it("should NOT set error if arrival date is before export date", () => {
+    const data = {
+      facilityArrivalDate: "08/10/2025",
+      transport: { exportDate: "09/10/2025" },
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
   });
 
-  describe("Facility Arrival Date: transport and exportDate edge cases", () => {
-    const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
-
-    it("should NOT set error if transport is missing", () => {
-      const data = {
-        facilityArrivalDate: "10/10/2025",
-        facilityName: "name",
-        facilityAddressOne: "address",
-        facilityTownCity: "city",
-        facilityPostcode: "postcode",
-      };
-      const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
-    });
-
-    it("should NOT set error if transport exists but exportDate is missing", () => {
-      const data = {
-        facilityArrivalDate: "10/10/2025",
-        transport: { vehicle: "plane" }, // exportDate missing
-        facilityName: "name",
-        facilityAddressOne: "address",
-        facilityTownCity: "city",
-        facilityPostcode: "postcode",
-      };
-      const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
-    });
-
-    it("should set error if transport exportDate exists and is same or one day before arrival date", () => {
-      const data = {
-        facilityArrivalDate: "10/10/2025",
-        transport: { exportDate: "10/10/2025" },
-        facilityName: "name",
-        facilityAddressOne: "address",
-        facilityTownCity: "city",
-        facilityPostcode: "postcode",
-      };
-      const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
-    });
+  it("should NOT set error if arrival date is same as export date", () => {
+    const data = {
+      facilityArrivalDate: "09/10/2025",
+      transport: { exportDate: "09/10/2025" },
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
   });
+
+  it("should set error if arrival date is after export date", () => {
+    const data = {
+      facilityArrivalDate: "10/10/2025",
+      transport: { exportDate: "09/10/2025" },
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateSameOrOneDayBeforeDepartureDateValidationError");
+  });
+
+  it("should NOT set error if transport.exportDate is missing", () => {
+    const data = {
+      facilityArrivalDate: "10/10/2025",
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+  });
+});
+
+describe("Facility Arrival Date: transport and exportDate edge cases", () => {
+  const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
+
+  it("should NOT set error if transport is missing", () => {
+    const data = {
+      facilityArrivalDate: "10/10/2025",
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+  });
+
+  it("should NOT set error if transport exists but exportDate is missing", () => {
+    const data = {
+      facilityArrivalDate: "10/10/2025",
+      transport: { vehicle: "plane" }, // exportDate missing
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+  });
+
+  it("should set error if transport exportDate exists and is same or one day before arrival date", () => {
+    const data = {
+      facilityArrivalDate: "10/10/2025",
+      transport: { exportDate: "10/10/2025" }, 
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+  });
+});
 
 });
 

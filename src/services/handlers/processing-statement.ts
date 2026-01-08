@@ -43,6 +43,32 @@ export default {
     return { errors };
   },
 
+  "/create-processing-statement/:documentNumber/progress": async ({ data, errors }) => {
+    // Validate that all products have catches (not just description)
+    const products = Array.isArray(data.products) ? data.products : [];
+    const catches = Array.isArray(data.catches) ? data.catches : [];
+    
+    const hasDescriptionOnlyProduct = products.some((product: any) => {
+      if (!product || typeof product !== 'object') return false;
+      
+      // Check if product has at least a description
+      const hasDescription = product.description || product.productDescription;
+      
+      // Check if product has catches by looking for catches with matching productId
+      const productCatches = catches.filter((c: any) => c.productId === product.id);
+      const hasCatches = productCatches.length > 0;
+      
+      // Product is invalid if it has description but no catches
+      return hasDescription && !hasCatches;
+    });
+    
+    if (hasDescriptionOnlyProduct) {
+      errors.products = "ccProgressPageProductDetailsRequired";
+    }
+    
+    return { errors };
+  },
+
   "/create-processing-statement/:documentNumber/add-consignment-details/:productIndex": async ({ data, errors, params }) => {
     const index = params.productIndex;
     const product = data.products[index];
@@ -320,11 +346,12 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
 }
 
 function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
-  if (!ctch.totalWeightLanded && ctch.catchCertificateType !== "uk") {
+  // Validate totalWeightLanded for both UK and non-UK catch certificates
+  if (!ctch.totalWeightLanded) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
-  } else if (ctch.totalWeightLanded <= 0 && ctch.catchCertificateType !== "uk") {
+  } else if (ctch.totalWeightLanded <= 0) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
-  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded) && ctch.catchCertificateType !== "uk") {
+  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
   } else {
     (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));

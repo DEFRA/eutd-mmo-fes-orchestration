@@ -4,12 +4,12 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { ConversionFactor } from './interfaces/ConversionFactor';
 import { LandingsRefreshData } from './interfaces';
 import { Vessel } from "../persistence/schema/frontEndModels/payload";
-import { v4 as uuidv4 } from  'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ICcQueryResult } from '../persistence/schema/onlineValidationResult';
 import { GearType } from './interfaces/GearType';
 
 
-export const refreshLandings = async (landingData: LandingsRefreshData, httpClient?: AxiosInstance) : Promise<any> => {
+export const refreshLandings = async (landingData: LandingsRefreshData, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     const client: AxiosInstance = httpClient ?? axios.create({ baseURL: baseUrl });
@@ -22,7 +22,7 @@ export const refreshLandings = async (landingData: LandingsRefreshData, httpClie
   }
 };
 
-export const getStateByCode = async (code: string, httpClient?: AxiosInstance) : Promise<any> => {
+export const getStateByCode = async (code: string, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -31,15 +31,15 @@ export const getStateByCode = async (code: string, httpClient?: AxiosInstance) :
         baseURL: baseUrl
       });
     }
-    const response:AxiosResponse = await client.get('/v1/states');
+    const response: AxiosResponse = await client.get('/v1/states');
     return response.data.find((state) => state.value === code);
-  } catch(err) {
+  } catch (err) {
     logger.error('Failed to get state for code', err);
     return err;
   }
 };
 
-export const getPresentationByCode = async (code: string, httpClient?: AxiosInstance) : Promise<any> => {
+export const getPresentationByCode = async (code: string, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -50,13 +50,13 @@ export const getPresentationByCode = async (code: string, httpClient?: AxiosInst
     }
     const response: AxiosResponse = await client.get('/v1/presentations');
     return response.data.find(pres => pres.value === code);
-  } catch(err) {
+  } catch (err) {
     logger.error('Failed to get presentation for code', err);
     return err;
   }
 };
 
-export const getSpeciesByFaoCode = async (faoCode: string, httpClient?: AxiosInstance) : Promise<any> => {
+export const getSpeciesByFaoCode = async (faoCode: string, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -67,13 +67,13 @@ export const getSpeciesByFaoCode = async (faoCode: string, httpClient?: AxiosIns
     }
     const response: AxiosResponse = await client.get(`/v1/species/${faoCode}`);
     return response.data;
-  } catch(err) {
+  } catch (err) {
     logger.error('Failed to get species for code', err);
     return err;
   }
 };
 
-export const getSpecies = async (label: string, httpClient?: AxiosInstance) : Promise<any> => {
+export const getSpecies = async (label: string, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -87,15 +87,15 @@ export const getSpecies = async (label: string, httpClient?: AxiosInstance) : Pr
         searchTerm: label
       }
     };
-    const response:AxiosResponse = await client.get('/v1/species/search', params);
+    const response: AxiosResponse = await client.get('/v1/species/search', params);
     return response.data;
-  } catch(err) {
+  } catch (err) {
     logger.error('Failed to get species for code', err);
     return err;
   }
 };
 
-export const getVessel = async (pln: string, name: string, httpClient?: AxiosInstance) : Promise<any> => {
+export const getVessel = async (pln: string, name: string, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -118,7 +118,7 @@ export const getVessel = async (pln: string, name: string, httpClient?: AxiosIns
   }
 };
 
-export const checkVesselLicense = async (vessel: Vessel, date: string, httpClient?: AxiosInstance) : Promise<any> => {
+export const checkVesselLicense = async (vessel: Vessel, date: string, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -140,15 +140,15 @@ export const checkVesselLicense = async (vessel: Vessel, date: string, httpClien
         landedDate: date
       }
     };
-    const response:AxiosResponse = await client.get('/v1/vessels/hasLicense', params);
+    const response: AxiosResponse = await client.get('/v1/vessels/hasLicense', params);
     return response.data;
-  } catch(err) {
+  } catch (err) {
     logger.error(`Vessel ${vessel.vesselName} has no valid license`, err.message);
     throw err;
   }
 };
 
-export const searchVessel = async (searchTerm: string, date: string, httpClient?: AxiosInstance) : Promise<Vessel[]> => {
+export const searchVessel = async (searchTerm: string, date: string, httpClient?: AxiosInstance): Promise<Vessel[]> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -163,15 +163,15 @@ export const searchVessel = async (searchTerm: string, date: string, httpClient?
         landedDate: date
       }
     };
-    const response:AxiosResponse = await client.get('/v1/vessels/search', params);
+    const response: AxiosResponse = await client.get('/v1/vessels/search', params);
     return response.data;
-  } catch(err) {
+  } catch (err) {
     logger.error('Vessel has no valid license', err.message);
     throw err;
   }
 };
 
-export const getVesselByPlnDate = async (pln: string, date: string, httpClient?: AxiosInstance) : Promise<Vessel> => {
+export const getVesselByPlnDate = async (pln: string, date: string, httpClient?: AxiosInstance): Promise<Vessel> => {
   const vesselsFound: Vessel[] = await searchVessel(pln, date, httpClient) || [];
   if (vesselsFound && vesselsFound.length > 1) {
     logger.error(`[GET-VESSEL-BY-PLN-DATE][ERROR][Multiple vessels with same PLN Date: ${JSON.stringify(vesselsFound)?.[0]}]`);
@@ -187,7 +187,7 @@ export type SeasonalFishPeriod = {
   validTo: string
 }
 
-export const getSeasonalFish = async (httpClient?: AxiosInstance) : Promise<SeasonalFishPeriod[]> => {
+export const getSeasonalFish = async (httpClient?: AxiosInstance): Promise<SeasonalFishPeriod[]> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -200,12 +200,12 @@ export const getSeasonalFish = async (httpClient?: AxiosInstance) : Promise<Seas
     const response: AxiosResponse = await client.get('/v1/seasonalFish');
     return response.data;
   } catch (e) {
-    logger.error({ err:e }, `[GET-SEASONAL-FISH][ERROR]${ e }`);
+    logger.error({ err: e }, `[GET-SEASONAL-FISH][ERROR]${e}`);
     throw e
   }
 };
 
-export const getConversionFactors = async (httpClient?: AxiosInstance) : Promise<ConversionFactor[]> => {
+export const getConversionFactors = async (httpClient?: AxiosInstance): Promise<ConversionFactor[]> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -218,13 +218,13 @@ export const getConversionFactors = async (httpClient?: AxiosInstance) : Promise
     const response: AxiosResponse = await client.get('/v1/factors');
     return response.data;
   }
-  catch(e) {
+  catch (e) {
     logger.error(`[GET-CONVERSION-FACTORS][ERROR] ${e}`);
     throw e;
   }
 };
 
-export const reportDraftCreated = async (documentNumber: string, httpClient?: AxiosInstance) : Promise<void> => {
+export const reportDraftCreated = async (documentNumber: string, httpClient?: AxiosInstance): Promise<void> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -234,9 +234,9 @@ export const reportDraftCreated = async (documentNumber: string, httpClient?: Ax
       });
     }
 
-    await client.post('/v1/data-hub/draft', {certificateId: documentNumber});
+    await client.post('/v1/data-hub/draft', { certificateId: documentNumber });
   }
-  catch(e) {
+  catch (e) {
     logger.error(`[REPORT-DRAFT-CREATED][ERROR] ${e}`);
     throw e;
   }
@@ -259,7 +259,7 @@ export const reportDocumentDeleted = async (documentNumber: string, httpClient?:
   }
 };
 
-export const reportDocumentSubmitted = async (url:string, validationData: ICcQueryResult[], httpClient?: AxiosInstance): Promise<void> => {
+export const reportDocumentSubmitted = async (url: string, validationData: ICcQueryResult[], httpClient?: AxiosInstance): Promise<void> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -292,7 +292,7 @@ export const reportDocumentVoided = async (documentNumber: string, httpClient?: 
       });
     }
 
-    await client.post('/v1/data-hub/void', { certificateId: documentNumber , isFromExporter: true});
+    await client.post('/v1/data-hub/void', { certificateId: documentNumber, isFromExporter: true });
   } catch (e) {
     logger.error(`[REPORT-DOCUMENT-VOIDED][ERROR] ${e}`);
     throw e;
@@ -305,7 +305,7 @@ export const virusDetected = async (fileName: string, content: string, documentN
   try {
     const payload = {
       fileName: fileName,
-      content : Buffer.from(content).toString('base64'),
+      content: Buffer.from(content).toString('base64'),
       documentNumber: documentNumber,
       key: key
     };
@@ -323,7 +323,7 @@ export const virusDetected = async (fileName: string, content: string, documentN
   }
 };
 
-export const addIsLegallyDue = async (documentNumber: string, httpClient?: AxiosInstance) : Promise<any> => {
+export const addIsLegallyDue = async (documentNumber: string, httpClient?: AxiosInstance): Promise<any> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -333,13 +333,13 @@ export const addIsLegallyDue = async (documentNumber: string, httpClient?: Axios
       });
     }
     await client.post('/v1/isLegallyDue', { documentNumber });
-  } catch(err) {
+  } catch (err) {
     logger.error('Failed to update exportData is legally due status', err);
     return err;
   }
 };
 
-export const isValidGearType = async (gearType: string, gearCategory: string, httpClient?: AxiosInstance) : Promise<boolean> => {
+export const isValidGearType = async (gearType: string, gearCategory: string, httpClient?: AxiosInstance): Promise<boolean> => {
   try {
     const baseUrl = ApplicationConfig.getReferenceServiceUrl();
     let client = httpClient;
@@ -356,8 +356,38 @@ export const isValidGearType = async (gearType: string, gearCategory: string, ht
 
     return response.data.some(item => gearType === `${item.gearName} (${item.gearCode})`);
   }
-  catch(e) {
+  catch (e) {
     logger.error(`[GET-VALID-GEAR-TYPES][ERROR] ${e}`);
+    throw e;
+  }
+};
+
+export const submitToCatchSystem = async (
+  documentNumber: string,
+  operation: 'submit' | 'void',
+  httpClient?: AxiosInstance
+): Promise<void> => {
+  try {
+    const baseUrl = ApplicationConfig.getReferenceServiceUrl();
+    let client = httpClient;
+    if (!client) {
+      client = axios.create({
+        baseURL: baseUrl
+      });
+    }
+
+    const payload = {
+      documentNumber,
+      operation
+    };
+
+    const endpoint = '/v1/catch-submission';
+
+    await client.post(endpoint, payload);
+
+    logger.info(`[DOCUMENT-SUBMISSION][${documentNumber}][${operation.toUpperCase()}][SUCCESS]`);
+  } catch (e) {
+    logger.error(`DOCUMENT-SUBMISSION][${documentNumber}][${operation.toUpperCase()}][ERROR] ${e}`);
     throw e;
   }
 };

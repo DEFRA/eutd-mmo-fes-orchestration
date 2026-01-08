@@ -16,11 +16,13 @@ export default class ConfirmDocumentDeleteController {
 
       let redirectUri = payload.previousUri;
       if (payload.documentDelete === 'Yes') {
-        await DataReferenceReader.reportDocumentDeleted(documentNumber)
-          .catch(e => logger.error(`[REPORT-DOCUMENT-DELETE][${documentNumber}][ERROR][${e}]`));
-
-        await DocumentDeleteService.deleteDocument(userPrincipal, documentNumber, journey, contactId);
-        await SaveAsDraftService.deleteDraftLink(userPrincipal, documentNumber, journey, contactId);
+        Promise.all([
+          DataReferenceReader.reportDocumentDeleted(documentNumber)
+            .catch(e => logger.error(`[REPORT-DOCUMENT-DELETE][${documentNumber}][ERROR][${e}]`)),
+          DocumentDeleteService.deleteDocument(userPrincipal, documentNumber, journey, contactId)
+            .then(() => SaveAsDraftService.deleteDraftLink(userPrincipal, documentNumber, journey, contactId))
+            .catch(e => logger.error(`[DELETE-ERROR][${e}]`))
+        ]);
 
         logger.info(`[REPORT-DOCUMENT-DELETE][${documentNumber}][SUCCESS]`);
         redirectUri = payload.nextUri;

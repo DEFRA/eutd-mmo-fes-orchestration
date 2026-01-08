@@ -45,6 +45,32 @@ export enum AddTransportation {
   No = 'no',
 }
 
+export enum EuCatchStatus {
+  Success = 'SUCCESS',
+  Failure = 'FAILURE',
+  Progress = 'IN_PROGRESS'
+}
+
+export type euStatus = 'SUCCESS' | 'FAILURE' | 'IN_PROGRESS';
+export interface ICatchStatus {
+  status: euStatus;
+  reference?: string;
+  message?: string;
+  code?: string;
+  name?: string;
+  uri?: string;
+  timestamp?: string;
+  reasonInformation?: string;
+  requestId?: string;
+  faultCode?: string;
+  faultString?: string;
+  validationErrors?: Array<{
+    id: string;
+    message: string;
+    field: string;
+  }>;
+}
+
 export enum HighSeasAreaOptions {
   Yes = 'Yes',
   No = 'No'
@@ -59,6 +85,7 @@ export interface Catch {
   homePort?: string;
   flag?: string; // jurisdiction under whose laws the vessel is registered or licensed
   cfr?: string; // cost and freight (CFR) is a legal term
+  ircs?: string | null;
   imoNumber?: string | null;
   licenceNumber?: string;
   licenceValidTo?: string;
@@ -242,7 +269,7 @@ export const cloneProductData = (original: Product, newDocumentNumber: string, e
 }
 
 export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch => {
-  const {id,vessel, pln, homePort, flag, cfr, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType, gearCode, highSeasArea,
+  const {id,vessel, pln, homePort, flag, cfr, ircs, imoNumber, licenceNumber, licenceValidTo, licenceHolder, date, startDate, faoArea, weight, gearCategory, gearType, gearCode, highSeasArea,
     exclusiveEconomicZones, rfmo } = original;
 
   const result = {
@@ -252,6 +279,7 @@ export const cloneCatch = (original: Catch, newDocumentNumber: string): Catch =>
     homePort,
     flag,
     cfr,
+    ircs,
     imoNumber,
     licenceNumber,
     licenceValidTo,
@@ -330,6 +358,7 @@ export interface ExportData {
 export interface CatchCertificate {
   documentNumber: string;
   status: string;
+  catchSubmission?: ICatchStatus;
   createdAt: string;
   createdBy?: string;
   createdByEmail: string;
@@ -342,7 +371,7 @@ export interface CatchCertificate {
   contactId?: string;
 }
 
-// Catch cert
+export interface CatchCertificateModel extends Document, CatchCertificate {}
 export interface CatchCertificateModel extends Document, CatchCertificate {}
 
 
@@ -365,6 +394,7 @@ const CatchSchema = new Schema({
   homePort:                 { type: String, required: false },
   flag:                     { type: String, required: false },
   cfr:                      { type: String, required: false },
+  ircs:                     { type: String, required: false },
   imoNumber:                { type: String, required: false },
   licenceNumber:            { type: String, required: false },
   licenceValidTo:           { type: String, required: false },
@@ -374,7 +404,7 @@ const CatchSchema = new Schema({
   startDate:                { type: String, required: false },
   faoArea:                  { type: String, required: true  },
   highSeasArea:             { type: String, required: false, enum: Object.values(HighSeasAreaOptions) },
-  exclusiveEconomicZones:    { type: [Country], required: false },
+  exclusiveEconomicZones:   { type: [Country], required: false },
   weight:                   { type: Number },
   gearCategory:             { type: String, required: false  },
   gearType:                 { type: String, required: false  },
@@ -450,9 +480,30 @@ const ExportDataSchema = new Schema({
   pointOfDestination:   { type: String,  required: false },
 }, { _id : false } );
 
+const ValidationErrorSchema = new Schema({
+  id:       { type: String,     required: true },
+  message:  { type: String,     required: true },
+  field:    { type: String,     required: true },
+});
+
+const CatchSubmission = new Schema({
+  status:             { type: String,     required: true, enum: Object.values(EuCatchStatus) },
+  reference:          { type: String,     required: false },
+  message:            { type: String,     required: false },
+  code:               { type: String,     required: false },
+  name:               { type: String,     required: false },
+  uri:                { type: String,     required: false },
+  timestamp:          { type: String,     required: false },
+  reasonInformation:  { type: String,     required: false },
+  faultCode:          { type: String,     required: false },
+  faultString:        { type: String,     required: false },
+  validationErrors:   { type: [ValidationErrorSchema],   required: false },
+});
+
 const CatchCertSchema = new Schema({
   documentNumber:   { type: String, required: true },
   status:           { type: String, required: true },
+  catchSubmission:  { type: CatchSubmission, required: false },
   createdAt:        { type: Date,   required: true, default: new Date() },
   createdBy:        { type: String },
   createdByEmail:   { type: String },

@@ -71,6 +71,7 @@ export const getCompletedDocuments = async (
       'documentUri',
       'createdAt',
       'userReference',
+      'catchSubmission',
     ])
     .sort({ createdAt: -1 })
     .skip(skip)
@@ -97,7 +98,7 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
   const [month, year] = yearAndMonth.split('-');
   const currentDate = new Date();
   const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
-  const monthInt = month ? parseInt(month) : currentDate.getUTCMonth();
+  const monthInt = month ? parseInt(month) : (currentDate.getUTCMonth() + 1);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await CatchCertModel.find({
     $or: ownerQuery,
@@ -106,7 +107,7 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
       '$gte': new Date(yearInt, monthInt - 1, 1),
       '$lt': new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference']);
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
   return data;
 };
 

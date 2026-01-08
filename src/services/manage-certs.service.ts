@@ -2,7 +2,7 @@ import axios from 'axios';
 import { MongoConnection } from "../persistence/mongo";
 import { BLOB_STORAGE_CONTAINER_NAME } from "./constants";
 import { baseConfig } from "../persistence/schema/base";
-import { reportDocumentVoided } from "./reference-data.service";
+import { reportDocumentVoided, submitToCatchSystem } from "./reference-data.service";
 import ApplicationConfig from "../applicationConfig";
 import logger from "../logger";
 import { validateDocumentOwner } from '../validators/documentOwnershipValidator';
@@ -11,74 +11,72 @@ import { voidConsolidateLandings } from "./landings-consolidate.service";
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import DocumentNumberService from './documentNumber.service';
 import * as pdfService from 'mmo-ecc-pdf-svc';
+import { EuCatchStatus } from '../persistence/schema/catchCert';
 
 const https = require('https');
 
 export default class ManageCertsService {
 
   public static async deleteDraftCertificate(documentNumber: string) {
-    const document = await MongoConnection.findOne(baseConfig.collection, {"documentNumber" : documentNumber}) as any;
+    const document = await MongoConnection.findOne(baseConfig.collection, { "documentNumber": documentNumber }) as any;
     const blobName = ManageCertsService.extractBlobName(document.documentUri);
 
     pdfService.deleteBlob(BLOB_STORAGE_CONTAINER_NAME, blobName);
-    await MongoConnection.deleteOne(baseConfig.collection, {"documentNumber" : documentNumber});
+    await MongoConnection.deleteOne(baseConfig.collection, { "documentNumber": documentNumber });
   }
 
   public static async voidCertificate(documentNumber: string, userPrincipalId: string, contactId: string) {
-    let voidSuccess = false;
-
-    const document: any = await MongoConnection.findOne(baseConfig.collection, {"documentNumber" : documentNumber})
-      .catch(error => logger.error(`[DOCUMENT-VOID][${documentNumber}][ERROR][${error.stack || error}]`));
-
-      if(!document) {
-      return false;
-    }
-
-    const ownerValidation = validateDocumentOwner(document, userPrincipalId, contactId);
-    if (document && ownerValidation) {
-      await MongoConnection.updateStatusAsVoid(baseConfig.collection, {"documentNumber" : documentNumber});
-      await reportDocumentVoided(documentNumber)
-        .catch(e => logger.error(`[REPORT-DOCUMENT-VOID][${documentNumber}][ERROR][${e}]`));
-       voidSuccess = true;
-
-      const data = {
-        "certNumber": documentNumber,
-        "timestamp": new Date().toISOString().toString(),
-        "status": "VOID"
-      }
-
-      const agent = new https.Agent({
-        secureOptions: SSL_OP_LEGACY_SERVER_CONNECT
+    const document: any = await MongoConnection.findOne(baseConfig.collection, { documentNumber })
+      .catch(error => {
+        logger.error(`[DOCUMENT-VOID][${documentNumber}][ERROR][${error.stack || error}]`);
+        return null;
       });
 
-      const config = {
-        headers: {
-          'X-API-KEY': ApplicationConfig._businessContinuityKey,
-          'accept': 'application/json'
-        },
-        httpsAgent: agent
-      }
+    if (!document) return false;
 
-      axios.put(`${ApplicationConfig._businessContinuityUrl}/api/certificates/${documentNumber}`, data, config)
-        .then(()  => logger.info(`Void Data for ${documentNumber} sent to BC server`))
-        .catch(err => logger.error(`Void Error - Data for ${documentNumber} not sent to BC server: ${err}`));
+    const ownerValidation = validateDocumentOwner(document, userPrincipalId, contactId);
+    if (!ownerValidation) return false;
 
-      const serviceName: ServiceNames = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
+    await MongoConnection.updateStatusAsVoid(baseConfig.collection, { documentNumber });
+    await reportDocumentVoided(documentNumber).catch(e => logger.error(`[REPORT-DOCUMENT-VOID][${documentNumber}][ERROR][${e}]`));
 
-      if (serviceName === ServiceNames.CC) {
-         voidConsolidateLandings(documentNumber)
-          .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
-      }
-   }
+    this.sendBusinessContinuityEvent(documentNumber);
 
-    return voidSuccess;
+    const serviceName: ServiceNames = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
+    if (serviceName === ServiceNames.CC) {
+      voidConsolidateLandings(documentNumber).catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
+    }
+
+    if (document.catchSubmission?.status === EuCatchStatus.Success) {
+      submitToCatchSystem(documentNumber, 'void').catch((e) => logger.error(`[CATCH-SYSTEM-VOID][${documentNumber}][ERROR][${e.message}]`));
+    }
+
+    return true;
+  }
+
+  private static sendBusinessContinuityEvent(documentNumber: string) {
+    const data = {
+      certNumber: documentNumber,
+      timestamp: new Date().toISOString().toString(),
+      status: 'VOID'
+    };
+
+    const agent = new https.Agent({ secureOptions: SSL_OP_LEGACY_SERVER_CONNECT });
+    const config = {
+      headers: { 'X-API-KEY': ApplicationConfig._businessContinuityKey, accept: 'application/json' },
+      httpsAgent: agent
+    };
+
+    axios.put(`${ApplicationConfig._businessContinuityUrl}/api/certificates/${documentNumber}`, data, config)
+      .then(() => logger.info(`Void Data for ${documentNumber} sent to BC server`))
+      .catch(err => logger.error(`Void Error - Data for ${documentNumber} not sent to BC server: ${err}`));
   }
 
   private static extractBlobName(documentUri: string) {
     const urlMinusQueryPath = documentUri.split("?")[0];
     const urlParts = urlMinusQueryPath.split("/");
 
-    return urlParts[urlParts.length-1];
+    return urlParts[urlParts.length - 1];
   }
 
 }

@@ -26,6 +26,7 @@ export interface Vessel {
   homePort?: string;
   flag?: string; // jurisdiction under whose laws the vessel is registered or licensed
   cfr?: string, // cost and freight (CFR) is a legal term
+  ircs?: string | null;
   licenceNumber?: string;
   licenceHolder?: string;
   imoNumber?: string; // International Maritime Organisation
@@ -188,6 +189,7 @@ const mapLandings = (landing: LandingStatus): BackEndModels.Catch => {
     homePort: landing.model?.vessel?.homePort,
     flag: landing.model?.vessel?.flag,
     cfr: landing.model?.vessel?.cfr,
+    ircs: landing.model?.vessel?.ircs,
     imoNumber: landing.model?.vessel?.imoNumber,
     licenceNumber: landing.model?.vessel?.licenceNumber,
     licenceValidTo: landing.model?.vessel?.licenceValidTo,
@@ -271,6 +273,7 @@ export const toFrontEndVessel = (landing: BackEndModels.Catch): Vessel => {
       homePort: landing.homePort,
       flag: landing.flag,
       cfr: landing.cfr,
+      ircs: landing.ircs,
       imoNumber: landing.imoNumber,
       licenceNumber: landing.licenceNumber,
       licenceValidTo: landing.licenceValidTo,
@@ -369,6 +372,7 @@ export const toFrontEndDirectLanding = (products: BackEndModels.Product[]): Dire
     homePort: landing.homePort,
     flag: landing.flag,
     cfr: landing.cfr,
+    ircs: landing.ircs,
     imoNumber: landing.imoNumber,
     licenceNumber: landing.licenceNumber,
     licenceValidTo: landing.licenceValidTo,

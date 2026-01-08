@@ -1,4 +1,3 @@
-import * as moment from 'moment';
 import * as mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as CatchCertService from './catchCert';
@@ -88,7 +87,7 @@ describe("catchCert - invalidateDraftCache", () => {
 });
 
 describe('catchCert - db related', () => {
-  let mongoServer;
+  let mongoServer: MongoMemoryServer;
   let mockWriteAllFor;
   let mockSessionStore;
 
@@ -128,7 +127,7 @@ describe('catchCert - db related', () => {
   const defaultRequestedByAdmin = false;
   const documentType = "catchCertificate";
 
-  const sampleDocument = (documentNumber, status, user?, draftData?, userReference?, createdAt?, exportData?, contId = contactId) => ({
+  const sampleDocument = (documentNumber: string, status: string, user?: string, draftData?: any, userReference?: string, createdAt?: Date, exportData?: any, contId = contactId) => ({
     documentNumber: documentNumber,
     status: status,
     createdAt: createdAt || new Date('2020-01-16'),
@@ -181,8 +180,8 @@ describe('catchCert - db related', () => {
 
   describe('createDraft', () => {
 
-    let mockGetDocumentNumber;
-    let mockInvalidateDraftCache;
+    let mockGetDocumentNumber: jest.SpyInstance;
+    let mockInvalidateDraftCache: jest.SpyInstance;
     const documentNumber = 'test-document-number';
 
     beforeEach(() => {
@@ -215,6 +214,96 @@ describe('catchCert - db related', () => {
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       expect(result).toBe(documentNumber);
+    });
+
+  });
+
+  describe('getCompletedDocuments', () => {
+
+    it('should return completed documents with catchSubmission', async () => {
+      const catchSubmission = {
+        status: 'SUCCESS',
+        reference: 'GBR-2020-CC-REF123',
+        message: 'Successfully submitted'
+      };
+
+      const document = sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Reference');
+      document['catchSubmission'] = catchSubmission;
+      await new CatchCertModel(document).save();
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].documentNumber).toBe('GBR-2020-CC-0E42C2DA5');
+      const resultCatchSubmission = (result[0] as any).catchSubmission;
+      expect(resultCatchSubmission.status).toBe(catchSubmission.status);
+      expect(resultCatchSubmission.reference).toBe(catchSubmission.reference);
+      expect(resultCatchSubmission.message).toBe(catchSubmission.message);
+    });
+
+    it('should return completed documents without catchSubmission', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Reference')).save();
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].documentNumber).toBe('GBR-2020-CC-0E42C2DA5');
+      expect(result[0].catchSubmission).toBeUndefined();
+    });
+
+    it('should handle pagination correctly', async () => {
+      for (let i = 1; i <= 15; i++) {
+        const doc = sampleDocument(`GBR-2020-CC-${i}`, 'COMPLETE', defaultUser, {}, `Ref${i}`, new Date(`2020-01-${i.toString().padStart(2, '0')}`));
+        doc['catchSubmission'] = { status: 'SUCCESS', reference: `REF${i}` };
+        await new CatchCertModel(doc).save();
+      }
+
+      const page1 = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+      const page2 = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 2);
+
+      expect(page1).toHaveLength(10);
+      expect(page2).toHaveLength(5);
+      expect((page1[0] as any).catchSubmission).toBeDefined();
+      expect((page2[0] as any).catchSubmission).toBeDefined();
+    });
+
+    it('should return documents in descending order by createdAt', async () => {
+      const doc1 = sampleDocument('GBR-2020-CC-1', 'COMPLETE', defaultUser, {}, 'Ref1', new Date('2020-01-01'));
+      doc1['catchSubmission'] = { status: 'SUCCESS' };
+      await new CatchCertModel(doc1).save();
+
+      const doc2 = sampleDocument('GBR-2020-CC-2', 'COMPLETE', defaultUser, {}, 'Ref2', new Date('2020-01-03'));
+      doc2['catchSubmission'] = { status: 'IN_PROGRESS' };
+      await new CatchCertModel(doc2).save();
+
+      const doc3 = sampleDocument('GBR-2020-CC-3', 'COMPLETE', defaultUser, {}, 'Ref3', new Date('2020-01-02'));
+      doc3['catchSubmission'] = { status: 'FAILURE' };
+      await new CatchCertModel(doc3).save();
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].documentNumber).toBe('GBR-2020-CC-2');
+      expect((result[0] as any).catchSubmission.status).toBe('IN_PROGRESS');
+      expect(result[1].documentNumber).toBe('GBR-2020-CC-3');
+      expect((result[1] as any).catchSubmission.status).toBe('FAILURE');
+      expect(result[2].documentNumber).toBe('GBR-2020-CC-1');
+      expect((result[2] as any).catchSubmission.status).toBe('SUCCESS');
+    });
+
+    it('should only return completed documents, not drafts or pending', async () => {
+      const completeDoc = sampleDocument('GBR-2020-CC-1', 'COMPLETE', defaultUser, {}, 'Complete');
+      completeDoc['catchSubmission'] = { status: 'SUCCESS' };
+      await new CatchCertModel(completeDoc).save();
+
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-2', 'DRAFT', defaultUser, {}, 'Draft')).save();
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-3', 'PENDING', defaultUser, {}, 'Pending')).save();
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].documentNumber).toBe('GBR-2020-CC-1');
+      expect(result[0].status).toBe('COMPLETE');
     });
 
   });
@@ -274,12 +363,56 @@ describe('catchCert - db related', () => {
     });
 
     it('should return certificates for the current year and month', async () => {
-      await new CatchCertModel(sampleDocument('doc1', 'COMPLETE', defaultUser, {}, 'First', moment.utc().subtract(1, 'month').toISOString())).save();
+      const date = new Date();
+      // Use current date instead of 1 month ago, since the query defaults to current year/month when empty string is passed
+      await new CatchCertModel(sampleDocument('doc1', 'COMPLETE', defaultUser, {}, 'First', date)).save();
 
       const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('', defaultUser, contactId);
-
       expect(result).toHaveLength(1);
       expect(result[0].documentNumber).toBe('doc1');
+    });
+
+    it('should return catchSubmission when it exists', async () => {
+      const catchSubmission = {
+        status: 'SUCCESS',
+        reference: 'GBR-2020-CC-REF123',
+        message: 'Successfully submitted to EU CATCH',
+        timestamp: '2020-01-16T10:00:00Z'
+      };
+
+      const document = sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Reference');
+      document['catchSubmission'] = catchSubmission;
+      await new CatchCertModel(document).save();
+
+      const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].documentNumber).toBe('GBR-2020-CC-0E42C2DA5');
+      const resultCatchSubmission = (result[0] as any).catchSubmission;
+      expect(resultCatchSubmission.status).toBe(catchSubmission.status);
+      expect(resultCatchSubmission.reference).toBe(catchSubmission.reference);
+      expect(resultCatchSubmission.message).toBe(catchSubmission.message);
+    });
+
+    it('should handle multiple certificates with different catchSubmission statuses', async () => {
+      const doc1 = sampleDocument('GBR-2020-CC-0E42C2DA1', 'COMPLETE', defaultUser, {}, 'Ref1', new Date('2020-01-01'));
+      doc1['catchSubmission'] = { status: 'SUCCESS', reference: 'REF1' };
+      await new CatchCertModel(doc1).save();
+
+      const doc2 = sampleDocument('GBR-2020-CC-0E42C2DA2', 'COMPLETE', defaultUser, {}, 'Ref2', new Date('2020-01-02'));
+      doc2['catchSubmission'] = { status: 'IN_PROGRESS', reference: 'REF2' };
+      await new CatchCertModel(doc2).save();
+
+      const doc3 = sampleDocument('GBR-2020-CC-0E42C2DA3', 'COMPLETE', defaultUser, {}, 'Ref3', new Date('2020-01-03'));
+      doc3['catchSubmission'] = { status: 'FAILURE', reference: 'REF3', faultCode: 'ERR_001' };
+      await new CatchCertModel(doc3).save();
+
+      const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
+
+      expect(result).toHaveLength(3);
+      expect((result[0] as any).catchSubmission.status).toBe('FAILURE');
+      expect((result[1] as any).catchSubmission.status).toBe('IN_PROGRESS');
+      expect((result[2] as any).catchSubmission.status).toBe('SUCCESS');
     });
 
   });
@@ -362,7 +495,7 @@ describe('catchCert - db related', () => {
   });
 
   describe('delete draft certificate', () => {
-    let mockInvalidateDraftCache;
+    let mockInvalidateDraftCache: jest.SpyInstance;
 
     beforeEach(() => {
       mockInvalidateDraftCache = jest.spyOn(CatchCertService, 'invalidateDraftCache');
@@ -445,10 +578,10 @@ describe('catchCert - db related', () => {
 
   describe('getDraftCatchCertHeadersForUser', () => {
 
-    let mockGetAllSystemErrors;
-    let mockGetDraftCache;
-    let mockSaveDraftCache;
-    let mockLoggerInfo;
+    let mockGetAllSystemErrors: jest.SpyInstance;
+    let mockGetDraftCache: jest.SpyInstance;
+    let mockSaveDraftCache: jest.SpyInstance;
+    let mockLoggerInfo: jest.SpyInstance;
 
     beforeEach(() => {
       mockGetAllSystemErrors = jest.spyOn(SummaryErrorsService, 'getAllSystemErrors');
@@ -828,8 +961,8 @@ describe('catchCert - db related', () => {
   });
 
   describe('upsertDraftData', () => {
-    let mockGet;
-    let mockDebug;
+    let mockGet: jest.SpyInstance;
+    let mockDebug: jest.SpyInstance;
 
     beforeEach(() => {
       mockGet = jest.spyOn(CatchCertService, "getDraft");
@@ -1221,7 +1354,7 @@ describe('catchCert - db related', () => {
       }
     };
 
-    let mock;
+    let mock: jest.SpyInstance;
 
     beforeAll(() => {
       mock = jest.spyOn(CatchCertService, 'getExportLocation');
@@ -1307,8 +1440,8 @@ describe('catchCert - db related', () => {
   });
 
   describe('getExportPayload', () => {
-    let mockGetDraft;
-    let mockMap;
+    let mockGetDraft: jest.SpyInstance;
+    let mockMap: jest.SpyInstance;
 
     beforeAll(() => {
       mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
@@ -1383,8 +1516,8 @@ describe('catchCert - db related', () => {
   });
 
   describe('getDirectExportPayload', () => {
-    let mockGetDraft;
-    let mockMap;
+    let mockGetDraft: jest.SpyInstance;
+    let mockMap: jest.SpyInstance;
 
     beforeAll(() => {
       mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
@@ -1459,8 +1592,8 @@ describe('catchCert - db related', () => {
   });
 
   describe('getExportLocation', () => {
-    let mockGetDraft;
-    let mockMap;
+    let mockGetDraft: jest.SpyInstance;
+    let mockMap: jest.SpyInstance;
 
     beforeAll(() => {
       mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
@@ -1551,8 +1684,8 @@ describe('catchCert - db related', () => {
   });
 
   describe('getTransportDetails', () => {
-    let mockGetDraft;
-    let mockMap;
+    let mockGetDraft: jest.SpyInstance;
+    let mockMap: jest.SpyInstance;
 
     beforeAll(() => {
       mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
@@ -1769,8 +1902,8 @@ describe('catchCert - db related', () => {
 
   describe('getDraft', () => {
 
-    let mockFind;
-    let mockGetDraftCache;
+    let mockFind: jest.SpyInstance;
+    let mockGetDraftCache: jest.SpyInstance;
 
     beforeAll(() => {
       mockFind = jest.spyOn(CatchCertModel, 'findOne');
@@ -1838,7 +1971,7 @@ describe('catchCert - db related', () => {
       return await CatchCertModel.findOne(query, projection, options);
     };
 
-    let mockInvalidateDraftCache;
+    let mockInvalidateDraftCache: jest.SpyInstance;
 
     beforeEach(() => {
       mockInvalidateDraftCache = jest.spyOn(CatchCertService, 'invalidateDraftCache');
@@ -1924,7 +2057,7 @@ describe('catchCert - db related', () => {
   });
 
   describe('getCertificateStatus', () => {
-    let mockGetDraft;
+    let mockGetDraft: jest.SpyInstance;
 
     beforeEach(() => {
       mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
@@ -1956,8 +2089,8 @@ describe('catchCert - db related', () => {
 
   describe('completeDraft', () => {
 
-    let mockDate;
-    let mockInvalidateDraftCache;
+    let mockDate: jest.SpyInstance;
+    let mockInvalidateDraftCache: jest.SpyInstance;
 
     beforeAll(() => {
       mockDate = jest.spyOn(Date, 'now');
@@ -2050,8 +2183,8 @@ describe('catchCert - db related', () => {
   });
 
   describe('getSpecies', () => {
-    let mockGetDraft;
-    let mockMap;
+    let mockGetDraft: jest.SpyInstance;
+    let mockMap: jest.SpyInstance;
 
     beforeAll(() => {
       mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
@@ -2161,8 +2294,8 @@ describe('catchCert - db related', () => {
     });
 
     describe('getConservation', () => {
-      let mockGet;
-      let mockMap;
+      let mockGet: jest.SpyInstance;
+      let mockMap: jest.SpyInstance;
 
       beforeAll(() => {
         mockGet = jest.spyOn(CatchCertService, 'getDraft');
@@ -2296,8 +2429,8 @@ describe('catchCert - db related', () => {
     });
 
     describe('getExporterDetails', () => {
-      let mockGet;
-      let mockMap;
+      let mockGet: jest.SpyInstance;
+      let mockMap: jest.SpyInstance;
 
       beforeAll(() => {
         mockGet = jest.spyOn(CatchCertService, 'getDraft');
@@ -2405,7 +2538,7 @@ describe('catchCert - db related', () => {
 
     describe('upsertUserReference', () => {
 
-      let mockInvalidateDraftCache;
+      let mockInvalidateDraftCache: jest.SpyInstance;
 
       beforeEach(() => {
         mockInvalidateDraftCache = jest.spyOn(CatchCertService, 'invalidateDraftCache');
@@ -2494,9 +2627,9 @@ describe('catchCert - db related', () => {
       requestByAdmin: false
     }
 
-    let mockInvalidateDraftCache;
-    let mockGetSpeciesByFaoCode
-    let mockLoggerInfo
+    let mockInvalidateDraftCache: jest.SpyInstance;
+    let mockGetSpeciesByFaoCode: jest.SpyInstance;
+    let mockLoggerInfo: jest.SpyInstance;
 
     beforeEach(async () => {
       jest
@@ -2615,7 +2748,7 @@ describe('catchCert - db related', () => {
 
   describe('voidCatchCertificate', () => {
     const documentNumber = 'GBR-XXXX-CC-XXXXXXXX';
-    let mockVoidCertificate;
+    let mockVoidCertificate: jest.SpyInstance;
 
     beforeEach(() => {
       mockVoidCertificate = jest.spyOn(ManageCertsService, 'voidCertificate');
@@ -2641,7 +2774,7 @@ describe('catchCert - db related', () => {
 
   describe('checkDocument', () => {
 
-    let mockUserCanCreateDraft;
+    let mockUserCanCreateDraft: jest.SpyInstance;
 
     beforeEach(() => {
       mockUserCanCreateDraft = jest.spyOn(Validator, 'userCanCreateDraft');
@@ -2763,7 +2896,7 @@ describe('getLandingsEntryOption', () => {
   const userPrincipal = 'Bob';
   const contactId = 'contactBob';
   const documentNumber = 'doc123';
-  let mockGetDraft;
+  let mockGetDraft: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
