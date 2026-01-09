@@ -2374,6 +2374,45 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
   });
+
+  it('with special characters personResponsibleForConsignment, plantApprovalNumber validates as error', async () => {
+    const currentUrl =
+      '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'CT-111111',
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110',
+          catchesCertificateType: 'uk'
+        }
+      ],
+      consignmentDescription: 'Consignment 1',
+      healthCertificateNumber: 'HC-111111',
+      healthCertificateDate: '31/03/2018',
+      addAnotherCatch: 'notset',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: 'isaac',
+      plantApprovalNumber: '@@@@@@@@',
+      plantName: 'name'
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    const expected = {
+      plantApprovalNumber: 'psAddProcessingPDFormatErrorPlantApprovalNumber',
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+  });
 });
 
 describe('validateCatchDetails', () => {
