@@ -140,24 +140,24 @@ describe('helper functions', () => {
 
   describe('validateTransportUnloadedFromFormat()', () => {
     it('should identify correct transport details format', () => {
-      let result = Service.isTransportUnloadedFromFormatValid('vehicle registration');
+      let result = Service.isPlantApprovalNumberFormatValid('vehicle registration');
       expect(result).toBeTruthy();
 
-      result = Service.isTransportUnloadedFromFormatValid("veh1cle reg1stration : \\1234/");
+      result = Service.isPlantApprovalNumberFormatValid("veh1cle reg1stration : \\1234/");
       expect(result).toBeTruthy();
 
-      result = Service.isTransportUnloadedFromFormatValid("vehicle-registration,  vehicle registration: 2");
+      result = Service.isPlantApprovalNumberFormatValid("vehicle-registration,  vehicle registration: 2");
       expect(result).toBeTruthy();
     });
 
     it('should identify incorrect transport details format', () => {
-      let result = Service.isTransportUnloadedFromFormatValid('vehicle registration; 1');
+      let result = Service.isPlantApprovalNumberFormatValid('vehicle registration; 1');
       expect(result).toBeFalsy();
 
-      result = Service.isTransportUnloadedFromFormatValid('vehicle_registration 1');
+      result = Service.isPlantApprovalNumberFormatValid('vehicle_registration 1');
       expect(result).toBeFalsy();
 
-      result = Service.isTransportUnloadedFromFormatValid('vehicle registration + flight number');
+      result = Service.isPlantApprovalNumberFormatValid('vehicle registration + flight number');
       expect(result).toBeFalsy();
     })
   });

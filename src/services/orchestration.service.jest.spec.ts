@@ -2073,8 +2073,8 @@ describe('get verifiy remaining methods', () => {
     expect(result).toBeTruthy();
   })
 
-  it('should call isTransportUnloadedFromFormatValid', async () => {
-    const result = Service.isTransportUnloadedFromFormatValid('number');
+  it('should call isPlantApprovalNumberFormatValid', async () => {
+    const result = Service.isPlantApprovalNumberFormatValid('number');
     expect(result).toBeTruthy();
   })
 
