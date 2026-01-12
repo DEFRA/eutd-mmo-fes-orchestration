@@ -23,7 +23,8 @@ import {
   validateMaximumFutureDate,
   validateNonUKCCNumberCharLimit,
   validateProductDescriptions,
-  isPsPlantNameValid
+  isPsPlantNameValid,
+  isPlantApprovalNumberFormatValid
 } from "../orchestration.service";
 import { isEmpty } from "lodash";
 
@@ -47,25 +48,25 @@ export default {
     // Validate that all products have catches (not just description)
     const products = Array.isArray(data.products) ? data.products : [];
     const catches = Array.isArray(data.catches) ? data.catches : [];
-    
+
     const hasDescriptionOnlyProduct = products.some((product: any) => {
       if (!product || typeof product !== 'object') return false;
-      
+
       // Check if product has at least a description
       const hasDescription = product.description || product.productDescription;
-      
+
       // Check if product has catches by looking for catches with matching productId
       const productCatches = catches.filter((c: any) => c.productId === product.id);
       const hasCatches = productCatches.length > 0;
-      
+
       // Product is invalid if it has description but no catches
       return hasDescription && !hasCatches;
     });
-    
+
     if (hasDescriptionOnlyProduct) {
       errors.products = "ccProgressPageProductDetailsRequired";
     }
-    
+
     return { errors };
   },
 
@@ -160,15 +161,20 @@ export default {
   "/create-processing-statement/:documentNumber/add-processing-plant-details": ({ data, errors }) => {
     addProcessingPlantAddressErrors(data, errors);
 
-    if (!data.personResponsibleForConsignment || validateWhitespace(data.personResponsibleForConsignment)) errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignment";
-    else if (data.personResponsibleForConsignment && isInvalidLength(data.personResponsibleForConsignment, MIN_PERSON_RESPONSIBLE_LENGTH, MAX_PERSON_RESPONSIBLE_LENGTH)) {
+    if (!data.personResponsibleForConsignment || validateWhitespace(data.personResponsibleForConsignment)) {
+      errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignment";
+    } else if (isInvalidLength(data.personResponsibleForConsignment, MIN_PERSON_RESPONSIBLE_LENGTH, MAX_PERSON_RESPONSIBLE_LENGTH)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignmentLength";
-    }
-    else if (data.personResponsibleForConsignment && !validatePersonResponsibleForConsignmentFormat(data.personResponsibleForConsignment)) {
+    } else if (!validatePersonResponsibleForConsignmentFormat(data.personResponsibleForConsignment)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorResponsibleValidation";
     }
 
-    if (!data.plantApprovalNumber || validateWhitespace(data.plantApprovalNumber)) errors['plantApprovalNumber'] = "psAddProcessingPDErrorPlantApprovalNumber";
+    if (!data.plantApprovalNumber || validateWhitespace(data.plantApprovalNumber)) {
+      errors['plantApprovalNumber'] = "psAddProcessingPDErrorPlantApprovalNumber";
+    } else if (!isPlantApprovalNumberFormatValid(data.plantApprovalNumber)) {
+      errors['plantApprovalNumber'] = "psAddProcessingPDFormatErrorPlantApprovalNumber";
+    }
+
     return { errors };
   },
 

@@ -827,7 +827,7 @@ export function validatePersonResponsibleForConsignmentFormat(str: string) {
   return regex.test(str);
 }
 
-export const isTransportUnloadedFromFormatValid = (str: string) => {
+export const isPlantApprovalNumberFormatValid = (str: string) => {
   const regex = /^[ A-Za-z0-9-,/\\:]*$/;
   return regex.test(str);
 };
