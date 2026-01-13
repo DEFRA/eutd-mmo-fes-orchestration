@@ -512,11 +512,17 @@ describe('completeDraft', () => {
   });
 
   it('should not upsert if no document is found', async () => {
+    const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+    const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
     await StorageDocumentService.completeDraft('test', 'documentUri', 'bob@bob.bob');
 
     const draft = await getDraft('GBR-2020-CC-NON-EXISTENT');
 
     expect(draft).toBeNull();
+
+    mockFeatureFlag.mockRestore();
+    mockSubmitToCatch.mockRestore();
   });
 
   it('should submit to CATCH when feature flag is enabled', async () => {
