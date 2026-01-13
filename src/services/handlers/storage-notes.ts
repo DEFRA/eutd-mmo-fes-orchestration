@@ -8,6 +8,7 @@ import {
   validateDateBefore,
   validateDateIsSameOrBefore,
   validateMaximumFutureDate,
+  validateMaximumOneDayFutureDate,
   validateUKDocumentNumberFormat,
   validateWhitespace,
 } from "../orchestration.service";
@@ -128,6 +129,9 @@ function checkFacilityArrivalDateError(exportData: any, departureDate: string, e
   }
    else if (exportData.transport?.exportDate && !validateDateIsSameOrBefore(exportData.facilityArrivalDate,  exportData.transport.exportDate)) {
     errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateSameOrOneDayBeforeDepartureDateValidationError";
+  }
+  else if ( !validateMaximumOneDayFutureDate(exportData.facilityArrivalDate)) {
+    errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDatenotMorethanOneDay";
   }
 }
 

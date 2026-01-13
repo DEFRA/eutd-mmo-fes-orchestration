@@ -2720,5 +2720,73 @@ describe("Facility Arrival Date: transport and exportDate edge cases", () => {
   });
 });
 
+describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
+  const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
+
+  it("should NOT set error for today's date", () => {
+    const today = new Date();
+    const todayFormatted = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+    
+    const data = {
+      facilityArrivalDate: todayFormatted,
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+  });
+
+  it("should NOT set error for tomorrow's date (1 day in future)", () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowFormatted = `${String(tomorrow.getDate()).padStart(2, '0')}/${String(tomorrow.getMonth() + 1).padStart(2, '0')}/${tomorrow.getFullYear()}`;
+    
+    const data = {
+      facilityArrivalDate: tomorrowFormatted,
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+  });
+
+  it("should set error for date more than 1 day in future (2 days)", () => {
+    const twoDaysLater = new Date();
+    twoDaysLater.setDate(twoDaysLater.getDate() + 2);
+    const twoDaysLaterFormatted = `${String(twoDaysLater.getDate()).padStart(2, '0')}/${String(twoDaysLater.getMonth() + 1).padStart(2, '0')}/${twoDaysLater.getFullYear()}`;
+    
+    const data = {
+      facilityArrivalDate: twoDaysLaterFormatted,
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDatenotMorethanOneDay");
+  });
+
+  it("should set error for date 7 days in future", () => {
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+    const sevenDaysLaterFormatted = `${String(sevenDaysLater.getDate()).padStart(2, '0')}/${String(sevenDaysLater.getMonth() + 1).padStart(2, '0')}/${sevenDaysLater.getFullYear()}`;
+    
+    const data = {
+      facilityArrivalDate: sevenDaysLaterFormatted,
+      facilityName: "name",
+      facilityAddressOne: "address",
+      facilityTownCity: "city",
+      facilityPostcode: "postcode",
+    };
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDatenotMorethanOneDay");
+  });
+
+});
+
 });
 
