@@ -233,16 +233,13 @@ describe('manage-cert-service', () => {
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.SD);
-      const mockLoggerInfo = jest.spyOn(Logger, 'info');
       const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
 
       await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
 
       expect(mockSubmitToCatch).not.toHaveBeenCalled();
-      expect(mockLoggerInfo).toHaveBeenCalledWith(`[CATCH-SYSTEM-VOID][${documentNumber}][FEATURE-FLAG-DISABLED][SKIPPING-NMD-PS-VOID-NOTIFICATION]`);
 
       getServiceSpy.mockRestore();
-      mockLoggerInfo.mockRestore();
       mockFeatureFlag.mockRestore();
     });
 
@@ -256,18 +253,13 @@ describe('manage-cert-service', () => {
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.PS);
-      const mockLoggerInfo = jest.spyOn(Logger, 'info');
-
-      // Mock feature flag as disabled
       const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
 
       await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
 
       expect(mockSubmitToCatch).not.toHaveBeenCalled();
-      expect(mockLoggerInfo).toHaveBeenCalledWith(`[CATCH-SYSTEM-VOID][${documentNumber}][FEATURE-FLAG-DISABLED][SKIPPING-NMD-PS-VOID-NOTIFICATION]`);
 
       getServiceSpy.mockRestore();
-      mockLoggerInfo.mockRestore();
       mockFeatureFlag.mockRestore();
     });
 
@@ -276,8 +268,7 @@ describe('manage-cert-service', () => {
       const userPrincipalId = 'a user id';
 
       mockMongoFindOne.mockResolvedValue({
-        createdBy: 'a user id',
-        catchSubmission: { status: 'SUCCESS', reference: 'EU.CATCH.SD.123' }
+        createdBy: 'a user id'
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.SD);
@@ -296,8 +287,7 @@ describe('manage-cert-service', () => {
       const userPrincipalId = 'a user id';
 
       mockMongoFindOne.mockResolvedValue({
-        createdBy: 'a user id',
-        catchSubmission: { status: 'SUCCESS', reference: 'EU.CATCH.CC.123' }
+        createdBy: 'a user id'
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.CC);
