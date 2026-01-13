@@ -183,8 +183,6 @@ export const completeDraft = async (documentNumber: string, documentUri: string,
   if (ApplicationConfig.enableNmdPsEuCatch) {
     submitToCatchSystem(documentNumber, 'submit')
       .catch(e => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][PS][ERROR][${e.message}]`));
-  } else {
-    logger.info(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][PS][FEATURE-FLAG-DISABLED][SKIPPING-PS-SUBMIT-NOTIFICATION]`);
   }
 };
 

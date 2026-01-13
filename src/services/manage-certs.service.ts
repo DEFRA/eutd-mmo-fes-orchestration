@@ -47,14 +47,11 @@ export default class ManageCertsService {
       voidConsolidateLandings(documentNumber).catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
     }
 
-    // FI0-10500: Feature flag for NMD/PS void notification to CATCH
     const isNmdOrPs = serviceName === ServiceNames.SD || serviceName === ServiceNames.PS;
     const shouldSkipDueToFlag = isNmdOrPs && !ApplicationConfig.enableNmdPsEuCatch;
 
     if (document.catchSubmission?.status === EuCatchStatus.Success && !shouldSkipDueToFlag) {
       submitToCatchSystem(documentNumber, 'void').catch((e) => logger.error(`[CATCH-SYSTEM-VOID][${documentNumber}][ERROR][${e.message}]`));
-    } else if (shouldSkipDueToFlag) {
-      logger.info(`[CATCH-SYSTEM-VOID][${documentNumber}][FEATURE-FLAG-DISABLED][SKIPPING-NMD-PS-VOID-NOTIFICATION]`);
     }
 
     return true;
