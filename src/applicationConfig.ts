@@ -104,7 +104,7 @@ class ApplicationConfig {
     this._lastUpdatedCookiePolicy = process.env.LAST_UPDATED_COOKIE_POLICY;
 
     this._maxAuthRetries = parseInt(process.env.MAX_AUTH_RETRIES, 10) || 2;
-    this._enableNmdPsEuCatch = process.env.ENABLE_EU_CATCH_PS_NMD === 'true';
+    this._enableNmdPsEuCatch = process.env.ENABLE_NMD_PS_EUCATCH === 'true';
   }
 
   getReferenceServiceUrl(): string {
