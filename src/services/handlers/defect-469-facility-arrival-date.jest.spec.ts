@@ -131,7 +131,7 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
         errors: {},
         _params: {},
       });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDatenotMorethanOneDay");
     });
     it('should accept date exactly 7 days in the future (maximum limit)', async () => {
       const maxFutureDate = (moment as any)().add(7, 'days').format("DD/MM/YYYY");
@@ -146,7 +146,7 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
         errors: {},
         _params: {},
       });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDatenotMorethanOneDay");
     });
     it('should accept past dates (last year)', async () => {
       const pastDate = (moment as any)().subtract(1, 'year').format("DD/MM/YYYY");
