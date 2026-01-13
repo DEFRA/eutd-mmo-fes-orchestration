@@ -1054,6 +1054,8 @@ describe('processingStatement', () => {
     it('should complete a draft certificate', async () => {
       const testDate = '2020-02-12';
       mockDate.mockReturnValue(testDate);
+      const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+      const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
 
       await new ProcessingStatementModel(
         sampleDocument('test', 'DRAFT', 'GBR-2020-CC-0E42C2DA5')
@@ -1064,6 +1066,9 @@ describe('processingStatement', () => {
         'documentUri',
         'bob@bob.bob'
       );
+
+      mockFeatureFlag.mockRestore();
+      mockSubmitToCatch.mockRestore();
 
       const updated = await getDraft('GBR-2020-CC-0E42C2DA5');
 
@@ -1079,6 +1084,9 @@ describe('processingStatement', () => {
     });
 
     it('should do nothing to a complete certificate', async () => {
+      const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+      const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
       await new ProcessingStatementModel(
         sampleDocument('test', 'COMPLETE', 'ZZZ-2020-CC-0E42C2DA5')
       ).save();
@@ -1091,12 +1099,18 @@ describe('processingStatement', () => {
         'bob@bob.bob'
       );
 
+      mockFeatureFlag.mockRestore();
+      mockSubmitToCatch.mockRestore();
+
       const updated = await getDraft('ZZZ-2020-CC-0E42C2DA5');
 
       expect(updated).toStrictEqual(original);
     });
 
     it('should not upsert if no document is found', async () => {
+      const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+      const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
       await ProcessingStatementService.completeDraft(
         'test',
         'documentUri',
@@ -1106,6 +1120,9 @@ describe('processingStatement', () => {
       const draft = await getDraft('GBR-2020-CC-NON-EXISTENT');
 
       expect(draft).toBeNull();
+
+      mockFeatureFlag.mockRestore();
+      mockSubmitToCatch.mockRestore();
     });
 
     it('should submit to CATCH when feature flag is enabled', async () => {
