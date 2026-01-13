@@ -9,6 +9,7 @@ import * as pdfService from 'mmo-ecc-pdf-svc';
 import DocumentNumberService from './documentNumber.service';
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import ApplicationConfig from '../applicationConfig';
+import { EuCatchStatus } from '../persistence/schema/catchCert';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -276,7 +277,8 @@ describe('manage-cert-service', () => {
       const userPrincipalId = 'a user id';
 
       mockMongoFindOne.mockResolvedValue({
-        createdBy: 'a user id'
+        createdBy: 'a user id',
+        catchSubmission: { status: EuCatchStatus.Success }
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.SD);
@@ -295,7 +297,8 @@ describe('manage-cert-service', () => {
       const userPrincipalId = 'a user id';
 
       mockMongoFindOne.mockResolvedValue({
-        createdBy: 'a user id'
+        createdBy: 'a user id',
+        catchSubmission: { status: EuCatchStatus.Success }
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.CC);
