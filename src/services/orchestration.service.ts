@@ -739,6 +739,11 @@ export function validateMaximumFutureDate(date) {
   return parseDate(date).isBefore(maxSubmissionDate, 'day');
 }
 
+export function validateMaximumOneDayFutureDate(date) {
+  const maxSubmissionDate = moment(Date.now()).add(1, 'day');    // Todays date + 1 day (not more than 1 day in future)
+  return parseDate(date).isSameOrBefore(maxSubmissionDate, 'day');
+}
+
 export function validateNumber(num) {
   return !isNaN(+num) && num.indexOf("e") === -1;
 }
