@@ -1118,6 +1118,46 @@ describe('processingStatement', () => {
 
       expect(draft).toBeNull();
     });
+
+    it('should submit to CATCH when feature flag is enabled', async () => {
+      const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
+      const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
+      await new ProcessingStatementModel(
+        sampleDocument('test', 'DRAFT', 'GBR-2020-PS-SUBMIT1')
+      ).save();
+
+      await ProcessingStatementService.completeDraft(
+        'GBR-2020-PS-SUBMIT1',
+        'documentUri',
+        'bob@bob.bob'
+      );
+
+      expect(mockSubmitToCatch).toHaveBeenCalledWith('GBR-2020-PS-SUBMIT1', 'submit');
+
+      mockFeatureFlag.mockRestore();
+      mockSubmitToCatch.mockRestore();
+    });
+
+    it('should not submit to CATCH when feature flag is disabled', async () => {
+      const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+      const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
+      await new ProcessingStatementModel(
+        sampleDocument('test', 'DRAFT', 'GBR-2020-PS-NOSUBMIT')
+      ).save();
+
+      await ProcessingStatementService.completeDraft(
+        'GBR-2020-PS-NOSUBMIT',
+        'documentUri',
+        'bob@bob.bob'
+      );
+
+      expect(mockSubmitToCatch).not.toHaveBeenCalled();
+
+      mockFeatureFlag.mockRestore();
+      mockSubmitToCatch.mockRestore();
+    });
   });
 
   describe('getProcessingStatementDraftNumber', () => {
