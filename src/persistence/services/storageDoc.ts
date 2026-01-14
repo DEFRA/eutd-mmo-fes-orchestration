@@ -6,8 +6,6 @@ import logger from '../../logger';
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
 import ServiceNames from '../../validators/interfaces/service.name.enum';
-import { submitToCatchSystem } from '../../services/reference-data.service';
-import ApplicationConfig from '../../applicationConfig';
 import moment = require('moment');
 import {
   Exporter,
@@ -16,7 +14,7 @@ import {
 } from "../schema/frontEndModels/exporterDetails";
 import { Transport, toBackEndTransport, toFrontEndTransport } from '../schema/frontEndModels/transport';
 import { StorageDocumentDraft } from '../../persistence/schema/frontEndModels/storageDocument';
-import {ExportLocation} from "../schema/frontEndModels/export-location";
+import { ExportLocation } from "../schema/frontEndModels/export-location";
 import { DocumentStatuses } from '../schema/catchCert';
 import { constructOwnerQuery } from './catchCert';
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
@@ -93,12 +91,12 @@ export const countCompletedDocuments = async (
 
 export const saveStorageDoc = async (dataToPersist: TransientData): Promise<void> => {
   try {
-    dataToPersist.status = STATUS_COMPLETE ;
+    dataToPersist.status = STATUS_COMPLETE;
     const data = mapToPersistableSchema(dataToPersist);
     const model = new StorageDocumentModel(data);
     await model.save();
 
-  } catch(e) {
+  } catch (e) {
     logger.error(e);
     // NB: The business decision is to not bubble this error up as persisting data into cosmos is only required for verification
     //     As a side effect you can have a document in blob storage but not made it to database
@@ -114,7 +112,7 @@ export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: strin
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await StorageDocumentModel.find({
     $or: ownerQuery,
-    status: {$nin: ['VOID', 'DRAFT']},
+    status: { $nin: ['VOID', 'DRAFT'] },
     createdAt: {
       // month is 0-indexed but allows -1, -2... -n. It takes back n months from given year.
       // For example
@@ -127,11 +125,11 @@ export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: strin
   return data;
 }
 
-export const getAllStorageDocsForUser = async(userPrincipal: string, contactId: string): Promise<StorageDocumentModel[]> => {
+export const getAllStorageDocsForUser = async (userPrincipal: string, contactId: string): Promise<StorageDocumentModel[]> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await StorageDocumentModel.find({
     $or: ownerQuery,
-    'status': {$ne: 'VOID'}
+    'status': { $ne: 'VOID' }
   }).select(['documentNumber', 'createdAt', 'documentUri', 'status']);
   return data;
 }
@@ -140,8 +138,8 @@ export const getDraftData = async (userPrincipal: string, path: string, contactI
   logger.debug(`[SD][getDraftData] getting ${path} data for ${userPrincipal}`);
 
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  const query = {$or: ownerQuery, status: 'DRAFT'};
-  const results = await StorageDocumentModel.findOne(query, 'draftData', {lean: true});
+  const query = { $or: ownerQuery, status: 'DRAFT' };
+  const results = await StorageDocumentModel.findOne(query, 'draftData', { lean: true });
   const dataExists = (results && results.draftData && Object.prototype.hasOwnProperty.call(results.draftData, path));
 
   logger.debug(`[SD][getDraftData] data found? ${dataExists}`);
@@ -155,7 +153,7 @@ export const upsertDraftDataForStorageDocuments = async (userPrincipal: string, 
   logger.debug(`[SD][upsertDraftDataForStorageDocuments] upserting ${path} data for ${userPrincipal}`);
 
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  const query = {$or: ownerQuery, status: 'DRAFT'};
+  const query = { $or: ownerQuery, status: 'DRAFT' };
   let draft = await StorageDocumentModel.findOne(query);
 
   if (!path && payload) {
@@ -173,20 +171,20 @@ export const upsertDraftDataForStorageDocuments = async (userPrincipal: string, 
   }
 
   if (path) {
-    const data = {...draft.draftData};
+    const data = { ...draft.draftData };
     data[path] = payload;
 
     draft.draftData = data;
   }
 
-  await StorageDocumentModel.findOneAndUpdate(query, draft, {upsert: true, omitUndefined: true});
+  await StorageDocumentModel.findOneAndUpdate(query, draft, { upsert: true, omitUndefined: true });
 };
 
 export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: string): Promise<StorageDocumentDraft[]> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  const query = {$or: ownerQuery, status: 'DRAFT'};
+  const query = { $or: ownerQuery, status: 'DRAFT' };
   const props = ['documentNumber', 'status', 'createdAt', 'userReference'];
-  const result = await StorageDocumentModel.find(query, props).sort({createdAt: 'desc'});
+  const result = await StorageDocumentModel.find(query, props).sort({ createdAt: 'desc' });
 
   return result.map(doc => ({
     documentNumber: doc.documentNumber,
@@ -199,13 +197,13 @@ export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: 
 export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-    return (draft && draft.exportData && draft.exportData.exporterDetails)
-      ? toFrontEndPsAndSdExporterDetails(draft.exportData.exporterDetails)
-      : null;
+  return (draft && draft.exportData && draft.exportData.exporterDetails)
+    ? toFrontEndPsAndSdExporterDetails(draft.exportData.exporterDetails)
+    : null;
 };
 
 export const completeDraft = async (documentNumber: string, documentUri: string, createdByEmail: string) => {
-  const update : StrictUpdateFilter<StorageDocument> = {
+  const update: StrictUpdateFilter<StorageDocument> = {
     $set: {
       'createdByEmail': createdByEmail,
       'status': 'COMPLETE',
@@ -215,18 +213,12 @@ export const completeDraft = async (documentNumber: string, documentUri: string,
   };
 
   await StorageDocumentModel.findOneAndUpdate(
-    {documentNumber: documentNumber, status: 'DRAFT'},
+    { documentNumber: documentNumber, status: 'DRAFT' },
     update
   );
-
-  // Submit to EU CATCH system if feature flag is enabled
-  if (ApplicationConfig.enableNmdPsEuCatch) {
-    submitToCatchSystem(documentNumber, 'submit')
-      .catch(e => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][NMD][ERROR][${e.message}]`));
-  }
 };
 
-export const deleteDraft = async (userPrincipal:string, documentNumber: string, contactId: string): Promise<void> => {
+export const deleteDraft = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   await StorageDocumentModel.findOneAndDelete({
     $or: ownerQuery,
@@ -237,9 +229,9 @@ export const deleteDraft = async (userPrincipal:string, documentNumber: string, 
 
 export const getDraft = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  const query: any = {$or: ownerQuery, status: 'DRAFT',documentNumber: documentNumber};
+  const query: any = { $or: ownerQuery, status: 'DRAFT', documentNumber: documentNumber };
 
-  return StorageDocumentModel.findOne(query, ['userReference','exportData', 'requestByAdmin'], {lean: true});
+  return StorageDocumentModel.findOne(query, ['userReference', 'exportData', 'requestByAdmin'], { lean: true });
 };
 
 export const getDraftCertificateNumber = async (userPrincipal: string, contactId: string) => {
@@ -255,8 +247,8 @@ export const getDraftCertificateNumber = async (userPrincipal: string, contactId
 
 export const upsertDraftData = async (userPrincipal: string, documentNumber: string, update: object, contactId: string) => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  const draft  = await getDraft(userPrincipal, documentNumber, contactId);
-  const conditions : any = { $or: ownerQuery, status: 'DRAFT', documentNumber: documentNumber };
+  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+  const conditions: any = { $or: ownerQuery, status: 'DRAFT', documentNumber: documentNumber };
   const options = { upsert: true, omitUndefined: true };
 
   if (draft) await StorageDocumentModel.findOneAndUpdate(conditions, update, options);
@@ -300,26 +292,26 @@ export const upsertTransportDetails = async (userPrincipal: string, payload: Tra
 
   const transport = toBackEndTransport(payload);
   const key = payload.arrival ? 'exportData.arrivalTransportation' : 'exportData.transportation'
-  await upsertDraftData(userPrincipal,documentNumber, {'$set': {[key]: transport}}, contactId);
+  await upsertDraftData(userPrincipal, documentNumber, { '$set': { [key]: transport } }, contactId);
 };
 
-export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string, arrival?:boolean): Promise<Transport> => {
-    const draft = await getDraft(userPrincipal, documentNumber, contactId);
-    const transportation = arrival ? draft?.exportData?.arrivalTransportation : draft?.exportData?.transportation;
-    return transportation ? toFrontEndTransport(transportation) : null;
+export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string, arrival?: boolean): Promise<Transport> => {
+  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+  const transportation = arrival ? draft?.exportData?.arrivalTransportation : draft?.exportData?.transportation;
+  return transportation ? toFrontEndTransport(transportation) : null;
 };
 
-export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber:string, contactId: string) => {
-  await upsertDraftData(userPrincipal, documentNumber, {'$set': {'exportData.exportedTo': payload.exportedTo, 'exportData.pointOfDestination': payload.pointOfDestination}}, contactId);
+export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber: string, contactId: string) => {
+  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedTo': payload.exportedTo, 'exportData.pointOfDestination': payload.pointOfDestination } }, contactId);
 };
 
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<ExportLocation> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
-  return (draft && draft.exportData && draft.exportData.exportedTo) ? {exportedTo : draft.exportData.exportedTo} : null;
+  return (draft && draft.exportData && draft.exportData.exportedTo) ? { exportedTo: draft.exportData.exportedTo } : null;
 };
 
 export const upsertUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string) => {
-  await upsertDraftData(userPrincipal, documentNumber, {'$set': {'userReference': userReference}}, contactId);
+  await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'userReference': userReference } }, contactId);
 };
 
 export const cloneStorageDocument = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal?: boolean): Promise<string> => {

@@ -40,9 +40,10 @@ import {
   StorageDocument,
 } from "../persistence/schema/frontEndModels/storageDocument";
 import { toFrontEndStorageDocumentExportData } from "../persistence/schema/storageDoc";
-import { reportDocumentSubmitted } from "../services/reference-data.service";
+import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
 import { invalidateDraftCache } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
+import ServiceNames from '../validators/interfaces/service.name.enum';
 
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
@@ -470,6 +471,14 @@ export default class OrchestrationService {
     OrchestrationService.sendBusinessContinuityEvent(documentNumber);
 
     void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch((e) => logger.error(`[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
+
+    // Submit to EU CATCH system for NMD/PS if feature flag is enabled
+    const serviceName = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
+    const isNmdOrPs = serviceName === ServiceNames.SD || serviceName === ServiceNames.PS;
+    if (isNmdOrPs && ApplicationConfig.enableNmdPsEuCatch) {
+      submitToCatchSystem(documentNumber, 'submit')
+        .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
+    }
 
     return pdf;
   }
