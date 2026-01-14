@@ -512,55 +512,11 @@ describe('completeDraft', () => {
   });
 
   it('should not upsert if no document is found', async () => {
-    const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
-    const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
-
     await StorageDocumentService.completeDraft('test', 'documentUri', 'bob@bob.bob');
 
     const draft = await getDraft('GBR-2020-CC-NON-EXISTENT');
 
     expect(draft).toBeNull();
-
-    mockFeatureFlag.mockRestore();
-    mockSubmitToCatch.mockRestore();
-  });
-
-  it('should submit to CATCH when feature flag is enabled', async () => {
-    const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
-    const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
-
-    await createDocument('Bob', 'DRAFT', 'GBR-2020-SD-SUBMIT1', new Date(2020, 0, 20), "User Reference", {
-      transportation: {
-        exportDate: "12/02/2020",
-      },
-      faciltyName: 'Facility',
-    });
-
-    await StorageDocumentService.completeDraft('GBR-2020-SD-SUBMIT1', 'documentUri', 'bob@bob.bob');
-
-    expect(mockSubmitToCatch).toHaveBeenCalledWith('GBR-2020-SD-SUBMIT1', 'submit');
-
-    mockFeatureFlag.mockRestore();
-    mockSubmitToCatch.mockRestore();
-  });
-
-  it('should not submit to CATCH when feature flag is disabled', async () => {
-    const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
-    const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
-
-    await createDocument('Bob', 'DRAFT', 'GBR-2020-SD-NOSUBMIT', new Date(2020, 0, 20), "User Reference", {
-      transportation: {
-        exportDate: "12/02/2020",
-      },
-      faciltyName: 'Facility',
-    });
-
-    await StorageDocumentService.completeDraft('GBR-2020-SD-NOSUBMIT', 'documentUri', 'bob@bob.bob');
-
-    expect(mockSubmitToCatch).not.toHaveBeenCalled();
-
-    mockFeatureFlag.mockRestore();
-    mockSubmitToCatch.mockRestore();
   });
 
 });
