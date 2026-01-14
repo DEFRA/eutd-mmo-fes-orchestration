@@ -47,7 +47,10 @@ export default class ManageCertsService {
       voidConsolidateLandings(documentNumber).catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
     }
 
-    if (document.catchSubmission?.status === EuCatchStatus.Success) {
+    // Void in EU CATCH system: CC always submits, PS/SD only if feature flag is enabled
+    const shouldVoidInCatch = document.catchSubmission?.status === EuCatchStatus.Success &&
+      (serviceName === ServiceNames.CC || ApplicationConfig.enableNmdPsEuCatch);
+    if (shouldVoidInCatch) {
       submitToCatchSystem(documentNumber, 'void').catch((e) => logger.error(`[CATCH-SYSTEM-VOID][${documentNumber}][ERROR][${e.message}]`));
     }
 
