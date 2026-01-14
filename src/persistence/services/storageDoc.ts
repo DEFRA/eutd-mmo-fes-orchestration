@@ -6,8 +6,6 @@ import logger from '../../logger';
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
 import ServiceNames from '../../validators/interfaces/service.name.enum';
-import { submitToCatchSystem } from '../../services/reference-data.service';
-import ApplicationConfig from '../../applicationConfig';
 import moment = require('moment');
 import {
   Exporter,
@@ -218,12 +216,6 @@ export const completeDraft = async (documentNumber: string, documentUri: string,
     { documentNumber: documentNumber, status: 'DRAFT' },
     update
   );
-
-  // Submit to EU CATCH system if feature flag is enabled
-  if (ApplicationConfig.enableNmdPsEuCatch) {
-    submitToCatchSystem(documentNumber, 'submit')
-      .catch(e => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][NMD][ERROR][${e.message}]`));
-  }
 };
 
 export const deleteDraft = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
