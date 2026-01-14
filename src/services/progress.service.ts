@@ -351,6 +351,29 @@ export default class ProgressService {
       ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
+  public static readonly allProductsHaveCatchDetails = (exportData: ProcessingStatement.ExportData): boolean => {
+    // If no products, return false
+    if (!Array.isArray(exportData?.products) || exportData.products.length === 0) {
+      return false;
+    }
+
+    // If no catches, return false
+    if (!Array.isArray(exportData?.catches) || exportData.catches.length === 0) {
+      return false;
+    }
+
+    // Check each product has at least one catch associated with it
+    return exportData.products.every((product: ProcessingStatement.Product) => {
+      // Find catches associated with this product by productId
+      const productCatches = exportData.catches.filter(
+        (catchItem: ProcessingStatement.Catch) => catchItem.productId === product.id
+      );
+      
+      // Product must have at least one catch
+      return productCatches.length > 0;
+    });
+  }
+
   public static isEmptyAndTrimSpaces(propertyValue: any): boolean {
     if (typeof propertyValue === 'string') {
       return !isEmpty(propertyValue) && propertyValue.trim() !== '';
@@ -475,11 +498,12 @@ export default class ProgressService {
 
     const hasCompletedAllProducts: boolean = ProgressService.getConsignmentDescriptionStatus(data?.exportData) === ProgressStatus.COMPLETED;
     const hasCompletedAllCatches: boolean = await ProgressService.getPSCatchStatus(data?.exportData?.catches, documentNumber, userPrincipal, contactId) === ProgressStatus.COMPLETED;
+    const allProductsHaveCatches: boolean = ProgressService.allProductsHaveCatchDetails(data?.exportData);
 
     const psProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
-      processedProductDetails: hasCompletedAllProducts && hasCompletedAllCatches ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
+      processedProductDetails: hasCompletedAllProducts && hasCompletedAllCatches && allProductsHaveCatches ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
       processingPlant,
       processingPlantAddress,
       exportHealthCertificate,
