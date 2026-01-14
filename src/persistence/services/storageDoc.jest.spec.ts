@@ -429,7 +429,6 @@ describe('getAllStorageDocsForUserByYearAndMonth', () => {
     expect(result[1].documentNumber).toBe('test 2');
     expect(result[2].documentNumber).toBe('test 1');
   });
-
 });
 
 describe('completeDraft', () => {
