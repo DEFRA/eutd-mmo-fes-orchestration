@@ -472,10 +472,12 @@ export default class OrchestrationService {
 
     void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch((e) => logger.error(`[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
 
-    // Submit to EU CATCH system for NMD/PS if feature flag is enabled
+    // Submit to EU CATCH system
+    // For CC: always submit, For PS/SD: only if feature flag is enabled
     const serviceName = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
     const isNmdOrPs = serviceName === ServiceNames.SD || serviceName === ServiceNames.PS;
-    if (isNmdOrPs && ApplicationConfig.enableNmdPsEuCatch) {
+    const shouldSubmit = serviceName === ServiceNames.CC || (isNmdOrPs && ApplicationConfig.enableNmdPsEuCatch);
+    if (shouldSubmit) {
       submitToCatchSystem(documentNumber, 'submit')
         .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
     }
