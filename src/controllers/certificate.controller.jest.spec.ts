@@ -640,7 +640,24 @@ describe('Certificate Controller', () => {
 
   describe('getEuDataIntegrationStatus', () => {
 
+    let mockGetPSDocument: jest.SpyInstance;
+    let mockGetNMDDocument: jest.SpyInstance;
+    let mockGetServiceNameFromDocumentNumber: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockGetPSDocument = jest.spyOn(require('../persistence/services/processingStatement'), 'getDocument');
+      mockGetNMDDocument = jest.spyOn(require('../persistence/services/storageDoc'), 'getDocument');
+      mockGetServiceNameFromDocumentNumber = jest.spyOn(require('../services/documentNumber.service').default, 'getServiceNameFromDocumentNumber');
+    });
+
+    afterEach(() => {
+      mockGetPSDocument.mockRestore();
+      mockGetNMDDocument.mockRestore();
+      mockGetServiceNameFromDocumentNumber.mockRestore();
+    });
+
     it('will return null if the document cannot be found', async () => {
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('CC');
       mockGetDocument.mockResolvedValue(null);
 
       const result = await CertificateController.getEuDataIntegrationStatus(req, 'Bob', documentNumber);
@@ -653,6 +670,7 @@ describe('Certificate Controller', () => {
     it('will return null if the document has no catchSubmission', async () => {
       const docWithoutEuRef = { ...backEndCc };
       delete docWithoutEuRef.catchSubmission;
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('CC');
       mockGetDocument.mockResolvedValue(docWithoutEuRef);
 
       const result = await CertificateController.getEuDataIntegrationStatus(req, 'Bob', documentNumber);
@@ -667,6 +685,7 @@ describe('Certificate Controller', () => {
         ...backEndCc,
         catchSubmission: { status: 'SUCCESS', reference: 'EU-CATCH-2024-12345' }
       };
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('CC');
       mockGetDocument.mockResolvedValue(docWithEuRef);
 
       const reqWithDifferentStatus = {
@@ -686,6 +705,7 @@ describe('Certificate Controller', () => {
         ...backEndCc,
         catchSubmission: { status: 'SUCCESS', reference: 'EU-CATCH-2024-12345' }
       };
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('CC');
       mockGetDocument.mockResolvedValue(docWithEuRef);
 
       const reqWithMatchingStatus = {
@@ -716,6 +736,7 @@ describe('Certificate Controller', () => {
           }]
         }
       };
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('CC');
       mockGetDocument.mockResolvedValue(docWithFailure);
 
       const reqWithFailureStatus = {
@@ -746,6 +767,7 @@ describe('Certificate Controller', () => {
           reasonInformation: 'Processing certificate'
         }
       };
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('CC');
       mockGetDocument.mockResolvedValue(docWithInProgress);
 
       const reqWithInProgressStatus = {
@@ -764,12 +786,124 @@ describe('Certificate Controller', () => {
 
     it('will catch and log errors when getting the document', async () => {
       const error = new Error('Database error');
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('CC');
       mockGetDocument.mockRejectedValue(error);
 
       await expect(CertificateController.getEuDataIntegrationStatus(req, 'Bob', documentNumber)).rejects.toThrow('Database error');
 
       expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
       expect(mockError).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][GBR-X-CC-1][ERROR][${error}]`);
+    });
+
+    it('will handle PS document type and return catchSubmission when available', async () => {
+      const psDocumentNumber = 'GBR-X-PS-1';
+      const docWithEuRef = {
+        documentNumber: psDocumentNumber,
+        catchSubmission: { status: 'SUCCESS', reference: 'EU-PS-2024-12345' }
+      };
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('PS');
+      mockGetPSDocument.mockResolvedValue(docWithEuRef);
+
+      const reqWithMatchingStatus = {
+        ...req,
+        params: { status: 'SUCCESS' }
+      };
+
+      const result = await CertificateController.getEuDataIntegrationStatus(reqWithMatchingStatus, 'Bob', psDocumentNumber);
+
+      expect(mockGetServiceNameFromDocumentNumber).toHaveBeenCalledWith(psDocumentNumber);
+      expect(mockGetPSDocument).toHaveBeenCalledWith(psDocumentNumber, 'Bob', contactId);
+      expect(result).toEqual({
+        reference: 'EU-PS-2024-12345',
+        status: 'SUCCESS'
+      });
+    });
+
+    it('will handle PS document type and return null when document not found', async () => {
+      const psDocumentNumber = 'GBR-X-PS-1';
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('PS');
+      mockGetPSDocument.mockResolvedValue(null);
+
+      const result = await CertificateController.getEuDataIntegrationStatus(req, 'Bob', psDocumentNumber);
+
+      expect(mockGetServiceNameFromDocumentNumber).toHaveBeenCalledWith(psDocumentNumber);
+      expect(mockGetPSDocument).toHaveBeenCalledWith(psDocumentNumber, 'Bob', contactId);
+      expect(result).toBeNull();
+      expect(mockInfo).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${psDocumentNumber}][NOT-FOUND]`);
+    });
+
+    it('will handle PS document type and catch errors', async () => {
+      const psDocumentNumber = 'GBR-X-PS-1';
+      const error = new Error('PS Database error');
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('PS');
+      mockGetPSDocument.mockRejectedValue(error);
+
+      await expect(CertificateController.getEuDataIntegrationStatus(req, 'Bob', psDocumentNumber)).rejects.toThrow('PS Database error');
+
+      expect(mockGetServiceNameFromDocumentNumber).toHaveBeenCalledWith(psDocumentNumber);
+      expect(mockGetPSDocument).toHaveBeenCalledWith(psDocumentNumber, 'Bob', contactId);
+      expect(mockError).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${psDocumentNumber}][ERROR][${error}]`);
+    });
+
+    it('will handle SD document type and return catchSubmission when available', async () => {
+      const sdDocumentNumber = 'GBR-X-SD-1';
+      const docWithEuRef = {
+        documentNumber: sdDocumentNumber,
+        catchSubmission: { status: 'SUCCESS', reference: 'EU-SD-2024-12345' }
+      };
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('SD');
+      mockGetNMDDocument.mockResolvedValue(docWithEuRef);
+
+      const reqWithMatchingStatus = {
+        ...req,
+        params: { status: 'SUCCESS' }
+      };
+
+      const result = await CertificateController.getEuDataIntegrationStatus(reqWithMatchingStatus, 'Bob', sdDocumentNumber);
+
+      expect(mockGetServiceNameFromDocumentNumber).toHaveBeenCalledWith(sdDocumentNumber);
+      expect(mockGetNMDDocument).toHaveBeenCalledWith(sdDocumentNumber, 'Bob', contactId);
+      expect(result).toEqual({
+        reference: 'EU-SD-2024-12345',
+        status: 'SUCCESS'
+      });
+    });
+
+    it('will handle SD document type and return null when document not found', async () => {
+      const sdDocumentNumber = 'GBR-X-SD-1';
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('SD');
+      mockGetNMDDocument.mockResolvedValue(null);
+
+      const result = await CertificateController.getEuDataIntegrationStatus(req, 'Bob', sdDocumentNumber);
+
+      expect(mockGetServiceNameFromDocumentNumber).toHaveBeenCalledWith(sdDocumentNumber);
+      expect(mockGetNMDDocument).toHaveBeenCalledWith(sdDocumentNumber, 'Bob', contactId);
+      expect(result).toBeNull();
+      expect(mockInfo).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${sdDocumentNumber}][NOT-FOUND]`);
+    });
+
+    it('will handle SD document type and catch errors', async () => {
+      const sdDocumentNumber = 'GBR-X-SD-1';
+      const error = new Error('SD Database error');
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('SD');
+      mockGetNMDDocument.mockRejectedValue(error);
+
+      await expect(CertificateController.getEuDataIntegrationStatus(req, 'Bob', sdDocumentNumber)).rejects.toThrow('SD Database error');
+
+      expect(mockGetServiceNameFromDocumentNumber).toHaveBeenCalledWith(sdDocumentNumber);
+      expect(mockGetNMDDocument).toHaveBeenCalledWith(sdDocumentNumber, 'Bob', contactId);
+      expect(mockError).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${sdDocumentNumber}][ERROR][${error}]`);
+    });
+
+    it('will log info for unsupported document type and return null', async () => {
+      const unsupportedDocumentNumber = 'GBR-X-XX-1';
+      mockGetServiceNameFromDocumentNumber.mockReturnValue('XX');
+
+      const result = await CertificateController.getEuDataIntegrationStatus(req, 'Bob', unsupportedDocumentNumber);
+
+      expect(mockGetServiceNameFromDocumentNumber).toHaveBeenCalledWith(unsupportedDocumentNumber);
+      expect(mockInfo).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${unsupportedDocumentNumber}][UNSUPPORTED-DOCUMENT-TYPE]`);
+      expect(result).toBeNull();
     });
 
   });
