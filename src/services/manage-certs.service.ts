@@ -47,10 +47,7 @@ export default class ManageCertsService {
       voidConsolidateLandings(documentNumber).catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
     }
 
-    const isNmdOrPs = serviceName === ServiceNames.SD || serviceName === ServiceNames.PS;
-    const shouldSkipDueToFlag = isNmdOrPs && !ApplicationConfig.enableNmdPsEuCatch;
-
-    if (document.catchSubmission?.status === EuCatchStatus.Success && !shouldSkipDueToFlag) {
+    if (document.catchSubmission?.status === EuCatchStatus.Success) {
       submitToCatchSystem(documentNumber, 'void').catch((e) => logger.error(`[CATCH-SYSTEM-VOID][${documentNumber}][ERROR][${e.message}]`));
     }
 
