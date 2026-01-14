@@ -9,6 +9,7 @@ import * as pdfService from 'mmo-ecc-pdf-svc';
 import DocumentNumberService from './documentNumber.service';
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import { EuCatchStatus } from '../persistence/schema/catchCert';
+import ApplicationConfig from '../applicationConfig';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -157,11 +158,15 @@ describe('manage-cert-service', () => {
 
       mockReportDocumentVoided.mockResolvedValue(null);
 
-      const documentNumber = 'test-document-number';
+      const documentNumber = 'GBR-2024-CC-12345678';
       const userPrincipalId = 'a user id';
+      
+      const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.CC);
 
       await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
       expect(mockSubmitToCatch).toHaveBeenCalledWith(documentNumber, 'void');
+      
+      getServiceSpy.mockRestore();
     });
 
     it('should call submit to catch with a valid documentNumber and catch error from submitting to catch', async () => {
@@ -178,11 +183,15 @@ describe('manage-cert-service', () => {
       mockReportDocumentVoided.mockResolvedValue(null);
       mockSubmitToCatch.mockRejectedValue(new Error ('something went wrong'));
 
-      const documentNumber = 'test-document-number';
+      const documentNumber = 'GBR-2024-CC-12345678';
       const userPrincipalId = 'a user id';
+      
+      const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.CC);
 
       await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
-      expect(mockLoggerError).toHaveBeenCalledWith('[CATCH-SYSTEM-VOID][test-document-number][ERROR][something went wrong]');
+      expect(mockLoggerError).toHaveBeenCalledWith('[CATCH-SYSTEM-VOID][GBR-2024-CC-12345678][ERROR][something went wrong]');
+      
+      getServiceSpy.mockRestore();
     });
 
     it('should gracefully handle a VOID event failure', async () => {
@@ -223,7 +232,7 @@ describe('manage-cert-service', () => {
       getServiceSpy.mockRestore();
     });
 
-    it('should submit to catch for NMD when successfully submitted before', async () => {
+    it('should submit to catch for NMD when successfully submitted before and flag is enabled', async () => {
       const documentNumber = 'GBR-2024-SD-12345678';
       const userPrincipalId = 'a user id';
 
@@ -233,15 +242,37 @@ describe('manage-cert-service', () => {
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.SD);
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
 
       await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
 
       expect(mockSubmitToCatch).toHaveBeenCalledWith(documentNumber, 'void');
 
       getServiceSpy.mockRestore();
+      jest.restoreAllMocks();
     });
 
-    it('should submit to catch for PS when successfully submitted before', async () => {
+    it('should NOT submit to catch for NMD when flag is disabled even if successfully submitted before', async () => {
+      const documentNumber = 'GBR-2024-SD-12345678';
+      const userPrincipalId = 'a user id';
+
+      mockMongoFindOne.mockResolvedValue({
+        createdBy: 'a user id',
+        catchSubmission: { status: EuCatchStatus.Success }
+      });
+
+      const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.SD);
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+
+      await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
+
+      expect(mockSubmitToCatch).not.toHaveBeenCalled();
+
+      getServiceSpy.mockRestore();
+      jest.restoreAllMocks();
+    });
+
+    it('should submit to catch for PS when successfully submitted before and flag is enabled', async () => {
       const documentNumber = 'GBR-2024-PS-12345678';
       const userPrincipalId = 'a user id';
 
@@ -251,12 +282,34 @@ describe('manage-cert-service', () => {
       });
 
       const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.PS);
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
 
       await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
 
       expect(mockSubmitToCatch).toHaveBeenCalledWith(documentNumber, 'void');
 
       getServiceSpy.mockRestore();
+      jest.restoreAllMocks();
+    });
+
+    it('should NOT submit to catch for PS when flag is disabled even if successfully submitted before', async () => {
+      const documentNumber = 'GBR-2024-PS-12345678';
+      const userPrincipalId = 'a user id';
+
+      mockMongoFindOne.mockResolvedValue({
+        createdBy: 'a user id',
+        catchSubmission: { status: EuCatchStatus.Success }
+      });
+
+      const getServiceSpy = jest.spyOn(DocumentNumberService, 'getServiceNameFromDocumentNumber').mockReturnValue(ServiceNames.PS);
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+
+      await ManageCertsService.voidCertificate(documentNumber, userPrincipalId, contactId);
+
+      expect(mockSubmitToCatch).not.toHaveBeenCalled();
+
+      getServiceSpy.mockRestore();
+      jest.restoreAllMocks();
     });
 
     it('should submit to catch for CC when successfully submitted before', async () => {
