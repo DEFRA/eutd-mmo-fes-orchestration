@@ -3204,6 +3204,118 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
+  it('will return INCOMPLETE processedProductDetails if products have valid descriptions but no associated catches (FI0-10647)', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        products: [
+          {
+            id: 'product-1',
+            commodityCode: '03026929',
+            description: 'Herring fillets',
+          },
+          {
+            id: 'product-2',
+            commodityCode: '16041210',
+            description: 'Atlantic cod fishcakes',
+          }
+        ],
+        catches: [],
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`
+    );
+    expect(mockProcessingStatementDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return INCOMPLETE processedProductDetails if some products do not have catch details (FI0-10647)', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        products: [
+          {
+            id: 'product-1',
+            commodityCode: '03026929',
+            description: 'Herring fillets - with catches',
+          },
+          {
+            id: 'product-2',
+            commodityCode: '16041210',
+            description: 'Atlantic cod - no catches',
+          }
+        ],
+        catches: [
+          {
+            productId: 'product-1',
+            species: 'Gymnotus pantherinus (AGH)',
+            catchCertificateNumber: 'GBR-2022-CC-VALID123',
+            id: 'CC-10-1670865091',
+            scientificName: 'Gymnotus pantherinus',
+            totalWeightLanded: '7',
+            exportWeightBeforeProcessing: '5',
+            exportWeightAfterProcessing: '6',
+            catchCertificateType: 'uk',
+          }
+        ],
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`
+    );
+    expect(mockProcessingStatementDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
   it('will return INCOMPLETED consignmentDescription if there is a list of products with a product that has a description over 50 characters', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
@@ -4291,8 +4403,16 @@ describe('getProcessingStatementProgress', () => {
       createdAt: new Date('2020-01-01').toISOString(),
       status: 'DRAFT',
       exportData: {
+        products: [
+          {
+            id: 'product-1',
+            description: 'Processed Fish Product',
+            commodityCode: '03055310',
+          },
+        ],
         catches: [
           {
+            productId: 'product-1',
             species: 'Atlantic herring (HER)',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
