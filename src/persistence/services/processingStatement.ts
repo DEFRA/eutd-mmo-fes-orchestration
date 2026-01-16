@@ -267,7 +267,7 @@ export const upsertExportLocation = async (userPrincipal: string, payload: Expor
   await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedTo': payload.exportedTo, 'exportData.pointOfDestination': payload.pointOfDestination } }, contactId);
 };
 
-export const cloneProcessingStatement = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal:boolean): Promise<string> => {
+export const cloneProcessingStatement = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal: boolean): Promise<string> => {
   const original: ProcessingStatement = await getDocument(documentNumber, userPrincipal, contactId);
 
   if (!original) {

@@ -9,6 +9,8 @@ import {
 import * as FrontEndExporterSchema from '../schema/frontEndModels/exporterDetails';
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
+import * as ReferenceDataService from '../../services/reference-data.service';
+import ApplicationConfig from '../../applicationConfig';
 
 describe('processingStatement', () => {
   let mongoServer;
@@ -1052,6 +1054,8 @@ describe('processingStatement', () => {
     it('should complete a draft certificate', async () => {
       const testDate = '2020-02-12';
       mockDate.mockReturnValue(testDate);
+      const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+      const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
 
       await new ProcessingStatementModel(
         sampleDocument('test', 'DRAFT', 'GBR-2020-CC-0E42C2DA5')
@@ -1062,6 +1066,9 @@ describe('processingStatement', () => {
         'documentUri',
         'bob@bob.bob'
       );
+
+      mockFeatureFlag.mockRestore();
+      mockSubmitToCatch.mockRestore();
 
       const updated = await getDraft('GBR-2020-CC-0E42C2DA5');
 
@@ -1077,6 +1084,9 @@ describe('processingStatement', () => {
     });
 
     it('should do nothing to a complete certificate', async () => {
+      const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+      const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
       await new ProcessingStatementModel(
         sampleDocument('test', 'COMPLETE', 'ZZZ-2020-CC-0E42C2DA5')
       ).save();
@@ -1088,6 +1098,9 @@ describe('processingStatement', () => {
         'documentUri',
         'bob@bob.bob'
       );
+
+      mockFeatureFlag.mockRestore();
+      mockSubmitToCatch.mockRestore();
 
       const updated = await getDraft('ZZZ-2020-CC-0E42C2DA5');
 

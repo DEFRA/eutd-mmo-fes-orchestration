@@ -7,6 +7,8 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import { StorageDocumentModel } from "../schema/storageDoc";
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
+import * as ReferenceDataService from '../../services/reference-data.service';
+import ApplicationConfig from '../../applicationConfig';
 
 let mongoServer: MongoMemoryServer;
 const defaultUserReference = 'User Reference';
@@ -454,6 +456,8 @@ describe('completeDraft', () => {
   it('should complete a draft certificate', async () => {
     const testDate = '2020-02-12';
     mockDate.mockReturnValue(testDate);
+    const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+    const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
 
     await createDocument('Bob', 'DRAFT', 'GBR-2020-CC-0E42C2DA5', new Date(2020, 0, 20), "User Reference", {
       transportation: {
@@ -463,6 +467,9 @@ describe('completeDraft', () => {
     });
 
     await StorageDocumentService.completeDraft('GBR-2020-CC-0E42C2DA5', 'documentUri', 'bob@bob.bob');
+
+    mockFeatureFlag.mockRestore();
+    mockSubmitToCatch.mockRestore();
 
     const updated = await getDraft('GBR-2020-CC-0E42C2DA5');
 
@@ -487,11 +494,17 @@ describe('completeDraft', () => {
   });
 
   it('should do nothing to a complete certificate', async () => {
+    const mockFeatureFlag = jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+    const mockSubmitToCatch = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
     await createDocument('Bob', 'COMPLETE', 'GBR-2020-CC-0E42C2DA5');
 
     const original = await getDraft('ZZZ-2020-CC-0E42C2DA5');
 
     await StorageDocumentService.completeDraft('ZZZ-2020-CC-0E42C2DA5', 'documentUri', 'bob@bob.bob');
+
+    mockFeatureFlag.mockRestore();
+    mockSubmitToCatch.mockRestore();
 
     const updated = await getDraft('ZZZ-2020-CC-0E42C2DA5');
 

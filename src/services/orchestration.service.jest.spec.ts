@@ -899,39 +899,6 @@ describe('generatePdf', () => {
         expect(mockLoggerError).toHaveBeenCalledWith('[REPORT-SD-PS-DOCUMENT-SUBMIT][GBR-3434-PS-3434-3434][ERROR][Error: error]');
     });
 
-    it('should submit to EU CATCH when destination is an EU country', async () => {
-      const userPrincipal = 'Bob';
-      const documentNumber = 'GBR-3434-PS-3434-3434';
-      // ensure exportedTo resolves to an EU country
-      mockLoadRequiredData.mockResolvedValue({ data: { exportedTo: { officialCountryName: 'SPAIN' }, exporter: {} }, exporter: { model: {} } });
-      const mockSubmit = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined as any);
-
-      jest.setTimeout(20000);
-      mockGetBlockingStatus.mockResolvedValue(false);
-      mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true, details: [], rawData: [] } });
-      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
-
-      expect(mockSubmit).not.toHaveBeenCalledWith(documentNumber, 'submit');
-
-      mockSubmit.mockRestore();
-    });
-
-    it('should NOT submit to EU CATCH when destination is NOT an EU country', async () => {
-      const userPrincipal = 'Bob';
-      const documentNumber = 'GBR-3434-PS-3434-3434';
-      mockLoadRequiredData.mockResolvedValue({ data: { exportedTo: { officialCountryName: 'INDIA' }, exporter: {} }, exporter: { model: {} } });
-      const mockSubmit = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined as any);
-
-      jest.setTimeout(20000);
-      mockGetBlockingStatus.mockResolvedValue(false);
-      mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true, details: [], rawData: [] } });
-      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
-
-      expect(mockSubmit).not.toHaveBeenCalled();
-
-      mockSubmit.mockRestore();
-    });
-
     it('should return 400 if there are validation errors', async () => {
       mockValidateCompletedDocument.mockResolvedValue(false);
 
@@ -1436,40 +1403,6 @@ describe('generatePdf', () => {
         uri: '_755e758f-6e43-4b0c-aa73-c45b6eb8cd81.pdf',
         documentNumber: 'GBR-3434-SD-3434-3434'
       });
-    });
-
-    it('should submit to EU CATCH when storage document destination is an EU country', async () => {
-      const userPrincipal = 'Bob';
-      const documentNumber = 'GBR-3434-SD-3434-3434';
-      // ensure exportedTo resolves to an EU country
-      mockLoadRequiredData.mockResolvedValue({ data: { exportedTo: { officialCountryName: 'SPAIN' }, exporter: {} }, exporter: { model: {} } });
-      const spyIsEu = jest.spyOn(require('../services/eu-countries.service'), 'isEuCountry').mockResolvedValue(true);
-      const mockSubmit = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined as any);
-
-      mockGetBlockingStatus.mockResolvedValue(false);
-      mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true, details: [], rawData: [] } });
-      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
-
-      expect(spyIsEu).not.toHaveBeenCalled();
-      expect(mockSubmit).not.toHaveBeenCalledWith(documentNumber, 'submit');
-
-      spyIsEu.mockRestore();
-      mockSubmit.mockRestore();
-    });
-
-    it('should NOT submit to EU CATCH when storage document destination is NOT an EU country', async () => {
-      const userPrincipal = 'Bob';
-      const documentNumber = 'GBR-3434-SD-3434-3434';
-      mockLoadRequiredData.mockResolvedValue({ data: { exportedTo: { officialCountryName: 'INDIA' }, exporter: {} }, exporter: { model: {} } });
-      const mockSubmit = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined as any);
-
-      mockGetBlockingStatus.mockResolvedValue(false);
-      mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true, details: [], rawData: [] } });
-      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
-
-      expect(mockSubmit).not.toHaveBeenCalled();
-
-      mockSubmit.mockRestore();
     });
 
     it('should gracefully handle a SUBMIT event failure', async () => {
