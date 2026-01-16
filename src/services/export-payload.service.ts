@@ -31,6 +31,7 @@ import { LandingsRefreshData } from './interfaces';
 import { CcExportedDetailModel } from '../persistence/schema/frontEndModels/exporterDetails';
 import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
 import { updateConsolidateLandings } from "./landings-consolidate.service";
+import { ExportLocation } from '../persistence/schema/frontEndModels/export-location';
 import * as pdfService from 'mmo-ecc-pdf-svc';
 
 const crypto = require('crypto');
@@ -302,7 +303,7 @@ export default class ExportPayloadService {
           documentNumber
         );
 
-        await CatchCertService.completeDraft(userPrincipal, documentNumber, storageInfo.uri, email, contactId);
+        await CatchCertService.completeDraft(userPrincipal, documentNumber, storageInfo.uri, email, contactId)
         await clearSessionDataForCurrentJourney(userPrincipal, documentNumber, contactId)
           .catch(e => { logger.error(`[CLEAR-SESSION-DATA][ERROR][${e}]`) });
         const data = {
@@ -329,7 +330,7 @@ export default class ExportPayloadService {
         updateConsolidateLandings(documentNumber)
           .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
 
-            await ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId);
+        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId);
         result.documentNumber = documentNumber;
         result.uri = storageInfo.uri;
 
@@ -387,14 +388,12 @@ export default class ExportPayloadService {
 
   private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string): Promise<void> {
     try {
-      const exportedTo = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId);
-      const toCheck = exportedTo?.exportedTo ?? exportedTo;
-      const shouldSubmit = await EuCountriesService.isEuCountry(toCheck);
-      if (shouldSubmit) {
+      const exportLocation: ExportLocation = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId);
+      const exportedTo = exportLocation?.exportedTo ?? exportLocation;
+      const isEuCountry = await EuCountriesService.isEuCountry(exportedTo);
+      if (isEuCountry) {
         ExportPayloadService.catchSubmissionForCC(userPrincipal, documentNumber, contactId)
           .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
-      } else {
-        logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][SKIPPED][Not an EU destination]`);
       }
     } catch (e) {
       logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][CHECK-EU-ERROR][${e}]`);
@@ -423,11 +422,11 @@ export default class ExportPayloadService {
   private static async refreshLandingsIfNeeded(documentNumber: string, exportPayload: ProductsLanded): Promise<boolean> {
     const numberOfLandings = getNumberOfUniqueLandings(exportPayload);
     const offlineValidation = ApplicationConfig.isOfflineValidation(numberOfLandings);
-      if (offlineValidation) {
+    if (offlineValidation) {
       logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][REFRESHING-LANDINGS-SERIAL]`);
       await this.performSerialRefresh(documentNumber, exportPayload.items);
     } else {
-        logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][REFRESHING-LANDINGS-PARALLEL]`);
+      logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][REFRESHING-LANDINGS-PARALLEL]`);
       await this.performParallelRefresh(documentNumber, exportPayload.items);
     }
 
