@@ -442,6 +442,65 @@ export default class ProgressService {
   ): ProgressStatus => [facilityName, facilityAddressOne, facilityTownCity, facilityPostcode, facilityArrivalDate, facilityStorage].every(value => ProgressService.isEmptyAndTrimSpaces(value))
       ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
 
+  public static readonly isFirstDateAfterSecondDate = (
+    firstDateStr: string | undefined,
+    secondDateStr: string | undefined
+  ): boolean => {
+    if (!firstDateStr || !secondDateStr) {
+      return false;
+    }
+
+    try {
+      // Parse dates with DD/MM/YYYY format
+      const firstDate = moment(firstDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
+      const secondDate = moment(secondDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
+      
+      // Return true if first date is after or same as second date
+      return firstDate.isValid() && secondDate.isValid() && firstDate.isSameOrAfter(secondDate);
+    } catch (error) {
+      return false;
+    }
+  };
+
+  public static readonly isFacilityArrivalAfterTransportDeparture = (
+    arrivalTransportation: CatchCertificateTransport | BackEndTransport | undefined,
+    facilityArrivalDate: string | undefined
+  ): boolean => {
+    if (!arrivalTransportation || !facilityArrivalDate) {
+      return false;
+    }
+
+    // Get departure date from arrival transportation
+    const transportDepartureDate = (arrivalTransportation as BackEndTransport)?.departureDate;
+    
+    if (!transportDepartureDate) {
+      return false;
+    }
+
+    // Check if facility arrival date is after transport departure date
+    return ProgressService.isFirstDateAfterSecondDate(facilityArrivalDate, transportDepartureDate);
+  };
+
+  public static readonly isDepartureTransportAfterArrivalTransport = (
+    departureTransportation: BackEndTransport | undefined,
+    arrivalTransportation: CatchCertificateTransport | BackEndTransport | undefined
+  ): boolean => {
+    if (!departureTransportation || !arrivalTransportation) {
+      return false;
+    }
+
+    // Get departure dates from both transportations
+    const departureDateStr = (departureTransportation as BackEndTransport)?.exportDate;
+    const arrivalDepartureDateStr = (arrivalTransportation as BackEndTransport)?.departureDate;
+    
+    if (!departureDateStr || !arrivalDepartureDateStr) {
+      return false;
+    }
+
+    // Check if departure transport date is after arrival transport departure date
+    return ProgressService.isFirstDateAfterSecondDate(departureDateStr, arrivalDepartureDateStr);
+  };
+
   public static readonly getUserReference = (userReference: string): ProgressStatus => {
     return ProgressService.isEmptyAndTrimSpaces(userReference)
       ? ProgressStatus.COMPLETED
@@ -541,13 +600,22 @@ export default class ProgressService {
 
     const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED && isEmpty(catchErrors);
 
+    // Check if facility arrival date is after the departure date from arrival transportation
+    const facilityStatus = ProgressService.getStorageFacilityStatus(data?.exportData?.facilityName, data?.exportData?.facilityAddressOne, data?.exportData?.facilityTownCity, data?.exportData?.facilityPostcode, data?.exportData?.facilityArrivalDate, data?.exportData?.facilityStorage);
+    const isFacilityArrivalDateAfterDeparture = ProgressService.isFacilityArrivalAfterTransportDeparture(data?.exportData?.arrivalTransportation, data?.exportData?.facilityArrivalDate);
+    const storageFacilitiesStatus = data?.exportData?.arrivalTransportation && isFacilityArrivalDateAfterDeparture ?facilityStatus: ProgressStatus.INCOMPLETE ;
+
+    // Check if departure transportation date is after arrival transportation departure date
+    const isDepartureAfterArrival = data?.exportData?.arrivalTransportation ? ProgressService.isDepartureTransportAfterArrivalTransport(data?.exportData?.transportation, data?.exportData?.arrivalTransportation) : true;
+    const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete && isDepartureAfterArrival ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       catches: catchesStatus,
       arrivalTransportationDetails: data?.exportData?.arrivalTransportation ? ProgressService.getTransportDetails(toFrontEndTransport(data.exportData.arrivalTransportation), "storageNotes", true) : ProgressStatus.INCOMPLETE,
-      storageFacilities: ProgressService.getStorageFacilityStatus(data?.exportData?.facilityName, data?.exportData?.facilityAddressOne, data?.exportData?.facilityTownCity, data?.exportData?.facilityPostcode, data?.exportData?.facilityArrivalDate, data?.exportData?.facilityStorage),
-      transportDetails: departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
+      storageFacilities: storageFacilitiesStatus,
+      transportDetails: transportDetailsStatus,
     };
 
     const requiredSectionsLength = Object.keys(sdProgress).filter((key) => key !== "reference").length;
