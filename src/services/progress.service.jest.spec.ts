@@ -3204,6 +3204,118 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
+  it('will return INCOMPLETE processedProductDetails if products have valid descriptions but no associated catches (FI0-10647)', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        products: [
+          {
+            id: 'product-1',
+            commodityCode: '03026929',
+            description: 'Herring fillets',
+          },
+          {
+            id: 'product-2',
+            commodityCode: '16041210',
+            description: 'Atlantic cod fishcakes',
+          }
+        ],
+        catches: [],
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`
+    );
+    expect(mockProcessingStatementDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
+  it('will return INCOMPLETE processedProductDetails if some products do not have catch details (FI0-10647)', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        products: [
+          {
+            id: 'product-1',
+            commodityCode: '03026929',
+            description: 'Herring fillets - with catches',
+          },
+          {
+            id: 'product-2',
+            commodityCode: '16041210',
+            description: 'Atlantic cod - no catches',
+          }
+        ],
+        catches: [
+          {
+            productId: 'product-1',
+            species: 'Gymnotus pantherinus (AGH)',
+            catchCertificateNumber: 'GBR-2022-CC-VALID123',
+            id: 'CC-10-1670865091',
+            scientificName: 'Gymnotus pantherinus',
+            totalWeightLanded: '7',
+            exportWeightBeforeProcessing: '5',
+            exportWeightAfterProcessing: '6',
+            catchCertificateType: 'uk',
+          }
+        ],
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`
+    );
+    expect(mockProcessingStatementDraft).toHaveBeenCalledWith(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+  });
+
   it('will return INCOMPLETED consignmentDescription if there is a list of products with a product that has a description over 50 characters', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
@@ -4291,8 +4403,16 @@ describe('getProcessingStatementProgress', () => {
       createdAt: new Date('2020-01-01').toISOString(),
       status: 'DRAFT',
       exportData: {
+        products: [
+          {
+            id: 'product-1',
+            description: 'Processed Fish Product',
+            commodityCode: '03055310',
+          },
+        ],
         catches: [
           {
+            productId: 'product-1',
             species: 'Atlantic herring (HER)',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
@@ -5121,11 +5241,11 @@ describe('getStorageDocumentProgress', () => {
         exporter: ProgressStatus.COMPLETED,
         reference: ProgressStatus.COMPLETED,
         catches: ProgressStatus.COMPLETED,
-        storageFacilities: ProgressStatus.COMPLETED,
+        storageFacilities: ProgressStatus.INCOMPLETE,
         transportDetails: ProgressStatus.COMPLETED,
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 4,
+      completedSections: 3,
       requiredSections: 5
     };
 
@@ -5787,5 +5907,504 @@ describe('getStorageDocumentProgress', () => {
     const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
 
     expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  describe('Storage Facilities Date Validation Tests', () => {
+    it('should return COMPLETED storageFacilities when facility arrival date is after arrival transportation departure date', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '15/01/2026',
+          facilityStorage: 'Frozen storage',
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+    });
+
+    it('should return INCOMPLETE storageFacilities when facility arrival date is not after arrival transportation departure date', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '13/01/2026',
+          facilityStorage: 'Frozen storage',
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).storageFacilities).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return INCOMPLETE storageFacilities when facility arrival date is missing', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '',
+          facilityStorage: 'Frozen storage',
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).storageFacilities).toBe(ProgressStatus.INCOMPLETE);
+    });
+  });
+
+  describe('Transport Details Date Validation Tests', () => {
+    it('should return COMPLETED transportDetails when departure transport date is after arrival transport departure date', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '14/01/2026',
+          facilityStorage: 'Frozen storage',
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "15/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+    });
+
+    it('should return INCOMPLETE transportDetails when departure transport date is not after arrival transport departure date', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '14/01/2026',
+          facilityStorage: 'Frozen storage',
+          arrivalTransportation: {
+            departureDate: '20/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "15/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return INCOMPLETE transportDetails when departure transport date is missing', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '14/01/2026',
+          facilityStorage: 'Frozen storage',
+          arrivalTransportation: {
+            departureDate: '20/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return INCOMPLETE transportDetails when arrival transport departure date is missing', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '14/01/2026',
+          facilityStorage: 'Frozen storage',
+          arrivalTransportation: {
+            departureDate: '',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "21/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return false when firstDateStr is undefined in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate(undefined, '14/01/2026');
+      expect(result).toBe(false);
+    });
+
+    it('should return false when secondDateStr is undefined in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate('15/01/2026', undefined);
+      expect(result).toBe(false);
+    });
+
+    it('should return false when both dates are undefined in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate(undefined, undefined);
+      expect(result).toBe(false);
+    });
   });
 });
