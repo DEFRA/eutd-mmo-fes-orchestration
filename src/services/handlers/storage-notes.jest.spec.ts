@@ -2721,7 +2721,7 @@ describe("Facility Arrival Date: transport and exportDate edge cases", () => {
 });
 
 describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
-  const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
+  const handler = StorageNotes["/create-non-manipulation-document/:documentNumber/add-storage-facility-details"];
 
   it("should NOT set error for today's date", () => {
     const today = new Date();
