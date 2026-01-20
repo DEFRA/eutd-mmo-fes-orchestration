@@ -33,7 +33,7 @@ describe("When making a request that requires checking if a document is legitima
     headers: {
       documentnumber: 'gbr-2020-01-3432-2343',
       referer:
-        'https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details',
+        'https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details',
     },
     app: { claims: { sub: { userPrincipal: 'tes' }, contactId: 'test' } },
     params: {},
@@ -44,7 +44,7 @@ describe("When making a request that requires checking if a document is legitima
 
     req.headers = {
       documentnumber: 'GBR-2020-01-3432-2343',
-      referer: "https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details"
+      referer: "https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details"
     };
 
     const result = await withDocumentLegitimatelyOwned(req, h, () => true);
@@ -57,7 +57,7 @@ describe("When making a request that requires checking if a document is legitima
 
     req.headers = {
       documentnumber: 'gbr-2020-01-3432-2343',
-      referer: "https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details"
+      referer: "https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details"
     };
 
     await withDocumentLegitimatelyOwned(req, h,(userPrincipal, documentNumber) => {
@@ -80,7 +80,7 @@ describe("When making a request that requires checking if a document is legitima
       headers : {
         documentnumber: 'gbr-2020-01-3432-2343',
         status: 'INVALID STATUS',
-        referer: "https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details"
+        referer: "https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details"
       },
       app : {claims: {sub: { userPrincipal: "tes"}, contactId: 'tes'}},
       params : {}
@@ -115,7 +115,7 @@ describe("When making a request that requires checking if a document is legitima
 
   it("will continue as normal if journey is for SD", async () => {
     validator.mockReturnValue(document);
-    req.headers = { documentnumber: 'test', referer: "https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details" };
+    req.headers = { documentnumber: 'test', referer: "https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details" };
     req.params = { journey: 'storageNote'};
 
     const result = await withDocumentLegitimatelyOwned(req, h, () => true);
@@ -125,7 +125,7 @@ describe("When making a request that requires checking if a document is legitima
 
   it("will continue as normal if journey is for PS", async () => {
     validator.mockReturnValue(document);
-    req.headers = { documentnumber: 'test', referer: "https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details" };
+    req.headers = { documentnumber: 'test', referer: "https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details" };
     req.params = { journey: 'processingStatement'};
 
     const result = await withDocumentLegitimatelyOwned(req, h, () => true);
@@ -165,7 +165,7 @@ describe("When making a request that requires checking if a document is legitima
 
   it("will return FORBIDDEN if we fail validation", async () => {
     validator.mockReturnValue(undefined);
-    req.headers = { documentnumber: 'GBR-test-document' , referer: "https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details"};
+    req.headers = { documentnumber: 'GBR-test-document' , referer: "https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details"};
     req.params = { journey: 'catchCertificate'};
 
     const result = await withDocumentLegitimatelyOwned(req, h,() => true);
@@ -175,7 +175,7 @@ describe("When making a request that requires checking if a document is legitima
 
   it("will return NOT FOUND if we fail validation", async () => {
     validator.mockReturnValue(null);
-    req.headers = { documentnumber: 'GBR-test-document' , referer: "https://ukecc-tst.azure.defra.cloud/create-storage-document/add-exporter-details"};
+    req.headers = { documentnumber: 'GBR-test-document' , referer: "https://ukecc-tst.azure.defra.cloud/create-non-manipulation-document/add-exporter-details"};
     req.params = { journey: 'catchCertificate'};
 
     const result = await withDocumentLegitimatelyOwned(req, h,() => true);

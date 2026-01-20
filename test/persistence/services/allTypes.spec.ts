@@ -394,7 +394,7 @@ test('Should persist storage doc data', async (t) => {
      addAnotherProduct: 'notset',
      transport:
       { vehicle: 'truck',
-        currentUri: '/create-storage-document/do-you-have-a-road-transport-document',
+        currentUri: '/create-non-manipulation-document/do-you-have-a-road-transport-document',
         journey: 'storageNotes',
         user_id: 'af880409-2014-484f-b4af-b7e5979a61dc',
         cmr: 'true',
@@ -443,7 +443,7 @@ test('Should not display void Storage Docs', async (t) => {
      addAnotherProduct: 'notset',
      transport:
       { vehicle: 'truck',
-        currentUri: '/create-storage-document/do-you-have-a-road-transport-document',
+        currentUri: '/create-non-manipulation-document/do-you-have-a-road-transport-document',
         journey: 'storageNotes',
         user_id: 'af880409-2014-484f-b4af-b7e5979a61dc',
         cmr: 'true',

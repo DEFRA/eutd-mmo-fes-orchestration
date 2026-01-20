@@ -27,7 +27,7 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
     addAnotherProduct: "notset",
   };
 
-  const currentUrl = "/create-storage-document/:documentNumber/add-storage-facility-details";
+  const currentUrl = "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
   const handler = SUT.default[currentUrl];
 
   describe('Rejecting Unrealistic Future Dates', () => {
