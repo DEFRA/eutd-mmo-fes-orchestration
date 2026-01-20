@@ -3,7 +3,7 @@ import * as FishValidator from "../../validators/fish.validator";
 import * as CommodityCodeValidator from "../../validators/pssdCommodityCode.validator";
 import * as CountriesValidator from "../../validators/countries.validator";
 
-describe("/create-storage-document/:documentNumber/add-product-to-this-consignment", () => {
+describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment", () => {
   let mockValidatorSpeciesName: jest.SpyInstance;
   let mockValidatorCommodityCode: jest.SpyInstance;
   let mockValidateSpeciesWithSuggestions: jest.SpyInstance;
@@ -31,7 +31,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with all mandatory fields validates as OK", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -82,7 +82,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     });
 
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -127,7 +127,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Error('Invalid country') });
 
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data: any = {
@@ -173,7 +173,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Error('Invalid country') });
 
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data: any = {
@@ -219,7 +219,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     mockValidateCountriesName.mockResolvedValue({ isError: true, error: new Error('Invalid country') });
 
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data: any = {
@@ -263,7 +263,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with no certificate type", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -306,7 +306,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   it("with an invalid certificate type", async () => {
 
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -349,7 +349,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with bad date for date of unloading", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -389,7 +389,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with future date for date of unloading", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -429,7 +429,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with no weight on CC", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -471,7 +471,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with no weight for net weight on arrival", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -512,7 +512,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with no weight for net weight of fishery products on arrival", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -553,7 +553,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with invalid value for net weight of product on arrival (more than 2 decimals)", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -595,7 +595,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with invalid value for net weight of fishery products on arrival (more than 2 decimals)", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -637,7 +637,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with missing product validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -683,7 +683,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
       isError: true
     });
 
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -728,7 +728,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with missing commodity code validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -771,7 +771,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with missing catch certificate number validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -813,7 +813,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("should return an error when the number of characters in the document number exceeds the threshold", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -857,7 +857,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("should return an error when the document number has invalid characters", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -901,7 +901,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with missing date product entered the UK validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -942,7 +942,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with missing place product entered the UK validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -983,7 +983,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with incorrect place product entered the UK validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1025,7 +1025,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with missing transport details validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1066,7 +1066,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with whitespace product, commodityCode, certificateNumber, placeOfUnloading and transportUnloadedFrom validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1113,7 +1113,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("invalid (negative) numbers in weightOnCC validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1156,7 +1156,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it("invalid (floating point) numbers in weightOnCC validates as error", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1199,7 +1199,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it('should return catches-species-incorrect error if there in nonjs and an incorrect search', async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1245,7 +1245,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it('should return catches-species-suggest error if there in nonjs and an incorrect search with possible results', async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1299,7 +1299,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with invalid supporting documents", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1344,7 +1344,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with invalid supporting documents with long length", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1389,7 +1389,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with invalid product description", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1433,7 +1433,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with invalid product description with long length", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1477,7 +1477,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with missing product description validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1520,7 +1520,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it("checks netWeightProductArrival, netWeightFisheryProductArrival and validates as zero", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1563,7 +1563,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it("checks netWeightProductArrival, netWeightProductArrival and validates as -1", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1606,7 +1606,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it("checks netWeightProductArrival, netWeightProductArrival and validates as Positive Max 2 Decimal", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1649,7 +1649,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it("checks netWeightProductArrival, netWeightProductArrival and validates as exceed 100000000000", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1692,7 +1692,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 
   it("with UK certificate type and invalid UK document format", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1740,7 +1740,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     const DocumentValidator = require("../../validators/documentValidator");
     jest.spyOn(DocumentValidator, 'validateCompletedDocument').mockResolvedValue(false);
 
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1789,7 +1789,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
     jest.spyOn(DocumentValidator, 'validateCompletedDocument').mockResolvedValue(true);
     jest.spyOn(DocumentValidator, 'validateSpecies').mockResolvedValue(false);
 
-    const currentUrl = "/create-storage-document/:documentNumber/add-product-to-this-consignment";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1834,7 +1834,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
   });
 });
 
-describe("/create-storage-document/:documentNumber/add-product-to-this-consignment/:index", () => {
+describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment/:index", () => {
   let mockValidatorSpeciesName: jest.SpyInstance;
   let mockValidatorCommodityCode: jest.SpyInstance;
   let mockValidateSpeciesWithSuggestions: jest.SpyInstance;
@@ -1865,7 +1865,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it("with all mandatory fields validates as OK", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment/:index";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1912,7 +1912,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
   it('should return catches-species-incorrect error if there in nonjs and an incorrect search', async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment/:index";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -1962,7 +1962,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
     it('should return catches-species-suggest error if there in nonjs and an incorrect search with possible results', async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index";
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment/:index";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -2020,7 +2020,7 @@ describe("/create-storage-document/:documentNumber/add-product-to-this-consignme
 
 });
 
-describe("/create-storage-document/:documentNumber/you-have-added-a-product", () => {
+describe("/create-non-manipulation-document/:documentNumber/you-have-added-a-product", () => {
   const data = {
     catches: [
       {
@@ -2054,7 +2054,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-product", ()
 
   it("with missing addAnotherProduct validates as error", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/you-have-added-a-product";
+      "/create-non-manipulation-document/:documentNumber/you-have-added-a-product";
     const handler = StorageNotes[currentUrl];
 
     const { errors } = await handler({
@@ -2072,7 +2072,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-product", ()
 
   it("with all mandatory fields validates as OK", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/you-have-added-a-product";
+      "/create-non-manipulation-document/:documentNumber/you-have-added-a-product";
     const handler = StorageNotes[currentUrl];
     data.addAnotherProduct = "yes";
 
@@ -2089,7 +2089,7 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-product", ()
 
   it("should set next to 'add-storage-facility-details' when data.addAnotherProduct set to 'no'", async () => {
     const currentUrl =
-      "/create-storage-document/:documentNumber/you-have-added-a-product";
+      "/create-non-manipulation-document/:documentNumber/you-have-added-a-product";
     const handler = StorageNotes[currentUrl];
     data.addAnotherProduct = "no";
 
@@ -2101,14 +2101,14 @@ describe("/create-storage-document/:documentNumber/you-have-added-a-product", ()
     });
 
     expect(errors).toEqual({});
-    expect(next).toEqual("/create-storage-document/:documentNumber/add-storage-facility-details");
+    expect(next).toEqual("/create-non-manipulation-document/:documentNumber/add-storage-facility-details");
     data.addAnotherProduct = "notset";
   });
 });
 
-describe("/create-storage-document/:documentNumber/departure-product-summary", () => {
+describe("/create-non-manipulation-document/:documentNumber/departure-product-summary", () => {
   it("Net weight on departure equal to or less than weight on document", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -2139,7 +2139,7 @@ describe("/create-storage-document/:documentNumber/departure-product-summary", (
   });
 
   it("checks netWeightProductDeparture, netWeightProductDeparture and validates as zero", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -2172,7 +2172,7 @@ describe("/create-storage-document/:documentNumber/departure-product-summary", (
   });
 
   it("checks netWeightProductDeparture, netWeightProductDeparture and validates as -1", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -2208,7 +2208,7 @@ describe("/create-storage-document/:documentNumber/departure-product-summary", (
   });
 
   it("checks netWeightProductDeparture, netWeightProductDeparture and validates as Positive Max 2 Decimal", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -2244,7 +2244,7 @@ describe("/create-storage-document/:documentNumber/departure-product-summary", (
   });
 
   it("checks netWeightProductDeparture, netWeightProductDeparture and validates as exceed 100000000000", async () => {
-    const currentUrl = "/create-storage-document/:documentNumber/departure-product-summary";
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -2279,7 +2279,7 @@ describe("/create-storage-document/:documentNumber/departure-product-summary", (
   });
 });
 
-describe("/create-storage-document/:documentNumber/add-storage-facility-details", () => {
+describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-details", () => {
   const data = {
     catches: [
       {
@@ -2301,7 +2301,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
 
   it("with missing storageFacilities validates as error", async () => {
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-details";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2340,7 +2340,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
     };
 
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-details";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2381,7 +2381,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
     };
 
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-details";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2422,7 +2422,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
     };
 
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-details";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2463,7 +2463,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
       addAnotherProduct: "notset",
     };
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-details";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
     const handler = StorageNotes[_currentUrl];
     const { errors } = handler({
       data: data,
@@ -2501,7 +2501,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
     };
 
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-details";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2518,7 +2518,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-details"
   });
 });
 
-describe("/create-storage-document/:documentNumber/add-storage-facility-approval", () => {
+describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-approval", () => {
   it("with storage approval number validates as error", async () => {
     const data = {
       addAnotherProduct: "notset",
@@ -2536,7 +2536,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
       facilityStorage: "Chilled",
     };
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-approval";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2571,7 +2571,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
       addAnotherProduct: "notset",
     };
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-approval";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2606,7 +2606,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
       addAnotherProduct: "notset",
     };
     const _currentUrl =
-      "/create-storage-document/:documentNumber/add-storage-facility-approval";
+      "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval";
     const handler = StorageNotes[_currentUrl];
 
     const { errors } = handler({
@@ -2624,7 +2624,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
     expect(errors).toEqual(expectedErrors);
   });
   describe("Facility Arrival Date vs Transport Export Date", () => {
-  const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
+  const handler = StorageNotes["/create-non-manipulation-document/:documentNumber/add-storage-facility-details"];
 
   it("should NOT set error if arrival date is before export date", () => {
     const data = {
@@ -2679,7 +2679,7 @@ describe("/create-storage-document/:documentNumber/add-storage-facility-approval
 });
 
 describe("Facility Arrival Date: transport and exportDate edge cases", () => {
-  const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
+  const handler = StorageNotes["/create-non-manipulation-document/:documentNumber/add-storage-facility-details"];
 
   it("should NOT set error if transport is missing", () => {
     const data = {
@@ -2721,7 +2721,7 @@ describe("Facility Arrival Date: transport and exportDate edge cases", () => {
 });
 
 describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
-  const handler = StorageNotes["/create-storage-document/:documentNumber/add-storage-facility-details"];
+  const handler = StorageNotes["/create-non-manipulation-document/:documentNumber/add-storage-facility-details"];
 
   it("should NOT set error for today's date", () => {
     const today = new Date();
