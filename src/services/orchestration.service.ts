@@ -102,7 +102,7 @@ export default class OrchestrationService {
       );
 
       data = currentSessionData
-        ? toFrontEndStorageDocumentExportData(currentSessionData.exportData)
+        ? toFrontEndStorageDocumentExportData(currentSessionData.exportData, currentSessionData.userReference)
         : currentSessionData;
     }
 
