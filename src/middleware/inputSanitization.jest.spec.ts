@@ -118,6 +118,41 @@ describe('Input Sanitization Middleware', () => {
       expect(detectInjectionInObject(null)).toEqual([]);
       expect(detectInjectionInObject(undefined)).toEqual([]);
     });
+
+    it('should detect injection in object keys (MongoDB operators)', () => {
+      const obj = {
+        '$where': 'malicious code',
+        normalKey: 'clean value'
+      };
+
+      const patterns = detectInjectionInObject(obj);
+      expect(patterns).toContain('$where');
+      expect(patterns.length).toBe(1);
+    });
+
+    it('should detect injection in both keys and values', () => {
+      const obj = {
+        '$ne': "' OR '1'='1",
+        username: 'admin'
+      };
+
+      const patterns = detectInjectionInObject(obj);
+      expect(patterns.length).toBe(2);
+      expect(patterns).toContain('$ne');
+    });
+
+    it('should detect NoSQL operators in nested object keys', () => {
+      const obj = {
+        user: {
+          '$gt': '',
+          name: 'John'
+        }
+      };
+
+      const patterns = detectInjectionInObject(obj);
+      expect(patterns).toContain('user.$gt');
+      expect(patterns.length).toBe(1);
+    });
   });
 
   describe('inputSanitizationPlugin', () => {
@@ -141,6 +176,12 @@ describe('Input Sanitization Middleware', () => {
       server.route({
         method: 'POST',
         path: '/test',
+        handler: () => ({ success: true })
+      });
+
+      server.route({
+        method: 'GET',
+        path: '/test/{id}',
         handler: () => ({ success: true })
       });
 
@@ -185,6 +226,15 @@ describe('Input Sanitization Middleware', () => {
         payload: {
           data: "SELECT * FROM products WHERE id=2"
         }
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('should block requests with SQL injection in path parameters', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: "/test/' OR '1'='1"
       });
 
       expect(response.statusCode).toBe(403);
