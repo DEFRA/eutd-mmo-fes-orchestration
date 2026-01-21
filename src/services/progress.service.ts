@@ -450,16 +450,12 @@ export default class ProgressService {
       return false;
     }
 
-    try {
-      // Parse dates with DD/MM/YYYY format
-      const firstDate = moment(firstDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
-      const secondDate = moment(secondDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
-      
-      // Return true if first date is after or same as second date
-      return firstDate.isValid() && secondDate.isValid() && firstDate.isSameOrAfter(secondDate);
-    } catch (error) {
-      return false;
-    }
+    // Parse dates with DD/MM/YYYY format
+    const firstDate = moment(firstDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
+    const secondDate = moment(secondDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
+    
+    // Return true if first date is after or same as second date
+    return firstDate.isValid() && secondDate.isValid() && firstDate.isSameOrAfter(secondDate);
   };
 
   public static readonly isFacilityArrivalAfterTransportDeparture = (
@@ -490,7 +486,7 @@ export default class ProgressService {
     }
 
     // Get departure dates from both transportations
-    const departureDateStr = (departureTransportation as BackEndTransport)?.exportDate;
+    const departureDateStr = departureTransportation?.exportDate;
     const arrivalDepartureDateStr = (arrivalTransportation as BackEndTransport)?.departureDate;
     
     if (!departureDateStr || !arrivalDepartureDateStr) {
