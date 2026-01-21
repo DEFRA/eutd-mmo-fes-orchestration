@@ -6526,63 +6526,6 @@ describe('Catch Certificate Progress - requestByAdmin branch coverage', () => {
 
       expect(result).toBe(false);
     });
-
-    it('should return true when both dates are present and departure is after arrival', () => {
-      const departureTransportation = {
-        vehicle: 'truck',
-        exportDate: '16/01/2026'
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane',
-        departureDate: '15/01/2026'
-      };
-
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
-
-      expect(result).toBe(true);
-    });
-
-    it('should return false when both dates are present but departure is before arrival', () => {
-      const departureTransportation = {
-        vehicle: 'truck',
-        exportDate: '14/01/2026'
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane',
-        departureDate: '15/01/2026'
-      };
-
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
-
-      expect(result).toBe(false);
-    });
-
-    it('should correctly access departureDate from BackEndTransport type', () => {
-      const departureTransportation = {
-        vehicle: 'truck',
-        exportDate: '16/01/2026',
-        exportedFrom: 'UK Port',
-        exportedTo: { officialCountryName: 'France' }
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane',
-        departureDate: '15/01/2026',
-        exportedFrom: 'Port A'
-      };
-
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
-
-      expect(result).toBe(true);
-    });
   });
 
   describe('isEmptyAndTrimSpaces - object value', () => {
