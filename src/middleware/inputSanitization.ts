@@ -12,7 +12,7 @@ const INJECTION_PATTERNS = [
   /(\$nin)/i,
   /(\$exists)/i,
   /(\$regex)/i,
-  /('.*OR.*'.*=.*')/i,
+  /('[^']{0,100}OR[^']{0,100}'[^']{0,100}=[^']{0,100}')/i,
   /\b(SELECT\s+(?:\w|,|\*)+\s+FROM)\b/i,
   /\b(INSERT\s+INTO)\b/i,
   /\b(UPDATE\s+\w+\s+SET)\b/i,
