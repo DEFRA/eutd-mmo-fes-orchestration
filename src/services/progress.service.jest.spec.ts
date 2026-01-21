@@ -6406,5 +6406,35 @@ describe('getStorageDocumentProgress', () => {
       const result = ProgressService.isFirstDateAfterSecondDate(undefined, undefined);
       expect(result).toBe(false);
     });
+
+    it('should return false when firstDateStr is invalid in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate('invalid-date', '14/01/2026');
+      expect(result).toBe(false);
+    });
+
+    it('should return false when secondDateStr is invalid in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate('15/01/2026', 'invalid-date');
+      expect(result).toBe(false);
+    });
+
+    it('should return false when both dates are invalid in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate('invalid-date1', 'invalid-date2');
+      expect(result).toBe(false);
+    });
+
+    it('should return true when first date is after second date in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate('15/01/2026', '14/01/2026');
+      expect(result).toBe(true);
+    });
+
+    it('should return true when first date is same as second date in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate('14/01/2026', '14/01/2026');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when first date is before second date in isFirstDateAfterSecondDate', () => {
+      const result = ProgressService.isFirstDateAfterSecondDate('13/01/2026', '14/01/2026');
+      expect(result).toBe(false);
+    });
   });
 });
