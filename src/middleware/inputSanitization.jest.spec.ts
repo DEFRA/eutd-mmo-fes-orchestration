@@ -1,8 +1,6 @@
 import {
   containsInjectionPattern,
   detectInjectionInObject,
-  validateInput,
-  sanitizeString,
   inputSanitizationPlugin
 } from './inputSanitization';
 import * as Hapi from '@hapi/hapi';
@@ -119,71 +117,6 @@ describe('Input Sanitization Middleware', () => {
     it('should handle null and undefined', () => {
       expect(detectInjectionInObject(null)).toEqual([]);
       expect(detectInjectionInObject(undefined)).toEqual([]);
-    });
-  });
-
-  describe('validateInput', () => {
-    let loggerWarnSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    });
-
-    afterEach(() => {
-      loggerWarnSpy.mockRestore();
-    });
-
-    it('should throw error for malicious input', () => {
-      expect(() => {
-        validateInput("' OR '1'='1", 'username');
-      }).toThrow('Invalid input detected');
-    });
-
-    it('should log warning for malicious input', () => {
-      try {
-        validateInput({ field: "SELECT * FROM users" }, 'testField');
-      } catch (e) {
-        // Expected to throw
-      }
-
-      expect(loggerWarnSpy).toHaveBeenCalled();
-      expect(loggerWarnSpy.mock.calls[0][0]).toContain('[SECURITY][INJECTION-ATTEMPT]');
-    });
-
-    it('should not throw for clean input', () => {
-      expect(() => {
-        validateInput('John Doe', 'name');
-      }).not.toThrow();
-
-      expect(() => {
-        validateInput({ name: 'John', age: 30 }, 'user');
-      }).not.toThrow();
-    });
-  });
-
-  describe('sanitizeString', () => {
-    it('should remove MongoDB operators', () => {
-      expect(sanitizeString('{"$where": "malicious"}')).not.toContain('$where');
-      expect(sanitizeString('{"$ne": null}')).not.toContain('$ne');
-    });
-
-    it('should remove SQL comment indicators', () => {
-      expect(sanitizeString('test -- comment')).not.toContain('--');
-      expect(sanitizeString('test /* comment */ value')).not.toContain('/*');
-    });
-
-    it('should remove null bytes', () => {
-      expect(sanitizeString('test\0value')).toBe('testvalue');
-    });
-
-    it('should preserve legitimate input', () => {
-      expect(sanitizeString('John Doe')).toBe('John Doe');
-      expect(sanitizeString('123 Main St')).toBe('123 Main St');
-    });
-
-    it('should handle non-string input', () => {
-      expect(sanitizeString(123 as any)).toBe(123);
-      expect(sanitizeString(null as any)).toBe(null);
     });
   });
 

@@ -122,4 +122,3 @@ export const inputSanitizationPlugin: Hapi.Plugin<any> = {
     });
   },
 };
-
