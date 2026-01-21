@@ -109,7 +109,7 @@ export default class ProgressRoutes {
                       });
 
                       if (hasDescriptionOnlyProduct) {
-                        return h.response({ products: 'error.products.incomplete' }).code(400);
+                        return h.response({ processedProductDetails: 'error.processedProductDetails.incomplete' }).code(400);
                       }
 
                       return completeProgressHandler(progress, completedSections, requiredSections, h);
