@@ -43,6 +43,7 @@ class ApplicationConfig {
   _maxAuthRetries: number;
   _consolidationServicUrl: string;
   _identityAppUrl: string;
+  _enableNmdPsEuCatch: boolean;
 
   loadProperties() {
     this._disableAuth = process.env.DISABLE_AUTH === 'true';
@@ -103,6 +104,7 @@ class ApplicationConfig {
     this._lastUpdatedCookiePolicy = process.env.LAST_UPDATED_COOKIE_POLICY;
 
     this._maxAuthRetries = parseInt(process.env.MAX_AUTH_RETRIES, 10) || 2;
+    this._enableNmdPsEuCatch = process.env.ENABLE_EU_CATCH_PS_NMD === 'true';
   }
 
   getReferenceServiceUrl(): string {
@@ -138,6 +140,10 @@ class ApplicationConfig {
 
   getAuthSecret() {
     return this._fesApiMasterPassword;
+  }
+
+  get enableNmdPsEuCatch(): boolean {
+    return this._enableNmdPsEuCatch;
   }
 }
 

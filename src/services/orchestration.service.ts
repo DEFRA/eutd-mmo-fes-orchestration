@@ -40,7 +40,7 @@ import {
   StorageDocument,
 } from "../persistence/schema/frontEndModels/storageDocument";
 import { toFrontEndStorageDocumentExportData } from "../persistence/schema/storageDoc";
-import { reportDocumentSubmitted } from "../services/reference-data.service";
+import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
 import { invalidateDraftCache } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
 
@@ -102,7 +102,7 @@ export default class OrchestrationService {
       );
 
       data = currentSessionData
-        ? toFrontEndStorageDocumentExportData(currentSessionData.exportData)
+        ? toFrontEndStorageDocumentExportData(currentSessionData.exportData, currentSessionData.userReference)
         : currentSessionData;
     }
 
@@ -471,6 +471,11 @@ export default class OrchestrationService {
 
     void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch((e) => logger.error(`[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
 
+    if (ApplicationConfig.enableNmdPsEuCatch) {
+      submitToCatchSystem(documentNumber, 'submit')
+        .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
+    }
+
     return pdf;
   }
 
@@ -739,6 +744,11 @@ export function validateMaximumFutureDate(date) {
   return parseDate(date).isBefore(maxSubmissionDate, 'day');
 }
 
+export function validateMaximumOneDayFutureDate(date) {
+  const maxSubmissionDate = moment(Date.now()).add(1, 'day');    // Todays date + 1 day (not more than 1 day in future)
+  return parseDate(date).isSameOrBefore(maxSubmissionDate, 'day');
+}
+
 export function validateNumber(num) {
   return !isNaN(+num) && num.indexOf("e") === -1;
 }
@@ -827,7 +837,7 @@ export function validatePersonResponsibleForConsignmentFormat(str: string) {
   return regex.test(str);
 }
 
-export const isTransportUnloadedFromFormatValid = (str: string) => {
+export const isPlantApprovalNumberFormatValid = (str: string) => {
   const regex = /^[ A-Za-z0-9-,/\\:]*$/;
   return regex.test(str);
 };

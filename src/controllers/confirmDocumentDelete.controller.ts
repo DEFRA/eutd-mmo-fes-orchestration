@@ -16,7 +16,7 @@ export default class ConfirmDocumentDeleteController {
 
       let redirectUri = payload.previousUri;
       if (payload.documentDelete === 'Yes') {
-        Promise.all([
+        await Promise.all([
           DataReferenceReader.reportDocumentDeleted(documentNumber)
             .catch(e => logger.error(`[REPORT-DOCUMENT-DELETE][${documentNumber}][ERROR][${e}]`)),
           DocumentDeleteService.deleteDocument(userPrincipal, documentNumber, journey, contactId)

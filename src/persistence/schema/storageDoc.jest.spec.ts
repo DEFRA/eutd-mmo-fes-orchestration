@@ -148,6 +148,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
+      userReference: undefined
     };
 
     const catches: Catch[] = [{
@@ -269,6 +270,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
+      userReference: undefined
     };
 
     const catches: Catch[] = [{
@@ -337,6 +339,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityStreetName: "",
       facilitySubBuildingName: "",
       facilityTownCity: "",
+      userReference: undefined
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(exportData)).toStrictEqual(expected);
@@ -346,7 +349,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
     const expected = {
       catches: [],
       validationErrors: [{}],
-      addAnotherProduct: "No"
+      addAnotherProduct: "No",
+      userReference: undefined
     };
 
     const exporterDetails: ExporterDetails = {
@@ -375,7 +379,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
     const expected = {
       catches: [],
       validationErrors: [{}],
-      addAnotherProduct: "No"
+      addAnotherProduct: "No",
+      userReference: undefined
     };
 
     expect(BackEndStorageDocument.toFrontEndStorageDocumentExportData(undefined)).toStrictEqual(expected);
@@ -422,7 +427,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityCountry: undefined,
       facilityCounty: undefined,
       facilityStorage: "Chilled",
-      facilitySubBuildingName: undefined
+      facilitySubBuildingName: undefined,
+      userReference: undefined
     });
   });
 

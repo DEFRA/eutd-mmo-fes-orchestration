@@ -47,6 +47,7 @@ export default class ManageCertsService {
       voidConsolidateLandings(documentNumber).catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
     }
 
+    // Void in EU CATCH system if previously submitted successfully
     if (document.catchSubmission?.status === EuCatchStatus.Success) {
       submitToCatchSystem(documentNumber, 'void').catch((e) => logger.error(`[CATCH-SYSTEM-VOID][${documentNumber}][ERROR][${e.message}]`));
     }

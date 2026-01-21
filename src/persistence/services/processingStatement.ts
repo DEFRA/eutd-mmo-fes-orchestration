@@ -114,7 +114,7 @@ export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYe
       "$gte": new Date(yearInt, monthInt - 1, 1),
       "$lt": new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference']);
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
   return data;
 };
 
@@ -267,7 +267,7 @@ export const upsertExportLocation = async (userPrincipal: string, payload: Expor
   await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.exportedTo': payload.exportedTo, 'exportData.pointOfDestination': payload.pointOfDestination } }, contactId);
 };
 
-export const cloneProcessingStatement = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal:boolean): Promise<string> => {
+export const cloneProcessingStatement = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal: boolean): Promise<string> => {
   const original: ProcessingStatement = await getDocument(documentNumber, userPrincipal, contactId);
 
   if (!original) {

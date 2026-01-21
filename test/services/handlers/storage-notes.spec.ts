@@ -3,11 +3,11 @@ import logger from '../../../src/logger';
 
 import StorageNotes from '../../../src/services/handlers/storage-notes';
 
-//------ TESTS FOR /create-storage-document/add-product-to-this-consignment -----
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with all mandatory fields validates as OK', async t => {
+//------ TESTS FOR /create-non-manipulation-document/add-product-to-this-consignment -----
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with all mandatory fields validates as OK', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -41,10 +41,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with missing product validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing product validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -81,10 +81,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with missing commodity code validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing commodity code validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -121,10 +121,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with missing catch certificate number validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing catch certificate number validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -161,10 +161,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with missing export weight validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing export weight validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -201,10 +201,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with missing date product entered the UK validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing date product entered the UK validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -241,10 +241,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with missing place product entered the UK validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing place product entered the UK validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -281,10 +281,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with missing transport details validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing transport details validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -321,10 +321,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment with whitespace product, commodityCode, certificateNumber, placeOfUnloading and transportUnloadedFrom validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with whitespace product, commodityCode, certificateNumber, placeOfUnloading and transportUnloadedFrom validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -366,10 +366,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment w
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment invalid (negative) numbers in productWeight validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment invalid (negative) numbers in productWeight validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -408,10 +408,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment i
   }
 });
 
-test('/create-storage-document/:documentNumber/add-product-to-this-consignment invalid (floating point) numbers in productWeight validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment invalid (floating point) numbers in productWeight validates as error', async t => {
   try {
     const currentUrl =
-      '/create-storage-document/:documentNumber/add-product-to-this-consignment';
+      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -450,10 +450,10 @@ test('/create-storage-document/:documentNumber/add-product-to-this-consignment i
   }
 });
 
-//------ TESTS FOR /create-storage-document/you-have-added-a-product -----
-test('/create-storage-document/you-have-added-a-product with selected another product choice details validates as OK', async t => {
+//------ TESTS FOR /create-non-manipulation-document/you-have-added-a-product -----
+test('/create-non-manipulation-document/you-have-added-a-product with selected another product choice details validates as OK', async t => {
   try {
-    const currentUrl = '/create-storage-document/you-have-added-a-product';
+    const currentUrl = '/create-non-manipulation-document/you-have-added-a-product';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -488,9 +488,9 @@ test('/create-storage-document/you-have-added-a-product with selected another pr
   }
 });
 
-test('/create-storage-document/you-have-added-a-product with unselected another product choice details validates as error', async t => {
+test('/create-non-manipulation-document/you-have-added-a-product with unselected another product choice details validates as error', async t => {
   try {
-    const currentUrl = '/create-storage-document/you-have-added-a-product';
+    const currentUrl = '/create-non-manipulation-document/you-have-added-a-product';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -526,10 +526,10 @@ test('/create-storage-document/you-have-added-a-product with unselected another 
   }
 });
 
-//------ TESTS FOR /create-storage-document/add-storage-facility-details -----
-test('/create-storage-document/add-storage-facility-details with all mandatory fields validates as OK', async t => {
+//------ TESTS FOR /create-non-manipulation-document/add-storage-facility-details -----
+test('/create-non-manipulation-document/add-storage-facility-details with all mandatory fields validates as OK', async t => {
   try {
-    const currentUrl = '/create-storage-document/add-storage-facility-details';
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -570,9 +570,9 @@ test('/create-storage-document/add-storage-facility-details with all mandatory f
   }
 });
 
-test('/create-storage-document/add-storage-facility-details with missing facility name fields validates as error', async t => {
+test('/create-non-manipulation-document/add-storage-facility-details with missing facility name fields validates as error', async t => {
   try {
-    const currentUrl = '/create-storage-document/add-storage-facility-details';
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -616,9 +616,9 @@ test('/create-storage-document/add-storage-facility-details with missing facilit
   }
 });
 
-test('/create-storage-document/add-storage-facility-details with missing address fields validates as error', async t => {
+test('/create-non-manipulation-document/add-storage-facility-details with missing address fields validates as error', async t => {
   try {
-    const currentUrl = '/create-storage-document/add-storage-facility-details';
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -663,9 +663,9 @@ test('/create-storage-document/add-storage-facility-details with missing address
   }
 });
 
-test('/create-storage-document/add-storage-facility-details with missing town or city field validates as error', async t => {
+test('/create-non-manipulation-document/add-storage-facility-details with missing town or city field validates as error', async t => {
   try {
-    const currentUrl = '/create-storage-document/add-storage-facility-details';
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -710,9 +710,9 @@ test('/create-storage-document/add-storage-facility-details with missing town or
   }
 });
 
-test('/create-storage-document/add-storage-facility-details with missing building and street field validates as error', async t => {
+test('/create-non-manipulation-document/add-storage-facility-details with missing building and street field validates as error', async t => {
   try {
-    const currentUrl = '/create-storage-document/add-storage-facility-details';
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -758,9 +758,9 @@ test('/create-storage-document/add-storage-facility-details with missing buildin
   }
 });
 
-test('/create-storage-document/add-storage-facility-details with missing Stored As fields validates as error', async t => {
+test('/create-non-manipulation-document/add-storage-facility-details with missing Stored As fields validates as error', async t => {
   try {
-    const currentUrl = '/create-storage-document/add-storage-facility-details';
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
     const handler = StorageNotes[currentUrl];
 
     const data = {
@@ -804,9 +804,9 @@ test('/create-storage-document/add-storage-facility-details with missing Stored 
   }
 });
 
-test('/create-storage-document/add-storage-facility-details with whitespace facilityName, facilityAddressOne and facilityTownCity validates as error', async t => {
+test('/create-non-manipulation-document/add-storage-facility-details with whitespace facilityName, facilityAddressOne and facilityTownCity validates as error', async t => {
   try {
-    const currentUrl = '/create-storage-document/add-storage-facility-details';
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
     const handler = StorageNotes[currentUrl];
 
     const data = {
