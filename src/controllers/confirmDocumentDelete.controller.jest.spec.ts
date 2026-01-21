@@ -124,7 +124,7 @@ it('should handle exceptions thrown during document deletion process', async () 
   expect(mockReportDocumentDelete).toHaveBeenCalledWith(documentNumber);
   expect(mockDeleteDocument).toHaveBeenCalled();
   
-  await new Promise(resolve => setTimeout(resolve, 10));
+  // Since Promise.all is now awaited, the error is caught and logged synchronously
   expect(mockLoggerError).toHaveBeenCalledWith(expect.stringContaining('[DELETE-ERROR]'));
   expect(mockDeleteDraftLink).not.toHaveBeenCalled();
 });
@@ -197,6 +197,73 @@ it('should handle exceptions thrown during document deletion process', async () 
     expect(mockLoggerError).toHaveBeenCalledWith(expect.any(Error));
     
     expect(result).toBeUndefined();
+  });
+
+  it('should wait for delete operations to complete before redirecting', async () => {
+    let deleteCompleted = false;
+    let draftLinkDeleted = false;
+
+    mockDeleteDocument.mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      deleteCompleted = true;
+      return null;
+    });
+    mockDeleteDraftLink.mockImplementation(async () => {
+      draftLinkDeleted = true;
+      return null;
+    });
+    mockReportDocumentDelete.mockResolvedValue(null);
+
+    const documentNumber = 'test-document-number';
+    const userPrincipalId = 'a user id';
+    const request: any = {
+      app: { claims: { sub: "test", email: "test@test.com" } },
+      params: { documentType: "catchCertificate" },
+      payload: {
+        documentDelete: 'Yes',
+        nextUri: '/test-url/{documentNumber}/test'
+      },
+      headers: {}
+    };
+
+    await ComfirmDocumentDeleteController.confirmDocumentDelete(request, h, userPrincipalId, documentNumber, contactId);
+
+    // Both operations should have completed before the function returned
+    expect(deleteCompleted).toBe(true);
+    expect(draftLinkDeleted).toBe(true);
+  });
+
+  it('should complete delete operations for all journey types', async () => {
+    mockDeleteDocument.mockResolvedValue(null);
+    mockDeleteDraftLink.mockResolvedValue(null);
+    mockReportDocumentDelete.mockResolvedValue(null);
+
+    const journeys = ['catchCertificate', 'processingStatement', 'storageNotes'];
+    const documentNumber = 'test-document-number';
+    const userPrincipalId = 'a user id';
+
+    for (const journey of journeys) {
+      mockDeleteDocument.mockClear();
+      mockDeleteDraftLink.mockClear();
+      mockReportDocumentDelete.mockClear();
+
+      const request: any = {
+        app: { claims: { sub: "test", email: "test@test.com" } },
+        params: { documentType: journey },
+        payload: {
+          journey,
+          documentDelete: 'Yes',
+          nextUri: '/test-url/{documentNumber}/test'
+        },
+        headers: {}
+      };
+
+      await ComfirmDocumentDeleteController.confirmDocumentDelete(request, h, userPrincipalId, documentNumber, contactId);
+
+      expect(mockDeleteDocument).toHaveBeenCalledWith(userPrincipalId, documentNumber, journey, contactId);
+      expect(mockDeleteDraftLink).toHaveBeenCalledWith(userPrincipalId, documentNumber, journey, contactId);
+      expect(mockReportDocumentDelete).toHaveBeenCalledWith(documentNumber);
+    }
   });
 });
 
