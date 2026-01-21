@@ -486,7 +486,7 @@ export default class ProgressService {
     }
 
     // Get departure dates from both transportations
-    const departureDateStr = departureTransportation?.exportDate;
+    const departureDateStr = departureTransportation.exportDate;
     const arrivalDepartureDateStr = (arrivalTransportation as BackEndTransport)?.departureDate;
     
     if (!departureDateStr || !arrivalDepartureDateStr) {
