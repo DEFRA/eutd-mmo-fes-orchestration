@@ -108,9 +108,8 @@ export default class ProgressRoutes {
                         return hasDescription && !hasCatches;
                       });
 
-                      // Check if all sections are complete (excluding product validation)
-                      if (completedSections === requiredSections && !hasDescriptionOnlyProduct) {
-                        return h.response().code(200);
+                      if (hasDescriptionOnlyProduct) {
+                        return h.response({ processedProductDetails: 'error.processedProductDetails.incomplete' }).code(400);
                       }
 
                       // Collect all validation errors including product validation
