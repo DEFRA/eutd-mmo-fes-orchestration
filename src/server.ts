@@ -17,6 +17,7 @@ import acceptsHtml from "./helpers/acceptsHtml";
 import { verify as jwtVerify, Jwt, JwtPayload } from 'jsonwebtoken';
 import applicationConfig from './applicationConfig';
 import { isRequestByAdmin } from './helpers/auth';
+import { inputSanitizationPlugin } from './middleware/inputSanitization';
 
 export default class Server {
   private static _instance: Hapi.Server<Hapi.ServerApplicationState>;
@@ -66,7 +67,8 @@ export default class Server {
       await Server._instance.register([
         { plugin: require('@hapi/inert') },
         { plugin: require('@hapi/vision') },
-        { plugin: require('hapi-boom-decorators') }
+        { plugin: require('hapi-boom-decorators') },
+        { plugin: inputSanitizationPlugin }
       ]);
       await Router.loadRoutes(Server._instance);
 
