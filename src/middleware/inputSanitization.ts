@@ -48,14 +48,15 @@ export function detectInjectionInObject(obj: any, path: string = ''): string[] {
 
   if (typeof obj === 'string') {
     if (containsInjectionPattern(obj)) {
-      detectedPatterns.push(path || 'root');
+      const pathName = path !== '' ? path : 'root';
+      detectedPatterns.push(pathName);
     }
     return detectedPatterns;
   }
 
   if (Array.isArray(obj)) {
     obj.forEach((item, index) => {
-      const itemPath = path ? `${path}[${index}]` : `[${index}]`;
+      const itemPath = path !== '' ? `${path}[${index}]` : `[${index}]`;
       detectedPatterns.push(...detectInjectionInObject(item, itemPath));
     });
     return detectedPatterns;
@@ -63,7 +64,7 @@ export function detectInjectionInObject(obj: any, path: string = ''): string[] {
 
   if (typeof obj === 'object') {
     Object.keys(obj).forEach(key => {
-      const keyPath = path ? `${path}.${key}` : key;
+      const keyPath = path !== '' ? `${path}.${key}` : key;
 
       // Check if the key itself contains injection patterns (e.g., MongoDB operators like $ne, $where)
       if (containsInjectionPattern(key)) {
