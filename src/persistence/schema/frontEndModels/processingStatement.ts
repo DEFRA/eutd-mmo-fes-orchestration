@@ -31,6 +31,7 @@ export interface ProcessingStatement {
   errorsUrl?: string;
   exportedTo: ICountry;
   pointOfDestination?: string;
+  userReference?: string;
   _plantDetailsUpdated?: boolean;
 }
 export interface ProcessingStatementDraft {
