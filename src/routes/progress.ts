@@ -108,11 +108,33 @@ export default class ProgressRoutes {
                         return hasDescription && !hasCatches;
                       });
 
-                      if (hasDescriptionOnlyProduct) {
-                        return h.response({ products: 'error.products.incomplete' }).code(400);
+                      // Check if all sections are complete (excluding product validation)
+                      if (completedSections === requiredSections && !hasDescriptionOnlyProduct) {
+                        return h.response().code(200);
                       }
 
-                      return completeProgressHandler(progress, completedSections, requiredSections, h);
+                      // Collect all validation errors including product validation
+                      const errors = Object.keys(progress).reduce((acc, key) => {
+                        if (progress[key] !== ProgressStatus.COMPLETED && progress[key] !== ProgressStatus.OPTIONAL && progress[key] !== '') {
+                          return {
+                            ...acc,
+                            [key]: `error.${key}.incomplete`
+                          }
+                        }
+                        return acc;
+                      }, {});
+
+                      // Add product validation error if products lack catches
+                      if (hasDescriptionOnlyProduct) {
+                        errors['processedProductDetails'] = 'error.processedProductDetails.incomplete';
+                      }
+
+                      // If there are any errors, return them
+                      if (Object.keys(errors).length > 0) {
+                        return h.response(errors).code(400);
+                      }
+
+                      return h.response().code(200);
                     }
                     case storageNote: {
                       const { completedSections, requiredSections, progress } = await ProgressService.getStorageDocumentProgress(
