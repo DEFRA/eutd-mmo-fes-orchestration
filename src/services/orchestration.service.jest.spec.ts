@@ -82,6 +82,7 @@ describe('get', () => {
 
     const sessionData = {
       test : "Test",
+      userReference: "user-ref-123",
       exportData : {
         catches: [{
           species: "Astronesthes niger (AHR)",
@@ -118,7 +119,7 @@ describe('get', () => {
 
       const result = await OrchestrationService.get(req, h, 'Bob','GBR-34424-234234-234234', contactId);
 
-      expect(result).toStrictEqual(toFrontEndProcessingStatementExportData(sessionData.exportData as any));
+      expect(result).toStrictEqual(toFrontEndProcessingStatementExportData(sessionData.exportData as any, sessionData.userReference));
     });
 
     it('should create an initial state if no data already exists', async () => {
