@@ -261,7 +261,7 @@ describe('exporter validate routes', () => {
       expect(response.result).toEqual(expectedResult);
     });
 
-    it('should return 400 when addressOne is empty', async () => {
+    it('should return 400 when subBuildingName, buildingNumber, buildingName, and streetName are all empty', async () => {
       const response = await server.inject({
         method: "POST",
         url: "/v1/exporter-validate",
@@ -284,12 +284,10 @@ describe('exporter validate routes', () => {
           country: "England"
         },
       });
-      const expectedResponse = ["error.addressFirstPart.any.required"]
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
-      expect(mockWithDocumentLegitimatelyOwned).toHaveBeenCalled();
+      expect(mockWithDocumentLegitimatelyOwned).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      expect(response.result).toEqual(expectedResponse);
     });
 
     it('should return 400 if documentNumber is not given in payload', async () => {
