@@ -35,7 +35,8 @@ export default class CertificateController {
     return {
       ...toFrontEndDocumentNumber(document),
       ...toFrontEndCatchCert(document),
-      validationErrors: summaryErrors
+      validationErrors: summaryErrors,
+      userReference: document.userReference
     };
   }
 
