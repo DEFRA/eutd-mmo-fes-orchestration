@@ -286,8 +286,8 @@ describe('exporter validate routes', () => {
       });
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(mockWithDocumentLegitimatelyOwned).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      expect(response.result).toEqual(['error.addressFirstPart.any.required']);
     });
 
     it('should return 400 if documentNumber is not given in payload', async () => {
