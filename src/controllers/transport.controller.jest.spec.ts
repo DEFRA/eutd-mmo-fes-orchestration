@@ -248,6 +248,122 @@ describe("TransportController", () => {
 
       expect(mockResponse).not.toHaveBeenCalledWith({ exportDate: 'error.directLanding.exportDate.any.min' });
     });
+
+    // FI0-10797: Test arrival departure date validation
+    it("should error when arrival departure date is after the facilityArrivalDate", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "truck",
+          departureDate: "10/11/2025",
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).toHaveBeenCalledWith({ departureDate: 'errorTruckDepartureDateAnyMax' });
+    });
+
+    it("should not error when arrival departure date equals the facilityArrivalDate", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "plane",
+          departureDate: "09/11/2025",
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ departureDate: 'errorPlaneDepartureDateAnyMax' });
+    });
+
+    it("should not error when arrival departure date is before the facilityArrivalDate", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "train",
+          departureDate: "08/11/2025",
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ departureDate: 'errorTrainDepartureDateAnyMax' });
+    });
+
+    it("should not validate arrival departure date when not arrival transport", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "containerVessel",
+          departureDate: "10/11/2025",
+          arrival: false,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ departureDate: 'errorContainerVesselDepartureDateAnyMax' });
+    });
+
+    it("should not validate arrival departure date when journey is not storageNotes", async () => {
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "truck",
+          departureDate: "10/11/2025",
+          arrival: true,
+          journey: "catchCertificate"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ departureDate: 'errorTruckDepartureDateAnyMax' });
+    });
   });
 
   describe("addTruckCMR()", () => {
