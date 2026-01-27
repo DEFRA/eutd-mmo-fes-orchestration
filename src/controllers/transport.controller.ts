@@ -70,7 +70,26 @@ export default class TransportController {
       }
     }
 
-    if (payload.departureDate) payload.departureDate = cleanDate(payload.departureDate);
+    if (payload.departureDate) {
+      payload.departureDate = cleanDate(payload.departureDate);
+
+      // FI0-10797: Validate arrival departure date is on or before storage facility arrival date
+      if (payload.arrival === true && payload.journey === 'storageNotes') {
+        const storageDocument = await OrchestrationService.getFromMongo(userPrincipal, documentNumber, storageNote, contactId);
+        if (storageDocument?.facilityArrivalDate) {
+          const arrivalDepartureDate = moment(payload.departureDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]);
+          const storageFacilityArrivalDate = moment(storageDocument.facilityArrivalDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]);
+          
+          if (arrivalDepartureDate.isAfter(storageFacilityArrivalDate, 'day')) {
+            // Use flat naming convention to match translation keys
+            const vehicleCapitalized = payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1);
+            const errorKey = `error${vehicleCapitalized}DepartureDateAnyMax`;
+            const errorObject = { departureDate: errorKey };
+            return h.response(errorObject).code(400).takeover();
+          }
+        }
+      }
+    }
 
     const data = await Services.addTransport(payload, documentNumber, contactId) as any;
 
