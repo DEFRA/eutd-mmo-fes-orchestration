@@ -25,7 +25,7 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
     facilityStorage: "Chilled",
     facilityArrivalDate: "01/01/2025",
   };
-  const currentUrl = "/create-storage-document/:documentNumber/add-storage-facility-details";
+  const currentUrl = "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
   const handler = SUT.default[currentUrl];
   describe('Rejecting Unrealistic Future Dates', () => {
     it('should reject date year 8888 (8/8/8888) as invalid - THE DEFECT-469 BUG', async () => {
@@ -131,7 +131,7 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
         errors: {},
         _params: {},
       });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDatenotMorethanOneDay");
     });
     it('should accept date exactly 7 days in the future (maximum limit)', async () => {
       const maxFutureDate = (moment as any)().add(7, 'days').format("DD/MM/YYYY");
@@ -146,7 +146,7 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
         errors: {},
         _params: {},
       });
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
+      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDatenotMorethanOneDay");
     });
     it('should accept past dates (last year)', async () => {
       const pastDate = (moment as any)().subtract(1, 'year').format("DD/MM/YYYY");

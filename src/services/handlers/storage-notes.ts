@@ -8,6 +8,7 @@ import {
   validateDateBefore,
   validateDateIsSameOrBefore,
   validateMaximumFutureDate,
+  validateMaximumOneDayFutureDate,
   validateUKDocumentNumberFormat,
   validateWhitespace,
 } from "../orchestration.service";
@@ -30,7 +31,7 @@ export const initialState = {
 };
 
 export default {
-  "/create-storage-document/:documentNumber/add-product-to-this-consignment": async ({ data, _nextUrl, _currentUrl, errors, documentNumber, userPrincipal, contactId }) => {
+  "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment": async ({ data, _nextUrl, _currentUrl, errors, documentNumber, userPrincipal, contactId }) => {
     const index = 0;
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
@@ -39,7 +40,7 @@ export default {
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
-  "/create-storage-document/:documentNumber/add-product-to-this-consignment/:index": async ({ data, _nextUrl, _currentUrl, errors, params, documentNumber, userPrincipal, contactId }) => {
+  "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment/:index": async ({ data, _nextUrl, _currentUrl, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = +params.index;
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
@@ -48,7 +49,7 @@ export default {
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
-  "/create-storage-document/:documentNumber/departure-product-summary": async ({ data, errors }) => {
+  "/create-non-manipulation-document/:documentNumber/departure-product-summary": async ({ data, errors }) => {
     for (const [index, ctch] of data.catches.entries()) {
       checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, errors);
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
@@ -59,10 +60,10 @@ export default {
       }
     }
 
-    return { errors, next: `/create-storage-document/:documentNumber/progress` }
+    return { errors, next: `/create-non-manipulation-document/:documentNumber/progress` }
   },
 
-  "/create-storage-document/:documentNumber/you-have-added-a-product": async ({ data, _nextUrl, currentUrl, errors }) => {
+  "/create-non-manipulation-document/:documentNumber/you-have-added-a-product": async ({ data, _nextUrl, currentUrl, errors }) => {
     for (const [index, ctch] of data.catches.entries()) {
       await validateProduct(ctch, index, errors);
     }
@@ -74,17 +75,17 @@ export default {
     }
 
     if (addAnotherProduct.toLowerCase() === 'yes') {
-      return { errors, next: `/create-storage-document/:documentNumber/add-product-to-this-consignment/${data.catches.length}` };
+      return { errors, next: `/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment/${data.catches.length}` };
     }
-    return { errors, next: `/create-storage-document/:documentNumber/add-storage-facility-details` }
+    return { errors, next: `/create-non-manipulation-document/:documentNumber/add-storage-facility-details` }
   },
 
-  "/create-storage-document/:documentNumber/add-storage-facility-details": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
+  "/create-non-manipulation-document/:documentNumber/add-storage-facility-details": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
     const departureDate = data.arrivalTransport?.departureDate;
     return validateStorageFacility(data, departureDate, errors)
   },
 
-  "/create-storage-document/:documentNumber/add-storage-facility-approval": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
+  "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
     return validateStorageApproval(data, errors)
   },
 };
@@ -128,6 +129,9 @@ function checkFacilityArrivalDateError(exportData: any, departureDate: string, e
   }
    else if (exportData.transport?.exportDate && !validateDateIsSameOrBefore(exportData.facilityArrivalDate,  exportData.transport.exportDate)) {
     errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateSameOrOneDayBeforeDepartureDateValidationError";
+  }
+  else if ( !validateMaximumOneDayFutureDate(exportData.facilityArrivalDate)) {
+    errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDatenotMorethanOneDay";
   }
 }
 

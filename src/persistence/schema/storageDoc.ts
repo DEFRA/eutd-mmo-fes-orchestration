@@ -185,7 +185,7 @@ export const toFrontEndCatchStorageDocument = (catchSD: Catch): Catch => {
   return catchSD as FrontEndStorageDocument.Catch;
 };
 
-export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : FrontEndStorageDocument.StorageDocument => {
+export const toFrontEndStorageDocumentExportData = (exportData : ExportData, userReference?: string) : FrontEndStorageDocument.StorageDocument => {
   const isEmpty = (
     exportData == undefined ||
     (
@@ -198,7 +198,8 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
     return {
       catches: [],
       validationErrors: [{}],
-      addAnotherProduct: "No"
+      addAnotherProduct: "No",
+      userReference
     }
   }
 
@@ -221,7 +222,8 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData) : F
     facilityCountry: exportData.facilityCountry,
     facilityApprovalNumber: exportData.facilityApprovalNumber,
     facilityStorage: exportData.facilityStorage,
-    facilityArrivalDate: exportData.facilityArrivalDate
+    facilityArrivalDate: exportData.facilityArrivalDate,
+    userReference
   };
 }
 

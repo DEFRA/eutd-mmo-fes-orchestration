@@ -40,7 +40,7 @@ import {
   StorageDocument,
 } from "../persistence/schema/frontEndModels/storageDocument";
 import { toFrontEndStorageDocumentExportData } from "../persistence/schema/storageDoc";
-import { reportDocumentSubmitted } from "../services/reference-data.service";
+import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
 import { invalidateDraftCache } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
 
@@ -102,7 +102,7 @@ export default class OrchestrationService {
       );
 
       data = currentSessionData
-        ? toFrontEndStorageDocumentExportData(currentSessionData.exportData)
+        ? toFrontEndStorageDocumentExportData(currentSessionData.exportData, currentSessionData.userReference)
         : currentSessionData;
     }
 
@@ -471,6 +471,11 @@ export default class OrchestrationService {
 
     void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch((e) => logger.error(`[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
 
+    if (ApplicationConfig.enableNmdPsEuCatch) {
+      submitToCatchSystem(documentNumber, 'submit')
+        .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
+    }
+
     return pdf;
   }
 
@@ -737,6 +742,11 @@ export function validateDateBefore(date, beforeDate) {
 export function validateMaximumFutureDate(date) {
   const maxSubmissionDate = moment(Date.now()).add(8, 'days');    // Todays date + 7 days advance as FI0-4667
   return parseDate(date).isBefore(maxSubmissionDate, 'day');
+}
+
+export function validateMaximumOneDayFutureDate(date) {
+  const maxSubmissionDate = moment(Date.now()).add(1, 'day');    // Todays date + 1 day (not more than 1 day in future)
+  return parseDate(date).isSameOrBefore(maxSubmissionDate, 'day');
 }
 
 export function validateNumber(num) {
