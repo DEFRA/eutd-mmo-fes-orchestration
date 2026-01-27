@@ -249,7 +249,6 @@ describe("TransportController", () => {
       expect(mockResponse).not.toHaveBeenCalledWith({ exportDate: 'error.directLanding.exportDate.any.min' });
     });
 
-    // FI0-10797: Test arrival departure date validation
     it("should error when arrival departure date is after the facilityArrivalDate", async () => {
       const req = {
         ...mockReq,
