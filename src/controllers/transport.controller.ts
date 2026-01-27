@@ -38,6 +38,10 @@ export default class TransportController {
     return payload.cmr === 'true' ? summaryUri : truckDetailsUri;
   }
 
+  private static parseDate(dateString: string) {
+    return moment(dateString, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]);
+  }
+
   private static async validateExportDate(payload: any, userPrincipal: string, documentNumber: string, contactId: string, h: Hapi.ResponseToolkit) {
     if (!payload.exportDate) {
       return null;
@@ -50,8 +54,8 @@ export default class TransportController {
       return null;
     }
 
-    const exportDate = parseDate(payload.exportDate);
-    const facilityArrivalDate = parseDate(storageDocument.facilityArrivalDate);
+    const exportDate = this.parseDate(payload.exportDate);
+    const facilityArrivalDate = this.parseDate(storageDocument.facilityArrivalDate);
 
     if (exportDate.isBefore(facilityArrivalDate)) {
       return h.response({ exportDate: `error.${payload.vehicle}.exportDate.any.min` }).code(400).takeover();
@@ -78,8 +82,8 @@ export default class TransportController {
       return null;
     }
 
-    const arrivalDepartureDate = parseDate(payload.departureDate);
-    const storageFacilityArrivalDate = parseDate(storageDocument.facilityArrivalDate);
+    const arrivalDepartureDate = this.parseDate(payload.departureDate);
+    const storageFacilityArrivalDate = this.parseDate(storageDocument.facilityArrivalDate);
 
     if (arrivalDepartureDate.isAfter(storageFacilityArrivalDate, 'day')) {
       const vehicleCapitalized = payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1);
@@ -117,25 +121,9 @@ export default class TransportController {
       return exportDateError;
     }
 
-    if (payload.departureDate) {
-      payload.departureDate = cleanDate(payload.departureDate);
-
-      // FI0-10797: Validate arrival departure date is on or before storage facility arrival date
-      if (payload.arrival === true && payload.journey === 'storageNotes') {
-        const storageDocument = await OrchestrationService.getFromMongo(userPrincipal, documentNumber, storageNote, contactId);
-        if (storageDocument?.facilityArrivalDate) {
-          const arrivalDepartureDate = moment(payload.departureDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]);
-          const storageFacilityArrivalDate = moment(storageDocument.facilityArrivalDate, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]);
-          
-          if (arrivalDepartureDate.isAfter(storageFacilityArrivalDate, 'day')) {
-            // Use flat naming convention to match translation keys
-            const vehicleCapitalized = payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1);
-            const errorKey = `error${vehicleCapitalized}DepartureDateAnyMax`;
-            const errorObject = { departureDate: errorKey };
-            return h.response(errorObject).code(400).takeover();
-          }
-        }
-      }
+    const departureDateError = await this.validateArrivalDepartureDate(payload, userPrincipal, documentNumber, contactId, h);
+    if (departureDateError) {
+      return departureDateError;
     }
 
     const data = await Services.addTransport(payload, documentNumber, contactId) as any;
