@@ -1,9 +1,8 @@
 import * as Hapi from '@hapi/hapi';
-import * as moment from 'moment';
 import logger from '../logger';
 import Services from "../services/transport.service";
 import acceptsHtml from "../helpers/acceptsHtml";
-import OrchestrationService, { cleanDate, storageNote } from "../services/orchestration.service";
+import OrchestrationService, { cleanDate, parseDate, storageNote } from "../services/orchestration.service";
 import { HapiRequestApplicationStateExtended } from '../types';
 
 export default class TransportController {
@@ -39,10 +38,6 @@ export default class TransportController {
     return payload.cmr === 'true' ? summaryUri : truckDetailsUri;
   }
 
-  private static parseDate(dateString: string) {
-    return moment(dateString, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"]);
-  }
-
   private static async validateExportDate(payload: any, userPrincipal: string, documentNumber: string, contactId: string, h: Hapi.ResponseToolkit) {
     if (!payload.exportDate) {
       return null;
@@ -55,8 +50,8 @@ export default class TransportController {
       return null;
     }
 
-    const exportDate = this.parseDate(payload.exportDate);
-    const facilityArrivalDate = this.parseDate(storageDocument.facilityArrivalDate);
+    const exportDate = parseDate(payload.exportDate);
+    const facilityArrivalDate = parseDate(storageDocument.facilityArrivalDate);
 
     if (exportDate.isBefore(facilityArrivalDate)) {
       return h.response({ exportDate: `error.${payload.vehicle}.exportDate.any.min` }).code(400).takeover();
@@ -83,8 +78,8 @@ export default class TransportController {
       return null;
     }
 
-    const arrivalDepartureDate = this.parseDate(payload.departureDate);
-    const storageFacilityArrivalDate = this.parseDate(storageDocument.facilityArrivalDate);
+    const arrivalDepartureDate = parseDate(payload.departureDate);
+    const storageFacilityArrivalDate = parseDate(storageDocument.facilityArrivalDate);
 
     if (arrivalDepartureDate.isAfter(storageFacilityArrivalDate, 'day')) {
       const vehicleCapitalized = payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1);
