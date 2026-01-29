@@ -20,6 +20,7 @@ export interface CatchCertificateTransport {
   flightNumber?: string;
   containerNumber?: string;
   containerIdentificationNumber?: string;
+  containerNumbers?: string[];
   railwayBillNumber?: string;
   vesselName?: string;
   flagState?: string;
@@ -106,6 +107,10 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
   switch (transport.vehicle) {
     case truck: {
       const model = transport as BackEndModels.CatchCertificateTruck;
+      // Transform containerIdentificationNumber string to containerNumbers array
+      const containerNumbers = model.containerIdentificationNumber 
+        ? model.containerIdentificationNumber.split(' ').filter((c: string) => c && c.trim())
+        : undefined;
       frontEndTransport = {
         id: transport.id.toString(),
         vehicle: model.vehicle,
@@ -115,6 +120,7 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         departurePlace: valueOrDefault(model.departurePlace, !model.cmr),
         freightBillNumber: valueOrDefault(model.freightBillNumber, !model.cmr),
         containerIdentificationNumber: valueOrDefault(model.containerIdentificationNumber, !model.cmr),
+        containerNumbers: valueOrDefault(containerNumbers, !model.cmr),
         documents: valueOrDefault(model.transportDocuments, !model.cmr)
       };
       break;
