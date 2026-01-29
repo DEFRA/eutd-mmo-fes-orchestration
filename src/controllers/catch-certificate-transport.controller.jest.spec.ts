@@ -251,6 +251,76 @@ describe("updateTransport", () => {
 
     await expect(TransportController.updateTransport(mockReq, USER_ID, DOCUMENT_NUMBER, contactId)).rejects.toThrow('something has gone wrong');
   })
+
+  it('will transform containerNumbers array to containerIdentificationNumber for truck', async () => {
+    const truckReq: any = {
+      app: { claims: { sub: "test", email: "test@test.com" } },
+      params: { documentType: "catchCertificate", transportId: 0 },
+      payload: {
+        id: 'truck-transport-id',
+        vehicle: 'truck',
+        containerNumbers: ['CONT001', 'CONT002', 'CONT003']
+      },
+      headers: { accept: "text/html" },
+    };
+
+    const expectedTransport: CatchCertificateTransport = {
+      id: 'truck-transport-id',
+      vehicle: 'truck',
+      containerNumbers: ['CONT001', 'CONT002', 'CONT003'],
+      containerIdentificationNumber: 'CONT001 CONT002 CONT003'
+    };
+
+    await TransportController.updateTransport(truckReq, USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockService).toHaveBeenCalledWith(expectedTransport, USER_ID, DOCUMENT_NUMBER, contactId);
+  })
+
+  it('will filter empty containerNumbers when transforming for truck', async () => {
+    const truckReq: any = {
+      app: { claims: { sub: "test", email: "test@test.com" } },
+      params: { documentType: "catchCertificate", transportId: 0 },
+      payload: {
+        id: 'truck-transport-id',
+        vehicle: 'truck',
+        containerNumbers: ['CONT001', '', '  ', 'CONT002', null]
+      },
+      headers: { accept: "text/html" },
+    };
+
+    const expectedTransport: CatchCertificateTransport = {
+      id: 'truck-transport-id',
+      vehicle: 'truck',
+      containerNumbers: ['CONT001', '', '  ', 'CONT002', null],
+      containerIdentificationNumber: 'CONT001 CONT002'
+    };
+
+    await TransportController.updateTransport(truckReq, USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockService).toHaveBeenCalledWith(expectedTransport, USER_ID, DOCUMENT_NUMBER, contactId);
+  })
+
+  it('will not transform containerNumbers for non-truck vehicles', async () => {
+    const trainReq: any = {
+      app: { claims: { sub: "test", email: "test@test.com" } },
+      params: { documentType: "catchCertificate", transportId: 0 },
+      payload: {
+        id: 'train-transport-id',
+        vehicle: 'train',
+        containerNumbers: ['CONT001', 'CONT002'],
+        containerIdentificationNumber: 'EXISTING VALUE'
+      },
+      headers: { accept: "text/html" },
+    };
+
+    const expectedTransport: CatchCertificateTransport = {
+      id: 'train-transport-id',
+      vehicle: 'train',
+      containerNumbers: ['CONT001', 'CONT002'],
+      containerIdentificationNumber: 'EXISTING VALUE'
+    };
+
+    await TransportController.updateTransport(trainReq, USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(mockService).toHaveBeenCalledWith(expectedTransport, USER_ID, DOCUMENT_NUMBER, contactId);
+  })
 });
 
 describe("removeTransport", () => {
