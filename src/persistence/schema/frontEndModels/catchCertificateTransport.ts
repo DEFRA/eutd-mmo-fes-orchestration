@@ -108,9 +108,7 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
     case truck: {
       const model = transport as BackEndModels.CatchCertificateTruck;
       // Transform containerIdentificationNumber string to containerNumbers array
-      const containerNumbers = model.containerIdentificationNumber 
-        ? model.containerIdentificationNumber.split(' ').filter((c: string) => c && c.trim())
-        : undefined;
+      const containerNumbers = model.containerIdentificationNumber?.split(' ').filter((c: string) => c?.trim());
       frontEndTransport = {
         id: transport.id.toString(),
         vehicle: model.vehicle,

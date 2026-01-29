@@ -31,7 +31,7 @@ export default class CatchCertificateTransportController {
     // Transform containerNumbers array to containerIdentificationNumber string for trucks
     let containerIdentificationNumber = payload.containerIdentificationNumber;
     if (payload.vehicle === 'truck' && payload.containerNumbers && Array.isArray(payload.containerNumbers)) {
-      containerIdentificationNumber = payload.containerNumbers.filter((c: string) => c && c.trim()).join(' ');
+      containerIdentificationNumber = payload.containerNumbers.filter((c: string) => c?.trim()).join(' ');
     }
     
     const transport: CatchCertificateTransport = {
