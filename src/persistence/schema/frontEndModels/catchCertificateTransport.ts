@@ -64,7 +64,7 @@ const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEnd
     registrationNumber: cmrIsSet && hasCmr ? undefined : transport.registrationNumber,
     departurePlace: cmrIsSet && hasCmr ? undefined : transport.departurePlace,
     freightBillNumber: cmrIsSet && hasCmr ? undefined : transport.freightBillNumber,
-    containerIdentificationNumber: cmrIsSet && hasCmr ? undefined : transport.containerIdentificationNumber,
+    containerIdentificationNumber: cmrIsSet && hasCmr ? undefined : (transport.containerNumbers?.length ? transport.containerNumbers.join(' ') : transport.containerIdentificationNumber),
     transportDocuments: cmrIsSet && hasCmr ? undefined : transport.documents,
   };
   return result;
@@ -84,7 +84,7 @@ const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
   id: parseInt(transport.id),
   vehicle: transport.vehicle,
   railwayBillNumber: transport.railwayBillNumber,
-  containerIdentificationNumber: transport.containerIdentificationNumber,
+  containerIdentificationNumber: transport.containerNumbers?.length ? transport.containerNumbers.join(' ') : transport.containerIdentificationNumber,
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
   transportDocuments: transport.documents,
