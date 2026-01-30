@@ -27,6 +27,20 @@ export default function buildErrorObject(data)  {
         errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`
         return;
       }
+
+      // Map container number pattern errors to frontend-friendly i18n keys depending on vehicle
+      if (detail.path[0] === 'containerNumbers' && detail.type === 'string.pattern.base') {
+        // transportType is set above from the original payload
+        if (transportType === 'train') {
+          errorObject[errorKey] = 'ccContainerIdentificationNumberInvalidFormat';
+        } else if (transportType === 'truck') {
+          errorObject[errorKey] = 'ccShippingContainerInvalidFormat';
+        } else {
+          // fallback to generic pattern error
+          errorObject[errorKey] = `error.${errorKey}.${detail.type}`;
+        }
+        return;
+      }
       if(detail.path[0] === 'exportDate' && detail.type === 'date.min'){
         errorObject[errorKey] = `error.${transportType}.exportDate.any.min`
         return
