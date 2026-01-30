@@ -43,6 +43,23 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     ],
     otherwise: Joi.forbidden(),
   }),
+  containerIdentificationNumber: Joi.alternatives().conditional('vehicle', {
+    switch: [
+      {
+        is: 'truck',
+        then: Joi.string().trim().max(150).regex(/^[A-Z]{3}[UJZR]\d{7}$/).allow('', null).optional().messages({
+          'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
+        }),
+      },
+      {
+        is: 'train',
+        then: Joi.string().trim().max(150).regex(/^[A-Z]{4}\d{7}$/).allow('', null).optional().messages({
+          'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
+        }),
+      }
+    ],
+    otherwise: Joi.forbidden(),
+  }),
   flightNumber: Joi.when('vehicle', {
     is: 'plane',
     then: Joi.when('$query.draft', {
