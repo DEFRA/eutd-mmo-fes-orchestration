@@ -148,7 +148,6 @@ describe("transport routes", () => {
                     flightNumber: "x",
                     departurePlace: "x",
                     containerNumber: "x",
-                    containerNumbers: ["ABCU1234567"],
                     pointOfDestination: "Paris Airport",
                     exportedTo: {
                       officialCountryName: "Nigeria"
@@ -177,7 +176,6 @@ describe("transport routes", () => {
                     vesselName: "x",
                     flagState: "x",
                     containerNumber: "ABCU1234567",
-                    containerNumbers: ["ABCU1234567"],
                     departurePlace: "x",
                     pointOfDestination: "Lagos Port",
                     exportedTo: {
@@ -799,7 +797,6 @@ describe("transport routes", () => {
               vesselName: "Vessel1111", // required field
               flagState: "UK", // required field
               freightBillNumber: "",
-              containerNumber: "ABCU1234567", // required field
               containerNumbers: ["ABCU1234567"], // required field
               placeOfUnloading: "UK", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
@@ -886,7 +883,31 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "containerNumbers.0": "ccShippingContainerNumberPatternError",
+                "containerNumbers.0": "error.containerNumbers.0.string.pattern.base",
+            });
+        });
+
+        it('returns 400 when containerNumbers contains empty string for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
+            const body = {
+              journey: "storageNotes",
+              vesselName: "Vessel1111",
+              flagState: "UK",
+              freightBillNumber: "",
+              containerNumbers: ["ABCU1234567", ""],
+              placeOfUnloading: "UK",
+              departureDate: moment().format('DD/MM/YYYY'),
+              vehicle:"containerVessel",
+              arrival: true,
+              departurePort: "Lexis Port",
+              departureCountry: "United Kingdom",
+            };
+
+            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
+            const response = await server.inject(request);
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({
+                "containerNumbers.1": "error.containerNumbers.1.string.empty",
             });
         });
 

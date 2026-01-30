@@ -1983,7 +1983,6 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumber: 'ABCU1234567',
         containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
@@ -2046,6 +2045,29 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2140,6 +2162,30 @@ describe('getTransportDetails', () => {
         vesselName: 'WIRON 5',
         flagState: '@#$%^',
         containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        freightBillNumber: 'FB789',
+        departurePort: 'London Heathrow',
+        departureDate: '15/11/2023',
+        departureCountry: 'United Kingdom',
+        placeOfUnloading: 'Sao Paulo'
+      };
+
+      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
+        ProgressStatus.INCOMPLETE
+      );
+    });
+
+    it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
+      const transport: Transport = {
+        vehicle: 'containerVessel',
+        exportedTo: {
+          officialCountryName: 'Brazil',
+          isoCodeAlpha2: 'BR',
+          isoCodeAlpha3: 'BRA',
+          isoNumericCode: '076',
+        },
+        vesselName: 'WIRON 5',
+        flagState: 'UK',
+        containerNumbers: ['ABCU1234567', ''],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -4993,16 +5039,9 @@ describe('getStorageDocumentProgress', () => {
           vesselName: "Felicity Ace",
           flagState: "Greece",
           containerNumber: "ABCU1234567",
-          freightBillNumber: "123"
-        }],
-        exportedTo: {
-          officialCountryName: "Algeria",
-          isoCodeAlpha2: "DZ",
-          isoCodeAlpha3: "DZA",
-          isoNumericCode: "012"
-        },
-        pointOfDestination: "Algiers Port",
-        exportDate: "22/09/2025"
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
+        }
       },
     });
 
@@ -5160,11 +5199,17 @@ describe('getStorageDocumentProgress', () => {
           vehicle: 'plane',
           flightNumber: 'BA078',
           containerNumber: 'ABCU1234567',
-          departurePlace: 'London Heathrow',
-          freightBillNumber: '123'
-        }],
-        pointOfDestination: 'Kabul Airport',
-        exportDate: '25/09/2023',
+          exportedFrom: 'United Kingdom',
+          exportDate: '25/09/2023',
+          exportedTo: {
+            officialCountryName: 'Afghanistan',
+            isoCodeAlpha2: 'AF',
+            isoCodeAlpha3: 'AFG',
+            isoNumericCode: '004',
+          },
+          pointOfDestination: 'Kabul Airport',
+          departurePlace: 'London Heathrow'
+        },
         facilityName: 'dora',
         facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
         facilityBuildingName: 'LANCASTER HOUSE',
@@ -5795,13 +5840,8 @@ describe('getStorageDocumentProgress', () => {
           vesselName: "Felicity Ace",
           flagState: "Greece",
           containerNumber: "ABCU1234567",
-          freightBillNumber: "123"
-        }],
-        exportedTo: {
-          officialCountryName: "Algeria",
-          isoCodeAlpha2: "DZ",
-          isoCodeAlpha3: "DZA",
-          isoNumericCode: "012"
+          exportDate: "22/09/2025",
+          freightBillNumber: ""
         },
         pointOfDestination: "Algiers Port",
         exportDate: "22/09/2025"
@@ -6127,7 +6167,7 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
+            containerNumber: "ABCU1234567",
             exportDate: "15/01/2026",
             freightBillNumber: ""
           },
