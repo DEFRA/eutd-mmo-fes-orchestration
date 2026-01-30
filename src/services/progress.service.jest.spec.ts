@@ -5039,9 +5039,16 @@ describe('getStorageDocumentProgress', () => {
           vesselName: "Felicity Ace",
           flagState: "Greece",
           containerNumber: "ABCU1234567",
-          exportDate: "22/09/2025",
-          freightBillNumber: ""
-        }
+          freightBillNumber: "123"
+        }],
+        exportedTo: {
+          officialCountryName: "Algeria",
+          isoCodeAlpha2: "DZ",
+          isoCodeAlpha3: "DZA",
+          isoNumericCode: "012"
+        },
+        pointOfDestination: "Algiers Port",
+        exportDate: "22/09/2025"
       },
     });
 
@@ -5199,17 +5206,11 @@ describe('getStorageDocumentProgress', () => {
           vehicle: 'plane',
           flightNumber: 'BA078',
           containerNumber: 'ABCU1234567',
-          exportedFrom: 'United Kingdom',
-          exportDate: '25/09/2023',
-          exportedTo: {
-            officialCountryName: 'Afghanistan',
-            isoCodeAlpha2: 'AF',
-            isoCodeAlpha3: 'AFG',
-            isoNumericCode: '004',
-          },
-          pointOfDestination: 'Kabul Airport',
-          departurePlace: 'London Heathrow'
-        },
+          departurePlace: 'London Heathrow',
+          freightBillNumber: '123'
+        }],
+        pointOfDestination: 'Kabul Airport',
+        exportDate: '25/09/2023',
         facilityName: 'dora',
         facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
         facilityBuildingName: 'LANCASTER HOUSE',
@@ -5240,10 +5241,10 @@ describe('getStorageDocumentProgress', () => {
         reference: ProgressStatus.COMPLETED,
         catches: ProgressStatus.COMPLETED,
         storageFacilities: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.COMPLETED,
+        transportDetails: ProgressStatus.INCOMPLETE,
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 3,
+      completedSections: 2,
       requiredSections: 5
     };
 
@@ -5840,8 +5841,13 @@ describe('getStorageDocumentProgress', () => {
           vesselName: "Felicity Ace",
           flagState: "Greece",
           containerNumber: "ABCU1234567",
-          exportDate: "22/09/2025",
-          freightBillNumber: ""
+          freightBillNumber: "123"
+        }],
+        exportedTo: {
+          officialCountryName: "Algeria",
+          isoCodeAlpha2: "DZ",
+          isoCodeAlpha3: "DZA",
+          isoNumericCode: "012"
         },
         pointOfDestination: "Algiers Port",
         exportDate: "22/09/2025"
@@ -6155,28 +6161,29 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: 'port',
             cmr: 'false'
           },
-          transportation: {
-            exportedTo: {
-              officialCountryName: "Algeria",
-              isoCodeAlpha2: "DZ",
-              isoCodeAlpha3: "DZA",
-              isoNumericCode: "012"
-            },
-            pointOfDestination: "Algiers Port",
+          transportations: [{
+            id: 1,
             vehicle: "containerVessel",
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
             containerNumber: "ABCU1234567",
-            exportDate: "15/01/2026",
-            freightBillNumber: ""
+            freightBillNumber: "123"
+          }],
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
           },
+          pointOfDestination: "Algiers Port",
+          exportDate: "15/01/2026"
         }
       });
 
       const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
 
-      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
     });
 
     it('should return INCOMPLETE transportDetails when departure transport date is not after arrival transport departure date', async () => {
