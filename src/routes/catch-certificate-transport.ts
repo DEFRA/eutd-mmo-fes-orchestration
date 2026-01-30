@@ -179,7 +179,7 @@ export default class CatchCertificateTransportRoutes {
                 allowUnknown: true,
                 context: { query: options?.context?.query || {} }
               });
-              
+
               // Validate truck nationality
               const countryValidationErrors = await validateTruckNationality(
                 value.vehicle,
