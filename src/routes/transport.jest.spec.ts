@@ -148,6 +148,7 @@ describe("transport routes", () => {
                     flightNumber: "x",
                     departurePlace: "x",
                     containerNumber: "x",
+                    containerNumbers: ["ABC1234567"],
                     pointOfDestination: "Paris Airport",
                     exportedTo: {
                       officialCountryName: "Nigeria"
@@ -176,6 +177,7 @@ describe("transport routes", () => {
                     vesselName: "x",
                     flagState: "x",
                     containerNumber: "ABCU1234567",
+                    containerNumbers: ["ABCU1234567"],
                     departurePlace: "x",
                     pointOfDestination: "Lagos Port",
                     exportedTo: {
