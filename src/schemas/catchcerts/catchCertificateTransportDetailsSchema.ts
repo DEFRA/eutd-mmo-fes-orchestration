@@ -29,8 +29,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       {
         is: 'truck',
         then: Joi.array()
-          .items(Joi.string().trim().max(150).regex(/^[A-Z]{3}[UJZR]\d{7}$/i).allow(''))
-          .max(5)
+          .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).allow(''))
+          .max(10)
           .optional(),
       },
       {
@@ -48,13 +48,15 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       {
         is: 'truck',
         then: Joi.string().trim().max(150).regex(/^[A-Z]{3}[UJZR]\d{7}$/).allow('', null).optional().messages({
-          'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
+          'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base',
+          'string.max': 'error.containerIdentificationNumber.string.pattern.base'
         }),
       },
       {
         is: 'train',
         then: Joi.string().trim().max(150).regex(/^[A-Z]{4}\d{7}$/).allow('', null).optional().messages({
-          'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
+          'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base',
+          'string.max': 'error.containerIdentificationNumber.string.pattern.base'
         }),
       }
     ],
