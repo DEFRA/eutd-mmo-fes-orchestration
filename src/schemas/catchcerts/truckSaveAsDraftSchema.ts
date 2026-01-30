@@ -27,7 +27,9 @@ const truckSaveAsDraftSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
     otherwise: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
   }),
-  containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).regex(/^[a-zA-Z0-9 ]*$/).optional(),
+  containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).optional().messages({
+    'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
+  }),
   freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   departurePlace: Joi.when('arrival', {
     is: true,

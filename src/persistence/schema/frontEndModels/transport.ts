@@ -340,7 +340,7 @@ const checkTruckDataFrontEnd = (transport: Transport) => {
 
 const checkPlaneDataFrontEnd = (transport: Transport) => (
   transport.flightNumber
-  && transport.containerNumbers
+  && (transport.containerNumbers || transport.containerNumber)
   && transport.departurePlace
 ) ? transport : {
   vehicle: transport.vehicle,
@@ -358,7 +358,7 @@ const checkTrainDataFrontEnd = (transport: Transport) => (
 const checkContainerVesselDataFrontEnd = (transport: Transport) => (
   transport.vesselName
   && transport.flagState
-  && transport.containerNumbers
+  && (transport.containerNumbers || transport.containerNumber)
   && transport.departurePlace
 ) ? transport : {
   vehicle: transport.vehicle,
