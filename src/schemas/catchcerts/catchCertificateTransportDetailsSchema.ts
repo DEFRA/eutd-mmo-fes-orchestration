@@ -33,9 +33,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     otherwise: Joi.forbidden(),
   }),
   containerIdentificationNumber: Joi.when('vehicle', {
-    is: 'train',
-    then: Joi.string().allow('', null).trim().max(150).regex(/^[a-zA-Z0-9 ]*$/).messages({
-      'string.max': 'error.containerIdentificationNumber.string.max',
+    is: Joi.valid('truck', 'train'),
+    then: Joi.string().allow('', null).trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).messages({
       'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
     }),
     otherwise: Joi.forbidden(),
@@ -50,13 +49,29 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     otherwise: Joi.forbidden(),
   }),
   containerNumber: Joi.when('vehicle', {
-    is: Joi.valid('plane', 'containerVessel'),
+    is: 'plane',
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9 ]+$/).required(),
+      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9 ]+$/).required().messages({
+        'any.required': 'error.containerNumber.plane.any.required',
+        'string.empty': 'error.containerNumber.plane.string.empty',
+        'string.pattern.base': 'error.containerNumber.plane.string.pattern.base',
+      }),
     }),
-    otherwise: Joi.forbidden(),
+    otherwise: Joi.when('vehicle', {
+      is: 'containerVessel',
+      then: Joi.when('$query.draft', {
+        is: true,
+        then: Joi.any(),
+        otherwise: Joi.string().trim().max(50).regex(/^[A-Z]{3}[UJZR]\d{7}$/).required().messages({
+          'any.required': 'error.containerNumber.containerVessel.any.required',
+          'string.empty': 'error.containerNumber.containerVessel.string.empty',
+          'string.pattern.base': 'error.containerNumber.string.pattern.base'
+        }),
+      }),
+      otherwise: Joi.forbidden(),
+    }),
   }),
   railwayBillNumber: Joi.when('vehicle', {
     is: 'train',

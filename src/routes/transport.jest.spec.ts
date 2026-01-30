@@ -147,7 +147,7 @@ describe("transport routes", () => {
                     arrival: false,
                     flightNumber: "x",
                     departurePlace: "x",
-                    containerNumbers: ["x"],
+                    containerNumber: "x",
                     pointOfDestination: "Paris Airport",
                     exportedTo: {
                       officialCountryName: "Nigeria"
@@ -175,7 +175,7 @@ describe("transport routes", () => {
                     arrival: false,
                     vesselName: "x",
                     flagState: "x",
-                    containerNumbers: ["x"],
+                    containerNumber: "ABCU1234567",
                     departurePlace: "x",
                     pointOfDestination: "Lagos Port",
                     exportedTo: {
@@ -797,7 +797,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111", // required field
               flagState: "UK", // required field
               freightBillNumber: "",
-              containerNumbers: ["CONT001"], // required field
+              containerNumbers: ["ABCU1234567"], // required field
               placeOfUnloading: "UK", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
               vehicle:"containerVessel",
@@ -820,7 +820,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111",
               flagState: "",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -868,7 +868,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111",
               flagState: "@#$%^",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -916,7 +916,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111",
               flagState: "UK",
               freightBillNumber: "",
-              containerNumbers: ["CONT001", ""],
+              containerNumbers: ["ABCU1234567", ""],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -970,7 +970,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"], // required field
+              containerNumbers: ["ABCU1234567"], // required field with ISO format
               departureCountry: "France", // required field
               departurePort: "Calais", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
@@ -1016,7 +1016,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               departureCountry: "",
               departurePort: "Calais",
               departureDate: moment().format('DD/MM/YYYY'),
@@ -1040,7 +1040,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               departureCountry: "France",
               departurePort: "",
               departureDate: moment().format('DD/MM/YYYY'),
@@ -1064,7 +1064,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               departureCountry: "France",
               departurePort: "Calais",
               departureDate: "",

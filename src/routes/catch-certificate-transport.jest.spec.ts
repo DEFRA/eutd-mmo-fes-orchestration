@@ -902,7 +902,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'containerVessel',
           vesselName: 'WIRON 5',
-          containerNumber: '0192394',
+          containerNumber: 'ABCU1234567',
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1282,7 +1282,10 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { vesselName: "error.vesselName.string.pattern.base" };
+      const error = { 
+        containerNumber: "error.containerNumber.string.pattern.base",
+        vesselName: "error.vesselName.string.pattern.base" 
+      };
       expect(response.result).toEqual(error);
     });
 
