@@ -29,20 +29,20 @@ export default class ExporterValidateRoutes {
               const addressOne = (address: any): string | undefined => {
                 const addressLineOne: string[] = [];
 
-                if (address && address.buildingNumber) {
-                  addressLineOne.push(address.buildingNumber);
+                if (address && address.buildingNumber && address.buildingNumber.trim()) {
+                  addressLineOne.push(address.buildingNumber.trim());
                 }
 
-                if (address && address.subBuildingName) {
-                  addressLineOne.push(address.subBuildingName);
+                if (address && address.subBuildingName && address.subBuildingName.trim()) {
+                  addressLineOne.push(address.subBuildingName.trim());
                 }
 
-                if (address && address.buildingName) {
-                  addressLineOne.push(address.buildingName);
+                if (address && address.buildingName && address.buildingName.trim()) {
+                  addressLineOne.push(address.buildingName.trim());
                 }
 
-                if (address && address.streetName) {
-                  addressLineOne.push(address.streetName);
+                if (address && address.streetName && address.streetName.trim()) {
+                  addressLineOne.push(address.streetName.trim());
                 }
 
                 return (addressLineOne.length > 0)
@@ -52,8 +52,6 @@ export default class ExporterValidateRoutes {
                   : '';
               }
               const addressFirstPart = addressOne(req.payload)
-
-              if (addressFirstPart === '') { return h.response(['error.addressFirstPart.any.required']).code(400) }
 
               await Controller.addExporterDetails(req, h, false, userPrincipal, documentNumber, contactId);
 
@@ -71,10 +69,10 @@ export default class ExporterValidateRoutes {
               payload: async function(value: any) {
                 const schema = Joi.object()
                   .keys({
-                    subBuildingName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).required(),
-                    buildingNumber: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).required(),
-                    buildingName: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
-                    streetName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).required(),
+                    subBuildingName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).allow(''),
+                    buildingNumber: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).allow(''),
+                    buildingName: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).allow(''),
+                    streetName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).allow(''),
                     townCity: Joi.string().trim().regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
                     county: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).allow(''),
                     postcode: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).required().min(5).max(8),
@@ -86,8 +84,19 @@ export default class ExporterValidateRoutes {
                   allowUnknown: true
                 });
 
-                if (errors.error) {
-                  throw errors.error;
+                const validationErrors = errors.error ? errors.error.details : [];
+
+                if (value && !value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
+                  validationErrors.push({
+                    message: '"addressFirstPart" is required',
+                    path: ['addressFirstPart'],
+                    type: 'any.required',
+                    context: { key: 'addressFirstPart', label: 'addressFirstPart' }
+                  });
+                }
+
+                if (validationErrors.length > 0) {
+                  throw new Joi.ValidationError('ValidationError', validationErrors, value);
                 }
 
                 if (COUNTRY.includes(value.country.toUpperCase())) {
@@ -115,7 +124,9 @@ export default class ExporterValidateRoutes {
                 if (acceptsHtml(req.headers)) {
                   return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
                 }
-                return h.response(errorObject).code(400).takeover();
+                // API consumers expect array format
+                const errorArray = Object.values(errorObject);
+                return h.response(errorArray).code(400).takeover();
               }
             }
           }
