@@ -16,8 +16,8 @@ const defaultUser = 'Bob';
 const defaultContact = 'contactBob';
 
 beforeAll(async () => {
-  mongoServer = new MongoMemoryServer();
-  const mongoUri = await mongoServer.getConnectionString();
+  mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
   await mongoose.connect(mongoUri).catch(err => { console.log(err) });
 });
 

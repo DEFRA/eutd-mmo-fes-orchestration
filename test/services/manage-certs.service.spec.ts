@@ -1,26 +1,20 @@
 import ManageCertsService from '../../src/services/manage-certs.service';
 import * as test from 'tape';
 import logger from '../../src/logger';
-import MongoMemoryServer from "mongodb-memory-server";
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import {MongoConnection} from "../../src/persistence/mongo";
 import {baseConfig} from "../../src/persistence/schema/base";
 
-let mongod;
+let mongod: MongoMemoryServer;
 
 test('setup', async (t) => {
-  mongod = new MongoMemoryServer({
+  mongod = await MongoMemoryServer.create({
     instance: {
       port: 17017,
-      ip: 'localhost',
       dbName: 'sample'
-    },
-    binary: {
-      // This is the most recent version supported
-      version: '3.6.3'
-    },
-    debug: true
+    }
   });
-  const connString = await mongod.getConnectionString();
+  const connString = mongod.getUri();
 
   await MongoConnection.connect(connString, 'sample', '');
   t.end();
