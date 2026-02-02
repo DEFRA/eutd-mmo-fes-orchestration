@@ -997,6 +997,102 @@ describe('upsertTransportDetails', () => {
       'contactBob'
     )
   });
+
+  it('should validate and reject invalid container numbers for train arrival', async () => {
+    const trainTransport = {
+      vehicle: 'train',
+      arrival: true,
+      containerNumbers: ['INVALID123'] // Invalid format
+    };
+
+    await expect(
+      StorageDocumentService.upsertTransportDetails('Bob', trainTransport, 'GBR-234234-234234-23424', defaultContact)
+    ).rejects.toThrow();
+  });
+
+  it('should validate and reject invalid container numbers for truck arrival', async () => {
+    const truckTransport = {
+      vehicle: 'truck',
+      arrival: true,
+      containerNumbers: ['ABC1234567'] // Missing U/J/Z/R character
+    };
+
+    await expect(
+      StorageDocumentService.upsertTransportDetails('Bob', truckTransport, 'GBR-234234-234234-23424', defaultContact)
+    ).rejects.toThrow();
+  });
+
+  it('should accept valid container numbers for train arrival', async () => {
+    const trainTransport = {
+      vehicle: 'train',
+      arrival: true,
+      containerNumbers: ['ABCU1234567', 'XYZJ7654321']
+    };
+
+    await StorageDocumentService.upsertTransportDetails('Bob', trainTransport, 'GBR-234234-234234-23424', defaultContact);
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should accept valid container numbers for truck arrival', async () => {
+    const truckTransport = {
+      vehicle: 'truck',
+      arrival: true,
+      containerNumbers: ['ABCZ1234567']
+    };
+
+    await StorageDocumentService.upsertTransportDetails('Bob', truckTransport, 'GBR-234234-234234-23424', defaultContact);
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should not validate container numbers for departure transport', async () => {
+    const departureTransport = {
+      vehicle: 'train',
+      arrival: false,
+      containerNumbers: ['INVALID123'] // Invalid but should not be validated for departure
+    };
+
+    await StorageDocumentService.upsertTransportDetails('Bob', departureTransport, 'GBR-234234-234234-23424', defaultContact);
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should not validate container numbers for plane arrival', async () => {
+    const planeTransport = {
+      vehicle: 'plane',
+      arrival: true,
+      containerNumbers: ['INVALID123'] // Invalid but should not be validated for plane
+    };
+
+    await StorageDocumentService.upsertTransportDetails('Bob', planeTransport, 'GBR-234234-234234-23424', defaultContact);
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should accept empty container numbers array', async () => {
+    const trainTransport = {
+      vehicle: 'train',
+      arrival: true,
+      containerNumbers: []
+    };
+
+    await StorageDocumentService.upsertTransportDetails('Bob', trainTransport, 'GBR-234234-234234-23424', defaultContact);
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should accept undefined container numbers', async () => {
+    const trainTransport = {
+      vehicle: 'train',
+      arrival: true,
+      containerNumbers: undefined
+    };
+
+    await StorageDocumentService.upsertTransportDetails('Bob', trainTransport, 'GBR-234234-234234-23424', defaultContact);
+
+    expect(spy).toHaveBeenCalled();
+  });
 });
 
 describe('getTransportDetails', () => {

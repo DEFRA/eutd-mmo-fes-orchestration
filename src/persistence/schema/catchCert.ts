@@ -319,25 +319,29 @@ export interface CatchCertificateBasicTransportDetails {
 }
 export interface CatchCertificateTrain extends CatchCertificateBasicTransportDetails {
   railwayBillNumber: string,
-  containerIdentificationNumber?: string
+  containerIdentificationNumber?: string,
+  containerNumbers?: string[]
 }
 
 export interface CatchCertificatePlane extends CatchCertificateBasicTransportDetails {
   flightNumber: string,
-  containerNumber: string
+  containerNumber: string,
+  containerNumbers?: string[]
 }
 
 export interface CatchCertificateContainerVessel extends CatchCertificateBasicTransportDetails {
   vesselName: string,
   flagState: string,
-  containerNumber: string
+  containerNumber: string,
+  containerNumbers?: string[]
 }
 
 export interface CatchCertificateTruck extends CatchCertificateBasicTransportDetails {
   cmr?: boolean;
   nationalityOfVehicle?: string,
   registrationNumber?: string,
-  containerIdentificationNumber?: string
+  containerIdentificationNumber?: string,
+  containerNumbers?: string[]
 }
 
 export type CatchCertificateTransport = CatchCertificateTrain | CatchCertificatePlane | CatchCertificateContainerVessel | CatchCertificateTruck;

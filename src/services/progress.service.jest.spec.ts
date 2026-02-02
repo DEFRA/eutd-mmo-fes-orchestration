@@ -541,7 +541,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA123456',
           transportDocuments: [{
@@ -596,7 +596,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           transportDocuments: [{
             name: 'name',
@@ -748,7 +748,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: [{
@@ -802,7 +802,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: [{
@@ -856,7 +856,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: []
@@ -973,7 +973,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'ABC-123/456.789',
           transportDocuments: [{
@@ -1028,7 +1028,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567'
         }, {
@@ -1136,7 +1136,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'ABC@123#!£$',
           transportDocuments: [{
@@ -1214,7 +1214,7 @@ describe('get', () => {
           vehicle: 'plane',
           exportedFrom: 'United Kingdom',
           flightNumber: 'BA078',
-          containerNumber: '0123456789',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London Heathrow',
           freightBillNumber: 'AA123456',
           transportDocuments: [{
@@ -1904,7 +1904,7 @@ describe('getTransportDetails', () => {
         },
         airwayBillNumber: 'AWB123456',
         flightNumber: 'FL123',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -1983,7 +1983,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2044,7 +2044,7 @@ describe('getTransportDetails', () => {
           isoNumericCode: '076',
         },
         vesselName: 'WIRON 5',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2057,28 +2057,8 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
-      const transport: Transport = {
-        vehicle: 'containerVessel',
-        exportedTo: {
-          officialCountryName: 'Brazil',
-          isoCodeAlpha2: 'BR',
-          isoCodeAlpha3: 'BRA',
-          isoNumericCode: '076',
-        },
-        vesselName: 'WIRON 5',
-        flagState: 'UK',
-        freightBillNumber: 'FB789',
-        departurePort: 'London Heathrow',
-        departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom',
-        placeOfUnloading: 'Sao Paulo'
-      };
-
-      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.INCOMPLETE
-      );
-    });
+    // Test removed: containerNumbers is now optional for container vessels
+    // it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
 
     it('should return INCOMPLETE when arrival container vessel is missing departureCountry', () => {
       const transport: Transport = {
@@ -2091,7 +2071,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2114,7 +2094,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departureDate: '15/11/2023',
         departureCountry: 'United Kingdom',
@@ -2137,7 +2117,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureCountry: 'United Kingdom',
@@ -2160,7 +2140,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: '@#$%^',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2173,29 +2153,8 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
-      const transport: Transport = {
-        vehicle: 'containerVessel',
-        exportedTo: {
-          officialCountryName: 'Brazil',
-          isoCodeAlpha2: 'BR',
-          isoCodeAlpha3: 'BRA',
-          isoNumericCode: '076',
-        },
-        vesselName: 'WIRON 5',
-        flagState: 'UK',
-        containerNumbers: ['CONT001', ''],
-        freightBillNumber: 'FB789',
-        departurePort: 'London Heathrow',
-        departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom',
-        placeOfUnloading: 'Sao Paulo'
-      };
-
-      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.INCOMPLETE
-      );
-    });
+    // Test removed: containerNumbers now allows empty strings in array
+    // it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
 
     // FI0-10289: Train arrival transport validation tests
     it('should return COMPLETED when all arrival train fields are filled out with valid values', () => {
@@ -5030,22 +4989,23 @@ describe('getStorageDocumentProgress', () => {
             netWeightFisheryProductDeparture: "100"
           }
         ],
-        transportation: {
-          exportedTo: {
-            officialCountryName: "Algeria",
-            isoCodeAlpha2: "DZ",
-            isoCodeAlpha3: "DZA",
-            isoNumericCode: "012"
-          },
-          pointOfDestination: "Algiers Port",
+        transportations: [{
+          id: 1,
           vehicle: "containerVessel",
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
-          exportDate: "22/09/2025",
-          freightBillNumber: ""
-        }
+          containerNumber: "ABCU1234567",
+          freightBillNumber: "123"
+        }],
+        exportedTo: {
+          officialCountryName: "Algeria",
+          isoCodeAlpha2: "DZ",
+          isoCodeAlpha3: "DZA",
+          isoNumericCode: "012"
+        },
+        pointOfDestination: "Algiers Port",
+        exportDate: "22/09/2025"
       },
     });
 
@@ -5061,10 +5021,10 @@ describe('getStorageDocumentProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         catches: ProgressStatus.COMPLETED,
         storageFacilities: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.COMPLETED,
+        transportDetails: ProgressStatus.INCOMPLETE,
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 2,
+      completedSections: 1,
       requiredSections: 5
     };
 
@@ -5083,6 +5043,7 @@ describe('getStorageDocumentProgress', () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
         transportation: {
+          id: "transport-id-124",
           exportedTo: {
             isoCodeAlpha2: "DZ",
             isoCodeAlpha3: "DZA",
@@ -5092,9 +5053,9 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test 1,Test 2",
+          containerNumber: "ABCJ1234567",
           exportDate: "22/09/2025",
-          freightBillNumber: ""
+          freightBillNumber: "123"
         }
       },
     });
@@ -5192,26 +5153,21 @@ describe('getStorageDocumentProgress', () => {
           },
         ],
         exportedTo: {
-          officialCountryName: 'SPAIN',
-          isoCodeAlpha2: 'A1',
-          isoCodeAlpha3: 'A3',
-          isoNumericCode: 'SP',
+          officialCountryName: 'Afghanistan',
+          isoCodeAlpha2: 'AF',
+          isoCodeAlpha3: 'AFG',
+          isoNumericCode: '004',
         },
-        transportation: {
+        transportations: [{
+          id: 1,
           vehicle: 'plane',
           flightNumber: 'BA078',
-          containerNumbers: '0123456789',
-          exportedFrom: 'United Kingdom',
-          exportDate: '25/09/2023',
-          exportedTo: {
-            officialCountryName: 'Afghanistan',
-            isoCodeAlpha2: 'AF',
-            isoCodeAlpha3: 'AFG',
-            isoNumericCode: '004',
-          },
-          pointOfDestination: 'Kabul Airport',
-          departurePlace: 'London Heathrow'
-        },
+          containerNumber: 'ABCU1234567',
+          departurePlace: 'London Heathrow',
+          freightBillNumber: '123'
+        }],
+        pointOfDestination: 'Kabul Airport',
+        exportDate: '25/09/2023',
         facilityName: 'dora',
         facilityAddressOne: 'MMO, LANCASTER HOUSE, HAMPSHIRE COURT',
         facilityBuildingName: 'LANCASTER HOUSE',
@@ -5242,10 +5198,10 @@ describe('getStorageDocumentProgress', () => {
         reference: ProgressStatus.COMPLETED,
         catches: ProgressStatus.COMPLETED,
         storageFacilities: ProgressStatus.INCOMPLETE,
-        transportDetails: ProgressStatus.COMPLETED,
+        transportDetails: ProgressStatus.INCOMPLETE,
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 3,
+      completedSections: 2,
       requiredSections: 5
     };
 
@@ -5358,7 +5314,7 @@ describe('getStorageDocumentProgress', () => {
           vehicle: 'plane',
           flightNumber: '0123456789',
           airwayBillNumber: 'a',
-          containerNumbers: 'one, two',
+          containerNumbers: 'ABCU1234567, ABCJ7654321',
           freightBillNumber: 'a',
           departurePort: 'airport',
           departureDate: '01/09/2025',
@@ -5835,28 +5791,29 @@ describe('getStorageDocumentProgress', () => {
           netWeightProductDeparture: '10.50',
           netWeightFisheryProductDeparture: '20.75'
         }],
-        transportation: {
-          exportedTo: {
-            officialCountryName: "Algeria",
-            isoCodeAlpha2: "DZ",
-            isoCodeAlpha3: "DZA",
-            isoNumericCode: "012"
-          },
-          pointOfDestination: "Algiers Port",
+        transportations: [{
+          id: 1,
           vehicle: "containerVessel",
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
-          exportDate: "22/09/2025",
-          freightBillNumber: ""
+          containerNumber: "ABCU1234567",
+          freightBillNumber: "123"
+        }],
+        exportedTo: {
+          officialCountryName: "Algeria",
+          isoCodeAlpha2: "DZ",
+          isoCodeAlpha3: "DZA",
+          isoNumericCode: "012"
         },
+        pointOfDestination: "Algiers Port",
+        exportDate: "22/09/2025"
       }
     });
 
     const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
 
-    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+    expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
   });
 
   it('should return INCOMPLETE transport details when at least one weight type is valid', async () => {
@@ -6161,28 +6118,29 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: 'port',
             cmr: 'false'
           },
-          transportation: {
-            exportedTo: {
-              officialCountryName: "Algeria",
-              isoCodeAlpha2: "DZ",
-              isoCodeAlpha3: "DZA",
-              isoNumericCode: "012"
-            },
-            pointOfDestination: "Algiers Port",
+          transportations: [{
+            id: 1,
             vehicle: "containerVessel",
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
-            exportDate: "15/01/2026",
-            freightBillNumber: ""
+            containerNumber: "ABCU1234567",
+            freightBillNumber: "123"
+          }],
+          exportedTo: {
+            officialCountryName: "Algeria",
+            isoCodeAlpha2: "DZ",
+            isoCodeAlpha3: "DZA",
+            isoNumericCode: "012"
           },
+          pointOfDestination: "Algiers Port",
+          exportDate: "15/01/2026"
         }
       });
 
       const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
 
-      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
     });
 
     it('should return INCOMPLETE transportDetails when departure transport date is not after arrival transport departure date', async () => {
