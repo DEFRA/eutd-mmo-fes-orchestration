@@ -69,10 +69,10 @@ export default class ExporterValidateRoutes {
               payload: async function(value: any) {
                 const schema = Joi.object()
                   .keys({
-                    subBuildingName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).required(),
-                    buildingNumber: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).required(),
-                    buildingName: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
-                    streetName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).required(),
+                    subBuildingName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).allow(''),
+                    buildingNumber: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).allow(''),
+                    buildingName: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).allow(''),
+                    streetName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).allow(''),
                     townCity: Joi.string().trim().regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
                     county: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).allow(''),
                     postcode: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).required().min(5).max(8),
@@ -86,7 +86,7 @@ export default class ExporterValidateRoutes {
 
                 const validationErrors = errors.error ? errors.error.details : [];
 
-                if (value && !value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
+                if (!value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
                   validationErrors.push({
                     message: '"addressFirstPart" is required',
                     path: ['addressFirstPart'],
