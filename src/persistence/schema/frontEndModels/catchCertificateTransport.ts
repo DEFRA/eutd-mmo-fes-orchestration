@@ -125,11 +125,14 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
     }
     case plane: {
       const model = transport as BackEndModels.CatchCertificatePlane;
+      // Transform containerNumber string to containerNumbers array
+      const containerNumbers = model.containerNumber?.split(' ').filter((c: string) => c?.trim());
       frontEndTransport = {
         id: transport.id.toString(),
         vehicle: model.vehicle,
         flightNumber: model.flightNumber,
         containerNumber: model.containerNumber,
+        containerNumbers: containerNumbers,
         departurePlace: model.departurePlace,
         freightBillNumber: model.freightBillNumber,
         documents: model.transportDocuments
@@ -138,11 +141,14 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
     }
     case train: {
       const model = transport as BackEndModels.CatchCertificateTrain;
+      // Transform containerIdentificationNumber string to containerNumbers array
+      const containerNumbers = model.containerIdentificationNumber?.split(' ').filter((c: string) => c?.trim());
       frontEndTransport = {
         id: transport.id.toString(),
         vehicle: model.vehicle,
         railwayBillNumber: model.railwayBillNumber,
         containerIdentificationNumber: model.containerIdentificationNumber,
+        containerNumbers: containerNumbers,
         departurePlace: model.departurePlace,
         freightBillNumber: model.freightBillNumber,
         documents: model.transportDocuments
@@ -151,12 +157,15 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
     }
     case containerVessel: {
       const model = transport as BackEndModels.CatchCertificateContainerVessel;
+      // Transform containerNumber string to containerNumbers array
+      const containerNumbers = model.containerNumber?.split(' ').filter((c: string) => c?.trim());
       frontEndTransport = {
         id: transport.id.toString(),
         vehicle: model.vehicle,
         vesselName: model.vesselName,
         flagState: model.flagState,
         containerNumber: model.containerNumber,
+        containerNumbers: containerNumbers,
         departurePlace: model.departurePlace,
         freightBillNumber: model.freightBillNumber,
         documents: model.transportDocuments

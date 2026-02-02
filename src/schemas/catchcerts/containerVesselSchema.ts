@@ -43,12 +43,13 @@ const containerVesselSchema = Joi.object({
   }),
   vesselName: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/),
   flagState: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
-  containerNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
+  containerNumber: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().max(50).regex(/^[A-Z]{3}[UJZR]\d{7}$/))
-    .min(1)
-    .max(5)
-    .required(),
+    .items(Joi.string().trim().max(50).regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
+      'string.pattern.base': 'error.containerNumbers.string.pattern.base'
+    }))
+    .max(10)
+    .optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.any(),

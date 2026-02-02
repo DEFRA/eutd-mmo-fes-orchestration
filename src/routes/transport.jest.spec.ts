@@ -148,7 +148,7 @@ describe("transport routes", () => {
                     flightNumber: "x",
                     departurePlace: "x",
                     containerNumber: "x",
-                    containerNumbers: ["ABC1234567"],
+                    containerNumbers: ["ABCU1234567"],
                     pointOfDestination: "Paris Airport",
                     exportedTo: {
                       officialCountryName: "Nigeria"
@@ -789,7 +789,6 @@ describe("transport routes", () => {
                 placeOfUnloading: "error.placeOfUnloading.any.required",
                 vesselName: "error.vesselName.string.empty",
                 flagState: "error.flagState.string.empty",
-                "containerNumbers.0": "error.containerNumbers.array.min",
             });
         });
 
@@ -840,29 +839,8 @@ describe("transport routes", () => {
             });
         });
 
-        it('returns 400 when containerNumbers is empty for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
-            const body = {
-              journey: "storageNotes",
-              vesselName: "Vessel1111",
-              flagState: "UK",
-              freightBillNumber: "",
-              containerNumbers: [],
-              placeOfUnloading: "UK",
-              departureDate: moment().format('DD/MM/YYYY'),
-              vehicle:"containerVessel",
-              arrival: true,
-              departurePort: "Lexis Port",
-              departureCountry: "United Kingdom",
-            };
-
-            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
-            const response = await server.inject(request);
-            expect(response.statusCode).toBe(400);
-            expect(mockAddTransport).not.toHaveBeenCalled();
-            expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.array.min",
-            });
-        });
+        // Test removed: containerNumbers is now optional, empty arrays are valid
+        // it('returns 400 when containerNumbers is empty for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
 
         it('returns 400 when flagState has invalid characters for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
             const body = {
@@ -912,29 +890,8 @@ describe("transport routes", () => {
             });
         });
 
-        it('returns 400 when containerNumbers contains empty string for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
-            const body = {
-              journey: "storageNotes",
-              vesselName: "Vessel1111",
-              flagState: "UK",
-              freightBillNumber: "",
-              containerNumbers: ["ABCU1234567", ""],
-              placeOfUnloading: "UK",
-              departureDate: moment().format('DD/MM/YYYY'),
-              vehicle:"containerVessel",
-              arrival: true,
-              departurePort: "Lexis Port",
-              departureCountry: "United Kingdom",
-            };
-
-            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
-            const response = await server.inject(request);
-            expect(response.statusCode).toBe(400);
-            expect(mockAddTransport).not.toHaveBeenCalled();
-            expect(response.result).toEqual({
-                "containerNumbers.1": "error.containerNumbers.1.string.empty",
-            });
-        });
+        // Test removed: containerNumbers now allows empty strings in array (they're filtered before save)
+        // it('returns 400 when containerNumbers contains empty string for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
 
         it('returns 400 when we POST an arrival when departureDate is past today\'s date and flight number and place of unloading are empty /v1/transport/plane/details', async () => {
             const body = {
@@ -958,7 +915,6 @@ describe("transport routes", () => {
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
                 flightNumber: "error.flightNumber.string.empty",
-                "containerNumbers.0": "error.containerNumbers.array.min",
                 departureCountry: "error.departureCountry.string.empty",
                 departurePort: "error.departurePort.string.empty",
                 placeOfUnloading: "error.placeOfUnloading.any.required",
@@ -988,29 +944,8 @@ describe("transport routes", () => {
             expect(response.result).toEqual({ some: 'data' });
         });
 
-        it('returns 400 when containerNumbers is empty for arrival plane transport /v1/transport/plane/details', async () => {
-            const body = {
-              journey: "storageNotes",
-              airwayBillNumber: "",
-              flightNumber: "FLIGHT1111",
-              freightBillNumber: "",
-              containerNumbers: [],
-              departureCountry: "France",
-              departurePort: "Calais",
-              departureDate: moment().format('DD/MM/YYYY'),
-              placeOfUnloading: "UK",
-              vehicle:"plane",
-              arrival: true
-            };
-
-            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
-            const response = await server.inject(request);
-            expect(response.statusCode).toBe(400);
-            expect(mockAddTransport).not.toHaveBeenCalled();
-            expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.array.min"
-            });
-        });
+        // Test removed: containerNumbers is now optional, empty arrays are valid
+        // it('returns 400 when containerNumbers is empty for arrival plane transport /v1/transport/plane/details', async () => {
 
         it('returns 400 when departureCountry is empty for arrival plane transport /v1/transport/plane/details', async () => {
             const body = {
