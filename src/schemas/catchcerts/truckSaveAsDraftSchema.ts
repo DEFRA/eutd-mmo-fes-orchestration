@@ -31,8 +31,9 @@ const truckSaveAsDraftSchema = Joi.object({
     'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
   }),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().max(50).regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
-      'string.pattern.base': 'error.containerNumbers.string.pattern.base'
+    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
+      'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+      'string.max': 'error.containerNumbers.string.max'
     }))
     .max(10)
     .optional(),
