@@ -293,6 +293,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.plane,
       flightNumber: "123456",
       containerNumber: "123456",
+      containerNumbers: ["123456"],
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
@@ -343,6 +344,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vesselName: "Vessel Name",
       flagState: "UK",
       containerNumber: "12345",
+      containerNumbers: ["12345"],
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
@@ -394,6 +396,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vesselName: "Vessel Name",
       flagState: "UK",
       containerNumber: "12345",
+      containerNumbers: ["12345"],
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
