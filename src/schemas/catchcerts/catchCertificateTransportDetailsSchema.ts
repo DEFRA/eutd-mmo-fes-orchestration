@@ -31,11 +31,11 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         Joi.string()
           .trim()
           .allow('')
-          .max(50)
           .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
+          .max(50)
           .messages({
-            'string.max': 'error.containerNumbers.string.max',
             'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+            'string.max': 'error.containerNumbers.string.max',
           })
       )
       .max(10)
