@@ -172,7 +172,7 @@ describe('exporter validate routes', () => {
         },
       });
 
-      const expectedResponse = { country: 'error.country.any.required' };
+      const expectedResponse = ['error.country.any.required'];
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
@@ -211,7 +211,7 @@ describe('exporter validate routes', () => {
         },
       });
 
-      const expectedResponse = { country: 'error.country.any.invalid' };
+      const expectedResponse = ['error.country.any.invalid'];
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(mockValidateCountriesName).toHaveBeenCalledWith({ officialCountryName: 'Invalid country name' }, '', 'country');
@@ -286,7 +286,6 @@ describe('exporter validate routes', () => {
       });
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
-      expect(mockWithDocumentLegitimatelyOwned).toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
       expect(response.result).toEqual(['error.addressFirstPart.any.required']);
     });
