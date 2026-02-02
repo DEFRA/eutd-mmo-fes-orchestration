@@ -86,7 +86,7 @@ export default class ExporterValidateRoutes {
 
                 const validationErrors = errors.error ? errors.error.details : [];
 
-                if (!value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
+                if (value && !value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
                   validationErrors.push({
                     message: '"addressFirstPart" is required',
                     path: ['addressFirstPart'],
