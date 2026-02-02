@@ -86,7 +86,7 @@ export default class ExporterValidateRoutes {
 
                 const validationErrors = errors.error ? errors.error.details : [];
 
-                if (!value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
+                if (value && !value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
                   validationErrors.push({
                     message: '"addressFirstPart" is required',
                     path: ['addressFirstPart'],
@@ -124,7 +124,9 @@ export default class ExporterValidateRoutes {
                 if (acceptsHtml(req.headers)) {
                   return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
                 }
-                return h.response(errorObject).code(400).takeover();
+                // API consumers expect array format
+                const errorArray = Object.values(errorObject);
+                return h.response(errorArray).code(400).takeover();
               }
             }
           }
