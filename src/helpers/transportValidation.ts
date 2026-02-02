@@ -15,7 +15,7 @@ export function validateContainerNumbers(
   }
 
   // Filter out empty strings
-  const nonEmptyContainers = containerNumbers.filter(c => c && c.trim());
+  const nonEmptyContainers = containerNumbers.filter(c => c?.trim());
 
   if (nonEmptyContainers.length === 0) {
     return validationErrors;
