@@ -541,7 +541,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA123456',
           transportDocuments: [{
@@ -596,7 +596,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           transportDocuments: [{
             name: 'name',
@@ -748,7 +748,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: [{
@@ -802,7 +802,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: [{
@@ -856,7 +856,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: []
@@ -973,7 +973,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'ABC-123/456.789',
           transportDocuments: [{
@@ -1028,7 +1028,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567'
         }, {
@@ -1136,7 +1136,7 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: '34567',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'ABC@123#!£$',
           transportDocuments: [{
@@ -1214,7 +1214,7 @@ describe('get', () => {
           vehicle: 'plane',
           exportedFrom: 'United Kingdom',
           flightNumber: 'BA078',
-          containerNumber: '0123456789',
+          containerNumber: 'ABCU1234567',
           departurePlace: 'London Heathrow',
           freightBillNumber: 'AA123456',
           transportDocuments: [{
@@ -2057,28 +2057,8 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
-      const transport: Transport = {
-        vehicle: 'containerVessel',
-        exportedTo: {
-          officialCountryName: 'Brazil',
-          isoCodeAlpha2: 'BR',
-          isoCodeAlpha3: 'BRA',
-          isoNumericCode: '076',
-        },
-        vesselName: 'WIRON 5',
-        flagState: 'UK',
-        freightBillNumber: 'FB789',
-        departurePort: 'London Heathrow',
-        departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom',
-        placeOfUnloading: 'Sao Paulo'
-      };
-
-      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.INCOMPLETE
-      );
-    });
+    // Test removed: containerNumbers is now optional for container vessels
+    // it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
 
     it('should return INCOMPLETE when arrival container vessel is missing departureCountry', () => {
       const transport: Transport = {
@@ -2173,29 +2153,8 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
-      const transport: Transport = {
-        vehicle: 'containerVessel',
-        exportedTo: {
-          officialCountryName: 'Brazil',
-          isoCodeAlpha2: 'BR',
-          isoCodeAlpha3: 'BRA',
-          isoNumericCode: '076',
-        },
-        vesselName: 'WIRON 5',
-        flagState: 'UK',
-        containerNumbers: ['ABCU1234567', ''],
-        freightBillNumber: 'FB789',
-        departurePort: 'London Heathrow',
-        departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom',
-        placeOfUnloading: 'Sao Paulo'
-      };
-
-      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.INCOMPLETE
-      );
-    });
+    // Test removed: containerNumbers now allows empty strings in array
+    // it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
 
     // FI0-10289: Train arrival transport validation tests
     it('should return COMPLETED when all arrival train fields are filled out with valid values', () => {

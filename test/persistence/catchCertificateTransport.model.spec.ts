@@ -136,6 +136,257 @@ test('CatchCertificateTransport toFrontEndTransport - should not include contain
   t.end();
 });
 
+test('CatchCertificateTransport toFrontEndTransport - should transform containerNumber string to containerNumbers array for plane', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificatePlane = {
+    id: 1,
+    vehicle: 'plane',
+    flightNumber: 'FL123',
+    containerNumber: 'ABCU1234567 ABCJ2345678 ABCZ3456789',
+    departurePlace: 'Heathrow'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
+  t.equal(result.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle single containerNumber for plane', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificatePlane = {
+    id: 1,
+    vehicle: 'plane',
+    flightNumber: 'FL123',
+    containerNumber: 'ABCU1234567',
+    departurePlace: 'Heathrow'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567']);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should filter out empty strings when splitting containerNumber for plane', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificatePlane = {
+    id: 1,
+    vehicle: 'plane',
+    flightNumber: 'FL123',
+    containerNumber: 'ABCU1234567  ABCJ2345678   ABCZ3456789',
+    departurePlace: 'Heathrow'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle empty containerNumber for plane', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificatePlane = {
+    id: 1,
+    vehicle: 'plane',
+    flightNumber: 'FL123',
+    containerNumber: '',
+    departurePlace: 'Heathrow'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.equal(result.containerNumbers, undefined);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should transform containerIdentificationNumber string to containerNumbers array for train', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateTrain = {
+    id: 1,
+    vehicle: 'train',
+    railwayBillNumber: 'RB123',
+    containerIdentificationNumber: 'ABCU1234567 ABCJ2345678 ABCZ3456789',
+    departurePlace: 'Station'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
+  t.equal(result.containerIdentificationNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle single containerIdentificationNumber for train', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateTrain = {
+    id: 1,
+    vehicle: 'train',
+    railwayBillNumber: 'RB123',
+    containerIdentificationNumber: 'ABCU1234567',
+    departurePlace: 'Station'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567']);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should filter out empty strings when splitting containerIdentificationNumber for train', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateTrain = {
+    id: 1,
+    vehicle: 'train',
+    railwayBillNumber: 'RB123',
+    containerIdentificationNumber: 'ABCU1234567  ABCJ2345678   ABCZ3456789',
+    departurePlace: 'Station'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle empty containerIdentificationNumber for train', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateTrain = {
+    id: 1,
+    vehicle: 'train',
+    railwayBillNumber: 'RB123',
+    containerIdentificationNumber: '',
+    departurePlace: 'Station'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.equal(result.containerNumbers, undefined);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle null containerIdentificationNumber for train', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateTrain = {
+    id: 1,
+    vehicle: 'train',
+    railwayBillNumber: 'RB123',
+    containerIdentificationNumber: null,
+    departurePlace: 'Station'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.equal(result.containerNumbers, undefined);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should transform containerNumber string to containerNumbers array for containerVessel', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateContainerVessel = {
+    id: 1,
+    vehicle: 'containerVessel',
+    vesselName: 'Ship Name',
+    flagState: 'UK',
+    containerNumber: 'ABCU1234567 ABCJ2345678 ABCZ3456789',
+    departurePlace: 'Port'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
+  t.equal(result.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle single containerNumber for containerVessel', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateContainerVessel = {
+    id: 1,
+    vehicle: 'containerVessel',
+    vesselName: 'Ship Name',
+    flagState: 'UK',
+    containerNumber: 'ABCU1234567',
+    departurePlace: 'Port'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567']);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should filter out empty strings when splitting containerNumber for containerVessel', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateContainerVessel = {
+    id: 1,
+    vehicle: 'containerVessel',
+    vesselName: 'Ship Name',
+    flagState: 'UK',
+    containerNumber: 'ABCU1234567  ABCJ2345678   ABCZ3456789',
+    departurePlace: 'Port'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle empty containerNumber for containerVessel', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateContainerVessel = {
+    id: 1,
+    vehicle: 'containerVessel',
+    vesselName: 'Ship Name',
+    flagState: 'UK',
+    containerNumber: '',
+    departurePlace: 'Port'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.equal(result.containerNumbers, undefined);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 container numbers for plane', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificatePlane = {
+    id: 1,
+    vehicle: 'plane',
+    flightNumber: 'FL123',
+    containerNumber: 'C1 C2 C3 C4 C5 C6 C7 C8 C9 C10',
+    departurePlace: 'Airport'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
+  t.equal(result.containerNumbers?.length, 10);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 container numbers for train', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateTrain = {
+    id: 1,
+    vehicle: 'train',
+    railwayBillNumber: 'RB123',
+    containerIdentificationNumber: 'C1 C2 C3 C4 C5 C6 C7 C8 C9 C10',
+    departurePlace: 'Station'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
+  t.equal(result.containerNumbers?.length, 10);
+  t.end();
+});
+
+test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 container numbers for containerVessel', (t) => {
+  const backEndTransport: BackEndModels.CatchCertificateContainerVessel = {
+    id: 1,
+    vehicle: 'containerVessel',
+    vesselName: 'Ship Name',
+    flagState: 'UK',
+    containerNumber: 'C1 C2 C3 C4 C5 C6 C7 C8 C9 C10',
+    departurePlace: 'Port'
+  };
+
+  const result = toFrontEndTransport(backEndTransport);
+
+  t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
+  t.equal(result.containerNumbers?.length, 10);
+  t.end();
+});
+
 test('CatchCertificateTransport toBackEndTransport - should preserve containerIdentificationNumber for truck when transforming to backend', (t) => {
   const frontEndTransport = {
     id: '1',
