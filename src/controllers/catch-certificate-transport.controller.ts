@@ -28,17 +28,26 @@ export default class CatchCertificateTransportController {
   public static async updateTransport(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = (req.payload as any)
     
-    // Transform containerNumbers array to containerIdentificationNumber string for trucks
     let containerIdentificationNumber = payload.containerIdentificationNumber;
-    if (payload.vehicle === 'truck' && payload.containerNumbers && Array.isArray(payload.containerNumbers)) {
+    let containerNumber = payload.containerNumber;
+    
+    // For truck and train, transform containerNumbers array to containerIdentificationNumber string
+    if ((payload.vehicle === 'truck' || payload.vehicle === 'train') && payload.containerNumbers && Array.isArray(payload.containerNumbers)) {
       containerIdentificationNumber = payload.containerNumbers.filter((c: string) => c?.trim()).join(' ');
+    }
+    
+    // For plane and container-vessel, transform containerNumbers array to containerNumber string
+    if ((payload.vehicle === 'plane' || payload.vehicle === 'containerVessel') 
+        && payload.containerNumbers && Array.isArray(payload.containerNumbers)) {
+      containerNumber = payload.containerNumbers.filter((c: string) => c?.trim()).join(' ');
     }
     
     const transport: CatchCertificateTransport = {
       id: payload.id,
       vehicle: payload.vehicle,
       ...payload,
-      containerIdentificationNumber
+      containerIdentificationNumber,
+      containerNumber
     };
 
     return Service.updateTransport(transport, userPrincipal, documentNumber, contactId);

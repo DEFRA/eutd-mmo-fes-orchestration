@@ -61,7 +61,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'truck',
         nationalityOfVehicle: 'United Kingdom',
         registrationNumber: 'ABC123',
-        containerNumbers: ['CONT001', 'CONT002', 'CONT003'],
+        containerNumbers: ['ABCU1234567', 'DEFJ2345678', 'GHIZ3456789'],
         departurePlace: 'Dover'
       };
 
@@ -98,7 +98,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('containerNumbers[0]');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should reject containerIdentificationNumber with invalid format (not ISO 6346)', () => {
@@ -114,7 +114,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('containerNumbers[0]');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should reject containerNumbers item with hyphens', () => {
@@ -130,7 +130,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('containerNumbers[0]');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should reject containerNumbers item with underscores', () => {
@@ -146,7 +146,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('containerNumbers[0]');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should reject containerIdentificationNumber with spaces', () => {
@@ -430,7 +430,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
+      expect(error?.message).toContain('error.containerNumbers.string.pattern.base');
     });
 
     it('should accept maximum 10 containerNumbers for plane', () => {
@@ -544,7 +544,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
+      expect(error?.message).toContain('error.containerNumbers.string.pattern.base');
     });
 
     it('should accept maximum 10 containerNumbers for containerVessel', () => {
@@ -581,20 +581,20 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
   describe('when vehicle is not truck or train', () => {
 
-    it('should forbid containerNumbers for plane', () => {
+    it('should forbid containerIdentificationNumber for plane', () => {
       const payload = {
         id: 'transport-123',
         vehicle: 'plane',
         flightNumber: 'FL123',
         containerNumber: 'CONT123',
-        containerNumbers: ['ABCD1234567'],
+        containerIdentificationNumber: 'ABCD1234567',
         departurePlace: 'Heathrow'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('containerNumbers');
+      expect(error?.message).toContain('containerIdentificationNumber');
     });
 
     it('should accept containerIdentificationNumber for train with valid alphanumeric value', () => {

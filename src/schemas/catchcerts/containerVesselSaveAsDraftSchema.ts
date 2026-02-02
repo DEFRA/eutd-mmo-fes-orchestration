@@ -40,7 +40,9 @@ const containerVesselSchema = Joi.object({
     is: true,
     then: Joi.array()
       .items(
-        Joi.string().trim().max(50).regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('')
+        Joi.string().trim().max(50).regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
+          'string.pattern.base': 'error.containerNumbers.string.pattern.base'
+        })
       )
       .max(10)
       .optional(),

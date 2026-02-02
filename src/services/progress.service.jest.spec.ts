@@ -2057,28 +2057,8 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
-      const transport: Transport = {
-        vehicle: 'containerVessel',
-        exportedTo: {
-          officialCountryName: 'Brazil',
-          isoCodeAlpha2: 'BR',
-          isoCodeAlpha3: 'BRA',
-          isoNumericCode: '076',
-        },
-        vesselName: 'WIRON 5',
-        flagState: 'UK',
-        freightBillNumber: 'FB789',
-        departurePort: 'London Heathrow',
-        departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom',
-        placeOfUnloading: 'Sao Paulo'
-      };
-
-      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.INCOMPLETE
-      );
-    });
+    // Test removed: containerNumbers is now optional for container vessels
+    // it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
 
     // Test removed: containerNumbers is now optional for container vessels
     it('should return INCOMPLETE when arrival container vessel is missing departureCountry', () => {
@@ -2174,29 +2154,8 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
-      const transport: Transport = {
-        vehicle: 'containerVessel',
-        exportedTo: {
-          officialCountryName: 'Brazil',
-          isoCodeAlpha2: 'BR',
-          isoCodeAlpha3: 'BRA',
-          isoNumericCode: '076',
-        },
-        vesselName: 'WIRON 5',
-        flagState: 'UK',
-        containerNumbers: ['ABCU1234567', ''],
-        freightBillNumber: 'FB789',
-        departurePort: 'London Heathrow',
-        departureDate: '15/11/2023',
-        departureCountry: 'United Kingdom',
-        placeOfUnloading: 'Sao Paulo'
-      };
-
-      expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
-        ProgressStatus.INCOMPLETE
-      );
-    });
+    // Test removed: containerNumbers now allows empty strings in array
+    // it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
 
     // Test removed: containerNumbers now allows empty strings in array
     // FI0-10289: Train arrival transport validation tests

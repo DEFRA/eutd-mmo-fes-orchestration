@@ -1,5 +1,4 @@
 import * as test from 'tape';
-import * as Hapi from "@hapi/hapi";
 const sinon = require('sinon');
 import CatchCertificateTransportController from "../../src/controllers/catch-certificate-transport.controller";
 import Service from "../../src/services/catch-certificate-transport.service";
@@ -125,15 +124,14 @@ test('CatchCertificateTransportController.updateTransport - should handle contai
   }
 });
 
-test('CatchCertificateTransportController.updateTransport - should not transform containerNumbers for plane vehicle', async (t) => {
+test('CatchCertificateTransportController.updateTransport - should transform containerNumbers array to containerNumber string for plane', async (t) => {
   try {
     const mockRequest = {
       payload: {
         id: '1',
         vehicle: 'plane',
         flightNumber: 'FL123',
-        containerNumber: 'CONT123',
-        containerNumbers: ['CONT001', 'CONT002'],
+        containerNumbers: ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789'],
         departurePlace: 'Heathrow'
       }
     };
@@ -144,7 +142,143 @@ test('CatchCertificateTransportController.updateTransport - should not transform
 
     const callArgs = updateTransportStub.getCall(0).args[0];
     t.equal(callArgs.vehicle, 'plane');
+    t.equal(callArgs.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
     t.equal(callArgs.containerIdentificationNumber, undefined);
+
+    updateTransportStub.restore();
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('CatchCertificateTransportController.updateTransport - should filter empty strings from containerNumbers array for plane', async (t) => {
+  try {
+    const mockRequest = {
+      payload: {
+        id: '1',
+        vehicle: 'plane',
+        flightNumber: 'FL123',
+        containerNumbers: ['ABCU1234567', '', 'ABCZ3456789', '  ', 'ABCR4567890'],
+        departurePlace: 'Heathrow'
+      }
+    };
+
+    const updateTransportStub = sinon.stub(Service, 'updateTransport').resolves({});
+
+    await CatchCertificateTransportController.updateTransport(mockRequest as any, userPrincipal, documentNumber, contactId);
+
+    const callArgs = updateTransportStub.getCall(0).args[0];
+    t.equal(callArgs.containerNumber, 'ABCU1234567 ABCZ3456789 ABCR4567890');
+
+    updateTransportStub.restore();
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('CatchCertificateTransportController.updateTransport - should transform containerNumbers array to containerIdentificationNumber string for train', async (t) => {
+  try {
+    const mockRequest = {
+      payload: {
+        id: '1',
+        vehicle: 'train',
+        railwayBillNumber: 'RB123',
+        containerNumbers: ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789'],
+        departurePlace: 'Station'
+      }
+    };
+
+    const updateTransportStub = sinon.stub(Service, 'updateTransport').resolves({});
+
+    await CatchCertificateTransportController.updateTransport(mockRequest as any, userPrincipal, documentNumber, contactId);
+
+    const callArgs = updateTransportStub.getCall(0).args[0];
+    t.equal(callArgs.vehicle, 'train');
+    t.equal(callArgs.containerIdentificationNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
+
+    updateTransportStub.restore();
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('CatchCertificateTransportController.updateTransport - should filter empty strings from containerNumbers array for train', async (t) => {
+  try {
+    const mockRequest = {
+      payload: {
+        id: '1',
+        vehicle: 'train',
+        railwayBillNumber: 'RB123',
+        containerNumbers: ['ABCU1234567', '', 'ABCZ3456789', '  '],
+        departurePlace: 'Station'
+      }
+    };
+
+    const updateTransportStub = sinon.stub(Service, 'updateTransport').resolves({});
+
+    await CatchCertificateTransportController.updateTransport(mockRequest as any, userPrincipal, documentNumber, contactId);
+
+    const callArgs = updateTransportStub.getCall(0).args[0];
+    t.equal(callArgs.containerIdentificationNumber, 'ABCU1234567 ABCZ3456789');
+
+    updateTransportStub.restore();
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('CatchCertificateTransportController.updateTransport - should transform containerNumbers array to containerNumber string for containerVessel', async (t) => {
+  try {
+    const mockRequest = {
+      payload: {
+        id: '1',
+        vehicle: 'containerVessel',
+        vesselName: 'Ship Name',
+        flagState: 'UK',
+        containerNumbers: ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789'],
+        departurePlace: 'Port'
+      }
+    };
+
+    const updateTransportStub = sinon.stub(Service, 'updateTransport').resolves({});
+
+    await CatchCertificateTransportController.updateTransport(mockRequest as any, userPrincipal, documentNumber, contactId);
+
+    const callArgs = updateTransportStub.getCall(0).args[0];
+    t.equal(callArgs.vehicle, 'containerVessel');
+    t.equal(callArgs.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
+    t.equal(callArgs.containerIdentificationNumber, undefined);
+
+    updateTransportStub.restore();
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('CatchCertificateTransportController.updateTransport - should filter empty strings from containerNumbers array for containerVessel', async (t) => {
+  try {
+    const mockRequest = {
+      payload: {
+        id: '1',
+        vehicle: 'containerVessel',
+        vesselName: 'Ship Name',
+        flagState: 'UK',
+        containerNumbers: ['ABCU1234567', '', 'ABCZ3456789', '  ', 'ABCR4567890'],
+        departurePlace: 'Port'
+      }
+    };
+
+    const updateTransportStub = sinon.stub(Service, 'updateTransport').resolves({});
+
+    await CatchCertificateTransportController.updateTransport(mockRequest as any, userPrincipal, documentNumber, contactId);
+
+    const callArgs = updateTransportStub.getCall(0).args[0];
+    t.equal(callArgs.containerNumber, 'ABCU1234567 ABCZ3456789 ABCR4567890');
 
     updateTransportStub.restore();
     t.end();

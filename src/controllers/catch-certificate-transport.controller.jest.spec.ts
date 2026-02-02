@@ -397,15 +397,14 @@ describe("updateTransport", () => {
     expect(mockService).toHaveBeenCalledWith(expectedTransport, USER_ID, DOCUMENT_NUMBER, contactId);
   })
 
-  it('will not transform containerNumbers for non-truck vehicles', async () => {
+  it('will transform containerNumbers for train vehicles', async () => {
     const trainReq: any = {
       app: { claims: { sub: "test", email: "test@test.com" } },
       params: { documentType: "catchCertificate", transportId: 0 },
       payload: {
         id: 'train-transport-id',
         vehicle: 'train',
-        containerNumbers: ['CONT001', 'CONT002'],
-        containerIdentificationNumber: 'EXISTING VALUE'
+        containerNumbers: ['CONT001', 'CONT002']
       },
       headers: { accept: "text/html" },
     };
@@ -414,7 +413,7 @@ describe("updateTransport", () => {
       id: 'train-transport-id',
       vehicle: 'train',
       containerNumbers: ['CONT001', 'CONT002'],
-      containerIdentificationNumber: 'EXISTING VALUE'
+      containerIdentificationNumber: 'CONT001 CONT002'
     };
 
     await TransportController.updateTransport(trainReq, USER_ID, DOCUMENT_NUMBER, contactId);
