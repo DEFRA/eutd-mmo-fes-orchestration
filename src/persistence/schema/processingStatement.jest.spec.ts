@@ -696,11 +696,11 @@ describe('When adding total weight landed to catches', () => {
 
 describe('When saving a Processing Statement', () => {
 
-  let mongoServer;
+  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    mongoServer = new MongoMemoryServer({ debug: true });
-    const mongoUri = await mongoServer.getConnectionString();
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri).catch(err => {console.log(err)});
 
   } );
