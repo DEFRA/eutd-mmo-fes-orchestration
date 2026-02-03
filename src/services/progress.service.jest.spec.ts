@@ -2058,8 +2058,6 @@ describe('getTransportDetails', () => {
     });
 
     // Test removed: containerNumbers is now optional for container vessels
-    // it('should return INCOMPLETE when arrival container vessel is missing containerNumbers', () => {
-
     it('should return INCOMPLETE when arrival container vessel is missing departureCountry', () => {
       const transport: Transport = {
         vehicle: 'containerVessel',
@@ -2154,8 +2152,6 @@ describe('getTransportDetails', () => {
     });
 
     // Test removed: containerNumbers now allows empty strings in array
-    // it('should return INCOMPLETE when arrival container vessel has empty string in containerNumbers', () => {
-
     // FI0-10289: Train arrival transport validation tests
     it('should return COMPLETED when all arrival train fields are filled out with valid values', () => {
       const transport: Transport = {
@@ -5099,8 +5095,8 @@ describe('getStorageDocumentProgress', () => {
       exportData: {
         catches: [
           {
-          product: 'Atlantic cod (COD)',
-          productDescription: 'Some product description',
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
             certificateType: 'non_uk',
@@ -5571,7 +5567,7 @@ describe('getStorageDocumentProgress', () => {
   });
 
   it('should return INCOMPLETE transport details when weights exceed 2 decimals', async () => {
-   mockStorageDocumentDraft.mockResolvedValue({
+    mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
@@ -5669,7 +5665,7 @@ describe('getStorageDocumentProgress', () => {
   });
 
   it('should return INCOMPLETE transport details when productWeight is empty', async () => {
-     mockStorageDocumentDraft.mockResolvedValue({
+    mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
         catches: [{
           product: 'Atlantic cod (COD)',
@@ -5931,6 +5927,9 @@ describe('getStorageDocumentProgress', () => {
         }
       });
 
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).storageFacilities).toBe(ProgressStatus.COMPLETED);
     });
 
     it('should return INCOMPLETE storageFacilities when facility arrival date is not after arrival transportation departure date', async () => {
@@ -6398,285 +6397,285 @@ describe('getStorageDocumentProgress', () => {
 });
 
 describe('Catch Certificate Progress - requestByAdmin branch coverage', () => {
-    let mockGetDraft: jest.SpyInstance;
-    let mockGetSummaryErrors: jest.SpyInstance;
+  let mockGetDraft: jest.SpyInstance;
+  let mockGetSummaryErrors: jest.SpyInstance;
 
-    beforeEach(() => {
-      mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
-      mockGetSummaryErrors = jest.spyOn(SummaryErrorsService, 'get');
-      mockGetSummaryErrors.mockResolvedValue(null);
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should mark exporter as COMPLETED when requestByAdmin is true even without contactId', async () => {
-      mockGetDraft.mockResolvedValue({
-        requestByAdmin: true,
-        exportData: {
-          landingsEntryOption: 'manualEntry',
-          exporterDetails: {
-            exporterFullName: 'John Doe',
-            exporterCompanyName: 'Test Company',
-            addressOne: 'Test Address',
-            postcode: 'TE1 1ST'
-          },
-          products: [],
-          transportation: {}
-        }
-      });
-
-      const result = await ProgressService.get('user123', 'DOC-123', 'contact123');
-      
-      expect(result.progress['exporter']).toBe(ProgressStatus.COMPLETED);
-    });
+  beforeEach(() => {
+    mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
+    mockGetSummaryErrors = jest.spyOn(SummaryErrorsService, 'get');
+    mockGetSummaryErrors.mockResolvedValue(null);
   });
 
-  describe('isFacilityArrivalAfterTransportDeparture - missing departure date', () => {
-    it('should return false when arrivalTransportation has no departureDate', () => {
-      const arrivalTransportation = {
-        vehicle: 'truck',
-        exportDate: '15/01/2026'
-      };
-      const facilityArrivalDate = '16/01/2026';
-
-      const result = ProgressService.isFacilityArrivalAfterTransportDeparture(
-        arrivalTransportation as any,
-        facilityArrivalDate
-      );
-
-      expect(result).toBe(false);
-    });
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  describe('isDepartureTransportAfterArrivalTransport - missing dates', () => {
-    it('should return false when departure transport has no exportDate', () => {
-      const departureTransportation = {
-        vehicle: 'truck'
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane',
-        departureDate: '14/01/2026'
-      };
-
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
-
-      expect(result).toBe(false);
+  it('should mark exporter as COMPLETED when requestByAdmin is true even without contactId', async () => {
+    mockGetDraft.mockResolvedValue({
+      requestByAdmin: true,
+      exportData: {
+        landingsEntryOption: 'manualEntry',
+        exporterDetails: {
+          exporterFullName: 'John Doe',
+          exporterCompanyName: 'Test Company',
+          addressOne: 'Test Address',
+          postcode: 'TE1 1ST'
+        },
+        products: [],
+        transportation: {}
+      }
     });
 
-    it('should return false when arrival transport has no departureDate', () => {
-      const departureTransportation = {
-        vehicle: 'truck',
-        exportDate: '15/01/2026'
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane'
-      };
+    const result = await ProgressService.get('user123', 'DOC-123', 'contact123');
 
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
+    expect(result.progress['exporter']).toBe(ProgressStatus.COMPLETED);
+  });
+});
 
-      expect(result).toBe(false);
-    });
+describe('isFacilityArrivalAfterTransportDeparture - missing departure date', () => {
+  it('should return false when arrivalTransportation has no departureDate', () => {
+    const arrivalTransportation = {
+      vehicle: 'truck',
+      exportDate: '15/01/2026'
+    };
+    const facilityArrivalDate = '16/01/2026';
 
-    it('should return true when both dates are present and departure is after arrival', () => {
-      const departureTransportation = {
-        vehicle: 'truck',
-        exportDate: '16/01/2026'
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane',
-        departureDate: '15/01/2026'
-      };
+    const result = ProgressService.isFacilityArrivalAfterTransportDeparture(
+      arrivalTransportation as any,
+      facilityArrivalDate
+    );
 
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
+    expect(result).toBe(false);
+  });
+});
 
-      expect(result).toBe(true);
-    });
+describe('isDepartureTransportAfterArrivalTransport - missing dates', () => {
+  it('should return false when departure transport has no exportDate', () => {
+    const departureTransportation = {
+      vehicle: 'truck'
+    };
+    const arrivalTransportation = {
+      vehicle: 'plane',
+      departureDate: '14/01/2026'
+    };
 
-    it('should return false when both dates are present but departure is before arrival', () => {
-      const departureTransportation = {
-        vehicle: 'truck',
-        exportDate: '14/01/2026'
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane',
-        departureDate: '15/01/2026'
-      };
+    const result = ProgressService.isDepartureTransportAfterArrivalTransport(
+      departureTransportation as any,
+      arrivalTransportation as any
+    );
 
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
-
-      expect(result).toBe(false);
-    });
-
-    it('should correctly access departureDate from BackEndTransport type', () => {
-      const departureTransportation = {
-        vehicle: 'truck',
-        exportDate: '16/01/2026',
-        exportedFrom: 'UK Port',
-        exportedTo: { officialCountryName: 'France' }
-      };
-      const arrivalTransportation = {
-        vehicle: 'plane',
-        departureDate: '15/01/2026',
-        exportedFrom: 'Port A'
-      };
-
-      const result = ProgressService.isDepartureTransportAfterArrivalTransport(
-        departureTransportation as any,
-        arrivalTransportation as any
-      );
-
-      expect(result).toBe(true);
-    });
+    expect(result).toBe(false);
   });
 
-  describe('isEmptyAndTrimSpaces - object value', () => {
-    it('should return true when object has all non-empty string values', () => {
-      const objectValue = {
-        prop1: 'value1',
-        prop2: 'value2'
-      };
+  it('should return false when arrival transport has no departureDate', () => {
+    const departureTransportation = {
+      vehicle: 'truck',
+      exportDate: '15/01/2026'
+    };
+    const arrivalTransportation = {
+      vehicle: 'plane'
+    };
 
-      const result = ProgressService.isEmptyAndTrimSpaces(objectValue);
+    const result = ProgressService.isDepartureTransportAfterArrivalTransport(
+      departureTransportation as any,
+      arrivalTransportation as any
+    );
 
-      expect(result).toBe(true);
-    });
-
-    it('should return false when object has empty string values', () => {
-      const objectValue = {
-        prop1: 'value1',
-        prop2: ''
-      };
-
-      const result = ProgressService.isEmptyAndTrimSpaces(objectValue);
-
-      expect(result).toBe(false);
-    });
-
-    it('should return false when object is empty', () => {
-      const result = ProgressService.isEmptyAndTrimSpaces({});
-
-      expect(result).toBe(false);
-    });
+    expect(result).toBe(false);
   });
 
-  describe('Processing Statement Progress - processingPlant COMPLETED branch', () => {
-    let mockProcessingStatementDraft: jest.SpyInstance;
-    let mockValidateCompletedDocument: jest.SpyInstance;
-    let mockValidateSpeciesMissing: jest.SpyInstance;
-    let mockValidateCountriesName: jest.SpyInstance;
-    let mockValidateCommodityCode: jest.SpyInstance;
+  it('should return true when both dates are present and departure is after arrival', () => {
+    const departureTransportation = {
+      vehicle: 'truck',
+      exportDate: '16/01/2026'
+    };
+    const arrivalTransportation = {
+      vehicle: 'plane',
+      departureDate: '15/01/2026'
+    };
 
-    beforeEach(() => {
-      mockValidateCompletedDocument = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
-      mockValidateCompletedDocument.mockResolvedValue(true);
-      mockValidateSpeciesMissing = jest.spyOn(DocumentValidator, 'validateSpecies');
-      mockValidateSpeciesMissing.mockResolvedValue(true);
-      mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
-      mockValidateCountriesName.mockResolvedValue({ isError: false });
-      mockValidateCommodityCode = jest.spyOn(CommodityCodeValidator, 'validateCommodityCode');
-      mockValidateCommodityCode.mockResolvedValue({ isError: false });
-      mockProcessingStatementDraft = jest.spyOn(ProcessingStatementService, 'getDraft');
-    });
+    const result = ProgressService.isDepartureTransportAfterArrivalTransport(
+      departureTransportation as any,
+      arrivalTransportation as any
+    );
 
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should mark processingPlant as COMPLETED when all required fields are present', async () => {
-      mockProcessingStatementDraft.mockResolvedValue({
-        exportData: {
-          plantName: 'Test Plant',
-          plantApprovalNumber: 'AP12345',
-          personResponsibleForConsignment: 'John Doe',
-          plantPostcode: 'TE1 1ST',
-          plantAddressOne: '123 Test Street',
-        }
-      });
-
-      const result = await ProgressService.getProcessingStatementProgress('user123', 'DOC-PS-123', 'contact123');
-
-      expect(result.progress['processingPlant']).toBe(ProgressStatus.COMPLETED);
-    });
-
-    it('should mark exportHealthCertificate as COMPLETED when certificate number and date are valid', async () => {
-      mockProcessingStatementDraft.mockResolvedValue({
-        exportData: {
-          healthCertificateNumber: '12/3/456789',
-          healthCertificateDate: '25/01/2026',
-        }
-      });
-
-      const result = await ProgressService.getProcessingStatementProgress('user123', 'DOC-PS-123', 'contact123');
-
-      expect(result.progress['exportHealthCertificate']).toBe(ProgressStatus.COMPLETED);
-    });
+    expect(result).toBe(true);
   });
 
-  describe('Storage Document Progress - transportDetails with all conditions met', () => {
-    let mockStorageDocumentDraft: jest.SpyInstance;
-    let mockValidateFishValidator: jest.SpyInstance;
-    let mockValidateCommodityCode: jest.SpyInstance;
+  it('should return false when both dates are present but departure is before arrival', () => {
+    const departureTransportation = {
+      vehicle: 'truck',
+      exportDate: '14/01/2026'
+    };
+    const arrivalTransportation = {
+      vehicle: 'plane',
+      departureDate: '15/01/2026'
+    };
 
-    beforeEach(() => {
-      mockValidateFishValidator = jest.spyOn(FishValidator, 'validateSpeciesName');
-      mockValidateFishValidator.mockResolvedValue({ isError: false });
-      mockValidateCommodityCode = jest.spyOn(CommodityCodeValidator, 'validateCommodityCode');
-      mockValidateCommodityCode.mockResolvedValue({ isError: false });
-      mockStorageDocumentDraft = jest.spyOn(StorageDocumentService, 'getDraft');
+    const result = ProgressService.isDepartureTransportAfterArrivalTransport(
+      departureTransportation as any,
+      arrivalTransportation as any
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it('should correctly access departureDate from BackEndTransport type', () => {
+    const departureTransportation = {
+      vehicle: 'truck',
+      exportDate: '16/01/2026',
+      exportedFrom: 'UK Port',
+      exportedTo: { officialCountryName: 'France' }
+    };
+    const arrivalTransportation = {
+      vehicle: 'plane',
+      departureDate: '15/01/2026',
+      exportedFrom: 'Port A'
+    };
+
+    const result = ProgressService.isDepartureTransportAfterArrivalTransport(
+      departureTransportation as any,
+      arrivalTransportation as any
+    );
+
+    expect(result).toBe(true);
+  });
+});
+
+describe('isEmptyAndTrimSpaces - object value', () => {
+  it('should return true when object has all non-empty string values', () => {
+    const objectValue = {
+      prop1: 'value1',
+      prop2: 'value2'
+    };
+
+    const result = ProgressService.isEmptyAndTrimSpaces(objectValue);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when object has empty string values', () => {
+    const objectValue = {
+      prop1: 'value1',
+      prop2: ''
+    };
+
+    const result = ProgressService.isEmptyAndTrimSpaces(objectValue);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when object is empty', () => {
+    const result = ProgressService.isEmptyAndTrimSpaces({});
+
+    expect(result).toBe(false);
+  });
+});
+
+describe('Processing Statement Progress - processingPlant COMPLETED branch', () => {
+  let mockProcessingStatementDraft: jest.SpyInstance;
+  let mockValidateCompletedDocument: jest.SpyInstance;
+  let mockValidateSpeciesMissing: jest.SpyInstance;
+  let mockValidateCountriesName: jest.SpyInstance;
+  let mockValidateCommodityCode: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockValidateCompletedDocument = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
+    mockValidateCompletedDocument.mockResolvedValue(true);
+    mockValidateSpeciesMissing = jest.spyOn(DocumentValidator, 'validateSpecies');
+    mockValidateSpeciesMissing.mockResolvedValue(true);
+    mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
+    mockValidateCountriesName.mockResolvedValue({ isError: false });
+    mockValidateCommodityCode = jest.spyOn(CommodityCodeValidator, 'validateCommodityCode');
+    mockValidateCommodityCode.mockResolvedValue({ isError: false });
+    mockProcessingStatementDraft = jest.spyOn(ProcessingStatementService, 'getDraft');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should mark processingPlant as COMPLETED when all required fields are present', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        plantName: 'Test Plant',
+        plantApprovalNumber: 'AP12345',
+        personResponsibleForConsignment: 'John Doe',
+        plantPostcode: 'TE1 1ST',
+        plantAddressOne: '123 Test Street',
+      }
     });
 
-    afterEach(() => {
-      jest.restoreAllMocks();
+    const result = await ProgressService.getProcessingStatementProgress('user123', 'DOC-PS-123', 'contact123');
+
+    expect(result.progress['processingPlant']).toBe(ProgressStatus.COMPLETED);
+  });
+
+  it('should mark exportHealthCertificate as COMPLETED when certificate number and date are valid', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        healthCertificateNumber: '12/3/456789',
+        healthCertificateDate: '25/01/2026',
+      }
     });
 
-    it('should mark transportDetails as INCOMPLETE when departure transport is not completed', async () => {
-      mockStorageDocumentDraft.mockResolvedValue({
-        exportData: {
-          catches: [
-            {
-              product: 'Cod',
-              id: 'catch-1',
-              commodityCode: '03026110',
-              certificateNumber: 'GBR-2022-CC-123456',
-              totalWeightLanded: '100',
-              exportWeightBeforeProcessing: '90',
-              exportWeightAfterProcessing: '85',
-              productWeight: '50',
-              fisheryProductDepartureWeight: '48'
-            }
-          ],
-          transportation: {
-            vehicle: 'truck',
-            // Missing exportDate - makes it INCOMPLETE
-            departurePlace: 'London Port'
-          },
-          arrivalTransportation: {
-            vehicle: 'plane',
-            departureDate: '15/01/2026',
-            exportDate: '15/01/2026',
-            departurePlace: 'Paris Port',
+    const result = await ProgressService.getProcessingStatementProgress('user123', 'DOC-PS-123', 'contact123');
+
+    expect(result.progress['exportHealthCertificate']).toBe(ProgressStatus.COMPLETED);
+  });
+});
+
+describe('Storage Document Progress - transportDetails with all conditions met', () => {
+  let mockStorageDocumentDraft: jest.SpyInstance;
+  let mockValidateFishValidator: jest.SpyInstance;
+  let mockValidateCommodityCode: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockValidateFishValidator = jest.spyOn(FishValidator, 'validateSpeciesName');
+    mockValidateFishValidator.mockResolvedValue({ isError: false });
+    mockValidateCommodityCode = jest.spyOn(CommodityCodeValidator, 'validateCommodityCode');
+    mockValidateCommodityCode.mockResolvedValue({ isError: false });
+    mockStorageDocumentDraft = jest.spyOn(StorageDocumentService, 'getDraft');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should mark transportDetails as INCOMPLETE when departure transport is not completed', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Cod',
+            id: 'catch-1',
+            commodityCode: '03026110',
+            certificateNumber: 'GBR-2022-CC-123456',
+            totalWeightLanded: '100',
+            exportWeightBeforeProcessing: '90',
+            exportWeightAfterProcessing: '85',
             productWeight: '50',
             fisheryProductDepartureWeight: '48'
           }
+        ],
+        transportation: {
+          vehicle: 'truck',
+          // Missing exportDate - makes it INCOMPLETE
+          departurePlace: 'London Port'
+        },
+        arrivalTransportation: {
+          vehicle: 'plane',
+          departureDate: '15/01/2026',
+          exportDate: '15/01/2026',
+          departurePlace: 'Paris Port',
+          productWeight: '50',
+          fisheryProductDepartureWeight: '48'
         }
-      });
-
-      const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-123', 'contact123');
-
-      expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
+      }
     });
+
+    const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-123', 'contact123');
+
+    expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
   });
+});
