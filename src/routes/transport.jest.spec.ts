@@ -241,7 +241,7 @@ describe("transport routes", () => {
 
                 const today = moment().format('DD/MM/YYYY');
                 const tomorrowIso = moment().add(1, 'day').toISOString();
-                
+
                 const request = createRequestObj(url, {...otherRequiredFields,
                     ...{facilityArrivalDate: today, exportDate: today, exportDateTo: tomorrowIso}
                 })
@@ -279,7 +279,7 @@ describe("transport routes", () => {
 
                 const today = moment().format('DD/MM/YYYY');
                 const tomorrowIso = moment().add(1, 'day').toISOString();
-                
+
                 const request = createRequestObj(url, {...otherRequiredFields,
                     ...{facilityArrivalDate: today, exportDate: today, exportDateTo: tomorrowIso}
                 })
@@ -840,8 +840,6 @@ describe("transport routes", () => {
         });
 
         // Test removed: containerNumbers is now optional, empty arrays are valid
-        // it('returns 400 when containerNumbers is empty for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
-
         it('returns 400 when flagState has invalid characters for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
             const body = {
               journey: "storageNotes",
@@ -891,8 +889,6 @@ describe("transport routes", () => {
         });
 
         // Test removed: containerNumbers now allows empty strings in array (they're filtered before save)
-        // it('returns 400 when containerNumbers contains empty string for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
-
         it('returns 400 when we POST an arrival when departureDate is past today\'s date and flight number and place of unloading are empty /v1/transport/plane/details', async () => {
             const body = {
               journey: "storageNotes",
@@ -945,8 +941,6 @@ describe("transport routes", () => {
         });
 
         // Test removed: containerNumbers is now optional, empty arrays are valid
-        // it('returns 400 when containerNumbers is empty for arrival plane transport /v1/transport/plane/details', async () => {
-
         it('returns 400 when departureCountry is empty for arrival plane transport /v1/transport/plane/details', async () => {
             const body = {
               journey: "storageNotes",
