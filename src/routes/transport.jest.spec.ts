@@ -783,7 +783,6 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                containerNumber: "error.containerNumber.any.required",
                 departureDate: "error.departureDate.date.max",
                 departureCountry: "error.departureCountry.any.required",
                 departurePort: "error.departurePort.any.required",
@@ -837,7 +836,6 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                containerNumber: "error.containerNumber.any.required",
                 flagState: "error.flagState.string.empty",
             });
         });
@@ -863,7 +861,6 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                containerNumber: "error.containerNumber.any.required",
                 flagState: "error.flagState.string.pattern.base",
             });
         });
@@ -888,7 +885,6 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "containerNumber": "error.containerNumber.any.required",
                 "containerNumbers.0": "ccShippingContainerNumberPatternError",
             });
         });
