@@ -27,6 +27,17 @@ export default function buildErrorObject(data)  {
         errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`
         return;
       }
+      if(detail.path[0] === 'containerNumbers' && detail.type === 'string.pattern.base'){
+        // Use different error messages for plane vs containerVessel
+        if(transportType === 'plane'){
+          errorObject[errorKey] = 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError'
+        } else if(transportType === 'containerVessel'){
+          errorObject[errorKey] = 'ccShippingContainerNumberPatternError'
+        } else {
+          errorObject[errorKey] = `error.${errorKey}.${detail.type}`
+        }
+        return;
+      }
       if(detail.path[0] === 'exportDate' && detail.type === 'date.min'){
         errorObject[errorKey] = `error.${transportType}.exportDate.any.min`
         return

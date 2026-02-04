@@ -73,7 +73,6 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   cmr: hasCmr ? cmr : undefined,
   nationalityOfVehicle: cmr ? undefined : transport.nationalityOfVehicle,
   registrationNumber: cmr ? undefined : transport.registrationNumber,
-  containerIdentificationNumber: cmr ? undefined : transport.containerIdentificationNumber,
   freightBillNumber: transport.freightBillNumber,
   departurePlace: cmr ? undefined : transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
