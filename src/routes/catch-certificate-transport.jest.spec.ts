@@ -904,6 +904,7 @@ describe("Transport endpoints", () => {
           vehicle: 'containerVessel',
           vesselName: 'WIRON 5',
           containerNumber: 'ABCU1234567',
+          containerNumbers: ['ABCU1234567'],
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1291,7 +1292,7 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
       const error = { 
-        containerNumber: "error.containerNumber.string.pattern.base",
+        containerNumbers: "error.containerNumbers.any.required",
         vesselName: "error.vesselName.string.pattern.base" 
       };
       expect(response.result).toEqual(error);

@@ -1983,6 +1983,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
+        containerNumber: 'ABCU1234567',
         containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
