@@ -798,6 +798,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111", // required field
               flagState: "UK", // required field
               freightBillNumber: "",
+              containerNumber: "ABCU1234567", // required field
               containerNumbers: ["ABCU1234567"], // required field
               placeOfUnloading: "UK", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
@@ -884,7 +885,7 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.0.string.pattern.base",
+                "containerNumbers.0": "ccShippingContainerNumberPatternError",
             });
         });
 
