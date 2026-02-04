@@ -862,6 +862,7 @@ describe("Transport endpoints", () => {
           vehicle: 'plane',
           flightNumber: 'UI90UXB',
           containerNumber: '012345678',
+          containerNumbers: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },
@@ -903,6 +904,7 @@ describe("Transport endpoints", () => {
           vehicle: 'containerVessel',
           vesselName: 'WIRON 5',
           containerNumber: 'ABCU1234567',
+          containerNumbers: ['ABCU1234567'],
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -945,6 +947,7 @@ describe("Transport endpoints", () => {
           vehicle: 'plane',
           flightNumber: 'UI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXB',
           containerNumber: '012345678',
+          containerNumbers: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },
@@ -966,6 +969,7 @@ describe("Transport endpoints", () => {
           vehicle: 'plane',
           flightNumber: '01234567',
           containerNumber: '@$%%$$%%',
+          containerNumbers: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },
@@ -1007,6 +1011,7 @@ describe("Transport endpoints", () => {
           vehicle: 'containerVessel',
           vesselName: '&£*W(W$*$*(W$&',
           containerNumber: '0192394',
+          containerNumbers: ['ABCU1234567'],
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1029,6 +1034,7 @@ describe("Transport endpoints", () => {
           vehicle: 'containerVessel',
           vesselName: 'Wiron 5',
           containerNumber: '£%%%@%%@',
+          containerNumbers: ['ABCU1234567'],
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1216,7 +1222,10 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { flightNumber: "error.flightNumber.string.max" };
+      const error = { 
+        containerNumbers: "error.containerNumbers.any.required",
+        flightNumber: "error.flightNumber.string.max" 
+      };
       expect(response.result).toEqual(error);
     });
 
@@ -1238,7 +1247,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumber: "error.containerNumber.string.pattern.base" };
+      const error = { containerNumbers: "error.containerNumbers.any.required" };
       expect(response.result).toEqual(error);
     });
 
@@ -1283,7 +1292,7 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
       const error = { 
-        containerNumber: "error.containerNumber.string.pattern.base",
+        containerNumbers: "error.containerNumbers.any.required",
         vesselName: "error.vesselName.string.pattern.base" 
       };
       expect(response.result).toEqual(error);
@@ -1308,7 +1317,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumber: "error.containerNumber.string.pattern.base", };
+      const error = { containerNumbers: "error.containerNumbers.any.required" };
       expect(response.result).toEqual(error);
     });
 
@@ -1534,6 +1543,7 @@ describe("Transport endpoints", () => {
           vehicle: 'plane', // Different vehicle type
           flightNumber: 'BA123',
           containerNumber: 'CONT123',
+          containerNumbers: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },
