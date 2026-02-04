@@ -285,6 +285,7 @@ export default class ProgressService {
         // If containerNumbers has valid values, remove containerNumber (singular) from validation to avoid conflicts
         if (hasValidContainerNumber) {
           delete payload.containerNumber;
+          delete payload.containerIdentificationNumber;
         }
         
         const { error } = catchCertificateTransportDetailsSchema.validate(payload);

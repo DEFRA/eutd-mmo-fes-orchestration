@@ -25,22 +25,82 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     otherwise: Joi.forbidden(),
   }),
   containerNumbers: Joi.when('vehicle', {
-    is: Joi.valid('truck', 'train', 'plane', 'containerVessel'),
+    is: 'plane',
     then: Joi.array()
       .items(
         Joi.string()
           .trim()
           .allow('')
-          .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
+          .regex(/^$|^[a-zA-Z0-9 ]+$/)
           .max(50)
           .messages({
-            'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+            'string.pattern.base': 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError',
             'string.max': 'error.containerNumbers.string.max',
           })
       )
+      .min(1)
       .max(10)
-      .optional(),
-    otherwise: Joi.forbidden(),
+      .required()
+      .custom((value, helpers) => {
+        // Check if all elements are empty
+        const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
+        if (nonEmptyItems.length === 0) {
+          return helpers.error('array.min');
+        }
+        return value;
+      })
+      .messages({
+        'array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+        'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+      }),
+    otherwise: Joi.when('vehicle', {
+      is: 'containerVessel',
+      then: Joi.array()
+        .items(
+          Joi.string()
+            .trim()
+            .allow('')
+            .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
+            .max(50)
+            .messages({
+              'string.pattern.base': 'ccShippingContainerNumberPatternError',
+              'string.max': 'error.containerNumbers.string.max',
+            })
+        )
+        .min(1)
+        .max(10)
+        .required()
+        .custom((value, helpers) => {
+          // Check if all elements are empty
+          const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
+          if (nonEmptyItems.length === 0) {
+            return helpers.error('array.min');
+          }
+          return value;
+        })
+        .messages({
+          'array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+          'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+        }),
+      otherwise: Joi.when('vehicle', {
+        is: Joi.valid('truck', 'train'),
+        then: Joi.array()
+          .items(
+            Joi.string()
+              .trim()
+              .allow('')
+              .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
+              .max(50)
+              .messages({
+                'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+                'string.max': 'error.containerNumbers.string.max',
+              })
+          )
+          .max(10)
+          .optional(),
+        otherwise: Joi.forbidden(),
+      }),
+    }),
   }),
   containerIdentificationNumber: Joi.when('vehicle', {
     is: Joi.valid('truck', 'train'),
@@ -60,24 +120,10 @@ const catchCertificateTransportDetailsSchema = Joi.object({
   }),
   containerNumber: Joi.when('vehicle', {
     is: 'plane',
-    then: Joi.when('$query.draft', {
-      is: true,
-      then: Joi.any(),
-      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional().messages({
-        'string.empty': 'error.containerNumber.plane.string.empty',
-        'string.pattern.base': 'error.containerNumber.plane.string.pattern.base',
-      }),
-    }),
+    then: Joi.any().optional(),
     otherwise: Joi.when('vehicle', {
       is: 'containerVessel',
-      then: Joi.when('$query.draft', {
-        is: true,
-        then: Joi.any(),
-        otherwise: Joi.string().trim().max(50).regex(/^[A-Z]{3}[UJZR]\d{7}$/).optional().messages({
-          'string.empty': 'error.containerNumber.containerVessel.string.empty',
-          'string.pattern.base': 'error.containerNumber.string.pattern.base'
-        }),
-      }),
+      then: Joi.any().optional(),
       otherwise: Joi.forbidden(),
     }),
   }),
