@@ -430,7 +430,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerNumbers.string.pattern.base');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should accept maximum 10 containerNumbers for plane', () => {
@@ -544,7 +544,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerNumbers.string.pattern.base');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should accept maximum 10 containerNumbers for containerVessel', () => {
@@ -587,6 +587,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'plane',
         flightNumber: 'FL123',
         containerNumber: 'CONT123',
+        containerNumbers: ['CONT123'],
         containerIdentificationNumber: 'ABCD1234567',
         departurePlace: 'Heathrow'
       };
@@ -690,6 +691,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vesselName: 'Ship Name',
         flagState: 'UK',
         containerNumber: 'ABCU1234567',
+        containerNumbers: ['ABCU1234567'],
         containerIdentificationNumber: 'ABCU1234567',
         departurePlace: 'Port'
       };
@@ -706,149 +708,38 @@ describe('catchCertificateTransportDetailsSchema - containerNumber validation', 
 
   describe('when vehicle is containerVessel', () => {
 
-    it('should accept valid containerNumber in ISO 6346 format', () => {
+    it('should accept valid containerNumber (singular field is optional and unvalidated)', () => {
       const payload = {
         id: 'transport-123',
         vehicle: 'containerVessel',
         vesselName: 'Ship Name',
         flagState: 'UK',
         containerNumber: 'ABCU1234567',
+        containerNumbers: ['ABCU1234567'],
         departurePlace: 'Port'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeUndefined();
-    });
-
-    it('should accept containerNumber with U, J, Z, or R category', () => {
-      const testCases = ['ABCU1234567', 'ABCJ1234567', 'ABCZ1234567', 'ABCR1234567'];
-      
-      testCases.forEach(containerNumber => {
-        const payload = {
-          id: 'transport-123',
-          vehicle: 'containerVessel',
-          vesselName: 'Ship Name',
-          flagState: 'UK',
-          containerNumber: containerNumber,
-          departurePlace: 'Port'
-        };
-
-        const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-
-        expect(error).toBeUndefined();
-      });
-    });
-
-    it('should reject containerNumber with invalid format', () => {
-      const payload = {
-        id: 'transport-123',
-        vehicle: 'containerVessel',
-        vesselName: 'Ship Name',
-        flagState: 'UK',
-        containerNumber: 'CONT123',
-        departurePlace: 'Port'
-      };
-
-      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-
-      expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerNumber.string.pattern.base');
-    });
-
-    it('should reject containerNumber with spaces', () => {
-      const payload = {
-        id: 'transport-123',
-        vehicle: 'containerVessel',
-        vesselName: 'Ship Name',
-        flagState: 'UK',
-        containerNumber: 'ABC U123 4567',
-        departurePlace: 'Port'
-      };
-
-      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-
-      expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerNumber.string.pattern.base');
-    });
-
-    it('should reject containerNumber with lowercase letters', () => {
-      const payload = {
-        id: 'transport-123',
-        vehicle: 'containerVessel',
-        vesselName: 'Ship Name',
-        flagState: 'UK',
-        containerNumber: 'abcu1234567',
-        departurePlace: 'Port'
-      };
-
-      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-
-      expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerNumber.string.pattern.base');
-    });
-
-    it('should reject containerNumber with wrong length', () => {
-      const payload = {
-        id: 'transport-123',
-        vehicle: 'containerVessel',
-        vesselName: 'Ship Name',
-        flagState: 'UK',
-        containerNumber: 'ABCU123456',
-        departurePlace: 'Port'
-      };
-
-      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-
-      expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerNumber.string.pattern.base');
-    });
-
-    it('should reject containerNumber with invalid category', () => {
-      const payload = {
-        id: 'transport-123',
-        vehicle: 'containerVessel',
-        vesselName: 'Ship Name',
-        flagState: 'UK',
-        containerNumber: 'ABCA1234567',
-        departurePlace: 'Port'
-      };
-
-      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-
-      expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerNumber.string.pattern.base');
     });
   });
 
   describe('when vehicle is plane', () => {
 
-    it('should accept valid containerNumber in alphanumeric format for plane', () => {
+    it('should accept valid containerNumber (singular field is optional and unvalidated)', () => {
       const payload = {
         id: 'transport-123',
         vehicle: 'plane',
         flightNumber: 'FL123',
         containerNumber: 'CONT123',
+        containerNumbers: ['CONT123'],
         departurePlace: 'Airport'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeUndefined();
-    });
-
-    it('should reject containerNumber with special characters for plane', () => {
-      const payload = {
-        id: 'transport-123',
-        vehicle: 'plane',
-        flightNumber: 'FL123',
-        containerNumber: 'CONT@123',
-        departurePlace: 'Airport'
-      };
-
-      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
-
-      expect(error).toBeDefined();
     });
   });
 });
