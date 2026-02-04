@@ -268,9 +268,25 @@ export default class ProgressService {
 
       const transportationIsIncomplete: boolean = (await Promise.all(transportations.map(async (transportation: CatchCertificateTransport) => {
         const frontEndTransportation: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
+        
+        // Check for plane and containerVessel that at least one valid container number exists
+        const requiresContainerNumbers = frontEndTransportation.vehicle === 'plane' || frontEndTransportation.vehicle === 'containerVessel';
+        const hasValidContainerNumber = frontEndTransportation.containerNumbers?.some(cn => cn?.trim());
+        
+        // If requires containerNumbers and none are valid, mark as incomplete
+        if (requiresContainerNumbers && !hasValidContainerNumber) {
+          return true;
+        }
+        
         const bypassForTruckCMR = frontEndTransportation.cmr === 'false' || !frontEndTransportation.cmr;
         const payload = { ...frontEndTransportation };
         delete payload.cmr;
+        
+        // If containerNumbers has valid values, remove containerNumber (singular) from validation to avoid conflicts
+        if (hasValidContainerNumber) {
+          delete payload.containerNumber;
+        }
+        
         const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
         // Check if the vehicle is truck, if so, check if Nationality of vehicle is a valid country
@@ -283,9 +299,9 @@ export default class ProgressService {
         const hasValidationError = bypassForTruckCMR && (error || nationalityErrors.length > 0);
         const missingTransportationDetails = bypassForTruckCMR && !frontEndTransportation.departurePlace
         const transportationDocumentIncomplete = bypassForTruckCMR && Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);
-
+        
         return hasValidationError || missingTransportationDetails || transportationDocumentIncomplete;
-      }))).some(incomplete => incomplete);
+      }))).some(Boolean);
 
       if (transportationIsIncomplete) {
         return ProgressStatus.INCOMPLETE;
@@ -379,7 +395,7 @@ export default class ProgressService {
       return !isEmpty(propertyValue) && propertyValue.trim() !== '';
     }
 
-    return !isEmpty(propertyValue) ? Object.keys(propertyValue).every(key => typeof propertyValue[key] === 'string' && propertyValue[key].trim() !== '') : false
+    return isEmpty(propertyValue) ? false : Object.keys(propertyValue).every(key => typeof propertyValue[key] === 'string' && propertyValue[key].trim() !== '')
   }
 
   private static readonly hasRequiredSDCatchProperties = (singleCatch: StorageDocument.Catch): boolean => {
