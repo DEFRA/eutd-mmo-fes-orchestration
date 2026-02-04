@@ -16,6 +16,26 @@ export const buildRedirectUrlWithErrorStringInQueryParam = (errorDetailsObj, red
     return `${redirectTo}?error=${errQueryString}`;
 }
 
+const handleContainerNumbersError = (detail, errorKey, transportType, errorObject) => {
+  if (detail.path[0] !== 'containerNumbers') return false;
+  
+  if (detail.type === 'array.min') {
+    errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`;
+    return true;
+  }
+  
+  if (detail.type === 'string.pattern.base') {
+    const errorMessages = {
+      plane: 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError',
+      containerVessel: 'ccShippingContainerNumberPatternError'
+    };
+    errorObject[errorKey] = errorMessages[transportType] || `error.${errorKey}.${detail.type}`;
+    return true;
+  }
+  
+  return false;
+};
+
 export default function buildErrorObject(data)  {
   const { details,_original } = data;
   const transportType = _original?.vehicle;
@@ -23,21 +43,9 @@ export default function buildErrorObject(data)  {
   details.forEach((detail) => {
     if (detail.path.length > 0) {
       const errorKey = detail.path.join().replace(/,/gi,'.');
-      if(detail.path[0] === 'containerNumbers' && detail.type === 'array.min'){
-        errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`
-        return;
-      }
-      if(detail.path[0] === 'containerNumbers' && detail.type === 'string.pattern.base'){
-        // Use different error messages for plane vs containerVessel
-        if(transportType === 'plane'){
-          errorObject[errorKey] = 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError'
-        } else if(transportType === 'containerVessel'){
-          errorObject[errorKey] = 'ccShippingContainerNumberPatternError'
-        } else {
-          errorObject[errorKey] = `error.${errorKey}.${detail.type}`
-        }
-        return;
-      }
+      
+      if (handleContainerNumbersError(detail, errorKey, transportType, errorObject)) return;
+      
       if(detail.path[0] === 'exportDate' && detail.type === 'date.min'){
         errorObject[errorKey] = `error.${transportType}.exportDate.any.min`
         return
