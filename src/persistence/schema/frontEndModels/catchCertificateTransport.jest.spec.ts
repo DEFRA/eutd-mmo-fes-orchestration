@@ -293,6 +293,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.plane,
       flightNumber: "123456",
       containerNumber: "123456",
+      containerNumbers: ["123456"],
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
@@ -343,6 +344,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vesselName: "Vessel Name",
       flagState: "UK",
       containerNumber: "12345",
+      containerNumbers: ["12345"],
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
@@ -394,6 +396,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vesselName: "Vessel Name",
       flagState: "UK",
       containerNumber: "12345",
+      containerNumbers: ["12345"],
       departurePlace: "London",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
@@ -443,6 +446,76 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.truck,
       cmr: 'true',
     });
+  });
+
+  it("should split containerIdentificationNumber string to containerNumbers array for truck with multiple containers", () => {
+    const transport: BackEndModels.CatchCertificateTruck = {
+      id: 0,
+      vehicle: FrontEndTransport.truck,
+      containerIdentificationNumber: "ABCU1234567 DEFJ2345678 GHIZ3456789",
+      nationalityOfVehicle: "UK",
+      registrationNumber: "ABC123",
+      departurePlace: "Dover",
+      freightBillNumber: 'FB123',
+      transportDocuments: []
+    };
+
+    const result = FrontEndTransport.toFrontEndTransport(transport);
+    
+    expect(result).toHaveProperty('containerNumbers', ["ABCU1234567", "DEFJ2345678", "GHIZ3456789"]);
+    expect(result).toHaveProperty('containerIdentificationNumber', "ABCU1234567 DEFJ2345678 GHIZ3456789");
+  });
+
+  it("should split containerNumber string to containerNumbers array for plane with multiple containers", () => {
+    const transport: BackEndModels.CatchCertificatePlane = {
+      id: 0,
+      vehicle: FrontEndTransport.plane,
+      flightNumber: "FL123",
+      containerNumber: "ABCU1234567 DEFJ2345678",
+      departurePlace: "Heathrow",
+      freightBillNumber: 'FB456',
+      transportDocuments: []
+    };
+
+    const result = FrontEndTransport.toFrontEndTransport(transport);
+    
+    expect(result).toHaveProperty('containerNumbers', ["ABCU1234567", "DEFJ2345678"]);
+    expect(result).toHaveProperty('containerNumber', "ABCU1234567 DEFJ2345678");
+  });
+
+  it("should split containerIdentificationNumber string to containerNumbers array for train with multiple containers", () => {
+    const transport: BackEndModels.CatchCertificateTrain = {
+      id: 0,
+      vehicle: FrontEndTransport.train,
+      railwayBillNumber: "RB123",
+      containerIdentificationNumber: "ABCU1234567 DEFJ2345678 GHIZ3456789",
+      departurePlace: "Station",
+      freightBillNumber: 'FB789',
+      transportDocuments: []
+    };
+
+    const result = FrontEndTransport.toFrontEndTransport(transport);
+    
+    expect(result).toHaveProperty('containerNumbers', ["ABCU1234567", "DEFJ2345678", "GHIZ3456789"]);
+    expect(result).toHaveProperty('containerIdentificationNumber', "ABCU1234567 DEFJ2345678 GHIZ3456789");
+  });
+
+  it("should split containerNumber string to containerNumbers array for containerVessel with multiple containers", () => {
+    const transport: BackEndModels.CatchCertificateContainerVessel = {
+      id: 0,
+      vehicle: FrontEndTransport.containerVessel,
+      vesselName: "Ship Name",
+      flagState: "UK",
+      containerNumber: "ABCU1234567 DEFJ2345678",
+      departurePlace: "Port",
+      freightBillNumber: 'FB999',
+      transportDocuments: []
+    };
+
+    const result = FrontEndTransport.toFrontEndTransport(transport);
+    
+    expect(result).toHaveProperty('containerNumbers', ["ABCU1234567", "DEFJ2345678"]);
+    expect(result).toHaveProperty('containerNumber', "ABCU1234567 DEFJ2345678");
   });
 
 });

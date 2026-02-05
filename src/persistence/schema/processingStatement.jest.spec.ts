@@ -150,6 +150,7 @@ describe('When mapping a back end Processing statement to front end', () => {
       healthCertificateNumber: "567567",
       healthCertificateDate: "27/10/2019",
       pointOfDestination: null,
+      userReference: undefined,
       exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
@@ -240,6 +241,7 @@ describe('When mapping a back end Processing statement to front end', () => {
       plantPostcode: 'fake post code',
       plantTownCity: null,
       pointOfDestination: null,
+      userReference: undefined,
       validationErrors: [],
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -287,6 +289,7 @@ describe('When mapping a back end Processing statement to front end', () => {
       plantPostcode: 'fake post code',
       plantTownCity: null,
       pointOfDestination: null,
+      userReference: undefined,
       validationErrors: [],
       exportedTo: {
         officialCountryName: "SPAIN"
@@ -693,11 +696,11 @@ describe('When adding total weight landed to catches', () => {
 
 describe('When saving a Processing Statement', () => {
 
-  let mongoServer;
+  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    mongoServer = new MongoMemoryServer({ debug: true });
-    const mongoUri = await mongoServer.getConnectionString();
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri).catch(err => {console.log(err)});
 
   } );

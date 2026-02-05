@@ -9,11 +9,11 @@ import { IForeignCatchCert } from '../schema/foreignCatchCert';
 import { StorageDocumentModel } from '../schema/storageDoc';
 import { ProcessingStatementModel } from '../schema/processingStatement';
 
-let mongoServer;
+let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
-  mongoServer = new MongoMemoryServer();
-  const mongoUri = await mongoServer.getConnectionString();
+  mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
   await mongoose.connect(mongoUri).catch(err => {console.log(err)});
 });
 

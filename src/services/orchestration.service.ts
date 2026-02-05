@@ -88,10 +88,10 @@ export default class OrchestrationService {
         data = toFrontEndProcessingStatementExportData({
           ...currentSessionData.exportData,
           catches: updatedCatches
-        });
+        }, currentSessionData.userReference);
       } else {
         data = currentSessionData
-          ? toFrontEndProcessingStatementExportData(currentSessionData.exportData)
+          ? toFrontEndProcessingStatementExportData(currentSessionData.exportData, currentSessionData.userReference)
           : currentSessionData;
       }
     } else if (redisKey === storageNote) {

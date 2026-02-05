@@ -165,7 +165,7 @@ const ProcessingStatementSchema = new Schema({
 
 export const toFrontEndProcessingStatementDocumentNumber = (document: ProcessingStatement) => toFrontEndDocumentNumber(document);
 
-export const toFrontEndProcessingStatementExportData = (exportData: ExportData) : FrontEndProcessingStatement.ProcessingStatement => {
+export const toFrontEndProcessingStatementExportData = (exportData: ExportData, userReference?: string) : FrontEndProcessingStatement.ProcessingStatement => {
   let plantDetailsUpdated;
   if (isOldProcessingPlantAddress(exportData)) {
     exportData = clearOldProcessingPlantAddress(exportData);
@@ -210,7 +210,8 @@ export const toFrontEndProcessingStatementExportData = (exportData: ExportData) 
     dateOfAcceptance: getDatafromExportData(exportData, 'dateOfAcceptance'),
     exportedTo: exportData?.exportedTo ? toExportedTo(exportData.exportedTo) : null,
     pointOfDestination: getDatafromExportData(exportData, 'pointOfDestination'),
-    _plantDetailsUpdated : !!plantDetailsUpdated
+    _plantDetailsUpdated : !!plantDetailsUpdated,
+    userReference
   };
 }
 

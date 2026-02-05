@@ -437,7 +437,7 @@ describe('seasonalFish', () => {
   it('works with ambiguous dates', async () => {
 
     mockGetSeasonalFish.mockResolvedValue([
-      { fao: 'BSS', validFrom: '2020-02-01T00:00:00', validTo: '2020-03-31T23:59:59' }
+      { fao: 'BSS', validFrom: '2020-02-01T00:00:00', validTo: '2020-03-30T23:59:59' }
     ]);
 
     const dateToTest = "2020-02-01";

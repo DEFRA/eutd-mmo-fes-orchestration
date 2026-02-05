@@ -9,17 +9,21 @@ import TransportDetails from '../src/validators/interfaces/transportDetails.inte
 import { SessionStoreFactory } from '../src/session_store/factory';
 import { SPECIES_KEY, TRANSPORT_KEY } from '../src/session_store/constants';
 import ApplicationConfig from '../src/applicationConfig';
-import MongoMemoryServer from 'mongodb-memory-server';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
+let mongod: MongoMemoryServer;
 
-const mongod = new MongoMemoryServer({
-  instance: {
-    port: 17017,
-    ip: 'localhost',
-    dbName: 'sample'
-  },
-  debug: true
-});
+const initMongo = async () => {
+  if (!mongod) {
+    mongod = await MongoMemoryServer.create({
+      instance: {
+        port: 17017,
+        dbName: 'sample'
+      }
+    });
+  }
+  return mongod;
+};
 
 export interface IPayload<T> {
   status: number;
@@ -28,8 +32,8 @@ export interface IPayload<T> {
 
 const startServer = async (): Promise<Hapi.Server> => {
   if (Server.instance() === undefined) {
-
-    const connString = await mongod.getConnectionString();
+    const mongo = await initMongo();
+    const connString = mongo.getUri();
     console.log('The mongo connection string used:', connString);
 
     ApplicationConfig.loadProperties();

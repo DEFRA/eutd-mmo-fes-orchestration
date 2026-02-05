@@ -38,7 +38,7 @@ const backEndCc: BackEnd.CatchCertificate = {
   documentNumber: "GBR-X-CC-1",
   requestByAdmin: false,
   audit: [],
-  userReference: "",
+  userReference: "user-ref-123",
   exportData: {
     exporterDetails: {
       exporterFullName: "Joe Blogg",
@@ -247,6 +247,7 @@ describe('Certificate Controller', () => {
         documentNumber: "GBR-X-CC-1",
         status: 'LOCKED',
         startedAt: "2021-01-05T16:59:29.190Z",
+        userReference: 'user-ref-123',
         exporter: {
           model: {
             addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
@@ -370,6 +371,7 @@ describe('Certificate Controller', () => {
         documentNumber: "GBR-X-CC-1",
         status: 'LOCKED',
         startedAt: "2021-01-05T16:59:29.190Z",
+        userReference: "",
         exporter: {
           model: {
             addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",
@@ -506,6 +508,7 @@ describe('Certificate Controller', () => {
         documentNumber: "GBR-X-CC-1",
         status: 'LOCKED',
         startedAt: "2021-01-05T16:59:29.190Z",
+        userReference: "user-ref-123",
         exporter: {
           model: {
             addressOne: "123 Unit 1 CJC Fish Ltd 17 Old Edinburgh Road",

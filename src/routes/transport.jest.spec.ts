@@ -147,7 +147,8 @@ describe("transport routes", () => {
                     arrival: false,
                     flightNumber: "x",
                     departurePlace: "x",
-                    containerNumbers: ["x"],
+                    containerNumber: "x",
+                    containerNumbers: ["ABCU1234567"],
                     pointOfDestination: "Paris Airport",
                     exportedTo: {
                       officialCountryName: "Nigeria"
@@ -175,7 +176,8 @@ describe("transport routes", () => {
                     arrival: false,
                     vesselName: "x",
                     flagState: "x",
-                    containerNumbers: ["x"],
+                    containerNumber: "ABCU1234567",
+                    containerNumbers: ["ABCU1234567"],
                     departurePlace: "x",
                     pointOfDestination: "Lagos Port",
                     exportedTo: {
@@ -239,7 +241,7 @@ describe("transport routes", () => {
 
                 const today = moment().format('DD/MM/YYYY');
                 const tomorrowIso = moment().add(1, 'day').toISOString();
-                
+
                 const request = createRequestObj(url, {...otherRequiredFields,
                     ...{facilityArrivalDate: today, exportDate: today, exportDateTo: tomorrowIso}
                 })
@@ -277,7 +279,7 @@ describe("transport routes", () => {
 
                 const today = moment().format('DD/MM/YYYY');
                 const tomorrowIso = moment().add(1, 'day').toISOString();
-                
+
                 const request = createRequestObj(url, {...otherRequiredFields,
                     ...{facilityArrivalDate: today, exportDate: today, exportDateTo: tomorrowIso}
                 })
@@ -787,7 +789,6 @@ describe("transport routes", () => {
                 placeOfUnloading: "error.placeOfUnloading.any.required",
                 vesselName: "error.vesselName.string.empty",
                 flagState: "error.flagState.string.empty",
-                "containerNumbers.0": "error.containerNumbers.array.min",
             });
         });
 
@@ -797,7 +798,8 @@ describe("transport routes", () => {
               vesselName: "Vessel1111", // required field
               flagState: "UK", // required field
               freightBillNumber: "",
-              containerNumbers: ["CONT001"], // required field
+              containerNumber: "ABCU1234567", // required field
+              containerNumbers: ["ABCU1234567"], // required field
               placeOfUnloading: "UK", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
               vehicle:"containerVessel",
@@ -820,7 +822,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111",
               flagState: "",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -838,37 +840,14 @@ describe("transport routes", () => {
             });
         });
 
-        it('returns 400 when containerNumbers is empty for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
-            const body = {
-              journey: "storageNotes",
-              vesselName: "Vessel1111",
-              flagState: "UK",
-              freightBillNumber: "",
-              containerNumbers: [],
-              placeOfUnloading: "UK",
-              departureDate: moment().format('DD/MM/YYYY'),
-              vehicle:"containerVessel",
-              arrival: true,
-              departurePort: "Lexis Port",
-              departureCountry: "United Kingdom",
-            };
-
-            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
-            const response = await server.inject(request);
-            expect(response.statusCode).toBe(400);
-            expect(mockAddTransport).not.toHaveBeenCalled();
-            expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.array.min",
-            });
-        });
-
+        // Test removed: containerNumbers is now optional, empty arrays are valid
         it('returns 400 when flagState has invalid characters for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
             const body = {
               journey: "storageNotes",
               vesselName: "Vessel1111",
               flagState: "@#$%^",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -906,34 +885,11 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.0.string.pattern.base",
+                "containerNumbers.0": "ccShippingContainerNumberPatternError",
             });
         });
 
-        it('returns 400 when containerNumbers contains empty string for arrival container vessel transport /v1/transport/containerVessel/details', async () => {
-            const body = {
-              journey: "storageNotes",
-              vesselName: "Vessel1111",
-              flagState: "UK",
-              freightBillNumber: "",
-              containerNumbers: ["CONT001", ""],
-              placeOfUnloading: "UK",
-              departureDate: moment().format('DD/MM/YYYY'),
-              vehicle:"containerVessel",
-              arrival: true,
-              departurePort: "Lexis Port",
-              departureCountry: "United Kingdom",
-            };
-
-            const request = createRequestObj('/v1/transport/containerVessel/details', body, 'POST')
-            const response = await server.inject(request);
-            expect(response.statusCode).toBe(400);
-            expect(mockAddTransport).not.toHaveBeenCalled();
-            expect(response.result).toEqual({
-                "containerNumbers.1": "error.containerNumbers.1.string.empty",
-            });
-        });
-
+        // Test removed: containerNumbers now allows empty strings in array (they're filtered before save)
         it('returns 400 when we POST an arrival when departureDate is past today\'s date and flight number and place of unloading are empty /v1/transport/plane/details', async () => {
             const body = {
               journey: "storageNotes",
@@ -956,7 +912,6 @@ describe("transport routes", () => {
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
                 flightNumber: "error.flightNumber.string.empty",
-                "containerNumbers.0": "error.containerNumbers.array.min",
                 departureCountry: "error.departureCountry.string.empty",
                 departurePort: "error.departurePort.string.empty",
                 placeOfUnloading: "error.placeOfUnloading.any.required",
@@ -970,7 +925,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"], // required field
+              containerNumbers: ["ABCU1234567"], // required field with ISO format
               departureCountry: "France", // required field
               departurePort: "Calais", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
@@ -986,37 +941,14 @@ describe("transport routes", () => {
             expect(response.result).toEqual({ some: 'data' });
         });
 
-        it('returns 400 when containerNumbers is empty for arrival plane transport /v1/transport/plane/details', async () => {
-            const body = {
-              journey: "storageNotes",
-              airwayBillNumber: "",
-              flightNumber: "FLIGHT1111",
-              freightBillNumber: "",
-              containerNumbers: [],
-              departureCountry: "France",
-              departurePort: "Calais",
-              departureDate: moment().format('DD/MM/YYYY'),
-              placeOfUnloading: "UK",
-              vehicle:"plane",
-              arrival: true
-            };
-
-            const request = createRequestObj('/v1/transport/plane/details', body, 'POST')
-            const response = await server.inject(request);
-            expect(response.statusCode).toBe(400);
-            expect(mockAddTransport).not.toHaveBeenCalled();
-            expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.array.min"
-            });
-        });
-
+        // Test removed: containerNumbers is now optional, empty arrays are valid
         it('returns 400 when departureCountry is empty for arrival plane transport /v1/transport/plane/details', async () => {
             const body = {
               journey: "storageNotes",
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               departureCountry: "",
               departurePort: "Calais",
               departureDate: moment().format('DD/MM/YYYY'),
@@ -1040,7 +972,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               departureCountry: "France",
               departurePort: "",
               departureDate: moment().format('DD/MM/YYYY'),
@@ -1064,7 +996,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["CONT001"],
+              containerNumbers: ["ABCU1234567"],
               departureCountry: "France",
               departurePort: "Calais",
               departureDate: "",

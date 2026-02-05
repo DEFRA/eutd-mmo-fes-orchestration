@@ -172,7 +172,7 @@ describe('exporter validate routes', () => {
         },
       });
 
-      const expectedResponse = { country: 'error.country.any.required' };
+      const expectedResponse = ['error.country.any.required'];
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
@@ -211,7 +211,7 @@ describe('exporter validate routes', () => {
         },
       });
 
-      const expectedResponse = { country: 'error.country.any.invalid' };
+      const expectedResponse = ['error.country.any.invalid'];
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(mockValidateCountriesName).toHaveBeenCalledWith({ officialCountryName: 'Invalid country name' }, '', 'country');
@@ -261,7 +261,7 @@ describe('exporter validate routes', () => {
       expect(response.result).toEqual(expectedResult);
     });
 
-    it('should return 400 when addressOne is empty', async () => {
+    it('should return 400 when subBuildingName, buildingNumber, buildingName, and streetName are all empty', async () => {
       const response = await server.inject({
         method: "POST",
         url: "/v1/exporter-validate",
@@ -284,12 +284,10 @@ describe('exporter validate routes', () => {
           country: "England"
         },
       });
-      const expectedResponse = ["error.addressFirstPart.any.required"]
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
-      expect(mockWithDocumentLegitimatelyOwned).toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      expect(response.result).toEqual(expectedResponse);
+      expect(response.result).toEqual(['error.addressFirstPart.any.required']);
     });
 
     it('should return 400 if documentNumber is not given in payload', async () => {

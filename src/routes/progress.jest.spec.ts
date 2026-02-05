@@ -556,6 +556,131 @@ describe("Progress routes", () => {
         `[GET-COMPLETE-PROGRESS][ERROR][${e.stack || e}]`
       );
     });
+
+    // FI0-10647: Product validation tests
+    it("will return 400 with processedProductDetails error when products have description but no catches", async () => {
+      mockGetDraft.mockResolvedValue({
+        exportData: {
+          products: [
+            { id: 'product-1', description: 'Product without catches' }
+          ],
+          catches: []
+        }
+      } as any);
+
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(400);
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      
+      const responsePayload = JSON.parse(response.payload);
+      expect(responsePayload.processedProductDetails).toBe('error.processedProductDetails.incomplete');
+    });
+
+    it("will return 400 with multiple errors when sections incomplete AND products lack catches", async () => {
+      const incompleteData = {
+        progress: {
+          reference: ProgressStatus.OPTIONAL,
+          exporter: ProgressStatus.INCOMPLETE,
+          consignmentDescription: ProgressStatus.COMPLETED,
+          catches: ProgressStatus.COMPLETED,
+          processingPlant: ProgressStatus.INCOMPLETE,
+          processingPlantAddress: ProgressStatus.COMPLETED,
+          exportHealthCertificate: ProgressStatus.COMPLETED,
+          exportDestination: ProgressStatus.COMPLETED,
+        },
+        completedSections: 5,
+        requiredSections: 7,
+      };
+
+      mockGetProgress.mockResolvedValue(incompleteData);
+      mockGetDraft.mockResolvedValue({
+        exportData: {
+          products: [
+            { id: 'product-1', description: 'Product without catches' }
+          ],
+          catches: []
+        }
+      } as any);
+
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(400);
+      
+      const responsePayload = JSON.parse(response.payload);
+      expect(responsePayload.exporter).toBe('error.exporter.incomplete');
+      expect(responsePayload.processingPlant).toBe('error.processingPlant.incomplete');
+      expect(responsePayload.processedProductDetails).toBe('error.processedProductDetails.incomplete');
+    });
+
+    it("will return 200 when all sections complete and products have matching catches", async () => {
+      mockGetDraft.mockResolvedValue({
+        exportData: {
+          products: [
+            { id: 'product-1', description: 'Valid Product' }
+          ],
+          catches: [
+            { productId: 'product-1', species: 'COD', weight: 100 }
+          ]
+        }
+      } as any);
+
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(200);
+      expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+    });
+
+    it("will return 400 when one product has catches but another does not", async () => {
+      mockGetDraft.mockResolvedValue({
+        exportData: {
+          products: [
+            { id: 'product-1', description: 'Product with catches' },
+            { id: 'product-2', description: 'Product without catches' }
+          ],
+          catches: [
+            { productId: 'product-1', species: 'COD' }
+          ]
+        }
+      } as any);
+
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(400);
+      
+      const responsePayload = JSON.parse(response.payload);
+      expect(responsePayload.processedProductDetails).toBe('error.processedProductDetails.incomplete');
+    });
+
+    it("will return 200 when product has no description yet", async () => {
+      mockGetDraft.mockResolvedValue({
+        exportData: {
+          products: [
+            { id: 'product-1' }
+          ],
+          catches: []
+        }
+      } as any);
+
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("will handle empty products array", async () => {
+      mockGetDraft.mockResolvedValue({
+        exportData: {
+          products: [],
+          catches: []
+        }
+      } as any);
+
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("will handle missing exportData gracefully", async () => {
+      mockGetDraft.mockResolvedValue({} as any);
+
+      const response = await server.inject(request);
+      expect(response.statusCode).toBe(200);
+    });
   });
 
   describe("GET /v1/progress/complete/storageNotes", () => {

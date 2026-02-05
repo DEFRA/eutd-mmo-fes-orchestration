@@ -18,6 +18,7 @@ import { ExportLocation } from "../schema/frontEndModels/export-location";
 import { DocumentStatuses } from '../schema/catchCert';
 import { constructOwnerQuery } from './catchCert';
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
+import { validateContainerNumbers } from '../../helpers/transportValidation';
 
 export const getDocument = async (
   documentNumber: string,
@@ -289,6 +290,14 @@ export const upsertExporterDetails = async (
 };
 
 export const upsertTransportDetails = async (userPrincipal: string, payload: Transport, documentNumber: string, contactId: string) => {
+
+  // Validate container numbers for arrival transport (train or truck only)
+  if (payload.arrival && (payload.vehicle === 'train' || payload.vehicle === 'truck')) {
+    const containerErrors = validateContainerNumbers(payload.containerNumbers);
+    if (containerErrors.length > 0) {
+      throw containerErrors[0]; // Throw the first error to be caught by error handler
+    }
+  }
 
   const transport = toBackEndTransport(payload);
   const key = payload.arrival ? 'exportData.arrivalTransportation' : 'exportData.transportation'

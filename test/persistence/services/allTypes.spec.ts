@@ -9,24 +9,18 @@ import { CatchCertModel, CatchCertificateModel } from '../../../src/persistence/
 
 import { connect } from 'mongoose';
 
-import MongoMemoryServer from 'mongodb-memory-server';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
-let mongod;
+let mongod: MongoMemoryServer;
 
 test('setup', async (t) => {
-  mongod = new MongoMemoryServer({
+  mongod = await MongoMemoryServer.create({
     instance: {
       port: 17017,
-      ip: 'localhost',
       dbName: 'sample'
-    },
-    binary: {
-      // This is the most recent version supported
-      version: '3.6.3'
-    },
-    debug: true
+    }
   });
-  const connString = await mongod.getConnectionString();
+  const connString = mongod.getUri();
   await connect(connString);
   t.end();
 });
@@ -178,7 +172,7 @@ test('Should query catch cert data when year crosses over', async t => {
     const certsBeforeInsert = await getAllCatchCertsForUserByYearAndMonth('01-2019', 'blah-blah-blah');
     t.isEqual(certsBeforeInsert.length, 0, 'Has no data for January');
 
-    const connString = await mongod.getConnectionString();
+    const connString = mongod.getUri();
     await connect(connString);
     const exportPayload ={
       items: [

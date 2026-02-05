@@ -159,6 +159,7 @@ export interface CertificateSummary {
   exportLocation: ExportLocation,
   landingsEntryOption: BackEndModels.LandingsEntryOptions
   validationErrors: (ValidationFailure | SystemFailure)[]
+  userReference?: string;
 }
 
 export const getNumberOfUniqueLandings = (input: ProductsLanded): number => {

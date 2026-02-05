@@ -2125,7 +2125,7 @@ describe('createExportCerticate', () => {
     submitSpy.mockRestore();
   });
 
-  it('passes exportedTo.exportedTo to isEuCountry when export location contains exportedTo property', async () => {
+  it('should pass exportedTo.exportedTo to isEuCountry when export location contains exportedTo property', async () => {
     // prepare spies
     const getLocSpy = jest.spyOn(CatchCertService, 'getExportLocation').mockResolvedValue({ exportedTo: { officialCountryName: 'Spain' } });
     const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);

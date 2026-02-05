@@ -2,25 +2,19 @@ import * as test from 'tape';
 
 import { connect } from 'mongoose';
 
-import MongoMemoryServer from 'mongodb-memory-server';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { save, find, saveOrUpdate } from '../../../src/persistence/services/userAttributes';
 import { IUserAttributes } from '../../../src/persistence/schema/userAttributes';
 
-let mongod;
+let mongod: MongoMemoryServer;
 
 test('setup', async (t) => {
-  mongod = new MongoMemoryServer({
+  mongod = await MongoMemoryServer.create({
     instance: {
-      ip: 'localhost',
-      dbName: 'sample' 
-    },
-    binary: {
-      // This is the most recent version supported
-      version: '3.6.3'
-    },
-    debug: true
+      dbName: 'sample'
+    }
   });
-  const connString = await mongod.getConnectionString();
+  const connString = mongod.getUri();
   await connect(connString);
   t.end();
 });
