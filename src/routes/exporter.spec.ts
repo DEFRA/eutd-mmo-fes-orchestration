@@ -161,6 +161,88 @@ describe('exporter routes', () => {
       expect(response.result.errors).toStrictEqual(expected);
     });
 
+    it('will return 400 if exporterFullName exceeds 70 characters', async () => {
+      const payload = {
+        exporterFullName: 'A'.repeat(71),
+        exporterCompanyName: 'Bob Co.',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.errors.exporterFullName).toBe('error.exporterFullName.string.max');
+    });
+
+    it('will return 400 if exporterFullName contains invalid characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob@123',
+        exporterCompanyName: 'Bob Co.',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.errors.exporterFullName).toBe('error.exporterFullName.string.pattern.base');
+    });
+
+    it('will return 400 if exporterCompanyName exceeds 250 characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob',
+        exporterCompanyName: 'A'.repeat(251),
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.errors.exporterCompanyName).toBe('error.exporterCompanyName.string.max');
+    });
+
+    it('will return 400 if exporterCompanyName contains invalid characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob',
+        exporterCompanyName: 'Bob & Co!',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.errors.exporterCompanyName).toBe('error.exporterCompanyName.string.pattern.base');
+    });
+
+    it('will accept valid exporterFullName with letters, spaces, apostrophes and periods', async () => {
+      const payload = {
+        exporterFullName: "Mary O'Connor Jr.",
+        exporterCompanyName: 'Bob Co.',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('will accept valid exporterCompanyName with letters, numbers, spaces, apostrophes, periods, hyphens and brackets', async () => {
+      const payload = {
+        exporterFullName: 'Bob',
+        exporterCompanyName: "O'Reilly's Co. (UK) Ltd [2024]",
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(200);
+    });
+
   })
 
   describe("POST /v1/exporter/processingStatement", () => {
@@ -221,6 +303,44 @@ describe('exporter routes', () => {
 
       expect(response.statusCode).toBe(400);
       expect(response.result.errors).toStrictEqual(expected);
+    });
+
+    it('will return 400 if exporterCompanyName exceeds 250 characters', async () => {
+      const payload = {
+        exporterCompanyName: 'A'.repeat(251),
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.errors.exporterCompanyName).toBe('error.exporterCompanyName.string.max');
+    });
+
+    it('will return 400 if exporterCompanyName contains invalid characters', async () => {
+      const payload = {
+        exporterCompanyName: 'Bob & Co!',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.errors.exporterCompanyName).toBe('error.exporterCompanyName.string.pattern.base');
+    });
+
+    it('will accept valid exporterCompanyName with letters, numbers, spaces, apostrophes, periods, hyphens and brackets', async () => {
+      const payload = {
+        exporterCompanyName: "O'Reilly's Co. (UK) Ltd [2024]",
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(200);
     });
   });
 
