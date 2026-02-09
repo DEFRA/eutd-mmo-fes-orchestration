@@ -49,8 +49,9 @@ const containerVesselSchema = Joi.object({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
       'string.max': 'error.containerNumbers.string.max'
     }))
+    .min(1)
     .max(10)
-    .optional(),
+    .required(),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.any(),
