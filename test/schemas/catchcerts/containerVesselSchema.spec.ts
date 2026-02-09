@@ -174,3 +174,250 @@ describe('containerVesselSchema - pointOfDestination validation', () => {
     });
   });
 });
+
+describe('containerVesselSchema - containerNumbers validation', () => {
+  const validPayload = {
+    ...basePayload,
+    departureDate: '01/01/2020',
+    pointOfDestination: 'Port of Le Havre'
+  };
+
+  describe('required field validation', () => {
+    it('returns any.required error when containerNumbers is missing', () => {
+      const payload = { ...validPayload };
+      delete payload.containerNumbers;
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
+      expect(cnErr).toBeDefined();
+      expect(cnErr.type).toBe('any.required');
+    });
+
+    it('returns any.required error when containerNumbers is undefined', () => {
+      const payload = { ...validPayload, containerNumbers: undefined };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
+      expect(cnErr).toBeDefined();
+      expect(cnErr.type).toBe('any.required');
+    });
+
+    it('passes validation when containerNumbers is provided with valid data', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABCU1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+  });
+
+  describe('minimum array length validation', () => {
+    it('returns array.min error when containerNumbers is empty array', () => {
+      const payload = { ...validPayload, containerNumbers: [] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
+      expect(cnErr).toBeDefined();
+      expect(cnErr.type).toBe('array.min');
+    });
+
+    it('passes validation with exactly 1 element (min boundary)', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABCU1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+  });
+
+  describe('pattern validation - ISO container format', () => {
+    it('accepts valid ISO container number format (3 letters + U/J/Z/R + 7 digits)', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABCU1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('accepts container number with J equipment category', () => {
+      const payload = { ...validPayload, containerNumbers: ['XYZJ9876543'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('accepts container number with Z equipment category', () => {
+      const payload = { ...validPayload, containerNumbers: ['DEFZ1111111'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('accepts container number with R equipment category', () => {
+      const payload = { ...validPayload, containerNumbers: ['GHIR2222222'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('accepts multiple valid ISO container numbers', () => {
+      const payload = { 
+        ...validPayload, 
+        containerNumbers: ['ABCU1234567', 'XYZJ9876543', 'DEFZ1111111']
+      };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('accepts empty string in array', () => {
+      const payload = { ...validPayload, containerNumbers: [''] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('rejects container number with lowercase letters', () => {
+      const payload = { ...validPayload, containerNumbers: ['abcu1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('rejects container number with invalid equipment category (not U/J/Z/R)', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABCA1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('rejects container number with less than 7 digits', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABCU123456'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('rejects container number with more than 7 digits', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABCU12345678'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('rejects container number with less than 3 owner letters', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABU1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('rejects container number with more than 3 owner letters', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABCDU1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('rejects container number with spaces', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABC U1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('rejects container number with special characters', () => {
+      const payload = { ...validPayload, containerNumbers: ['ABC-U1234567'] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
+    });
+  });
+
+  describe('array constraints', () => {
+    it('accepts array with 5 elements', () => {
+      const payload = { 
+        ...validPayload, 
+        containerNumbers: ['ABCU1234567', 'XYZJ9876543', 'DEFZ1111111', 'GHIR2222222', 'JKLU3333333']
+      };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('accepts array with 10 elements (max boundary)', () => {
+      const payload = { 
+        ...validPayload, 
+        containerNumbers: Array(10).fill('ABCU1234567')
+      };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeUndefined();
+    });
+
+    it('rejects array with more than 10 elements', () => {
+      const payload = { 
+        ...validPayload, 
+        containerNumbers: Array(11).fill('ABCU1234567')
+      };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
+      expect(cnErr).toBeDefined();
+      expect(cnErr.type).toBe('array.max');
+    });
+
+    it('returns string.max error when container number exceeds 50 chars', () => {
+      const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
+      const { error } = containerVesselSchemaDefault.default.validate(payload, { abortEarly: false });
+      expect(error).toBeDefined();
+      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
+      expect(cnErr).toBeDefined();
+      expect(cnErr.message).toBe('error.containerNumbers.string.max');
+    });
+  });
+
+  describe('nonJS error mode', () => {
+    it('returns correct error key when containerNumbers is missing', () => {
+      const payload = { ...validPayload };
+      delete payload.containerNumbers;
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).containerNumbers).toBe('error.containerNumbers.any.required');
+    });
+
+    it('returns correct error key when containerNumbers is empty array', () => {
+      const payload = { ...validPayload, containerNumbers: [] };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).containerNumbers).toBe('error.containerNumbers.array.min');
+    });
+
+    it('returns correct error key when container number has invalid pattern', () => {
+      const payload = { ...validPayload, containerNumbers: ['INVALID123'] };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).containerNumbers).toBe('error.containerNumbers.string.pattern.base');
+    });
+
+    it('returns correct error key when container number exceeds max length', () => {
+      const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).containerNumbers).toBe('error.containerNumbers.string.max');
+    });
+
+    it('returns correct error key when array exceeds max size', () => {
+      const payload = { 
+        ...validPayload, 
+        containerNumbers: Array(11).fill('ABCU1234567')
+      };
+      const errors = validateNonJs(payload);
+      expect(errors).toBeDefined();
+      expect((errors as any).containerNumbers).toBe('error.containerNumbers.array.max');
+    });
+  });
+});
