@@ -45,12 +45,12 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         // Check if all elements are empty
         const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
         if (nonEmptyItems.length === 0) {
-          return helpers.error('array.min');
+          return helpers.error('plane.array.min');
         }
         return value;
       })
       .messages({
-        'array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+        'plane.array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
         'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
       }),
     otherwise: Joi.when('vehicle', {
@@ -74,13 +74,13 @@ const catchCertificateTransportDetailsSchema = Joi.object({
           // Check if all elements are empty
           const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
           if (nonEmptyItems.length === 0) {
-            return helpers.error('array.min');
+            return helpers.error('container-vessel.array.min');
           }
           return value;
         })
         .messages({
-          'array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
-          'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+          'container-vessel.array.min': 'ccContainerVesselContainerNumberLabelError',
+          'any.required': 'ccContainerVesselContainerNumberLabelError',
         }),
       otherwise: Joi.when('vehicle', {
         is: Joi.valid('truck', 'train'),
