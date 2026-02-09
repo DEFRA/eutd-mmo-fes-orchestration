@@ -83,7 +83,7 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.filter((c: string) => c && c.trim()).join(',') : undefined,
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
@@ -91,7 +91,7 @@ const getPlaneBackEndTransport = (transport: Transport) => ({
   flightNumber: transport.flightNumber,
   airwayBillNumber: transport.airwayBillNumber,
   containerNumber: transport.containerNumber,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.filter((c: string) => c && c.trim()).join(',') : undefined,
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   freightBillNumber: transport.freightBillNumber,
@@ -115,7 +115,7 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.filter((c: string) => c && c.trim()).join(',') : undefined,
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
@@ -127,7 +127,7 @@ const getContainerVesselBackEndTransport = (transport: Transport) => ({
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
   containerNumber: transport.containerNumber,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.filter((c: string) => c && c.trim()).join(',') : undefined,
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   exportDate: transport.exportDate,
