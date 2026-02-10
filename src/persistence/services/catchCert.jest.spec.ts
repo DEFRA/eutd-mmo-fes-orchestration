@@ -92,8 +92,8 @@ describe('catchCert - db related', () => {
   let mockSessionStore;
 
   beforeAll(async () => {
-    mongoServer = new MongoMemoryServer();
-    const mongoUri = await mongoServer.getConnectionString();
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
     mongoose.connect(mongoUri).catch(err => { console.log(err) });
 
     mockSessionStore = new MockSessionStorage();
