@@ -31,11 +31,12 @@ describe("When mapping from a front end transport to a backend transport", () =>
   });
 
   it("if vehicle is plane then it should contain all relevant properties for plane", () => {
+
     const transport: FrontEndTransport.CatchCertificateTransport = {
       id: '0',
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
+      containerNumbers: ["Cont Number"],
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
@@ -45,7 +46,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       id: 0,
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
+      containerNumbers: ["Cont Number"],
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
       transportDocuments: [{ name: 'name', reference: 'reference' }]
@@ -82,12 +83,13 @@ describe("When mapping from a front end transport to a backend transport", () =>
   });
 
   it("if vehicle is container vessel then it should contain all relevant properties for container vessel", () => {
+
     const transport: FrontEndTransport.CatchCertificateTransport = {
       id: '0',
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumber: "Cont Number",
+      containerNumbers: ["Cont Number"],
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
       documents: [{ name: 'name', reference: 'reference' }]
@@ -98,7 +100,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState : "UK",
-      containerNumber : "Cont Number",
+      containerNumbers : ["Cont Number"],
       departurePlace: "here",
       freightBillNumber: 'AA1234567',
       transportDocuments: [{ name: 'name', reference: 'reference' }]
@@ -467,11 +469,12 @@ describe("When mapping from a backend transport to front end transport", () => {
   });
 
   it("should split containerNumber string to containerNumbers array for plane with multiple containers", () => {
+
     const transport: BackEndModels.CatchCertificatePlane = {
       id: 0,
       vehicle: FrontEndTransport.plane,
       flightNumber: "FL123",
-      containerNumber: "ABCU1234567 DEFJ2345678",
+      containerNumbers: ["ABCU1234567", "DEFJ2345678"],
       departurePlace: "Heathrow",
       freightBillNumber: 'FB456',
       transportDocuments: []
@@ -484,11 +487,12 @@ describe("When mapping from a backend transport to front end transport", () => {
   });
 
   it("should split containerIdentificationNumber string to containerNumbers array for train with multiple containers", () => {
+
     const transport: BackEndModels.CatchCertificateTrain = {
       id: 0,
       vehicle: FrontEndTransport.train,
       railwayBillNumber: "RB123",
-      containerIdentificationNumber: "ABCU1234567 DEFJ2345678 GHIZ3456789",
+      containerNumbers: ["ABCU1234567", "DEFJ2345678", "GHIZ3456789"],
       departurePlace: "Station",
       freightBillNumber: 'FB789',
       transportDocuments: []
@@ -501,12 +505,13 @@ describe("When mapping from a backend transport to front end transport", () => {
   });
 
   it("should split containerNumber string to containerNumbers array for containerVessel with multiple containers", () => {
+
     const transport: BackEndModels.CatchCertificateContainerVessel = {
       id: 0,
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Ship Name",
       flagState: "UK",
-      containerNumber: "ABCU1234567 DEFJ2345678",
+      containerNumbers: ["ABCU1234567", "DEFJ2345678"],
       departurePlace: "Port",
       freightBillNumber: 'FB999',
       transportDocuments: []
