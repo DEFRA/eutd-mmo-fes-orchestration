@@ -38,6 +38,13 @@ const seasonalFishValidator = (blackPeriods: SeasonalFishPeriod[]) =>
     const result = [];
 
     fields.forEach(field => {
+      // Skip start date validation for European Seabass (BSS)
+      // No validation required on start date regardless of date provided
+      // Seasonal validation only applies to landing date
+      if (field === 'startDate' && item.species.code === 'BSS') {
+        return;
+      }
+
       const isSeasonalCatch = blackPeriods.some((p) => p.fao === item.species.code &&
         moment(p.validFrom).isSameOrBefore(item[field]) &&
         moment(item[field]).isSameOrBefore(p.validTo));
