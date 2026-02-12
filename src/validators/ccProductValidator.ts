@@ -38,6 +38,13 @@ const seasonalFishValidator = (blackPeriods: SeasonalFishPeriod[]) =>
     const result = [];
 
     fields.forEach(field => {
+      // Skip start date validation for European Seabass (BSS)
+      // Business rule: fishermen can start trip on restricted period end date (31/03)
+      // if they catch no fish during restricted period and land after it ends
+      if (field === 'startDate' && item.species.code === 'BSS') {
+        return;
+      }
+
       const isSeasonalCatch = blackPeriods.some((p) => p.fao === item.species.code &&
         moment(p.validFrom).isSameOrBefore(item[field]) &&
         moment(item[field]).isSameOrBefore(p.validTo));

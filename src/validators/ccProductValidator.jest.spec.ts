@@ -492,6 +492,114 @@ describe('seasonalFish', () => {
 
   });
 
+  it('should skip start date validation for BSS (European Seabass) species', async () => {
+    mockGetSeasonalFish.mockResolvedValue([
+      { fao: 'BSS', validFrom: '2020-02-01T00:00:00', validTo: '2020-03-30T23:59:59' }
+    ]);
+
+    const products = [{
+      product: {
+        id: "bss-product-id",
+        commodityCode: "03028410",
+        presentation: { code: "WHL", label: "Whole" },
+        state: { code: "FRE", label: "Fresh" },
+        species: { code: "BSS", label: "European seabass (BSS)" }
+      },
+      landings: [{
+        model: {
+          id: "bss-landing-id",
+          vessel: {
+            pln: "TEST123",
+            vesselName: "TEST VESSEL",
+            flag: "GBR",
+            homePort: "TEST PORT",
+            licenceNumber: "12345",
+            imoNumber: null,
+            licenceValidTo: "2382-12-31T00:00:00",
+            rssNumber: "T12345",
+            vesselLength: 10.5,
+            label: "TEST VESSEL (TEST123)",
+            domId: "TESTVESSEL-TEST123"
+          },
+          startDate: "2020-03-31T00:00:00.000Z", // Date during restricted period
+          dateLanded: "2020-04-01T00:00:00.000Z", // Date after restricted period
+          exportWeight: 50,
+          faoArea: "FAO27"
+        }
+      }]
+    }];
+
+    const expected = [{
+      id: "bss-product-id",
+      landingId: "bss-landing-id",
+      pln: "TEST123",
+      startDate: "2020-03-31T00:00:00.000Z",
+      dateLanded: "2020-04-01T00:00:00.000Z",
+      species: { code: "BSS", label: "European seabass (BSS)" },
+      weight: 50,
+      validator: "seasonalFish",
+      result: [] // No errors - start date validation skipped for BSS
+    }];
+
+    const validations = await ProductValidator.validateProducts(products);
+
+    expect(validations).toEqual(expected);
+  });
+
+  it('should still validate landing date for BSS even when start date validation is skipped', async () => {
+    mockGetSeasonalFish.mockResolvedValue([
+      { fao: 'BSS', validFrom: '2020-02-01T00:00:00', validTo: '2020-03-30T23:59:59' }
+    ]);
+
+    const products = [{
+      product: {
+        id: "bss-product-id",
+        commodityCode: "03028410",
+        presentation: { code: "WHL", label: "Whole" },
+        state: { code: "FRE", label: "Fresh" },
+        species: { code: "BSS", label: "European seabass (BSS)" }
+      },
+      landings: [{
+        model: {
+          id: "bss-landing-id",
+          vessel: {
+            pln: "TEST123",
+            vesselName: "TEST VESSEL",
+            flag: "GBR",
+            homePort: "TEST PORT",
+            licenceNumber: "12345",
+            imoNumber: null,
+            licenceValidTo: "2382-12-31T00:00:00",
+            rssNumber: "T12345",
+            vesselLength: 10.5,
+            label: "TEST VESSEL (TEST123)",
+            domId: "TESTVESSEL-TEST123"
+          },
+          startDate: "2020-03-31T00:00:00.000Z", // Date during restricted period - should be allowed
+          dateLanded: "2020-02-15T00:00:00.000Z", // Date during restricted period - should error
+          exportWeight: 50,
+          faoArea: "FAO27"
+        }
+      }]
+    }];
+
+    const expected = [{
+      id: "bss-product-id",
+      landingId: "bss-landing-id",
+      pln: "TEST123",
+      startDate: "2020-03-31T00:00:00.000Z",
+      dateLanded: "2020-02-15T00:00:00.000Z",
+      species: { code: "BSS", label: "European seabass (BSS)" },
+      weight: 50,
+      validator: "seasonalFish",
+      result: ['dateLanded'] // Only landing date should error, not start date
+    }];
+
+    const validations = await ProductValidator.validateProducts(products);
+
+    expect(validations).toEqual(expected);
+  });
+
 })
 
 describe('productsAreValid', () => {
