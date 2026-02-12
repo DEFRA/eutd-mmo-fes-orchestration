@@ -50,13 +50,12 @@ export default class ExporterRoutes {
             tags: ['api', 'exporter'],
             validate: {
               options: { abortEarly: false },
-              failAction: async function (req, h, error) {
-                return await withDocumentLegitimatelyOwned(req,h,async (userPrincipal,documentNumber, contactId) => {
-                  return await Controller.processSaveExporterDetailsErrors(req,h,error,userPrincipal,documentNumber, contactId);
-                }).catch(e => {
-                  logger.error(`[SAVE-EXPORTER-DETAILS][FAIL-ACTION][ERROR][${e.stack || e}`);
-                  return h.response().code(500).takeover();
-                });
+              failAction: async function(req, h, error) {
+                const errorObject = errorExtractor(error);
+                if (acceptsHtml(req.headers)) {
+                    return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
+                }
+                return h.response(errorObject).code(400).takeover();
               },
               payload: async (value, options) => {
                 let schema;
