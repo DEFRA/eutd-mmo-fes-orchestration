@@ -30,3 +30,11 @@ export const getFAOAreaList = () : string[] => {
 export const valueOrDefault = <T>(value: T, condition: boolean, defaultValue?: any) => condition ? value : defaultValue;
 
 export const hasValue = <T>(value: T) => value !== undefined && value !== null;
+
+
+// Utility function to transform containerNumbers string to array
+export const transformContainerNumbers = (containerNumbers: string | undefined): string[] | undefined => {
+  if (!containerNumbers) return undefined;
+  return containerNumbers.split(' ').filter((c: string) => c?.trim());
+};
+     
