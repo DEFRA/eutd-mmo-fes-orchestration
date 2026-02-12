@@ -50,9 +50,8 @@ export default class ExporterRoutes {
             tags: ['api', 'exporter'],
             validate: {
               options: { abortEarly: false },
-              failAction: function(req, h, error) {
+              failAction: async function(req, h, error) {
                 const errorObject = errorExtractor(error);
-                console.log(errorObject, `${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject));
                 if (acceptsHtml(req.headers)) {
                     return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
                 }
