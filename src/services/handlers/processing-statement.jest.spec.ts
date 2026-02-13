@@ -436,7 +436,6 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
       "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
       'catches-0-species': 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
-      "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
     }
 
     expect(errors).toEqual(expectedErrors);
@@ -452,6 +451,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'CT-902-9_(-)_()',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
@@ -491,6 +491,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'NOT-A-UK-CATCH-CERTIFICATE',
           catchCertificateType: 'uk',
           totalWeightLanded: '1112',
@@ -531,6 +532,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'NOT-A-UK-CATCH-CERTIFICATE',
           catchCertificateType: 'non_uk',
           issuingCountry: { officialCountryName: '' },
@@ -570,6 +572,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'NOT-A-UK-CATCH-CERTIFICATE-WITH-MORE-THAN-52-CHARACTERS',
           catchCertificateType: 'non_uk',
           issuingCountry: { officialCountryName: '' },
@@ -613,6 +616,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'VALID-CERTIFICATE-123',
           catchCertificateType: 'non_uk',
           issuingCountry: 'InvalidCountryName',  // String format to simulate browser input
@@ -656,6 +660,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'VALID-CERTIFICATE-123',
           catchCertificateType: 'non_uk',
           issuingCountry: { officialCountryName: '' },  // Empty country name
@@ -699,6 +704,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'VALID-CERTIFICATE-123',
           catchCertificateType: 'non_uk',
           // issuingCountry: undefined (not set)
@@ -741,6 +747,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'NOT-A-UK-CATCH-CERTIFICATE',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
@@ -780,6 +787,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'GBR-2022-PS-01234ABCD',
           catchCertificateType: 'uk',
           totalWeightLanded: '1112',
@@ -820,6 +828,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
         {
           id: '',
           species: 'Atlantic Cod',
+          speciesCode: 'COD',
           catchCertificateNumber: 'GBR-2022-SD-01234ABCD',
           catchCertificateType: 'uk',
           totalWeightLanded: '1112',
@@ -882,6 +891,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           {
             id: '',
             species: 'Atlantic Cod',
+            speciesCode: 'COD',
             catchCertificateNumber: 'GBR-2022-CC-01234ABCD',
             catchCertificateType: 'uk',
             totalWeightLanded: '1112',
@@ -971,6 +981,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           {
             id: '',
             species: 'Atlantic Cod',
+            speciesCode: 'COD',
             catchCertificateNumber: 'GBR-2022-CC-01234ABCD',
             catchCertificateType: 'uk',
             totalWeightLanded: '1112',
@@ -1048,7 +1059,6 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
       "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
       "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
-      "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
       'catches-0-species': 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
     };
     expect(errors).toEqual(expectedErrors);
@@ -1561,7 +1571,6 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
         "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
       "catches-0-exportWeightBeforeProcessing":
         "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
-      "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1572,11 +1581,12 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
       catches: [
         {
           species: "Atlantic Cod",
+          speciesCode: 'COD',
           catchCertificateNumber: "CT-111111",
           totalWeightLanded: "123.12345",
           exportWeightBeforeProcessing: "10.456",
           exportWeightAfterProcessing: "10.54567",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -1588,8 +1598,6 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
     });
 
     const expected = {
-      "catches-0-totalWeightLanded":
-        "psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal",
       "catches-0-exportWeightBeforeProcessing":
         "psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalBeforeProcessing",
       "catches-0-exportWeightAfterProcessing":
@@ -1603,11 +1611,12 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
       catches: [
         {
           species: "Atlantic Cod",
+          speciesCode: 'COD',
           catchCertificateNumber: "CT-111111",
           totalWeightLanded: "-123",
           exportWeightBeforeProcessing: "0",
           exportWeightAfterProcessing: "-123.456",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -1619,8 +1628,6 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
     });
 
     const expected = {
-      "catches-0-totalWeightLanded":
-        "psAddCatchWeightsErrorTotalWeightGreaterThanNull",
       "catches-0-exportWeightBeforeProcessing":
         "psAddCatchWeightsErrorExportWeightGreaterThanNullBeforeProcessing",
       "catches-0-exportWeightAfterProcessing":
@@ -1788,7 +1795,6 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-wei
     const expectedErrors = {
       'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing',
       'catches-0-exportWeightBeforeProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing',
-      'catches-0-totalWeightLanded': 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG',
     };
 
     expect(errors).toEqual(expectedErrors);

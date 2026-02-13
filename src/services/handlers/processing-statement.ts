@@ -264,7 +264,12 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
 }
 
 function validateSpeciesInput(ctch: any, index: number, errors: any) {
-  if (!ctch.species || validateWhitespace(ctch.species)) {
+  // Validate that both species and speciesCode are present
+  // species: user-selected value from dropdown
+  // speciesCode: FAO code extracted from the species string (only populated when selecting from dropdown)
+  // This ensures users can only select from the dropdown and cannot enter free text
+  if (!ctch.species || validateWhitespace(ctch.species) || 
+      !ctch.speciesCode || validateWhitespace(ctch.speciesCode)) {
     errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
   }
 }
@@ -325,7 +330,10 @@ function validateNonUKCatchCertificateNumber(ctch: any, index: number, errors: a
 }
 
 export function validateCatchWeights(ctch: any, index: number, errors: any) {
-  validateCatchWeightsTotalWeightErrors(ctch, index, errors);
+  // Validate totalWeightLanded only for non-UK catch certificates
+  if (ctch.catchCertificateType === 'non_uk') {
+    validateCatchWeightsTotalWeightErrors(ctch, index, errors);
+  }
 
   if (!ctch.exportWeightBeforeProcessing) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing';
@@ -333,7 +341,7 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorExportWeightGreaterThanNullBeforeProcessing';
   } else if (!isPositiveNumberWithTwoDecimals(ctch.exportWeightBeforeProcessing)) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalBeforeProcessing';
-  } else if (ctch.exportWeightBeforeProcessing > parseFloat(ctch.totalWeightLanded)) {
+  } else if (ctch.totalWeightLanded && ctch.exportWeightBeforeProcessing > parseFloat(ctch.totalWeightLanded)) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessingMoreThanTotalWeight'
   } else {
     (ctch.exportWeightBeforeProcessing = numberAsString(ctch.exportWeightBeforeProcessing));
@@ -352,7 +360,6 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
 }
 
 function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
-  // Validate totalWeightLanded for both UK and non-UK catch certificates
   if (!ctch.totalWeightLanded) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
   } else if (ctch.totalWeightLanded <= 0) {
