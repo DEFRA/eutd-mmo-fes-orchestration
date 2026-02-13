@@ -264,14 +264,12 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
 }
 
 function validateSpeciesInput(ctch: any, index: number, errors: any) {
-  if (!ctch.species || validateWhitespace(ctch.species)) {
-    errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
-    return;
-  }
-
-  // Validate that a species code is present - this ensures the species was selected from the dropdown
-  // and not entered as free text
-  if (!ctch.speciesCode || validateWhitespace(ctch.speciesCode)) {
+  // Validate that both species and speciesCode are present
+  // species: user-selected value from dropdown
+  // speciesCode: FAO code extracted from the species string (only populated when selecting from dropdown)
+  // This ensures users can only select from the dropdown and cannot enter free text
+  if (!ctch.species || validateWhitespace(ctch.species) || 
+      !ctch.speciesCode || validateWhitespace(ctch.speciesCode)) {
     errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
   }
 }
