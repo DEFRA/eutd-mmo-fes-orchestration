@@ -4370,6 +4370,7 @@ describe('getProcessingStatementProgress', () => {
           {
             productId: 'product-1',
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '34',
