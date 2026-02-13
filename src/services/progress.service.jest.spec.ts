@@ -3229,6 +3229,7 @@ describe('getProcessingStatementProgress', () => {
           {
             productId: 'product-1',
             species: 'Gymnotus pantherinus (AGH)',
+            speciesCode: 'AGH',
             catchCertificateNumber: 'GBR-2022-CC-VALID123',
             id: 'CC-10-1670865091',
             scientificName: 'Gymnotus pantherinus',
@@ -3319,6 +3320,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '34',
@@ -3328,6 +3330,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018899',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3376,6 +3379,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'non_uk',
@@ -3386,6 +3390,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018900',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3396,6 +3401,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (COD)',
+            speciesCode: 'COD',
             id: '2342234-1610018901',
             catchCertificateNumber: 'GBR-2022-CC-123456789',
             catchCertificateType: 'uk',
@@ -3446,6 +3452,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'non_uk',
@@ -3456,6 +3463,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018900',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3465,6 +3473,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (COD)',
+            speciesCode: 'COD',
             id: '2342234-1610018901',
             catchCertificateNumber: 'GBR-2022-CC-123456789',
             catchCertificateType: 'uk',
@@ -3514,6 +3523,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'uk',
@@ -3524,6 +3534,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018899',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3572,6 +3583,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '£$"£kg',
@@ -3581,6 +3593,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018899',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3629,6 +3642,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '34',
@@ -3638,6 +3652,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             scientificName: 'scientificName',
@@ -3684,6 +3699,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'non_uk',
@@ -3694,6 +3710,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018900',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3703,6 +3720,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (COD)',
+            speciesCode: 'COD',
             id: '2342234-1610018901',
             catchCertificateNumber: 'GBR-2022-CC-123456789',
             catchCertificateType: 'uk',
