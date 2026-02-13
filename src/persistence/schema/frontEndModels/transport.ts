@@ -1,5 +1,6 @@
 import * as BackEndModels from "../../schema/common"
 import { toExportedTo, ICountry } from '../common';
+import { joinContainerNumbers } from '../../../helpers/utils/utils';
 
 export const truck = 'truck';
 export const plane = 'plane';
@@ -80,14 +81,14 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
   flightNumber: transport.flightNumber,
   airwayBillNumber: transport.airwayBillNumber,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   freightBillNumber: transport.freightBillNumber,
@@ -111,7 +112,7 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
@@ -122,7 +123,7 @@ const getContainerVesselBackEndTransport = (transport: Transport) => ({
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   exportDate: transport.exportDate,
@@ -137,7 +138,13 @@ const getFishingVesselBackEndTransport = (transport: Transport) => ({
   exportedTo: transport.exportedTo
 });
 
-const getFrontEndContainerNumbers = (containerNumbers?: string) => containerNumbers ? containerNumbers.split(',').map(cn => cn.trim()) : undefined;
+const getFrontEndContainerNumbers = (containerNumbers?: string | string[]) => {
+  if (!containerNumbers) return undefined;
+  // Handle if already an array
+  if (Array.isArray(containerNumbers)) return containerNumbers.filter((cn: string) => cn?.trim());
+  // Handle if string (split by comma)
+  return containerNumbers.split(',').map(cn => cn.trim());
+};
 
 export const toFrontEndTransport = (
   transport: BackEndModels.Transport

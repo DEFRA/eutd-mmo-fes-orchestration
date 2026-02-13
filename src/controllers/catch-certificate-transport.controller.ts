@@ -28,18 +28,10 @@ export default class CatchCertificateTransportController {
   public static async updateTransport(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = (req.payload as any)
     
-    let containerNumbers: string | undefined;
-    
-    // Transform containerNumbers array to comma-separated string
-    if (payload.containerNumbers && Array.isArray(payload.containerNumbers)) {
-      containerNumbers = payload.containerNumbers.filter((c: string) => c?.trim()).join(' ');
-    }
-    
     const transport: CatchCertificateTransport = {
       id: payload.id,
       vehicle: payload.vehicle,
-      ...payload,
-      containerNumbers
+      ...payload
     };
 
     return Service.updateTransport(transport, userPrincipal, documentNumber, contactId);

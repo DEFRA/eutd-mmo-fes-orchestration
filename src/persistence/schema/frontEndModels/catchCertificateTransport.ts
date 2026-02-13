@@ -1,4 +1,4 @@
-import { hasValue, transformContainerNumbers, valueOrDefault } from "../../../helpers/utils/utils";
+import { hasValue, transformContainerNumbers, joinContainerNumbers, valueOrDefault } from "../../../helpers/utils/utils";
 import * as BackEndModels from "../../schema/catchCert";
 
 export const truck = 'truck';
@@ -62,7 +62,7 @@ const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEnd
     registrationNumber: cmrIsSet && hasCmr ? undefined : transport.registrationNumber,
     departurePlace: cmrIsSet && hasCmr ? undefined : transport.departurePlace,
     freightBillNumber: cmrIsSet && hasCmr ? undefined : transport.freightBillNumber,
-    containerNumbers: cmrIsSet && hasCmr ? undefined : (typeof transport.containerNumbers === 'string' ? transport.containerNumbers : undefined),
+    containerNumbers: cmrIsSet && hasCmr ? undefined : joinContainerNumbers(transport.containerNumbers),
     transportDocuments: cmrIsSet && hasCmr ? undefined : transport.documents,
   };
   return result;
@@ -72,7 +72,7 @@ const getPlaneBackEndTransport = (transport: CatchCertificateTransport) => ({
   id: parseInt(transport.id),
   vehicle: transport.vehicle,
   flightNumber: transport.flightNumber,
-  containerNumbers: typeof transport.containerNumbers === 'string' ? transport.containerNumbers : undefined,
+  containerNumbers: joinContainerNumbers(transport.containerNumbers),
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
   transportDocuments: transport.documents,
@@ -82,7 +82,7 @@ const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
   id: parseInt(transport.id),
   vehicle: transport.vehicle,
   railwayBillNumber: transport.railwayBillNumber,
-  containerNumbers: typeof transport.containerNumbers === 'string' ? transport.containerNumbers : undefined,
+  containerNumbers: joinContainerNumbers(transport.containerNumbers),
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
   transportDocuments: transport.documents,
@@ -93,7 +93,7 @@ const getContainerVesselBackEndTransport = (transport: CatchCertificateTransport
   vehicle: transport.vehicle,
   vesselName: transport.vesselName,
   flagState: transport.flagState,
-  containerNumbers: typeof transport.containerNumbers === 'string' ? transport.containerNumbers : undefined,
+  containerNumbers: joinContainerNumbers(transport.containerNumbers),
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
   transportDocuments: transport.documents,
