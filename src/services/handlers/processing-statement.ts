@@ -266,6 +266,13 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
 function validateSpeciesInput(ctch: any, index: number, errors: any) {
   if (!ctch.species || validateWhitespace(ctch.species)) {
     errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
+    return;
+  }
+
+  // Validate that a species code is present - this ensures the species was selected from the dropdown
+  // and not entered as free text
+  if (!ctch.speciesCode || validateWhitespace(ctch.speciesCode)) {
+    errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
   }
 }
 
@@ -333,7 +340,7 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorExportWeightGreaterThanNullBeforeProcessing';
   } else if (!isPositiveNumberWithTwoDecimals(ctch.exportWeightBeforeProcessing)) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalBeforeProcessing';
-  } else if (ctch.exportWeightBeforeProcessing > parseFloat(ctch.totalWeightLanded)) {
+  } else if (ctch.totalWeightLanded && ctch.exportWeightBeforeProcessing > parseFloat(ctch.totalWeightLanded)) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessingMoreThanTotalWeight'
   } else {
     (ctch.exportWeightBeforeProcessing = numberAsString(ctch.exportWeightBeforeProcessing));
@@ -352,15 +359,18 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
 }
 
 function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
-  // Validate totalWeightLanded for both UK and non-UK catch certificates
-  if (!ctch.totalWeightLanded) {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
-  } else if (ctch.totalWeightLanded <= 0) {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
-  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
-  } else {
-    (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
+  // Validate totalWeightLanded only for non-UK catch certificates
+  // For UK catch certificates, totalWeightLanded is not required as there's no field for it
+  if (ctch.catchCertificateType === 'non_uk') {
+    if (!ctch.totalWeightLanded) {
+      errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
+    } else if (ctch.totalWeightLanded <= 0) {
+      errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
+    } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
+      errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
+    } else {
+      (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
+    }
   }
 }
 
