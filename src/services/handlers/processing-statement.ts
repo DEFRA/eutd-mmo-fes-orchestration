@@ -330,7 +330,10 @@ function validateNonUKCatchCertificateNumber(ctch: any, index: number, errors: a
 }
 
 export function validateCatchWeights(ctch: any, index: number, errors: any) {
-  validateCatchWeightsTotalWeightErrors(ctch, index, errors);
+  // Validate totalWeightLanded only for non-UK catch certificates
+  if (ctch.catchCertificateType === 'non_uk') {
+    validateCatchWeightsTotalWeightErrors(ctch, index, errors);
+  }
 
   if (!ctch.exportWeightBeforeProcessing) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing';
@@ -357,18 +360,14 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
 }
 
 function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
-  // Validate totalWeightLanded only for non-UK catch certificates
-  // For UK catch certificates, totalWeightLanded is not required as there's no field for it
-  if (ctch.catchCertificateType === 'non_uk') {
-    if (!ctch.totalWeightLanded) {
-      errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
-    } else if (ctch.totalWeightLanded <= 0) {
-      errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
-    } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
-      errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
-    } else {
-      (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
-    }
+  if (!ctch.totalWeightLanded) {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
+  } else if (ctch.totalWeightLanded <= 0) {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
+  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
+  } else {
+    (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
   }
 }
 
