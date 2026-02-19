@@ -24,7 +24,7 @@ export default class CertificateRoutes {
                 }
 
                 return documentSummary;
-              }, [DocumentStatuses.Draft, DocumentStatuses.Locked]).catch(e => {
+              }, [DocumentStatuses.Draft, DocumentStatuses.Locked,DocumentStatuses.Complete]).catch(e => {
                 logger.error(`[GET-CERTIFICATE-SUMMARY][ERROR][${e.stack || e}]`);
                 return h.response().code(500);
               });
