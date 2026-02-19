@@ -126,7 +126,9 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         nationalityOfVehicle: "British",
         registrationNumber: "WE78ERF",
         departurePlace: "London",
-        exportDate: "25/11/2019"
+        exportDate: "25/11/2019",
+        departureDate: "",
+        containerNumbers: []
       },
       arrivalTransport: undefined,
       exportedTo: {
@@ -241,7 +243,9 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         nationalityOfVehicle: "British",
         registrationNumber: "WE78ERF",
         departurePlace: "London",
-        exportDate: "25/11/2019"
+        exportDate: "25/11/2019",
+        departureDate: "",
+        containerNumbers: []
       },
       exportedTo: {
         officialCountryName: "SPAIN"
@@ -255,7 +259,9 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         nationalityOfVehicle: "British",
         registrationNumber: "WE78ERF",
         departurePlace: "London",
-        exportDate: "25/11/2019"
+        exportDate: "25/11/2019",
+        departureDate: "",
+        containerNumbers: []
       },
       facilityAddressOne: "",
       facilityApprovalNumber: "",

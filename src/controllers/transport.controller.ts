@@ -112,14 +112,17 @@ export default class TransportController {
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
 
-    const exportDateError = await this.validateExportDate(payload, userPrincipal, documentNumber, contactId, h);
-    if (exportDateError) {
-      return exportDateError;
-    }
+    // Skip validations when saving as draft
+    if (!savingAsDraft) {
+      const exportDateError = await this.validateExportDate(payload, userPrincipal, documentNumber, contactId, h);
+      if (exportDateError) {
+        return exportDateError;
+      }
 
-    const departureDateError = await this.validateArrivalDepartureDate(payload, userPrincipal, documentNumber, contactId, h);
-    if (departureDateError) {
-      return departureDateError;
+      const departureDateError = await this.validateArrivalDepartureDate(payload, userPrincipal, documentNumber, contactId, h);
+      if (departureDateError) {
+        return departureDateError;
+      }
     }
 
     const data = await Services.addTransport(payload, documentNumber, contactId) as any;
