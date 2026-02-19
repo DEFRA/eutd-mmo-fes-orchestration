@@ -1,11 +1,22 @@
 import * as BackEndModels from "../../schema/common"
 import { toExportedTo, ICountry } from '../common';
+import * as moment from 'moment';
 
 export const truck = 'truck';
 export const plane = 'plane';
 export const train = 'train';
 export const containerVessel = 'containerVessel';
 export const fishingVessel = 'directLanding';
+
+// Helper to ensure date is in DD/MM/YYYY format for frontend
+const formatDateForFrontend = (date: any): string => {
+  if (!date) return '';
+  if (typeof date === 'string' && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date)) {
+    return date; // Already in DD/MM/YYYY format
+  }
+  const m = moment(date);
+  return m.isValid() ? m.format('DD/MM/YYYY') : date;
+};
 
 export interface Transport {
   vehicle: string;
@@ -142,7 +153,10 @@ const getFishingVesselBackEndTransport = (transport: Transport) => ({
   exportedTo: transport.exportedTo
 });
 
-const getFrontEndContainerNumbers = (containerNumbers?: string) => containerNumbers ? containerNumbers.split(',').map(cn => cn.trim()) : undefined;
+const getFrontEndContainerNumbers = (containerNumbers?: string) => {
+  if (!containerNumbers || containerNumbers === "") return [];
+  return containerNumbers.split(',').map(cn => cn.trim());
+};
 
 export const toFrontEndTransport = (
   transport: BackEndModels.Transport
@@ -162,11 +176,11 @@ export const toFrontEndTransport = (
           freightBillNumber: model.freightBillNumber,
           departurePlace: model.departurePlace,
           pointOfDestination: model.pointOfDestination,
-          exportDate: transport.exportDate,
+          exportDate: formatDateForFrontend(transport.exportDate),
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate,
+          departureDate: formatDateForFrontend(model.departureDate),
           placeOfUnloading: model.placeOfUnloading,
           containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
         };
@@ -184,11 +198,11 @@ export const toFrontEndTransport = (
           containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
           departurePlace: model.departurePlace,
           pointOfDestination: model.pointOfDestination,
-          exportDate: model.exportDate,
+          exportDate: formatDateForFrontend(model.exportDate),
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate,
+          departureDate: formatDateForFrontend(model.departureDate),
           placeOfUnloading: model.placeOfUnloading,
         };
         break;
@@ -201,11 +215,11 @@ export const toFrontEndTransport = (
           freightBillNumber: model.freightBillNumber,
           departurePlace: model.departurePlace,
           pointOfDestination: model.pointOfDestination,
-          exportDate: model.exportDate,
+          exportDate: formatDateForFrontend(model.exportDate),
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate,
+          departureDate: formatDateForFrontend(model.departureDate),
           placeOfUnloading: model.placeOfUnloading,
           containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
         };
@@ -222,11 +236,11 @@ export const toFrontEndTransport = (
           containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
           departurePlace: model.departurePlace,
           pointOfDestination: model.pointOfDestination,
-          exportDate: model.exportDate,
+          exportDate: formatDateForFrontend(model.exportDate),
           exportedTo: toExportedTo(model.exportedTo),
           departureCountry: model.departureCountry,
           departurePort: model.departurePort,
-          departureDate: model.departureDate,
+          departureDate: formatDateForFrontend(model.departureDate),
           placeOfUnloading: model.placeOfUnloading,
         };
         break;
@@ -234,7 +248,7 @@ export const toFrontEndTransport = (
       case fishingVessel: {
         frontEndTransport = {
           vehicle: transport.vehicle,
-          exportDate: transport.exportDate,
+          exportDate: formatDateForFrontend(transport.exportDate),
           exportedTo: toExportedTo(transport.exportedTo),
         };
         break;
@@ -256,6 +270,9 @@ export const toFrontEndTransport = (
         isoCodeAlpha3: '',
         isoNumericCode: '',
       },
+      exportDate: '',
+      departureDate: '',
+      containerNumbers: []
     }
     return frontEndTransport;
   }

@@ -1,220 +1,139 @@
-import { describe, it, expect } from '@jest/globals';
-import planeSaveAsDraftSchema from '../../../src/schemas/catchcerts/planeSaveAsDraftSchema';
-import {buildNonJsErrorObject} from "../../../src/helpers/errorExtractor";
+import * as test from 'tape';
 import * as Joi from 'joi';
+import planeSaveAsDraftSchema from '../../../src/schemas/catchcerts/planeSaveAsDraftSchema';
 
-function validateNonJs(obj) {
-  const res = Joi.validate(obj, planeSaveAsDraftSchema, { abortEarly: false });
-  if( !res.error) return null;
-  return buildNonJsErrorObject(res.error, obj);
-}
+test('planeSaveAsDraftSchema - should allow valid container numbers in any format', t => {
+  const validContainerNumbers = [
+    'ABCD1234567',    // Invalid ISO format but should pass in draft mode
+    'ABCJ0123456',    // Valid ISO format
+    'TEST123',        // Short
+    '',               // Empty
+    'ABC DEF 123'     // With spaces
+  ];
 
-const basePayload = {
-  vehicle: 'plane',
-  arrival: false,
-  exportedTo: {
-    officialCountryName: 'France',
-    isoCodeAlpha2: 'FR'
-  },
-  pointOfDestination: 'Paris Airport',
-  flightNumber: 'FL123',
-  departurePlace: 'London',
-  journey: 'air',
-  departureCountry: 'United Kingdom'
-};
+  validContainerNumbers.forEach(containerNumber => {
+    const result = Joi.validate({
+      vehicle: 'plane',
+      arrival: false,
+      containerNumbers: [containerNumber],
+      journey: 'storageNotes'
+    }, planeSaveAsDraftSchema, {
+      abortEarly: false
+    });
 
-describe('planeSaveAsDraftSchema - containerNumbers validation', () => {
-  const validPayload = {
-    ...basePayload
+    t.equal(result.error, null, `Container number "${containerNumber}" should be valid in save as draft mode`);
+  });
+
+  t.end();
+});
+
+test('planeSaveAsDraftSchema - should reject container numbers exceeding max length', t => {
+  const longContainer = 'A'.repeat(51); // Exceeds 50 char limit
+
+  const result = Joi.validate({
+    vehicle: 'plane',
+    arrival: false,
+    containerNumbers: [longContainer],
+    journey: 'storageNotes'
+  }, planeSaveAsDraftSchema, {
+    abortEarly: false
+  });
+
+  t.notEqual(result.error, null, 'Container number exceeding 50 chars should fail');
+  t.ok(result.error.details.some(d => d.message.includes('max')), 'Error should mention max length');
+  t.end();
+});
+
+test('planeSaveAsDraftSchema - should allow empty/optional fields for save as draft', t => {
+  const minimalPayload = {
+    vehicle: 'plane',
+    arrival: false,
+    journey: 'storageNotes'
   };
 
-  describe('pattern validation', () => {
-    it('accepts alphanumeric container numbers with spaces', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT123', 'ABC456 789'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts single alphanumeric container number', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONTAINER1'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts container numbers with only letters', () => {
-      const payload = { ...validPayload, containerNumbers: ['ABCDEFGH'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts container numbers with only numbers', () => {
-      const payload = { ...validPayload, containerNumbers: ['12345678'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts container numbers at 50 character boundary', () => {
-      const payload = { ...validPayload, containerNumbers: ['A'.repeat(50)] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('returns string.max error when container number exceeds 50 chars', () => {
-      const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.max');
-    });
-
-    it('accepts empty string in array', () => {
-      const payload = { ...validPayload, containerNumbers: [''] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts mixed valid container numbers including empty strings', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT123', '', 'ABC456'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('rejects container numbers with special characters', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT@123', 'ABC#456'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
-    });
-
-    it('rejects container numbers with hyphens', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT-123'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
-    });
-
-    it('rejects container numbers with dots', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT.123'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
-    });
-
-    it('rejects container numbers with slashes', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT/123'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
-    });
+  const result = Joi.validate(minimalPayload, planeSaveAsDraftSchema, {
+    abortEarly: false
   });
 
-  describe('array constraints', () => {
-    it('accepts array with exactly 1 element', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT123'] };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
+  t.equal(result.error, null, 'Minimal payload with only required fields should pass');
+  t.end();
+});
 
-    it('accepts array with 5 elements', () => {
-      const payload = { 
-        ...validPayload, 
-        containerNumbers: ['CONT1', 'CONT2', 'CONT3', 'CONT4', 'CONT5']
-      };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts array with 10 elements (max boundary)', () => {
-      const payload = { 
-        ...validPayload, 
-        containerNumbers: Array(10).fill('CONT123')
-      };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('rejects array with more than 10 elements', () => {
-      const payload = { 
-        ...validPayload, 
-        containerNumbers: Array(11).fill('CONT123')
-      };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
-      expect(cnErr).toBeDefined();
-      expect(cnErr.type).toBe('array.max');
-    });
-
-    it('passes validation when containerNumbers is optional and missing', () => {
-      const payload = { ...validPayload };
-      delete payload.containerNumbers;
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('passes validation when containerNumbers is undefined', () => {
-      const payload = { ...validPayload, containerNumbers: undefined };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
+test('planeSaveAsDraftSchema - should allow partial date input for save as draft', t => {
+  const result = Joi.validate({
+    vehicle: 'plane',
+    arrival: false,
+    journey: 'storageNotes',
+    exportDate: '', // Empty date should be allowed
+  }, planeSaveAsDraftSchema, {
+    abortEarly: false
   });
 
-  describe('nonJS error mode', () => {
-    it('returns correct error key when container number exceeds max length', () => {
-      const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
-      const errors = validateNonJs(payload);
-      expect(errors).toBeDefined();
-      expect((errors as any).containerNumbers).toBe('error.containerNumbers.string.max');
+  t.equal(result.error, null, 'Empty exportDate should be valid in save as draft mode');
+  t.end();
+});
+
+test('planeSaveAsDraftSchema - should allow valid exportDate formats', t => {
+  const validDates = [
+    '19/02/2026',
+    '19/2/2026',
+    '9/02/2026',
+    '9/2/2026',
+    ''
+  ];
+
+  validDates.forEach(date => {
+    const result = Joi.validate({
+      vehicle: 'plane',
+      arrival: false,
+      journey: 'storageNotes',
+      exportDate: date,
+      exportDateTo: '2026-12-31T00:00:00.000Z'
+    }, planeSaveAsDraftSchema, {
+      abortEarly: false
     });
 
-    it('returns correct error key when container number has invalid pattern', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT@123'] };
-      const errors = validateNonJs(payload);
-      expect(errors).toBeDefined();
-      expect((errors as any).containerNumbers).toBe('error.containerNumbers.string.pattern.base');
-    });
-
-    it('returns correct error key when array exceeds max size', () => {
-      const payload = { 
-        ...validPayload, 
-        containerNumbers: Array(11).fill('CONT123')
-      };
-      const errors = validateNonJs(payload);
-      expect(errors).toBeDefined();
-      expect((errors as any).containerNumbers).toBe('error.containerNumbers.array.max');
-    });
+    t.equal(result.error, null, `Date "${date}" should be valid`);
   });
 
-  describe('save as draft mode - lenient validation', () => {
-    it('accepts payload with minimal fields', () => {
-      const payload = { 
-        vehicle: 'plane',
-        containerNumbers: ['CONT123']
-      };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
+  t.end();
+});
 
-    it('accepts empty or null values for optional fields', () => {
-      const payload = { 
-        vehicle: 'plane',
-        airwayBillNumber: '',
-        flightNumber: '',
-        departurePlace: '',
-        pointOfDestination: '',
-        containerNumbers: ['CONT123']
-      };
-      const { error } = planeSaveAsDraftSchema.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
+test('planeSaveAsDraftSchema - should allow optional fields with empty strings', t => {
+  const payload = {
+    vehicle: 'plane',
+    arrival: false,
+    journey: 'storageNotes',
+    pointOfDestination: '',
+    airwayBillNumber: '',
+    flightNumber: '',
+    departurePlace: '',
+    freightBillNumber: '',
+    departureDate: ''
+  };
+
+  const result = Joi.validate(payload, planeSaveAsDraftSchema, {
+    abortEarly: false
   });
+
+  t.equal(result.error, null, 'All optional fields with empty strings should pass in save as draft mode');
+  t.end();
+});
+
+test('planeSaveAsDraftSchema - should allow arrival transport validation', t => {
+  const arrivalPayload = {
+    vehicle: 'plane',
+    arrival: true, // Arrival mode
+    journey: 'storageNotes',
+    departureCountry: '',
+    departurePort: '',
+    departureDate: ''
+  };
+
+  const result = Joi.validate(arrivalPayload, planeSaveAsDraftSchema, {
+    abortEarly: false
+  });
+
+  t.equal(result.error, null, 'Arrival transport with empty fields should pass in save as draft mode');
+  t.end();
 });

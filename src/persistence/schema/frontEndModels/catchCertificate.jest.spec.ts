@@ -164,6 +164,9 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
           officialCountryName: "",
         },
         vehicle: "",
+        exportDate: "",
+        departureDate: "",
+        containerNumbers: []
       },
       exportLocation: {
         exportedFrom: "United Kingdom",
@@ -345,6 +348,7 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
       },
       transport: {
         vehicle: "directLanding",
+        exportDate: "",
         exportedTo: {
           officialCountryName: "SPAIN",
           isoCodeAlpha2: "A1",
