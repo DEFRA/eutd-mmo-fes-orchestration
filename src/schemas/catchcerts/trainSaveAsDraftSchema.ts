@@ -22,12 +22,9 @@ const trainSaveAsDraftSchema = Joi.object({
     otherwise: Joi.string().trim().allow('').alphanum().max(15).optional()
   }),
   freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
-  containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).optional().messages({
-    'string.pattern.base': 'error.containerIdentificationNumber.string.pattern.base'
-  }),
+  containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
-      'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+    .items(Joi.string().trim().allow('').max(50).messages({
       'string.max': 'error.containerNumbers.string.max'
     }))
     .max(10)

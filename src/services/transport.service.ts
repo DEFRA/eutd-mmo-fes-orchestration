@@ -31,13 +31,13 @@ export default class TransportService {
           nextUri: payload.nextUri
         };
         await withUserSessionDataStored(payload.user_id, sessionData, contactId, async () => {
-          await StorageNotesService.upsertTransportDetails(userPrincipal, transport, documentNumber, contactId);
+          await StorageNotesService.upsertTransportDetails(userPrincipal, transport, documentNumber, contactId, payload.isTransportSavedAsDraft);
         });
         break;
       }
     }
 
-    return await this.getTransportDetails(userPrincipal, payload.journey, documentNumber, contactId);
+    return await this.getTransportDetails(userPrincipal, payload.journey, documentNumber, contactId, payload.arrival);
   }
 
   public static async removeTransport(userPrincipal: string, documentNumber: string, contactId: string): Promise<void> {

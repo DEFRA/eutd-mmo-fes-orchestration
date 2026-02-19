@@ -328,6 +328,7 @@ describe('Certificate Controller', () => {
             officialCountryName: "SPAIN",
           },
           vehicle: "directLanding",
+          exportDate: ""
         },
         transportations: [{
           id: "0",
@@ -454,6 +455,7 @@ describe('Certificate Controller', () => {
             officialCountryName: "SPAIN",
           },
           vehicle: "directLanding",
+          exportDate: ""
         },
         transportations: [{
           id: "0",
@@ -589,6 +591,7 @@ describe('Certificate Controller', () => {
             officialCountryName: "SPAIN",
           },
           vehicle: "directLanding",
+          exportDate: ""
         },
         transportations: [{
           id: "0",
