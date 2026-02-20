@@ -3,7 +3,6 @@ import * as moment from "moment";
 import ApplicationConfig from "../../applicationConfig";
 import { decimalPlacesValidator } from "../../helpers/customValidators";
 import { getFAOAreaList } from '../../helpers/utils/utils';
-import { logger } from '@azure/event-hubs';
 
 const extendedJoi = Joi.extend(require('@joi/date'));
 
@@ -46,7 +45,6 @@ const directLandingsSchema = Joi.object({
     }
     const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
     if (dateLanded.isBefore(startDate, 'day')) {
-      logger.error(`Start date ${startDate} is after date landed ${dateLanded.format('YYYY-MM-DD')}`);
       return helpers.error('date.max');
     }
     return value;
