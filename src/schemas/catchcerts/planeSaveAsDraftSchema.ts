@@ -31,14 +31,13 @@ const planeSaveAsDraftSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
     otherwise: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
   }),
-  containerNumber: Joi.string().trim().allow('').max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
-      'string.pattern.base': 'error.containerNumbers.string.pattern.base',
-      'string.max': 'error.containerNumbers.string.max'
-    }))
-    .max(10)
-    .optional(),
+      .items(Joi.string().trim().regex(/^$|^[A-Z]{4}\d{7}$/).max(50).allow('').messages({
+        'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+        'string.max': 'error.containerNumbers.string.max'
+      }))
+      .max(10)
+      .optional(),
   freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {

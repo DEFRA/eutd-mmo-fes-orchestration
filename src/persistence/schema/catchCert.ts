@@ -319,29 +319,25 @@ export interface CatchCertificateBasicTransportDetails {
 }
 export interface CatchCertificateTrain extends CatchCertificateBasicTransportDetails {
   railwayBillNumber: string,
-  containerIdentificationNumber?: string,
-  containerNumbers?: string[]
+  containerNumbers?: string
 }
 
 export interface CatchCertificatePlane extends CatchCertificateBasicTransportDetails {
   flightNumber: string,
-  containerNumber: string,
-  containerNumbers?: string[]
+  containerNumbers?: string
 }
 
 export interface CatchCertificateContainerVessel extends CatchCertificateBasicTransportDetails {
   vesselName: string,
   flagState: string,
-  containerNumber: string,
-  containerNumbers?: string[]
+  containerNumbers?: string
 }
 
 export interface CatchCertificateTruck extends CatchCertificateBasicTransportDetails {
   cmr?: boolean;
   nationalityOfVehicle?: string,
   registrationNumber?: string,
-  containerIdentificationNumber?: string,
-  containerNumbers?: string[]
+  containerNumbers?: string
 }
 
 export type CatchCertificateTransport = CatchCertificateTrain | CatchCertificatePlane | CatchCertificateContainerVessel | CatchCertificateTruck;
@@ -461,12 +457,11 @@ export const CatchCertificateTransportSchema = new Schema({
   departurePlace:       { type: String,  required: false },
   nationalityOfVehicle: { type: String,  required: false },
   registrationNumber:   { type: String,  required: false },
-  containerIdentificationNumber: { type: String, required: false },
+  containerNumbers:     { type: String,  required: false },
   railwayBillNumber:    { type: String,  required: false },
   flightNumber:         { type: String,  required: false },
   vesselName:           { type: String,  required: false },
   flagState:            { type: String,  required: false },
-  containerNumber:      { type: String,  required: false },
   freightBillNumber:    { type: String,  required: false },
   transportDocuments:   { type: [CatchCertificateTransportDocumentSchema], required: false }
 }, { _id : false });

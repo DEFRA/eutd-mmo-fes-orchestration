@@ -43,14 +43,33 @@ const containerVesselSchema = Joi.object({
   }),
   vesselName: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/),
   flagState: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
-  containerNumber: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
-      'string.pattern.base': 'error.containerNumbers.string.pattern.base',
-      'string.max': 'error.containerNumbers.string.max'
-    }))
+    .items(
+      Joi.string()
+        .trim()
+        .allow('')
+        .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
+        .max(50)
+        .messages({
+          'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+          'string.max': 'error.containerNumbers.string.max',
+        })
+    )
+    .min(1)
     .max(10)
-    .optional(),
+    .required()
+    .custom((value, helpers) => {
+      // Check if all elements are empty
+      const nonEmptyItems = value.filter((item) => item && item.trim().length > 0);
+      if (nonEmptyItems.length === 0) {
+        return helpers.error('container-vessel.array.min');
+      }
+      return value;
+    })
+    .messages({
+      'container-vessel.array.min': 'ccContainerVesselContainerNumberLabelError',
+      'any.required': 'ccContainerVesselContainerNumberLabelError',
+    }),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.any(),
