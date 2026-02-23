@@ -55,7 +55,13 @@ const directLandingsSchema = Joi.object({
   weights: Joi.array().items(Joi.object().keys({
     speciesId: Joi.string().trim().label("speciesId").required(),
     exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required()
-  })).min(1).required(),
+  })).min(1).custom((weights: any[], helpers: any) => {
+    const totalWeight = weights.reduce((sum: number, w: any) => sum + (w.exportWeight || 0), 0);
+    if (totalWeight > 99999999999.99) {
+      return helpers.error('array.totalWeightExceeded');
+    }
+    return weights;
+  }, 'Total weight validator').required(),
   gearCategory: Joi.custom((value: string, helpers: any) => {
     const gearCategory = helpers.original;
     const gearType = helpers.state.ancestors[0].gearType;
