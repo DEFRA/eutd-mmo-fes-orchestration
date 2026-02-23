@@ -688,7 +688,10 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: '',
         isoCodeAlpha3: '',
         isoNumericCode: '',
-      }
+      },
+      exportDate: '',
+      departureDate: '',
+      containerNumbers: []
     });
   });
 
@@ -713,7 +716,10 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      exportDate: "",
+      departureDate: "",
+      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -747,7 +753,10 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      exportDate: "",
+      departureDate: "",
+      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -777,7 +786,10 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      exportDate: "",
+      departureDate: "",
+      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -851,7 +863,10 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      exportDate: "",
+      departureDate: "",
+      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -883,7 +898,10 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      exportDate: "",
+      departureDate: "",
+      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -917,7 +935,9 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      exportDate: "",
+      departureDate: ""
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -943,7 +963,8 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      exportDate: ""
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -966,7 +987,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       exportedFrom: "United Kingdom",
       vesselName: "Vessel Name",
       flagState: "UK",
-      exportDate: "some date",
+      exportDate: "02/09/2025",
       exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
@@ -980,13 +1001,15 @@ describe("When mapping from a backend transport to front end transport", () => {
       vesselName: "Vessel Name",
       flagState: "UK",
             departurePlace: "London",
-      exportDate: "some date",
+      exportDate: "02/09/2025",
       exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
         isoCodeAlpha3: "A3",
         isoNumericCode: "SP"
-      }
+      },
+      departureDate: "",
+      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);

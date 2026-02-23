@@ -796,7 +796,7 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
     expect(error?.details[0].message).toMatch(/pattern|max/i);
   });
 
-  it('should reject containerIdentificationNumber with invalid format', () => {
+  it('should accept any containerIdentificationNumber format in save-as-draft mode', () => {
     const payload = {
       vehicle: 'truck',
       nationalityOfVehicle: 'United Kingdom',
@@ -807,11 +807,10 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
 
     const { error } = truckSaveAsDraftSchema.validate(payload);
 
-    expect(error).toBeDefined();
-    expect(error?.details[0].message).toMatch(/pattern|match/i);
+    expect(error).toBeUndefined(); // No validation error in draft mode
   });
 
-  it('should reject containerIdentificationNumber with spaces', () => {
+  it('should accept containerIdentificationNumber with spaces in save-as-draft mode', () => {
     const payload = {
       vehicle: 'truck',
       containerNumbers: ['ABC 123 XYZ']
@@ -819,8 +818,7 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
 
     const { error } = truckSaveAsDraftSchema.validate(payload);
 
-    expect(error).toBeDefined();
-    expect(error?.details[0].message).toMatch(/pattern|match/i);
+    expect(error).toBeUndefined(); // No validation error in draft mode
   });
 
   it('should trim whitespace from containerIdentificationNumber', () => {

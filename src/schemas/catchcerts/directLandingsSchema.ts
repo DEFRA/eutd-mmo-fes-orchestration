@@ -10,15 +10,16 @@ const directLandingsSchema = Joi.object({
   dateLanded: Joi.string()
     .custom((value, helpers) => {
       const parts = value.split('-');
-      if (parts.length !== 3)
-        return helpers.error('date.base');
+      // check array parts are note empty.
+      if (parts.length !== 3 || parts.some(part => part.trim() === ''))
+        return helpers.error('directLanding.date.base');
 
       const year = parts[0];
       const month = parts[1].padStart(2, '0');
       const day = parts[2].padStart(2, '0');
       const isoDate = `${year}-${month}-${day}`;
       if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
-        return helpers.error('date.base');
+        return helpers.error('directLanding.date.invalid');
       }
       const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
       if (moment(value).isAfter(maxDate, 'day')) {
@@ -55,7 +56,13 @@ const directLandingsSchema = Joi.object({
   weights: Joi.array().items(Joi.object().keys({
     speciesId: Joi.string().trim().label("speciesId").required(),
     exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required()
-  })).min(1).required(),
+  })).min(1).custom((weights: any[], helpers: any) => {
+    const totalWeight = weights.reduce((sum: number, w: any) => sum + (w.exportWeight || 0), 0);
+    if (totalWeight > 99999999999.99) {
+      return helpers.error('array.totalWeightExceeded');
+    }
+    return weights;
+  }, 'Total weight validator').required(),
   gearCategory: Joi.custom((value: string, helpers: any) => {
     const gearCategory = helpers.original;
     const gearType = helpers.state.ancestors[0].gearType;
