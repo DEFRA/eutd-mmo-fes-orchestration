@@ -5068,7 +5068,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: ["ABCJ1234567"],
+          containerNumbers: "ABCJ1234567",
           exportDate: "22/09/2025",
           freightBillNumber: "123"
         }
