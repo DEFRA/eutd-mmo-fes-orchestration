@@ -1,4 +1,5 @@
 import { validateLanding, createExportPayloadForValidation } from './ccLandingValidator';
+import ExportPayloadService from '../services/export-payload.service';
 import VesselValidator from '../services/vesselValidator.service';
 import * as ProductValidator from './ccProductValidator';
 import * as ReferenceDataService from '../services/reference-data.service';
@@ -35,6 +36,7 @@ describe("validateLanding", () => {
     afterEach(() => {
       mockCheckVesselWithDate.mockRestore();
       mockValidateProducts.mockRestore();
+            jest.restoreAllMocks();
     });
 
     it("should pass", async () => {
@@ -104,7 +106,7 @@ describe("validateLanding", () => {
     });
 
     it("will return error if any one call to isValidGearType fails", async () => {
-        mockIsValidGearType.mockReturnValueOnce(false);
+        mockIsValidGearType.mockResolvedValueOnce(false);
         const payload: ProductLanded[] = [{
             product,
             landings: [
@@ -116,6 +118,52 @@ describe("validateLanding", () => {
         const result = await validateLanding(payload);
         expect(mockIsValidGearType).toHaveBeenCalledTimes(3);
         expect(result).toStrictEqual({ error: 'invalid', errors: { gearType: 'error.gearType.invalid' } });
+    });
+
+    it("should return aggregate-weight error when adjusted total exceeds limit", async () => {
+        const existingPayload = {
+            items: [
+                { landings: [{ model: { exportWeight: 9999900 } }] }
+            ]
+        } as any;
+
+        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(existingPayload);
+
+        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
+
+        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
+        expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan' } });
+    });
+
+    it("should not error for aggregate-weight when under limit", async () => {
+        const existingPayload = {
+            items: [
+                { landings: [{ model: { exportWeight: 5000 } }] }
+            ]
+        } as any;
+
+        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(existingPayload);
+
+        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
+
+        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
+        expect(result).toBeUndefined();
+    });
+
+    it("should return both gearType and aggregate-weight errors together", async () => {
+        const existingPayload = {
+            items: [
+                { landings: [{ model: { exportWeight: 9999900 } }] }
+            ]
+        } as any;
+
+        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(existingPayload);
+        mockIsValidGearType.mockResolvedValueOnce(false);
+
+        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
+
+        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
+        expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan', gearType: 'error.gearType.invalid' } });
     });
 });
 
