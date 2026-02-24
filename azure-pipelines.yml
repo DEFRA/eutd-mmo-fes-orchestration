@@ -38,7 +38,7 @@ resources:
       name: 'DEFRA/eutd-mmo-fes-pipeline-common'
       endpoint: DEFRA
       type: github
-      ref: refs/heads/main
+      ref: feature/app-settings-update #refs/heads/main
 
 extends:
   template: /includes/app-deployment.yaml@MMOPipelineCommon
