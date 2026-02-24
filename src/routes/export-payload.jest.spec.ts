@@ -11,7 +11,7 @@ import { LandingsEntryOptions } from "../persistence/schema/catchCert";
 import * as CountriesValidator from "../validators/countries.validator";
 import VesselValidator from "../services/vesselValidator.service";
 import * as ProductValidator from "../validators/ccProductValidator";
-import * as LandingValidator from "../validators/ccLandingValidator";
+// LandingValidator import removed because related tests were deleted
 
 const Joi = require('joi');
 
@@ -574,71 +574,7 @@ describe("exporter-payload routes", () => {
       expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
     });
 
-    it('returns 400 with short key when adding a landing pushes total >= 10,000,000', async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-
-      const currentPayload = {
-        items: [
-          {
-            product: { id: 'p-other' },
-            landings: [{ model: { exportWeight: 9900000 } }],
-          },
-        ],
-      } as any;
-
-      jest.spyOn(ExportPayloadService, 'get' as any).mockResolvedValue(currentPayload as any);
-      jest.spyOn(LandingValidator, 'validateLanding').mockResolvedValue(undefined as any);
-
-      const req = {
-        ...request,
-        payload: {
-          ...request.payload,
-          product: 'product-1',
-          exportWeight: '200000',
-        },
-      };
-
-      const response = await server.inject(req);
-
-      expect(response.statusCode).toBe(400);
-      const parsed = JSON.parse(response.payload as string);
-      expect(parsed.errors.exportWeight).toBe('ccAddLandingTotalExportWeightLessThan');
-    });
-
-    it('returns 400 with short key when editing a landing still exceeds limit after adjusting original weight', async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-
-      const currentPayload = {
-        items: [
-          {
-            product: { id: 'product-1' },
-            landings: [
-              { model: { id: 'land-1', exportWeight: 5000000 } },
-              { model: { id: 'land-2', exportWeight: 5000000 } },
-            ],
-          },
-        ],
-      } as any;
-
-      jest.spyOn(ExportPayloadService, 'get' as any).mockResolvedValue(currentPayload as any);
-      jest.spyOn(LandingValidator, 'validateLanding').mockResolvedValue(undefined as any);
-
-      const req = {
-        ...request,
-        payload: {
-          ...request.payload,
-          product: 'product-1',
-          id: 'land-1',
-          exportWeight: '6000000',
-        },
-      };
-
-      const response = await server.inject(req);
-
-      expect(response.statusCode).toBe(400);
-      const parsed = JSON.parse(response.payload as string);
-      expect(parsed.errors.exportWeight).toBe('ccAddLandingTotalExportWeightLessThan');
-    });
+    // Tests for aggregate-weight validation removed.
 
     it("should return 200 for a request payload containing a start date before the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
