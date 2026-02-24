@@ -521,7 +521,7 @@ export default class ExportPayloadController {
 
       const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-      const result = await LandingValidator.validateLanding(items)
+      const result = await LandingValidator.validateLanding(items, { userPrincipal, documentNumber, contactId })
 
       if (result?.error === 'invalid') {
         newLanding.error = result.error;
@@ -612,7 +612,7 @@ export default class ExportPayloadController {
 
     const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-    const validation = await LandingValidator.validateLanding(items);
+    const validation = await LandingValidator.validateLanding(items, { userPrincipal, documentNumber, contactId });
 
     if (validation?.error === 'invalid') {
       newLanding.error = validation.error;
@@ -624,14 +624,40 @@ export default class ExportPayloadController {
         errors: validation.errors
       };
 
+      // Provide frontend-friendly alias for field-level errors so existing UI (which posts
+      // `weight`) can render orchestration validation errors sent under `exportWeight`.
+      try {
+        if (exportPayload && exportPayload.errors && typeof exportPayload.errors === 'object') {
+          const errs: any = exportPayload.errors;
+          if (errs.exportWeight && !errs.weight) {
+            errs.weight = errs.exportWeight;
+          }
+        }
+      } catch (e) {
+        logger.debug(`[UPSERT-EXPORT-PAYLOAD][ALIAS-ERRORS][ERROR][${e && e.stack ? e.stack : e}]`);
+      }
+
       return h.response(exportPayload).code(400);
     }
+
+    // Aggregate export-weight validation moved into the landing validator
 
     const result = await ExportPayloadService.upsertLanding(productId, newLanding, userPrincipal, documentNumber, contactId);
 
     await SummaryErrorsService.clearErrors(documentNumber);
 
     if (newLanding.error) {
+      try {
+        if (result && result.errors && typeof result.errors === 'object') {
+          const errs: any = result.errors;
+          if (errs.exportWeight && !errs.weight) {
+            errs.weight = errs.exportWeight;
+          }
+        }
+      } catch (e) {
+        logger.debug(`[UPSERT-EXPORT-PAYLOAD][ALIAS-ERRORS-RESULT][ERROR][${e && e.stack ? e.stack : e}]`);
+      }
+
       return h.response(result).code(400);
     }
     else if (acceptsHtml(req.headers)) {
@@ -648,6 +674,18 @@ export default class ExportPayloadController {
       result = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
       result.error = 'invalid';
       result.errors = errorExtractor(error);
+    }
+
+    // Ensure frontend-friendly alias for export weight errors
+    try {
+      if (result && result.errors && typeof result.errors === 'object' && !Array.isArray(result.errors)) {
+        const errs: any = result.errors;
+        if (errs.exportWeight && !errs.weight) {
+          errs.weight = errs.exportWeight;
+        }
+      }
+    } catch (e) {
+      logger.debug(`[GET-EXPORT-PAYLOAD-INVALID-REQUEST][ALIAS-ERRORS][ERROR][${e && e.stack ? e.stack : e}]`);
     }
 
     if (acceptsHtml(req.headers)) {
@@ -676,6 +714,18 @@ export default class ExportPayloadController {
       };
       result = await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
     }
+    // Alias exportWeight -> weight for schema/validation fail paths
+    try {
+      if (result && result.errors && typeof result.errors === 'object' && !Array.isArray(result.errors)) {
+        const errs: any = result.errors;
+        if (errs.exportWeight && !errs.weight) {
+          errs.weight = errs.exportWeight;
+        }
+      }
+    } catch (e) {
+      logger.debug(`[UPSERT-EXPORT-PAYLOAD-INVALID-REQUEST][ALIAS-ERRORS][ERROR][${e && e.stack ? e.stack : e}]`);
+    }
+
     if (acceptsHtml(req.headers)) {
       return h.redirect(req.payload.currentUri).takeover();
     } else {
@@ -712,7 +762,7 @@ export default class ExportPayloadController {
 
     const exportPayload = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-    const validation = await LandingValidator.validateLanding(exportPayload);
+    const validation = await LandingValidator.validateLanding(exportPayload, { userPrincipal, documentNumber, contactId });
 
     if (validation?.error === 'invalid') {
       newLanding.error = validation.error;

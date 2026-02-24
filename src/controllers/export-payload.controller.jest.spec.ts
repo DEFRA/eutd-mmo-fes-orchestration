@@ -1237,7 +1237,7 @@ describe("methods", () => {
         DOCUMENT_NUMBER,
         contactId
       );
-      expect(mockValidateLanding).toHaveBeenCalledWith(null);
+      expect(mockValidateLanding).toHaveBeenCalledWith(null, { userPrincipal: USER_ID, documentNumber: DOCUMENT_NUMBER, contactId });
       const expectedNewLanding = {
         addMode: false,
         editMode: false,
@@ -1282,7 +1282,7 @@ describe("methods", () => {
         DOCUMENT_NUMBER,
         contactId
       );
-      expect(mockValidateLanding).toHaveBeenCalledWith(null);
+      expect(mockValidateLanding).toHaveBeenCalledWith(null, { userPrincipal: USER_ID, documentNumber: DOCUMENT_NUMBER, contactId });
       const expectedNewLanding = {
         addMode: false,
         editMode: false,
@@ -1593,7 +1593,7 @@ describe("methods", () => {
         "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
         DOCUMENT_NUMBER,
         contactId);
-      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation);
+      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation, { userPrincipal: USER_ID, documentNumber: DOCUMENT_NUMBER, contactId });
       expect(mockExportPayloadServiceSave).toHaveBeenCalledWith(
         {
           error: "invalid",
@@ -1691,7 +1691,7 @@ describe("methods", () => {
         "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
         DOCUMENT_NUMBER,
         contactId);
-      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation);
+      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation, { userPrincipal: USER_ID, documentNumber: DOCUMENT_NUMBER, contactId });
 
       expect(mockExportPayloadServiceSave).toHaveBeenCalledWith(
         {
@@ -1786,7 +1786,7 @@ describe("methods", () => {
         "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
         DOCUMENT_NUMBER,
         contactId);
-      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation);
+      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation, { userPrincipal: USER_ID, documentNumber: DOCUMENT_NUMBER, contactId });
       expect(mockExportPayloadServiceSave).toHaveBeenCalledWith(
         {
           error: "",
@@ -1921,7 +1921,7 @@ describe("methods", () => {
         "GBR-2021-CC-8386AADB5-798bb990-9198-47c7-818f-f3309881f222",
         DOCUMENT_NUMBER,
         contactId);
-      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation);
+      expect(mockValidateLanding).toHaveBeenCalledWith(mockExportPayloadForValidation, { userPrincipal: USER_ID, documentNumber: DOCUMENT_NUMBER, contactId });
       expect(mockExportPayloadServiceSave).toHaveBeenCalledWith(
         {
           error: "",
