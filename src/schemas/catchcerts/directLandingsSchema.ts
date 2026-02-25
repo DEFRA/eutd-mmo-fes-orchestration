@@ -10,15 +10,16 @@ const directLandingsSchema = Joi.object({
   dateLanded: Joi.string()
     .custom((value, helpers) => {
       const parts = value.split('-');
-      if (parts.length !== 3)
-        return helpers.error('date.base');
+      // check array parts are note empty.
+      if (parts.length !== 3 || parts.some(part => part.trim() === ''))
+        return helpers.error('directLanding.date.base');
 
       const year = parts[0];
       const month = parts[1].padStart(2, '0');
       const day = parts[2].padStart(2, '0');
       const isoDate = `${year}-${month}-${day}`;
       if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
-        return helpers.error('date.base');
+        return helpers.error('directLanding.date.invalid');
       }
       const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
       if (moment(value).isAfter(maxDate, 'day')) {

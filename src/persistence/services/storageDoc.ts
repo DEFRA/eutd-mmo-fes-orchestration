@@ -289,10 +289,10 @@ export const upsertExporterDetails = async (
   );
 };
 
-export const upsertTransportDetails = async (userPrincipal: string, payload: Transport, documentNumber: string, contactId: string) => {
+export const upsertTransportDetails = async (userPrincipal: string, payload: Transport, documentNumber: string, contactId: string, isTransportSavedAsDraft?: boolean) => {
 
-  // Validate container numbers for arrival transport (train or truck only)
-  if (payload.arrival && (payload.vehicle === 'train' || payload.vehicle === 'truck')) {
+  // Only validate container numbers when NOT saving as draft
+  if (!isTransportSavedAsDraft && payload.arrival && (payload.vehicle === 'train' || payload.vehicle === 'truck')) {
     const containerErrors = validateContainerNumbers(payload.containerNumbers);
     if (containerErrors.length > 0) {
       throw containerErrors[0]; // Throw the first error to be caught by error handler
