@@ -862,6 +862,37 @@ describe("Document controller", () => {
       );
     });
 
+    it('case catchCerts executes inProgress and completed lookups concurrently', async () => {
+      // Arrange
+      mockReq.query.type = catchCerts;
+      let resolveInProgress;
+      let completedLookupCalled = false;
+
+      const inProgressPromise = new Promise(resolve => {
+        resolveInProgress = resolve;
+      });
+
+      mockGetDraftCatchCertHeadersForUser.mockReturnValue(inProgressPromise);
+      mockGetAllCatchCertsForUserByYearAndMonth.mockImplementation(() => {
+        completedLookupCalled = true;
+        return Promise.resolve(completedCC);
+      });
+
+      // Act
+      const responsePromise = DocumentController.getAllDocuments(mockReq);
+      await Promise.resolve();
+
+      // Assert
+      expect(completedLookupCalled).toBeTruthy();
+
+      resolveInProgress(inProgressCC);
+      const response = await responsePromise;
+      expect(response).toEqual({
+        completed: { ...completedCC },
+        inProgress: { ...inProgressCC },
+      });
+    });
+
     it('case processingStatement', async () => {
       // Arrange
       mockReq.query.type = processingStatement;

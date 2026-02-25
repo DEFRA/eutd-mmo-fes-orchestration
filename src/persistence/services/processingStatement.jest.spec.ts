@@ -544,6 +544,27 @@ describe('processingStatement', () => {
   });
 
   describe('getAllProcessingStatementsForUserByYearAndMonth', () => {
+    it('should execute month/year query with lean to reduce hydration overhead', async () => {
+      const mockLean = jest.fn().mockResolvedValue([]);
+      const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
+      const mockSort = jest.fn().mockReturnValue({ select: mockSelect });
+      const findSpy = jest
+        .spyOn(ProcessingStatementModel, 'find')
+        .mockReturnValue({ sort: mockSort } as any);
+
+      await ProcessingStatementService.getAllProcessingStatementsForUserByYearAndMonth(
+        '01-2020',
+        testUser,
+        testContact
+      );
+
+      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+      expect(mockSelect).toHaveBeenCalled();
+      expect(mockLean).toHaveBeenCalledTimes(1);
+
+      findSpy.mockRestore();
+    });
+
     it('should not return draft or void certificates', async () => {
       await createDocument(null, 'DRAFT', testUser, 'test 1');
       await createDocument(null, 'COMPLETE', testUser, 'test 2');
@@ -639,6 +660,35 @@ describe('processingStatement', () => {
       expect(result[0].documentNumber).toBe('test 3');
       expect(result[1].documentNumber).toBe('test 2');
       expect(result[2].documentNumber).toBe('test 1');
+    });
+  });
+
+  describe('getDraftDocumentHeaders query chain', () => {
+    it('should execute draft headers query with lean', async () => {
+      const mockDocs = [
+        {
+          documentNumber: 'doc1',
+          status: 'DRAFT',
+          createdAt: new Date('2020-01-01'),
+          userReference: 'ref1',
+        },
+      ];
+      const mockLean = jest.fn().mockResolvedValue(mockDocs);
+      const mockSort = jest.fn().mockReturnValue({ lean: mockLean });
+      const findSpy = jest
+        .spyOn(ProcessingStatementModel, 'find')
+        .mockReturnValue({ sort: mockSort } as any);
+
+      const result = await ProcessingStatementService.getDraftDocumentHeaders(
+        testUser,
+        testContact
+      );
+
+      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+      expect(mockLean).toHaveBeenCalledTimes(1);
+      expect(result[0].documentNumber).toBe('doc1');
+
+      findSpy.mockRestore();
     });
   });
 
