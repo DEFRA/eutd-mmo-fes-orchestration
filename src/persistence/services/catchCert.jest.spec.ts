@@ -310,6 +310,21 @@ describe('catchCert - db related', () => {
 
   describe('getAllCatchCertsForUserByYearAndMonth', () => {
 
+    it('should execute query with lean to avoid mongoose document hydration', async () => {
+      const mockLean = jest.fn().mockResolvedValue([]);
+      const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
+      const mockSort = jest.fn().mockReturnValue({ select: mockSelect });
+      const findSpy = jest.spyOn(CatchCertModel, 'find').mockReturnValue({ sort: mockSort } as any);
+
+      await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
+
+      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+      expect(mockSelect).toHaveBeenCalled();
+      expect(mockLean).toHaveBeenCalledTimes(1);
+
+      findSpy.mockRestore();
+    });
+
     it('should not return draft or void certificates', async () => {
       await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
       await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6', 'DRAFT')).save();

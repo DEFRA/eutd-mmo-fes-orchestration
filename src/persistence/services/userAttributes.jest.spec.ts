@@ -19,6 +19,7 @@ describe('User Attribute services', () => {
 
   afterEach(async() => {
     await UserAttributesModel.deleteMany({});
+    UserAttributes.clearFindCacheForTests();
   });
 
   afterAll(async () => {
@@ -96,6 +97,19 @@ describe('User Attribute services', () => {
       expect(result.userPrincipal).toEqual(undefined);
       expect(result.attributes).toEqual(mockUserAttributesEntry.attributes);
       expect(result.favourites).toEqual(mockUserAttributesEntry.favourites);
+    });
+
+    it('should return cached result for repeated reads of same user and projection', async () => {
+      const findOneSpy = jest.spyOn(UserAttributesModel, 'findOne');
+
+      const first = await UserAttributes.find(USER_ID, ['attributes']);
+      const second = await UserAttributes.find(USER_ID, ['attributes']);
+
+      expect(first.attributes).toEqual(mockUserAttributesEntry.attributes);
+      expect(second.attributes).toEqual(mockUserAttributesEntry.attributes);
+      expect(findOneSpy).toHaveBeenCalledTimes(1);
+
+      findOneSpy.mockRestore();
     });
 
   });
