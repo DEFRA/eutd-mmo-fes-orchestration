@@ -54,10 +54,14 @@ const directLandingsSchema = Joi.object({
     vesselName: Joi.string().trim().custom((value: string, helpers: any) => {
       if (typeof value !== 'string') {
         return helpers.error('directLanding.any.required');
-      } else {
-        return helpers.error('directLanding.any.invalid');
+      } else { return value; }
+    }).label("vessel.vesselName").required(),
+    isListed: Joi.boolean().custom((value: boolean, helpers: any) => {
+      if (value === false) {
+        return helpers.error('directLanding.vessel.isListed.base');
       }
-    }).label("vessel.vesselName").required()
+      return value;
+    }).label("vessel.isListed").optional(),
   }).required(),
   weights: Joi.array().items(Joi.object().keys({
     speciesId: Joi.string().trim().label("speciesId").required(),
