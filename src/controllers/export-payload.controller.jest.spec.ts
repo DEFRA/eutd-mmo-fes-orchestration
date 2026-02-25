@@ -3163,3 +3163,125 @@ describe("confirmLandingsType", () => {
   });
 
 });
+
+describe('additional ExportPayloadController helper branches', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('handleValidateResponse returns result for non-html and no errors', () => {
+    const req: any = { headers: {} };
+    const payload: any = {};
+    const result: any = { errors: [] };
+
+    const res = (SUT as any).handleValidateResponse(req, { response: () => ({ code: jest.fn() }), redirect: jest.fn() } as any, false, payload, result);
+
+    expect(res).toBe(result);
+  });
+
+  it('handleValidateResponse returns 400 response when non-html and errors present', () => {
+    const req: any = { headers: {} };
+    const payload: any = {};
+    const responseCode = jest.fn();
+    const h: any = { response: () => ({ code: responseCode }), redirect: jest.fn() };
+    const result: any = { errors: [{ msg: 'err' }] };
+
+    (SUT as any).handleValidateResponse(req, h, false, payload, result);
+
+    expect(responseCode).toHaveBeenCalledWith(400);
+  });
+
+  it('handleValidateResponse redirects to nextUri when html and no errors', () => {
+    const payload: any = { nextUri: '/next', currentUri: '/current', dashboardUri: '/dash' };
+    const h: any = { response: () => ({ code: jest.fn() }), redirect: jest.fn() };
+    const result: any = { errors: [] };
+
+    const mockAccepts = jest.spyOn(AcceptsHTML, 'default').mockReturnValue(true);
+
+    (SUT as any).handleValidateResponse({ headers: {} } as any, h, false, payload, result);
+
+    expect(h.redirect).toHaveBeenCalledWith(payload.nextUri);
+
+    mockAccepts.mockRestore();
+  });
+
+  it('handleValidateResponse redirects to dashboard when savingAsDraft and html', () => {
+    const payload: any = { nextUri: '/next', currentUri: '/current', dashboardUri: '/dash' };
+    const h: any = { response: () => ({ code: jest.fn() }), redirect: jest.fn() };
+    const result: any = { errors: [] };
+
+    const mockAccepts = jest.spyOn(AcceptsHTML, 'default').mockReturnValue(true);
+
+    (SUT as any).handleValidateResponse({ headers: {} } as any, h, true, payload, result);
+
+    expect(h.redirect).toHaveBeenCalledWith(payload.dashboardUri);
+
+    mockAccepts.mockRestore();
+  });
+
+  it('handleValidateResponse redirects to currentUri when html and errors exist', () => {
+    const payload: any = { nextUri: '/next', currentUri: '/current', dashboardUri: '/dash' };
+    const h: any = { response: () => ({ code: jest.fn() }), redirect: jest.fn() };
+    const result: any = { errors: ['x'] };
+
+    const mockAccepts = jest.spyOn(AcceptsHTML, 'default').mockReturnValue(true);
+
+    (SUT as any).handleValidateResponse({ headers: {} } as any, h, false, payload, result);
+
+    expect(h.redirect).toHaveBeenCalledWith(payload.currentUri);
+
+    mockAccepts.mockRestore();
+  });
+
+  it('augmentVesselDetails returns vessel when found and builds label', async () => {
+    const mockVessel = { vesselName: 'WIRON 5', pln: 'PLN123' } as any;
+    const spy = jest.spyOn(ReferenceDataService as any, 'getVessel').mockResolvedValue(mockVessel);
+
+    const res = await (SUT as any).augmentVesselDetails('WIRON 5 (PLN123)');
+
+    expect(spy).toHaveBeenCalledWith('PLN123', 'WIRON 5');
+    expect(res.label).toBe('WIRON 5 (PLN123)');
+  });
+
+  it('augmentVesselDetails falls back to label when vessel not found', async () => {
+    const spy = jest.spyOn(ReferenceDataService as any, 'getVessel').mockResolvedValue(null);
+
+    const res = await (SUT as any).augmentVesselDetails('UNKNOWN');
+
+    expect(spy).toHaveBeenCalled();
+    expect(res.label).toBe('UNKNOWN');
+  });
+
+  it('addPayloadProduct adds new product when not present', () => {
+    const exportPayload = { items: [{ product: { id: 'p1' } }] };
+    const newProduct = { id: 'p2' };
+
+    const newPayload = (SUT as any).addPayloadProduct(exportPayload, newProduct);
+
+    expect(newPayload.items.length).toBe(2);
+    expect(newPayload.items.find(i => i.product.id === 'p2')).toBeTruthy();
+  });
+
+  it('removePayloadProduct removes product by id', () => {
+    const exportPayload = { items: [{ product: { id: 'p1' } }, { product: { id: 'p2' } }] };
+
+    const result = (SUT as any).removePayloadProduct(exportPayload, 'p1');
+
+    expect(result.items.length).toBe(1);
+    expect(result.items.find(i => i.product.id === 'p1')).toBeUndefined();
+  });
+
+  it('numberOfUniqueLandings counts unique pln/date combinations', () => {
+    const payload = {
+      items: [
+        { landings: [{ model: { vessel: { pln: 'A' }, dateLanded: '2020-01-01' } }] },
+        { landings: [{ model: { vessel: { pln: 'A' }, dateLanded: '2020-01-01' } }] },
+        { landings: [{ model: { vessel: { pln: 'B' }, dateLanded: '2020-01-02' } }] }
+      ]
+    } as any;
+
+    const count = (SUT as any).numberOfUniqueLandings(payload);
+
+    expect(count).toBe(2);
+  });
+});

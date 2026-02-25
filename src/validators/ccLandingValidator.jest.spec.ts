@@ -164,6 +164,21 @@ describe("validateLanding", () => {
         expect(res).toBeNull();
     });
 
+    it('should subtract original landing weight when calculating adjusted total', async () => {
+        const currentExportPayload = {
+            items: [
+                { landings: [{ model: { id: 'L1', exportWeight: 5000000 } }, { model: { id: 'L2', exportWeight: 4000000 } }] }
+            ]
+        } as any;
+
+        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(currentExportPayload);
+
+        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, id: 'L1', exportWeight: 6000000 } }] }];
+
+        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
+        expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan' } });
+    });
+
     it("should not error for aggregate-weight when under limit", async () => {
         const existingPayload = {
             items: [
