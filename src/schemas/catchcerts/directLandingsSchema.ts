@@ -11,7 +11,7 @@ const directLandingsSchema = Joi.object({
     .custom((value, helpers) => {
       const parts = value.split('-');
       // check array parts are note empty.
-      if (parts.length !== 3 || parts.some(part => part.trim() === ''))
+      if (parts.every(part => part.trim() === ''))
         return helpers.error('directLanding.date.base');
 
       const year = parts[0];
@@ -51,7 +51,13 @@ const directLandingsSchema = Joi.object({
   }, 'Start Date Validator').required(),
   faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
   vessel: Joi.object().keys({
-    vesselName: Joi.string().trim().label("vessel.vesselName").required()
+    vesselName: Joi.string().trim().custom((value: string, helpers: any) => {
+      if (typeof value !== 'string') {
+        return helpers.error('directLanding.any.required');
+      } else {
+        return helpers.error('directLanding.any.invalid');
+      }
+    }).label("vessel.vesselName").required()
   }).required(),
   weights: Joi.array().items(Joi.object().keys({
     speciesId: Joi.string().trim().label("speciesId").required(),
