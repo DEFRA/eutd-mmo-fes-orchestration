@@ -147,7 +147,6 @@ describe("transport routes", () => {
                     arrival: false,
                     flightNumber: "x",
                     departurePlace: "x",
-                    containerNumber: "x",
                     containerNumbers: ["ABCU1234567"],
                     pointOfDestination: "Paris Airport",
                     exportedTo: {
@@ -176,7 +175,6 @@ describe("transport routes", () => {
                     arrival: false,
                     vesselName: "x",
                     flagState: "x",
-                    containerNumber: "ABCU1234567",
                     containerNumbers: ["ABCU1234567"],
                     departurePlace: "x",
                     pointOfDestination: "Lagos Port",
@@ -783,6 +781,8 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
+                containerNumbers: "error.containerNumbers.container-vessel.array.min",
+                "containerNumbers.0": "error.containerNumbers.array.min",
                 departureDate: "error.departureDate.date.max",
                 departureCountry: "error.departureCountry.any.required",
                 departurePort: "error.departurePort.any.required",
@@ -798,7 +798,6 @@ describe("transport routes", () => {
               vesselName: "Vessel1111", // required field
               flagState: "UK", // required field
               freightBillNumber: "",
-              containerNumber: "ABCU1234567", // required field
               containerNumbers: ["ABCU1234567"], // required field
               placeOfUnloading: "UK", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
@@ -911,6 +910,8 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
+                containerNumbers: "error.containerNumbers.plane.array.min",
+                "containerNumbers.0": "error.containerNumbers.array.min",
                 flightNumber: "error.flightNumber.string.empty",
                 departureCountry: "error.departureCountry.string.empty",
                 departurePort: "error.departurePort.string.empty",

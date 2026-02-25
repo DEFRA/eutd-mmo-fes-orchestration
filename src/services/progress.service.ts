@@ -269,24 +269,18 @@ export default class ProgressService {
       const transportationIsIncomplete: boolean = (await Promise.all(transportations.map(async (transportation: CatchCertificateTransport) => {
         const frontEndTransportation: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
         
-        // Check for plane and containerVessel that at least one valid container number exists
-        const requiresContainerNumbers = frontEndTransportation.vehicle === 'plane' || frontEndTransportation.vehicle === 'containerVessel';
-        const hasValidContainerNumber = frontEndTransportation.containerNumbers?.some(cn => cn?.trim());
-        
-        // If requires containerNumbers and none are valid, mark as incomplete
-        if (requiresContainerNumbers && !hasValidContainerNumber) {
-          return true;
+        // Only require containerNumbers for plane and container vessel
+        const vehicleType = frontEndTransportation.vehicle;
+        if (vehicleType === 'plane' || vehicleType === 'containerVessel') {
+          const hasValidContainerNumber = frontEndTransportation.containerNumbers?.some(cn => cn?.trim());
+          if (!hasValidContainerNumber) {
+            return true;
+          }
         }
         
         const bypassForTruckCMR = frontEndTransportation.cmr === 'false' || !frontEndTransportation.cmr;
         const payload = { ...frontEndTransportation };
         delete payload.cmr;
-        
-        // If containerNumbers has valid values, remove containerNumber (singular) from validation to avoid conflicts
-        if (hasValidContainerNumber) {
-          delete payload.containerNumber;
-          delete payload.containerIdentificationNumber;
-        }
         
         const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 

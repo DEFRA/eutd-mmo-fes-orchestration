@@ -11,7 +11,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'truck',
         nationalityOfVehicle: 'United Kingdom',
         registrationNumber: 'ABC123',
-        containerIdentificationNumber: 'ABCU1234567',
+        containerNumbers: ['ABCU1234567'],
         departurePlace: 'Dover',
         freightBillNumber: 'FB123'
       };
@@ -30,7 +30,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
           vehicle: 'truck',
           nationalityOfVehicle: 'United Kingdom',
           registrationNumber: 'ABC123',
-          containerIdentificationNumber: containerNumber,
+          containerNumbers: [containerNumber],
           departurePlace: 'Dover'
         };
 
@@ -155,14 +155,14 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'truck',
         nationalityOfVehicle: 'United Kingdom',
         registrationNumber: 'ABC123',
-        containerIdentificationNumber: 'ABC U123 4567',
+        containerNumbers: ['ABC U123 4567'],
         departurePlace: 'Dover'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerIdentificationNumber.string.pattern.base');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should reject containerIdentificationNumber with lowercase letters', () => {
@@ -171,14 +171,14 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'truck',
         nationalityOfVehicle: 'United Kingdom',
         registrationNumber: 'ABC123',
-        containerIdentificationNumber: 'abcu1234567',
+        containerNumbers: ['abcu1234567'],
         departurePlace: 'Dover'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerIdentificationNumber.string.pattern.base');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should reject containerIdentificationNumber with wrong length', () => {
@@ -187,14 +187,14 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'truck',
         nationalityOfVehicle: 'United Kingdom',
         registrationNumber: 'ABC123',
-        containerIdentificationNumber: 'ABCU123456',
+        containerNumbers: ['ABCU123456'],
         departurePlace: 'Dover'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerIdentificationNumber.string.pattern.base');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should reject containerIdentificationNumber with invalid category (not U, J, Z, or R)', () => {
@@ -203,14 +203,14 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'truck',
         nationalityOfVehicle: 'United Kingdom',
         registrationNumber: 'ABC123',
-        containerIdentificationNumber: 'ABCA1234567',
+        containerNumbers: ['ABCA1234567'],
         departurePlace: 'Dover'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerIdentificationNumber.string.pattern.base');
+      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
     it('should trim whitespace from containerIdentificationNumber', () => {
@@ -219,14 +219,14 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'truck',
         nationalityOfVehicle: 'United Kingdom',
         registrationNumber: 'ABC123',
-        containerIdentificationNumber: '  ABCU1234567  ',
+        containerNumbers: ['  ABCU1234567  '],
         departurePlace: 'Dover'
       };
 
       const { error, value } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeUndefined();
-      expect(value.containerIdentificationNumber).toBe('ABCU1234567');
+      expect(value.containerNumbers[0]).toBe('ABCU1234567');
     });
   });
 
@@ -586,16 +586,13 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         id: 'transport-123',
         vehicle: 'plane',
         flightNumber: 'FL123',
-        containerNumber: 'CONT123',
         containerNumbers: ['CONT123'],
-        containerIdentificationNumber: 'ABCD1234567',
         departurePlace: 'Heathrow'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
-      expect(error).toBeDefined();
-      expect(error?.message).toContain('containerIdentificationNumber');
+      expect(error).toBeUndefined();
     });
 
     it('should accept containerIdentificationNumber for train with valid alphanumeric value', () => {
@@ -603,7 +600,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         id: 'transport-123',
         vehicle: 'train',
         railwayBillNumber: 'RB123',
-        containerIdentificationNumber: 'ABCU1234567',
+        containerNumbers: ['ABCU1234567'],
         departurePlace: 'Station'
       };
 
@@ -617,7 +614,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         id: 'transport-123',
         vehicle: 'train',
         railwayBillNumber: 'RB123',
-        containerIdentificationNumber: '',
+        containerNumbers: [],
         departurePlace: 'Station'
       };
 
@@ -631,6 +628,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         id: 'transport-123',
         vehicle: 'train',
         railwayBillNumber: 'RB123',
+        containerNumbers: [],
         departurePlace: 'Station'
       };
 
@@ -645,14 +643,14 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         id: 'transport-123',
         vehicle: 'train',
         railwayBillNumber: 'RB123',
-        containerIdentificationNumber: longValue,
+        containerNumbers: [longValue],
         departurePlace: 'Station'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerIdentificationNumber.string.pattern.base');
+      expect(error?.message).toContain('error.containerNumbers');
     });
 
     it('should accept containerIdentificationNumber for train with spaces', () => {
@@ -660,7 +658,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         id: 'transport-123',
         vehicle: 'train',
         railwayBillNumber: 'RB123',
-        containerIdentificationNumber: 'ABCU1234567',
+        containerNumbers: ['ABCU1234567'],
         departurePlace: 'Station'
       };
 
@@ -674,14 +672,14 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         id: 'transport-123',
         vehicle: 'train',
         railwayBillNumber: 'RB123',
-        containerIdentificationNumber: 'ABC-123',
+        containerNumbers: ['ABC-123'],
         departurePlace: 'Station'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.message).toContain('error.containerIdentificationNumber.string.pattern.base');
+      expect(error?.message).toContain('error.containerNumbers');
     });
 
     it('should forbid containerIdentificationNumber for containerVessel', () => {
@@ -690,16 +688,13 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
         vehicle: 'containerVessel',
         vesselName: 'Ship Name',
         flagState: 'UK',
-        containerNumber: 'ABCU1234567',
         containerNumbers: ['ABCU1234567'],
-        containerIdentificationNumber: 'ABCU1234567',
         departurePlace: 'Port'
       };
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
-      expect(error).toBeDefined();
-      expect(error?.message).toContain('containerIdentificationNumber');
+      expect(error).toBeUndefined();
     });
   });
 });
@@ -714,7 +709,6 @@ describe('catchCertificateTransportDetailsSchema - containerNumber validation', 
         vehicle: 'containerVessel',
         vesselName: 'Ship Name',
         flagState: 'UK',
-        containerNumber: 'ABCU1234567',
         containerNumbers: ['ABCU1234567'],
         departurePlace: 'Port'
       };
@@ -732,7 +726,6 @@ describe('catchCertificateTransportDetailsSchema - containerNumber validation', 
         id: 'transport-123',
         vehicle: 'plane',
         flightNumber: 'FL123',
-        containerNumber: 'CONT123',
         containerNumbers: ['CONT123'],
         departurePlace: 'Airport'
       };
@@ -751,7 +744,7 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
       vehicle: 'truck',
       nationalityOfVehicle: 'United Kingdom',
       registrationNumber: 'ABC123',
-      containerIdentificationNumber: 'ABCU1234567',
+      containerNumbers: ['ABCU1234567'],
       departurePlace: 'Dover'
     };
 
@@ -765,7 +758,7 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
       vehicle: 'truck',
       nationalityOfVehicle: 'United Kingdom',
       registrationNumber: 'ABC123',
-      containerIdentificationNumber: '',
+      containerNumbers: [],
       departurePlace: 'Dover'
     };
 
@@ -779,7 +772,6 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
       vehicle: 'truck',
       nationalityOfVehicle: 'United Kingdom',
       registrationNumber: 'ABC123',
-      containerIdentificationNumber: null,
       departurePlace: 'Dover'
     };
 
@@ -794,14 +786,14 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
       vehicle: 'truck',
       nationalityOfVehicle: 'United Kingdom',
       registrationNumber: 'ABC123',
-      containerIdentificationNumber: longValue,
+      containerNumbers: [longValue],
       departurePlace: 'Dover'
     };
 
     const { error } = truckSaveAsDraftSchema.validate(payload);
 
     expect(error).toBeDefined();
-    expect(error?.details[0].message).toContain('150');
+    expect(error?.details[0].message).toMatch(/pattern|max/i);
   });
 
   it('should accept any containerIdentificationNumber format in save-as-draft mode', () => {
@@ -809,7 +801,7 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
       vehicle: 'truck',
       nationalityOfVehicle: 'United Kingdom',
       registrationNumber: 'ABC123',
-      containerIdentificationNumber: 'ABC!@#123', // Any format allowed in draft
+      containerNumbers: ['ABC!@#123'],
       departurePlace: 'Dover'
     };
 
@@ -821,7 +813,7 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
   it('should accept containerIdentificationNumber with spaces in save-as-draft mode', () => {
     const payload = {
       vehicle: 'truck',
-      containerIdentificationNumber: 'ABC 123 XYZ' // Spaces allowed in draft
+      containerNumbers: ['ABC 123 XYZ']
     };
 
     const { error } = truckSaveAsDraftSchema.validate(payload);
@@ -832,13 +824,13 @@ describe('truckSaveAsDraftSchema - containerIdentificationNumber validation', ()
   it('should trim whitespace from containerIdentificationNumber', () => {
     const payload = {
       vehicle: 'truck',
-      containerIdentificationNumber: '  ABCU1234567  '
+      containerNumbers: ['  ABCU1234567  ']
     };
 
     const { error, value } = truckSaveAsDraftSchema.validate(payload);
 
     expect(error).toBeUndefined();
-    expect(value.containerIdentificationNumber).toBe('ABCU1234567');
+    expect(value.containerNumbers[0]).toBe('ABCU1234567');
   });
 });
 

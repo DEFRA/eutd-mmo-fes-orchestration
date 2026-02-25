@@ -35,7 +35,6 @@ const containerVesselSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
     otherwise: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\-' ]+$/)
   }),
-  containerNumber: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.when('arrival', {
     is: true,
     then: Joi.array()

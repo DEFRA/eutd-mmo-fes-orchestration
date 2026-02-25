@@ -5,11 +5,10 @@ interface TransportDetails extends IStoreable {
     vehicle: string,
     user_id: string,
     railwayBillNumber? : string,
-    containerNumber? : string,
+    containerNumbers? : string,
     flightNumber? : string,
     nationalityOfVehicle? : string,
     registrationNumber? : string,
-    containerIdentificationNumber? : string,
     flagState? : string,
     vesselName? : string,
     cmr? : string

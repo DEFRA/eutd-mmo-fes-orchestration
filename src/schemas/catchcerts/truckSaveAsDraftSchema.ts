@@ -27,7 +27,6 @@ const truckSaveAsDraftSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
     otherwise: Joi.string().trim().allow('').optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
   }),
-  containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).optional(),
   containerNumbers: Joi.array()
     .items(Joi.string().trim().allow('').max(50).messages({
       'string.max': 'error.containerNumbers.string.max'
