@@ -66,7 +66,7 @@ export const validateAggregateExportWeight = async (exportPayload: ProductLanded
       currentExportPayload.items.forEach((item: any) => {
         if (item.landings && item.landings.length > 0) {
           item.landings.forEach((l: any) => {
-            const w = Number(l.model?.exportWeight) ?? 0;
+            const w = Number(l.model?.exportWeight) || 0;
             currentTotal += w;
           });
         }
@@ -75,7 +75,7 @@ export const validateAggregateExportWeight = async (exportPayload: ProductLanded
 
     const newWeightsTotal = exportPayload
       .flatMap(x => x.landings)
-      .reduce((acc, l: any) => acc + (Number(l.model?.exportWeight) ?? 0), 0);
+      .reduce((acc, l: any) => acc + (Number(l.model?.exportWeight) || 0), 0);
 
     let originalWeightsToSubtract = 0;
     if (currentExportPayload?.items) {
@@ -86,7 +86,7 @@ export const validateAggregateExportWeight = async (exportPayload: ProductLanded
             if (item.landings && item.landings.length > 0) {
               const found = item.landings.find((el: any) => el.model?.id === id);
               if (found) {
-                originalWeightsToSubtract += Number(found.model?.exportWeight) ?? 0;
+                originalWeightsToSubtract += Number(found.model?.exportWeight) || 0;
               }
             }
           });
