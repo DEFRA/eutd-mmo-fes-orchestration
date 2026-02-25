@@ -92,14 +92,14 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
+  containerNumbers: joinContainerNumbers(transport.containerNumbers),
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
   flightNumber: transport.flightNumber,
   airwayBillNumber: transport.airwayBillNumber,
-  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
+  containerNumbers: joinContainerNumbers(transport.containerNumbers),
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   freightBillNumber: transport.freightBillNumber,
@@ -123,7 +123,7 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
+  containerNumbers: joinContainerNumbers(transport.containerNumbers),
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
@@ -134,7 +134,7 @@ const getContainerVesselBackEndTransport = (transport: Transport) => ({
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
-  containerNumbers: joinContainerNumbers(transport.containerNumbers, ','),
+  containerNumbers: joinContainerNumbers(transport.containerNumbers),
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   exportDate: transport.exportDate,

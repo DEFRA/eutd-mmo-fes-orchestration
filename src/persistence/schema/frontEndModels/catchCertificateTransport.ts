@@ -55,7 +55,7 @@ const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEnd
   const cmrIsSet = typeof transport.cmr === 'string';
   const hasCmr = transport.cmr === 'true';
   const result = {
-    id: parseInt(transport.id),
+    id: Number.parseInt(transport.id),
     vehicle: transport.vehicle,
     cmr: cmrIsSet ? hasCmr : undefined,
     nationalityOfVehicle: cmrIsSet && hasCmr ? undefined : transport.nationalityOfVehicle,
