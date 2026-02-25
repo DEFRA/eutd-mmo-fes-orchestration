@@ -55,7 +55,7 @@ describe('getDraft', () => {
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
-        containerNumber: '12345',
+        containerNumbers: '12345',
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
@@ -645,7 +645,7 @@ describe('GetExporterDetails', () => {
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
-        containerNumber: '12345',
+        containerNumbers: '12345',
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
@@ -677,7 +677,7 @@ describe('GetExporterDetails', () => {
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
-        containerNumber: '12345',
+        containerNumbers: '12345',
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
@@ -728,7 +728,7 @@ describe('UpsertDraftData', () => {
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
-        containerNumber: '12345',
+        containerNumbers: '12345',
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
@@ -782,7 +782,7 @@ describe('UpsertDraftData', () => {
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
-        containerNumber: '12345',
+        containerNumbers: '12345',
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
@@ -856,7 +856,7 @@ describe('Upsert Exporter Details', () => {
       transportation: {
         vehicle: 'plane',
         flightNumber: 'BA078',
-        containerNumber: '12345',
+        containerNumbers: '12345',
         departurePlace: 'Essex',
         exportDate: '18/11/2019'
       },
