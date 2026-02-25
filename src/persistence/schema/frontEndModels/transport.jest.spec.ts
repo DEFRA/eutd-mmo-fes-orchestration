@@ -1,3 +1,4 @@
+import { toFrontEndTransport } from './transport';
 import * as FrontEndTransport from "./transport"
 import * as BackEndModels from "../common"
 
@@ -1698,5 +1699,39 @@ describe("When mapping from backend to frontend transport with pointOfDestinatio
         pointOfDestination: "Port of Le Havre"
       });
     });
+  });
+});
+
+describe('formatDateForFrontend behavior via toFrontEndTransport', () => {
+  it('returns empty string when dates are falsy', () => {
+    const model: any = { vehicle: 'truck', exportDate: null, departureDate: undefined };
+    const res = toFrontEndTransport(model);
+
+    expect(res.exportDate).toBe('');
+    expect(res.departureDate).toBe('');
+  });
+
+  it('returns the same string when already in DD/MM/YYYY format', () => {
+    const model: any = { vehicle: 'truck', exportDate: '01/02/2020', departureDate: '10/11/2021' };
+    const res = toFrontEndTransport(model);
+
+    expect(res.exportDate).toBe('01/02/2020');
+    expect(res.departureDate).toBe('10/11/2021');
+  });
+
+  it('formats ISO date strings to DD/MM/YYYY', () => {
+    const model: any = { vehicle: 'truck', exportDate: '2020-03-04T00:00:00.000Z', departureDate: '2021-12-05T00:00:00.000Z' };
+    const res = toFrontEndTransport(model);
+
+    expect(res.exportDate).toBe('04/03/2020');
+    expect(res.departureDate).toBe('05/12/2021');
+  });
+
+  it('returns original string when date is invalid', () => {
+    const model: any = { vehicle: 'truck', exportDate: 'not-a-date', departureDate: 'also-bad' };
+    const res = toFrontEndTransport(model);
+
+    expect(res.exportDate).toBe('not-a-date');
+    expect(res.departureDate).toBe('also-bad');
   });
 });

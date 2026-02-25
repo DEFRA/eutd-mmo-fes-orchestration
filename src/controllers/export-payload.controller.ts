@@ -521,7 +521,7 @@ export default class ExportPayloadController {
 
       const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-      const result = await LandingValidator.validateLanding(items)
+      const result = await LandingValidator.validateLanding(items, { userPrincipal, documentNumber, contactId })
 
       if (result?.error === 'invalid') {
         newLanding.error = result.error;
@@ -612,7 +612,7 @@ export default class ExportPayloadController {
 
     const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-    const validation = await LandingValidator.validateLanding(items);
+    const validation = await LandingValidator.validateLanding(items, { userPrincipal, documentNumber, contactId });
 
     if (validation?.error === 'invalid') {
       newLanding.error = validation.error;
@@ -624,14 +624,18 @@ export default class ExportPayloadController {
         errors: validation.errors
       };
 
+
       return h.response(exportPayload).code(400);
     }
+
 
     const result = await ExportPayloadService.upsertLanding(productId, newLanding, userPrincipal, documentNumber, contactId);
 
     await SummaryErrorsService.clearErrors(documentNumber);
 
     if (newLanding.error) {
+     
+
       return h.response(result).code(400);
     }
     else if (acceptsHtml(req.headers)) {
@@ -649,6 +653,7 @@ export default class ExportPayloadController {
       result.error = 'invalid';
       result.errors = errorExtractor(error);
     }
+
 
     if (acceptsHtml(req.headers)) {
       return h.redirect(req.payload.currentUri).takeover();
@@ -712,7 +717,7 @@ export default class ExportPayloadController {
 
     const exportPayload = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-    const validation = await LandingValidator.validateLanding(exportPayload);
+    const validation = await LandingValidator.validateLanding(exportPayload, { userPrincipal, documentNumber, contactId });
 
     if (validation?.error === 'invalid') {
       newLanding.error = validation.error;
