@@ -1,4 +1,4 @@
-import { validateLanding, createExportPayloadForValidation } from './ccLandingValidator';
+import { validateLanding, createExportPayloadForValidation, validateAggregateExportWeight } from './ccLandingValidator';
 import ExportPayloadService from '../services/export-payload.service';
 import VesselValidator from '../services/vesselValidator.service';
 import * as ProductValidator from './ccProductValidator';
@@ -148,6 +148,20 @@ describe("validateLanding", () => {
 
         const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
         expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan' } });
+    });
+
+    it('validateAggregateExportWeight returns null when opts are missing', async () => {
+        const res = await validateAggregateExportWeight(exportPayload as any);
+        expect(res).toBeNull();
+    });
+
+    it('validateAggregateExportWeight returns null when ExportPayloadService.get throws', async () => {
+        jest.spyOn(ExportPayloadService, 'get').mockRejectedValueOnce(new Error('boom'));
+
+        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
+
+        const res = await validateAggregateExportWeight(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
+        expect(res).toBeNull();
     });
 
     it("should not error for aggregate-weight when under limit", async () => {
