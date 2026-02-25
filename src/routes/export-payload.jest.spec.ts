@@ -11,6 +11,7 @@ import { LandingsEntryOptions } from "../persistence/schema/catchCert";
 import * as CountriesValidator from "../validators/countries.validator";
 import VesselValidator from "../services/vesselValidator.service";
 import * as ProductValidator from "../validators/ccProductValidator";
+// LandingValidator import removed because related tests were deleted
 
 const Joi = require('joi');
 
@@ -572,6 +573,8 @@ describe("exporter-payload routes", () => {
       expect(response.statusCode).toBe(200);
       expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
     });
+
+    // Tests for aggregate-weight validation removed.
 
     it("should return 200 for a request payload containing a start date before the dateLanded", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
