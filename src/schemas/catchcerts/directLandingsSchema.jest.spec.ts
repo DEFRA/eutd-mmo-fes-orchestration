@@ -61,31 +61,31 @@ describe('directLandingsSchema - dateLanded validation', () => {
 		expect(dateErr.type).toBe('any.required');
 	});
 
-	it('returns directLanding.date.base error when dateLanded has empty parts', () => {
+	it('returns date.base error when dateLanded has empty parts', () => {
 		const payload = { ...basePayload, dateLanded: '2026--15' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeDefined();
 		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
 		expect(dateErr).toBeDefined();
-		expect(dateErr.type).toBe('directLanding.date.base');
+		expect(dateErr.type).toBe('date.base');
 	});
 
-	it('returns directLanding.date.base error when dateLanded has wrong number of parts', () => {
+	it('returns date.base error when dateLanded has wrong number of parts', () => {
 		const payload = { ...basePayload, dateLanded: '2026-02' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeDefined();
 		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
 		expect(dateErr).toBeDefined();
-		expect(dateErr.type).toBe('directLanding.date.base');
+		expect(dateErr.type).toBe('date.base');
 	});
 
-	it('returns directLanding.date.invalid error when dateLanded is invalid date', () => {
+	it('returns date.base error when dateLanded is invalid date', () => {
 		const payload = { ...basePayload, dateLanded: '2026-02-31' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeDefined();
 		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
 		expect(dateErr).toBeDefined();
-		expect(dateErr.type).toBe('directLanding.date.invalid');
+		expect(dateErr.type).toBe('date.base');
 	});
 
 	it('returns date.max error when dateLanded exceeds future limit', () => {
@@ -574,14 +574,14 @@ describe('directLandingsSchema - nonJS error mode', () => {
 		const payload = { ...basePayload, dateLanded: '2026--15' };
 		const errors = validateNonJs(payload);
 		expect(errors).toBeDefined();
-		expect(errors.dateLanded).toContain('directLanding.date.base');
+		expect(errors.dateLanded).toContain('date.base');
 	});
 
 	it('returns correct error key for invalid date', () => {
 		const payload = { ...basePayload, dateLanded: '2026-02-31' };
 		const errors = validateNonJs(payload);
 		expect(errors).toBeDefined();
-		expect(errors.dateLanded).toContain('directLanding.date.invalid');
+		expect(errors.dateLanded).toContain('date.base');
 	});
 
 	it('returns correct error key for startDate after dateLanded', () => {
