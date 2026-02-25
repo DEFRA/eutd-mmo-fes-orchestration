@@ -341,7 +341,7 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorExportWeightGreaterThanNullBeforeProcessing';
   } else if (!isPositiveNumberWithTwoDecimals(ctch.exportWeightBeforeProcessing)) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalBeforeProcessing';
-  } else if (ctch.totalWeightLanded && ctch.exportWeightBeforeProcessing > parseFloat(ctch.totalWeightLanded)) {
+  } else if (ctch.totalWeightLanded && ctch.exportWeightBeforeProcessing > Number.parseFloat(ctch.totalWeightLanded)) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessingMoreThanTotalWeight'
   } else {
     (ctch.exportWeightBeforeProcessing = numberAsString(ctch.exportWeightBeforeProcessing));
