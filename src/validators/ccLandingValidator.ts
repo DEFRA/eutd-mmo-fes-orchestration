@@ -54,7 +54,7 @@ export const createExportPayloadForValidation = (product, landing) => {
 }
 
 export const validateAggregateExportWeight = async (exportPayload: ProductLanded[], opts?: { userPrincipal?: string, documentNumber?: string, contactId?: string }) => {
-  if (!(opts && opts.userPrincipal && opts.documentNumber && opts.contactId)) {
+  if (!(opts?.userPrincipal && opts?.documentNumber && opts?.contactId)) {
     logger.info('[AGGREGATE-WEIGHT][SKIPPED][MISSING-OPTS]');
     return null;
   }
@@ -66,7 +66,7 @@ export const validateAggregateExportWeight = async (exportPayload: ProductLanded
       currentExportPayload.items.forEach((item: any) => {
         if (item.landings && item.landings.length > 0) {
           item.landings.forEach((l: any) => {
-            const w = Number(l.model?.exportWeight) || 0;
+            const w = Number(l.model?.exportWeight) ?? 0;
             currentTotal += w;
           });
         }
@@ -75,7 +75,7 @@ export const validateAggregateExportWeight = async (exportPayload: ProductLanded
 
     const newWeightsTotal = exportPayload
       .flatMap(x => x.landings)
-      .reduce((acc, l: any) => acc + (Number(l.model?.exportWeight) || 0), 0);
+      .reduce((acc, l: any) => acc + (Number(l.model?.exportWeight) ?? 0), 0);
 
     let originalWeightsToSubtract = 0;
     if (currentExportPayload?.items) {
@@ -86,7 +86,7 @@ export const validateAggregateExportWeight = async (exportPayload: ProductLanded
             if (item.landings && item.landings.length > 0) {
               const found = item.landings.find((el: any) => el.model?.id === id);
               if (found) {
-                originalWeightsToSubtract += Number(found.model?.exportWeight) || 0;
+                originalWeightsToSubtract += Number(found.model?.exportWeight) ?? 0;
               }
             }
           });
@@ -107,7 +107,7 @@ export const validateAggregateExportWeight = async (exportPayload: ProductLanded
 
     return null;
   } catch (e) {
-    logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][${e.stack || e}]`);
+    logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][${e?.stack ?? e}]`);
     return null;
   }
 }
@@ -121,7 +121,7 @@ export const validateLanding = async (exportPayload: ProductLanded[], opts?: { u
     errors.dateLanded = 'validation.vessel.license.invalid-date';
   }
    const aggregateResult = await validateAggregateExportWeight(exportPayload, opts);
-    if (aggregateResult && aggregateResult.errors) {
+    if (aggregateResult?.errors) {
       Object.assign(errors, aggregateResult.errors);
     }
   const seasonalFishValidationGuard = await validateProducts(exportPayload);
