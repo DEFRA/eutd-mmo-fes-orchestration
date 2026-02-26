@@ -26,6 +26,7 @@ export interface CatchCertificateTransport {
   flagState?: string;
   freightBillNumber?: string;
   documents?: CatchCertificateTransportDocument[];
+  airwayBillNumber?: string;
 }
 
 export const toBackEndTransport = (transport: CatchCertificateTransport): BackEndModels.CatchCertificateTransport => {
@@ -78,6 +79,7 @@ const getPlaneBackEndTransport = (transport: CatchCertificateTransport) => ({
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
   transportDocuments: transport.documents,
+  airwayBillNumber: transport.airwayBillNumber
 });
 
 const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
@@ -99,6 +101,7 @@ const getContainerVesselBackEndTransport = (transport: CatchCertificateTransport
   departurePlace: transport.departurePlace,
   freightBillNumber: transport.freightBillNumber,
   transportDocuments: transport.documents,
+  airwayBillNumber: transport.airwayBillNumber
 });
 
 export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTransport): CatchCertificateTransport => {
@@ -135,7 +138,8 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         containerNumbers: containerNumbers,
         departurePlace: model.departurePlace,
         freightBillNumber: model.freightBillNumber,
-        documents: model.transportDocuments
+        documents: model.transportDocuments,
+        airwayBillNumber: model.airwayBillNumber
       };
       break;
     }
