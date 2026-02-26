@@ -45,9 +45,8 @@ const containerVesselSchema = Joi.object({
   flagState: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-' ]+$/),
   containerNumber: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
+    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
-      'string.max': 'error.containerNumbers.string.max'
     }))
     .max(10)
     .optional(),
