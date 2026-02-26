@@ -124,6 +124,54 @@ test('/create-processing-statement/add-catch-to-consignment/:catchIndex with all
   t.end();
 });
 
+test('/create-processing-statement/add-processing-plant-address with missing plantPostcode validates as error', async t => {
+  try {
+    const currentUrl = '/create-processing-statement/add-processing-plant-address';
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'CT-111111',
+          totalWeightLanded: '1112',
+          exportWeightBeforeProcessing: '1111',
+          exportWeightAfterProcessing: '1110'
+        }
+      ],
+      consignmentDescription: 'Consignment 1',
+      healthCertificateNumber: 'HC-111111',
+      healthCertificateDate: '31/03/2018',
+      addAnotherCatch: 'notset',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: 'Hank',
+      plantApprovalNumber: 'Marvin',
+      plantName: 'Triffid',
+      plantAddressOne: 'Fish Quay',
+      plantAddressTwo: 'Fishy Way',
+      plantTownCity: 'Seaham',
+      plantPostcode: ' '
+    };
+
+    let {errors} = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantPostcode: 'Enter the postcode'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
 test('/create-processing-statement/add-catch-to-consignment/:catchIndex with missing species validates as error', async t => {
   try {
     const currentUrl = '/create-processing-statement/add-catch-to-consignment';
@@ -392,6 +440,45 @@ test('/create-processing-statement/add-catch-to-consignment/:catchIndex with inv
         'Enter the export weight (after processing) as a whole number, like 500'
     };
 
+    t.true(errors);
+    t.deepEquals(errors, expected);
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+test('/create-processing-statement/add-catch-to-consignment/:catchIndex with zero totalWeightLanded validates as error', async t => {
+  try {
+    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          species: 'Atlantic Cod',
+          catchCertificateNumber: 'CT-111111',
+          totalWeightLanded: '0',
+          exportWeightBeforeProcessing: '1',
+          exportWeightAfterProcessing: '1'
+        }
+      ],
+      consignmentDescription: 'A description',
+      healthCertificateNumber: 'HN-111111',
+      healthCertificateDate: '31/03/2018'
+    };
+
+    let {errors} = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      'catches-0-totalWeightLanded': 'psAddCatchWeightsErrorTotalWeightGreaterThanNull'
+    };
     t.true(errors);
     t.deepEquals(errors, expected);
   } catch (e) {
