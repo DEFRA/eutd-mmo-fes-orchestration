@@ -383,6 +383,10 @@ describe('directLandingsSchema - weights total validation', () => {
 				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
 			);
 			expect(weightError).toBeUndefined();
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
 		});
 
 		it('does not return an array.totalWeightExceeded error when multiple weights total exactly the limit', () => {
@@ -398,6 +402,10 @@ describe('directLandingsSchema - weights total validation', () => {
 				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
 			);
 			expect(weightError).toBeUndefined();
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
 		});
 
 		it('does not return an array.totalWeightExceeded error for typical small weights', () => {
@@ -413,6 +421,10 @@ describe('directLandingsSchema - weights total validation', () => {
 				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
 			);
 			expect(weightError).toBeUndefined();
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
 		});
 	});
 
