@@ -84,7 +84,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       expect(error).toBeUndefined();
     });
 
-    it('should reject containerNumbers item with invalid format regardless of length (FI0-10940: no 50-char limit)', () => {
+    it('should reject containerNumbers item with invalid format regardless of length (no 50-char limit)', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -102,7 +102,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
-    it('should NOT reject a containerNumbers item solely because it exceeds 50 characters (FI0-10940)', () => {
+    it('should NOT reject a containerNumbers item solely because it exceeds 50 characters', () => {
       // A 51-char all-uppercase-letters value fails pattern only (not max)
       const longValue = 'A'.repeat(51);
       const payload = {
@@ -298,7 +298,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       });
     });
 
-    it('should reject containerNumbers item with invalid format regardless of length for train (FI0-10940: no 50-char limit)', () => {
+    it('should reject containerNumbers item with invalid format regardless of length for train (no 50-char limit)', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -315,7 +315,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
-    it('should NOT reject containerNumbers item solely because it exceeds 50 characters for train (FI0-10940)', () => {
+    it('should NOT reject containerNumbers item solely because it exceeds 50 characters for train', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -551,7 +551,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       });
     });
 
-    it('should reject containerNumbers item with invalid format regardless of length for containerVessel (FI0-10940: no 50-char limit)', () => {
+    it('should reject containerNumbers item with invalid format regardless of length for containerVessel (no 50-char limit)', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -569,7 +569,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
     });
 
-    it('should NOT reject containerNumbers item solely because it exceeds 50 characters for containerVessel (FI0-10940)', () => {
+    it('should NOT reject containerNumbers item solely because it exceeds 50 characters for containerVessel', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
