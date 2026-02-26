@@ -95,16 +95,22 @@ export default class DocumentController {
 
       switch (req.query.type) {
         case catchCerts:
-          inProgress = await getDraftCatchCertHeadersForUser(userPrincipal, contactId);
-          completed = await getAllCatchCertsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId);
+          [inProgress, completed] = await Promise.all([
+            getDraftCatchCertHeadersForUser(userPrincipal, contactId),
+            getAllCatchCertsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId)
+          ]);
           break;
         case processingStatement:
-          inProgress = await getDraftProcessingStatementsForUser(userPrincipal, contactId);
-          completed = await getAllProcessingStatementsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId);
+          [inProgress, completed] = await Promise.all([
+            getDraftProcessingStatementsForUser(userPrincipal, contactId),
+            getAllProcessingStatementsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId)
+          ]);
           break;
         case storageNote:
-          inProgress = await getDraftStorageDocumentsForUser(userPrincipal, contactId);
-          completed = await getAllStorageDocsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId);
+          [inProgress, completed] = await Promise.all([
+            getDraftStorageDocumentsForUser(userPrincipal, contactId),
+            getAllStorageDocsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId)
+          ]);
           break;
         default:
           inProgress = [];

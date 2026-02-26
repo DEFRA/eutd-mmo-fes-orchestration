@@ -58,23 +58,45 @@ export default class UserAttributesRoutes {
             cors: true,
             description: 'Get user attributes for user',
             handler: async (req: Hapi.Request) => {
-              const allUserAttributes: IUserAttributes | null = await find((req.app as HapiRequestApplicationStateExtended).claims.sub);
-              if (allUserAttributes?.attributes) {
-                return allUserAttributes.attributes.reduce((attributes: IAttribute[], attribute: IAttribute, ) => {
-                  if (attribute.name === "privacy_statement") {
-                    const shouldIncludePrivacyAttribute = moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement).isSameOrBefore(attribute.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement);
-                    return shouldIncludePrivacyAttribute ? [ ...attributes, attribute] : attributes;
-                  }
+              const userId = (req.app as HapiRequestApplicationStateExtended).claims.sub;
+              const allUserAttributes: IUserAttributes | null = await find(userId, ['attributes']);
+              const attributes = allUserAttributes?.attributes;
 
-                  if (attribute.name === "accepts_cookies") {
-                    const shouldIncludeCookieAttribute = moment.utc(ApplicationConfig._lastUpdatedCookiePolicy).isSameOrBefore(attribute.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedCookiePolicy);
-                    return shouldIncludeCookieAttribute ? [ ...attributes, attribute] : attributes;
-                  }
-
-                  return [ ...attributes, attribute];
-                }, []);
+              if (!attributes?.length) {
+                return [];
               }
-              return [];
+
+              const hasPrivacyThreshold = !isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement);
+              const hasCookieThreshold = !isEmpty(ApplicationConfig._lastUpdatedCookiePolicy);
+
+              const privacyThreshold = hasPrivacyThreshold
+                ? moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement).valueOf()
+                : 0;
+              const cookieThreshold = hasCookieThreshold
+                ? moment.utc(ApplicationConfig._lastUpdatedCookiePolicy).valueOf()
+                : 0;
+
+              const filteredAttributes: IAttribute[] = [];
+
+              for (const attribute of attributes) {
+                if (attribute.name === 'privacy_statement') {
+                  if (!hasPrivacyThreshold || moment.utc(attribute.modifiedAt).valueOf() >= privacyThreshold) {
+                    filteredAttributes.push(attribute);
+                  }
+                  continue;
+                }
+
+                if (attribute.name === 'accepts_cookies') {
+                  if (!hasCookieThreshold || moment.utc(attribute.modifiedAt).valueOf() >= cookieThreshold) {
+                    filteredAttributes.push(attribute);
+                  }
+                  continue;
+                }
+
+                filteredAttributes.push(attribute);
+              }
+
+              return filteredAttributes;
             },
             tags: ['api']
           }

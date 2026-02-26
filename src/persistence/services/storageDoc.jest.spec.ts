@@ -253,6 +253,26 @@ describe('getDraftDocumentHeaders', () => {
   const testUser = 'Bob';
   const testContact = 'contactBob';
 
+  it('should execute draft headers query with lean', async () => {
+    const mockDocs = [{
+      documentNumber: 'doc1',
+      status: 'DRAFT',
+      createdAt: new Date('2020-01-01'),
+      userReference: 'ref1'
+    }];
+    const mockLean = jest.fn().mockResolvedValue(mockDocs);
+    const mockSort = jest.fn().mockReturnValue({ lean: mockLean });
+    const findSpy = jest.spyOn(StorageDocumentModel, 'find').mockReturnValue({ sort: mockSort } as any);
+
+    const result = await StorageDocumentService.getDraftDocumentHeaders(testUser, testContact);
+
+    expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+    expect(mockLean).toHaveBeenCalledTimes(1);
+    expect(result[0].documentNumber).toBe('doc1');
+
+    findSpy.mockRestore();
+  });
+
   it('should return a draft if one is present', async () => {
     await createDocument('Bob');
 
@@ -373,6 +393,21 @@ describe('getDraftDocumentHeaders', () => {
 
 describe('getAllStorageDocsForUserByYearAndMonth', () => {
   const testContact = 'contactBob';
+
+  it('should execute month/year query with lean to reduce hydration overhead', async () => {
+    const mockLean = jest.fn().mockResolvedValue([]);
+    const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
+    const mockSort = jest.fn().mockReturnValue({ select: mockSelect });
+    const findSpy = jest.spyOn(StorageDocumentModel, 'find').mockReturnValue({ sort: mockSort } as any);
+
+    await StorageDocumentService.getAllStorageDocsForUserByYearAndMonth('01-2020', 'Bob', testContact);
+
+    expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+    expect(mockSelect).toHaveBeenCalled();
+    expect(mockLean).toHaveBeenCalledTimes(1);
+
+    findSpy.mockRestore();
+  });
 
   it('should return documents for the given user, year, and month', async () => {
     await Promise.all([
