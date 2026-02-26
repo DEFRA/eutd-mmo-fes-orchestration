@@ -12,7 +12,7 @@ type FindCacheEntry = {
 const findCache = new Map<string, FindCacheEntry>();
 
 const getFindCacheKey = (userPrincipal: string, property?: string[]): string => {
-  const projection = Array.isArray(property) ? [...property].sort().join(',') : '*';
+  const projection = Array.isArray(property) ? [...property].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })).join(',') : '*';
   return `${userPrincipal}|${projection}`;
 };
 
