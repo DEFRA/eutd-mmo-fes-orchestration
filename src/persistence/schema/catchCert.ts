@@ -326,7 +326,8 @@ export interface CatchCertificateTrain extends CatchCertificateBasicTransportDet
 export interface CatchCertificatePlane extends CatchCertificateBasicTransportDetails {
   flightNumber: string,
   containerNumber: string,
-  containerNumbers?: string[]
+  containerNumbers?: string[],
+  airwayBillNumber?: string
 }
 
 export interface CatchCertificateContainerVessel extends CatchCertificateBasicTransportDetails {
@@ -464,6 +465,7 @@ export const CatchCertificateTransportSchema = new Schema({
   containerIdentificationNumber: { type: String, required: false },
   railwayBillNumber:    { type: String,  required: false },
   flightNumber:         { type: String,  required: false },
+  airwayBillNumber:     { type: String,  required: false },
   vesselName:           { type: String,  required: false },
   flagState:            { type: String,  required: false },
   containerNumber:      { type: String,  required: false },
