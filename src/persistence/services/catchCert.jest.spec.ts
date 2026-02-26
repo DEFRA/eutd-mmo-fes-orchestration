@@ -21,7 +21,7 @@ import SummaryErrorsService from '../../services/summaryErrors.service';
 import { MockSessionStorage } from '../../../test/session_store/mock';
 import { SessionStoreFactory } from '../../session_store/factory';
 import { IStoreable } from '../../session_store/storeable';
-import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
+import { CATCH_CERTIFICATE_KEY, COMPLETED_CC_HEADERS_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
 import logger from '../../logger';
 
 const CONTACT_ID = 'contactBob';
@@ -309,6 +309,58 @@ describe('catchCert - db related', () => {
   });
 
   describe('getAllCatchCertsForUserByYearAndMonth', () => {
+
+    let mockGetDraftCache: jest.SpyInstance;
+    let mockSaveDraftCache: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockGetDraftCache = jest.spyOn(CatchCertService, 'getDraftCache').mockResolvedValue(null);
+      mockSaveDraftCache = jest.spyOn(CatchCertService, 'saveDraftCache').mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      mockGetDraftCache.mockRestore();
+      mockSaveDraftCache.mockRestore();
+    });
+
+    it('should return cached results without querying MongoDB when cache is populated', async () => {
+      const cachedDocs = [{ documentNumber: 'GBR-2020-CC-CACHED', status: 'COMPLETE' }] as any;
+      mockGetDraftCache.mockResolvedValue(cachedDocs);
+      const findSpy = jest.spyOn(CatchCertModel, 'find');
+
+      const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
+
+      expect(result).toEqual(cachedDocs);
+      expect(findSpy).not.toHaveBeenCalled();
+      expect(mockGetDraftCache).toHaveBeenCalledWith(
+        defaultUser,
+        contactId,
+        `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/01-2020`
+      );
+
+      findSpy.mockRestore();
+    });
+
+    it('should query MongoDB on cache miss and save results to cache', async () => {
+      const mockLean = jest.fn().mockResolvedValue([]);
+      const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
+      const mockSort = jest.fn().mockReturnValue({ select: mockSelect });
+      const findSpy = jest.spyOn(CatchCertModel, 'find').mockReturnValue({ sort: mockSort } as any);
+
+      await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
+
+      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+      expect(mockSelect).toHaveBeenCalled();
+      expect(mockLean).toHaveBeenCalledTimes(1);
+      expect(mockSaveDraftCache).toHaveBeenCalledWith(
+        defaultUser,
+        contactId,
+        `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/01-2020`,
+        []
+      );
+
+      findSpy.mockRestore();
+    });
 
     it('should execute query with lean to avoid mongoose document hydration', async () => {
       const mockLean = jest.fn().mockResolvedValue([]);
@@ -1211,12 +1263,13 @@ describe('catchCert - db related', () => {
     test("upsert data if draft exists", async () => {
       const mockInvalidateDraftCache = jest.spyOn(CatchCertService, "invalidateDraftCache");
       const mockSaveDraftCache = jest.spyOn(CatchCertService, 'saveDraftCache');
+      const mockFindOneAndUpdate = jest.spyOn(CatchCertModel, 'findOneAndUpdate');
 
       mockInvalidateDraftCache.mockResolvedValue(Promise.resolve());
       mockSaveDraftCache.mockResolvedValue(Promise.resolve());
+      mockFindOneAndUpdate.mockResolvedValue({ documentNumber: "GBR-2020-CC-0E42C2DA5" } as any);
 
       const returnedDoc = { document: "GBR-2020-CC-0E42C2DA5" };
-      mockGet.mockResolvedValue({ documentNumber: "GBR-2020-CC-0E42C2DA5" });
       await CatchCertService.upsertDraftData(
         "BOB",
         "GBR-2020-CC-0E42C2DA5",
@@ -1231,6 +1284,8 @@ describe('catchCert - db related', () => {
       );
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(mockSaveDraftCache).toHaveBeenCalledTimes(1);
+
+      mockFindOneAndUpdate.mockRestore();
     });
 
     test("upsert data if draft does not exist", async () => {
@@ -2189,11 +2244,31 @@ describe('catchCert - db related', () => {
       expect(draft).toBeNull();
     });
 
-    it('should invalidate the cache for draft documents', async () => {
+    it('should invalidate the draft headers cache for draft documents', async () => {
       await CatchCertService.completeDraft(defaultUser, 'test', 'documentUri', 'bob@bob.bob', contactId);
 
-      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
+    });
+
+    it('should invalidate the completed certs cache for the current year/month', async () => {
+      const testDate = '2026-02-15';
+      mockDate.mockReturnValue(testDate);
+      const d = new Date(testDate);
+      const expectedYearAndMonth = `${d.getUTCMonth() + 1}-${d.getUTCFullYear()}`;
+
+      await CatchCertService.completeDraft(defaultUser, 'test', 'documentUri', 'bob@bob.bob', contactId);
+
+      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(
+        defaultUser,
+        `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/${expectedYearAndMonth}`,
+        contactId
+      );
+    });
+
+    it('should invalidate both the draft headers and completed certs caches', async () => {
+      await CatchCertService.completeDraft(defaultUser, 'test', 'documentUri', 'bob@bob.bob', contactId);
+
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
     });
   });
 
