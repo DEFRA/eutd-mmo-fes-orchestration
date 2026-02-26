@@ -61,10 +61,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
             .trim()
             .allow('')
             .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
-            .max(50)
             .messages({
               'string.pattern.base': 'ccShippingContainerNumberPatternError',
-              'string.max': 'error.containerNumbers.string.max',
             })
         )
         .min(1)
@@ -90,10 +88,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
               .trim()
               .allow('')
               .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
-              .max(50)
               .messages({
                 'string.pattern.base': 'error.containerNumbers.string.pattern.base',
-                'string.max': 'error.containerNumbers.string.max',
               })
           )
           .max(10)
