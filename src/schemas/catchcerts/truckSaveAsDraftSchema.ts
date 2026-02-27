@@ -29,9 +29,7 @@ const truckSaveAsDraftSchema = Joi.object({
   }),
   containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().allow('').max(50).messages({
-      'string.max': 'error.containerNumbers.string.max'
-    }))
+    .items(Joi.string().trim().allow(''))
     .max(10)
     .optional(),
   freightBillNumber: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),

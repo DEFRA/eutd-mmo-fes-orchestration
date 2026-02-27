@@ -40,9 +40,7 @@ const containerVesselSchema = Joi.object({
     is: true,
     then: Joi.array()
       .items(
-        Joi.string().trim().allow('').max(50).messages({
-          'string.max': 'error.containerNumbers.string.max'
-        })
+        Joi.string().trim().allow('')
       )
       .max(10)
       .optional(),
