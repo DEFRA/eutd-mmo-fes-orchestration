@@ -1223,7 +1223,7 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
       const error = { 
-        containerNumbers: "error.containerNumbers.any.required",
+        containerNumbers: "commonAddTransportationDetailsPlaneContainerNumberLabelError",
         flightNumber: "error.flightNumber.string.max" 
       };
       expect(response.result).toEqual(error);
@@ -1247,7 +1247,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumbers: "error.containerNumbers.any.required" };
+      const error = { containerNumbers: "commonAddTransportationDetailsPlaneContainerNumberLabelError" };
       expect(response.result).toEqual(error);
     });
 
@@ -1292,7 +1292,7 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
       const error = { 
-        containerNumbers: "error.containerNumbers.any.required",
+        containerNumbers: "ccContainerVesselContainerNumberLabelError",
         vesselName: "error.vesselName.string.pattern.base" 
       };
       expect(response.result).toEqual(error);
@@ -1317,7 +1317,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumbers: "error.containerNumbers.any.required" };
+      const error = { containerNumbers: "ccContainerVesselContainerNumberLabelError" };
       expect(response.result).toEqual(error);
     });
 
