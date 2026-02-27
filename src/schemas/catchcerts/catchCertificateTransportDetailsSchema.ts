@@ -111,7 +111,16 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       is: true,
       then: Joi.any(),
       otherwise: Joi.string().trim().alphanum().max(15).required(),
-     }),
+    }),
+    otherwise: Joi.forbidden(),
+  }),
+  airwayBillNumber: Joi.when('vehicle', {
+    is: 'plane',
+    then: Joi.when('$query.draft', {
+      is: true,
+      then: Joi.any(),
+      otherwise: Joi.string().trim().allow('').max(50).regex(/^[a-zA-Z0-9-./]+$/).optional()
+    }),
     otherwise: Joi.forbidden(),
   }),
   containerNumber: Joi.when('vehicle', {
