@@ -20,6 +20,7 @@ import logger from "../logger";
 import { SYSTEM_ERROR } from '../services/constants';
 import { defineAuthStrategies } from '../helpers/auth';
 import { mergeSchemaAndValidationErrors } from '../validators/validationErrors';
+import { validateAggregateExportWeight } from '../validators/ccLandingValidator';
 
 const extendedJoi = Joi.extend(require('@joi/date'));
 
@@ -58,12 +59,18 @@ export default class ExportPayloadRoutes {
               },
               payload: async function (value: any) {
                 const errors = manualLandingsSchema.validate(value, { abortEarly: false, allowUnknown: true });
-                
+                const exportWeightError = await validateAggregateExportWeight(value);
+                logger.info('Export weight validation errors: %o', exportWeightError);
                 // Validate each exclusiveEconomicZone country
                 const eezValidationErrors = await validateExclusiveEconomicZones(value);
 
-                // Merge and throw all errors (schema + EEZ validation)
-                const combinedError = mergeSchemaAndValidationErrors(errors.error, eezValidationErrors);
+                // Combine EEZ and export weight errors into a flat array
+                const validationErrors = [] as any[];
+                if (eezValidationErrors && eezValidationErrors.length > 0) validationErrors.push(...eezValidationErrors);
+                if (exportWeightError && exportWeightError.length > 0) validationErrors.push(...exportWeightError);
+                logger.info('Validation errors: %o', validationErrors);
+                // Merge and throw all errors (schema + EEZ validation + export weight)
+                const combinedError = mergeSchemaAndValidationErrors(errors.error, validationErrors);
                 if (combinedError) {
                   throw combinedError;
                 }
