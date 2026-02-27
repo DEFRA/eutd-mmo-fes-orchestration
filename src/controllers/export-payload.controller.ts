@@ -521,7 +521,7 @@ export default class ExportPayloadController {
 
       const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-      const result = await LandingValidator.validateLanding(items, { userPrincipal, documentNumber, contactId })
+      const result = await LandingValidator.validateLanding(items)
 
       if (result?.error === 'invalid') {
         newLanding.error = result.error;
@@ -612,7 +612,8 @@ export default class ExportPayloadController {
 
     const items = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-    const validation = await LandingValidator.validateLanding(items, { userPrincipal, documentNumber, contactId });
+
+    const validation = await LandingValidator.validateLanding(items);
 
     if (validation?.error === 'invalid') {
       newLanding.error = validation.error;
@@ -717,7 +718,8 @@ export default class ExportPayloadController {
 
     const exportPayload = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
-    const validation = await LandingValidator.validateLanding(exportPayload, { userPrincipal, documentNumber, contactId });
+
+    const validation = await LandingValidator.validateLanding(exportPayload);
 
     if (validation?.error === 'invalid') {
       newLanding.error = validation.error;

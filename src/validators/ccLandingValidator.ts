@@ -1,10 +1,10 @@
+import * as Joi from 'joi';
 import VesselValidator from "../services/vesselValidator.service";
 import { validateProducts } from "./ccProductValidator";
 import logger from "../logger";
 import * as moment from 'moment';
 import { ProductLanded } from "../persistence/schema/frontEndModels/payload";
 import { isValidGearType } from "../services/reference-data.service";
-import ExportPayloadService from "../services/export-payload.service";
 
 function validateSeasonalFish(validations: {
   validator: string;
@@ -20,7 +20,7 @@ function validateSeasonalFish(validations: {
   };
   weight: number;
 }[]) {
-	const errors = {};
+  const errors: any = {};
 
   for (const i in validations) {
     validations[i].result.forEach((field: string) => {
@@ -36,10 +36,8 @@ function validateSeasonalFish(validations: {
     }
   }
 
-
-	return errors;
+  return errors;
 }
-
 
 export const createExportPayloadForValidation = (product, landing) => {
   landing.dateLanded = moment.utc(landing.dateLanded).format('YYYY-MM-DD');
@@ -53,66 +51,36 @@ export const createExportPayloadForValidation = (product, landing) => {
   }];
 }
 
-export const validateAggregateExportWeight = async (exportPayload: ProductLanded[], opts?: { userPrincipal?: string, documentNumber?: string, contactId?: string }) => {
-  if (!(opts?.userPrincipal && opts?.documentNumber && opts?.contactId)) {
-    logger.info('[AGGREGATE-WEIGHT][SKIPPED][MISSING-OPTS]');
-    return null;
+export const validateAggregateExportWeight = async (input: any) => {
+  const createAggregateError = (): Joi.ValidationError => {
+    return new Joi.ValidationError('ccAddLandingTotalExportWeightLessThan', [
+      {
+        message: 'ccAddLandingTotalExportWeightLessThan',
+        path: ['exportWeight'],
+        type: 'any.invalid',
+        context: { label: 'exportWeight', key: 'exportWeight' }
+      }
+    ], null);
+  };
+
+  // If called from route payload validator with raw request value: only consider totalCombinedExportWeight
+  if (input?.totalCombinedExportWeight !== undefined && input?.exportWeight !== undefined) {
+    try {
+      const frontendTotal = Number(input.totalCombinedExportWeight)+Number(input.exportWeight);
+      if (!Number.isNaN(frontendTotal) && frontendTotal >= 10000000) {
+        return [createAggregateError()];
+      }
+      return [];
+    } catch (e) {
+      logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][${e?.stack ?? e}]`);
+      return [];
+    }
   }
-
-  try {
-    const currentExportPayload = await ExportPayloadService.get(opts.userPrincipal, opts.documentNumber, opts.contactId);
-    let currentTotal = 0;
-    if (currentExportPayload?.items) {
-      currentExportPayload.items.forEach((item: any) => {
-        if (item.landings && item.landings.length > 0) {
-          item.landings.forEach((l: any) => {
-            const w = Number(l.model?.exportWeight) || 0;
-            currentTotal += w;
-          });
-        }
-      });
-    }
-
-    const newWeightsTotal = exportPayload
-      .flatMap(x => x.landings)
-      .reduce((acc, l: any) => acc + (Number(l.model?.exportWeight) || 0), 0);
-
-    let originalWeightsToSubtract = 0;
-    if (currentExportPayload?.items) {
-      exportPayload.flatMap(x => x.landings).forEach((l: any) => {
-        const id = l.model?.id;
-        if (id) {
-          currentExportPayload.items.forEach((item: any) => {
-            if (item.landings && item.landings.length > 0) {
-              const found = item.landings.find((el: any) => el.model?.id === id);
-              if (found) {
-                originalWeightsToSubtract += Number(found.model?.exportWeight) || 0;
-              }
-            }
-          });
-        }
-      });
-    }
-
-    const adjustedTotal = currentTotal - originalWeightsToSubtract + newWeightsTotal;
-    logger.info(`[AGGREGATE-WEIGHT][CURRENT:${currentTotal}][SUBTRACT:${originalWeightsToSubtract}][NEW:${newWeightsTotal}][ADJUSTED:${adjustedTotal}]`);
-    if (adjustedTotal >= 10000000) {
-      return {
-        error: 'invalid',
-        errors: {
-          exportWeight: 'ccAddLandingTotalExportWeightLessThan'
-        }
-      };
-    }
-
-    return null;
-  } catch (e) {
-    logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][${e?.stack ?? e}]`);
-    return null;
-  }
+  // Default: no aggregate errors for other input shapes
+  return [];
 }
 
-export const validateLanding = async (exportPayload: ProductLanded[], opts?: { userPrincipal?: string, documentNumber?: string, contactId?: string }) => {
+export const validateLanding = async (exportPayload: ProductLanded[]) => {
   const errors: any = {};
   try {
     await VesselValidator.checkVesselWithDate(exportPayload);
@@ -120,18 +88,14 @@ export const validateLanding = async (exportPayload: ProductLanded[], opts?: { u
     logger.info('[INVALID-LANDING][INVALID-VESSEL-LICENSE]');
     errors.dateLanded = 'validation.vessel.license.invalid-date';
   }
-   const aggregateResult = await validateAggregateExportWeight(exportPayload, opts);
-    if (aggregateResult?.errors) {
-      Object.assign(errors, aggregateResult.errors);
-    }
   const seasonalFishValidationGuard = await validateProducts(exportPayload);
   const hasSeasonalFishError = seasonalFishValidationGuard.some(validation => (validation.result.length > 0 && validation.validator === 'seasonalFish'))
   if (hasSeasonalFishError) {
     logger.info('[INVALID-LANDING][OUT-OF-SEASON-FISH]');
     Object.assign(errors, validateSeasonalFish(seasonalFishValidationGuard));
-  } 
+  }
   const gearValidityChecks: Promise<boolean>[] = exportPayload
-    .flatMap(x => x.landings)
+    .reduce((acc: any[], x) => acc.concat(x.landings || []), [])
     .filter(x => x.model.gearCategory)
     .map(x => isValidGearType(x.model.gearType, x.model.gearCategory));
 
