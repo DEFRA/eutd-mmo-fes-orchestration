@@ -70,6 +70,8 @@ const directLandingsSchema = Joi.object({
     const totalWeight = weights.reduce((sum: number, w: any) => sum + (w.exportWeight || 0), 0);
     if (totalWeight > 99999999999.99) {
       return helpers.error('array.totalWeightExceeded');
+    } else if (typeof totalWeight !== "number" || !totalWeight || totalWeight <= 0) { // is not a number or is zero or negative
+      return helpers.error('exportWeight.directLanding.any.base');
     }
     return weights;
   }, 'Total weight validator').required(),
