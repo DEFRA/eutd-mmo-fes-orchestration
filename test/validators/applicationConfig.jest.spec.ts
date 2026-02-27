@@ -1,5 +1,5 @@
-import ApplicationConfig from "./applicationConfig";
-import logger from "./logger";
+import ApplicationConfig from "../../src/applicationConfig";
+import logger from "../../src/logger";
 
 describe("ApplicationConfig", () => {
   let mockErrorLogger;

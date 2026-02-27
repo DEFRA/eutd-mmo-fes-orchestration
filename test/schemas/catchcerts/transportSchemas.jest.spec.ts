@@ -1,5 +1,5 @@
-import catchCertificateTransportDetailsSchema from './catchCertificateTransportDetailsSchema';
-import truckSaveAsDraftSchema from './truckSaveAsDraftSchema';
+import catchCertificateTransportDetailsSchema from '../../../src/schemas/catchcerts/catchCertificateTransportDetailsSchema';
+import truckSaveAsDraftSchema from '../../../src/schemas/catchcerts/truckSaveAsDraftSchema';
 
 describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber validation', () => {
 
@@ -23,7 +23,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerIdentificationNumber with U, J, Z, or R category', () => {
       const testCases = ['ABCU1234567', 'ABCJ1234567', 'ABCZ1234567', 'ABCR1234567'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',
@@ -282,7 +282,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerNumbers with valid ISO 6346 format for train', () => {
       const testCases = ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789', 'ABCR4567890'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',
@@ -423,7 +423,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerNumbers with valid ISO 6346 format for plane', () => {
       const testCases = ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789', 'ABCR4567890'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',
@@ -534,7 +534,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerNumbers with valid ISO 6346 format for containerVessel', () => {
       const testCases = ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789', 'ABCR4567890'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',

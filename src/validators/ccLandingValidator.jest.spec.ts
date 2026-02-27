@@ -15,7 +15,19 @@ describe("createExportPayloadForValidation", () => {
       const payload = createExportPayloadForValidation(product, landing);
 
       expect(payload[0].landings[0].model.startDate).toBeUndefined();
-  });
+    });
+
+    it("should format startDate when it is provided", () => {
+      const landingWithStartDate = {
+        ...landing,
+        dateLanded: '2019-03-27T00:00:00.000Z',
+        startDate: '2019-01-01T00:00:00.000Z',
+      };
+      const payload = createExportPayloadForValidation(product, landingWithStartDate);
+
+      expect(payload[0].landings[0].model.startDate).toBe('2019-01-01');
+      expect(payload[0].landings[0].model.dateLanded).toBe('2019-03-27');
+    });
 });
 
 describe("validateLanding", () => {
@@ -147,6 +159,23 @@ describe("validateLanding", () => {
         expect(res).toStrictEqual([]);
     });
 
+    it("validateAggregateExportWeight returns empty array when computation throws", async () => {
+        const throwingValue = { valueOf: () => { throw new Error('forced error'); } };
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: throwingValue, exportWeight: '0' } as any);
+        expect(res).toStrictEqual([]);
+    });
+
+    it("validateAggregateExportWeight returns empty array when called with null input", async () => {
+        const res = await validateAggregateExportWeight(null as any);
+        expect(res).toStrictEqual([]);
+    });
+
+    it("validateAggregateExportWeight returns empty array when error thrown has no stack", async () => {
+        const errNoStack = { stack: undefined, valueOf: () => { throw errNoStack; } };
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: errNoStack, exportWeight: '0' } as any);
+        expect(res).toStrictEqual([]);
+    });
+
     it("should return gearType error from validateLanding and aggregate error from validateAggregateExportWeight separately", async () => {
         mockIsValidGearType.mockResolvedValueOnce(false);
 
@@ -157,6 +186,34 @@ describe("validateLanding", () => {
 
         const agg = await validateAggregateExportWeight({ totalCombinedExportWeight: '10000000', exportWeight: '200' } as any);
         expect(agg && agg.length > 0).toBe(true);
+    });
+
+    it("should return gearType error when isValidGearType promise is rejected", async () => {
+        mockIsValidGearType.mockRejectedValueOnce(new Error('reference data unavailable'));
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { gearType: 'error.gearType.invalid' } });
+    });
+
+    it("should handle payload where landings is undefined", async () => {
+        const payload: ProductLanded[] = [{ product, landings: undefined as any }];
+
+        const result = await validateLanding(payload);
+        expect(result).toBeUndefined();
+        expect(mockIsValidGearType).not.toHaveBeenCalled();
+    });
+
+    it("should error for both startDate and dateLanded across multiple seasonal fish validations without processing further items", async () => {
+        mockValidateProducts.mockResolvedValueOnce([
+            { result: ['startDate', 'dateLanded'], validator: 'seasonalFish' },
+            { result: ['startDate', 'dateLanded'], validator: 'seasonalFish' },
+        ]);
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: {
+            startDate: 'error.startDate.seasonalFish.invalidate',
+            dateLanded: 'error.seasonalFish.invalidate'
+        }});
     });
 });
 

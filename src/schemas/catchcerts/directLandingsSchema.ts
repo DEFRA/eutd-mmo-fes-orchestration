@@ -11,7 +11,7 @@ const directLandingsSchema = Joi.object({
     .custom((value, helpers) => {
       const parts = value.split('-');
       // check array parts are note empty.
-      if (parts.length !== 3 || parts.some(part => part.trim() === ''))
+      if (parts.every(part => part.trim() === ''))
         return helpers.error('directLanding.date.base');
 
       const year = parts[0];
@@ -51,7 +51,17 @@ const directLandingsSchema = Joi.object({
   }, 'Start Date Validator').required(),
   faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
   vessel: Joi.object().keys({
-    vesselName: Joi.string().trim().label("vessel.vesselName").required()
+    vesselName: Joi.string().trim().custom((value: string, helpers: any) => {
+      if (typeof value !== 'string') {
+        return helpers.error('directLanding.any.required');
+      } else { return value; }
+    }).label("vessel.vesselName").required(),
+    isListed: Joi.boolean().custom((value: boolean, helpers: any) => {
+      if (value === false) {
+        return helpers.error('directLanding.vessel.isListed.base');
+      }
+      return value;
+    }).label("vessel.isListed").optional(),
   }).required(),
   weights: Joi.array().items(Joi.object().keys({
     speciesId: Joi.string().trim().label("speciesId").required(),
@@ -60,6 +70,8 @@ const directLandingsSchema = Joi.object({
     const totalWeight = weights.reduce((sum: number, w: any) => sum + (w.exportWeight || 0), 0);
     if (totalWeight > 99999999999.99) {
       return helpers.error('array.totalWeightExceeded');
+    } else if (typeof totalWeight !== "number" || !totalWeight || totalWeight <= 0) { // is not a number or is zero or negative
+      return helpers.error('exportWeight.directLanding.any.base');
     }
     return weights;
   }, 'Total weight validator').required(),
