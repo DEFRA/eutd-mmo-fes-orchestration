@@ -1,7 +1,7 @@
 import * as moment from 'moment';
-import directLandingsSchema from './directLandingsSchema';
-import { buildNonJsErrorObject } from '../../helpers/errorExtractor';
-import ApplicationConfig from '../../applicationConfig';
+import directLandingsSchema from '../../../src/schemas/catchcerts/directLandingsSchema';
+import { buildNonJsErrorObject } from '../../../src/helpers/errorExtractor';
+import ApplicationConfig from '../../../src/applicationConfig';
 
 if (!process.env.LANDING_LIMIT_DAYS_IN_THE_FUTURE) {
 	process.env.LANDING_LIMIT_DAYS_IN_THE_FUTURE = '7';
