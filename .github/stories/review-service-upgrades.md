@@ -2,15 +2,31 @@
 
 ### 0) Prep
 
-1.  **Checkout a fresh branch**
+1.  **Capture work identifiers before branching**
 
-        -   `git checkout -b feature/-FI0-10851-sprint-182-review-service-to-identify-if-upgrades-are-required`
+        -   Ask for and confirm:
 
-2.  **Clean slate**
+                    -   Ticket number (for example: `ABC-123`)
+
+                    -   Sprint number (for example: `182`)
+
+                    -   Short work summary slug (for example: `review-service-to-identify-if-upgrades-are-required`)
+
+2.  **Checkout a fresh branch**
+
+        -   Use the collected values in the branch name:
+
+                    -   `git checkout -b feature/<ticket>-sprint-<sprint>-<summary-slug>`
+
+        -   Example:
+
+                    -   `git checkout -b feature/ABC-123-sprint-182-review-service-to-identify-if-upgrades-are-required`
+
+3.  **Clean slate**
 
         -   Ensure you're not carrying local build artefacts, and you're on the right Node version (use `.nvmrc` / `.node-version` if present).
 
-3.  **Ensure `.nvmrc` exists and is correct**
+4.  **Ensure `.nvmrc` exists and is correct**
 
         -   If `.nvmrc` exists, verify it matches the repo's expected Node version.
 
@@ -187,7 +203,37 @@ Options in order:
 
         -   `package-lock.json`
 
-2.  **PR description template**
+2.  **Commit message rule (ticket number mandatory)**
+
+        -   Include the ticket number in **every** commit message.
+
+        -   Recommended format:
+
+                    -   `<type>(<scope>): <change summary> <TICKET-NUMBER>`
+
+        -   Example:
+
+                    -   `chore(deps): upgrade direct dependencies and patch transitive tar vulnerability ABC-123`
+
+        -   Commit command example:
+
+                    -   `git commit -m "chore(deps): upgrade direct dependencies and patch transitive tar vulnerability ABC-123"`
+
+3.  **Suggested commit sequence**
+
+        -   Baseline/setup commit (optional):
+
+                    -   `git commit -m "chore(setup): align node version and baseline checks ABC-123"`
+
+        -   Dependency upgrade commit:
+
+                    -   `git commit -m "chore(deps): apply non-breaking dependency upgrades ABC-123"`
+
+        -   Overrides commit (only if used):
+
+                    -   `git commit -m "chore(deps): add npm overrides for transitive vulnerability mitigation ABC-123"`
+
+4.  **PR description template**
 
         -   What you ran: `npm ci`, `npm audit`, `npm audit fix`, `npm outdated`, update approach
 
@@ -207,19 +253,20 @@ Options in order:
 
 ## Agent-friendly execution sequence (copy/paste)
 
-1.  `git checkout -b feature/<ticket>-dependency-upgrades`
-2.  Ensure `.nvmrc` exists/updated, then `nvm use`
-3.  `npm ci`
-4.  Baseline: `npm test && npm run build`
-5.  `npm audit`
-6.  `npm audit fix`
-7.  `npm audit`
-8.  `npm outdated`
-9.  Upgrade direct deps one-by-one (minor/patch only)
-10. After each package: `npm test && npm run build`
-11. On failure: revert `package.json` + `package-lock.json`, log failure, continue
-12. Final: `npm test && npm run build && npm audit`
-13. Prepare PR with before/after audit + revert log + `.nvmrc` note
+1.  Ask for ticket number + sprint number + summary slug
+2.  `git checkout -b feature/<ticket>-sprint-<sprint>-<summary-slug>`
+3.  Ensure `.nvmrc` exists/updated, then `nvm use`
+4.  `npm ci`
+5.  Baseline: `npm test && npm run build`
+6.  `npm audit`
+7.  `npm audit fix`
+8.  `npm audit`
+9.  `npm outdated`
+10. Upgrade direct deps one-by-one (minor/patch only)
+11. After each package: `npm test && npm run build`
+12. On failure: revert `package.json` + `package-lock.json`, log failure, continue
+13. Final: `npm test && npm run build && npm audit`
+14. Commit using ticket in message, then prepare PR with before/after audit + revert log + `.nvmrc` note
 
 ---
 
