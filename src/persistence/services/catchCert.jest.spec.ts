@@ -21,7 +21,7 @@ import SummaryErrorsService from '../../services/summaryErrors.service';
 import { MockSessionStorage } from '../../../test/session_store/mock';
 import { SessionStoreFactory } from '../../session_store/factory';
 import { IStoreable } from '../../session_store/storeable';
-import { CATCH_CERTIFICATE_KEY, COMPLETED_CC_HEADERS_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
+import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
 import logger from '../../logger';
 
 const CONTACT_ID = 'contactBob';
@@ -309,73 +309,6 @@ describe('catchCert - db related', () => {
   });
 
   describe('getAllCatchCertsForUserByYearAndMonth', () => {
-
-    let mockGetDraftCache: jest.SpyInstance;
-    let mockSaveDraftCache: jest.SpyInstance;
-
-    beforeEach(() => {
-      mockGetDraftCache = jest.spyOn(CatchCertService, 'getDraftCache').mockResolvedValue(null);
-      mockSaveDraftCache = jest.spyOn(CatchCertService, 'saveDraftCache').mockResolvedValue(undefined);
-    });
-
-    afterEach(() => {
-      mockGetDraftCache.mockRestore();
-      mockSaveDraftCache.mockRestore();
-    });
-
-    it('should return cached results without querying MongoDB when cache is populated', async () => {
-      const cachedDocs = [{ documentNumber: 'GBR-2020-CC-CACHED', status: 'COMPLETE' }] as any;
-      mockGetDraftCache.mockResolvedValue(cachedDocs);
-      const findSpy = jest.spyOn(CatchCertModel, 'find');
-
-      const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
-
-      expect(result).toEqual(cachedDocs);
-      expect(findSpy).not.toHaveBeenCalled();
-      expect(mockGetDraftCache).toHaveBeenCalledWith(
-        defaultUser,
-        contactId,
-        `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/01-2020`
-      );
-
-      findSpy.mockRestore();
-    });
-
-    it('should query MongoDB on cache miss and save results to cache', async () => {
-      const mockLean = jest.fn().mockResolvedValue([]);
-      const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
-      const mockSort = jest.fn().mockReturnValue({ select: mockSelect });
-      const findSpy = jest.spyOn(CatchCertModel, 'find').mockReturnValue({ sort: mockSort } as any);
-
-      await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
-
-      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
-      expect(mockSelect).toHaveBeenCalled();
-      expect(mockLean).toHaveBeenCalledTimes(1);
-      expect(mockSaveDraftCache).toHaveBeenCalledWith(
-        defaultUser,
-        contactId,
-        `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/01-2020`,
-        []
-      );
-
-      findSpy.mockRestore();
-    });
-
-    it('should execute query with lean to avoid mongoose document hydration', async () => {
-      const mockLean = jest.fn().mockResolvedValue([]);
-      const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
-      const mockSort = jest.fn().mockReturnValue({ select: mockSelect });
-      const findSpy = jest.spyOn(CatchCertModel, 'find').mockReturnValue({ sort: mockSort } as any);
-
-      await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
-
-      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
-      expect(mockSelect).toHaveBeenCalled();
-      expect(mockLean).toHaveBeenCalledTimes(1);
-
-      findSpy.mockRestore();
-    });
 
     it('should not return draft or void certificates', async () => {
       await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
@@ -1263,13 +1196,12 @@ describe('catchCert - db related', () => {
     test("upsert data if draft exists", async () => {
       const mockInvalidateDraftCache = jest.spyOn(CatchCertService, "invalidateDraftCache");
       const mockSaveDraftCache = jest.spyOn(CatchCertService, 'saveDraftCache');
-      const mockFindOneAndUpdate = jest.spyOn(CatchCertModel, 'findOneAndUpdate');
 
       mockInvalidateDraftCache.mockResolvedValue(Promise.resolve());
       mockSaveDraftCache.mockResolvedValue(Promise.resolve());
-      mockFindOneAndUpdate.mockResolvedValue({ documentNumber: "GBR-2020-CC-0E42C2DA5" } as any);
 
       const returnedDoc = { document: "GBR-2020-CC-0E42C2DA5" };
+      mockGet.mockResolvedValue({ documentNumber: "GBR-2020-CC-0E42C2DA5" });
       await CatchCertService.upsertDraftData(
         "BOB",
         "GBR-2020-CC-0E42C2DA5",
@@ -1284,8 +1216,6 @@ describe('catchCert - db related', () => {
       );
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(mockSaveDraftCache).toHaveBeenCalledTimes(1);
-
-      mockFindOneAndUpdate.mockRestore();
     });
 
     test("upsert data if draft does not exist", async () => {
@@ -1977,8 +1907,7 @@ describe('catchCert - db related', () => {
 
     beforeAll(() => {
       mockFind = jest.spyOn(CatchCertModel, 'findOne');
-      // getDraft chains .lean() on the result — mock must support that
-      mockFind.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+      mockFind.mockResolvedValue(null);
 
       mockGetDraftCache = jest.spyOn(CatchCertService, 'getDraftCache');
     });
@@ -2006,7 +1935,7 @@ describe('catchCert - db related', () => {
 
     test('cache returns empty', async () => {
       mockGetDraftCache.mockResolvedValue({});
-      mockFind.mockReturnValue({ lean: jest.fn().mockResolvedValue({ doc: 'GBR-343434-234234-2344', contactId }) });
+      mockFind.mockResolvedValue({ doc: 'GBR-343434-234234-2344', contactId });
 
       const result = await CatchCertService.getDraft(undefined, 'GBR-343434-234234-2344', undefined);
 
@@ -2023,7 +1952,7 @@ describe('catchCert - db related', () => {
 
     it('should return null when owner validation fails', async () => {
       mockGetDraftCache.mockResolvedValue({});
-      mockFind.mockReturnValue({ lean: jest.fn().mockResolvedValue({ doc: 'GBR-343434-234234-2344', contactId }) });
+      mockFind.mockResolvedValue({ doc: 'GBR-343434-234234-2344', contactId });
 
       const result = await CatchCertService.getDraft('Bob', 'GBR-343434-234234-2344', contactId);
 
@@ -2128,47 +2057,31 @@ describe('catchCert - db related', () => {
   });
 
   describe('getCertificateStatus', () => {
-    // getCertificateStatus was rewritten to be cache-first:
-    // cache hit → returns cached.status; cache miss → findOne with { status:1, _id:0 } projection
-    let mockGetDraftCache: jest.SpyInstance;
-    let mockFindOne: jest.SpyInstance;
+    let mockGetDraft: jest.SpyInstance;
 
     beforeEach(() => {
-      mockGetDraftCache = jest.spyOn(CatchCertService, 'getDraftCache');
-      mockGetDraftCache.mockResolvedValue(null);
-      mockFindOne = jest.spyOn(CatchCertModel, 'findOne');
-      mockFindOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+      mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
+      mockGetDraft.mockResolvedValue(undefined);
     });
 
     afterEach(() => {
-      mockGetDraftCache.mockRestore();
-      mockFindOne.mockRestore();
+      mockGetDraft.mockRestore();
     });
 
-    it('should return the status of a document (cache hit)', async () => {
-      mockGetDraftCache.mockResolvedValue({ status: 'LOCKED' });
+    it('should return the status of a document', async () => {
+
+      mockGetDraft.mockResolvedValue(sampleDocument('test', 'LOCKED'));
 
       const result = await CatchCertService.getCertificateStatus('Bob', 'test', contactId);
 
+      expect(mockGetDraft).toHaveBeenCalled();
       expect(result).toBe('LOCKED');
-      // On cache hit, findOne should NOT be called
-      expect(mockFindOne).not.toHaveBeenCalled();
-    });
-
-    it('should return the status of a document (DB fallback)', async () => {
-      // cache miss → falls through to projected findOne
-      mockFindOne.mockReturnValue({ lean: jest.fn().mockResolvedValue({ status: 'LOCKED' }) });
-
-      const result = await CatchCertService.getCertificateStatus('Bob', 'test', contactId);
-
-      expect(result).toBe('LOCKED');
-      expect(mockFindOne).toHaveBeenCalled();
     });
 
     it('should not return a status if no document is found', async () => {
-      // cache miss + DB returns null
       const result = await CatchCertService.getCertificateStatus('Bob', 'test', contactId);
 
+      expect(mockGetDraft).toHaveBeenCalled();
       expect(result).toBeNull();
     });
 
@@ -2261,31 +2174,11 @@ describe('catchCert - db related', () => {
       expect(draft).toBeNull();
     });
 
-    it('should invalidate the draft headers cache for draft documents', async () => {
+    it('should invalidate the cache for draft documents', async () => {
       await CatchCertService.completeDraft(defaultUser, 'test', 'documentUri', 'bob@bob.bob', contactId);
 
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
-    });
-
-    it('should invalidate the completed certs cache for the current year/month', async () => {
-      const testDate = '2026-02-15';
-      mockDate.mockReturnValue(testDate);
-      const d = new Date(testDate);
-      const expectedYearAndMonth = `${d.getUTCMonth() + 1}-${d.getUTCFullYear()}`;
-
-      await CatchCertService.completeDraft(defaultUser, 'test', 'documentUri', 'bob@bob.bob', contactId);
-
-      expect(mockInvalidateDraftCache).toHaveBeenCalledWith(
-        defaultUser,
-        `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/${expectedYearAndMonth}`,
-        contactId
-      );
-    });
-
-    it('should invalidate both the draft headers and completed certs caches', async () => {
-      await CatchCertService.completeDraft(defaultUser, 'test', 'documentUri', 'bob@bob.bob', contactId);
-
-      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -2996,9 +2889,9 @@ describe('catchCert - db related', () => {
     }
   };
 
-  // ─── getLandingsEntryOption ─────────────────────────────────────────────────
+});
 
-  describe('getLandingsEntryOption', () => {
+describe('getLandingsEntryOption', () => {
 
   const userPrincipal = 'Bob';
   const contactId = 'contactBob';
@@ -3069,375 +2962,7 @@ describe('catchCert - db related', () => {
     expect(mockGetDraft).toHaveBeenCalledWith(userPrincipal, documentNumber, contactId);
   });
 
-  }); // end: getLandingsEntryOption
-
-  // ─── optimized function tests (re-mock getSessionStore after getDraftCache's resetAllMocks) ─────
-
-  describe('optimized functions', () => {
-
-    beforeEach(() => {
-      // Restore all spies (clears the getDraft mock left by getLandingsEntryOption.beforeEach
-      // and re-sets any mocks reset by getDraftCache.afterEach → jest.resetAllMocks())
-      jest.restoreAllMocks();
-      // Re-establish the session store mock needed by getDraftCache / saveDraftCache / invalidateDraftCache
-      jest.spyOn(SessionStoreFactory, 'getSessionStore').mockResolvedValue(mockSessionStore);
-    });
-
-    // ─── getDraft (.lean() on findOne) ───────────────────────────────────────
-
-    describe('getDraft', () => {
-      const docNumber = 'GBR-2024-CC-DRAFT001';
-
-      it('returns a plain JS object (lean) — no Mongoose instance methods', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft)).save();
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(null);
-        mockSessionStore.writeFor = jest.fn().mockResolvedValue(undefined);
-
-        const result = await CatchCertService.getDraft(defaultUser, docNumber, contactId);
-
-        expect(result).not.toBeNull();
-        expect(result.documentNumber).toBe(docNumber);
-        // .lean() strips Mongoose prototype — save() is not a function on plain objects
-        expect(typeof (result as any).save).toBe('undefined');
-      });
-
-      it('returns null when document does not exist', async () => {
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(null);
-
-        const result = await CatchCertService.getDraft(defaultUser, 'GBR-UNKNOWN', contactId);
-        expect(result).toBeNull();
-      });
-
-      it('returns null when document belongs to a different user', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft, 'another-user', {}, undefined, undefined, undefined, 'another-contact')).save();
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(null);
-
-        const result = await CatchCertService.getDraft(defaultUser, docNumber, contactId);
-        expect(result).toBeNull();
-      });
-
-      it('returns cached document without hitting DB (cache-first path)', async () => {
-        const cachedDoc = sampleDocument(docNumber, DocumentStatuses.Draft);
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(cachedDoc);
-
-        const result = await CatchCertService.getDraft(defaultUser, docNumber, contactId);
-        expect(result).toEqual(cachedDoc);
-      });
-
-      it('saves to cache after successful DB fetch for Draft status', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft)).save();
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(null);
-        mockSessionStore.writeFor = jest.fn().mockResolvedValue(undefined);
-
-        await CatchCertService.getDraft(defaultUser, docNumber, contactId);
-
-        expect(mockSessionStore.writeFor).toHaveBeenCalledWith(
-          defaultUser, contactId, docNumber, expect.objectContaining({ documentNumber: docNumber })
-        );
-      });
-    });
-
-    // ─── getCertificateStatus (cache-first + projected query) ────────────────
-
-    describe('getCertificateStatus', () => {
-      const docNumber = 'GBR-2024-CC-STATUS001';
-
-      it('returns status directly from cache without DB query', async () => {
-        mockSessionStore.readFor = jest.fn().mockResolvedValue({
-          documentNumber: docNumber,
-          status: DocumentStatuses.Pending,
-        });
-
-        const status = await CatchCertService.getCertificateStatus(defaultUser, docNumber, contactId);
-        expect(status).toBe(DocumentStatuses.Pending);
-      });
-
-      it('returns status from DB on cache miss (projected query)', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft)).save();
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(null);
-
-        const status = await CatchCertService.getCertificateStatus(defaultUser, docNumber, contactId);
-        expect(status).toBe(DocumentStatuses.Draft);
-      });
-
-      it('returns null for a non-existent document', async () => {
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(null);
-
-        const status = await CatchCertService.getCertificateStatus(defaultUser, 'GBR-MISSING', contactId);
-        expect(status).toBeNull();
-      });
-
-      it('returns null when document is owned by a different user', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft, 'other-user', {}, undefined, undefined, undefined, 'other-contact')).save();
-        mockSessionStore.readFor = jest.fn().mockResolvedValue(null);
-
-        const status = await CatchCertService.getCertificateStatus(defaultUser, docNumber, contactId);
-        expect(status).toBeNull();
-      });
-    });
-
-    // ─── checkDocument (field projection on findOne) ─────────────────────────
-
-    describe('checkDocument', () => {
-      const docNumber = 'GBR-2024-CC-CHECK001';
-
-      it('returns false when document does not exist', async () => {
-        const result = await CatchCertService.checkDocument('GBR-UNKNOWN', defaultUser, contactId, documentType);
-        expect(result).toBe(false);
-      });
-
-      it('returns false when document is owned by a different user', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Complete, 'other-user', {}, undefined, undefined, undefined, 'other-contact')).save();
-
-        const result = await CatchCertService.checkDocument(docNumber, defaultUser, contactId, documentType);
-        expect(result).toBe(false);
-      });
-    });
-
-    // ─── completeDraft (projection: { _id: 1 } on findOneAndUpdate) ──────────
-
-    describe('completeDraft', () => {
-      const docNumber = 'GBR-2024-CC-COMP001';
-      let mockInvalidateCache: jest.SpyInstance;
-
-      beforeEach(() => {
-        mockInvalidateCache = jest.spyOn(CatchCertService, 'invalidateDraftCache').mockResolvedValue(undefined);
-      });
-
-      afterEach(() => {
-        mockInvalidateCache.mockRestore();
-      });
-
-      it('sets status to Complete and stores documentUri', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft)).save();
-
-        await CatchCertService.completeDraft(defaultUser, docNumber, 'http://example.com/cert.pdf', defaultUserEmail, contactId);
-
-        const doc = await CatchCertModel.findOne({ documentNumber: docNumber }).lean();
-        expect((doc as any).status).toBe(DocumentStatuses.Complete);
-        expect((doc as any).documentUri).toBe('http://example.com/cert.pdf');
-      });
-
-      it('does not overwrite a document already in Complete status', async () => {
-        await new CatchCertModel({
-          ...sampleDocument(docNumber, DocumentStatuses.Complete),
-          documentUri: 'http://original.com/cert.pdf',
-        }).save();
-
-        await CatchCertService.completeDraft(defaultUser, docNumber, 'http://new.com/cert.pdf', defaultUserEmail, contactId);
-
-        const doc = await CatchCertModel.findOne({ documentNumber: docNumber }).lean();
-        expect((doc as any).documentUri).toBe('http://original.com/cert.pdf');
-      });
-
-      it('transitions Pending → Complete', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Pending)).save();
-
-        await CatchCertService.completeDraft(defaultUser, docNumber, 'http://example.com/cert.pdf', defaultUserEmail, contactId);
-
-        const doc = await CatchCertModel.findOne({ documentNumber: docNumber }).lean();
-        expect((doc as any).status).toBe(DocumentStatuses.Complete);
-      });
-
-      it('invalidates draft-headers cache via invalidateDraftCache', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft)).save();
-
-        await CatchCertService.completeDraft(defaultUser, docNumber, 'http://example.com/cert.pdf', defaultUserEmail, contactId);
-
-        expect(mockInvalidateCache).toHaveBeenCalledWith(
-          defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId
-        );
-      });
-    });
-
-    // ─── updateCertificateStatus (projection: { _id: 1 } on findOneAndUpdate) ─
-
-    describe('updateCertificateStatus', () => {
-      const docNumber = 'GBR-2024-CC-UPD001';
-      let mockInvalidateCache: jest.SpyInstance;
-
-      beforeEach(() => {
-        mockInvalidateCache = jest.spyOn(CatchCertService, 'invalidateDraftCache').mockResolvedValue(undefined);
-      });
-
-      afterEach(() => {
-        mockInvalidateCache.mockRestore();
-      });
-
-      it('transitions Draft → Locked', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft)).save();
-
-        await CatchCertService.updateCertificateStatus(defaultUser, docNumber, contactId, DocumentStatuses.Locked);
-
-        const doc = await CatchCertModel.findOne({ documentNumber: docNumber }).lean();
-        expect((doc as any).status).toBe(DocumentStatuses.Locked);
-      });
-
-      it('transitions Locked → Draft', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Locked)).save();
-
-        await CatchCertService.updateCertificateStatus(defaultUser, docNumber, contactId, DocumentStatuses.Draft);
-
-        const doc = await CatchCertModel.findOne({ documentNumber: docNumber }).lean();
-        expect((doc as any).status).toBe(DocumentStatuses.Draft);
-      });
-
-      it('does not change a Complete document status', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Complete)).save();
-
-        await CatchCertService.updateCertificateStatus(defaultUser, docNumber, contactId, DocumentStatuses.Draft);
-
-        const doc = await CatchCertModel.findOne({ documentNumber: docNumber }).lean();
-        expect((doc as any).status).toBe(DocumentStatuses.Complete);
-      });
-
-      it('calls invalidateDraftCache with draft-headers key after status change', async () => {
-        await new CatchCertModel(sampleDocument(docNumber, DocumentStatuses.Draft)).save();
-
-        await CatchCertService.updateCertificateStatus(defaultUser, docNumber, contactId, DocumentStatuses.Locked);
-
-        expect(mockInvalidateCache).toHaveBeenCalledWith(
-          defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId
-        );
-      });
-    });
-
-    // ─── cloneCatchCertificate (parallel getDocument + getUniqueDocumentNumber) ─
-
-    describe('cloneCatchCertificate — optimized', () => {
-      const docNumber = 'GBR-2024-CC-ORIG001';
-      const clonedDocNumber = 'GBR-2024-CC-CLONE001';
-      let mockInvalidateCache: jest.SpyInstance;
-      let mockGetDocumentNumber: jest.SpyInstance;
-
-      const docWithExportData = {
-        documentNumber: docNumber,
-        status: DocumentStatuses.Complete,
-        createdBy: defaultUser,
-        createdByEmail: defaultUserEmail,
-        createdAt: new Date('2024-01-01').toString(),
-        draftData: {},
-        exportData: {
-          exporterDetails: { exporterFullName: 'Test User' },
-          products: [],
-          transportation: { vehicle: 'Truck' },
-          transportations: [],
-          conservation: { conservationReference: 'REF001' },
-          landingsEntryOption: 'manualEntry'
-        },
-        userReference: defaultUserReference,
-        contactId
-      };
-
-      beforeEach(async () => {
-        mockInvalidateCache = jest.spyOn(CatchCertService, 'invalidateDraftCache').mockResolvedValue(undefined);
-        mockGetDocumentNumber = jest.spyOn(DocumentNumberService, 'getUniqueDocumentNumber').mockResolvedValue(clonedDocNumber);
-        await new CatchCertModel(docWithExportData).save();
-      });
-
-      afterEach(() => {
-        mockInvalidateCache.mockRestore();
-        mockGetDocumentNumber.mockRestore();
-      });
-
-      it('creates a new document with the generated document number', async () => {
-        const newDocNumber = await CatchCertService.cloneCatchCertificate(
-          docNumber, defaultUser, false, contactId, false, false
-        );
-
-        expect(newDocNumber).toBe(clonedDocNumber);
-        const cloned = await CatchCertModel.findOne({ documentNumber: clonedDocNumber }).lean();
-        expect(cloned).not.toBeNull();
-      });
-
-      it('throws when the source document does not exist', async () => {
-        await expect(
-          CatchCertService.cloneCatchCertificate('GBR-NONEXISTENT', defaultUser, false, contactId, false, false)
-        ).rejects.toThrow(/not found/);
-      });
-
-      it('calls invalidateDraftCache with draft-headers key after cloning', async () => {
-        await CatchCertService.cloneCatchCertificate(docNumber, defaultUser, false, contactId, false, false);
-
-        expect(mockInvalidateCache).toHaveBeenCalledWith(
-          defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId
-        );
-      });
-    });
-
-    // ─── getDraftCatchCertHeadersForUser ($sort in pipeline validates order) ──
-
-    describe('getDraftCatchCertHeadersForUser — sort & Set optimizations', () => {
-      let mockGetDraftCache: jest.SpyInstance;
-      let mockSaveDraftCache: jest.SpyInstance;
-      let mockGetAllSystemErrors: jest.SpyInstance;
-
-      beforeEach(() => {
-        mockGetDraftCache = jest.spyOn(CatchCertService, 'getDraftCache').mockResolvedValue(null);
-        mockSaveDraftCache = jest.spyOn(CatchCertService, 'saveDraftCache').mockResolvedValue(null);
-        mockGetAllSystemErrors = jest.spyOn(SummaryErrorsService, 'getAllSystemErrors').mockResolvedValue([]);
-      });
-
-      afterEach(() => {
-        mockGetDraftCache.mockRestore();
-        mockSaveDraftCache.mockRestore();
-        mockGetAllSystemErrors.mockRestore();
-      });
-
-      it('returns headers sorted by createdAt descending (confirms $sort in pipeline)', async () => {
-        await new CatchCertModel(sampleDocument('GBR-CC-SORT-OLD', DocumentStatuses.Draft, defaultUser, {}, undefined, new Date('2024-01-01'), undefined, contactId)).save();
-        await new CatchCertModel(sampleDocument('GBR-CC-SORT-NEW', DocumentStatuses.Draft, defaultUser, {}, undefined, new Date('2024-12-01'), undefined, contactId)).save();
-
-        const results = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
-
-        expect(results[0].documentNumber).toBe('GBR-CC-SORT-NEW');
-        expect(results[1].documentNumber).toBe('GBR-CC-SORT-OLD');
-      });
-
-      it('marks isFailed=true using Set lookup when documentNumber is in systemErrors', async () => {
-        const failedDocNumber = 'GBR-CC-FAIL-001';
-        await new CatchCertModel(sampleDocument(failedDocNumber, DocumentStatuses.Draft, defaultUser, {}, undefined, undefined, undefined, contactId)).save();
-
-        mockGetAllSystemErrors.mockResolvedValue([{ documentNumber: failedDocNumber } as any]);
-
-        const results = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
-        const failed = results.find((r) => r.documentNumber === failedDocNumber);
-
-        expect(failed).toBeDefined();
-        expect(failed.isFailed).toBe(true);
-      });
-
-      it('marks isFailed=false when documentNumber is NOT in systemErrors (Set O(1) miss)', async () => {
-        const cleanDocNumber = 'GBR-CC-CLEAN-001';
-        await new CatchCertModel(sampleDocument(cleanDocNumber, DocumentStatuses.Draft, defaultUser, {}, undefined, undefined, undefined, contactId)).save();
-
-        mockGetAllSystemErrors.mockResolvedValue([{ documentNumber: 'GBR-CC-DIFFERENT-001' } as any]);
-
-        const results = await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
-        const clean = results.find((r) => r.documentNumber === cleanDocNumber);
-
-        expect(clean).toBeDefined();
-        expect(clean.isFailed).toBe(false);
-      });
-    });
-
-    // ─── getCompletedDocuments (.lean() — plain objects) ─────────────────────
-
-    describe('getCompletedDocuments — lean results', () => {
-      it('returns plain objects with no Mongoose instance methods', async () => {
-        await new CatchCertModel(sampleDocument('GBR-CC-LEAN-001', DocumentStatuses.Complete)).save();
-
-        const results = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
-
-        expect(results.length).toBeGreaterThan(0);
-        // .lean() returns plain JS objects — no save() method is attached
-        expect(typeof (results[0] as any).save).toBe('undefined');
-      });
-    });
-
-  }); // end: optimized functions
-
-}); // end: catchCert - db related
+});
 
 describe('constructOwnerQuery', () => {
   it('will return createdBy & contactId if userPrincipal & contactId are provided', () => {

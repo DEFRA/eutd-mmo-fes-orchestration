@@ -19,7 +19,7 @@ import SummaryErrorsService from '../../services/summaryErrors.service';
 import { SessionStoreFactory } from '../../session_store/factory';
 import { getRedisOptions } from '../../session_store/redis';
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
-import { CATCH_CERTIFICATE_KEY, COMPLETED_CC_HEADERS_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
+import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
 import { userCanCreateDraft } from '../../validators/draftCreationValidator';
 import { getSpeciesByFaoCode } from '../../services/reference-data.service';
 
@@ -75,8 +75,7 @@ export const getCompletedDocuments = async (
     ])
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit)
-    .lean();
+    .limit(limit);
 
   return documents;
 };
@@ -96,19 +95,10 @@ export const countCompletedDocuments = async (
 };
 
 export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string, userPrincipal: string, contactId: string): Promise<CatchCertificateModel[]> => {
-  const cacheKey = `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/${yearAndMonth}`;
-  const cachedResults = await getDraftCache<CatchCertificateModel[]>(userPrincipal, contactId, cacheKey);
-  if (cachedResults !== null && Array.isArray(cachedResults)) {
-    logger.info(`[GET-COMPLETED-CC-HEADERS-FROM-CACHE][USER-PRINCIPAL][${userPrincipal}][CONTACT-ID][${contactId}][YEAR-MONTH][${yearAndMonth}]`);
-    return cachedResults;
-  }
-
-  logger.info(`[GET-COMPLETED-CC-HEADERS-FROM-MONGO][YEAR-MONTH][${yearAndMonth}]`);
-
   const [month, year] = yearAndMonth.split('-');
   const currentDate = new Date();
-  const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
-  const monthInt = month ? Number.parseInt(month) : (currentDate.getUTCMonth() + 1);
+  const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
+  const monthInt = month ? parseInt(month) : (currentDate.getUTCMonth() + 1);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await CatchCertModel.find({
     $or: ownerQuery,
@@ -117,16 +107,13 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
       '$gte': new Date(yearInt, monthInt - 1, 1),
       '$lt': new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
-
-  void saveDraftCache(userPrincipal, contactId, cacheKey, data);
-
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
   return data;
 };
 
 export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, contactId: string): Promise<CatchCertificateDraft[]> => {
 
-  const cacheResults = await getDraftCache<CatchCertificateDraft[]>(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`);
+  const cacheResults: CatchCertificateDraft[] = await getDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`) as CatchCertificateDraft[];
   if (cacheResults !== null && Array.isArray(cacheResults)) {
     logger.info(`[GET-DRAFT-CATCH-CERTIFICATE-HEADERS-FROM-CACHE][USER-PRINCIPAL][${userPrincipal}][CONTACT-ID][${contactId}]`);
     return cacheResults;
@@ -158,27 +145,17 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
         createdAt: true,
         isFailed: { $and: [{ $anyElementTrue: ["$isFailed"] }, { $eq: ["$status", DocumentStatuses.Draft] }] }
       }
-    },
-    {
-      $sort: { createdAt: -1 as -1 }
     }
   ];
 
-  const [result, systemErrors] = await Promise.all([
-    CatchCertModel.aggregate(query),
-    SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId)
-  ]);
-
-  const failedDocNumbers = new Set<string>(
-    systemErrors.map((sf: SystemFailure) => sf.documentNumber)
-  );
-
+  const result = await CatchCertModel.aggregate(query).sort({ createdAt: 'desc' });
+  const systemErrors: SystemFailure[] = await SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId);
   const data: CatchCertificateDraft[] = result.map(catchCert => ({
     documentNumber: catchCert.documentNumber,
     status: catchCert.status,
     userReference: catchCert.userReference,
     startedAt: moment.utc(catchCert.createdAt).format('DD MMM YYYY'),
-    isFailed: failedDocNumbers.has(catchCert.documentNumber) || catchCert.isFailed
+    isFailed: systemErrors.some((systemFailure: SystemFailure) => systemFailure.documentNumber === catchCert.documentNumber) || catchCert.isFailed
   }));
 
   void saveDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, data);
@@ -219,6 +196,7 @@ export const upsertDraftData = async (
   update: object,
   contactId: string
 ) => {
+  const draft = await getDraft(userPrincipal, documentNumber, contactId);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const conditions: any = {
     $or: ownerQuery,
@@ -226,7 +204,7 @@ export const upsertDraftData = async (
     documentNumber: documentNumber,
   };
   const options = {
-    upsert: false,
+    upsert: true,
     omitUndefined: true,
     new: true
   };
@@ -236,10 +214,10 @@ export const upsertDraftData = async (
     )}]`
   );
 
-  const result = await CatchCertModel.findOneAndUpdate(conditions, update, { ...options, lean: true });
-  if (result) {
-    void invalidateDraftCache(userPrincipal, documentNumber, contactId);
-    void saveDraftCache(userPrincipal, contactId, documentNumber, result);
+  if (draft) {
+    const result = await CatchCertModel.findOneAndUpdate(conditions, update, options);
+    await invalidateDraftCache(userPrincipal, documentNumber, contactId);
+    await saveDraftCache(userPrincipal, contactId, documentNumber, result);
   }
 };
 
@@ -303,15 +281,14 @@ export const deleteDraftCertificate = async (
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 
-  // projection: { _id: 1 } avoids returning the full document on delete
-  return CatchCertModel.findOneAndDelete(query, { projection: { _id: 1 } });
+  return CatchCertModel.findOneAndDelete(query);
 };
 
-export const getDraftCache = async <T = CatchCertificate | CatchCertificateDraft[] | IDraft>(
+export const getDraftCache = async (
   userPrincipal: string,
   contactId: string,
   key: string
-): Promise<T> => {
+): Promise<CatchCertificate | CatchCertificateDraft[] | IDraft> => {
   const sessionStore = await SessionStoreFactory.getSessionStore(
     getRedisOptions()
   );
@@ -321,11 +298,11 @@ export const getDraftCache = async <T = CatchCertificate | CatchCertificateDraft
   return result;
 };
 
-export const saveDraftCache = async <T>(
+export const saveDraftCache = async (
   userPrincipal: string,
   contactId: string,
   key: string,
-  cacheData: T
+  cacheData: CatchCertificate | CatchCertificateDraft[] | IDraft
 ): Promise<void> => {
   const sessionStore = await SessionStoreFactory.getSessionStore(
     getRedisOptions()
@@ -352,7 +329,7 @@ export const getDraft = async (
 ): Promise<CatchCertificate> => {
   logger.info(`[GET-DRAFT][DOCUMENT-NUMBER][${documentNumber}][USER-PRINCIPLE][${userPrincipal}][CONTACT-ID][${contactId}]`);
 
-  let doc = await getDraftCache<CatchCertificate>(userPrincipal, contactId, documentNumber);
+  let doc = await getDraftCache(userPrincipal, contactId, documentNumber) as CatchCertificate;
   if (isEmpty(doc)) {
     logger.info(`[GET-DRAFT][DOCUMENT-NUMBER][${documentNumber}][GET-DRAFT-CACHE-EMPTY]`);
 
@@ -365,7 +342,7 @@ export const getDraft = async (
         ],
       },
       documentNumber: documentNumber,
-    }).lean();
+    });
 
     if (!doc) {
       return null;
@@ -384,26 +361,21 @@ export const getDraft = async (
 };
 
 export const completeDraft = async (userPrincipal: string, documentNumber: string, documentUri: string, createdByEmail: string, contactId: string) => {
-  const now = new Date(Date.now());
   const update: StrictUpdateFilter<CatchCertificate> = {
     $set: {
       'createdByEmail': createdByEmail,
       'status': DocumentStatuses.Complete,
       'documentUri': documentUri,
-      'createdAt': now.toString()
+      'createdAt': new Date(Date.now()).toString()
     }
   };
 
-  // projection: { _id: 1 } avoids returning the full document — result is unused
   await CatchCertModel.findOneAndUpdate(
     { documentNumber: documentNumber, status: { $in: [DocumentStatuses.Draft, DocumentStatuses.Pending] } },
-    update,
-    { projection: { _id: 1 } }
+    update
   );
 
-  const currentYearAndMonth = `${now.getUTCMonth() + 1}-${now.getUTCFullYear()}`;
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
-  void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${COMPLETED_CC_HEADERS_KEY}/${currentYearAndMonth}`, contactId);
 };
 
 export const updateCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string, status: DocumentStatuses): Promise<void> => {
@@ -413,14 +385,12 @@ export const updateCertificateStatus = async (userPrincipal: string, documentNum
     }
   };
 
-  // projection: { _id: 1 } avoids returning the full document — result is unused
   await CatchCertModel.findOneAndUpdate(
     {
       documentNumber: documentNumber,
       status: { $ne: DocumentStatuses.Complete }
     },
-    update,
-    { projection: { _id: 1 } }
+    update
   );
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
@@ -431,20 +401,9 @@ export const getCertificateStatus = async (
   documentNumber: string,
   contactId: string
 ): Promise<string> => {
-  // Check cache first — avoids a full DB round-trip on cache hit
-  const cached = await getDraftCache<CatchCertificate>(userPrincipal, contactId, documentNumber);
-  if (!isEmpty(cached)) {
-    return cached.status ?? null;
-  }
+  const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  // Cache miss: query only the status field — ownerQuery enforces ownership at DB level
-  const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  const doc = await CatchCertModel.findOne(
-    { $or: ownerQuery, documentNumber },
-    { status: 1, _id: 0 }
-  ).lean();
-
-  return doc?.status ?? null;
+  return draft && draft.status ? draft.status : null;
 };
 
 export const getSpecies = async (
@@ -592,27 +551,26 @@ export const updateProductScientificName = async (product: Product, documentNumb
 
 export const cloneCatchCertificate = async (documentNumber: string, userPrincipal: string, excludeLandings: boolean, contactId: string, requestByAdmin: boolean, voidOriginal: boolean): Promise<string> => {
 
-  const [original, newDocumentNumber] = await Promise.all([
-    getDocument(documentNumber, userPrincipal, contactId),
-    DocumentNumberService.getUniqueDocumentNumber(ServiceNames.CC, CatchCertModel)
-  ]);
+  const original = await getDocument(documentNumber, userPrincipal, contactId);
 
   if (!original) {
     throw new Error(`Document ${documentNumber} not found for user ${userPrincipal}`);
   }
 
+  const newDocumentNumber = await DocumentNumberService.getUniqueDocumentNumber(ServiceNames.CC, CatchCertModel);
   const copy = cloneCC(original, newDocumentNumber, excludeLandings, contactId, requestByAdmin, voidOriginal);
 
   if (Array.isArray(copy.exportData.products) && copy.exportData.products.length > 0) {
-    await Promise.all(copy.exportData.products.map(product => updateProductScientificName(product, documentNumber)));
+    for (const product of copy.exportData.products) {
+      await updateProductScientificName(product, documentNumber);
+    }
   } else {
     logger.info(`[GET-COPY][PRODUCT][${documentNumber}][NO-PRODUCT]`);
   }
 
-  await Promise.all([
-    new CatchCertModel(copy).save(),
-    invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId)
-  ]);
+  void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
+
+  await new CatchCertModel(copy).save();
 
   return newDocumentNumber;
 
@@ -635,15 +593,9 @@ export const checkDocument = async (
   contactId: string,
   documentType: string
 ): Promise<boolean> => {
-  // Only fetch fields needed for ownership validation — avoids transferring full document
   const document = await CatchCertModel.findOne({
     documentNumber: documentNumber,
-  }, {
-    createdBy: 1,
-    contactId: 1,
-    'exportData.exporterDetails.contactId': 1,
-    _id: 0,
-  }).lean();
+  });
 
   if (!document) {
     return false;

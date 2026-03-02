@@ -71,8 +71,7 @@ export const getCompletedDocuments = async (
     ])
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit)
-    .lean();
+    .limit(limit);
 
   return documents;
 };
@@ -123,7 +122,7 @@ export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: strin
       "$gte": new Date(yearInt, monthInt - 1, 1),
       "$lt": new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({createdAt: 'desc'}).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
+  }).sort({createdAt: 'desc'}).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
   return data;
 }
 
@@ -132,7 +131,7 @@ export const getAllStorageDocsForUser = async (userPrincipal: string, contactId:
   const data = await StorageDocumentModel.find({
     $or: ownerQuery,
     'status': { $ne: 'VOID' }
-  }).select(['documentNumber', 'createdAt', 'documentUri', 'status']).lean();
+  }).select(['documentNumber', 'createdAt', 'documentUri', 'status']);
   return data;
 }
 
@@ -156,7 +155,7 @@ export const upsertDraftDataForStorageDocuments = async (userPrincipal: string, 
 
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
-  let draft = await StorageDocumentModel.findOne(query, null, { lean: true });
+  let draft = await StorageDocumentModel.findOne(query);
 
   if (!path && payload) {
     throw new Error("[SD][upsertDraftDataForStorageDocuments][INVALID-ARGUMENTS]");
@@ -179,14 +178,14 @@ export const upsertDraftDataForStorageDocuments = async (userPrincipal: string, 
     draft.draftData = data;
   }
 
-  await StorageDocumentModel.findOneAndUpdate(query, draft, { upsert: true, omitUndefined: true, lean: true, projection: { _id: 1 } });
+  await StorageDocumentModel.findOneAndUpdate(query, draft, { upsert: true, omitUndefined: true });
 };
 
 export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: string): Promise<StorageDocumentDraft[]> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
   const props = ['documentNumber', 'status', 'createdAt', 'userReference'];
-  const result = await StorageDocumentModel.find(query, props).sort({ createdAt: 'desc' }).lean();
+  const result = await StorageDocumentModel.find(query, props).sort({ createdAt: 'desc' });
 
   return result.map(doc => ({
     documentNumber: doc.documentNumber,
@@ -214,22 +213,19 @@ export const completeDraft = async (documentNumber: string, documentUri: string,
     }
   };
 
-  // projection: { _id: 1 } avoids returning the full document — result is unused
   await StorageDocumentModel.findOneAndUpdate(
     { documentNumber: documentNumber, status: 'DRAFT' },
-    update,
-    { projection: { _id: 1 } }
+    update
   );
 };
 
 export const deleteDraft = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  // projection: { _id: 1 } avoids returning the full document on delete
   await StorageDocumentModel.findOneAndDelete({
     $or: ownerQuery,
     documentNumber: documentNumber,
     status: 'DRAFT'
-  }, { projection: { _id: 1 } });
+  });
 }
 
 export const getDraft = async (userPrincipal: string, documentNumber: string, contactId: string) => {
@@ -242,7 +238,7 @@ export const getDraft = async (userPrincipal: string, documentNumber: string, co
 export const getDraftCertificateNumber = async (userPrincipal: string, contactId: string) => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
-  const draft = await StorageDocumentModel.findOne(query, 'documentNumber', { lean: true });
+  const draft = await StorageDocumentModel.findOne(query);
   const dataExists = (draft && draft.documentNumber);
 
   return dataExists
@@ -256,7 +252,7 @@ export const upsertDraftData = async (userPrincipal: string, documentNumber: str
   const conditions: any = { $or: ownerQuery, status: 'DRAFT', documentNumber: documentNumber };
   const options = { upsert: true, omitUndefined: true };
 
-  if (draft) await StorageDocumentModel.findOneAndUpdate(conditions, update, { ...options, lean: true, projection: { _id: 1 } });
+  if (draft) await StorageDocumentModel.findOneAndUpdate(conditions, update, options);
 };
 
 export const createDraft = async (userPrincipal: string, email: string, requestedByAdmin: boolean, contactId: string) => {
@@ -328,16 +324,13 @@ export const upsertUserReference = async (userPrincipal: string, documentNumber:
 };
 
 export const cloneStorageDocument = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal?: boolean): Promise<string> => {
-  // Parallelise independent DB calls to reduce total elapsed time
-  const [original, newDocumentNumber] = await Promise.all([
-    getDocument(documentNumber, userPrincipal, contactId),
-    DocumentNumberService.getUniqueDocumentNumber(ServiceNames.SD, StorageDocumentModel)
-  ]);
+  const original: StorageDocument = await getDocument(documentNumber, userPrincipal, contactId);
 
   if (!original) {
     throw new Error(`Document ${documentNumber} not found for user ${userPrincipal}`);
   }
 
+  const newDocumentNumber = await DocumentNumberService.getUniqueDocumentNumber(ServiceNames.SD, StorageDocumentModel);
   const copy = cloneSD(original, newDocumentNumber, requestByAdmin, voidOriginal);
   await new StorageDocumentModel(copy).save();
 
