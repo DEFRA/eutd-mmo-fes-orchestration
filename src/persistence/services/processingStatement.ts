@@ -65,8 +65,7 @@ export const getCompletedDocuments = async (
     ])
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit)
-    .lean();
+    .limit(limit);
 
   return documents;
 };
@@ -91,7 +90,7 @@ export const getDraftData = async (userPrincipal: string, path: string, contactI
     $or: ownerQuery,
     status: 'DRAFT',
   };
-  const draft = await ProcessingStatementModel.findOne(query, 'draftData', { lean: true });
+  const draft = await ProcessingStatementModel.findOne(query);
 
   return (draft && draft.draftData[path])
     ? draft.draftData[path]
@@ -145,7 +144,7 @@ export const getDraft = async (userPrincipal: string, documentNumber: string, co
 export const getDraftCertificateNumber = async (userPrincipal: string, contactId: string) => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
-  const draft = await ProcessingStatementModel.findOne(query, 'documentNumber', { lean: true });
+  const draft = await ProcessingStatementModel.findOne(query);
   const dataExists = (draft && draft.documentNumber);
 
   return dataExists
@@ -157,7 +156,7 @@ export const upsertDraftData = async (userPrincipal: string, documentNumber: str
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const conditions: any = { $or: ownerQuery, status: 'DRAFT', documentNumber: documentNumber };
-  const options = { upsert: true, omitUndefined: true, lean: true, projection: { _id: 1 } };
+  const options = { upsert: true, omitUndefined: true };
 
   if (draft) await ProcessingStatementModel.findOneAndUpdate(conditions, update, options);
 };
@@ -172,11 +171,9 @@ export const completeDraft = async (documentNumber: string, documentUri: string,
     }
   };
 
-  // projection: { _id: 1 } avoids returning the full document — result is unused
   await ProcessingStatementModel.findOneAndUpdate(
     { documentNumber: documentNumber, status: 'DRAFT' },
-    update,
-    { projection: { _id: 1 } }
+    update
   );
 };
 
@@ -211,7 +208,7 @@ export const upsertDraftDataForProcessingStatement = async (userPrincipal: strin
     'status': 'DRAFT'
   };
 
-  let draft = await ProcessingStatementModel.findOne(query, null, { lean: true });
+  let draft = await ProcessingStatementModel.findOne(query);
 
   if (!path && payload) {
     throw new Error("[upsertDraftDataForProcessingStatement][INVALID-ARGUMENTS]");
@@ -236,20 +233,17 @@ export const upsertDraftDataForProcessingStatement = async (userPrincipal: strin
   await ProcessingStatementModel.findOneAndUpdate(query, draft, {
     upsert: true,
     omitUndefined: true,
-    lean: true,
-    projection: { _id: 1 },
   });
   return draft;
 };
 
 export const deleteDraftStatement = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  // projection: { _id: 1 } avoids returning the full document on delete
   return await ProcessingStatementModel.findOneAndDelete({
     $or: ownerQuery,
     documentNumber: documentNumber,
     'status': 'DRAFT'
-  }, { projection: { _id: 1 } });
+  });
 };
 
 export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
@@ -274,16 +268,13 @@ export const upsertExportLocation = async (userPrincipal: string, payload: Expor
 };
 
 export const cloneProcessingStatement = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal: boolean): Promise<string> => {
-  // Parallelise independent DB calls to reduce total elapsed time
-  const [original, newDocumentNumber] = await Promise.all([
-    getDocument(documentNumber, userPrincipal, contactId),
-    DocumentNumberService.getUniqueDocumentNumber(ServiceNames.PS, ProcessingStatementModel)
-  ]);
+  const original: ProcessingStatement = await getDocument(documentNumber, userPrincipal, contactId);
 
   if (!original) {
     throw new Error(`Document ${documentNumber} not found for user with userPrincipal: '${userPrincipal}' or contactId: '${contactId}'`);
   }
 
+  const newDocumentNumber = await DocumentNumberService.getUniqueDocumentNumber(ServiceNames.PS, ProcessingStatementModel);
   const copy = clonePS(original, newDocumentNumber, requestByAdmin, voidOriginal);
 
   await new ProcessingStatementModel(copy).save();
