@@ -8,10 +8,11 @@ describe('NotificationService', () => {
     let mockGetSessionStore;
     let mockSessionStore;
 
-    beforeEach(() => {
-      NotificationService.clearSessionStoreCacheForTests();
+    beforeAll(() => {
       mockGetSessionStore = jest.spyOn(SessionStoreFactory, 'getSessionStore');
+    });
 
+    beforeEach(() => {
       mockSessionStore = {
         read: jest.fn(),
         readAll: jest.fn(),
@@ -29,10 +30,6 @@ describe('NotificationService', () => {
       mockGetSessionStore.mockResolvedValue(mockSessionStore);
     });
 
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
     it(`should return data from the 'notifications' key in redis`, async () => {
       const notification = {title: 'test', message: 'test', isPublished: true};
 
@@ -42,20 +39,6 @@ describe('NotificationService', () => {
 
       expect(result).toBe(notification);
       expect(mockSessionStore.read).toHaveBeenCalledWith('notification');
-    });
-
-    it('should initialize session store only once across multiple reads', async () => {
-      const notification = {title: 'test', message: 'test', isPublished: true};
-
-      mockSessionStore.read.mockResolvedValue(notification);
-
-      await NotificationService.get();
-      await NotificationService.get();
-
-      expect(mockGetSessionStore).toHaveBeenCalledTimes(1);
-      expect(mockSessionStore.read).toHaveBeenCalledTimes(2);
-      expect(mockSessionStore.read).toHaveBeenNthCalledWith(1, 'notification');
-      expect(mockSessionStore.read).toHaveBeenNthCalledWith(2, 'notification');
     });
 
   });

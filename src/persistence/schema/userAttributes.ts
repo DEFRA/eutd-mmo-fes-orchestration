@@ -65,6 +65,4 @@ const UserAtrributesSchema = new Schema({
   favourites:     { type: FavouritesSchema }
 });
 
-UserAtrributesSchema.index({ userPrincipal: 1 });
-
 export const UserAttributesModel = model<IUserAttributes>('UserAttributesModel', UserAtrributesSchema, 'userAttributes');
