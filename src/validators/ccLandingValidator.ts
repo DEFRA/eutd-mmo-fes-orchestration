@@ -51,7 +51,7 @@ export const createExportPayloadForValidation = (product, landing) => {
   }];
 }
 
-export const validateAggregateExportWeight = async (input: any) => {
+export const validateAggregateExportWeight = async (input: any, existingLandingWeight?: number) => {
   const createAggregateError = (): Joi.ValidationError => {
     return new Joi.ValidationError('ccAddLandingTotalExportWeightLessThan', [
       {
@@ -62,14 +62,14 @@ export const validateAggregateExportWeight = async (input: any) => {
       }
     ], null);
   };
-
-  // If called from route payload validator with raw request value: only consider totalCombinedExportWeight
+  // If called from route payload validator with raw request value
   if (input?.totalCombinedExportWeight !== undefined && input?.exportWeight !== undefined) {
     try {
-      const frontendTotal = Number(input.totalCombinedExportWeight)+Number(input.exportWeight);
-      if (!Number.isNaN(frontendTotal) && frontendTotal >= 10000000) {
+       const oldWeight = existingLandingWeight || 0;
+       const adjustedTotal = Number(input.totalCombinedExportWeight) - oldWeight + Number(input.exportWeight);
+        if (!Number.isNaN(adjustedTotal) && adjustedTotal >= 10000000) {
         return [createAggregateError()];
-      }
+          }
       return [];
     } catch (e) {
       logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][${e?.stack ?? e}]`);

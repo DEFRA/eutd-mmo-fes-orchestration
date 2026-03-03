@@ -59,7 +59,9 @@ export default class ExportPayloadRoutes {
               },
               payload: async function (value: any) {
                 const errors = manualLandingsSchema.validate(value, { abortEarly: false, allowUnknown: true });
-                const exportWeightError = await validateAggregateExportWeight(value);
+                // Pass existingLandingWeight to validation for correct aggregate weight calculation when editing
+                const existingWeight = value.existingLandingWeight ? Number(value.existingLandingWeight) : undefined;
+                const exportWeightError = await validateAggregateExportWeight(value, existingWeight);
                 logger.info('Export weight validation errors: %o', exportWeightError);
                 // Validate each exclusiveEconomicZone country
                 const eezValidationErrors = await validateExclusiveEconomicZones(value);
