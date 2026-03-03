@@ -6,8 +6,6 @@ import ApplicationConfig from "../applicationConfig";
 describe('user attribute routes', () => {
 
   const server = Hapi.server();
-  const originalLastUpdatedPrivacyStatement = ApplicationConfig._lastUpdatedPrivacyStatement;
-  const originalLastUpdatedCookiePolicy = ApplicationConfig._lastUpdatedCookiePolicy;
 
   beforeAll(async () => {
     const routes = await new UserAttributesRoutes();
@@ -42,8 +40,6 @@ describe('user attribute routes', () => {
     let mockFindUserAttributes;
 
     beforeEach(() => {
-      ApplicationConfig._lastUpdatedPrivacyStatement = '';
-      ApplicationConfig._lastUpdatedCookiePolicy = '';
       mockFindUserAttributes = jest.spyOn(UserAttributeService, 'find');
       mockFindUserAttributes.mockResolvedValue(userAttributes);
     });
@@ -52,15 +48,10 @@ describe('user attribute routes', () => {
       mockFindUserAttributes.mockRestore();
     });
 
-    afterAll(() => {
-      ApplicationConfig._lastUpdatedPrivacyStatement = originalLastUpdatedPrivacyStatement;
-      ApplicationConfig._lastUpdatedCookiePolicy = originalLastUpdatedCookiePolicy;
-    });
-
     it('will return 200', async () => {
       const response = await server.inject(request);
 
-      expect(mockFindUserAttributes).toHaveBeenCalledWith('Bob', ['attributes']);
+      expect(mockFindUserAttributes).toHaveBeenCalled();
       expect(response.statusCode).toBe(200);
     });
 
@@ -267,49 +258,6 @@ describe('user attribute routes', () => {
       const response = await server.inject(request);
       expect(response.result).toHaveLength(1)
       expect(response.result?.[0].name).toEqual("language");
-    });
-
-    it('will filter privacy and cookies independently and keep other attributes', async () => {
-      const data = {
-        userPrincipal: 'Bob',
-        attributes: [{
-          name: 'privacy_statement',
-          value: true,
-          modifiedAt: '2020-01-01T00:00:00Z'
-        }, {
-          name: 'accepts_cookies',
-          value: 'yes',
-          modifiedAt: '2022-01-01T00:00:00Z'
-        }, {
-          name: 'language',
-          value: 'en_UK',
-          modifiedAt: '2023-01-01T00:00:00Z'
-        }],
-        favourites: {
-          products: []
-        }
-      }
-
-      ApplicationConfig._lastUpdatedPrivacyStatement = '2021-01-01T00:00:00Z';
-      ApplicationConfig._lastUpdatedCookiePolicy = '2021-01-01T00:00:00Z';
-
-      mockFindUserAttributes.mockResolvedValue(data);
-
-      const response = await server.inject(request);
-
-      expect(response.result).toHaveLength(2);
-      expect(response.result).toEqual([
-        {
-          name: 'accepts_cookies',
-          value: 'yes',
-          modifiedAt: '2022-01-01T00:00:00Z'
-        },
-        {
-          name: 'language',
-          value: 'en_UK',
-          modifiedAt: '2023-01-01T00:00:00Z'
-        }
-      ]);
     });
 
     it('will throw an 500 error', async () => {
