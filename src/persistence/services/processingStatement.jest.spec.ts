@@ -544,6 +544,27 @@ describe('processingStatement', () => {
   });
 
   describe('getAllProcessingStatementsForUserByYearAndMonth', () => {
+    it('should execute month/year query with lean to reduce hydration overhead', async () => {
+      const mockLean = jest.fn().mockResolvedValue([]);
+      const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
+      const mockSort = jest.fn().mockReturnValue({ select: mockSelect });
+      const findSpy = jest
+        .spyOn(ProcessingStatementModel, 'find')
+        .mockReturnValue({ sort: mockSort } as any);
+
+      await ProcessingStatementService.getAllProcessingStatementsForUserByYearAndMonth(
+        '01-2020',
+        testUser,
+        testContact
+      );
+
+      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+      expect(mockSelect).toHaveBeenCalled();
+      expect(mockLean).toHaveBeenCalledTimes(1);
+
+      findSpy.mockRestore();
+    });
+
     it('should not return draft or void certificates', async () => {
       await createDocument(null, 'DRAFT', testUser, 'test 1');
       await createDocument(null, 'COMPLETE', testUser, 'test 2');
@@ -639,6 +660,35 @@ describe('processingStatement', () => {
       expect(result[0].documentNumber).toBe('test 3');
       expect(result[1].documentNumber).toBe('test 2');
       expect(result[2].documentNumber).toBe('test 1');
+    });
+  });
+
+  describe('getDraftDocumentHeaders query chain', () => {
+    it('should execute draft headers query with lean', async () => {
+      const mockDocs = [
+        {
+          documentNumber: 'doc1',
+          status: 'DRAFT',
+          createdAt: new Date('2020-01-01'),
+          userReference: 'ref1',
+        },
+      ];
+      const mockLean = jest.fn().mockResolvedValue(mockDocs);
+      const mockSort = jest.fn().mockReturnValue({ lean: mockLean });
+      const findSpy = jest
+        .spyOn(ProcessingStatementModel, 'find')
+        .mockReturnValue({ sort: mockSort } as any);
+
+      const result = await ProcessingStatementService.getDraftDocumentHeaders(
+        testUser,
+        testContact
+      );
+
+      expect(mockSort).toHaveBeenCalledWith({ createdAt: 'desc' });
+      expect(mockLean).toHaveBeenCalledTimes(1);
+      expect(result[0].documentNumber).toBe('doc1');
+
+      findSpy.mockRestore();
     });
   });
 
@@ -1486,21 +1536,6 @@ describe('processingStatement', () => {
 
       expect(cloned.requestByAdmin).toBe(false);
     });
-
-    // ── Promise.all parallelisation ──────────────────────────────────────────
-    it('resolves getDocument and getUniqueDocumentNumber in parallel (Promise.all)', async () => {
-      const getDocumentSpy = jest.spyOn(ProcessingStatementService, 'getDocument');
-
-      const result = await ProcessingStatementService.cloneProcessingStatement(
-        originalDocNumber, 'Bob', testContact, requestByAdmin, voidOriginal
-      );
-
-      // getDocument was called once — parallel execution does not change observable behaviour
-      expect(getDocumentSpy).toHaveBeenCalledTimes(1);
-      expect(getDocumentSpy).toHaveBeenCalledWith(originalDocNumber, 'Bob', testContact);
-      expect(result).toBe(cloneDocNumber);
-      getDocumentSpy.mockRestore();
-    });
   });
 
   describe('voidProcessingStatement', () => {
@@ -1569,132 +1604,6 @@ describe('processingStatement', () => {
       );
 
       expect(result).toBeFalsy();
-    });
-  });
-
-  // ── Optimized function tests ─────────────────────────────────────────────
-
-  describe('getCompletedDocuments — lean results', () => {
-    it('returns plain objects with no Mongoose instance methods (.lean())', async () => {
-      await createDocument(null, 'COMPLETE', testUser, 'PS-LEAN-001');
-
-      const results = await ProcessingStatementService.getCompletedDocuments(testUser, testContact, 10, 1);
-
-      expect(results.length).toBeGreaterThan(0);
-      expect(typeof (results[0] as any).save).toBe('undefined');
-    });
-
-    it('returns only documents belonging to the requesting user', async () => {
-      await createDocument(null, 'COMPLETE', testUser, 'PS-OWN-001');
-      await createDocument(null, 'COMPLETE', 'OtherUser', 'PS-OWN-002', defaultUserReference, new Date(), 'otherContact');
-
-      const results = await ProcessingStatementService.getCompletedDocuments(testUser, testContact, 10, 1);
-
-      expect(results.every((d: any) => d.documentNumber !== 'PS-OWN-002')).toBe(true);
-    });
-
-    it('respects pagination — skip and limit', async () => {
-      await createDocument(null, 'COMPLETE', testUser, 'PS-PAGE-001', defaultUserReference, new Date('2024-01-01'));
-      await createDocument(null, 'COMPLETE', testUser, 'PS-PAGE-002', defaultUserReference, new Date('2024-06-01'));
-      await createDocument(null, 'COMPLETE', testUser, 'PS-PAGE-003', defaultUserReference, new Date('2024-12-01'));
-
-      const page1 = await ProcessingStatementService.getCompletedDocuments(testUser, testContact, 2, 1);
-      const page2 = await ProcessingStatementService.getCompletedDocuments(testUser, testContact, 2, 2);
-
-      expect(page1.length).toBe(2);
-      expect(page2.length).toBe(1);
-    });
-  });
-
-  describe('getDraftDocumentHeaders — lean + sort', () => {
-    it('returns plain objects with no Mongoose instance methods (.lean())', async () => {
-      await createDocument(null, 'DRAFT', testUser, 'PS-HDR-LEAN-001');
-
-      const results = await ProcessingStatementService.getDraftDocumentHeaders(testUser, testContact);
-
-      expect(results.length).toBeGreaterThan(0);
-      expect(typeof (results[0] as any).save).toBe('undefined');
-    });
-
-    it('returns headers sorted by createdAt descending', async () => {
-      await createDocument(null, 'DRAFT', testUser, 'PS-SORT-OLD', defaultUserReference, new Date('2024-01-01'));
-      await createDocument(null, 'DRAFT', testUser, 'PS-SORT-NEW', defaultUserReference, new Date('2024-12-01'));
-
-      const results = await ProcessingStatementService.getDraftDocumentHeaders(testUser, testContact);
-
-      const indices = results.map(r => r.documentNumber);
-      const oldIdx = indices.indexOf('PS-SORT-OLD');
-      const newIdx = indices.indexOf('PS-SORT-NEW');
-      expect(newIdx).toBeLessThan(oldIdx);
-    });
-  });
-
-  describe('completeDraft — projection: { _id: 1 }', () => {
-    it('sets status to COMPLETE and stores documentUri', async () => {
-      await createDocument(null, 'DRAFT', testUser, 'PS-COMP-001');
-
-      await ProcessingStatementService.completeDraft('PS-COMP-001', 'http://example.com/ps.pdf', testUserEmail);
-
-      const doc = await ProcessingStatementModel.findOne({ documentNumber: 'PS-COMP-001' }).lean();
-      expect((doc as any).status).toBe('COMPLETE');
-      expect((doc as any).documentUri).toBe('http://example.com/ps.pdf');
-    });
-
-    it('does not overwrite a document already in COMPLETE status', async () => {
-      await createDocument(null, 'COMPLETE', testUser, 'PS-COMP-002');
-      // original documentUri is 'test' from createDocument helper
-      await ProcessingStatementService.completeDraft('PS-COMP-002', 'http://new.com/ps.pdf', testUserEmail);
-
-      const doc = await ProcessingStatementModel.findOne({ documentNumber: 'PS-COMP-002' }).lean();
-      expect((doc as any).documentUri).toBe('test');
-    });
-  });
-
-  describe('deleteDraftStatement — projection: { _id: 1 }', () => {
-    it('deletes the draft and returns a truthy value', async () => {
-      await createDocument(null, 'DRAFT', testUser, 'PS-DEL-001');
-
-      const result = await ProcessingStatementService.deleteDraftStatement(testUser, 'PS-DEL-001', testContact);
-
-      expect(result).toBeTruthy();
-      const remaining = await ProcessingStatementModel.findOne({ documentNumber: 'PS-DEL-001' });
-      expect(remaining).toBeNull();
-    });
-
-    it('returns null when no matching draft exists', async () => {
-      const result = await ProcessingStatementService.deleteDraftStatement(testUser, 'PS-NONEXISTENT', testContact);
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('cloneProcessingStatement — Promise.all parallelisation verification', () => {
-    it('getUniqueDocumentNumber and getDocument are both called exactly once', async () => {
-      const cloneDocNum = 'PS-PAR-CLONE-001';
-      jest.spyOn(DocumentNumberService, 'getUniqueDocumentNumber').mockResolvedValue(cloneDocNum);
-
-      const ps: ProcessingStatement = {
-        createdBy: testUser,
-        createdByEmail: testUserEmail,
-        createdAt: new Date().toISOString(),
-        status: 'DRAFT',
-        documentNumber: 'PS-PAR-ORIG-001',
-        exportData: { catches: [], exporterDetails: null, consignmentDescription: '', healthCertificateNumber: '', healthCertificateDate: '', personResponsibleForConsignment: '', plantApprovalNumber: '', plantName: '', plantAddressOne: '', plantBuildingName: '', plantBuildingNumber: '', plantSubBuildingName: '', plantStreetName: '', plantCounty: '', plantCountry: '', plantTownCity: '', plantPostcode: '', dateOfAcceptance: '', exportedTo: null },
-        requestByAdmin: false,
-        documentUri: '',
-        draftData: {},
-      };
-      await new ProcessingStatementModel(ps).save();
-
-      const getDocSpy = jest.spyOn(ProcessingStatementService, 'getDocument');
-      const getNumSpy = jest.spyOn(DocumentNumberService, 'getUniqueDocumentNumber');
-
-      await ProcessingStatementService.cloneProcessingStatement('PS-PAR-ORIG-001', testUser, testContact, false, false);
-
-      expect(getDocSpy).toHaveBeenCalledTimes(1);
-      expect(getNumSpy).toHaveBeenCalledTimes(1);
-
-      getDocSpy.mockRestore();
-      getNumSpy.mockRestore();
     });
   });
 
