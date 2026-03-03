@@ -148,8 +148,10 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
     }
   ];
 
-  const result = await CatchCertModel.aggregate(query).sort({ createdAt: 'desc' });
-  const systemErrors: SystemFailure[] = await SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId);
+  const [result, systemErrors] = await Promise.all([
+    CatchCertModel.aggregate(query).sort({ createdAt: 'desc' }),
+    SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId),
+  ]);
   const data: CatchCertificateDraft[] = result.map(catchCert => ({
     documentNumber: catchCert.documentNumber,
     status: catchCert.status,
@@ -279,9 +281,10 @@ export const deleteDraftCertificate = async (
     status: DocumentStatuses.Draft,
   };
 
-  void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
+  const result = await CatchCertModel.findOneAndDelete(query);
+  await invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 
-  return CatchCertModel.findOneAndDelete(query);
+  return result;
 };
 
 export const getDraftCache = async (
