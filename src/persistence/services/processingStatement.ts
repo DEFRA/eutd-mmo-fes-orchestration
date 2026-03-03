@@ -114,7 +114,7 @@ export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYe
       "$gte": new Date(yearInt, monthInt - 1, 1),
       "$lt": new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
   return data;
 };
 
@@ -122,7 +122,7 @@ export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: 
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
   const props = ['documentNumber', 'status', 'createdAt', 'userReference'];
-  const result = await ProcessingStatementModel.find(query, props).sort({ createdAt: 'desc' });
+  const result = await ProcessingStatementModel.find(query, props).sort({ createdAt: 'desc' }).lean();
 
   return result.map(doc => ({
     documentNumber: doc.documentNumber,
