@@ -62,21 +62,14 @@ export const validateAggregateExportWeight = async (input: any, existingLandingW
       }
     ], null);
   };
-
   // If called from route payload validator with raw request value
   if (input?.totalCombinedExportWeight !== undefined && input?.exportWeight !== undefined) {
     try {
-      // When editing a landing (existingLandingWeight provided):
-      // totalCombinedExportWeight includes the OLD weight, so we need to subtract it first
-      // then add the NEW exportWeight to get the actual new total
-      const oldWeight = existingLandingWeight || 0;
-      const adjustedTotal = Number(input.totalCombinedExportWeight) - oldWeight + Number(input.exportWeight);
-      
-      logger.info(`[VALIDATE-AGGREGATE-WEIGHT] totalCombined: ${input.totalCombinedExportWeight}, existingWeight: ${oldWeight}, newWeight: ${input.exportWeight}, adjustedTotal: ${adjustedTotal}`);
-      
-      if (!Number.isNaN(adjustedTotal) && adjustedTotal >= 10000000) {
+       const oldWeight = existingLandingWeight || 0;
+       const adjustedTotal = Number(input.totalCombinedExportWeight) - oldWeight + Number(input.exportWeight);
+        if (!Number.isNaN(adjustedTotal) && adjustedTotal >= 10000000) {
         return [createAggregateError()];
-      }
+          }
       return [];
     } catch (e) {
       logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][${e?.stack ?? e}]`);
