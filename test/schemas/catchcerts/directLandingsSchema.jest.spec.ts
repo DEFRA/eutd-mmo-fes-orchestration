@@ -488,6 +488,144 @@ describe('directLandingsSchema - weights total validation', () => {
 	});
 });
 
+describe('directLandingsSchema - weights custom total validator (exportWeight.directLanding.any.base removed)', () => {
+	/**
+	 * These tests document the current behaviour of the weights custom validator after
+	 * the `else if (typeof totalWeight !== "number" || !totalWeight || totalWeight <= 0)`
+	 * branch was removed.  The `exportWeight.directLanding.any.base` error must never
+	 * be returned by this schema.
+	 */
+	const validBaseWithEez = {
+		...basePayload,
+		highSeasArea: 'No',
+		exclusiveEconomicZones: [{ officialCountryName: 'United Kingdom' }],
+	};
+
+	describe('exportWeight.directLanding.any.base is never returned', () => {
+		it('does not return exportWeight.directLanding.any.base for a single valid weight', () => {
+			const payload = { ...validBaseWithEez, weights: [{ speciesId: 'COD', exportWeight: 100 }] };
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+
+		it('does not return exportWeight.directLanding.any.base for multiple valid weights', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [
+					{ speciesId: 'COD', exportWeight: 50 },
+					{ speciesId: 'HKE', exportWeight: 25.5 },
+				],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+
+		it('does not return exportWeight.directLanding.any.base when total weight equals the maximum limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 99999999999.99 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+
+		it('does not return exportWeight.directLanding.any.base even when total weight exceeds the limit (array.totalWeightExceeded is returned instead)', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 100000000000 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+	});
+
+	describe('array.totalWeightExceeded is returned when total weight exceeds 99,999,999,999.99', () => {
+		it('returns array.totalWeightExceeded for a single weight above the limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 100000000000 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const weightError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
+			);
+			expect(weightError).toBeDefined();
+			expect(weightError?.path).toEqual(['weights']);
+		});
+
+		it('returns array.totalWeightExceeded when multiple weights combine to exceed the limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [
+					{ speciesId: 'COD', exportWeight: 50000000000 },
+					{ speciesId: 'HKE', exportWeight: 50000000000 },
+				],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const weightError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
+			);
+			expect(weightError).toBeDefined();
+		});
+	});
+
+	describe('no custom validator errors when total weight is within the valid range', () => {
+		it('passes for a single weight well below the limit', () => {
+			const payload = { ...validBaseWithEez, weights: [{ speciesId: 'COD', exportWeight: 500 }] };
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const customError = error?.details.find(
+				(d) =>
+					d.path[0] === 'weights' &&
+					(d.type === 'array.totalWeightExceeded' || d.type === 'exportWeight.directLanding.any.base'),
+			);
+			expect(customError).toBeUndefined();
+		});
+
+		it('passes for multiple weights whose total is exactly the limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [
+					{ speciesId: 'COD', exportWeight: 50000000000 },
+					{ speciesId: 'HKE', exportWeight: 49999999999.99 },
+				],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const customError = error?.details.find(
+				(d) =>
+					d.path[0] === 'weights' &&
+					(d.type === 'array.totalWeightExceeded' || d.type === 'exportWeight.directLanding.any.base'),
+			);
+			expect(customError).toBeUndefined();
+		});
+
+		it('passes for a single weight at the exact maximum (99,999,999,999.99)', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 99999999999.99 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const customError = error?.details.find(
+				(d) =>
+					d.path[0] === 'weights' &&
+					(d.type === 'array.totalWeightExceeded' || d.type === 'exportWeight.directLanding.any.base'),
+			);
+			expect(customError).toBeUndefined();
+		});
+	});
+});
+
 describe('directLandingsSchema - gear validation', () => {
 	it('returns any.required error when gearCategory is missing', () => {
 		const payload = { ...basePayload };
