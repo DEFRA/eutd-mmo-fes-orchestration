@@ -504,5 +504,141 @@ describe('exporter validate routes', () => {
       expect(mockAddExporterDetails).toHaveBeenCalled();
       expect(response.statusCode).toBe(200);
     });
+
+    it('should return 400 if townCity contains emoji characters', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          postcode: "SE16 5HL",
+          buildingNumber: "2",
+          streetName: "High Street",
+          buildingName: "The Point",
+          townCity: "Newcastle 🏙️",
+          county: "Tyneside",
+          country: "United Kingdom",
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return 400 if streetName contains emoji characters', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          postcode: "SE16 5HL",
+          buildingNumber: "2",
+          streetName: "High Street 🔧",
+          buildingName: "The Point",
+          townCity: "Newcastle",
+          county: "Tyneside",
+          country: "United Kingdom",
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return 400 if subBuildingName contains emoji characters', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          postcode: "SE16 5HL",
+          buildingNumber: "2",
+          subBuildingName: "MMO 😀",
+          streetName: "High Street",
+          buildingName: "The Point",
+          townCity: "Newcastle",
+          county: "Tyneside",
+          country: "United Kingdom",
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return 400 if buildingName contains emoji characters', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          postcode: "SE16 5HL",
+          buildingNumber: "2",
+          streetName: "High Street",
+          buildingName: "The Point 🏠",
+          townCity: "Newcastle",
+          county: "Tyneside",
+          country: "United Kingdom",
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return 400 if county contains emoji characters', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          postcode: "SE16 5HL",
+          buildingNumber: "2",
+          streetName: "High Street",
+          buildingName: "The Point",
+          townCity: "Newcastle",
+          county: "Tyneside 🌍",
+          country: "United Kingdom",
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+    });
   });
 });
