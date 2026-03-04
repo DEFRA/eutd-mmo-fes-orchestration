@@ -1,5 +1,6 @@
 import * as Joi from 'joi';
 import * as moment from 'moment';
+import { validateNoEmoji } from '../../validators/emojiValidator';
 import ApplicationConfig from '../../applicationConfig';
 import { decimalPlacesValidator } from '../../helpers/customValidators';
 import { getFAOAreaList } from '../../helpers/utils/utils';
@@ -9,7 +10,7 @@ const extendedJoi = Joi.extend(require('@joi/date'));
 const manualLandingsSchema = Joi.object({
   product: Joi.string().trim().required(),
   vessel: Joi.object().keys({
-    vesselName: Joi.string().trim().label('Vessel').required(),
+    vesselName: Joi.string().trim().custom(validateNoEmoji).label('Vessel').required(),
   }),
   dateLanded: Joi.string()
     .custom((value, helpers) => {
