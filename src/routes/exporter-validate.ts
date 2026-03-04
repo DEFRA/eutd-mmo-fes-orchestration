@@ -6,6 +6,7 @@ import { validateCountriesName } from '../validators/countries.validator';
 import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimatelyOwned';
 import acceptsHtml from '../helpers/acceptsHtml';
 import errorExtractor from "../helpers/errorExtractor";
+import { validateNoEmoji } from '../validators/emojiValidator';
 
 import ApplicationConfig from '../applicationConfig';
 import { ICountry } from '../persistence/schema/common';
@@ -69,12 +70,12 @@ export default class ExporterValidateRoutes {
               payload: async function(value: any) {
                 const schema = Joi.object()
                   .keys({
-                    subBuildingName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).allow(''),
+                    subBuildingName: Joi.string().allow('').custom(validateNoEmoji).regex(/^[A-Za-z0-9'/\-.,() &!]+$/),
                     buildingNumber: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).allow(''),
-                    buildingName: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).allow(''),
-                    streetName: Joi.string().regex(/^[A-Za-z0-9'/\-.,() &!]+$/).allow(''),
-                    townCity: Joi.string().trim().regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
-                    county: Joi.string().regex(/^[A-Za-z0-9'/\-., &!]+$/).allow(''),
+                    buildingName: Joi.string().allow('').custom(validateNoEmoji).regex(/^[A-Za-z0-9'/\-., &!]+$/),
+                    streetName: Joi.string().allow('').custom(validateNoEmoji).regex(/^[A-Za-z0-9'/\-.,() &!]+$/),
+                    townCity: Joi.string().trim().custom(validateNoEmoji).regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
+                    county: Joi.string().allow('').custom(validateNoEmoji).regex(/^[A-Za-z0-9'/\-., &!]+$/),
                     postcode: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).required().min(5).max(8),
                     country: Joi.string().required()
                   })

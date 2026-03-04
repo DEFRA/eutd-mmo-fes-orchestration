@@ -14,6 +14,7 @@ import { getMaxFavouritesError } from './favourites';
 import { defineAuthStrategies } from '../helpers/auth';
 import { HapiRequestApplicationStateExtended } from '../types';
 import { Product } from '../persistence/schema/frontEndModels/species';
+import { validateNoEmoji } from '../validators/emojiValidator';
 
 export default class FishRoutes {
   public async register(server: Hapi.Server): Promise<any> {
@@ -91,11 +92,11 @@ export default class FishRoutes {
                     id: Joi.string().optional(),
                     btn_submit: Joi.string().allow(''),
                     redirect: Joi.string().required(),
-                    species: Joi.string().required(),
+                    species: Joi.string().required().custom(validateNoEmoji),
                     state: Joi.string().required().disallow(''),
                     presentation: Joi.string().required().disallow(''),
                     commodity_code: Joi.required().disallow(''),
-                    commodity_code_description: Joi.string().allow(''),
+                    commodity_code_description: Joi.string().allow('').custom(validateNoEmoji),
                     addToFavourites : Joi.boolean().optional(),
                   });
 
@@ -166,11 +167,11 @@ export default class FishRoutes {
                   .keys({
                     id: Joi.string().required(),
                     redirect: Joi.string().required(),
-                    species: Joi.string().required(),
+                    species: Joi.string().required().custom(validateNoEmoji),
                     state: Joi.string().required().disallow(''),
                     presentation: Joi.string().required().disallow(''),
                     commodity_code: Joi.required().disallow(''),
-                    commodity_code_description: Joi.string().allow('')
+                    commodity_code_description: Joi.string().allow('').custom(validateNoEmoji)
                   });
 
                 if (!schema) {

@@ -258,6 +258,36 @@ describe('fish routes', () => {
 
       expect(response.statusCode).toBe(400);
     });
+
+    it('should return 400 if species contains emoji characters', async () => {
+      const response = await server.inject({
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          species: 'Atlantic cod 🐟'
+        }
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(JSON.parse(response.payload)).toEqual(
+        expect.objectContaining({ species: 'error.species.string.emoji' })
+      );
+    });
+
+    it('should return 400 if commodity_code_description contains emoji characters', async () => {
+      const response = await server.inject({
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          commodity_code_description: 'Fresh fish 🎣'
+        }
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(JSON.parse(response.payload)).toEqual(
+        expect.objectContaining({ commodity_code_description: 'error.commodity_code_description.string.emoji' })
+      );
+    });
   });
 
   describe("PUT /fish/add/{productId}", () => {
