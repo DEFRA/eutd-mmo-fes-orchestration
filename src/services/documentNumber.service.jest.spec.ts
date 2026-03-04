@@ -197,13 +197,34 @@ describe('getDocument', () => {
     expect(result).toBeNull();
   });
 
-  it('will return null if the found document status is not complete or pending', async () => {
+  it('will return null if the found document status is not complete, pending or draft', async () => {
     mockGetServiceName.mockReturnValue(ServiceNames.CC);
-    mockGetCC.mockResolvedValue({documentNumber: 'doc1', status: 'DRAFT'});
+    mockGetCC.mockResolvedValue({documentNumber: 'doc1', status: 'REVOKED'});
 
     const result = await DocumentNumberService.getDocument('doc1', 'Bob', contactId);
 
     expect(result).toBeNull();
+  });
+
+  it('will return document details if a draft CC is found', async () => {
+    mockGetServiceName.mockReturnValue(ServiceNames.CC);
+    mockGetCC.mockResolvedValue({
+      documentNumber: 'doc1',
+      documentUri: 'uri',
+      status: 'DRAFT',
+      createdAt: '2022-03-04T09:45:11.000Z',
+      userReference: '',
+    });
+
+    const result = await DocumentNumberService.getDocument('doc1', 'Bob', contactId);
+
+    expect(result).toMatchObject({
+      documentNumber: 'doc1',
+      documentUri: 'uri',
+      documentStatus: 'DRAFT',
+      createdAt: '2022-03-04T09:45:11.000Z',
+      userReference: '',
+    });
   });
 
   it('will return document details if a completed CC is found', async () => {
@@ -241,6 +262,7 @@ describe('getDocument', () => {
     expect(result).toMatchObject({
       documentNumber: 'doc1',
       documentUri: 'uri',
+      documentStatus: 'PENDING',
       createdAt: '2022-03-04T09:45:11.000Z',
       userReference: '',
     });
@@ -261,6 +283,7 @@ describe('getDocument', () => {
     expect(result).toMatchObject({
       documentNumber: 'doc1',
       documentUri: 'uri',
+      documentStatus: 'COMPLETE',
       createdAt: '2022-03-04T09:45:11.000Z',
       userReference: '',
     });
@@ -281,6 +304,7 @@ describe('getDocument', () => {
     expect(result).toMatchObject({
       documentNumber: 'doc1',
       documentUri: 'uri',
+      documentStatus: 'COMPLETE',
       createdAt: '2022-03-04T09:45:11.000Z',
       userReference: '',
     });
