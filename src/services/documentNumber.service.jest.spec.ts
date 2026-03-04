@@ -2,6 +2,7 @@ import DocumentNumberService, { processingStatement, storageNote } from './docum
 import * as CatchCertService from "../persistence/services/catchCert";
 import * as ProcessingStatementService from "../persistence/services/processingStatement";
 import * as StorageDocumentService from "../persistence/services/storageDoc";
+import { SessionStoreFactory } from '../session_store/factory';
 import { DOCUMENT_NUMBER_KEY } from '../session_store/constants';
 import ServiceNames from '../validators/interfaces/service.name.enum';
 
@@ -66,6 +67,15 @@ describe('getDraftDocument', () => {
     expect(result).toStrictEqual(expected);
   });
 
+  it('should return an empty array if PS service returns null', async () => {
+    mockGetPSHeaders.mockReturnValue(null);
+
+    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${processingStatement}/${DOCUMENT_NUMBER_KEY}`, contactId);
+
+    expect(mockGetPSHeaders).toHaveBeenCalled();
+    expect(result).toStrictEqual([]);
+  });
+
   it('should call the SD service if the key contains storageNote', async () => {
     mockGetSDHeaders.mockReturnValue(expected);
 
@@ -75,6 +85,15 @@ describe('getDraftDocument', () => {
     expect(mockGetPSHeaders).not.toHaveBeenCalled();
     expect(mockGetSDHeaders).toHaveBeenCalled();
     expect(result).toStrictEqual(expected);
+  });
+
+  it('should return an empty array if SD service returns null', async () => {
+    mockGetSDHeaders.mockReturnValue(null);
+
+    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${storageNote}/${DOCUMENT_NUMBER_KEY}`, contactId);
+
+    expect(mockGetSDHeaders).toHaveBeenCalled();
+    expect(result).toStrictEqual([]);
   });
 
 });
@@ -422,5 +441,44 @@ describe('getCompletedDocuments', () => {
     const result = await DocumentNumberService.getCompletedDocuments('storageNotes', userPrincipal, contactId, 1, 1);
 
     expect(result).toBe(documents);
+  });
+});
+
+describe('getFullDocument', () => {
+  it('should return the document payload from the session store', async () => {
+    const mockPayload = { documentNumber: 'doc1', status: 'DRAFT' };
+    const mockGetDocument = jest.fn().mockResolvedValue(mockPayload);
+    jest.spyOn(SessionStoreFactory, 'getSessionStore').mockResolvedValue({
+      getDocument: mockGetDocument,
+    } as any);
+
+    const result = await DocumentNumberService.getFullDocument('doc1');
+
+    expect(mockGetDocument).toHaveBeenCalledWith('doc1');
+    expect(result).toEqual(mockPayload);
+  });
+});
+
+describe('createDocumentNumber', () => {
+  it('should create a document number and write it to the session store', async () => {
+    const mockWriteAllFor = jest.fn().mockResolvedValue(undefined);
+    const mockTagByDocumentNumber = jest.fn().mockResolvedValue(undefined);
+    jest.spyOn(SessionStoreFactory, 'getSessionStore').mockResolvedValue({
+      writeAllFor: mockWriteAllFor,
+      tagByDocumentNumber: mockTagByDocumentNumber,
+    } as any);
+
+    const result = await DocumentNumberService.createDocumentNumber('Bob', 'CC', 'aKey', 'catchCertificate', 'contactBob');
+
+    expect(result).toHaveProperty('documentNumber');
+    expect(result.documentNumber).toMatch(/^GBR-\d{4}-CC-/);
+    expect(result).toHaveProperty('status', 'DRAFT');
+    expect(result).toHaveProperty('startedAt');
+    expect(mockWriteAllFor).toHaveBeenCalledWith('Bob', 'contactBob', 'aKey', expect.objectContaining({
+      documentNumber: expect.any(String),
+      status: 'DRAFT',
+      startedAt: expect.any(String),
+    }));
+    expect(mockTagByDocumentNumber).toHaveBeenCalledWith('Bob', 'contactBob', result.documentNumber, 'catchCertificate');
   });
 });
