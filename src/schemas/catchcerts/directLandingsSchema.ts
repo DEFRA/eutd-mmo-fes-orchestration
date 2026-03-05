@@ -4,7 +4,6 @@ import { validateNoEmoji } from '../../validators/emojiValidator';
 import ApplicationConfig from "../../applicationConfig";
 import { decimalPlacesValidator } from "../../helpers/customValidators";
 import { getFAOAreaList } from '../../helpers/utils/utils';
-import { logger } from '@azure/event-hubs';
 
 const extendedJoi = Joi.extend(require('@joi/date'));
 
@@ -20,7 +19,6 @@ const directLandingsSchema = Joi.object({
       const month = parts[1].padStart(2, '0');
       const day = parts[2].padStart(2, '0');
       const isoDate = `${year}-${month}-${day}`;
-      logger.info(`Validating dateLanded: ${isoDate}`);
       if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
         return helpers.error('directLanding.date.invalid');
       }
