@@ -1,7 +1,7 @@
 {
   "name": "mmo-fes-orchestration",
   "description": "A service to orchestrate actions on behalf of a export catch certicate user",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "private": true,
   "engines": {
     "node": "~24.13.1",
