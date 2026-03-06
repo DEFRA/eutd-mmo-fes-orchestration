@@ -158,9 +158,9 @@ export default class DocumentController {
     });
 
     return {
-      pageNumber: parseInt(pageNumber),
-      pageLimit: parseInt(pageLimit),
-      totalPages: Math.ceil(docCount / parseInt(pageLimit)),
+      pageNumber: Number.parseInt(pageNumber),
+      pageLimit: Number.parseInt(pageLimit),
+      totalPages: Math.ceil(docCount / Number.parseInt(pageLimit)),
       totalRecords: docCount,
       data,
     };
