@@ -137,7 +137,7 @@ export default class OrchestrationService {
   public static async saveAndValidate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = req.payload;
     const nextUrl = req.query.n;
-    const saveAsDraftUrl = req.query.saveAsDraftUrl;
+    const saveAsDraftUrl = req.query.saveAsDraftUrl as string;
     const currentUrl = req.query.c;
     let saveToRedisIfErrors = false;
 
