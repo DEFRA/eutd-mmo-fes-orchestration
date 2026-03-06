@@ -44,7 +44,10 @@ const directLandingsSchema = Joi.object({
     if (!moment(startDate, "YYYY-MM-DD", true).isValid()) {
       return helpers.error('date.base');
     }
-    const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
+    const dateLanded = moment(helpers.state.ancestors[0].dateLanded, "YYYY-MM-DD", true);
+    if (!dateLanded.isValid()) {
+      return value;
+    }
     if (dateLanded.isBefore(startDate, 'day')) {
       return helpers.error('date.max');
     }

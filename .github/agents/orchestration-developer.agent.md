@@ -55,6 +55,7 @@ Execute user requests **completely and autonomously**. Never stop halfway - iter
 - Test auth scenarios: JWT valid/invalid, Basic auth, disabled auth
 - Mock external services (Reference Service, Notify, Blob Storage)
 - Use `*.jest.spec.ts` suffix for all test files
+- **All test files must live in the `test/` folder** (mirror the `src/` directory structure within `test/`)
 
 ### 3. Build & Quality Validation
 
@@ -350,6 +351,7 @@ Status: COMPLETED
 ❌ Skipping ownership validation (`withDocumentLegitimatelyOwned`)
 ❌ Not using colon-delimited keys for Redis session storage
 ❌ Test files with `.spec.ts` suffix (must be `.jest.spec.ts`)
+❌ Test files placed inside `src/` (must live under `test/`)
 ❌ Missing MongoDB Memory Server cleanup in tests
 
 ## Quality Checklist
