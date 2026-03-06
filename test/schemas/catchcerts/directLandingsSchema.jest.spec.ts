@@ -101,7 +101,7 @@ describe('directLandingsSchema - dateLanded validation', () => {
 	});
 
 	it('returns date.max error when dateLanded exceeds future limit', () => {
-		if (isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
+		if (Number.isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
 			return;
 		}
 		const futureDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture + 5, 'days').format('YYYY-MM-DD');
@@ -114,7 +114,7 @@ describe('directLandingsSchema - dateLanded validation', () => {
 	});
 
 	it('passes validation with valid dateLanded within future limit', () => {
-		if (isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
+		if (Number.isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
 			return;
 		}
 		const validFutureDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture - 1, 'days').format('YYYY-MM-DD');
@@ -178,6 +178,23 @@ describe('directLandingsSchema - startDate validation', () => {
 		const payload = { ...basePayload, dateLanded: '2026-02-15', startDate: '2026-02-10' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeUndefined();
+	});
+
+	it('does not return date.max on startDate when dateLanded is an invalid partial string (e.g. "--3-")', () => {
+		// "--3-" is leniently parsed by moment without strict mode, producing a valid-ish date.
+		// The fix ensures dateLanded is parsed strictly; if invalid, startDate validation is skipped
+		// and no spurious date.max error is raised for startDate.
+		const payload = { ...basePayload, dateLanded: '--3-', startDate: '2026-02-10' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		// dateLanded itself should error (not all parts blank, but moment strict rejects it)
+		const dateLandedErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
+		expect(dateLandedErr).toBeDefined();
+		// startDate must NOT produce a date.max error due to the invalid dateLanded value
+		const startErr = error.details.find(
+			(d: any) => d.path.join('.') === 'startDate' && d.type === 'date.max'
+		);
+		expect(startErr).toBeUndefined();
 	});
 });
 
