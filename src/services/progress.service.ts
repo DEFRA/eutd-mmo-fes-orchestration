@@ -17,7 +17,7 @@ import * as ProcessingStatement from '../persistence/schema/processingStatement'
 import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
-import { checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent, checkNetWeightFisheryProductDepartureIsZeroPositive, checkNetWeightProductDepartureIsZeroPositive, validateEntry, validateProduct } from './handlers/storage-notes';
+import { checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent, checkNetWeightFisheryProductDepartureIsZeroPositive, checkNetWeightProductDepartureIsZeroPositive, validateEntry, validateProduct, validateStorageFacility, validateStorageApproval } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
@@ -650,10 +650,21 @@ export default class ProgressService {
 
     const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED && isEmpty(catchErrors);
 
+    // Check facility validation errors
+    const facilityErrors = {};
+    const departureDate = data?.exportData?.arrivalTransportation?.departureDate;
+    
+    if (data?.exportData) {
+      validateStorageFacility(data.exportData, departureDate, facilityErrors);
+      validateStorageApproval(data.exportData, facilityErrors);
+    }
+
+    const hasFacilityValidationErrors = !isEmpty(facilityErrors);
+
     // Check if facility arrival date is after the departure date from arrival transportation
     const facilityStatus = ProgressService.getStorageFacilityStatus(data?.exportData?.facilityName, data?.exportData?.facilityAddressOne, data?.exportData?.facilityTownCity, data?.exportData?.facilityPostcode, data?.exportData?.facilityArrivalDate, data?.exportData?.facilityStorage);
     const isFacilityArrivalDateAfterDeparture = ProgressService.isFacilityArrivalAfterTransportDeparture(data?.exportData?.arrivalTransportation, data?.exportData?.facilityArrivalDate);
-    const storageFacilitiesStatus = data?.exportData?.arrivalTransportation && isFacilityArrivalDateAfterDeparture ?facilityStatus: ProgressStatus.INCOMPLETE ;
+    const storageFacilitiesStatus = data?.exportData?.arrivalTransportation && isFacilityArrivalDateAfterDeparture && !hasFacilityValidationErrors ? facilityStatus : ProgressStatus.INCOMPLETE;
 
     // Check if departure transportation date is after arrival transportation departure date
     const isDepartureAfterArrival = data?.exportData?.arrivalTransportation ? ProgressService.isDepartureTransportAfterArrivalTransport(data?.exportData?.transportation, data?.exportData?.arrivalTransportation) : true;
