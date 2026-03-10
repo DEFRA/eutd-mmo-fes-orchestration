@@ -135,7 +135,7 @@ function checkFacilityArrivalDateError(exportData: any, departureDate: string, e
   }
 }
 
-function validateStorageFacility(exportData: any, departureDate: string, errors, isStorageFacilitiesPage: boolean = false) {
+export function validateStorageFacility(exportData: any, departureDate: string, errors, isStorageFacilitiesPage: boolean = false) {
   checkFacilityArrivalDateError(exportData, departureDate, errors);
 
   if (!exportData.facilityName || validateWhitespace(exportData.facilityName)) {
@@ -159,7 +159,7 @@ function validateStorageFacility(exportData: any, departureDate: string, errors,
   return { errors };
 }
 
-function validateStorageApproval(exportData: any, errors) {
+export function validateStorageApproval(exportData: any, errors) {
   if (exportData.facilityApprovalNumber && isInvalidLength(exportData.facilityApprovalNumber, 0, 50)) {
     errors[`storageFacilities-facilityApproval`] = 'sdAddStorageFacilityApprovalCharacterError';
   }
