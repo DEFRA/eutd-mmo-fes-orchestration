@@ -281,6 +281,7 @@ export async function validateEntry(product: any, index: number, errors, documen
   checkWeightOnCCErrors(product, errors, index);
   checkNetWeightArrival(product, errors, index);
   checkNetFisheryWeightArrival(product, errors, index);
+  checkNetWeightArrivalNotExceedFisheryWeight(product, errors, index);
 
   return { errors };
 }
@@ -402,5 +403,15 @@ function checkNetFisheryWeightArrival(product: any, errors: any, index: number) 
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal';
   } else if (!isNotExceed12Digit(product.netWeightFisheryProductArrival)) {
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalExceed12Digit';
+  }
+}
+
+function checkNetWeightArrivalNotExceedFisheryWeight(product: any, errors: any, index: number) {
+  if (
+    !errors[`catches-${index}-netWeightProductArrival`] &&
+    !errors[`catches-${index}-netWeightFisheryProductArrival`] &&
+    (+product.netWeightFisheryProductArrival) > (+product.netWeightProductArrival)
+  ) {
+    errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightFisheryProductArrivalExceedsProductArrival';
   }
 }
