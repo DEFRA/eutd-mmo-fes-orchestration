@@ -131,8 +131,8 @@ export default class DocumentController {
     const userPrincipal = <string>(req as any).app.claims.sub;
     const contactId = <string>(req as any).app.claims.contactId;
     const documentType = <string>req.params.documentType;
-    const pageNumber = req.query.pageNumber ?? 1;
-    const pageLimit = req.query.pageLimit ?? 50;
+    const pageNumber = (req.query.pageNumber as string) ?? '1';
+    const pageLimit = (req.query.pageLimit as string) ?? '50';
 
     const docCount = await DocumentNumberService.countDocuments(
       documentType,
@@ -158,9 +158,9 @@ export default class DocumentController {
     });
 
     return {
-      pageNumber: parseInt(pageNumber),
-      pageLimit: parseInt(pageLimit),
-      totalPages: Math.ceil(docCount / pageLimit),
+      pageNumber: Number.parseInt(pageNumber),
+      pageLimit: Number.parseInt(pageLimit),
+      totalPages: Math.ceil(docCount / Number.parseInt(pageLimit)),
       totalRecords: docCount,
       data,
     };

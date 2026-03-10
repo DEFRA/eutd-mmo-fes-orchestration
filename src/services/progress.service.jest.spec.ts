@@ -450,8 +450,12 @@ describe('get', () => {
                 licenceValidTo: '2027-12-31T00:00:00',
                 id: 'GBR-2021-CC-757029CB7-1638174370',
                 date: '2021-11-27',
+                startDate: '2021-11-20',
                 faoArea: 'FAO27',
                 weight: 5,
+                gearCategory: 'Trawls',
+                gearType: 'OTB',
+                highSeasArea: 'No',
               },
             ],
           },
@@ -1204,6 +1208,12 @@ describe('get', () => {
               {
                 vessel: 'MOYUNA',
                 date: '2021-11-27',
+                startDate: '2021-11-20',
+                faoArea: 'FAO27',
+                weight: 100,
+                gearCategory: 'Trawls',
+                gearType: 'OTB',
+                highSeasArea: 'No',
               },
             ],
           },
@@ -3229,6 +3239,7 @@ describe('getProcessingStatementProgress', () => {
           {
             productId: 'product-1',
             species: 'Gymnotus pantherinus (AGH)',
+            speciesCode: 'AGH',
             catchCertificateNumber: 'GBR-2022-CC-VALID123',
             id: 'CC-10-1670865091',
             scientificName: 'Gymnotus pantherinus',
@@ -3319,6 +3330,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '34',
@@ -3328,6 +3340,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018899',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3376,6 +3389,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'non_uk',
@@ -3386,6 +3400,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018900',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3396,6 +3411,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (COD)',
+            speciesCode: 'COD',
             id: '2342234-1610018901',
             catchCertificateNumber: 'GBR-2022-CC-123456789',
             catchCertificateType: 'uk',
@@ -3446,6 +3462,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'non_uk',
@@ -3456,6 +3473,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018900',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3465,6 +3483,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (COD)',
+            speciesCode: 'COD',
             id: '2342234-1610018901',
             catchCertificateNumber: 'GBR-2022-CC-123456789',
             catchCertificateType: 'uk',
@@ -3514,6 +3533,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'uk',
@@ -3524,6 +3544,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018899',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3572,6 +3593,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '£$"£kg',
@@ -3581,6 +3603,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018899',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3629,6 +3652,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '34',
@@ -3638,6 +3662,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             scientificName: 'scientificName',
@@ -3684,6 +3709,7 @@ describe('getProcessingStatementProgress', () => {
         catches: [
           {
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'non_uk',
@@ -3694,6 +3720,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Black scabbardfish (BSF)',
+            speciesCode: 'BSF',
             id: '2342234-1610018900',
             catchCertificateNumber: 'GB-123-456-345',
             totalWeightLanded: '170',
@@ -3703,6 +3730,7 @@ describe('getProcessingStatementProgress', () => {
           },
           {
             species: 'Atlantic herring (COD)',
+            speciesCode: 'COD',
             id: '2342234-1610018901',
             catchCertificateNumber: 'GBR-2022-CC-123456789',
             catchCertificateType: 'uk',
@@ -4370,6 +4398,7 @@ describe('getProcessingStatementProgress', () => {
           {
             productId: 'product-1',
             species: 'Atlantic herring (HER)',
+            speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             totalWeightLanded: '34',
@@ -6678,5 +6707,233 @@ describe('Storage Document Progress - transportDetails with all conditions met',
     const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-123', 'contact123');
 
     expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
+  });
+});
+
+describe('hasLandingData - EU2026 mandatory fields validation', () => {
+  const validLanding = {
+    id: '1',
+    vessel: 'TEST VESSEL',
+    date: '2026-01-15',
+    startDate: '2026-01-10',
+    faoArea: '27.4.b',
+    weight: 100,
+    gearCategory: 'Trawls',
+    gearType: 'OTB',
+    highSeasArea: 'No'
+  };
+
+  it('should return true when all products have complete landing data with EU2026 mandatory fields', () => {
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [validLanding]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when products have caughtBy but missing startDate', () => {
+    const landingWithoutStartDate = { ...validLanding };
+    delete landingWithoutStartDate.startDate;
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [landingWithoutStartDate]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products have caughtBy but missing gearCategory', () => {
+    const landingWithoutGearCategory = { ...validLanding };
+    delete landingWithoutGearCategory.gearCategory;
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [landingWithoutGearCategory]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products have caughtBy but missing gearType', () => {
+    const landingWithoutGearType = { ...validLanding };
+    delete landingWithoutGearType.gearType;
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [landingWithoutGearType]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products have caughtBy but missing highSeasArea', () => {
+    const landingWithoutHighSeasArea = { ...validLanding };
+    delete landingWithoutHighSeasArea.highSeasArea;
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [landingWithoutHighSeasArea]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products have caughtBy but startDate is empty string', () => {
+    const landingWithEmptyStartDate = { ...validLanding, startDate: '' };
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [landingWithEmptyStartDate]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products have caughtBy but startDate is whitespace', () => {
+    const landingWithWhitespaceStartDate = { ...validLanding, startDate: '   ' };
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [landingWithWhitespaceStartDate]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return true when all products have multiple complete landings', () => {
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [
+          validLanding,
+          { ...validLanding, id: '2', date: '2026-01-16' }
+        ]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when one landing in multiple landings is missing mandatory fields', () => {
+    const incompleteLanding = { ...validLanding };
+    delete incompleteLanding.gearType;
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [
+          validLanding,
+          incompleteLanding
+        ]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products have empty caughtBy array', () => {
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: []
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products have undefined caughtBy', () => {
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products array is empty', () => {
+    const products = [];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false when products is undefined', () => {
+    const result = ProgressService.hasLandingData(undefined as any);
+
+    expect(result).toBe(false);
+  });
+
+  it('should check all products - return false if any product has incomplete landings', () => {
+    const incompleteLanding = { ...validLanding };
+    delete incompleteLanding.highSeasArea;
+
+    const products = [
+      {
+        speciesId: '1',
+        speciesCode: 'COD',
+        caughtBy: [validLanding]
+      },
+      {
+        speciesId: '2',
+        speciesCode: 'HAD',
+        caughtBy: [incompleteLanding]
+      }
+    ];
+
+    const result = ProgressService.hasLandingData(products as any);
+
+    expect(result).toBe(false);
   });
 });

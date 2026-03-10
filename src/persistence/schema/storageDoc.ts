@@ -289,8 +289,6 @@ export const cloneCatches = (original: Catch): Catch => {
     productDescription,
     netWeightProductArrival,
     netWeightFisheryProductArrival,
-    netWeightProductDeparture,
-    netWeightFisheryProductDeparture,
   } = original;
 
   const result = {
@@ -310,8 +308,6 @@ export const cloneCatches = (original: Catch): Catch => {
     productDescription,
     netWeightProductArrival,
     netWeightFisheryProductArrival,
-    netWeightProductDeparture,
-    netWeightFisheryProductDeparture,
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);

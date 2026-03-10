@@ -242,3 +242,77 @@ callsFunctionWithSaveAsDraft(
   'addTransportDetails',
   Controller.addTransportDetailsSaveAsDraft
 );
+
+test('TransportController.addTransportDetails - Should skip validation when saving as draft', async (t) => {
+  try {
+    const serviceStub = sinon.stub(Services, 'addTransport').resolves({ success: true });
+    const mockReq = mock(hapi.Request);
+    mockReq.app = {
+      claims: {
+        sub: USER_ID
+      }
+    };
+    mockReq.payload = {
+      vehicle: 'plane',
+      arrival: false,
+      journey: 'storageNotes',
+      exportDate: '', // Invalid/empty date - should be allowed in draft mode
+      dashboardUri: '/dashboard',
+      nextUri: '/next'
+    };
+    mockReq.headers = { accept: 'text/html' };
+    const mockRes = { redirect: sinon.fake() };
+
+    // Call with savingAsDraft = true
+    await Controller.addTransportDetails(mockReq, mockRes, true, USER_ID, 'GBR-2026-SD-TEST', 'contact123');
+
+    // Verify service was called (validation was skipped)
+    t.assert(serviceStub.called, 'Service should be called even with invalid data when saving as draft');
+    
+    // Verify redirect to dashboard
+    t.deepEquals(mockRes.redirect.getCall(0).args, [mockReq.payload.dashboardUri], 'Should redirect to dashboard');
+
+    serviceStub.restore();
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('TransportController.addTransportDetails - Should validate when NOT saving as draft', async (t) => {
+  try {
+    const serviceStub = sinon.stub(Services, 'addTransport').resolves({ success: true });
+    const mockReq = mock(hapi.Request);
+    mockReq.app = {
+      claims: {
+        sub: USER_ID
+      }
+    };
+    mockReq.payload = {
+      vehicle: 'plane',
+      arrival: false,
+      journey: 'storageNotes',
+      exportDate: '19/02/2026', // Valid date
+      exportDateTo: '2026-12-31T00:00:00.000Z',
+      facilityArrivalDate: '10/02/2026',
+      dashboardUri: '/dashboard',
+      nextUri: '/next'
+    };
+    mockReq.headers = { accept: 'text/html' };
+    const mockRes = { redirect: sinon.fake() };
+
+    // Call with savingAsDraft = false
+    await Controller.addTransportDetails(mockReq, mockRes, false, USER_ID, 'GBR-2026-SD-TEST', 'contact123');
+
+    // Verify service was called after validation passed
+    t.assert(serviceStub.called, 'Service should be called after validation passes');
+    
+    // Verify redirect to nextUri (not dashboard)
+    t.deepEquals(mockRes.redirect.getCall(0).args, [mockReq.payload.nextUri], 'Should redirect to nextUri');
+
+    serviceStub.restore();
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});

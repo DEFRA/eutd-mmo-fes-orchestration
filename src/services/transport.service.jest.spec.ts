@@ -158,7 +158,7 @@ describe("The Transport Service", () => {
 
       await TransportService.addTransport({user_id: "Bob", journey: "storageNotes", transport: "some data"},'GB-34324-34234-234234', contactId);
 
-      expect(mockStorageNoteUpsertTransportData).toHaveBeenCalledWith("Bob", {"journey": "storageNotes", "transport": "some data", "user_id": "Bob"},'GB-34324-34234-234234', contactId);
+      expect(mockStorageNoteUpsertTransportData).toHaveBeenCalledWith("Bob", {"journey": "storageNotes", "transport": "some data", "user_id": "Bob"},'GB-34324-34234-234234', contactId, undefined);
     });
 
     it("Will save transport details to mongo when there existing data", async () => {
@@ -173,7 +173,7 @@ describe("The Transport Service", () => {
 
       await TransportService.addTransport({user_id: "Bob", journey: "storageNotes", transport: "some data", vehicle: "rocket"},'GB-34324-34234-234234', contactId);
 
-      expect(mockStorageNoteUpsertTransportData).toHaveBeenCalledWith("Bob", {"journey": "storageNotes", "transport": "some data", "vehicle" : "rocket", "user_id": "Bob"},'GB-34324-34234-234234', contactId);
+      expect(mockStorageNoteUpsertTransportData).toHaveBeenCalledWith("Bob", {"journey": "storageNotes", "transport": "some data", "vehicle" : "rocket", "user_id": "Bob"},'GB-34324-34234-234234', contactId, undefined);
     });
 
     it("Will save session data in REDIS", async () => {

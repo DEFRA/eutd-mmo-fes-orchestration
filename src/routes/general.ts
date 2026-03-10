@@ -41,7 +41,7 @@ export default class GeneralRoutes {
           method: 'GET',
           path: '/v1/client-ip',
           handler: (req, h) => {
-            const xFF = req.headers['x-forwarded-for'];
+            const xFF = req.headers['x-forwarded-for'] as string;
             const ip = xFF ? xFF.split(',')[0] : req.info.remoteAddress;
             return h.response(ip);
           }

@@ -16,7 +16,7 @@ export const withDocumentLegitimatelyOwned = async (
     document?: CatchCertificate | ProcessingStatement | StorageDocument
   ) => any,
   statuses: DocumentStatuses[] = [DocumentStatuses.Draft]): Promise<Hapi.ResponseObject> => {
-  let documentNumber = req.headers['documentnumber'];
+  let documentNumber = req.headers['documentnumber'] as string;
   const app = req.app as HapiRequestApplicationStateExtended;
   const userPrincipal = app.claims.sub;
   const contactId = app.claims.contactId;

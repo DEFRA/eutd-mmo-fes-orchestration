@@ -50,26 +50,39 @@ export default class ExporterRoutes {
             tags: ['api', 'exporter'],
             validate: {
               options: { abortEarly: false },
-              failAction: async function (req, h, error) {
-                return await withDocumentLegitimatelyOwned(req,h,async (userPrincipal,documentNumber, contactId) => {
-                  return await Controller.processSaveExporterDetailsErrors(req,h,error,userPrincipal,documentNumber, contactId);
-                }).catch(e => {
-                  logger.error(`[SAVE-EXPORTER-DETAILS][FAIL-ACTION][ERROR][${e.stack || e}`);
-                  return h.response().code(500).takeover();
-                });
+              failAction: async function(req, h, error) {
+                const errorObject = errorExtractor(error);
+                if (acceptsHtml(req.headers)) {
+                    return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
+                }
+                return h.response(errorObject).code(400).takeover();
               },
               payload: async (value, options) => {
                 let schema;
                 // options.context === req
                 if (options.context.params.journey === 'catchCertificate') {
                   schema = Joi.object({
-                    exporterFullName: Joi.string().trim().required(),
-                    exporterCompanyName: Joi.string().trim().label("Company name").required(),
+                    exporterFullName: Joi.string()
+                      .trim()
+                      .max(70)
+                      .pattern(/^[a-zA-Z .']+$/)
+                      .required(),
+                    exporterCompanyName: Joi.string()
+                      .trim()
+                      .label("Company name")
+                      .max(250)
+                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .required(),
                     postcode: Joi.string().trim().label("Postcode").required()
                   });
                 } else {
                   schema = Joi.object({
-                    exporterCompanyName: Joi.string().trim().label("Company name").required(),
+                    exporterCompanyName: Joi.string()
+                      .trim()
+                      .label("Company name")
+                      .max(250)
+                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .required(),
                     postcode: Joi.string().trim().label("Postcode").required()
                   });
                 }
@@ -119,18 +132,32 @@ export default class ExporterRoutes {
               payload: (value, options) => {
                 let schema;
                 if (options.context.params.journey === 'catchCertificate') {
-                  schema = {
-                    exporterFullName: Joi.string().trim().required(),
-                    exporterCompanyName: Joi.string().trim().label("Company name").required(),
+                  schema = Joi.object({
+                    exporterFullName: Joi.string()
+                      .trim()
+                      .max(70)
+                      .pattern(/^[a-zA-Z .']+$/)
+                      .required(),
+                    exporterCompanyName: Joi.string()
+                      .trim()
+                      .label("Company name")
+                      .max(250)
+                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .required(),
                     addressOne: Joi.string().trim().label("Building and street").required(),
                     townCity: Joi.string().trim().label("Town or city").required()
-                  };
+                  });
                 } else {
-                  schema = {
-                    exporterCompanyName: Joi.string().trim().label("Company name").required(),
+                  schema = Joi.object({
+                    exporterCompanyName: Joi.string()
+                      .trim()
+                      .label("Company name")
+                      .max(250)
+                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .required(),
                     addressOne: Joi.string().trim().label("Building and street").required(),
                     townCity: Joi.string().trim().label("Town or city").required()
-                  };
+                  });
                 }
 
                 const errors = schema.validate(value);

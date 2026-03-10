@@ -50,9 +50,21 @@ export default function buildErrorObject(data)  {
         errorObject[errorKey] = `error.${transportType}.exportDate.any.min`
         return
       }
+
+      // If a custom message token is provided (e.g. from business validation), use it as-is
+      if (detail.message && /^[A-Za-z0-9_-]+$/.test(detail.message)) {
+        errorObject[errorKey] = detail.message;
+        return;
+      }
+
       errorObject[errorKey] = `error.${errorKey}.${detail.type}`
     } else if (detail.context.label) {
-      errorObject[detail.context.label] = `error.${detail.context.label}.${detail.type}`
+      // Prefer a custom message token when available
+      if (detail.message && /^[A-Za-z0-9_-]+$/.test(detail.message)) {
+        errorObject[detail.context.label] = detail.message;
+      } else {
+        errorObject[detail.context.label] = `error.${detail.context.label}.${detail.type}`
+      }
     }
   });
   return errorObject;

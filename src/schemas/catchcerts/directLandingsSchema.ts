@@ -10,15 +10,16 @@ const directLandingsSchema = Joi.object({
   dateLanded: Joi.string()
     .custom((value, helpers) => {
       const parts = value.split('-');
-      if (parts.length !== 3)
-        return helpers.error('date.base');
+      // check array parts are note empty.
+      if (parts.every(part => part.trim() === ''))
+        return helpers.error('directLanding.date.base');
 
       const year = parts[0];
       const month = parts[1].padStart(2, '0');
       const day = parts[2].padStart(2, '0');
       const isoDate = `${year}-${month}-${day}`;
       if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
-        return helpers.error('date.base');
+        return helpers.error('directLanding.date.invalid');
       }
       const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
       if (moment(value).isAfter(maxDate, 'day')) {
@@ -42,7 +43,10 @@ const directLandingsSchema = Joi.object({
     if (!moment(startDate, "YYYY-MM-DD", true).isValid()) {
       return helpers.error('date.base');
     }
-    const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
+    const dateLanded = moment(helpers.state.ancestors[0].dateLanded, "YYYY-MM-DD", true);
+    if (!dateLanded.isValid()) {
+      return value;
+    }
     if (dateLanded.isBefore(startDate, 'day')) {
       return helpers.error('date.max');
     }
@@ -50,12 +54,30 @@ const directLandingsSchema = Joi.object({
   }, 'Start Date Validator').required(),
   faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
   vessel: Joi.object().keys({
-    vesselName: Joi.string().trim().label("vessel.vesselName").required()
+    vesselName: Joi.string().trim().custom((value: string, helpers: any) => {
+      if (typeof value !== 'string') {
+        return helpers.error('directLanding.any.required');
+      } else { return value; }
+    }).label("vessel.vesselName").required(),
+    isListed: Joi.boolean().custom((value: boolean, helpers: any) => {
+      if (value === false) {
+        return helpers.error('directLanding.vessel.isListed.base');
+      }
+      return value;
+    }).label("vessel.isListed").optional(),
   }).required(),
   weights: Joi.array().items(Joi.object().keys({
     speciesId: Joi.string().trim().label("speciesId").required(),
     exportWeight: Joi.number().greater(0).custom(decimalPlacesValidator, 'Decimal places validator').label("Export weight").required()
-  })).min(1).required(),
+  })).min(1).custom((weights: any[], helpers: any) => {
+    const totalWeight = weights.reduce((sum: number, w: any) => sum + (w.exportWeight || 0), 0);
+    if (totalWeight > 99999999999.99) {
+      return helpers.error('array.totalWeightExceeded');
+    } else if (typeof totalWeight !== "number" || !totalWeight || totalWeight <= 0) { // is not a number or is zero or negative
+      return helpers.error('exportWeight.directLanding.any.base');
+    }
+    return weights;
+  }, 'Total weight validator').required(),
   gearCategory: Joi.custom((value: string, helpers: any) => {
     const gearCategory = helpers.original;
     const gearType = helpers.state.ancestors[0].gearType;

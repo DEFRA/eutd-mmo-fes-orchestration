@@ -1,7 +1,6 @@
 import * as Hapi from '@hapi/hapi';
 import * as DocumentOwnershipValidator from '../validators/documentOwnershipValidator';
 import ExporterRoutes from './exporter';
-import ExporterService from '../services/exporter.service';
 import ExporterController from '../controllers/exporter.controller';
 
 const createServerInstance = async () => {
@@ -62,7 +61,9 @@ describe('exporter routes', () => {
 
     beforeEach(() => {
       mockValidateDocumentOwnership.mockResolvedValue({ documentNumber: 'GBR-2021-CC-3434343434' });
-      mockGetExporterDetails.mockResolvedValue({some: 'data'});
+      mockGetExporterDetails.mockImplementation((_req, _userPrincipal, _documentNumber, _contactId) => {
+        return Promise.resolve({some: 'data'});
+      });
     });
 
     afterAll(() => {
@@ -87,6 +88,12 @@ describe('exporter routes', () => {
       const response = await server.inject(request);
       expect(response.statusCode).toBe(200);
       expect(response.result).toEqual({some: 'data'});
+      expect(mockGetExporterDetails).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Bob',
+        'DOCUMENT123',
+        undefined
+      );
     });
 
     it('will return 500', async () => {
@@ -102,16 +109,18 @@ describe('exporter routes', () => {
   describe('POST /v1/exporter/catchCertificate', () => {
 
     let mockValidateDocumentOwnership;
-    let mockSave;
+    let mockAddExporterDetails;
 
     beforeAll(() => {
       mockValidateDocumentOwnership = jest.spyOn(DocumentOwnershipValidator, 'validateDocumentOwnership');
-      mockSave = jest.spyOn(ExporterService, 'save');
+      mockAddExporterDetails = jest.spyOn(ExporterController, 'addExporterDetails');
     });
 
     beforeEach(() => {
       mockValidateDocumentOwnership.mockResolvedValue({ documentNumber: 'GBR-2021-CC-3434343434' });
-      mockSave.mockResolvedValue('success');
+      mockAddExporterDetails.mockImplementation((_req, _h, _saveAsDraft, _userPrincipal, _documentNumber, _contactId) => {
+        return Promise.resolve('success');
+      });
     });
 
     afterAll(() => {
@@ -158,26 +167,110 @@ describe('exporter routes', () => {
       };
 
       expect(response.statusCode).toBe(400);
-      expect(response.result.errors).toStrictEqual(expected);
+      expect(response.result).toStrictEqual(expected);
+    });
+
+    it('will return 400 if exporterFullName exceeds 70 characters', async () => {
+      const payload = {
+        exporterFullName: 'A'.repeat(71),
+        exporterCompanyName: 'Bob Co.',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterFullName).toBe('error.exporterFullName.string.max');
+    });
+
+    it('will return 400 if exporterFullName contains invalid characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob@123',
+        exporterCompanyName: 'Bob Co.',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterFullName).toBe('error.exporterFullName.string.pattern.base');
+    });
+
+    it('will return 400 if exporterCompanyName exceeds 250 characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob',
+        exporterCompanyName: 'A'.repeat(251),
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterCompanyName).toBe('error.exporterCompanyName.string.max');
+    });
+
+    it('will return 400 if exporterCompanyName contains invalid characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob',
+        exporterCompanyName: 'Bob & Co!',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterCompanyName).toBe('error.exporterCompanyName.string.pattern.base');
+    });
+
+    it('will accept valid exporterFullName with letters, spaces, apostrophes and periods', async () => {
+      const payload = {
+        exporterFullName: "Mary O'Connor Jr.",
+        exporterCompanyName: 'Bob Co.',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('will accept valid exporterCompanyName with letters, numbers, spaces, apostrophes, periods, hyphens and brackets', async () => {
+      const payload = {
+        exporterFullName: 'Bob',
+        exporterCompanyName: "O'Reilly's Co. (UK) Ltd [2024]",
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(200);
     });
 
   })
 
   describe("POST /v1/exporter/processingStatement", () => {
     let mockValidateDocumentOwnership;
-    let mockSave;
+    let mockAddExporterDetails;
 
     beforeAll(() => {
       mockValidateDocumentOwnership = jest.spyOn(
         DocumentOwnershipValidator,
         "validateDocumentOwnership"
       );
-      mockSave = jest.spyOn(ExporterService, "save");
+      mockAddExporterDetails = jest.spyOn(ExporterController, "addExporterDetails");
     });
 
     beforeEach(() => {
       mockValidateDocumentOwnership.mockResolvedValue({ documentNumber: 'GBR-2021-CC-3434343434' });
-      mockSave.mockResolvedValue("success");
+      mockAddExporterDetails.mockImplementation((_req, _h, _saveAsDraft, _userPrincipal, _documentNumber, _contactId) => {
+        return Promise.resolve("success");
+      });
     });
 
     afterAll(() => {
@@ -220,7 +313,45 @@ describe('exporter routes', () => {
       };
 
       expect(response.statusCode).toBe(400);
-      expect(response.result.errors).toStrictEqual(expected);
+      expect(response.result).toStrictEqual(expected);
+    });
+
+    it('will return 400 if exporterCompanyName exceeds 250 characters', async () => {
+      const payload = {
+        exporterCompanyName: 'A'.repeat(251),
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterCompanyName).toBe('error.exporterCompanyName.string.max');
+    });
+
+    it('will return 400 if exporterCompanyName contains invalid characters', async () => {
+      const payload = {
+        exporterCompanyName: 'Bob & Co!',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterCompanyName).toBe('error.exporterCompanyName.string.pattern.base');
+    });
+
+    it('will accept valid exporterCompanyName with letters, numbers, spaces, apostrophes, periods, hyphens and brackets', async () => {
+      const payload = {
+        exporterCompanyName: "O'Reilly's Co. (UK) Ltd [2024]",
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(200);
     });
   });
 

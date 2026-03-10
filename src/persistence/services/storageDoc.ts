@@ -71,7 +71,8 @@ export const getCompletedDocuments = async (
     ])
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   return documents;
 };
@@ -131,7 +132,7 @@ export const getAllStorageDocsForUser = async (userPrincipal: string, contactId:
   const data = await StorageDocumentModel.find({
     $or: ownerQuery,
     'status': { $ne: 'VOID' }
-  }).select(['documentNumber', 'createdAt', 'documentUri', 'status']);
+  }).select(['documentNumber', 'createdAt', 'documentUri', 'status']).lean();
   return data;
 }
 
@@ -155,7 +156,7 @@ export const upsertDraftDataForStorageDocuments = async (userPrincipal: string, 
 
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
-  let draft = await StorageDocumentModel.findOne(query);
+  let draft = await StorageDocumentModel.findOne(query, null, { lean: true });
 
   if (!path && payload) {
     throw new Error("[SD][upsertDraftDataForStorageDocuments][INVALID-ARGUMENTS]");
@@ -178,7 +179,7 @@ export const upsertDraftDataForStorageDocuments = async (userPrincipal: string, 
     draft.draftData = data;
   }
 
-  await StorageDocumentModel.findOneAndUpdate(query, draft, { upsert: true, omitUndefined: true });
+  await StorageDocumentModel.findOneAndUpdate(query, draft, { upsert: true, omitUndefined: true, lean: true, projection: { _id: 1 } });
 };
 
 export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: string): Promise<StorageDocumentDraft[]> => {
@@ -213,19 +214,22 @@ export const completeDraft = async (documentNumber: string, documentUri: string,
     }
   };
 
+  // projection: { _id: 1 } avoids returning the full document — result is unused
   await StorageDocumentModel.findOneAndUpdate(
     { documentNumber: documentNumber, status: 'DRAFT' },
-    update
+    update,
+    { projection: { _id: 1 } }
   );
 };
 
 export const deleteDraft = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
+  // projection: { _id: 1 } avoids returning the full document on delete
   await StorageDocumentModel.findOneAndDelete({
     $or: ownerQuery,
     documentNumber: documentNumber,
     status: 'DRAFT'
-  });
+  }, { projection: { _id: 1 } });
 }
 
 export const getDraft = async (userPrincipal: string, documentNumber: string, contactId: string) => {
@@ -238,7 +242,7 @@ export const getDraft = async (userPrincipal: string, documentNumber: string, co
 export const getDraftCertificateNumber = async (userPrincipal: string, contactId: string) => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
-  const draft = await StorageDocumentModel.findOne(query);
+  const draft = await StorageDocumentModel.findOne(query, 'documentNumber', { lean: true });
   const dataExists = (draft && draft.documentNumber);
 
   return dataExists
@@ -252,7 +256,7 @@ export const upsertDraftData = async (userPrincipal: string, documentNumber: str
   const conditions: any = { $or: ownerQuery, status: 'DRAFT', documentNumber: documentNumber };
   const options = { upsert: true, omitUndefined: true };
 
-  if (draft) await StorageDocumentModel.findOneAndUpdate(conditions, update, options);
+  if (draft) await StorageDocumentModel.findOneAndUpdate(conditions, update, { ...options, lean: true, projection: { _id: 1 } });
 };
 
 export const createDraft = async (userPrincipal: string, email: string, requestedByAdmin: boolean, contactId: string) => {
@@ -289,10 +293,10 @@ export const upsertExporterDetails = async (
   );
 };
 
-export const upsertTransportDetails = async (userPrincipal: string, payload: Transport, documentNumber: string, contactId: string) => {
+export const upsertTransportDetails = async (userPrincipal: string, payload: Transport, documentNumber: string, contactId: string, isTransportSavedAsDraft?: boolean) => {
 
-  // Validate container numbers for arrival transport (train or truck only)
-  if (payload.arrival && (payload.vehicle === 'train' || payload.vehicle === 'truck')) {
+  // Only validate container numbers when NOT saving as draft
+  if (!isTransportSavedAsDraft && payload.arrival && (payload.vehicle === 'train' || payload.vehicle === 'truck')) {
     const containerErrors = validateContainerNumbers(payload.containerNumbers);
     if (containerErrors.length > 0) {
       throw containerErrors[0]; // Throw the first error to be caught by error handler
@@ -324,13 +328,16 @@ export const upsertUserReference = async (userPrincipal: string, documentNumber:
 };
 
 export const cloneStorageDocument = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal?: boolean): Promise<string> => {
-  const original: StorageDocument = await getDocument(documentNumber, userPrincipal, contactId);
+  // Parallelise independent DB calls to reduce total elapsed time
+  const [original, newDocumentNumber] = await Promise.all([
+    getDocument(documentNumber, userPrincipal, contactId),
+    DocumentNumberService.getUniqueDocumentNumber(ServiceNames.SD, StorageDocumentModel)
+  ]);
 
   if (!original) {
     throw new Error(`Document ${documentNumber} not found for user ${userPrincipal}`);
   }
 
-  const newDocumentNumber = await DocumentNumberService.getUniqueDocumentNumber(ServiceNames.SD, StorageDocumentModel);
   const copy = cloneSD(original, newDocumentNumber, requestByAdmin, voidOriginal);
   await new StorageDocumentModel(copy).save();
 

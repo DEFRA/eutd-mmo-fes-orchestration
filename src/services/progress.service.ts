@@ -160,7 +160,20 @@ export default class ProgressService {
   public static readonly hasLandingData = (products: Product[]) => {
     if (products !== undefined && products.length > 0) {
       return products.every(item => {
-        return !isEmpty(item.caughtBy);
+        // Check that each product has landing data (caughtBy)
+        if (isEmpty(item.caughtBy)) {
+          return false;
+        }
+
+        // Check that each landing has the mandatory EU2026 fields
+        return item.caughtBy.every((landing: Catch) => {
+          return (
+            ProgressService.isEmptyAndTrimSpaces(landing.startDate) &&
+            ProgressService.isEmptyAndTrimSpaces(landing.gearCategory) &&
+            ProgressService.isEmptyAndTrimSpaces(landing.gearType) &&
+            ProgressService.isEmptyAndTrimSpaces(landing.highSeasArea)
+          );
+        });
       });
     }
 

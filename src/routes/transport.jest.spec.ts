@@ -783,7 +783,6 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.array.min",
                 departureDate: "error.departureDate.date.max",
                 departureCountry: "error.departureCountry.any.required",
                 departurePort: "error.departurePort.any.required",
@@ -912,7 +911,6 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "containerNumbers.0": "error.containerNumbers.array.min",
                 flightNumber: "error.flightNumber.string.empty",
                 departureCountry: "error.departureCountry.string.empty",
                 departurePort: "error.departurePort.string.empty",

@@ -300,6 +300,7 @@ describe('CatchCertificateTransport - getTransportDetails', () => {
     expect(mockGetDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', 'contactId');
     expect(result).toEqual({
       vehicle: "directLanding",
+      exportDate: ""
     });
   });
 
