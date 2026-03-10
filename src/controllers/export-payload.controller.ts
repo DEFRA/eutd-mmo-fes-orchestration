@@ -15,6 +15,7 @@ import {
 } from '../services/constants';
 import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../session_store/constants';
 import errorExtractor from '../helpers/errorExtractor';
+import { withUserSessionDataStored, SessionData } from '../helpers/sessionManager';
 import ExportPayloadService from '../services/export-payload.service';
 import * as PayloadSchema from '../persistence/schema/frontEndModels/payload';
 import { fishingVessel } from '../persistence/schema/frontEndModels/transport';
@@ -655,6 +656,60 @@ export default class ExportPayloadController {
       result.errors = errorExtractor(error);
     }
 
+
+    if (acceptsHtml(req.headers)) {
+      return h.redirect(req.payload.currentUri).takeover();
+    } else {
+      return h.response(result).code(400).takeover();
+    }
+  }
+
+  /**
+   * failAction handler for the direct-landing validate route.
+   * Unlike getExportPayloadInvalidRequest, this also persists the error state to the
+   * session store so that getLandingsStatus correctly returns INCOMPLETE when the
+   * landing has outstanding validation failures (FI0-10996).
+   */
+  public static async getDirectLandingExportPayloadInvalidRequest(
+    req: any,
+    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>,
+    error: any,
+    userPrincipal: string,
+    documentNumber: string,
+    contactId: string
+  ) {
+    let result;
+
+    if (req.payload) {
+      result = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
+      result.error = 'invalid';
+      result.errors = errorExtractor(error);
+
+      // Persist error state to session for each existing landing so the progress
+      // check correctly returns INCOMPLETE instead of COMPLETED (FI0-10996).
+      if (result?.items) {
+        for (const item of result.items) {
+          if (Array.isArray(item.landings)) {
+            for (const landing of item.landings) {
+              if (landing?.model?.id) {
+                const sessionData: SessionData = {
+                  documentNumber,
+                  landing: {
+                    landingId: landing.model.id,
+                    addMode: false,
+                    editMode: true,
+                    error: 'invalid',
+                    errors: errorExtractor(error),
+                    model: landing.model
+                  }
+                };
+                await withUserSessionDataStored(userPrincipal, sessionData, contactId);
+              }
+            }
+          }
+        }
+      }
+    }
 
     if (acceptsHtml(req.headers)) {
       return h.redirect(req.payload.currentUri).takeover();
