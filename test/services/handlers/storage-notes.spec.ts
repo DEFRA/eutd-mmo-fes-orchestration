@@ -1,7 +1,7 @@
 import * as test from 'tape';
 import logger from '../../../src/logger';
 
-import StorageNotes from '../../../src/services/handlers/storage-notes';
+import StorageNotes, { validateEntry } from '../../../src/services/handlers/storage-notes';
 
 //------ TESTS FOR /create-non-manipulation-document/add-product-to-this-consignment -----
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with all mandatory fields validates as OK', async t => {
@@ -847,6 +847,84 @@ test('/create-non-manipulation-document/add-storage-facility-details with whites
 
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+//------ TESTS FOR net weight arrival cross-field validation -----
+// Base product: certificateType 'uk' (no external country validation call),
+// no certificateNumber (early return without external call),
+// all individual weight fields valid — focuses tests on the cross-check only.
+const arrivalWeightBaseProduct = {
+  certificateType: 'uk',
+  productDescription: 'TestProduct',
+  weightOnCC: '100',
+};
+
+test('validateEntry net weight arrival: fishery weight less than product weight - no cross-check error', async t => {
+  try {
+    const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '30' };
+    const { errors } = await validateEntry(product, 0, {});
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight < product weight');
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('validateEntry net weight arrival: fishery weight equal to product weight - no cross-check error', async t => {
+  try {
+    const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '50' };
+    const { errors } = await validateEntry(product, 0, {});
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight = product weight');
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('validateEntry net weight arrival: fishery weight exceeds product weight - sets cross-check error on fishery weight field', async t => {
+  try {
+    const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80' };
+    const { errors } = await validateEntry(product, 0, {});
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set when fishery weight > product weight');
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('validateEntry net weight arrival: cross-check error applied at correct index', async t => {
+  try {
+    const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80' };
+    const { errors } = await validateEntry(product, 2, {});
+    t.equal(errors['catches-2-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set on correct index');
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error on wrong index');
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('validateEntry net weight arrival: cross-check skipped when netWeightProductArrival has individual validation error', async t => {
+  try {
+    const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '-1', netWeightFisheryProductArrival: '80' };
+    const { errors } = await validateEntry(product, 0, {});
+    t.equal(errors['catches-0-netWeightProductArrival'], 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0', 'individual error set on product arrival weight');
+    t.not(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error not set when product arrival has individual error');
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('validateEntry net weight arrival: cross-check skipped when netWeightFisheryProductArrival has individual validation error', async t => {
+  try {
+    const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '-1' };
+    const { errors } = await validateEntry(product, 0, {});
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0', 'individual error set on fishery arrival weight');
     t.end();
   } catch (e) {
     t.end(e);
