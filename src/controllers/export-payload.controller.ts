@@ -684,37 +684,47 @@ export default class ExportPayloadController {
       result = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
       result.error = 'invalid';
       result.errors = errorExtractor(error);
-
-      // Persist error state to session for each existing landing so the progress
-      // check correctly returns INCOMPLETE instead of COMPLETED (FI0-10996).
-      if (result?.items) {
-        for (const item of result.items) {
-          if (Array.isArray(item.landings)) {
-            for (const landing of item.landings) {
-              if (landing?.model?.id) {
-                const sessionData: SessionData = {
-                  documentNumber,
-                  landing: {
-                    landingId: landing.model.id,
-                    addMode: false,
-                    editMode: true,
-                    error: 'invalid',
-                    errors: errorExtractor(error),
-                    model: landing.model
-                  }
-                };
-                await withUserSessionDataStored(userPrincipal, sessionData, contactId);
-              }
-            }
-          }
-        }
-      }
+      await ExportPayloadController.persistDirectLandingErrorsToSession(result, error, userPrincipal, documentNumber, contactId);
     }
 
     if (acceptsHtml(req.headers)) {
       return h.redirect(req.payload.currentUri).takeover();
     } else {
       return h.response(result).code(400).takeover();
+    }
+  }
+
+  /**
+   * Persists error: 'invalid' to the session for every landing in the current payload,
+   * so that getLandingsStatus can correctly return INCOMPLETE (FI0-10996).
+   */
+  private static async persistDirectLandingErrorsToSession(
+    result: any,
+    error: any,
+    userPrincipal: string,
+    documentNumber: string,
+    contactId: string
+  ) {
+    if (!result?.items) return;
+
+    const landingErrors = errorExtractor(error);
+    for (const item of result.items) {
+      if (!Array.isArray(item.landings)) continue;
+      for (const landing of item.landings) {
+        if (!landing?.model?.id) continue;
+        const sessionData: SessionData = {
+          documentNumber,
+          landing: {
+            landingId: landing.model.id,
+            addMode: false,
+            editMode: true,
+            error: 'invalid',
+            errors: landingErrors,
+            model: landing.model
+          }
+        };
+        await withUserSessionDataStored(userPrincipal, sessionData, contactId);
+      }
     }
   }
 
