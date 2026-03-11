@@ -103,7 +103,7 @@ export default class ExportPayloadRoutes {
               options: { abortEarly: false },
               failAction: async function (req, h, error) {
                 return await withDocumentLegitimatelyOwned(req, h, async (userPrincipal, documentNumber, contactId) => {
-                  return await Controller.getExportPayloadInvalidRequest(req, h, error, userPrincipal, documentNumber, contactId);
+                  return await Controller.getDirectLandingExportPayloadInvalidRequest(req, h, error, userPrincipal, documentNumber, contactId);
                 }).catch(err => {
                   logger.error(`[UPSERTING-FAILED-DIRECT-LANDING][ERROR][${err.stack || err}`);
                   return h.response().code(500).takeover();
