@@ -1,5 +1,5 @@
-import catchCertificateTransportDetailsSchema from './catchCertificateTransportDetailsSchema';
-import truckSaveAsDraftSchema from './truckSaveAsDraftSchema';
+import catchCertificateTransportDetailsSchema from '../../../src/schemas/catchcerts/catchCertificateTransportDetailsSchema';
+import truckSaveAsDraftSchema from '../../../src/schemas/catchcerts/truckSaveAsDraftSchema';
 
 describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber validation', () => {
 
@@ -23,7 +23,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerIdentificationNumber with U, J, Z, or R category', () => {
       const testCases = ['ABCU1234567', 'ABCJ1234567', 'ABCZ1234567', 'ABCR1234567'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',
@@ -84,7 +84,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       expect(error).toBeUndefined();
     });
 
-    it('should reject containerNumbers item exceeding 50 characters', () => {
+    it('should reject containerNumbers item with invalid format regardless of length (no 50-char limit)', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -98,7 +98,27 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
+      expect(error?.details[0].message).not.toContain('string.max');
       expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
+    });
+
+    it('should NOT reject a containerNumbers item solely because it exceeds 50 characters', () => {
+      // A 51-char all-uppercase-letters value fails pattern only (not max)
+      const longValue = 'A'.repeat(51);
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'truck',
+        nationalityOfVehicle: 'United Kingdom',
+        registrationNumber: 'ABC123',
+        containerNumbers: [longValue],
+        departurePlace: 'Dover'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
+
+      expect(error).toBeDefined();
+      // Error should be from pattern validation, not max length
+      expect(error?.details[0].message).toContain('error.containerNumbers.string.pattern.base');
     });
 
     it('should reject containerIdentificationNumber with invalid format (not ISO 6346)', () => {
@@ -262,7 +282,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerNumbers with valid ISO 6346 format for train', () => {
       const testCases = ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789', 'ABCR4567890'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',
@@ -278,7 +298,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       });
     });
 
-    it('should reject containerNumbers item exceeding 50 characters for train', () => {
+    it('should reject containerNumbers item with invalid format regardless of length for train (no 50-char limit)', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -291,7 +311,24 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
+      expect(error?.details[0].message).not.toContain('string.max');
       expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
+    });
+
+    it('should NOT reject containerNumbers item solely because it exceeds 50 characters for train', () => {
+      const longValue = 'A'.repeat(51);
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'train',
+        railwayBillNumber: 'RB123',
+        containerNumbers: [longValue],
+        departurePlace: 'Station'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
+
+      expect(error).toBeDefined();
+      expect(error?.details[0].message).toContain('error.containerNumbers.string.pattern.base');
     });
 
     it('should reject containerNumbers with invalid format for train', () => {
@@ -386,7 +423,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerNumbers with valid ISO 6346 format for plane', () => {
       const testCases = ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789', 'ABCR4567890'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',
@@ -497,7 +534,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
     it('should accept containerNumbers with valid ISO 6346 format for containerVessel', () => {
       const testCases = ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789', 'ABCR4567890'];
-      
+
       testCases.forEach(containerNumber => {
         const payload = {
           id: 'transport-123',
@@ -514,7 +551,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       });
     });
 
-    it('should reject containerNumbers item exceeding 50 characters for containerVessel', () => {
+    it('should reject containerNumbers item with invalid format regardless of length for containerVessel (no 50-char limit)', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -528,7 +565,25 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
+      expect(error?.details[0].message).not.toContain('string.max');
       expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
+    });
+
+    it('should NOT reject containerNumbers item solely because it exceeds 50 characters for containerVessel', () => {
+      const longValue = 'A'.repeat(51);
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'containerVessel',
+        vesselName: 'Ship Name',
+        flagState: 'UK',
+        containerNumbers: [longValue],
+        departurePlace: 'Port'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
+
+      expect(error).toBeDefined();
+      expect(error?.details[0].message).toContain('ccShippingContainerNumberPatternError');
     });
 
     it('should reject containerNumbers with invalid format for containerVessel', () => {

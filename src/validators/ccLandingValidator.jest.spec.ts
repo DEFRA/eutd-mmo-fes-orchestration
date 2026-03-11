@@ -1,5 +1,4 @@
 import { validateLanding, createExportPayloadForValidation, validateAggregateExportWeight } from './ccLandingValidator';
-import ExportPayloadService from '../services/export-payload.service';
 import VesselValidator from '../services/vesselValidator.service';
 import * as ProductValidator from './ccProductValidator';
 import * as ReferenceDataService from '../services/reference-data.service';
@@ -16,7 +15,19 @@ describe("createExportPayloadForValidation", () => {
       const payload = createExportPayloadForValidation(product, landing);
 
       expect(payload[0].landings[0].model.startDate).toBeUndefined();
-  });
+    });
+
+    it("should format startDate when it is provided", () => {
+      const landingWithStartDate = {
+        ...landing,
+        dateLanded: '2019-03-27T00:00:00.000Z',
+        startDate: '2019-01-01T00:00:00.000Z',
+      };
+      const payload = createExportPayloadForValidation(product, landingWithStartDate);
+
+      expect(payload[0].landings[0].model.startDate).toBe('2019-01-01');
+      expect(payload[0].landings[0].model.dateLanded).toBe('2019-03-27');
+    });
 });
 
 describe("validateLanding", () => {
@@ -120,94 +131,89 @@ describe("validateLanding", () => {
         expect(result).toStrictEqual({ error: 'invalid', errors: { gearType: 'error.gearType.invalid' } });
     });
 
-    it("should return aggregate-weight error when adjusted total exceeds limit", async () => {
-        const existingPayload = {
-            items: [
-                { landings: [{ model: { exportWeight: 9999900 } }] }
-            ]
-        } as any;
-
-        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(existingPayload);
-
-        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
-
-        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
-        expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan' } });
+    it("validateAggregateExportWeight returns an error when frontendTotal meets/exceeds limit", async () => {
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: '10000000', exportWeight: '0' } as any);
+        expect(Array.isArray(res)).toBe(true);
+        expect(res && res.length > 0).toBe(true);
+        const detail = res && res[0] && res[0].details && res[0].details[0];
+        expect(detail.message).toBe('ccAddLandingTotalExportWeightLessThan');
     });
 
-    it("should return aggregate-weight error when adjusted total equals limit (10,000,000)", async () => {
-        const existingPayload = {
-            items: [
-                { landings: [{ model: { exportWeight: 10000000 } }] }
-            ]
-        } as any;
-
-        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(existingPayload);
-
-        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 0 } }] }];
-
-        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
-        expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan' } });
-    });
-
-    it('validateAggregateExportWeight returns null when opts are missing', async () => {
+    it('validateAggregateExportWeight returns empty array when opts are missing', async () => {
         const res = await validateAggregateExportWeight(exportPayload as any);
-        expect(res).toBeNull();
+        expect(res).toStrictEqual([]);
     });
 
-    it('validateAggregateExportWeight returns null when ExportPayloadService.get throws', async () => {
-        jest.spyOn(ExportPayloadService, 'get').mockRejectedValueOnce(new Error('boom'));
-
-        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
-
-        const res = await validateAggregateExportWeight(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
-        expect(res).toBeNull();
+    it('validateAggregateExportWeight returns empty array when frontendTotal is invalid (NaN)', async () => {
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: 'not-a-number', exportWeight: '200' } as any);
+        expect(res).toStrictEqual([]);
     });
 
-    it('should subtract original landing weight when calculating adjusted total', async () => {
-        const currentExportPayload = {
-            items: [
-                { landings: [{ model: { id: 'L1', exportWeight: 5000000 } }, { model: { id: 'L2', exportWeight: 4000000 } }] }
-            ]
-        } as any;
-
-        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(currentExportPayload);
-
-        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, id: 'L1', exportWeight: 6000000 } }] }];
-
-        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
-        expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan' } });
+    it('should return aggregate-weight error when frontend total is adjusted and exceeds limit', async () => {
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: '10000000', exportWeight: '0' } as any);
+        expect(res && res.length > 0).toBe(true);
     });
 
     it("should not error for aggregate-weight when under limit", async () => {
-        const existingPayload = {
-            items: [
-                { landings: [{ model: { exportWeight: 5000 } }] }
-            ]
-        } as any;
-
-        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(existingPayload);
-
-        const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
-
-        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
-        expect(result).toBeUndefined();
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: '5200', exportWeight: '0' } as any);
+        expect(res).toStrictEqual([]);
     });
 
-    it("should return both gearType and aggregate-weight errors together", async () => {
-        const existingPayload = {
-            items: [
-                { landings: [{ model: { exportWeight: 9999900 } }] }
-            ]
-        } as any;
+    it("validateAggregateExportWeight returns empty array when computation throws", async () => {
+        const throwingValue = { valueOf: () => { throw new Error('forced error'); } };
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: throwingValue, exportWeight: '0' } as any);
+        expect(res).toStrictEqual([]);
+    });
 
-        jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(existingPayload);
+    it("validateAggregateExportWeight returns empty array when called with null input", async () => {
+        const res = await validateAggregateExportWeight(null as any);
+        expect(res).toStrictEqual([]);
+    });
+
+    it("validateAggregateExportWeight returns empty array when error thrown has no stack", async () => {
+        const errNoStack = { stack: undefined, valueOf: () => { throw errNoStack; } };
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: errNoStack, exportWeight: '0' } as any);
+        expect(res).toStrictEqual([]);
+    });
+
+    it("should return gearType error from validateLanding and aggregate error from validateAggregateExportWeight separately", async () => {
         mockIsValidGearType.mockResolvedValueOnce(false);
 
         const incomingPayload: ProductLanded[] = [{ product, landings: [{ model: { ...landing, exportWeight: 200 } }] }];
 
-        const result = await validateLanding(incomingPayload, { userPrincipal: 'u', documentNumber: 'dn', contactId: 'c' });
-        expect(result).toStrictEqual({ error: 'invalid', errors: { exportWeight: 'ccAddLandingTotalExportWeightLessThan', gearType: 'error.gearType.invalid' } });
+        const landingResult = await validateLanding(incomingPayload);
+        expect(landingResult).toStrictEqual({ error: 'invalid', errors: { gearType: 'error.gearType.invalid' } });
+
+        const agg = await validateAggregateExportWeight({ totalCombinedExportWeight: '10000000', exportWeight: '200' } as any);
+        expect(agg && agg.length > 0).toBe(true);
+    });
+
+    it("should return gearType error when isValidGearType promise is rejected", async () => {
+        mockIsValidGearType.mockRejectedValueOnce(new Error('reference data unavailable'));
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { gearType: 'error.gearType.invalid' } });
+    });
+
+    it("should handle payload where landings is undefined", async () => {
+        const payload: ProductLanded[] = [{ product, landings: undefined as any }];
+
+        const result = await validateLanding(payload);
+        expect(result).toBeUndefined();
+        expect(mockIsValidGearType).not.toHaveBeenCalled();
+    });
+
+    it("should error for both startDate and dateLanded across multiple seasonal fish validations without processing further items", async () => {
+        mockValidateProducts.mockResolvedValueOnce([
+            { result: ['startDate', 'dateLanded'], validator: 'seasonalFish' },
+            { result: ['startDate', 'dateLanded'], validator: 'seasonalFish' },
+        ]);
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: {
+            startDate: 'error.startDate.seasonalFish.invalidate',
+            dateLanded: 'error.seasonalFish.invalidate'
+        }});
     });
 });
 

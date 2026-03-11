@@ -252,6 +252,34 @@ describe('exporter routes', () => {
       expect(response.statusCode).toBe(200);
     });
 
+    it('will return 400 if exporterFullName contains emoji characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob 😀',
+        exporterCompanyName: 'Bob Co.',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterFullName).toBe('error.exporterFullName.string.emoji');
+    });
+
+    it('will return 400 if exporterCompanyName contains emoji characters', async () => {
+      const payload = {
+        exporterFullName: 'Bob',
+        exporterCompanyName: 'Bob Co. 🔧',
+        townCity: 'Town',
+        postcode: 'Bob123'
+      };
+
+      const response = await server.inject({...request, payload});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterCompanyName).toBe('error.exporterCompanyName.string.emoji');
+    });
+
   })
 
   describe("POST /v1/exporter/processingStatement", () => {
@@ -352,6 +380,19 @@ describe('exporter routes', () => {
       const response = await server.inject({...request, payload});
 
       expect(response.statusCode).toBe(200);
+    });
+
+    it('will return 400 if exporterCompanyName contains emoji characters', async () => {
+      const payload = {
+        exporterCompanyName: 'Bob Co. 🔥',
+        townCity: 'Town',
+        postcode: 'Bob123',
+      };
+
+      const response = await server.inject({ ...request, payload });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result.exporterCompanyName).toBe('error.exporterCompanyName.string.emoji');
     });
   });
 

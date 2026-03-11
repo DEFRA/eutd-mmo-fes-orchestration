@@ -107,7 +107,7 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
       '$gte': new Date(yearInt, monthInt - 1, 1),
       '$lt': new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
   return data;
 };
 

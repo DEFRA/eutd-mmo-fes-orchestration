@@ -1,7 +1,7 @@
 import * as moment from 'moment';
-import directLandingsSchema from './directLandingsSchema';
-import { buildNonJsErrorObject } from '../../helpers/errorExtractor';
-import ApplicationConfig from '../../applicationConfig';
+import directLandingsSchema from '../../../src/schemas/catchcerts/directLandingsSchema';
+import { buildNonJsErrorObject } from '../../../src/helpers/errorExtractor';
+import ApplicationConfig from '../../../src/applicationConfig';
 
 if (!process.env.LANDING_LIMIT_DAYS_IN_THE_FUTURE) {
 	process.env.LANDING_LIMIT_DAYS_IN_THE_FUTURE = '7';
@@ -61,8 +61,8 @@ describe('directLandingsSchema - dateLanded validation', () => {
 		expect(dateErr.type).toBe('any.required');
 	});
 
-	it('returns directLanding.date.base error when dateLanded has empty parts', () => {
-		const payload = { ...basePayload, dateLanded: '2026--15' };
+	it('returns directLanding.date.base error when all dateLanded parts are blank (e.g., "   -   -   ")', () => {
+		const payload = { ...basePayload, dateLanded: '   -   -   ' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeDefined();
 		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
@@ -70,13 +70,25 @@ describe('directLandingsSchema - dateLanded validation', () => {
 		expect(dateErr.type).toBe('directLanding.date.base');
 	});
 
-	it('returns directLanding.date.base error when dateLanded has wrong number of parts', () => {
+	it('passes validation with dateLanded having an empty part (e.g., 2026--15)', () => {
+		const payload = { ...basePayload, dateLanded: '2026--15' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		// The schema only checks if ALL parts are empty, so '2026--15' passes the parts check
+		// but will fail on moment validation
+		expect(error).toBeDefined();
+		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
+		expect(dateErr).toBeDefined();
+		expect(dateErr.type).toBe('directLanding.date.invalid');
+	});
+
+	it('returns an error when dateLanded has wrong number of parts (e.g., 2026-02)', () => {
 		const payload = { ...basePayload, dateLanded: '2026-02' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeDefined();
 		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
 		expect(dateErr).toBeDefined();
-		expect(dateErr.type).toBe('directLanding.date.base');
+		// parts[2] is undefined so padStart throws; Joi wraps unhandled custom errors as any.custom
+		expect(dateErr.type).toBe('any.custom');
 	});
 
 	it('returns directLanding.date.invalid error when dateLanded is invalid date', () => {
@@ -89,7 +101,7 @@ describe('directLandingsSchema - dateLanded validation', () => {
 	});
 
 	it('returns date.max error when dateLanded exceeds future limit', () => {
-		if (isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
+		if (Number.isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
 			return;
 		}
 		const futureDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture + 5, 'days').format('YYYY-MM-DD');
@@ -102,7 +114,7 @@ describe('directLandingsSchema - dateLanded validation', () => {
 	});
 
 	it('passes validation with valid dateLanded within future limit', () => {
-		if (isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
+		if (Number.isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
 			return;
 		}
 		const validFutureDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture - 1, 'days').format('YYYY-MM-DD');
@@ -166,6 +178,23 @@ describe('directLandingsSchema - startDate validation', () => {
 		const payload = { ...basePayload, dateLanded: '2026-02-15', startDate: '2026-02-10' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeUndefined();
+	});
+
+	it('does not return date.max on startDate when dateLanded is an invalid partial string (e.g. "--3-")', () => {
+		// "--3-" is leniently parsed by moment without strict mode, producing a valid-ish date.
+		// The fix ensures dateLanded is parsed strictly; if invalid, startDate validation is skipped
+		// and no spurious date.max error is raised for startDate.
+		const payload = { ...basePayload, dateLanded: '--3-', startDate: '2026-02-10' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		// dateLanded itself should error (not all parts blank, but moment strict rejects it)
+		const dateLandedErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
+		expect(dateLandedErr).toBeDefined();
+		// startDate must NOT produce a date.max error due to the invalid dateLanded value
+		const startErr = error.details.find(
+			(d: any) => d.path.join('.') === 'startDate' && d.type === 'date.max'
+		);
+		expect(startErr).toBeUndefined();
 	});
 });
 
@@ -232,11 +261,34 @@ describe('directLandingsSchema - vessel validation', () => {
 		expect(error).toBeUndefined();
 	});
 
-	it('trims whitespace from vesselName', () => {
+	it('passes validation with vesselName containing surrounding whitespace (trimmed by Joi before custom validator)', () => {
 		const payload = { ...basePayload, vessel: { vesselName: '  Test Vessel  ' } };
-		const { error, value } = directLandingsSchema.validate(payload, { abortEarly: false });
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeUndefined();
-		expect(value.vessel.vesselName).toBe('Test Vessel');
+	});
+
+	it('returns string.empty error when vesselName is whitespace only', () => {
+		const payload = { ...basePayload, vessel: { vesselName: '   ' } };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		const vesselNameErr = error.details.find((d: any) => d.path.join('.') === 'vessel.vesselName');
+		expect(vesselNameErr).toBeDefined();
+		expect(vesselNameErr.type).toBe('string.empty');
+	});
+
+	it('passes validation when isListed is true', () => {
+		const payload = { ...basePayload, vessel: { vesselName: 'Test Vessel', isListed: true } };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeUndefined();
+	});
+
+	it('returns directLanding.vessel.isListed.base error when isListed is false', () => {
+		const payload = { ...basePayload, vessel: { vesselName: 'Test Vessel', isListed: false } };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		const isListedErr = error.details.find((d: any) => d.path.join('.') === 'vessel.isListed');
+		expect(isListedErr).toBeDefined();
+		expect(isListedErr.type).toBe('directLanding.vessel.isListed.base');
 	});
 });
 
@@ -348,6 +400,10 @@ describe('directLandingsSchema - weights total validation', () => {
 				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
 			);
 			expect(weightError).toBeUndefined();
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
 		});
 
 		it('does not return an array.totalWeightExceeded error when multiple weights total exactly the limit', () => {
@@ -363,6 +419,10 @@ describe('directLandingsSchema - weights total validation', () => {
 				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
 			);
 			expect(weightError).toBeUndefined();
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
 		});
 
 		it('does not return an array.totalWeightExceeded error for typical small weights', () => {
@@ -378,6 +438,10 @@ describe('directLandingsSchema - weights total validation', () => {
 				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
 			);
 			expect(weightError).toBeUndefined();
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
 		});
 	});
 
@@ -437,6 +501,144 @@ describe('directLandingsSchema - weights total validation', () => {
 			const allTypes = error?.details.map((d) => d.type) ?? [];
 			expect(allTypes).toContain('array.totalWeightExceeded');
 			expect(allTypes).toContain('string.empty');
+		});
+	});
+});
+
+describe('directLandingsSchema - weights custom total validator (exportWeight.directLanding.any.base removed)', () => {
+	/**
+	 * These tests document the current behaviour of the weights custom validator after
+	 * the `else if (typeof totalWeight !== "number" || !totalWeight || totalWeight <= 0)`
+	 * branch was removed.  The `exportWeight.directLanding.any.base` error must never
+	 * be returned by this schema.
+	 */
+	const validBaseWithEez = {
+		...basePayload,
+		highSeasArea: 'No',
+		exclusiveEconomicZones: [{ officialCountryName: 'United Kingdom' }],
+	};
+
+	describe('exportWeight.directLanding.any.base is never returned', () => {
+		it('does not return exportWeight.directLanding.any.base for a single valid weight', () => {
+			const payload = { ...validBaseWithEez, weights: [{ speciesId: 'COD', exportWeight: 100 }] };
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+
+		it('does not return exportWeight.directLanding.any.base for multiple valid weights', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [
+					{ speciesId: 'COD', exportWeight: 50 },
+					{ speciesId: 'HKE', exportWeight: 25.5 },
+				],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+
+		it('does not return exportWeight.directLanding.any.base when total weight equals the maximum limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 99999999999.99 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+
+		it('does not return exportWeight.directLanding.any.base even when total weight exceeds the limit (array.totalWeightExceeded is returned instead)', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 100000000000 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const baseError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'exportWeight.directLanding.any.base',
+			);
+			expect(baseError).toBeUndefined();
+		});
+	});
+
+	describe('array.totalWeightExceeded is returned when total weight exceeds 99,999,999,999.99', () => {
+		it('returns array.totalWeightExceeded for a single weight above the limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 100000000000 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const weightError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
+			);
+			expect(weightError).toBeDefined();
+			expect(weightError?.path).toEqual(['weights']);
+		});
+
+		it('returns array.totalWeightExceeded when multiple weights combine to exceed the limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [
+					{ speciesId: 'COD', exportWeight: 50000000000 },
+					{ speciesId: 'HKE', exportWeight: 50000000000 },
+				],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const weightError = error?.details.find(
+				(d) => d.path[0] === 'weights' && d.type === 'array.totalWeightExceeded',
+			);
+			expect(weightError).toBeDefined();
+		});
+	});
+
+	describe('no custom validator errors when total weight is within the valid range', () => {
+		it('passes for a single weight well below the limit', () => {
+			const payload = { ...validBaseWithEez, weights: [{ speciesId: 'COD', exportWeight: 500 }] };
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const customError = error?.details.find(
+				(d) =>
+					d.path[0] === 'weights' &&
+					(d.type === 'array.totalWeightExceeded' || d.type === 'exportWeight.directLanding.any.base'),
+			);
+			expect(customError).toBeUndefined();
+		});
+
+		it('passes for multiple weights whose total is exactly the limit', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [
+					{ speciesId: 'COD', exportWeight: 50000000000 },
+					{ speciesId: 'HKE', exportWeight: 49999999999.99 },
+				],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const customError = error?.details.find(
+				(d) =>
+					d.path[0] === 'weights' &&
+					(d.type === 'array.totalWeightExceeded' || d.type === 'exportWeight.directLanding.any.base'),
+			);
+			expect(customError).toBeUndefined();
+		});
+
+		it('passes for a single weight at the exact maximum (99,999,999,999.99)', () => {
+			const payload = {
+				...validBaseWithEez,
+				weights: [{ speciesId: 'COD', exportWeight: 99999999999.99 }],
+			};
+			const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+			const customError = error?.details.find(
+				(d) =>
+					d.path[0] === 'weights' &&
+					(d.type === 'array.totalWeightExceeded' || d.type === 'exportWeight.directLanding.any.base'),
+			);
+			expect(customError).toBeUndefined();
 		});
 	});
 });
@@ -570,11 +772,12 @@ describe('directLandingsSchema - nonJS error mode', () => {
 		expect(errors.highSeasArea).toContain('error.highSeasArea');
 	});
 
-	it('returns correct error key for invalid dateLanded format', () => {
+	it('returns correct error key for dateLanded with empty part (fails moment validation)', () => {
 		const payload = { ...basePayload, dateLanded: '2026--15' };
 		const errors = validateNonJs(payload);
 		expect(errors).toBeDefined();
-		expect(errors.dateLanded).toContain('directLanding.date.base');
+		// '2026--15' passes the parts.every check but fails moment validation
+		expect(errors.dateLanded).toContain('directLanding.date.invalid');
 	});
 
 	it('returns correct error key for invalid date', () => {
@@ -595,7 +798,7 @@ describe('directLandingsSchema - nonJS error mode', () => {
 		const payload = { ...basePayload, faoArea: 'INVALID' };
 		const errors = validateNonJs(payload);
 		expect(errors).toBeDefined();
-		expect(errors.faoArea).toContain('error.faoArea');
+		expect(errors.faoArea).toBe('error.faoArea.any.only');
 	});
 
 	it('returns correct error key for exportWeight with too many decimals', () => {

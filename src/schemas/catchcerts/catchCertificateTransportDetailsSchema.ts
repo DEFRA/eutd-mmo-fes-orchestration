@@ -1,4 +1,5 @@
 import * as Joi from "joi";
+import { validateNoEmoji, createEmojiAwarePatternValidator } from '../../validators/emojiValidator';
 
 const catchCertificateTransportDetailsSchema = Joi.object({
   id: Joi.string().required(),
@@ -20,7 +21,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\- ]+$/).required(),
+      otherwise: Joi.string().trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/)).required(),
     }),
     otherwise: Joi.forbidden(),
   }),
@@ -61,10 +62,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
             .trim()
             .allow('')
             .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
-            .max(50)
             .messages({
               'string.pattern.base': 'ccShippingContainerNumberPatternError',
-              'string.max': 'error.containerNumbers.string.max',
             })
         )
         .min(1)
@@ -90,10 +89,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
               .trim()
               .allow('')
               .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
-              .max(50)
               .messages({
                 'string.pattern.base': 'error.containerNumbers.string.pattern.base',
-                'string.max': 'error.containerNumbers.string.max',
               })
           )
           .max(10)
@@ -114,8 +111,17 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().alphanum().max(15).required(),
-     }),
+      otherwise: Joi.string().trim().custom(validateNoEmoji).alphanum().max(15).required(),
+    }),
+    otherwise: Joi.forbidden(),
+  }),
+  airwayBillNumber: Joi.when('vehicle', {
+    is: 'plane',
+    then: Joi.when('$query.draft', {
+      is: true,
+      then: Joi.any(),
+      otherwise: Joi.string().trim().allow('').max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]+$/)).optional()
+    }),
     otherwise: Joi.forbidden(),
   }),
   containerNumber: Joi.when('vehicle', {
@@ -132,7 +138,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().alphanum().max(15).required(),
+      otherwise: Joi.string().trim().custom(validateNoEmoji).alphanum().max(15).required(),
     }),
     otherwise: Joi.forbidden(),
   }),
@@ -141,7 +147,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/).required(),
+      otherwise: Joi.string().trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'`() ]+$/)).required(),
     }),
     otherwise: Joi.forbidden()
   }),
@@ -157,12 +163,12 @@ const catchCertificateTransportDetailsSchema = Joi.object({
   departurePlace: Joi.when('$query.draft', {
     is: true,
     then: Joi.any(),
-    otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/).required(),
+    otherwise: Joi.string().trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/)).required(),
   }),
   freightBillNumber: Joi.when('$query.draft', {
     is: true,
-    then: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/),
-    otherwise: Joi.string().trim().max(60).regex(/^[a-zA-Z0-9-./]+$/)
+  then: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)),
+  otherwise: Joi.string().trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]+$/))
   }),
   documents: Joi.array().optional()
 });

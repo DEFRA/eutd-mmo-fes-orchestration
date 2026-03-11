@@ -1,10 +1,10 @@
-import Server from './server';
+import Server from '../src/server';
 import * as appInsights from 'applicationinsights';
-import applicationConfig from './applicationConfig';
+import applicationConfig from '../src/applicationConfig';
 import * as dotEnv from 'dotenv';
-import { SessionStoreFactory } from './session_store/factory'
-import { MongoConnection } from './persistence/mongo';
-import Router from './router';
+import { SessionStoreFactory } from '../src/session_store/factory'
+import { MongoConnection } from '../src/persistence/mongo';
+import Router from '../src/router';
 import * as Jwt from 'jsonwebtoken';
 
 // mock dotenv

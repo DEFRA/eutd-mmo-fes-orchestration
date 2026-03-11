@@ -78,7 +78,7 @@ export default class DocumentNumberService {
         break;
     }
 
-    return (document !== null && (document.status === DocumentStatuses.Complete || document.status === DocumentStatuses.Pending))
+    return (document !== null && (document.status === DocumentStatuses.Complete || document.status === DocumentStatuses.Pending || document.status === DocumentStatuses.Draft) )
       ? {documentNumber: document.documentNumber, documentUri: document.documentUri, documentStatus: document.status, createdAt: document.createdAt, userReference: document.userReference}
       : null;
   }

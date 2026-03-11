@@ -1,6 +1,7 @@
 const BaseJoi = require('joi');
 const Extension = require('@joi/date');
 const Joi = BaseJoi.extend(Extension);
+const { createEmojiAwarePatternValidator } = require('../../validators/emojiValidator');
 
 const truckSchema = Joi.object({
   vehicle: Joi.string().optional(),
@@ -17,29 +18,28 @@ const truckSchema = Joi.object({
   }),
   pointOfDestination: Joi.when('arrival', {
     is: true,
-    then: Joi.string().trim().allow('').allow(null).optional().max(100).regex(/^[a-zA-Z0-9\-' /]+$/),
-    otherwise: Joi.string().empty('').trim().required().max(100).regex(/^[a-zA-Z0-9\-' /]+$/)
+    then: Joi.string().trim().allow('').allow(null).optional().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' /]+$/)),
+    otherwise: Joi.string().empty('').trim().required().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' /]+$/))
   }),
   cmr: Joi.string().optional(),
   nationalityOfVehicle: Joi.string().trim().required(),
-  registrationNumber: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
-  freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
+  registrationNumber: Joi.string().trim().required().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/)),
+  freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
+    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
-      'string.max': 'error.containerNumbers.string.max'
     }))
     .max(10)
     .optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
-    then: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/),
-    otherwise: Joi.string().trim().required().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/)
+    then: Joi.string().trim().allow('').allow(null).optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/)),
+    otherwise: Joi.string().trim().required().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/))
   }),
   placeOfUnloading: Joi.when('arrival', {
     is: true,
-    then: Joi.string().empty('').trim().required().max(50).regex(/^[a-zA-Z0-9\- ]+$/),
-    otherwise: Joi.string().trim().allow('').allow(null).optional().max(50).regex(/^[a-zA-Z0-9\- ]+$/)
+    then: Joi.string().empty('').trim().required().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/)),
+    otherwise: Joi.string().trim().allow('').allow(null).optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/))
   }),
   journey: Joi.string(),
   facilityArrivalDate: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).optional(),
@@ -79,8 +79,8 @@ const truckSchema = Joi.object({
   }),
   departurePort: Joi.when('arrival', {
     is: true,
-    then: Joi.string().empty('').trim().required().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/),
-    otherwise: Joi.string().allow('').allow(null).trim().max(50).regex(/^[a-zA-Z0-9\-"' ]+$/).optional()
+    then: Joi.string().empty('').trim().required().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-"' ]+$/)),
+    otherwise: Joi.string().allow('').allow(null).trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-"' ]+$/)).optional()
   }),
   departureDate: Joi.when('arrival', {
     is: true,

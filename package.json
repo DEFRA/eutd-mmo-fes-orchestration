@@ -4,8 +4,8 @@
   "version": "1.10.0",
   "private": true,
   "engines": {
-    "node": "~22.13.1",
-    "npm": "~10.9.2"
+    "node": "~24.13.1",
+    "npm": "~11.8.0"
   },
   "overrides": {
     "hapi-boom-decorators": {
@@ -15,7 +15,7 @@
     "mongodb-memory-server": {
       "tmp": "^0.2.1"
     },
-    "tar": "7.5.4",
+    "tar": ">=7.5.8",
     "muhammara": {
       "tar": "7.5.4"
     },
@@ -48,9 +48,9 @@
   },
   "dependencies": {
     "@azure/event-hubs": "^5.11.4",
-    "@azure/storage-blob": "^12.17.0",
+    "@azure/storage-blob": "^12.31.0",
     "@hapi/basic": "^7.0.2",
-    "@hapi/hapi": "^21.3.12",
+    "@hapi/hapi": "^21.4.4",
     "@hapi/hoek": "^9.3.0",
     "@hapi/inert": "^7.1.0",
     "@hapi/vision": "^7.0.3",
@@ -58,8 +58,8 @@
     "@hapi/yar": "^11.0.2",
     "@joi/date": "^2.1.1",
     "applicationinsights": "2.9.7",
-    "applicationinsights-native-metrics": "0.0.10",
-    "axios": "^1.12.2",
+    "applicationinsights-native-metrics": "^0.0.11",
+    "axios": "^1.13.6",
     "bunyan": "1.8.15",
     "commander": "12.0.0",
     "cron": "3.1.7",
@@ -71,22 +71,23 @@
     "form-data": "^4.0.0",
     "hapi-auth-jwt2": "^10.7.0",
     "hapi-boom-decorators": "^4.1.2",
-    "ioredis": "^5.4.1",
+    "ioredis": "^5.10.0",
     "joi": "^17.13.3",
     "json-query": "2.2.2",
     "jsonfile": "6.1.0",
-    "jsonwebtoken": "9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "3.1.0",
     "lodash": "^4.17.21",
-    "mmo-ecc-pdf-svc": "2.3.57",
+    "mmo-ecc-pdf-svc": "2.4.11",
     "moment": "^2.30.1",
     "mongodb": "^6.6.2",
-    "mongoose": "^7.5.0",
-    "notifications-node-client": "^8.2.0",
+    "mongoose": "^7.8.9",
+    "muhammara": "^6.0.4",
+    "notifications-node-client": "^8.3.0",
     "npm-run-all": "4.1.5",
     "path-to-regexp": "^6.3.0",
     "qs": "^6.14.1",
-    "rimraf": "^6.0.1",
+    "rimraf": "^6.1.3",
     "url-parse": "^1.5.10",
     "uuid": "^10.0.0"
   },
@@ -97,7 +98,7 @@
     "@types/json-query": "2.2.6",
     "@types/jsonfile": "6.1.4",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/lodash": "4.17.6",
+    "@types/lodash": "^4.17.24",
     "@types/mongodb": "^4.0.7",
     "@types/nock": "11.1.0",
     "@types/node": "^20.14.10",

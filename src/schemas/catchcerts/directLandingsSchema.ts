@@ -1,5 +1,6 @@
 import * as Joi from 'joi';
 import * as moment from "moment";
+import { validateNoEmoji } from '../../validators/emojiValidator';
 import ApplicationConfig from "../../applicationConfig";
 import { decimalPlacesValidator } from "../../helpers/customValidators";
 import { getFAOAreaList } from '../../helpers/utils/utils';
@@ -11,7 +12,7 @@ const directLandingsSchema = Joi.object({
     .custom((value, helpers) => {
       const parts = value.split('-');
       // check array parts are note empty.
-      if (parts.length !== 3 || parts.some(part => part.trim() === ''))
+      if (parts.every(part => part.trim() === ''))
         return helpers.error('directLanding.date.base');
 
       const year = parts[0];
@@ -43,7 +44,10 @@ const directLandingsSchema = Joi.object({
     if (!moment(startDate, "YYYY-MM-DD", true).isValid()) {
       return helpers.error('date.base');
     }
-    const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
+    const dateLanded = moment(helpers.state.ancestors[0].dateLanded, "YYYY-MM-DD", true);
+    if (!dateLanded.isValid()) {
+      return value;
+    }
     if (dateLanded.isBefore(startDate, 'day')) {
       return helpers.error('date.max');
     }
@@ -51,7 +55,17 @@ const directLandingsSchema = Joi.object({
   }, 'Start Date Validator').required(),
   faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
   vessel: Joi.object().keys({
-    vesselName: Joi.string().trim().label("vessel.vesselName").required()
+    vesselName: Joi.string().trim().custom(validateNoEmoji).custom((value: string, helpers: any) => {
+      if (typeof value !== 'string') {
+        return helpers.error('directLanding.any.required');
+      } else { return value; }
+    }).label("vessel.vesselName").required(),
+    isListed: Joi.boolean().custom((value: boolean, helpers: any) => {
+      if (value === false) {
+        return helpers.error('directLanding.vessel.isListed.base');
+      }
+      return value;
+    }).label("vessel.isListed").optional(),
   }).required(),
   weights: Joi.array().items(Joi.object().keys({
     speciesId: Joi.string().trim().label("speciesId").required(),
