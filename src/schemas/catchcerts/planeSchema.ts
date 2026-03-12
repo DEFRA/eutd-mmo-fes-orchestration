@@ -37,6 +37,7 @@ const schema = Joi.object({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
       'string.max': 'error.containerNumbers.string.max'
     }))
+    .min(1)
     .max(10)
     .optional(),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).regex(/^[a-zA-Z0-9-./]*$/).optional(),
