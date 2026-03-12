@@ -40,7 +40,8 @@ const schema = Joi.object({
     }))
     .min(1)
     .max(10)
-    .required(),
+    .required()
+    .unique((a, b) => a !== '' && b !== '' && a === b),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   placeOfUnloading: Joi.when('arrival', {
     is: true,

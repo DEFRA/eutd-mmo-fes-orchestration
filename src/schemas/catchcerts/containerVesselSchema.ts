@@ -51,6 +51,7 @@ const containerVesselSchema = Joi.object({
     }))
     .min(1)
     .max(10)
+    .unique((a, b) => a !== '' && b !== '' && a === b)
     .optional(),
   departurePlace: Joi.when('arrival', {
     is: true,

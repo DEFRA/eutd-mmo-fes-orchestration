@@ -32,6 +32,14 @@ const handleContainerNumbersError = (detail, errorKey, transportType, errorObjec
     errorObject[errorKey] = errorMessages[transportType] || `error.${errorKey}.${detail.type}`;
     return true;
   }
+
+  if (detail.type === 'array.unique') {
+    const pos = detail.context.pos;
+    const dupePos = detail.context.dupePos;
+    errorObject[`containerNumbers.${pos}`] = 'error.containerNumbers.array.unique';
+    errorObject[`containerNumbers.${dupePos}`] = 'error.containerNumbers.array.unique';
+    return true;
+  }
   
   return false;
 };
@@ -76,6 +84,13 @@ export function buildNonJsErrorObject(standardError, njError)  {
     if (standardError) {
       const { details } = standardError;
       details.map((detail) => {
+        if (detail.path[0] === 'containerNumbers' && detail.type === 'array.unique') {
+          const pos = detail.context.pos;
+          const dupePos = detail.context.dupePos;
+          errorObject[`containerNumbers.${pos}`] = 'error.containerNumbers.array.unique';
+          errorObject[`containerNumbers.${dupePos}`] = 'error.containerNumbers.array.unique';
+          return;
+        }
         const errorKey = detail.path.join().replace(/,/gi,'.');
         errorObject[errorKey] = `error.${errorKey}.${detail.type}`
       });
