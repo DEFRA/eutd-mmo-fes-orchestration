@@ -908,23 +908,41 @@ test('validateEntry net weight arrival: cross-check error applied at correct ind
   }
 });
 
-test('validateEntry net weight arrival: cross-check skipped when netWeightProductArrival has individual validation error', async t => {
+test('validateEntry net weight arrival: cross-check not triggered when netWeightProductArrival has individual validation error', async t => {
   try {
+    // product arrival (-1) has an individual error; the cross-check inside checkNetFisheryWeightArrival
+    // guards on !errors[netWeightProductArrival], so fishery gets no error when product is invalid
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '-1', netWeightFisheryProductArrival: '80' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightProductArrival'], 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0', 'individual error set on product arrival weight');
-    t.not(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error not set when product arrival has individual error');
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no fishery error when product has individual error — cross-check guarded by !errors[product]');
     t.end();
   } catch (e) {
     t.end(e);
   }
 });
 
-test('validateEntry net weight arrival: cross-check skipped when netWeightFisheryProductArrival has individual validation error', async t => {
+test('validateEntry net weight arrival: fishery individual error preserved when fishery does not exceed product weight and product is valid', async t => {
   try {
+    // fishery (-1) has its own individual error; product (50) is valid and -1 does not numerically
+    // exceed 50, so the cross-check does not fire and the fishery individual error is preserved
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '-1' };
     const { errors } = await validateEntry(product, 0, {});
-    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0', 'individual error set on fishery arrival weight');
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0', 'individual fishery error preserved when fishery does not numerically exceed product and product is valid');
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('validateEntry net weight arrival: fishery individual error preserved when fishery also numerically exceeds product weight', async t => {
+  try {
+    // fishery (80.123) has an individual format error and also numerically exceeds product (50).
+    // Because fishery already has its own individual error, the cross-check is skipped so the
+    // format error is preserved — all field errors are shown rather than being overwritten.
+    const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80.123' };
+    const { errors } = await validateEntry(product, 0, {});
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal', 'individual fishery format error preserved; cross-check skipped because fishery already has its own error');
     t.end();
   } catch (e) {
     t.end(e);
