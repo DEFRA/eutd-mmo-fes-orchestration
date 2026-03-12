@@ -38,8 +38,9 @@ const schema = Joi.object({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
       'string.max': 'error.containerNumbers.string.max'
     }))
+    .min(1)
     .max(10)
-    .optional(),
+    .required(),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   placeOfUnloading: Joi.when('arrival', {
     is: true,
