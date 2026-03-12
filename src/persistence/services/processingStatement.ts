@@ -12,8 +12,10 @@ import {
 import { ProcessingStatementDraft } from '../schema/frontEndModels/processingStatement';
 import { ExportLocation } from "../schema/frontEndModels/export-location";
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
-import { constructOwnerQuery } from './catchCert';
+import { constructOwnerQuery, getDraftCache, saveDraftCache, invalidateDraftCache } from './catchCert';
 import { DocumentStatuses } from '../schema/catchCert';
+import { PROCESSING_STATEMENT_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
+import logger from '../../logger';
 
 export const getDocument = async (
   documentNumber: string,
@@ -101,6 +103,12 @@ export const getDraftData = async (userPrincipal: string, path: string, contactI
 };
 
 export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYear: string, userPrincipal: string, contactId: string): Promise<IProcessingStatementModel[]> => {
+  const cacheKey = `${PROCESSING_STATEMENT_KEY}/completed/${monthAndYear}`;
+  const cached = await getDraftCache(userPrincipal, contactId, cacheKey) as unknown as IProcessingStatementModel[];
+  if (cached !== null && Array.isArray(cached)) {
+    return cached;
+  }
+
   const [month, year] = monthAndYear.split('-');
   const currentDate = new Date();
   const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
@@ -110,29 +118,40 @@ export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYe
     $or: ownerQuery,
     status: { $nin: ['VOID', 'DRAFT'] },
     createdAt: {
-      // month is 0-indexed but allows -1, -2... -n. It takes back n months from given year.
-      // For example
-      // > new Date(2019, -2, 1)
-      // 2018-11-01T00:00:00.000Z
       "$gte": new Date(yearInt, monthInt - 1, 1),
       "$lt": new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
+
+  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 60);
+
   return data;
 };
 
 export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: string): Promise<ProcessingStatementDraft[]> => {
+  const cacheKey = `${PROCESSING_STATEMENT_KEY}/${DRAFT_HEADERS_KEY}`;
+  const cacheResults = await getDraftCache(userPrincipal, contactId, cacheKey) as ProcessingStatementDraft[];
+  if (cacheResults !== null && Array.isArray(cacheResults)) {
+    logger.info(`[GET-DRAFT-PS-HEADERS-FROM-CACHE][USER-PRINCIPAL][${userPrincipal}][CONTACT-ID][${contactId}]`);
+    return cacheResults;
+  }
+
+  logger.info(`[GET-DRAFT-PS-HEADERS-FROM-MONGO][${cacheResults}]`);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
   const props = ['documentNumber', 'status', 'createdAt', 'userReference'];
-  const result = await ProcessingStatementModel.find(query, props).sort({ createdAt: 'desc' });
+  const result = await ProcessingStatementModel.find(query, props).sort({ createdAt: 'desc' }).lean();
 
-  return result.map(doc => ({
+  const data: ProcessingStatementDraft[] = result.map(doc => ({
     documentNumber: doc.documentNumber,
     status: doc.status,
     startedAt: moment.utc(doc.createdAt).format('DD MMM YYYY'),
     userReference: doc.userReference
   }));
+
+  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 300);
+
+  return data;
 };
 
 export const getDraft = async (userPrincipal: string, documentNumber: string, contactId: string) => {
@@ -202,6 +221,8 @@ export const createDraft = async (userPrincipal: string, email: string, requeste
     requestByAdmin: requestedByAdmin,
     contactId: contactId,
   }).save();
+
+  void invalidateDraftCache(userPrincipal, `${PROCESSING_STATEMENT_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 
   return documentNumberGenerated;
 };
