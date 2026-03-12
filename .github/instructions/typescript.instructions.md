@@ -1,6 +1,6 @@
 ---
 description: 'TypeScript best practices for MMO FES services'
-applyTo: '**/*.{ts,tsx}'
+applyTo: '**/*.ts'
 ---
 
 # TypeScript Best Practices for MMO FES
