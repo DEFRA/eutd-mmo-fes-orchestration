@@ -36,17 +36,14 @@ const containerVesselSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' ]+$/)),
     otherwise: Joi.string().trim().allow('').optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' ]+$/))
   }),
-  containerNumber: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
-  containerNumbers: Joi.when('arrival', {
-    is: true,
-    then: Joi.array()
-      .items(
-        Joi.string().trim().allow('')
-      )
-      .max(10)
-      .optional(),
-    otherwise: Joi.any()
-  }),
+    containerNumber: Joi.array()
+    .items(
+      Joi.string().trim().allow('').max(50).messages({
+        'string.max': 'error.containerNumber.string.max'
+      })
+    )
+    .max(10)
+    .optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.any(),

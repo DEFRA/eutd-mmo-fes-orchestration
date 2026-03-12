@@ -27,7 +27,7 @@ export function validateContainerNumbers(
     if (!CONTAINER_NUMBER_REGEX.test(trimmed)) {
       logger.error(`[TRANSPORT-VALIDATE][ERROR][INVALID-CONTAINER-NUMBER][${trimmed}]`);
       validationErrors.push(
-        buildErrorForClient('sdShippingContainerInvalidFormat', `containerNumbers.${index}`)
+        buildErrorForClient('sdShippingContainerInvalidFormat', `containerNumber.${index}`)
       );
     }
   });
