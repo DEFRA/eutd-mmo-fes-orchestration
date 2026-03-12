@@ -49,6 +49,7 @@ const containerVesselSchema = Joi.object({
     .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
     }))
+    .min(1)
     .max(10)
     .optional(),
   departurePlace: Joi.when('arrival', {

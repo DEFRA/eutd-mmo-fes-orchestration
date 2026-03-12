@@ -789,6 +789,7 @@ describe("transport routes", () => {
                 placeOfUnloading: "error.placeOfUnloading.any.required",
                 vesselName: "error.vesselName.string.empty",
                 flagState: "error.flagState.string.empty",
+                "containerNumbers.0": "error.containerNumbers.array.min",
             });
         });
 
@@ -916,6 +917,7 @@ describe("transport routes", () => {
                 departurePort: "error.departurePort.string.empty",
                 placeOfUnloading: "error.placeOfUnloading.any.required",
                 departureDate: "error.departureDate.date.max",
+                "containerNumbers.0": "error.containerNumbers.array.min",
             });
         });
 
