@@ -130,7 +130,7 @@ function processData(data: unknown) {
   if (!isLanding(data)) {
     throw new Error('Invalid landing data');
   }
-  
+
   // data is now ILanding
   console.log(data.rssNumber);
 }
@@ -151,7 +151,7 @@ function getCatchSpecies(doc: Document): string[] {
   if (!doc.exportData || !doc.exportData.catches) {
     return [];
   }
-  
+
   // exportData is guaranteed to exist here
   return doc.exportData.catches.map(c => c.species);
 }
@@ -244,7 +244,7 @@ async function fetchLandings(): Promise<ILanding[]> {
 }
 
 // Error handling with union types
-type Result<T, E = Error> = 
+type Result<T, E = Error> =
   | { success: true; value: T }
   | { success: false; error: E };
 
@@ -314,7 +314,7 @@ declare module '@hapi/hapi' {
       role: string;
     };
   }
-  
+
   interface Request {
     app: ApplicationState;
   }
@@ -373,12 +373,12 @@ function loadConfig(): ApplicationConfig {
     serviceBusConnectionString: process.env.AZURE_QUEUE_CONNECTION_STRING,
     instrumentationKey: process.env.INSTRUMENTATION_KEY,
   };
-  
+
   // Type guard validation
   if (!config.mongoUri) {
     throw new Error('DB_CONNECTION_URI required');
   }
-  
+
   return config as ApplicationConfig;
 }
 ```
