@@ -41,7 +41,6 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       )
       .min(1)
       .max(10)
-      .unique((a: string, b: string) => a !== '' && b !== '' && a === b)
       .required()
       .custom((value, helpers) => {
         // Check if all elements are empty
@@ -69,7 +68,6 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         )
         .min(1)
         .max(10)
-        .unique((a: string, b: string) => a !== '' && b !== '' && a === b)
         .required()
         .custom((value, helpers) => {
           // Check if all elements are empty
@@ -96,7 +94,6 @@ const catchCertificateTransportDetailsSchema = Joi.object({
               })
           )
           .max(10)
-          .unique((a: string, b: string) => a !== '' && b !== '' && a === b)
           .optional(),
         otherwise: Joi.forbidden(),
       }),
