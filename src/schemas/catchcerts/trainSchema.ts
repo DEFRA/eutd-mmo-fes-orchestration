@@ -28,6 +28,7 @@ const trainSchema = Joi.object({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
     }))
     .max(10)
+    .unique((a, b) => a !== '' && b !== '' && a === b)
     .optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
