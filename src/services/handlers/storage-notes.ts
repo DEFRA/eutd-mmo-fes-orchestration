@@ -281,7 +281,6 @@ export async function validateEntry(product: any, index: number, errors, documen
   checkWeightOnCCErrors(product, errors, index);
   checkNetWeightArrival(product, errors, index);
   checkNetFisheryWeightArrival(product, errors, index);
-
   return { errors };
 }
 
@@ -298,10 +297,10 @@ async function validateIssuingCountryForNonUK(product: any, index: number, error
     return;
   }
 
-  const country: ICountry = typeof product.issuingCountry === 'string' 
+  const country: ICountry = typeof product.issuingCountry === 'string'
     ? { officialCountryName: product.issuingCountry, isoCodeAlpha2: undefined, isoCodeAlpha3: undefined, isoNumericCode: undefined }
     : product.issuingCountry;
-  
+
   const countryValidation = await validateCountriesName(country, ApplicationConfig.getReferenceServiceUrl(), 'issuingCountry');
   if (countryValidation.isError) {
     errors[`catches-${index}-issuingCountry`] = 'sdAddCatchDetailsErrorEnterIssuingCountry';
@@ -402,5 +401,7 @@ function checkNetFisheryWeightArrival(product: any, errors: any, index: number) 
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal';
   } else if (!isNotExceed12Digit(product.netWeightFisheryProductArrival)) {
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalExceed12Digit';
+  } else if (!errors[`catches-${index}-netWeightProductArrival`] && (+product.netWeightFisheryProductArrival) > (+product.netWeightProductArrival)) {
+    errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightFisheryProductArrivalExceedsProductArrival';
   }
 }

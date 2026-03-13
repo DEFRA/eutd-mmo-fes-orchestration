@@ -7,6 +7,7 @@ import * as FishValidator from '../validators/fish.validator';
 import * as CommodityCodeValidator from '../validators/pssdCommodityCode.validator';
 import * as CountriesValidator from '../validators/countries.validator';
 import SummaryErrorsService from './summaryErrors.service';
+import * as SessionManager from '../helpers/sessionManager';
 import { ProgressStatus } from '../persistence/schema/common';
 import { Progress } from '../persistence/schema/frontEndModels/payload';
 import logger from '../logger';
@@ -1509,10 +1510,14 @@ describe('getLandingStatus', () => {
   let mockGetSummaryErrors: jest.SpyInstance;
   let mockHasLandingData: jest.SpyInstance;
   let mockFilterErrors: jest.SpyInstance;
+  let mockGetCurrentSessionData: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetSummaryErrors = jest.spyOn(SummaryErrorsService, 'get');
     mockGetSummaryErrors.mockResolvedValue(null);
+
+    mockGetCurrentSessionData = jest.spyOn(SessionManager, 'getCurrentSessionData');
+    mockGetCurrentSessionData.mockResolvedValue(undefined);
 
     mockHasLandingData = jest.spyOn(ProgressService, 'hasLandingData');
     mockHasLandingData.mockReturnValue(false);
@@ -1581,6 +1586,53 @@ describe('getLandingStatus', () => {
       userPrincipal,
       documentNumber,
       products,
+      contactId
+    );
+
+    expect(result).toBe(ProgressStatus.COMPLETED);
+  });
+
+  it('will return INCOMPLETE when session has a landing with error "invalid" and the landing ID matches a current caughtBy entry (FI0-10996)', async () => {
+    mockHasLandingData.mockReturnValue(true);
+    const productsWithCaughtBy = [
+      { caughtBy: [{ id: 'landing-1' }] }
+    ] as any[];
+    mockGetCurrentSessionData.mockResolvedValue({
+      documentNumber,
+      landings: [
+        { landingId: 'landing-1', error: 'invalid', errors: { 'weights': 'ccDirectLandingTotalExportWeightExceeded' }, model: {} as any }
+      ]
+    });
+
+    const result = await ProgressService.getLandingsStatus(
+      userPrincipal,
+      documentNumber,
+      productsWithCaughtBy,
+      contactId
+    );
+
+    expect(result).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('will return COMPLETE when session has a stale error for a landing ID that no longer exists in caughtBy (FI0-10996 - correcting an invalid weight generates a new ID)', async () => {
+    mockHasLandingData.mockReturnValue(true);
+    const productsWithNewId = [
+      { caughtBy: [{ id: 'landing-new-id' }] }
+    ] as any[];
+    mockGetCurrentSessionData.mockResolvedValue({
+      documentNumber,
+      landings: [
+        // Stale entry from the previous invalid submission (old landing ID)
+        { landingId: 'landing-old-id', error: 'invalid', errors: { 'weights': 'ccDirectLandingTotalExportWeightExceeded' }, model: {} as any },
+        // New successful submission entry
+        { landingId: 'landing-new-id', error: '', errors: {}, model: {} as any }
+      ]
+    });
+
+    const result = await ProgressService.getLandingsStatus(
+      userPrincipal,
+      documentNumber,
+      productsWithNewId,
       contactId
     );
 
