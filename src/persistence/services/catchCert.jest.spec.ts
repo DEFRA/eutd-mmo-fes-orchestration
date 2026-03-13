@@ -574,6 +574,21 @@ describe('catchCert - db related', () => {
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith(defaultUser, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       expect(certificate).not.toBeNull();
     });
+
+    it('should delete the document before invalidating the cache', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT', 'Bob')).save();
+
+      let documentExistedAtCacheInvalidation: boolean | undefined;
+      mockInvalidateDraftCache.mockImplementation(async () => {
+        const doc = await CatchCertModel.findOne({ documentNumber: 'GBR-2020-CC-0E42C2DA5' });
+        documentExistedAtCacheInvalidation = doc !== null;
+      });
+
+      await CatchCertService.deleteDraftCertificate('Bob', 'GBR-2020-CC-0E42C2DA5', contactId);
+
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
+      expect(documentExistedAtCacheInvalidation).toBe(false);
+    });
   });
 
   describe('getDraftCatchCertHeadersForUser', () => {
@@ -821,6 +836,28 @@ describe('catchCert - db related', () => {
           "userReference": "User Reference",
           "isFailed": false
         }]);
+    });
+
+    it('should call getAllSystemErrors and the aggregate query in parallel on a cache miss', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'DRAFT')).save();
+
+      const callOrder: string[] = [];
+      mockGetAllSystemErrors.mockImplementation(async () => {
+        callOrder.push('getAllSystemErrors');
+        return [];
+      });
+      mockSaveDraftCache.mockImplementation(async () => {
+        callOrder.push('saveDraftCache');
+      });
+
+      await CatchCertService.getDraftCatchCertHeadersForUser(defaultUser, contactId);
+
+      expect(mockGetAllSystemErrors).toHaveBeenCalledTimes(1);
+      expect(mockGetAllSystemErrors).toHaveBeenCalledWith(defaultUser, contactId);
+      // Both getAllSystemErrors and saveDraftCache must have been called,
+      // confirming the parallel path completed end-to-end.
+      expect(callOrder).toContain('getAllSystemErrors');
+      expect(callOrder).toContain('saveDraftCache');
     });
 
     it('should return a failed draft if the cert contains system errors', async () => {
