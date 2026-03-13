@@ -28,9 +28,10 @@ const truckSaveAsDraftSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/)),
     otherwise: Joi.string().trim().allow('').optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/))
   }),
-  containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).optional(),
-  containerNumbers: Joi.array()
-    .items(Joi.string().trim().allow(''))
+  containerNumber: Joi.array()
+    .items(Joi.string().trim().allow('').max(50).messages({
+      'string.max': 'error.containerNumber.string.max'
+    }))
     .max(10)
     .optional(),
   freightBillNumber: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),

@@ -861,8 +861,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'plane',
           flightNumber: 'UI90UXB',
-          containerNumber: '012345678',
-          containerNumbers: ['ABCU1234567'],
+          containerNumber: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },
@@ -903,8 +902,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'containerVessel',
           vesselName: 'WIRON 5',
-          containerNumber: 'ABCU1234567',
-          containerNumbers: ['ABCU1234567'],
+          containerNumber: ['ABCU1234567'],
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -946,8 +944,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'plane',
           flightNumber: 'UI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXBUI90UXB',
-          containerNumber: '012345678',
-          containerNumbers: ['ABCU1234567'],
+          containerNumber: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },
@@ -968,8 +965,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'plane',
           flightNumber: '01234567',
-          containerNumber: '@$%%$$%%',
-          containerNumbers: ['ABCU1234567'],
+          containerNumber: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },
@@ -1010,8 +1006,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'containerVessel',
           vesselName: '&£*W(W$*$*(W$&',
-          containerNumber: '0192394',
-          containerNumbers: ['ABCU1234567'],
+          containerNumber: ['ABCU1234567'],
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1033,8 +1028,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'containerVessel',
           vesselName: 'Wiron 5',
-          containerNumber: '£%%%@%%@',
-          containerNumbers: ['ABCU1234567'],
+          containerNumber: ['ABCU1234567'],
           flagState: 'UK',
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
@@ -1223,7 +1217,7 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
       const error = { 
-        containerNumbers: "commonAddTransportationDetailsPlaneContainerNumberLabelError",
+        containerNumber: "error.containerNumber.array.base",
         flightNumber: "error.flightNumber.string.max" 
       };
       expect(response.result).toEqual(error);
@@ -1247,7 +1241,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumbers: "commonAddTransportationDetailsPlaneContainerNumberLabelError" };
+      const error = { containerNumber: "error.containerNumber.array.base" };
       expect(response.result).toEqual(error);
     });
 
@@ -1292,7 +1286,7 @@ describe("Transport endpoints", () => {
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
       const error = { 
-        containerNumbers: "ccContainerVesselContainerNumberLabelError",
+        containerNumber: "error.containerNumber.array.base",
         vesselName: "error.vesselName.string.pattern.base" 
       };
       expect(response.result).toEqual(error);
@@ -1317,7 +1311,7 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { containerNumbers: "ccContainerVesselContainerNumberLabelError" };
+      const error = { containerNumber: "error.containerNumber.array.base" };
       expect(response.result).toEqual(error);
     });
 
@@ -1542,8 +1536,7 @@ describe("Transport endpoints", () => {
           id: '0',
           vehicle: 'plane', // Different vehicle type
           flightNumber: 'BA123',
-          containerNumber: 'CONT123',
-          containerNumbers: ['ABCU1234567'],
+          containerNumber: ['ABCU1234567'],
           departurePlace: 'Hull',
           freightBillNumber: 'AA1234567'
         },

@@ -25,33 +25,27 @@ export interface BasicTransportDetails {
   departurePort?: string;
   departureDate?: string;
   placeOfUnloading?: string;
+  containerNumber?: string
 }
 
 export interface Train extends BasicTransportDetails {
   railwayBillNumber: string,
-  containerNumbers?: string
 }
 
 export interface Plane extends BasicTransportDetails {
   flightNumber: string,
-  containerNumber: string,
   airwayBillNumber?: string,
-  containerNumbers?: string
 }
 
 export interface ContainerVessel extends BasicTransportDetails {
   vesselName: string,
   flagState: string,
-  containerNumber: string,
-  containerNumbers?: string
 }
 
 export interface Truck extends BasicTransportDetails {
   cmr?: boolean,
   nationalityOfVehicle?: string,
   registrationNumber?: string,
-  containerNumbers?: string
-  containerIdentificationNumber?: string
 }
 
 type FishingVessel = BasicTransportDetails;
@@ -74,13 +68,11 @@ export const TransportSchema = new Schema({
   cmr:                            { type: Boolean, required: false },
   nationalityOfVehicle:           { type: String,  required: false },
   registrationNumber:             { type: String,  required: false },
-  containerIdentificationNumber:  { type: String,  required: false },
   railwayBillNumber:              { type: String,  required: false },
   flightNumber:                   { type: String,  required: false },
   vesselName:                     { type: String,  required: false },
   flagState:                      { type: String,  required: false },
   containerNumber:                { type: String,  required: false },
-  containerNumbers:               { type: String,  required: false },
   exportDate:                     { type: String,  required: false },
   airwayBillNumber:               { type: String,  required: false },
   freightBillNumber:              { type: String,  required: false },
@@ -88,7 +80,7 @@ export const TransportSchema = new Schema({
   departurePort:                  { type: String,  required: false },
   departureDate:                  { type: String,  required: false },
   placeOfUnloading:               { type: String,  required: false },
-}, { _id : false });
+}, { _id : false, strict: false });
 
 export interface ExporterDetails {
   contactId?: string;

@@ -25,9 +25,10 @@ const truckSchema = Joi.object({
   nationalityOfVehicle: Joi.string().trim().required(),
   registrationNumber: Joi.string().trim().required().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/)),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
-  containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
-      'string.pattern.base': 'error.containerNumbers.string.pattern.base',
+  containerNumber: Joi.array()
+    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
+      'string.pattern.base': 'error.containerNumber.string.pattern.base',
+      'string.max': 'error.containerNumber.string.max'
     }))
     .max(10)
     .optional(),

@@ -4,7 +4,7 @@ import { CcExporter } from './exporterDetails';
 import { Conservation } from './conservation';
 import { CatchCertificateTransport } from './catchCertificateTransport';
 import { ExportLocation } from './export-location';
-import { ICountry, ProgressStatus, Transport } from '../../../persistence/schema/common';
+import { ICountry, ProgressStatus } from '../../../persistence/schema/common';
 import { CatchCertificateProgress } from './catchCertificate';
 import { ProcessingStatementProgress } from './processingStatement';
 import { StorageDocumentProgress } from './storageDocument';
@@ -147,6 +147,29 @@ export interface Progress {
   requiredSections?: number
 }
 
+export interface TransportPayload {
+  vehicle: string;
+  exportedFrom?: string;
+  departurePlace?: string;
+  pointOfDestination?: string;
+  exportDate?: string;
+  exportedTo?: ICountry;
+  freightBillNumber?: string;
+  departureCountry?: string;
+  departurePort?: string;
+  departureDate?: string;
+  placeOfUnloading?: string;
+  containerNumber?: string[];
+  cmr?: string;
+  nationalityOfVehicle?: string;
+  registrationNumber?: string;
+  railwayBillNumber?: string;
+  flightNumber?: string;
+  airwayBillNumber?: string;
+  vesselName?: string;
+  flagState?: string;
+}
+
 export interface CertificateSummary {
   documentNumber: string;
   status: string;
@@ -154,7 +177,7 @@ export interface CertificateSummary {
   exporter: CcExporter,
   exportPayload: ProductsLanded,
   conservation: Conservation,
-  transport?: Transport,
+  transport?: TransportPayload,
   transportations?: CatchCertificateTransport[],
   exportLocation: ExportLocation,
   landingsEntryOption: BackEndModels.LandingsEntryOptions

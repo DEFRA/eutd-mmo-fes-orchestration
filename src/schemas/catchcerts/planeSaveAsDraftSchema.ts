@@ -32,13 +32,13 @@ const planeSaveAsDraftSchema = Joi.object({
     then: Joi.string().trim().allow('').optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/)),
     otherwise: Joi.string().trim().allow('').optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/))
   }),
-  containerNumber: Joi.string().trim().allow('').max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
-  containerNumbers: Joi.array()
-    .items(Joi.string().trim().allow('').max(50).messages({
-      'string.max': 'error.containerNumbers.string.max'
-    }))
-    .max(10)
-    .optional(),
+  containerNumber: Joi.array()
+     .items(Joi.string().trim().regex(/^$|^[a-zA-Z0-9 ]+$/).max(50).allow('').messages({
+        'string.pattern.base': 'error.containerNumber.string.pattern.base',
+        'string.max': 'error.containerNumber.string.max'
+      }))
+      .max(10)
+      .optional(),
   freightBillNumber: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {

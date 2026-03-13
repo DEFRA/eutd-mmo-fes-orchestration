@@ -109,7 +109,15 @@ export default class CatchCertificateTransportService {
           // keep details from existing transport if changing the CMR value (this can only happen for trucks)
           payload = { ...toFrontEndTransport({ ...transportations[index], cmr: payload.cmr === 'true' }) };
         }
-        transportations[index] = toBackEndTransport({ ...payload, documents: vehicleHasChanged ? [] : draftTransport.transportDocuments });
+        // Transform the new payload
+        const transformedTransport = toBackEndTransport({ ...payload, documents: vehicleHasChanged ? [] : draftTransport.transportDocuments });
+        // Preserve old container fields and add new containerNumber
+        const preservedTransport = {
+          ...transformedTransport,
+          containerIdentificationNumber: (draftTransport as any).containerIdentificationNumber,
+          containerNumbers: (draftTransport as any).containerNumbers
+        } as any;
+        transportations[index] = preservedTransport;
         await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': transportations } }, contactId);
       }
 

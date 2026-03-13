@@ -147,8 +147,7 @@ describe("transport routes", () => {
                     arrival: false,
                     flightNumber: "x",
                     departurePlace: "x",
-                    containerNumber: "x",
-                    containerNumbers: ["ABCU1234567"],
+                    containerNumber: ["ABCU1234567"],
                     pointOfDestination: "Paris Airport",
                     exportedTo: {
                       officialCountryName: "Nigeria"
@@ -176,8 +175,7 @@ describe("transport routes", () => {
                     arrival: false,
                     vesselName: "x",
                     flagState: "x",
-                    containerNumber: "ABCU1234567",
-                    containerNumbers: ["ABCU1234567"],
+                    containerNumber: ["ABCU1234567"],
                     departurePlace: "x",
                     pointOfDestination: "Lagos Port",
                     exportedTo: {
@@ -769,7 +767,7 @@ describe("transport routes", () => {
               vesselName: "",
               flagState: "",
               freightBillNumber: "",
-              containerNumbers: [],
+              containerNumber: [],
               departureCountry: "",
               departurePort: "",
               placeOfUnloading: "",
@@ -789,7 +787,8 @@ describe("transport routes", () => {
                 placeOfUnloading: "error.placeOfUnloading.any.required",
                 vesselName: "error.vesselName.string.empty",
                 flagState: "error.flagState.string.empty",
-                "containerNumbers.0": "error.containerNumbers.array.min",
+                containerNumber: "ccContainerVesselContainerNumberLabelError",
+                "containerNumber.0": "error.containerNumber.array.min",
             });
         });
 
@@ -799,8 +798,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111", // required field
               flagState: "UK", // required field
               freightBillNumber: "",
-              containerNumber: "ABCU1234567", // required field
-              containerNumbers: ["ABCU1234567"], // required field
+              containerNumber: ["ABCU1234567"], // required field
               placeOfUnloading: "UK", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
               vehicle:"containerVessel",
@@ -823,7 +821,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111",
               flagState: "",
               freightBillNumber: "",
-              containerNumbers: ["ABCU1234567"],
+              containerNumber: ["ABCU1234567"],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -848,7 +846,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111",
               flagState: "@#$%^",
               freightBillNumber: "",
-              containerNumbers: ["ABCU1234567"],
+              containerNumber: ["ABCU1234567"],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -872,7 +870,7 @@ describe("transport routes", () => {
               vesselName: "Vessel1111",
               flagState: "UK",
               freightBillNumber: "",
-              containerNumbers: ["CONT@#$"],
+              containerNumber: ["CONT@#$"],
               placeOfUnloading: "UK",
               departureDate: moment().format('DD/MM/YYYY'),
               vehicle:"containerVessel",
@@ -886,7 +884,7 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
-                "containerNumbers.0": "ccShippingContainerNumberPatternError",
+                "containerNumber.0": "error.containerNumber.0.string.pattern.base",
             });
         });
 
@@ -897,7 +895,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "",
               freightBillNumber: "",
-              containerNumbers: [],
+              containerNumber: [],
               departureCountry: "",
               departurePort: "",
               departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
@@ -917,7 +915,8 @@ describe("transport routes", () => {
                 departurePort: "error.departurePort.string.empty",
                 placeOfUnloading: "error.placeOfUnloading.any.required",
                 departureDate: "error.departureDate.date.max",
-                "containerNumbers.0": "error.containerNumbers.array.min",
+                containerNumber: "commonAddTransportationDetailsPlaneContainerNumberLabelError",
+                "containerNumber.0": "error.containerNumber.array.min",
             });
         });
 
@@ -927,7 +926,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["ABCU1234567"], // required field with ISO format
+              containerNumber: ["ABCU1234567"], // required field with ISO format
               departureCountry: "France", // required field
               departurePort: "Calais", // required field
               departureDate: moment().format('DD/MM/YYYY'), // required field
@@ -950,7 +949,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["ABCU1234567"],
+              containerNumber: ["ABCU1234567"],
               departureCountry: "",
               departurePort: "Calais",
               departureDate: moment().format('DD/MM/YYYY'),
@@ -974,7 +973,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["ABCU1234567"],
+              containerNumber: ["ABCU1234567"],
               departureCountry: "France",
               departurePort: "",
               departureDate: moment().format('DD/MM/YYYY'),
@@ -998,7 +997,7 @@ describe("transport routes", () => {
               airwayBillNumber: "",
               flightNumber: "FLIGHT1111",
               freightBillNumber: "",
-              containerNumbers: ["ABCU1234567"],
+              containerNumber: ["ABCU1234567"],
               departureCountry: "France",
               departurePort: "Calais",
               departureDate: "",

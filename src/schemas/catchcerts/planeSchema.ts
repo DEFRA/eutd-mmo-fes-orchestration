@@ -32,15 +32,33 @@ const schema = Joi.object({
     then: Joi.string().trim().allow('').allow(null).optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/)),
     otherwise: Joi.string().trim().required().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/))
   }),
-  containerNumber: Joi.string().trim().optional().max(50).regex(/^[a-zA-Z0-9 ]+$/).optional(),
-  containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).max(50).allow('').messages({
-      'string.pattern.base': 'error.containerNumbers.string.pattern.base',
-      'string.max': 'error.containerNumbers.string.max'
-    }))
+  containerNumber: Joi.array()
+    .items(
+      Joi.string()
+        .trim()
+        .allow('')
+        .regex(/^$|^[a-zA-Z0-9 ]+$/)
+        .max(50)
+        .messages({
+          'string.pattern.base': 'error.containerNumber.string.pattern.base',
+          'string.max': 'error.containerNumber.string.max',
+        })
+    )
     .min(1)
     .max(10)
-    .required(),
+    .required()
+    .custom((value, helpers) => {
+      // Check if all elements are empty
+      const nonEmptyItems = value.filter((item) => item && item.trim().length > 0);
+      if (nonEmptyItems.length === 0) {
+        return helpers.error('plane.array.min');
+      }
+      return value;
+    })
+    .messages({
+      'plane.array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+      'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+    }),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   placeOfUnloading: Joi.when('arrival', {
     is: true,

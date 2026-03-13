@@ -55,7 +55,7 @@ describe("errorExtractor", () => {
 
     const result = buildErrorObject(data);
 
-    const expectedResult = { "containerNumbers.0": "error.containerNumbers.array.min" };
+    const expectedResult = { "containerNumbers": "error.containerNumbers.array.min" };
     expect(result).toEqual(expectedResult);
   });
 
@@ -97,7 +97,7 @@ describe("errorExtractor", () => {
 
     const result = buildErrorObject(data);
 
-    expect(result).toEqual({ containerNumbers: "ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError" });
+    expect(result).toEqual({ containerNumbers: "error.containerNumbers.string.pattern.base" });
   });
 
   it("buildErrorObject() should handle containerNumbers string.pattern.base for containerVessel transport", () => {
@@ -108,7 +108,7 @@ describe("errorExtractor", () => {
 
     const result = buildErrorObject(data);
 
-    expect(result).toEqual({ containerNumbers: "ccShippingContainerNumberPatternError" });
+    expect(result).toEqual({ containerNumbers: "error.containerNumbers.string.pattern.base" });
   });
 
   it("buildErrorObject() should handle containerNumbers string.pattern.base for unknown transport (fallback)", () => {

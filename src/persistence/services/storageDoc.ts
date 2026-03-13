@@ -317,7 +317,7 @@ export const upsertTransportDetails = async (userPrincipal: string, payload: Tra
 
   // Only validate container numbers when NOT saving as draft
   if (!isTransportSavedAsDraft && payload.arrival && (payload.vehicle === 'train' || payload.vehicle === 'truck')) {
-    const containerErrors = validateContainerNumbers(payload.containerNumbers);
+    const containerErrors = validateContainerNumbers(payload.containerNumber);
     if (containerErrors.length > 0) {
       throw containerErrors[0]; // Throw the first error to be caught by error handler
     }
@@ -325,7 +325,21 @@ export const upsertTransportDetails = async (userPrincipal: string, payload: Tra
 
   const transport = toBackEndTransport(payload);
   const key = payload.arrival ? 'exportData.arrivalTransportation' : 'exportData.transportation'
-  await upsertDraftData(userPrincipal, documentNumber, { '$set': { [key]: transport } }, contactId);
+  // Preserve old container fields (containerIdentificationNumber and containerNumbers) when updating
+  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+  const draftTransport = payload.arrival ? draft?.exportData?.arrivalTransportation : draft?.exportData?.transportation;
+  
+  if (draftTransport) {
+    // Preserve old container fields and add new containerNumber
+    const preservedTransport = {
+      ...transport,
+      containerIdentificationNumber: (draftTransport as any).containerIdentificationNumber,
+      containerNumbers: (draftTransport as any).containerNumbers
+    } as any;
+    await upsertDraftData(userPrincipal, documentNumber, { '$set': { [key]: preservedTransport } }, contactId);
+  } else {
+    await upsertDraftData(userPrincipal, documentNumber, { '$set': { [key]: transport } }, contactId);
+  }
 };
 
 export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string, arrival?: boolean): Promise<Transport> => {

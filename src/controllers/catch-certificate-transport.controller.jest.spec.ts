@@ -358,7 +358,7 @@ describe("updateTransport", () => {
       payload: {
         id: 'truck-transport-id',
         vehicle: 'truck',
-        containerNumbers: ['CONT001', 'CONT002', 'CONT003']
+        containerNumber: ['CONT001', 'CONT002', 'CONT003']
       },
       headers: { accept: "text/html" },
     };
@@ -366,8 +366,7 @@ describe("updateTransport", () => {
     const expectedTransport: CatchCertificateTransport = {
       id: 'truck-transport-id',
       vehicle: 'truck',
-      containerNumbers: ['CONT001', 'CONT002', 'CONT003'],
-      containerIdentificationNumber: 'CONT001 CONT002 CONT003'
+      containerNumber: ['CONT001', 'CONT002', 'CONT003']
     };
 
     await TransportController.updateTransport(truckReq, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -381,7 +380,7 @@ describe("updateTransport", () => {
       payload: {
         id: 'truck-transport-id',
         vehicle: 'truck',
-        containerNumbers: ['CONT001', '', '  ', 'CONT002', null]
+        containerNumber: ['CONT001', '', '  ', 'CONT002', null]
       },
       headers: { accept: "text/html" },
     };
@@ -389,8 +388,7 @@ describe("updateTransport", () => {
     const expectedTransport: CatchCertificateTransport = {
       id: 'truck-transport-id',
       vehicle: 'truck',
-      containerNumbers: ['CONT001', '', '  ', 'CONT002', null],
-      containerIdentificationNumber: 'CONT001 CONT002'
+      containerNumber: ['CONT001', '', '  ', 'CONT002', null]
     };
 
     await TransportController.updateTransport(truckReq, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -404,7 +402,7 @@ describe("updateTransport", () => {
       payload: {
         id: 'train-transport-id',
         vehicle: 'train',
-        containerNumbers: ['CONT001', 'CONT002']
+        containerNumber: ['CONT001', 'CONT002']
       },
       headers: { accept: "text/html" },
     };
@@ -412,8 +410,7 @@ describe("updateTransport", () => {
     const expectedTransport: CatchCertificateTransport = {
       id: 'train-transport-id',
       vehicle: 'train',
-      containerNumbers: ['CONT001', 'CONT002'],
-      containerIdentificationNumber: 'CONT001 CONT002'
+      containerNumber: ['CONT001', 'CONT002']
     };
 
     await TransportController.updateTransport(trainReq, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -427,7 +424,7 @@ describe("updateTransport", () => {
       payload: {
         id: 'plane-transport-id',
         vehicle: 'plane',
-        containerNumbers: ['ABCU1234567', 'DEFJ2345678']
+        containerNumber: ['ABCU1234567', 'DEFJ2345678']
       },
       headers: { accept: "text/html" },
     };
@@ -435,8 +432,7 @@ describe("updateTransport", () => {
     const expectedTransport: CatchCertificateTransport = {
       id: 'plane-transport-id',
       vehicle: 'plane',
-      containerNumbers: ['ABCU1234567', 'DEFJ2345678'],
-      containerNumber: 'ABCU1234567 DEFJ2345678'
+      containerNumber: ['ABCU1234567', 'DEFJ2345678']
     };
 
     await TransportController.updateTransport(planeReq, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -450,7 +446,7 @@ describe("updateTransport", () => {
       payload: {
         id: 'vessel-transport-id',
         vehicle: 'containerVessel',
-        containerNumbers: ['GHIZ3456789', 'JKLR4567890']
+        containerNumber: ['GHIZ3456789', 'JKLR4567890']
       },
       headers: { accept: "text/html" },
     };
@@ -458,8 +454,7 @@ describe("updateTransport", () => {
     const expectedTransport: CatchCertificateTransport = {
       id: 'vessel-transport-id',
       vehicle: 'containerVessel',
-      containerNumbers: ['GHIZ3456789', 'JKLR4567890'],
-      containerNumber: 'GHIZ3456789 JKLR4567890'
+      containerNumber: ['GHIZ3456789', 'JKLR4567890']
     };
 
     await TransportController.updateTransport(containerVesselReq, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -473,7 +468,7 @@ describe("updateTransport", () => {
       payload: {
         id: 'plane-transport-id',
         vehicle: 'plane',
-        containerNumbers: ['ABCU1234567', '', null, 'DEFJ2345678']
+        containerNumber: ['ABCU1234567', 'DEFJ2345678']
       },
       headers: { accept: "text/html" },
     };
@@ -481,8 +476,7 @@ describe("updateTransport", () => {
     const expectedTransport: CatchCertificateTransport = {
       id: 'plane-transport-id',
       vehicle: 'plane',
-      containerNumbers: ['ABCU1234567', '', null, 'DEFJ2345678'],
-      containerNumber: 'ABCU1234567 DEFJ2345678'
+      containerNumber: ['ABCU1234567', 'DEFJ2345678']
     };
 
     await TransportController.updateTransport(planeReq, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -496,7 +490,7 @@ describe("updateTransport", () => {
       payload: {
         id: 'vessel-transport-id',
         vehicle: 'containerVessel',
-        containerNumbers: ['GHIZ3456789', '  ', 'JKLR4567890', null]
+        containerNumber: ['GHIZ3456789', 'JKLR4567890']
       },
       headers: { accept: "text/html" },
     };
@@ -504,8 +498,7 @@ describe("updateTransport", () => {
     const expectedTransport: CatchCertificateTransport = {
       id: 'vessel-transport-id',
       vehicle: 'containerVessel',
-      containerNumbers: ['GHIZ3456789', '  ', 'JKLR4567890', null],
-      containerNumber: 'GHIZ3456789 JKLR4567890'
+      containerNumber: ['GHIZ3456789', 'JKLR4567890']
     };
 
     await TransportController.updateTransport(containerVesselReq, USER_ID, DOCUMENT_NUMBER, contactId);

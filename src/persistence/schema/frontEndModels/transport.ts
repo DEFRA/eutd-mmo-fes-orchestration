@@ -1,6 +1,7 @@
 import * as BackEndModels from "../../schema/common"
 import { toExportedTo, ICountry } from '../common';
 import * as moment from 'moment';
+import { joinContainerNumbers, migrateContainerNumbers, transformContainerNumbers } from "../../../helpers/utils/utils";
 
 export const truck = 'truck';
 export const plane = 'plane';
@@ -23,12 +24,10 @@ export interface Transport {
   cmr?: string;
   nationalityOfVehicle?: string;
   registrationNumber?: string;
-  containerIdentificationNumber?: string;
   departurePlace?: string;
   pointOfDestination?: string;
   flightNumber?: string;
-  containerNumber?: string;
-  containerNumbers?: string[];
+  containerNumber?: string[];
   railwayBillNumber?: string;
   airwayBillNumber?: string;
   vesselName?: string;
@@ -84,7 +83,6 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   cmr: hasCmr ? cmr : undefined,
   nationalityOfVehicle: cmr ? undefined : transport.nationalityOfVehicle,
   registrationNumber: cmr ? undefined : transport.registrationNumber,
-  containerIdentificationNumber: transport.containerIdentificationNumber,
   freightBillNumber: transport.freightBillNumber,
   departurePlace: cmr ? undefined : transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
@@ -94,15 +92,14 @@ const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: bo
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumber: joinContainerNumbers(transport.containerNumber),
 });
 
 const getPlaneBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
   flightNumber: transport.flightNumber,
   airwayBillNumber: transport.airwayBillNumber,
-  containerNumber: transport.containerNumber,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumber: joinContainerNumbers(transport.containerNumber),
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   freightBillNumber: transport.freightBillNumber,
@@ -126,7 +123,7 @@ const getTrainBackEndTransport = (transport: Transport) => ({
   exportDate: transport.exportDate,
   exportedTo: transport.exportedTo,
   placeOfUnloading: transport.placeOfUnloading,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumber: joinContainerNumbers(transport.containerNumber),
 });
 
 const getContainerVesselBackEndTransport = (transport: Transport) => ({
@@ -137,8 +134,7 @@ const getContainerVesselBackEndTransport = (transport: Transport) => ({
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
   departureDate: transport.departureDate,
-  containerNumber: transport.containerNumber,
-  containerNumbers: transport.containerNumbers?.length ? transport.containerNumbers.join(',') : undefined,
+  containerNumber: joinContainerNumbers(transport.containerNumber),
   departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   exportDate: transport.exportDate,
@@ -153,11 +149,6 @@ const getFishingVesselBackEndTransport = (transport: Transport) => ({
   exportedTo: transport.exportedTo
 });
 
-const getFrontEndContainerNumbers = (containerNumbers?: string) => {
-  if (!containerNumbers || containerNumbers === "") return [];
-  return containerNumbers.split(',').map(cn => cn.trim());
-};
-
 export const toFrontEndTransport = (
   transport: BackEndModels.Transport
 ): Transport => {
@@ -167,6 +158,7 @@ export const toFrontEndTransport = (
     switch (transport.vehicle) {
       case truck: {
         const model = transport as BackEndModels.Truck;
+        migrateContainerNumbers(model);
         const hasCmr = model.cmr !== null && model.cmr !== undefined;
         frontEndTransport = {
           vehicle: model.vehicle,
@@ -182,20 +174,20 @@ export const toFrontEndTransport = (
           departurePort: model.departurePort,
           departureDate: formatDateForFrontend(model.departureDate),
           placeOfUnloading: model.placeOfUnloading,
-          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
+          containerNumber: transformContainerNumbers(model.containerNumber),
         };
 
         break;
       }
       case plane: {
         const model = transport as BackEndModels.Plane;
+        migrateContainerNumbers(model);
         frontEndTransport = {
           vehicle: model.vehicle,
           flightNumber: model.flightNumber,
           airwayBillNumber: model.airwayBillNumber,
           freightBillNumber: model.freightBillNumber,
-          containerNumber: model.containerNumber,
-          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
+          containerNumber: transformContainerNumbers(model.containerNumber),
           departurePlace: model.departurePlace,
           pointOfDestination: model.pointOfDestination,
           exportDate: formatDateForFrontend(model.exportDate),
@@ -209,6 +201,7 @@ export const toFrontEndTransport = (
       }
       case train: {
         const model = transport as BackEndModels.Train;
+        migrateContainerNumbers(model);
         frontEndTransport = {
           vehicle: model.vehicle,
           railwayBillNumber: model.railwayBillNumber,
@@ -221,19 +214,19 @@ export const toFrontEndTransport = (
           departurePort: model.departurePort,
           departureDate: formatDateForFrontend(model.departureDate),
           placeOfUnloading: model.placeOfUnloading,
-          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
+          containerNumber: transformContainerNumbers(model.containerNumber),
         };
         break;
       }
       case containerVessel: {
         const model = transport as BackEndModels.ContainerVessel;
+        migrateContainerNumbers(model);
         frontEndTransport = {
           vehicle: model.vehicle,
           vesselName: model.vesselName,
           flagState: model.flagState,
           freightBillNumber: model.freightBillNumber,
-          containerNumber: model.containerNumber,
-          containerNumbers: getFrontEndContainerNumbers(model.containerNumbers),
+          containerNumber: transformContainerNumbers(model.containerNumber),
           departurePlace: model.departurePlace,
           pointOfDestination: model.pointOfDestination,
           exportDate: formatDateForFrontend(model.exportDate),
@@ -272,7 +265,7 @@ export const toFrontEndTransport = (
       },
       exportDate: '',
       departureDate: '',
-      containerNumbers: []
+      containerNumber: []
     }
     return frontEndTransport;
   }
@@ -357,7 +350,7 @@ const checkTruckDataFrontEnd = (transport: Transport) => {
 
 const checkPlaneDataFrontEnd = (transport: Transport) => (
   transport.flightNumber
-  && (transport.containerNumbers || transport.containerNumber)
+  && (transport.containerNumber)
   && transport.departurePlace
 ) ? transport : {
   vehicle: transport.vehicle,
@@ -375,7 +368,7 @@ const checkTrainDataFrontEnd = (transport: Transport) => (
 const checkContainerVesselDataFrontEnd = (transport: Transport) => (
   transport.vesselName
   && transport.flagState
-  && (transport.containerNumbers || transport.containerNumber)
+  && (transport.containerNumber)
   && transport.departurePlace
 ) ? transport : {
   vehicle: transport.vehicle,

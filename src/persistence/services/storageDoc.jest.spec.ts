@@ -1002,7 +1002,7 @@ describe('upsertTransportDetails', () => {
     const trainTransport = {
       vehicle: 'train',
       arrival: true,
-      containerNumbers: ['INVALID123'] // Invalid format
+      containerNumber: ['INVALID123'] // Invalid format
     };
 
     await expect(
@@ -1014,7 +1014,7 @@ describe('upsertTransportDetails', () => {
     const truckTransport = {
       vehicle: 'truck',
       arrival: true,
-      containerNumbers: ['ABC1234567'] // Missing U/J/Z/R character
+      containerNumber: ['ABC1234567'] // Missing U/J/Z/R character
     };
 
     await expect(
@@ -1026,7 +1026,7 @@ describe('upsertTransportDetails', () => {
     const trainTransport = {
       vehicle: 'train',
       arrival: true,
-      containerNumbers: ['ABCU1234567', 'XYZJ7654321']
+      containerNumber: ['ABCU1234567', 'XYZJ7654321']
     };
 
     await StorageDocumentService.upsertTransportDetails('Bob', trainTransport, 'GBR-234234-234234-23424', defaultContact);
@@ -1038,7 +1038,7 @@ describe('upsertTransportDetails', () => {
     const truckTransport = {
       vehicle: 'truck',
       arrival: true,
-      containerNumbers: ['ABCZ1234567']
+      containerNumber: ['ABCZ1234567']
     };
 
     await StorageDocumentService.upsertTransportDetails('Bob', truckTransport, 'GBR-234234-234234-23424', defaultContact);
@@ -1050,7 +1050,7 @@ describe('upsertTransportDetails', () => {
     const departureTransport = {
       vehicle: 'train',
       arrival: false,
-      containerNumbers: ['INVALID123'] // Invalid but should not be validated for departure
+      containerNumber: ['INVALID123'] // Invalid but should not be validated for departure
     };
 
     await StorageDocumentService.upsertTransportDetails('Bob', departureTransport, 'GBR-234234-234234-23424', defaultContact);
@@ -1062,7 +1062,7 @@ describe('upsertTransportDetails', () => {
     const planeTransport = {
       vehicle: 'plane',
       arrival: true,
-      containerNumbers: ['INVALID123'] // Invalid but should not be validated for plane
+      containerNumber: ['INVALID123'] // Invalid but should not be validated for plane
     };
 
     await StorageDocumentService.upsertTransportDetails('Bob', planeTransport, 'GBR-234234-234234-23424', defaultContact);
@@ -1074,7 +1074,7 @@ describe('upsertTransportDetails', () => {
     const trainTransport = {
       vehicle: 'train',
       arrival: true,
-      containerNumbers: []
+      containerNumber: []
     };
 
     await StorageDocumentService.upsertTransportDetails('Bob', trainTransport, 'GBR-234234-234234-23424', defaultContact);
@@ -1086,7 +1086,7 @@ describe('upsertTransportDetails', () => {
     const trainTransport = {
       vehicle: 'train',
       arrival: true,
-      containerNumbers: undefined
+      containerNumber: undefined
     };
 
     await StorageDocumentService.upsertTransportDetails('Bob', trainTransport, 'GBR-234234-234234-23424', defaultContact);
