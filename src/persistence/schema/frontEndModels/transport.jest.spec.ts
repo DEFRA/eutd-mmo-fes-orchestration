@@ -78,7 +78,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "here",
       user_id: "UID",
       journey: "Journey",
@@ -95,7 +95,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
+      containerNumber: "ABCJ1234567",
       departurePlace: "here",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -115,7 +115,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "here",
       user_id: "UID",
       journey: "Journey",
@@ -127,7 +127,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
+      containerNumber: "ABCJ1234567",
       departurePlace: "here"
     };
 
@@ -142,8 +142,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.plane,
       airwayBillNumber: "AWB123456",
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
-      containerNumbers: ["CONT1", "CONT2", "CONT3"],
+      containerNumber: ["Cont Number"],
       freightBillNumber: "FB789",
       departurePlace: "here",
       departureCountry: "United Kingdom",
@@ -166,7 +165,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
       airwayBillNumber: "AWB123456",
       flightNumber: "Fl Number",
       containerNumber: "Cont Number",
-      containerNumbers: "CONT1,CONT2,CONT3",
       freightBillNumber: "FB789",
       departurePlace: "here",
       departureCountry: "United Kingdom",
@@ -189,8 +187,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
-      containerNumbers: [],
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "here",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -203,7 +200,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "Fl Number",
-      containerNumber: "Cont Number",
+      containerNumber: "ABCJ1234567",
       departurePlace: "here",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -282,7 +279,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumber: "Cont Number",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "here",
       user_id: "UID",
       journey: "Journey",
@@ -300,7 +297,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumber: "Cont Number",
+      containerNumber: "ABCJ1234567",
       departurePlace: "here",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -321,7 +318,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumbers: ["Cont Number"],
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "here",
       user_id: "UID",
       journey: "Journey",
@@ -339,7 +336,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumbers: "Cont Number",
+      containerNumber: "ABCJ1234567",
       departurePlace: "here",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -360,7 +357,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumber: "Cont Number",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "here",
       user_id: "UID",
       journey: "Journey",
@@ -373,7 +370,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumber: "Cont Number",
+      containerNumber: "ABCJ1234567",
       departurePlace: "here"
     };
 
@@ -617,7 +614,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       cmr: "false",
       nationalityOfVehicle: "UK",
       registrationNumber: "REG123",
-      containerIdentificationNumber: "ABCD1234567",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "Dover",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -632,7 +629,7 @@ describe("When mapping from a front end transport to a backend transport", () =>
       cmr: false,
       nationalityOfVehicle: "UK",
       registrationNumber: "REG123",
-      containerIdentificationNumber: "ABCD1234567",
+      containerNumber: "ABCJ1234567",
       departurePlace: "Dover",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -698,7 +695,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       },
       exportDate: '',
       departureDate: '',
-      containerNumbers: []
+      containerNumber: []
     });
   });
 
@@ -725,8 +722,7 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoNumericCode: "SP"
       },
       exportDate: "",
-      departureDate: "",
-      containerNumbers: []
+      departureDate: ""
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -762,8 +758,7 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoNumericCode: "SP"
       },
       exportDate: "",
-      departureDate: "",
-      containerNumbers: []
+      departureDate: ""
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -774,7 +769,7 @@ describe("When mapping from a backend transport to front end transport", () => {
     const transport: BackEndModels.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "123456",
-      containerNumber: "123456",
+      containerNumber: "ABCJ1234567",
       departurePlace: "London",
       exportedFrom: "United Kingdom",
       exportedTo: {
@@ -788,7 +783,7 @@ describe("When mapping from a backend transport to front end transport", () => {
     const expectedResult: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "123456",
-      containerNumber: "123456",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "London",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -798,7 +793,6 @@ describe("When mapping from a backend transport to front end transport", () => {
       },
       exportDate: "",
       departureDate: "",
-      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -809,8 +803,7 @@ describe("When mapping from a backend transport to front end transport", () => {
     const transport: BackEndModels.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: "123456",
-      containerNumber: "123456",
-      containerNumbers: "CONT1,CONT2,CONT3",
+      containerNumber: "ABCJ1234567",
       departurePlace: "London",
       departureCountry: "United Kingdom",
       departurePort: "London Heathrow",
@@ -832,8 +825,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       flightNumber: "123456",
       airwayBillNumber: "AWB123456",
       freightBillNumber: "FB789",
-      containerNumber: "123456",
-      containerNumbers: ["CONT1", "CONT2", "CONT3"],
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "London",
       exportDate: "02/09/2025",
       exportedTo: {
@@ -876,8 +868,7 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoNumericCode: "SP"
       },
       exportDate: "",
-      departureDate: "",
-      containerNumbers: []
+      departureDate: ""
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -887,7 +878,7 @@ describe("When mapping from a backend transport to front end transport", () => {
 
     const transport: BackEndModels.Transport = {
       vehicle: FrontEndTransport.containerVessel,
-      containerNumber: "12345",
+      containerNumber: "ABCJ1234567",
       departurePlace: "London",
       exportedFrom: "United Kingdom",
       vesselName: "Vessel Name",
@@ -904,7 +895,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumber: "12345",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "London",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -914,7 +905,6 @@ describe("When mapping from a backend transport to front end transport", () => {
       },
       exportDate: "",
       departureDate: "",
-      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -924,7 +914,7 @@ describe("When mapping from a backend transport to front end transport", () => {
 
     const transport: BackEndModels.Transport = {
       vehicle: FrontEndTransport.containerVessel,
-      containerNumbers: "12345",
+      containerNumber: "ABCJ1234567",
       departurePlace: "London",
       exportedFrom: "United Kingdom",
       vesselName: "Vessel Name",
@@ -941,7 +931,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumbers: ["12345"],
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "London",
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -996,7 +986,7 @@ describe("When mapping from a backend transport to front end transport", () => {
 
     const transport: BackEndModels.Transport = {
       vehicle: FrontEndTransport.containerVessel,
-      containerNumber: "12345",
+      containerNumber: "ABCJ1234567",
       departurePlace: "London",
       exportedFrom: "United Kingdom",
       vesselName: "Vessel Name",
@@ -1014,7 +1004,7 @@ describe("When mapping from a backend transport to front end transport", () => {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: "Vessel Name",
       flagState: "UK",
-      containerNumber: "12345",
+      containerNumber: ["ABCJ1234567"],
       departurePlace: "London",
       exportDate: "02/09/2025",
       exportedTo: {
@@ -1024,7 +1014,6 @@ describe("When mapping from a backend transport to front end transport", () => {
         isoNumericCode: "SP"
       },
       departureDate: "",
-      containerNumbers: []
     };
 
     expect(FrontEndTransport.toFrontEndTransport(transport)).toStrictEqual(expectedResult);
@@ -1213,8 +1202,7 @@ describe('checkTransportDataFrontEnd', () => {
     const fullValidObject: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.plane,
       flightNumber: 'flight number',
-      containerNumber: 'cont. number',
-      containerNumbers: ['cont. number'],
+      containerNumber: ['ABCJ1234567'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1237,7 +1225,7 @@ describe('checkTransportDataFrontEnd', () => {
     shouldReturnFullObject(fullValidObject);
     shouldReturnBaseValidObject(baseValidObject, {
       vehicle: FrontEndTransport.plane,
-      containerNumber: 'cont. number',
+      containerNumber: ['ABCJ1234567'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1262,8 +1250,7 @@ describe('checkTransportDataFrontEnd', () => {
     shouldReturnBaseValidObject(baseValidObject, {
       vehicle: FrontEndTransport.plane,
       flightNumber: 'flight number',
-      containerNumber: 'cont. number',
-      containerNumbers: ['cont. number'],
+      containerNumber: ['ABCJ1234567'],
       exportDate: 'some date',
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -1329,8 +1316,7 @@ describe('checkTransportDataFrontEnd', () => {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: 'vessel name',
       flagState: 'some flag name',
-      containerNumber: 'container number',
-      containerNumbers: ['cont. number'],
+      containerNumber: ['ABCJ1234567'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1354,8 +1340,7 @@ describe('checkTransportDataFrontEnd', () => {
     shouldReturnBaseValidObject(baseValidObject, {
       vehicle: FrontEndTransport.containerVessel,
       flagState: 'some flag name',
-      containerNumber: 'container number',
-      containerNumbers: ['cont. number'],
+      containerNumber: ['ABCJ1234567'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1368,8 +1353,7 @@ describe('checkTransportDataFrontEnd', () => {
     shouldReturnBaseValidObject(baseValidObject, {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: 'vessel name',
-      containerNumber: 'container number',
-      containerNumbers: ['cont. number'],
+      containerNumber: ['ABCJ1234567'],
       departurePlace: 'here or there',
       exportDate: 'some date',
       exportedTo: {
@@ -1396,8 +1380,7 @@ describe('checkTransportDataFrontEnd', () => {
       vehicle: FrontEndTransport.containerVessel,
       vesselName: 'vessel name',
       flagState: 'some flag name',
-      containerNumber: 'container number',
-      containerNumbers: ['cont. number'],
+      containerNumber: ['ABCJ1234567'],
       exportDate: 'some date',
       exportedTo: {
         officialCountryName: "SPAIN",
@@ -1508,7 +1491,7 @@ describe("When mapping transport with pointOfDestination field", () => {
       const transport: FrontEndTransport.Transport = {
         vehicle: FrontEndTransport.plane,
         flightNumber: "FL123",
-        containerNumber: "CONT456",
+        containerNumber: ["ABCJ1234567"],
         departurePlace: "London Heathrow",
         pointOfDestination: "Charles de Gaulle Airport",
         user_id: "UID",
@@ -1526,7 +1509,7 @@ describe("When mapping transport with pointOfDestination field", () => {
       const expectedResult: BackEndModels.Transport = {
         vehicle: FrontEndTransport.plane,
         flightNumber: "FL123",
-        containerNumber: "CONT456",
+        containerNumber: "ABCJ1234567",
         departurePlace: "London Heathrow",
         pointOfDestination: "Charles de Gaulle Airport",
         exportedTo: {
@@ -1585,7 +1568,7 @@ describe("When mapping transport with pointOfDestination field", () => {
         vehicle: FrontEndTransport.containerVessel,
         vesselName: "MS Maersk",
         flagState: "Denmark",
-        containerNumber: "CONT123",
+        containerNumber: ["ABCJ1234567"],
         departurePlace: "Port of Southampton",
         pointOfDestination: "Port of Le Havre",
         user_id: "UID",
@@ -1604,7 +1587,7 @@ describe("When mapping transport with pointOfDestination field", () => {
         vehicle: FrontEndTransport.containerVessel,
         vesselName: "MS Maersk",
         flagState: "Denmark",
-        containerNumber: "CONT123",
+        containerNumber: "ABCJ1234567",
         departurePlace: "Port of Southampton",
         pointOfDestination: "Port of Le Havre",
         exportedTo: {

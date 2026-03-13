@@ -166,7 +166,7 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         vehicle: "",
         exportDate: "",
         departureDate: "",
-        containerNumbers: []
+        containerNumber: []
       },
       exportLocation: {
         exportedFrom: "United Kingdom",

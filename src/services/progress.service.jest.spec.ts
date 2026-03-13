@@ -545,13 +545,13 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA123456',
           transportDocuments: [{
             name: 'name',
             reference: 'reference'
-          }]
+          }],
+          containerNumber: 'ABCU1234567 DEFJ2345678'
         }],
         landingsEntryOption: 'manualEntry',
         exportedFrom: 'United Kingdom',
@@ -600,12 +600,12 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           transportDocuments: [{
             name: 'name',
             reference: 'reference'
-          }]
+          }],
+          containerNumber: 'ABCU1234567 DEFJ2345678'
         }],
         landingsEntryOption: 'manualEntry',
         exportedFrom: 'United Kingdom',
@@ -752,7 +752,6 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: [{
@@ -806,7 +805,6 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
           transportDocuments: [{
@@ -860,10 +858,10 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567',
-          transportDocuments: []
+          transportDocuments: [],
+          containerNumber: 'ABCU1234567 DEFJ2345678'
         }],
         landingsEntryOption: 'manualEntry',
         exportedFrom: 'United Kingdom',
@@ -977,13 +975,13 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'ABC-123/456.789',
           transportDocuments: [{
             name: 'name',
             reference: 'reference'
-          }]
+          }],
+          containerNumber: 'ABCU1234567 DEFJ2345678'
         }],
         landingsEntryOption: 'manualEntry',
         exportedFrom: 'United Kingdom',
@@ -1032,7 +1030,6 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'AA1234567'
         }, {
@@ -1140,7 +1137,6 @@ describe('get', () => {
           id: 0,
           vehicle: 'plane',
           flightNumber: '3456',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London',
           freightBillNumber: 'ABC@123#!£$',
           transportDocuments: [{
@@ -1224,13 +1220,13 @@ describe('get', () => {
           vehicle: 'plane',
           exportedFrom: 'United Kingdom',
           flightNumber: 'BA078',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London Heathrow',
           freightBillNumber: 'AA123456',
           transportDocuments: [{
             name: 'name',
             reference: 'reference'
-          }]
+          }],
+          containerNumber: 'ABCU1234567 DEFJ2345678'
         }],
         conservation: {
           conservationReference: 'UK Fisheries Policy',
@@ -1914,7 +1910,7 @@ describe('getTransportDetails', () => {
         },
         airwayBillNumber: 'AWB123456',
         flightNumber: 'FL123',
-        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        containerNumber: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -1956,7 +1952,7 @@ describe('getTransportDetails', () => {
         },
         airwayBillNumber: 'AWB123456',
         flightNumber: 'FL123',
-        containerNumbers: ['CONT001', '@%&*'],
+        containerNumber: ['CONT001', '@%&*'],
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
@@ -1993,8 +1989,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumber: 'ABCU1234567',
-        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        containerNumber: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2036,7 +2031,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['CONT001', '@%&*'],
+        containerNumber: ['CONT001', '@%&*'],
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
@@ -2055,7 +2050,7 @@ describe('getTransportDetails', () => {
           isoNumericCode: '076',
         },
         vesselName: 'WIRON 5',
-        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        containerNumber: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2080,7 +2075,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        containerNumber: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2103,7 +2098,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        containerNumber: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departureDate: '15/11/2023',
         departureCountry: 'United Kingdom',
@@ -2126,7 +2121,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        containerNumber: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureCountry: 'United Kingdom',
@@ -2149,7 +2144,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: '@#$%^',
-        containerNumbers: ['ABCU1234567', 'ABCJ7654321'],
+        containerNumber: ['ABCU1234567', 'ABCJ7654321'],
         freightBillNumber: 'FB789',
         departurePort: 'London Heathrow',
         departureDate: '15/11/2023',
@@ -2304,7 +2299,7 @@ describe('getTransportDetails', () => {
         },
         vesselName: 'WIRON 5',
         flagState: 'UK',
-        containerNumbers: ['CONT001', '@%&*'],
+        containerNumber: ['CONT001', '@%&*'],
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes", true)).toBe(
@@ -5188,7 +5183,6 @@ describe('getStorageDocumentProgress', () => {
           id: 1,
           vehicle: 'plane',
           flightNumber: 'BA078',
-          containerNumber: 'ABCU1234567',
           departurePlace: 'London Heathrow',
           freightBillNumber: '123'
         }],
@@ -5340,12 +5334,12 @@ describe('getStorageDocumentProgress', () => {
           vehicle: 'plane',
           flightNumber: '0123456789',
           airwayBillNumber: 'a',
-          containerNumbers: 'ABCU1234567, ABCJ7654321',
+          containerNumber: 'ABCU1234567 ABCJ7654321',
           freightBillNumber: 'a',
           departurePort: 'airport',
           departureDate: '01/09/2025',
           departureCountry: 'Equatorial Guinea',
-          placeOfUnloading: 'place'
+          placeOfUnloading: 'place',
         },
       },
     });
@@ -5535,7 +5529,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
+          containerNumber: "Test1,Test2",
           exportDate: "22/09/2025",
           freightBillNumber: ""
         },
@@ -5584,7 +5578,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
+          containerNumber: "Test1,Test2",
           exportDate: "22/09/2025",
           freightBillNumber: ""
         },
@@ -5633,7 +5627,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
+          containerNumber: "Test1,Test2",
           exportDate: "22/09/2025",
           freightBillNumber: ""
         },
@@ -5682,7 +5676,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
+          containerNumber: "Test1,Test2",
           exportDate: "22/09/2025",
           freightBillNumber: ""
         },
@@ -5731,7 +5725,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
+          containerNumber: "Test1,Test2",
           exportDate: "22/09/2025",
           freightBillNumber: ""
         },
@@ -5780,7 +5774,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
+          containerNumber: "Test1,Test2",
           exportDate: "22/09/2025",
           freightBillNumber: ""
         },
@@ -5880,7 +5874,7 @@ describe('getStorageDocumentProgress', () => {
           departurePlace: "port",
           vesselName: "Felicity Ace",
           flagState: "Greece",
-          containerNumbers: "Test1,Test2",
+          containerNumber: "Test1,Test2",
           exportDate: "22/09/2025",
           freightBillNumber: ""
         },
@@ -5950,7 +5944,7 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
+            containerNumber: "Test1,Test2",
             exportDate: "22/01/2026",
             freightBillNumber: ""
           },
@@ -6019,7 +6013,7 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
+            containerNumber: "Test1,Test2",
             exportDate: "22/01/2026",
             freightBillNumber: ""
           },
@@ -6088,7 +6082,7 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
+            containerNumber: "Test1,Test2",
             exportDate: "22/01/2026",
             freightBillNumber: ""
           },
@@ -6229,7 +6223,7 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
+            containerNumber: "Test1,Test2",
             exportDate: "15/01/2026",
             freightBillNumber: ""
           },
@@ -6298,7 +6292,7 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
+            containerNumber: "Test1,Test2",
             exportDate: "",
             freightBillNumber: ""
           },
@@ -6367,7 +6361,7 @@ describe('getStorageDocumentProgress', () => {
             departurePlace: "port",
             vesselName: "Felicity Ace",
             flagState: "Greece",
-            containerNumbers: "Test1,Test2",
+            containerNumber: "Test1,Test2",
             exportDate: "21/01/2026",
             freightBillNumber: ""
           },
