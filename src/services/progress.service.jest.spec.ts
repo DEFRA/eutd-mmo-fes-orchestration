@@ -6151,6 +6151,216 @@ describe('getStorageDocumentProgress', () => {
 
       expect((result.progress as StorageDocumentProgress).storageFacilities).toBe(ProgressStatus.INCOMPLETE);
     });
+
+    it('should return INCOMPLETE storageFacilities when facility approval number contains invalid characters', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '20/01/2026',
+          facilityApprovalNumber: 'UK/ABC/001@#$',
+          facilityStorage: 'Frozen',
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).storageFacilities).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return INCOMPLETE storageFacilities when facility approval number exceeds 50 characters', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '20/01/2026',
+          facilityApprovalNumber: 'A'.repeat(60),
+          facilityStorage: 'Frozen',
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).storageFacilities).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return COMPLETED storageFacilities when facility approval number is valid', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          catches: [{
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '100',
+            weightOnCC: '100',
+            placeOfUnloading: 'London',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'vessel',
+            id: 'catch-id-123',
+            netWeightProductArrival: '90',
+            netWeightFisheryProductArrival: '90',
+            netWeightProductDeparture: '10.50',
+            netWeightFisheryProductDeparture: '10'
+          }],
+          facilityName: 'Cold Storage Facility',
+          facilityAddressOne: '123 Storage Lane',
+          facilityTownCity: 'London',
+          facilityPostcode: 'SW1A 1AA',
+          facilityArrivalDate: '20/01/2026',
+          facilityApprovalNumber: 'UK/ABC/001',
+          facilityStorage: 'Frozen',
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "Test1,Test2",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).storageFacilities).toBe(ProgressStatus.COMPLETED);
+    });
   });
 
   describe('Transport Details Date Validation Tests', () => {
