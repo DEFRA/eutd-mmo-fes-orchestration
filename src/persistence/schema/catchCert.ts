@@ -518,4 +518,9 @@ const CatchCertSchema = new Schema({
   parentDocumentVoid:{ type: Boolean, required: false}
 });
 
+// Compound indexes for common query patterns (owner + status + date sorting)
+CatchCertSchema.index({ contactId: 1, status: 1, createdAt: -1 });
+CatchCertSchema.index({ createdBy: 1, status: 1, createdAt: -1 });
+CatchCertSchema.index({ documentNumber: 1 });
+
 export const CatchCertModel = BaseModel.discriminator<CatchCertificateModel>('catchCert', CatchCertSchema);
