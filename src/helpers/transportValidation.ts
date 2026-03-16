@@ -32,6 +32,21 @@ export function validateContainerNumbers(
     }
   });
 
+  // Check for duplicate container numbers
+  const seen = new Map<string, number>();
+  nonEmptyContainers.forEach((containerNumber, index) => {
+    const trimmed = containerNumber.trim();
+    const previousIndex = seen.get(trimmed);
+    if (previousIndex !== undefined) {
+      logger.error(`[TRANSPORT-VALIDATE][ERROR][DUPLICATE-CONTAINER-NUMBER][${trimmed}]`);
+      validationErrors.push(
+        buildErrorForClient('sdShippingContainerDuplicateError', `containerNumbers.${index}`)
+      );
+    } else {
+      seen.set(trimmed, index);
+    }
+  });
+
   return validationErrors;
 }
 

@@ -97,7 +97,7 @@ describe("errorExtractor", () => {
 
     const result = buildErrorObject(data);
 
-    expect(result).toEqual({ containerNumbers: "ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError" });
+    expect(result).toEqual({ containerNumbers: "ccShippingContainerNumberPatternError" });
   });
 
   it("buildErrorObject() should handle containerNumbers string.pattern.base for containerVessel transport", () => {
@@ -120,6 +120,20 @@ describe("errorExtractor", () => {
     const result = buildErrorObject(data);
 
     expect(result).toEqual({ containerNumbers: "error.containerNumbers.string.pattern.base" });
+  });
+
+  it("buildErrorObject() should handle containerNumbers array.unique on the duplicate entry only", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 1], context: { pos: 1, dupePos: 0, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "containerVessel" },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.1": "error.containerNumbers.array.unique",
+    });
+    expect(result).not.toHaveProperty("containerNumbers.0");
   });
 
   it("buildErrorObject() should use custom message token when provided for a path detail", () => {
