@@ -42,6 +42,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       .min(1)
       .max(10)
       .required()
+      .unique((a, b) => a && b && a.trim() === b.trim())
       .custom((value, helpers) => {
         // Check if all elements are empty
         const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
@@ -53,6 +54,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       .messages({
         'plane.array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
         'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+        'array.unique': 'error.containerNumbers.array.unique',
       }),
     otherwise: Joi.when('vehicle', {
       is: 'containerVessel',
@@ -69,6 +71,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         .min(1)
         .max(10)
         .required()
+        .unique((a, b) => a && b && a.trim() === b.trim())
         .custom((value, helpers) => {
           // Check if all elements are empty
           const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
@@ -80,6 +83,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         .messages({
           'container-vessel.array.min': 'ccContainerVesselContainerNumberLabelError',
           'any.required': 'ccContainerVesselContainerNumberLabelError',
+          'array.unique': 'error.containerNumbers.array.unique',
         }),
       otherwise: Joi.when('vehicle', {
         is: Joi.valid('truck', 'train'),
@@ -93,8 +97,12 @@ const catchCertificateTransportDetailsSchema = Joi.object({
                 'string.pattern.base': 'error.containerNumbers.string.pattern.base',
               })
           )
+          .unique((a, b) => a && b && a.trim() === b.trim())
           .max(10)
-          .optional(),
+          .optional()
+          .messages({
+            'array.unique': 'error.containerNumbers.array.unique',
+          }),
         otherwise: Joi.forbidden(),
       }),
     }),
