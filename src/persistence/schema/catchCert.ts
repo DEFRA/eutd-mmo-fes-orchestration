@@ -529,6 +529,12 @@ const CatchCertSchema = new Schema({
 // Compound indexes for common query patterns (owner + status + date sorting)
 CatchCertSchema.index({ contactId: 1, status: 1, createdAt: -1 });
 CatchCertSchema.index({ createdBy: 1, status: 1, createdAt: -1 });
-CatchCertSchema.index({ documentNumber: 1 });
+// Unique constraint on documentNumber — there must only ever be one document per number.
+// Also used by getDraft, completeDraft, updateCertificateStatus, and checkDocument lookups.
+CatchCertSchema.index({ documentNumber: 1 }, { unique: true });
+// Supports getAllCatchCertsForUserByYearAndMonth which filters by owner + status=COMPLETE
+// then ranges over createdAt; the existing owner+status indexes already cover sorting,
+// but this dedicated date index helps the month/year range scan under high load.
+CatchCertSchema.index({ createdAt: 1, status: 1 });
 
 export const CatchCertModel = BaseModel.discriminator<CatchCertificateModel>('catchCert', CatchCertSchema);

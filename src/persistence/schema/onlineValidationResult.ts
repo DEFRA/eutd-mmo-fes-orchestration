@@ -50,4 +50,10 @@ export interface ICcQueryResult {
 }
 
 export interface ICcQueryResultModel extends ICcQueryResult, Document {}
+
+// The draft dashboard aggregation does a $lookup from exportCertificates to
+// failedonlinecertificates on documentNumber. Without this index, that join
+// is a full collection scan for every draft document loaded.
+EmptySchema.index({ documentNumber: 1 });
+
 export const FailedOnlineCertificates  = model<ICcQueryResultModel>('failedOnlineCertificates', EmptySchema);

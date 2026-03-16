@@ -65,4 +65,8 @@ const UserAtrributesSchema = new Schema({
   favourites:     { type: FavouritesSchema }
 });
 
+// Every request hits this collection with { userPrincipal } — without this index
+// each query is a full collection scan.
+UserAtrributesSchema.index({ userPrincipal: 1 }, { unique: true });
+
 export const UserAttributesModel = model<IUserAttributes>('UserAttributesModel', UserAtrributesSchema, 'userAttributes');
