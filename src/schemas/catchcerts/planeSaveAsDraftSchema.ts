@@ -37,12 +37,8 @@ const planeSaveAsDraftSchema = Joi.object({
     .items(Joi.string().trim().allow('').max(50).messages({
       'string.max': 'error.containerNumbers.string.max'
     }))
-    .unique((a, b) => a && b && a.trim() === b.trim())
     .max(10)
-    .optional()
-    .messages({
-      'array.unique': 'error.containerNumbers.array.unique',
-    }),
+    .optional(),
   freightBillNumber: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   journey: Joi.string(),
   exportDate: Joi.when('journey', {

@@ -204,4 +204,35 @@ describe('containerVesselSchema - containerNumbers validation', () => {
     expect(err).toBeDefined();
     expect(err.message).toBe('error.containerNumbers.string.pattern.base');
   });
+
+  it('returns array.unique error when duplicate container numbers are provided', () => {
+    const payload = { ...validPayload, containerNumbers: ['ABCU1234567', 'ABCU1234567'] };
+    const { error } = containerVesselSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const err = error.details.find((d: any) => d.type === 'array.unique');
+    expect(err).toBeDefined();
+    expect(err.message).toBe('error.containerNumbers.array.unique');
+  });
+
+  it('passes validation when all container numbers are unique', () => {
+    const payload = { ...validPayload, containerNumbers: ['ABCU1234567', 'ABCJ7654321'] };
+    const { error } = containerVesselSchemaDefault.validate(payload, { abortEarly: false });
+    const err = error?.details.find((d: any) => d.type === 'array.unique');
+    expect(err).toBeUndefined();
+  });
+
+  it('does not flag empty strings as duplicates', () => {
+    const payload = { ...validPayload, containerNumbers: ['', ''] };
+    const { error } = containerVesselSchemaDefault.validate(payload, { abortEarly: false });
+    const err = error?.details.find((d: any) => d.type === 'array.unique');
+    expect(err).toBeUndefined();
+  });
+
+  it('returns array.unique error when duplicates exist among multiple containers', () => {
+    const payload = { ...validPayload, containerNumbers: ['ABCU1234567', 'ABCJ7654321', 'ABCU1234567'] };
+    const { error } = containerVesselSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const err = error.details.find((d: any) => d.type === 'array.unique');
+    expect(err).toBeDefined();
+  });
 });

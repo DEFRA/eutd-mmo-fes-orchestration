@@ -43,12 +43,8 @@ const containerVesselSchema = Joi.object({
       .items(
         Joi.string().trim().allow('')
       )
-      .unique((a, b) => a && b && a.trim() === b.trim())
       .max(10)
-      .optional()
-      .messages({
-        'array.unique': 'error.containerNumbers.array.unique',
-      }),
+      .optional(),
     otherwise: Joi.any()
   }),
   departurePlace: Joi.when('arrival', {

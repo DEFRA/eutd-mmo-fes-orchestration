@@ -31,12 +31,8 @@ const truckSaveAsDraftSchema = Joi.object({
   containerIdentificationNumber: Joi.string().allow('', null).trim().max(150).optional(),
   containerNumbers: Joi.array()
     .items(Joi.string().trim().allow(''))
-    .unique((a, b) => a && b && a.trim() === b.trim())
     .max(10)
-    .optional()
-    .messages({
-      'array.unique': 'error.containerNumbers.array.unique',
-    }),
+    .optional(),
   freightBillNumber: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   departurePlace: Joi.when('arrival', {
     is: true,
