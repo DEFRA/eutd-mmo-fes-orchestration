@@ -391,4 +391,4 @@ for (const transformed of processLargeDataset(largeArray)) {
 - **Atomic cache updates** - no partial state
 - **Joi validation** on all inputs
 - **Try/catch** around external calls
-- **>90%** enforced in batch/consolidation services
+- **>90%** coverage enforced
