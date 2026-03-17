@@ -16,10 +16,9 @@ import { Transport, toBackEndTransport, toFrontEndTransport } from '../schema/fr
 import { StorageDocumentDraft } from '../../persistence/schema/frontEndModels/storageDocument';
 import { ExportLocation } from "../schema/frontEndModels/export-location";
 import { DocumentStatuses } from '../schema/catchCert';
-import { constructOwnerQuery, getDraftCache, saveDraftCache, invalidateDraftCache } from './catchCert';
+import { constructOwnerQuery } from './catchCert';
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
 import { validateContainerNumbers } from '../../helpers/transportValidation';
-import { STORAGE_NOTES_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
 
 export const getDocument = async (
   documentNumber: string,
@@ -108,12 +107,6 @@ export const saveStorageDoc = async (dataToPersist: TransientData): Promise<void
 }
 
 export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: string, userPrincipal: string, contactId: string): Promise<StorageDocumentModel[]> => {
-  const cacheKey = `${STORAGE_NOTES_KEY}/completed/${monthAndYear}`;
-  const cached = await getDraftCache(userPrincipal, contactId, cacheKey) as unknown as StorageDocumentModel[];
-  if (cached !== null && Array.isArray(cached)) {
-    return cached;
-  }
-
   const [month, year] = monthAndYear.split('-');
   const currentDate = new Date();
   const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
@@ -123,13 +116,14 @@ export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: strin
     $or: ownerQuery,
     status: { $nin: ['VOID', 'DRAFT'] },
     createdAt: {
+      // month is 0-indexed but allows -1, -2... -n. It takes back n months from given year.
+      // For example
+      // > new Date(2019, -2, 1)
+      // 2018-11-01T00:00:00.000Z
       "$gte": new Date(yearInt, monthInt - 1, 1),
       "$lt": new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({createdAt: 'desc'}).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
-
-  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 60);
-
+  }).sort({createdAt: 'desc'}).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
   return data;
 }
 
@@ -189,29 +183,17 @@ export const upsertDraftDataForStorageDocuments = async (userPrincipal: string, 
 };
 
 export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: string): Promise<StorageDocumentDraft[]> => {
-  const cacheKey = `${STORAGE_NOTES_KEY}/${DRAFT_HEADERS_KEY}`;
-  const cacheResults = await getDraftCache(userPrincipal, contactId, cacheKey) as StorageDocumentDraft[];
-  if (cacheResults !== null && Array.isArray(cacheResults)) {
-    logger.info(`[GET-DRAFT-SD-HEADERS-FROM-CACHE][USER-PRINCIPAL][${userPrincipal}][CONTACT-ID][${contactId}]`);
-    return cacheResults;
-  }
-
-  logger.info(`[GET-DRAFT-SD-HEADERS-FROM-MONGO][${cacheResults}]`);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
   const props = ['documentNumber', 'status', 'createdAt', 'userReference'];
-  const result = await StorageDocumentModel.find(query, props).sort({ createdAt: 'desc' }).lean();
+  const result = await StorageDocumentModel.find(query, props).sort({ createdAt: 'desc' });
 
-  const data: StorageDocumentDraft[] = result.map(doc => ({
+  return result.map(doc => ({
     documentNumber: doc.documentNumber,
     status: doc.status,
     userReference: doc.userReference,
     startedAt: moment.utc(doc.createdAt).format('DD MMM YYYY')
   }));
-
-  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 300);
-
-  return data;
 };
 
 export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
@@ -289,8 +271,6 @@ export const createDraft = async (userPrincipal: string, email: string, requeste
     documentNumber: documentNumberGenerated,
     requestByAdmin: requestedByAdmin
   }).save();
-
-  void invalidateDraftCache(userPrincipal, `${STORAGE_NOTES_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 
   return documentNumberGenerated;
 };

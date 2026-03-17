@@ -67,7 +67,7 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
     }
   }
 
-  async writeFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T, _ttlSeconds?: number): Promise<void> {
+  async writeFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T): Promise<void> {
     const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
     this.store[fullKey] = data;
   }

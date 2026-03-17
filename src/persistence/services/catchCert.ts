@@ -95,12 +95,6 @@ export const countCompletedDocuments = async (
 };
 
 export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string, userPrincipal: string, contactId: string): Promise<CatchCertificateModel[]> => {
-  const cacheKey = `${CATCH_CERTIFICATE_KEY}/completed/${yearAndMonth}`;
-  const cached = await getDraftCache(userPrincipal, contactId, cacheKey) as unknown as CatchCertificateModel[];
-  if (cached !== null && Array.isArray(cached)) {
-    return cached;
-  }
-
   const [month, year] = yearAndMonth.split('-');
   const currentDate = new Date();
   const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
@@ -113,10 +107,7 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
       '$gte': new Date(yearInt, monthInt - 1, 1),
       '$lt': new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
-
-  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 60);
-
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
   return data;
 };
 
@@ -157,10 +148,8 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
     }
   ];
 
-  const [result, systemErrors] = await Promise.all([
-    CatchCertModel.aggregate(query).sort({ createdAt: 'desc' }),
-    SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId)
-  ]);
+  const result = await CatchCertModel.aggregate(query).sort({ createdAt: 'desc' });
+  const systemErrors: SystemFailure[] = await SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId);
   const data: CatchCertificateDraft[] = result.map(catchCert => ({
     documentNumber: catchCert.documentNumber,
     status: catchCert.status,
@@ -169,7 +158,7 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
     isFailed: systemErrors.some((systemFailure: SystemFailure) => systemFailure.documentNumber === catchCert.documentNumber) || catchCert.isFailed
   }));
 
-  void saveDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, data, 300);
+  void saveDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, data);
 
   return data;
 }
@@ -313,13 +302,12 @@ export const saveDraftCache = async (
   userPrincipal: string,
   contactId: string,
   key: string,
-  cacheData: CatchCertificate | CatchCertificateDraft[] | IDraft,
-  ttlSeconds?: number
+  cacheData: CatchCertificate | CatchCertificateDraft[] | IDraft
 ): Promise<void> => {
   const sessionStore = await SessionStoreFactory.getSessionStore(
     getRedisOptions()
   );
-  await sessionStore.writeFor(userPrincipal, contactId, key, cacheData as any, ttlSeconds);
+  await sessionStore.writeFor(userPrincipal, contactId, key, cacheData as any);
 };
 
 export const invalidateDraftCache = async (

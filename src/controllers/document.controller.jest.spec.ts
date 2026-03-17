@@ -809,19 +809,19 @@ describe("Document controller", () => {
       };
 
       mockGetDraftCatchCertHeadersForUser = jest.spyOn(CatchCertService, 'getDraftCatchCertHeadersForUser');
-      mockGetDraftCatchCertHeadersForUser.mockResolvedValue(inProgressCC);
+      mockGetDraftCatchCertHeadersForUser.mockReturnValue(inProgressCC);
       mockGetAllCatchCertsForUserByYearAndMonth = jest.spyOn(CatchCertService, 'getAllCatchCertsForUserByYearAndMonth');
-      mockGetAllCatchCertsForUserByYearAndMonth.mockResolvedValue(completedCC);
+      mockGetAllCatchCertsForUserByYearAndMonth.mockReturnValue(completedCC);
 
       mockGetDraftProcessingStatementsForUser = jest.spyOn(ProcessingStatementService, 'getDraftDocumentHeaders');
-      mockGetDraftProcessingStatementsForUser.mockResolvedValue(inProgressPS);
+      mockGetDraftProcessingStatementsForUser.mockReturnValue(inProgressPS);
       mockGetAllProcessingStatementsForUserByYearAndMonth = jest.spyOn(ProcessingStatementService, 'getAllProcessingStatementsForUserByYearAndMonth');
-      mockGetAllProcessingStatementsForUserByYearAndMonth.mockResolvedValue(completedPS);
+      mockGetAllProcessingStatementsForUserByYearAndMonth.mockReturnValue(completedPS);
 
       mockGetDraftStorageDocumentsForUser = jest.spyOn(StorageDocService, 'getDraftDocumentHeaders');
-      mockGetDraftStorageDocumentsForUser.mockResolvedValue(inProgressSD);
+      mockGetDraftStorageDocumentsForUser.mockReturnValue(inProgressSD);
       mockGetAllStorageDocsForUserByYearAndMonth = jest.spyOn(StorageDocService, 'getAllStorageDocsForUserByYearAndMonth');
-      mockGetAllStorageDocsForUserByYearAndMonth.mockResolvedValue(completedSD);
+      mockGetAllStorageDocsForUserByYearAndMonth.mockReturnValue(completedSD);
     });
 
     afterAll(() => {
