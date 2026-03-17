@@ -5,7 +5,6 @@ import {
   MIN_PERSON_RESPONSIBLE_LENGTH,
 } from "../../services/constants";
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
-import { containsEmoji } from "../../validators/emojiValidator";
 import { validateCountriesName } from "../../validators/countries.validator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { ICountry } from "../../persistence/schema/common";
@@ -28,6 +27,7 @@ import {
   isPlantApprovalNumberFormatValid
 } from "../orchestration.service";
 import { isEmpty } from "lodash";
+import { containsEmoji } from '../../validators/emojiValidator';
 
 export const initialState = {
   processingStatement: {
@@ -164,6 +164,8 @@ export default {
 
     if (!data.personResponsibleForConsignment || validateWhitespace(data.personResponsibleForConsignment)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignment";
+    } else if (containsEmoji(data.personResponsibleForConsignment)) {
+      errors['personResponsibleForConsignment'] = "emojiCharactersNotPermitted";
     } else if (isInvalidLength(data.personResponsibleForConsignment, MIN_PERSON_RESPONSIBLE_LENGTH, MAX_PERSON_RESPONSIBLE_LENGTH)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignmentLength";
     } else if (!validatePersonResponsibleForConsignmentFormat(data.personResponsibleForConsignment)) {
@@ -198,6 +200,8 @@ export default {
 function addProcessingPlantAddressErrors(data, errors) {
   if (!data.plantName || validateWhitespace(data.plantName)) {
     errors['plantName'] = "psAddProcessingPlantAddressErrorNullPlantName";
+  } else if (containsEmoji(data.plantName)) {
+    errors['plantName'] = "emojiCharactersNotPermitted";
   } else if (data.plantName.length > MAX_PLANT_NAME_LENGTH) {
     errors['plantName'] = "psAddProcessingPlantAddressErrorMaxLimitPlantName";
   } else if (!isPsPlantNameValid(data.plantName)) {

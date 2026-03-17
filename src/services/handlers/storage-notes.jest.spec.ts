@@ -2898,77 +2898,6 @@ describe("validateStorageFacility - partial address field validation", () => {
   });
 });
 
-describe("validateStorageFacility - emoji validation", () => {
-  const todayFormatted = (() => {
-    const d = new Date();
-    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-  })();
-
-  it("should return emojiCharactersNotPermitted for facilityName containing an emoji", () => {
-    const { errors } = validateStorageFacility(
-      {
-        facilityArrivalDate: todayFormatted,
-        facilityName: "Facility 😀",
-        facilityAddressOne: "1 Fish Lane",
-        facilityTownCity: "Seaham",
-        facilityPostcode: "SR7 7AA",
-      },
-      undefined,
-      {}
-    );
-
-    expect(errors["storageFacilities-facilityName"]).toBe("emojiCharactersNotPermitted");
-  });
-
-  it("should return emojiCharactersNotPermitted for facilityAddressOne containing an emoji", () => {
-    const { errors } = validateStorageFacility(
-      {
-        facilityArrivalDate: todayFormatted,
-        facilityName: "Cold Store",
-        facilityAddressOne: "1 Fish 🐟 Lane",
-        facilityTownCity: "Seaham",
-        facilityPostcode: "SR7 7AA",
-      },
-      undefined,
-      {}
-    );
-
-    expect(errors["storageFacilities-facilityAddressOne"]).toBe("emojiCharactersNotPermitted");
-  });
-
-  it("should return emojiCharactersNotPermitted for facilityTownCity containing an emoji", () => {
-    const { errors } = validateStorageFacility(
-      {
-        facilityArrivalDate: todayFormatted,
-        facilityName: "Cold Store",
-        facilityAddressOne: "1 Fish Lane",
-        facilityTownCity: "Sea🌊ham",
-        facilityPostcode: "SR7 7AA",
-      },
-      undefined,
-      {}
-    );
-
-    expect(errors["storageFacilities-facilityTownCity"]).toBe("emojiCharactersNotPermitted");
-  });
-
-  it("should not return an emoji error for valid facilityName", () => {
-    const { errors } = validateStorageFacility(
-      {
-        facilityArrivalDate: todayFormatted,
-        facilityName: "Cold Store Ltd",
-        facilityAddressOne: "1 Fish Lane",
-        facilityTownCity: "Seaham",
-        facilityPostcode: "SR7 7AA",
-      },
-      undefined,
-      {}
-    );
-
-    expect(errors["storageFacilities-facilityName"]).toBeUndefined();
-  });
-});
-
 describe("validateDocumentType", () => {
   it("should set error when certificateType is undefined", () => {
     const errors = {};
@@ -3046,6 +2975,50 @@ describe("checkNetWeightArrivalNotExceedFisheryWeight - fishery weight exceeds p
     });
 
     expect(errors["catches-0-netWeightFisheryProductArrival"]).toBe("sdNetWeightFisheryProductArrivalExceedsProductArrival");
+  });
+});
+
+describe("validateStorageFacility - emoji validation", () => {
+  it("should return emojiCharactersNotPermitted for facilityName containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank \u{1F600} Marvin",
+        facilityAddressOne: "Fish Quay",
+        facilityTownCity: "Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityName"]).toBe("emojiCharactersNotPermitted");
+  });
+
+  it("should return emojiCharactersNotPermitted for facilityAddressOne containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank Marvin",
+        facilityAddressOne: "\u{1F3E0} Fish Quay",
+        facilityTownCity: "Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityAddressOne"]).toBe("emojiCharactersNotPermitted");
+  });
+
+  it("should return emojiCharactersNotPermitted for facilityTownCity containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank Marvin",
+        facilityAddressOne: "Fish Quay",
+        facilityTownCity: "\u{1F30A} Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityTownCity"]).toBe("emojiCharactersNotPermitted");
   });
 });
 

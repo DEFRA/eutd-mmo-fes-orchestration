@@ -14,8 +14,8 @@ import {
 } from "../orchestration.service";
 
 import ApplicationConfig from '../../applicationConfig';
+import { containsEmoji } from '../../validators/emojiValidator';
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
-import { containsEmoji } from "../../validators/emojiValidator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { validateCountriesName } from "../../validators/countries.validator";
 import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_PRODUCT_DESCRIPTION } from "../constants";

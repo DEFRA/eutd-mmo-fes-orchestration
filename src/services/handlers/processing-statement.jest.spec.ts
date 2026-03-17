@@ -2341,64 +2341,6 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     expect(errors).toEqual(expected);
   });
 
-  it('with emoji in plantAddressOne validates as emojiCharactersNotPermitted', async () => {
-    const currentUrl =
-      '/create-processing-statement/:documentNumber/add-processing-plant-address';
-    const handler = SUT[currentUrl];
-
-    const data = {
-      catches: [],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantName: 'Triffid',
-      plantAddressOne: '1 Fish 🐟 Lane',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE1 1EA'
-    };
-
-    const { errors } = await handler({
-      data: data,
-      errors: {}
-    });
-
-    expect(errors['plantAddressOne']).toBe('emojiCharactersNotPermitted');
-  });
-
-  it('with emoji in plantTownCity validates as emojiCharactersNotPermitted', async () => {
-    const currentUrl =
-      '/create-processing-statement/:documentNumber/add-processing-plant-address';
-    const handler = SUT[currentUrl];
-
-    const data = {
-      catches: [],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantName: 'Triffid',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Sea🌊ham',
-      plantPostcode: 'SE1 1EA'
-    };
-
-    const { errors } = await handler({
-      data: data,
-      errors: {}
-    });
-
-    expect(errors['plantTownCity']).toBe('emojiCharactersNotPermitted');
-  });
-
   it('with whitespace personResponsibleForConsignment, plantApprovalNumber validates as error', async () => {
     const currentUrl =
       '/create-processing-statement/:documentNumber/add-processing-plant-details';
@@ -2758,5 +2700,73 @@ describe('calling handler for /create-processing-statement/:documentNumber/progr
     expect(errors).toEqual({
       products: 'ccProgressPageProductDetailsRequired'
     });
+  });
+});
+
+describe('emoji validation across processing statement fields', () => {
+  const baseDetails = {
+    catches: [],
+    personResponsibleForConsignment: 'Hank',
+    plantApprovalNumber: 'Marvin',
+  };
+
+  it('should return emojiCharactersNotPermitted for plantName containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: { ...baseDetails, plantName: "Plant \u{1F40F} Name" },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ plantName: 'emojiCharactersNotPermitted' });
+  });
+
+  it('should return emojiCharactersNotPermitted for personResponsibleForConsignment containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: { ...baseDetails, plantName: 'Valid Plant', personResponsibleForConsignment: "Hank \u{1F600}" },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ personResponsibleForConsignment: 'emojiCharactersNotPermitted' });
+  });
+
+  it('should return emojiCharactersNotPermitted for plantAddressOne containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-address';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        plantName: 'Valid Plant',
+        plantAddressOne: "\u{1F3E0} Fish Quay",
+        plantAddressTwo: 'Fishy Way',
+        plantTownCity: 'Seaham',
+        plantPostcode: 'SE11EA',
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ plantAddressOne: 'emojiCharactersNotPermitted' });
+  });
+
+  it('should return emojiCharactersNotPermitted for plantTownCity containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-address';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        plantName: 'Valid Plant',
+        plantAddressOne: 'Fish Quay',
+        plantAddressTwo: 'Fishy Way',
+        plantTownCity: "\u{1F30A} Seaham",
+        plantPostcode: 'SE11EA',
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ plantTownCity: 'emojiCharactersNotPermitted' });
   });
 });
