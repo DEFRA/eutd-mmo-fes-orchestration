@@ -1,5 +1,6 @@
 import * as Hapi from '@hapi/hapi';
 import logger from '../logger';
+import { performance } from 'node:perf_hooks';
 import Services from "../services/transport.service";
 import acceptsHtml from "../helpers/acceptsHtml";
 import OrchestrationService, { cleanDate, parseDate, storageNote } from "../services/orchestration.service";
@@ -45,7 +46,9 @@ export default class TransportController {
 
     payload.exportDate = cleanDate(payload.exportDate);
 
+    const mongoStart = performance.now();
     const storageDocument = await OrchestrationService.getFromMongo(userPrincipal, documentNumber, storageNote, contactId);
+    logger.info(`[PERF][transport] validateExportDate_getFromMongo=${Math.round(performance.now() - mongoStart)}ms documentNumber=${documentNumber}`);
     if (!storageDocument?.facilityArrivalDate) {
       return null;
     }
@@ -73,7 +76,9 @@ export default class TransportController {
       return null;
     }
 
+    const mongoStart = performance.now();
     const storageDocument = await OrchestrationService.getFromMongo(userPrincipal, documentNumber, storageNote, contactId);
+    logger.info(`[PERF][transport] validateArrivalDepartureDate_getFromMongo=${Math.round(performance.now() - mongoStart)}ms documentNumber=${documentNumber}`);
     if (!storageDocument?.facilityArrivalDate) {
       return null;
     }
@@ -108,11 +113,13 @@ export default class TransportController {
   }
 
   public static async addTransportDetails(req: Hapi.Request, h, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
+    const totalStart = performance.now();
     logger.info({ userPrincipal: userPrincipal }, 'Received a request to add a transport details');
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
 
     // Skip validations when saving as draft
+    const validationsStart = performance.now();
     if (!savingAsDraft) {
       const exportDateError = await this.validateExportDate(payload, userPrincipal, documentNumber, contactId, h);
       if (exportDateError) {
@@ -124,8 +131,13 @@ export default class TransportController {
         return departureDateError;
       }
     }
+    const validationsMs = Math.round(performance.now() - validationsStart);
 
+    const addTransportStart = performance.now();
     const data = await Services.addTransport(payload, documentNumber, contactId) as any;
+    const addTransportMs = Math.round(performance.now() - addTransportStart);
+
+    logger.info(`[PERF][transport] addTransportDetails validations=${validationsMs}ms addTransport=${addTransportMs}ms total=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber} savingAsDraft=${savingAsDraft}`);
 
     if (acceptsHtml(req.headers)) {
       if (savingAsDraft) {
