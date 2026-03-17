@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 import * as Hapi from '@hapi/hapi';
+import { performance } from 'node:perf_hooks';
 import { IUploadedLanding } from "../persistence/schema/uploads";
 import { buildRedirectUrlWithErrorStringInQueryParam } from '../helpers/errorExtractor';
 import { getRandomNumber } from '../helpers/utils/utils';
@@ -14,6 +15,7 @@ import ApplicationConfig from '../applicationConfig'
 import { readFavouritesProducts } from '../persistence/services/favourites';
 import { IProduct } from '../persistence/schema/userAttributes';
 import FavouritesController from './favourites.controller';
+import logger from '../logger';
 
 export default class UploadsController {
 
@@ -93,7 +95,11 @@ export default class UploadsController {
   }
 
   public static async saveLandingRows(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, uploadedLandings: IUploadedLanding[]): Promise<Hapi.ResponseObject> {
+    const totalStart = performance.now();
+
+    const validateStart = performance.now();
     const landings = await this.validateLandings(userPrincipal, uploadedLandings);
+    const validateMs = Math.round(performance.now() - validateStart);
 
     const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors?.length === 0 || !landing.errors;
     const hasValidLanding = (_: IUploadedLanding[]): boolean => _.some(isValidLanding);
@@ -110,6 +116,9 @@ export default class UploadsController {
     }
 
     const validLandings: IUploadedLanding[] = landings.filter(isValidLanding);
+
+    logger.info(`[PERF][POST /v2/save/landings] validateLandings=${validateMs}ms rows=${Array.isArray(uploadedLandings) ? uploadedLandings.length : 0} validRows=${validLandings.length}`);
+
     const exportPayload: ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId) || { items: [] };
     const totalCurrentLandings: LandingStatus[] = exportPayload.items.reduce((acc: LandingStatus[], curr: ProductLanded) => {
       if (curr.landings && curr.landings.length > 0) {
@@ -131,16 +140,36 @@ export default class UploadsController {
       });
     }
 
-    const findLanding = (currentLanding: IUploadedLanding, items: ProductLanded[]): ProductLanded =>
-      items.find((item: ProductLanded) =>
-        currentLanding.product.species === item.product.species.label &&
-        currentLanding.product.speciesCode === item.product.species.code &&
-        currentLanding.product.state === item.product.state.code &&
-        currentLanding.product.presentation === item.product.presentation.code &&
-        currentLanding.product.commodity_code === item.product.commodityCode);
+    const buildLandingKey = (landing: IUploadedLanding) => {
+      const product = landing.product;
+      return [
+        product?.species,
+        product?.speciesCode,
+        product?.state,
+        product?.presentation,
+        product?.commodity_code
+      ].join('|');
+    };
+
+    const buildItemKey = (item: ProductLanded) => {
+      return [
+        item?.product?.species?.label,
+        item?.product?.species?.code,
+        item?.product?.state?.code,
+        item?.product?.presentation?.code,
+        item?.product?.commodityCode
+      ].join('|');
+    };
+
+    const mergeStart = performance.now();
+    const itemsByKey = new Map<string, ProductLanded>();
+    exportPayload.items.forEach((item: ProductLanded) => {
+      itemsByKey.set(buildItemKey(item), item);
+    });
 
     for (const validLanding of validLandings) {
-      const item: ProductLanded = findLanding(validLanding, exportPayload.items);
+      const key = buildLandingKey(validLanding);
+      const item: ProductLanded | undefined = itemsByKey.get(key);
       const newLanding: LandingStatus = {
         model: {
           id: `${documentNumber}-${getRandomNumber()}`,
@@ -158,10 +187,30 @@ export default class UploadsController {
         }
       };
 
-      UploadsController.addLanding(item, newLanding, documentNumber, validLanding, exportPayload);
+      if (item && Array.isArray(item.landings)) {
+        item.landings.push(newLanding);
+      } else if (item) {
+        item.landings = [newLanding];
+      } else {
+        const productId = `${documentNumber}-${uuidv4()}`;
+        const product: Product = toProduct({ ...validLanding, id: productId });
+        const newItem: ProductLanded = {
+          product,
+          landings: [newLanding]
+        };
+        exportPayload.items.push(newItem);
+        itemsByKey.set(key, newItem);
+      }
     }
 
+    const mergeMs = Math.round(performance.now() - mergeStart);
+
+    const saveStart = performance.now();
     await ExportPayloadService.save(exportPayload, userPrincipal, documentNumber, contactId);
+
+    const saveMs = Math.round(performance.now() - saveStart);
+    const totalMs = Math.round(performance.now() - totalStart);
+    logger.info(`[PERF][POST /v2/save/landings] mergeRows=${mergeMs}ms saveExportPayload=${saveMs}ms total=${totalMs}ms documentNumber=${documentNumber}`);
 
     return h.response(landings).code(200);
   }

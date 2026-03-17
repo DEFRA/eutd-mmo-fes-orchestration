@@ -6,6 +6,7 @@ import acceptsHtml from '../helpers/acceptsHtml';
 import errorExtractor from "../helpers/errorExtractor";
 import logger from '../logger';
 import ApplicationConfig from "../applicationConfig";
+import { performance } from 'node:perf_hooks';
 import { virusDetected } from "../services/reference-data.service";
 import { IUploadedLanding } from "../persistence/schema/uploads";
 import { isEmpty } from "lodash";
@@ -33,7 +34,6 @@ export default class UploadsRoutes {
                 }
 
                 const fileHasVirus = await virusDetected(getFileName(payload.file),csv,documentNumber);
-
                 if (fileHasVirus === true) {
                   return h.response(getFileValidationError("error.upload.invalid-columns")).code(400);
                 }
@@ -168,6 +168,7 @@ export default class UploadsRoutes {
           cors: true,
           handler: async function (req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>) {
             return await withDocumentLegitimatelyOwned(req, h, async (userPrincipal, documentNumber, contactId) => {
+              const totalStart = performance.now();
               const rows: IUploadedLanding[] = await UploadsController.getCacheUploadedRows(userPrincipal, contactId);
 
               if (rows === undefined || rows === null) {
@@ -191,6 +192,8 @@ export default class UploadsRoutes {
 
               const response: Hapi.ResponseObject = await UploadsController.saveLandingRows(req, h, userPrincipal, documentNumber, contactId, rows);
               UploadsController.invalidateCacheUploadedRows(userPrincipal, contactId);
+
+              logger.info(`[PERF][POST /v2/save/landings] routeTotal=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber}`);
               return response;
             }).catch(error => {
               logger.error(`[SAVE-UPLOAD-FILE][ERROR][${error}]`);
