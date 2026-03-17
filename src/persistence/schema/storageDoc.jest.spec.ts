@@ -492,6 +492,8 @@ describe('When cloning a storage document', () => {
     certificateNumber: "12",
     productWeight: "12",
     weightOnCC: "12",
+    netWeightProductDeparture: "10",
+    netWeightFisheryProductDeparture: "11",
     placeOfUnloading: "12",
     dateOfUnloading: "26/05/2021",
     transportUnloadedFrom: "12",
@@ -505,6 +507,8 @@ describe('When cloning a storage document', () => {
     certificateNumber: "12",
     productWeight: "12",
     weightOnCC: "12",
+    netWeightProductDeparture: "8",
+    netWeightFisheryProductDeparture: "9",
     placeOfUnloading: "12",
     dateOfUnloading: "26/05/2021",
     transportUnloadedFrom: "12",
@@ -679,6 +683,8 @@ describe('When cloning a storage document', () => {
       expect(clone.certificateNumber).toBe(originalCatch.certificateNumber);
       expect(clone.productWeight).toBe(originalCatch.productWeight);
       expect(clone.weightOnCC).toBe(originalCatch.weightOnCC);
+      expect(clone.netWeightProductDeparture).toBe(originalCatch.netWeightProductDeparture);
+      expect(clone.netWeightFisheryProductDeparture).toBe(originalCatch.netWeightFisheryProductDeparture);
       expect(clone.dateOfUnloading).toBe(originalCatch.dateOfUnloading);
       expect(clone.placeOfUnloading).toBe(originalCatch.placeOfUnloading);
       expect(clone.transportUnloadedFrom).toBe(originalCatch.transportUnloadedFrom);
