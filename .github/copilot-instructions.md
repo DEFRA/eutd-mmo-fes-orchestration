@@ -70,7 +70,7 @@ npm run test:ci    # CI mode (runInBand, junit output)
 - Tests use **Jest** with `ts-jest` preset
 - Test files: `*.jest.spec.ts` (NOT `.spec.ts`)
 - MongoDB tests use `mongodb-memory-server`
-- Coverage thresholds: 86% branches, 90% functions/lines/statements
+- Coverage thresholds: 90% branches, 90% functions/lines/statements
 
 ### Build & Deploy
 ```bash
@@ -143,3 +143,7 @@ logger.info({
 - **Auth helpers**: `src/helpers/auth.ts`, `src/helpers/withDocumentLegitimatelyOwned.ts`
 - **Session store**: `src/session_store/redis.ts`, `src/session_store/factory.ts`
 - **Schemas**: `src/persistence/schema/{catchCert,processingStatement,storageDoc}.ts`
+
+## Skills
+
+Use `/develop` for implementation, coding, and research tasks. Use `/unit-tests` for writing tests, coverage, and SonarQube issues.

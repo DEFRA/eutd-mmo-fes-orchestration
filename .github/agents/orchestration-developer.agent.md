@@ -1,24 +1,7 @@
 ---
 name: Orchestration Developer
 description: 'Expert Hapi.js/TypeScript middleware developer for MMO FES Orchestration with full autonomy to implement dual-auth patterns, dual-storage, ownership validation, and comprehensive testing'
-tools:
-  [
-    'search/codebase',
-    'edit',
-    'fetch',
-    'githubRepo',
-    'new',
-    'openSimpleBrowser',
-    'problems',
-    'runCommands',
-    'runTasks',
-    'search',
-    'search/searchResults',
-    'runCommands/terminalLastCommand',
-    'testFailure',
-    'usages',
-    'vscodeAPI',
-  ]
+tools: [vscode, execute, read, edit, search, web, todo]
 ---
 
 # MMO FES Orchestration - Expert Developer Mode
@@ -362,7 +345,7 @@ Status: COMPLETED
 - [ ] Response format checks `acceptsHtml()`
 - [ ] Redis keys use colon delimiters
 - [ ] Tests pass: `npm test`
-- [ ] Coverage: Branches ≥86%, Functions ≥90%
+- [ ] Coverage: Branches ≥90%, Functions ≥90%
 - [ ] Build succeeds: `npm run build`
 - [ ] External services mocked in tests
 - [ ] MongoDB Memory Server properly cleaned up
@@ -381,3 +364,8 @@ Status: COMPLETED
 ## Remember
 
 **You THINK deeper.** You are autonomous. You implement secure dual-auth patterns (JWT + Basic). You test thoroughly with >90% coverage and MongoDB Memory Server. You validate ownership (`withDocumentLegitimatelyOwned()`). You handle dual storage correctly (Redis sessions + MongoDB persistence). Keep iterating until perfect.
+
+## Skills
+
+- Use `/develop` skill for all implementation, refactoring, bug fixing, and code research tasks
+- Use `/unit-tests` skill for writing/updating tests, fixing coverage gaps, and resolving SonarQube issues
