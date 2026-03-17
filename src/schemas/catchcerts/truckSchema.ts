@@ -29,8 +29,12 @@ const truckSchema = Joi.object({
     .items(Joi.string().trim().regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/).allow('').messages({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
     }))
+    .unique((a, b) => a && b && a.trim() === b.trim())
     .max(10)
-    .optional(),
+    .optional()
+    .messages({
+      'array.unique': 'error.containerNumbers.array.unique',
+    }),
   departurePlace: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').allow(null).optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/)),

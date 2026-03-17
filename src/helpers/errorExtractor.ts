@@ -26,10 +26,16 @@ const handleContainerNumbersError = (detail, errorKey, transportType, errorObjec
   
   if (detail.type === 'string.pattern.base') {
     const errorMessages = {
-      plane: 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError',
+      plane: 'ccShippingContainerNumberPatternError',
       containerVessel: 'ccShippingContainerNumberPatternError'
     };
     errorObject[errorKey] = errorMessages[transportType] || `error.${errorKey}.${detail.type}`;
+    return true;
+  }
+
+  if (detail.type === 'array.unique') {
+    const pos = detail.context?.pos;
+    errorObject[`containerNumbers.${pos}`] = 'error.containerNumbers.array.unique';
     return true;
   }
   
