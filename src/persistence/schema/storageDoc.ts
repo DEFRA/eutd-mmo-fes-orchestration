@@ -319,9 +319,5 @@ export const cloneCatches = (original: Catch): Catch => {
   return result;
 };
 
-StorageDocumentSchema.index({ contactId: 1, status: 1, createdAt: -1 });
-StorageDocumentSchema.index({ createdBy: 1, status: 1, createdAt: -1 });
-StorageDocumentSchema.index({ documentNumber: 1 });
-
 export const StorageDocumentModel = BaseModel.discriminator<StorageDocumentModel>('storageDocument', StorageDocumentSchema);
 

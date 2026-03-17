@@ -346,8 +346,4 @@ export const clearOldProcessingPlantAddress = (exportData) => {
   return clearedData;
 };
 
-ProcessingStatementSchema.index({ contactId: 1, status: 1, createdAt: -1 });
-ProcessingStatementSchema.index({ createdBy: 1, status: 1, createdAt: -1 });
-ProcessingStatementSchema.index({ documentNumber: 1 });
-
 export const ProcessingStatementModel = BaseModel.discriminator<IProcessingStatementModel>('processingStatement', ProcessingStatementSchema);
