@@ -5,6 +5,7 @@ import {
   MIN_PERSON_RESPONSIBLE_LENGTH,
 } from "../../services/constants";
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
+import { containsEmoji } from "../../validators/emojiValidator";
 import { validateCountriesName } from "../../validators/countries.validator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { ICountry } from "../../persistence/schema/common";
@@ -183,7 +184,9 @@ export default {
     if (!data.plantAddressOne && !data.plantAddressTwo && !data.plantTownCity && !data.plantPostcode) errors['plantAddressOne'] = "psAddProcessingPlantAddressErrorAddress";
     else {
       if (!data.plantAddressOne || validateWhitespace(data.plantAddressOne)) errors['plantAddressOne'] = "Enter the building and street (address line 1 of 2)";
+      else if (containsEmoji(data.plantAddressOne)) errors['plantAddressOne'] = "emojiCharactersNotPermitted";
       if (!data.plantTownCity || validateWhitespace(data.plantTownCity)) errors['plantTownCity'] = "Enter the town or city";
+      else if (containsEmoji(data.plantTownCity)) errors['plantTownCity'] = "emojiCharactersNotPermitted";
       if (!data.plantPostcode || validateWhitespace(data.plantPostcode)) errors['plantPostcode'] = "Enter the postcode";
     }
 
