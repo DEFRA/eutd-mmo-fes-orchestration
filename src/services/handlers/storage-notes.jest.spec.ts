@@ -2277,6 +2277,94 @@ describe("/create-non-manipulation-document/:documentNumber/departure-product-su
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
   });
+
+  it("Scenario 1: returns error when netWeightProductDeparture exceeds netWeightProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "20",
+          netWeightProductArrival: "10",
+          netWeightFisheryProductDeparture: "5",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightProductDeparture"]).toBe("sdNetWeightProductDepartureExceedsArrival");
+  });
+
+  it("Scenario 2: no error when netWeightProductDeparture is less than or equal to netWeightProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const dataEqual = {
+      catches: [
+        {
+          netWeightProductDeparture: "10",
+          netWeightProductArrival: "10",
+          netWeightFisheryProductDeparture: "5",
+        },
+      ],
+    };
+
+    const dataLess = {
+      catches: [
+        {
+          netWeightProductDeparture: "8",
+          netWeightProductArrival: "10",
+          netWeightFisheryProductDeparture: "5",
+        },
+      ],
+    };
+
+    const { errors: errorsEqual } = await handler({ data: dataEqual, errors: {} });
+    const { errors: errorsLess } = await handler({ data: dataLess, errors: {} });
+
+    expect(errorsEqual["catches-0-netWeightProductDeparture"]).toBeUndefined();
+    expect(errorsLess["catches-0-netWeightProductDeparture"]).toBeUndefined();
+  });
+
+  it("Scenario 3: returns error when netWeightFisheryProductDeparture exceeds netWeightProductDeparture", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "10",
+          netWeightProductArrival: "20",
+          netWeightFisheryProductDeparture: "15",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBe("sdNetWeightFisheryProductDepartureExceedsProductDeparture");
+  });
+
+  it("Scenario 3: no error when netWeightFisheryProductDeparture is equal to netWeightProductDeparture", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "10",
+          netWeightProductArrival: "20",
+          netWeightFisheryProductDeparture: "10",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
+  });
 });
 
 describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-details", () => {
