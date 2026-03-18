@@ -150,6 +150,30 @@ describe("errorExtractor", () => {
     });
   });
 
+  it("buildErrorObject() should fall back to context.pos when _original has no containerNumbers", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 2], context: { pos: 2, dupePos: 0, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "containerVessel" },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.2": "error.containerNumbers.array.unique",
+    });
+  });
+
+  it("buildErrorObject() should fall through to default error for unhandled containerNumbers error type", () => {
+    const data = {
+      details: [{ type: "any.required", path: ["containerNumbers", 0], context: {} }],
+      _original: { vehicle: "containerVessel" },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({ "containerNumbers.0": "error.containerNumbers.0.any.required" });
+  });
+
   it("buildErrorObject() should use custom message token when provided for a path detail", () => {
     const data = {
       details: [{ type: "any.required", path: ["vesselName"], message: "customTokenKey" }],
