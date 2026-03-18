@@ -150,6 +150,21 @@ describe("errorExtractor", () => {
     });
   });
 
+  it("buildErrorObject() should skip empty and null container entries when checking for duplicates", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 3], context: { pos: 3, dupePos: 1, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "containerVessel", containerNumbers: ["", null, "ABCU1234567", "ABCU1234567"] },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.3": "error.containerNumbers.array.unique",
+    });
+    expect(result).not.toHaveProperty("containerNumbers.0");
+    expect(result).not.toHaveProperty("containerNumbers.1");
+  });
+
   it("buildErrorObject() should fall back to context.pos when _original has no containerNumbers", () => {
     const data = {
       details: [{ type: "array.unique", path: ["containerNumbers", 2], context: { pos: 2, dupePos: 0, dupeValue: "ABCU1234567" } }],
