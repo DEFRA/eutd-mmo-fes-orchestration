@@ -15,6 +15,7 @@ import {
 } from '../services/constants';
 import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../session_store/constants';
 import errorExtractor from '../helpers/errorExtractor';
+import { withUserSessionDataStored, SessionData } from '../helpers/sessionManager';
 import ExportPayloadService from '../services/export-payload.service';
 import * as PayloadSchema from '../persistence/schema/frontEndModels/payload';
 import { fishingVessel } from '../persistence/schema/frontEndModels/transport';
@@ -660,6 +661,70 @@ export default class ExportPayloadController {
       return h.redirect(req.payload.currentUri).takeover();
     } else {
       return h.response(result).code(400).takeover();
+    }
+  }
+
+  /**
+   * failAction handler for the direct-landing validate route.
+   * Unlike getExportPayloadInvalidRequest, this also persists the error state to the
+   * session store so that getLandingsStatus correctly returns INCOMPLETE when the
+   * landing has outstanding validation failures (FI0-10996).
+   */
+  public static async getDirectLandingExportPayloadInvalidRequest(
+    req: any,
+    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>,
+    error: any,
+    userPrincipal: string,
+    documentNumber: string,
+    contactId: string
+  ) {
+    let result;
+
+    if (req.payload) {
+      result = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
+      result.error = 'invalid';
+      result.errors = errorExtractor(error);
+      await ExportPayloadController.persistDirectLandingErrorsToSession(result, error, userPrincipal, documentNumber, contactId);
+    }
+
+    if (acceptsHtml(req.headers)) {
+      return h.redirect(req.payload.currentUri).takeover();
+    } else {
+      return h.response(result).code(400).takeover();
+    }
+  }
+
+  /**
+   * Persists error: 'invalid' to the session for every landing in the current payload,
+   * so that getLandingsStatus can correctly return INCOMPLETE (FI0-10996).
+   */
+  private static async persistDirectLandingErrorsToSession(
+    result: any,
+    error: any,
+    userPrincipal: string,
+    documentNumber: string,
+    contactId: string
+  ) {
+    if (!result?.items) return;
+
+    const landingErrors = errorExtractor(error);
+    for (const item of result.items) {
+      if (!Array.isArray(item.landings)) continue;
+      for (const landing of item.landings) {
+        if (!landing?.model?.id) continue;
+        const sessionData: SessionData = {
+          documentNumber,
+          landing: {
+            landingId: landing.model.id,
+            addMode: false,
+            editMode: true,
+            error: 'invalid',
+            errors: landingErrors,
+            model: landing.model
+          }
+        };
+        await withUserSessionDataStored(userPrincipal, sessionData, contactId);
+      }
     }
   }
 

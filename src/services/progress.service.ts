@@ -11,6 +11,7 @@ import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/st
 import { checkTransportDataFrontEnd, toFrontEndTransport, Transport, truck, train, plane, containerVessel } from "../persistence/schema/frontEndModels/transport";
 import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
+import { getCurrentSessionData, SessionLanding } from '../helpers/sessionManager';
 import { utc } from 'moment';
 import * as ProcessingStatement from '../persistence/schema/processingStatement';
 import * as StorageDocument from '../persistence/schema/storageDoc';
@@ -121,6 +122,29 @@ export default class ProgressService {
     if (filteredErrors.length > 0) {
       return ProgressStatus.ERROR;
     }
+
+    // Check session data for any outstanding landing errors (e.g. Joi schema validation
+    // failures on the direct-landing form that are not persisted to the database).
+    // Without this check, a previously-valid direct landing remains in MongoDB and
+    // getLandingsStatus would incorrectly return COMPLETED (FI0-10996).
+    // We only flag a session error as relevant if the landing ID still exists in the
+    // current products' caughtBy – stale entries from a prior edit (where a new
+    // random ID was assigned on successful re-save) are therefore safely ignored.
+    const sessionData = await getCurrentSessionData(userPrincipal, documentNumber, contactId);
+    if (sessionData?.landings?.some((l: SessionLanding) => l.error === 'invalid')) {
+      const currentLandingIds = new Set<string>(
+        (products || []).flatMap((p: Product) =>
+          ((p as any).caughtBy || []).map((c: any) => c.id).filter(Boolean)
+        )
+      );
+      const hasSessionLandingErrors = sessionData.landings.some(
+        (l: SessionLanding) => l.error === 'invalid' && currentLandingIds.has(l.landingId)
+      );
+      if (hasSessionLandingErrors) {
+        return ProgressStatus.INCOMPLETE;
+      }
+    }
+
     if (products && products.length > 0 && !ProgressService.hasLandingData(products)) {
       return ProgressStatus.INCOMPLETE;
     }

@@ -9,6 +9,7 @@ import * as ProductValidator from "../validators/ccProductValidator";
 import * as LandingValidator from "../validators/ccLandingValidator";
 import * as AcceptsHTML from "../helpers/acceptsHtml";
 import * as FrontEndModels from "../persistence/schema/frontEndModels/payload";
+import * as SessionManager from "../helpers/sessionManager";
 import * as Utils from "../helpers/utils/utils";
 import SUT from "./export-payload.controller";
 import logger from "../logger";
@@ -2585,6 +2586,104 @@ describe("methods", () => {
       expect(mockExportPayloadServiceGet).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
       expect(mockRedirect).toHaveBeenCalled();
     });
+  });
+
+  describe("getDirectLandingExportPayloadInvalidRequest", () => {
+
+    let mockWithUserSessionDataStored: jest.SpyInstance;
+    let mockHResponse: jest.Mock;
+    let mockH: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>;
+
+    beforeEach(() => {
+      mockHResponse = jest.fn()
+        .mockReturnValue({
+          code: () => ({
+            takeover: jest.fn()
+          })
+        });
+      mockH = {
+        response: mockHResponse,
+        redirect: () => ({
+          takeover: jest.fn(),
+        }),
+      } as unknown as Hapi.ResponseToolkit<Hapi.ReqRefDefaults>;
+
+      mockWithUserSessionDataStored = jest.spyOn(SessionManager, 'withUserSessionDataStored');
+      mockWithUserSessionDataStored.mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      mockWithUserSessionDataStored.mockRestore();
+    });
+
+    it('should save error state to session for each landing and return 400 (FI0-10996)', async () => {
+      const error: any = {
+        details: [{
+          path: ['weights']
+        }]
+      };
+
+      await SUT.getDirectLandingExportPayloadInvalidRequest(
+        { ...mockReq, headers: {} },
+        mockH,
+        error,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockExportPayloadServiceGet).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+      // Session store should have been called for landings with valid model IDs
+      expect(mockWithUserSessionDataStored).toHaveBeenCalled();
+      expect(mockHResponse).toHaveBeenCalledWith(
+        expect.objectContaining({ error: 'invalid' })
+      );
+    });
+
+    it('should redirect to currentUri when request accepts HTML (FI0-10996)', async () => {
+      const error: any = {
+        details: [{
+          path: ['weights']
+        }]
+      };
+
+      const mockRedirectH = jest.fn().mockReturnValue({ takeover: jest.fn() });
+      const htmlH = {
+        response: mockHResponse,
+        redirect: mockRedirectH,
+      } as unknown as Hapi.ResponseToolkit<Hapi.ReqRefDefaults>;
+
+      await SUT.getDirectLandingExportPayloadInvalidRequest(
+        mockReq,
+        htmlH,
+        error,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockExportPayloadServiceGet).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+      expect(mockWithUserSessionDataStored).toHaveBeenCalled();
+      expect(mockRedirectH).toHaveBeenCalled();
+    });
+
+    it('should not call withUserSessionDataStored when req.payload is falsy', async () => {
+      const error: any = {
+        details: [{ path: ['weights'] }]
+      };
+
+      await SUT.getDirectLandingExportPayloadInvalidRequest(
+        { ...mockReq, headers: {}, payload: null },
+        mockH,
+        error,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockWithUserSessionDataStored).not.toHaveBeenCalled();
+    });
+
   });
 
 });

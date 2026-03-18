@@ -38,8 +38,13 @@ const schema = Joi.object({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
       'string.max': 'error.containerNumbers.string.max'
     }))
+    .unique((a, b) => a && b && a.trim() === b.trim())
+    .min(1)
     .max(10)
-    .optional(),
+    .required()
+    .messages({
+      'array.unique': 'error.containerNumbers.array.unique',
+    }),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   placeOfUnloading: Joi.when('arrival', {
     is: true,
