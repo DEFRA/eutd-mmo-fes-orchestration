@@ -2702,3 +2702,71 @@ describe('calling handler for /create-processing-statement/:documentNumber/progr
     });
   });
 });
+
+describe('emoji validation across processing statement fields', () => {
+  const baseDetails = {
+    catches: [],
+    personResponsibleForConsignment: 'Hank',
+    plantApprovalNumber: 'Marvin',
+  };
+
+  it('should return emojiCharactersNotPermitted for plantName containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: { ...baseDetails, plantName: "Plant \u{1F40F} Name" },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ plantName: 'emojiCharactersNotPermitted' });
+  });
+
+  it('should return emojiCharactersNotPermitted for personResponsibleForConsignment containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-details';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: { ...baseDetails, plantName: 'Valid Plant', personResponsibleForConsignment: "Hank \u{1F600}" },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ personResponsibleForConsignment: 'emojiCharactersNotPermitted' });
+  });
+
+  it('should return emojiCharactersNotPermitted for plantAddressOne containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-address';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        plantName: 'Valid Plant',
+        plantAddressOne: "\u{1F3E0} Fish Quay",
+        plantAddressTwo: 'Fishy Way',
+        plantTownCity: 'Seaham',
+        plantPostcode: 'SE11EA',
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ plantAddressOne: 'emojiCharactersNotPermitted' });
+  });
+
+  it('should return emojiCharactersNotPermitted for plantTownCity containing emoji', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant-address';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        plantName: 'Valid Plant',
+        plantAddressOne: 'Fish Quay',
+        plantAddressTwo: 'Fishy Way',
+        plantTownCity: "\u{1F30A} Seaham",
+        plantPostcode: 'SE11EA',
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({ plantTownCity: 'emojiCharactersNotPermitted' });
+  });
+});

@@ -853,6 +853,114 @@ test('/create-non-manipulation-document/add-storage-facility-details with whites
   }
 });
 
+test('/create-non-manipulation-document/add-storage-facility-details with emoji in facilityName validates as error', async t => {
+  try {
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [],
+      facilityName: 'Hank 😀 Marvin',
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: 'Seaham',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
+      addAnotherProduct: 'notset'
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      'storageFacilities-facilityName': 'emojiCharactersNotPermitted'
+    };
+
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('/create-non-manipulation-document/add-storage-facility-details with emoji in facilityAddressOne validates as error', async t => {
+  try {
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: '🏠 Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: 'Seaham',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
+      addAnotherProduct: 'notset'
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      'storageFacilities-facilityAddressOne': 'emojiCharactersNotPermitted'
+    };
+
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
+test('/create-non-manipulation-document/add-storage-facility-details with emoji in facilityTownCity validates as error', async t => {
+  try {
+    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [],
+      facilityName: 'Hank Marvin',
+      facilityAddressOne: 'Fish Quay',
+      facilityAddressTwo: 'Fishy Way',
+      facilityTownCity: '🌊 Seaham',
+      facilityPostcode: 'SE11EA',
+      facilityStorage: 'Chilled',
+      addAnotherProduct: 'notset'
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      'storageFacilities-facilityTownCity': 'emojiCharactersNotPermitted'
+    };
+
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.end();
+  } catch (e) {
+    t.end(e);
+  }
+});
+
 //------ TESTS FOR net weight arrival cross-field validation -----
 // Base product: certificateType 'uk' (no external country validation call),
 // no certificateNumber (early return without external call),

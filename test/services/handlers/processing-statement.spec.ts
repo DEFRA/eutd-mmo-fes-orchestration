@@ -910,3 +910,154 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
   }
   t.end();
 });
+test('/create-processing-statement/add-processing-plant-details with emoji in plantName validates as error', async t => {
+  try {
+    const currentUrl = '/create-processing-statement/add-processing-plant-details';
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [],
+      consignmentDescription: 'Consignment 1',
+      healthCertificateNumber: 'HC-111111',
+      healthCertificateDate: '31/03/2018',
+      addAnotherCatch: 'notset',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: 'Hank',
+      plantApprovalNumber: 'Marvin',
+      plantName: '🐟 Triffid Plant',
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantName: 'emojiCharactersNotPermitted'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-details with emoji in personResponsibleForConsignment validates as error', async t => {
+  try {
+    const currentUrl = '/create-processing-statement/add-processing-plant-details';
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [],
+      consignmentDescription: 'Consignment 1',
+      healthCertificateNumber: 'HC-111111',
+      healthCertificateDate: '31/03/2018',
+      addAnotherCatch: 'notset',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: 'Hank 😀',
+      plantApprovalNumber: 'Marvin',
+      plantName: 'Triffid Plant',
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      personResponsibleForConsignment: 'emojiCharactersNotPermitted'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-address with emoji in plantAddressOne validates as error', async t => {
+  try {
+    const currentUrl = '/create-processing-statement/add-processing-plant-address';
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [],
+      consignmentDescription: 'Consignment 1',
+      healthCertificateNumber: 'HC-111111',
+      healthCertificateDate: '31/03/2018',
+      addAnotherCatch: 'notset',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: 'Hank',
+      plantApprovalNumber: 'Marvin',
+      plantName: 'Triffid Plant',
+      plantAddressOne: '🏠 Fish Quay',
+      plantAddressTwo: 'Fishy Way',
+      plantTownCity: 'Seaham',
+      plantPostcode: 'SE11EA'
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantAddressOne: 'emojiCharactersNotPermitted'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-address with emoji in plantTownCity validates as error', async t => {
+  try {
+    const currentUrl = '/create-processing-statement/add-processing-plant-address';
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [],
+      consignmentDescription: 'Consignment 1',
+      healthCertificateNumber: 'HC-111111',
+      healthCertificateDate: '31/03/2018',
+      addAnotherCatch: 'notset',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: 'Hank',
+      plantApprovalNumber: 'Marvin',
+      plantName: 'Triffid Plant',
+      plantAddressOne: 'Fish Quay',
+      plantAddressTwo: 'Fishy Way',
+      plantTownCity: '🌊 Seaham',
+      plantPostcode: 'SE11EA'
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantTownCity: 'emojiCharactersNotPermitted'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
