@@ -27,6 +27,7 @@ import {
   isPlantApprovalNumberFormatValid
 } from "../orchestration.service";
 import { isEmpty } from "lodash";
+import { containsEmoji } from '../../validators/emojiValidator';
 
 export const initialState = {
   processingStatement: {
@@ -163,6 +164,8 @@ export default {
 
     if (!data.personResponsibleForConsignment || validateWhitespace(data.personResponsibleForConsignment)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignment";
+    } else if (containsEmoji(data.personResponsibleForConsignment)) {
+      errors['personResponsibleForConsignment'] = "emojiCharactersNotPermitted";
     } else if (isInvalidLength(data.personResponsibleForConsignment, MIN_PERSON_RESPONSIBLE_LENGTH, MAX_PERSON_RESPONSIBLE_LENGTH)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignmentLength";
     } else if (!validatePersonResponsibleForConsignmentFormat(data.personResponsibleForConsignment)) {
@@ -183,7 +186,9 @@ export default {
     if (!data.plantAddressOne && !data.plantAddressTwo && !data.plantTownCity && !data.plantPostcode) errors['plantAddressOne'] = "psAddProcessingPlantAddressErrorAddress";
     else {
       if (!data.plantAddressOne || validateWhitespace(data.plantAddressOne)) errors['plantAddressOne'] = "Enter the building and street (address line 1 of 2)";
+      else if (containsEmoji(data.plantAddressOne)) errors['plantAddressOne'] = "emojiCharactersNotPermitted";
       if (!data.plantTownCity || validateWhitespace(data.plantTownCity)) errors['plantTownCity'] = "Enter the town or city";
+      else if (containsEmoji(data.plantTownCity)) errors['plantTownCity'] = "emojiCharactersNotPermitted";
       if (!data.plantPostcode || validateWhitespace(data.plantPostcode)) errors['plantPostcode'] = "Enter the postcode";
     }
 
@@ -195,6 +200,8 @@ export default {
 function addProcessingPlantAddressErrors(data, errors) {
   if (!data.plantName || validateWhitespace(data.plantName)) {
     errors['plantName'] = "psAddProcessingPlantAddressErrorNullPlantName";
+  } else if (containsEmoji(data.plantName)) {
+    errors['plantName'] = "emojiCharactersNotPermitted";
   } else if (data.plantName.length > MAX_PLANT_NAME_LENGTH) {
     errors['plantName'] = "psAddProcessingPlantAddressErrorMaxLimitPlantName";
   } else if (!isPsPlantNameValid(data.plantName)) {

@@ -14,6 +14,7 @@ import {
 } from "../orchestration.service";
 
 import ApplicationConfig from '../../applicationConfig';
+import { containsEmoji } from '../../validators/emojiValidator';
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { validateCountriesName } from "../../validators/countries.validator";
@@ -140,6 +141,8 @@ export function validateStorageFacility(exportData: any, departureDate: string, 
 
   if (!exportData.facilityName || validateWhitespace(exportData.facilityName)) {
     errors[`storageFacilities-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
+  } else if (containsEmoji(exportData.facilityName)) {
+    errors[`storageFacilities-facilityName`] = `emojiCharactersNotPermitted`;
   }
 
   if (!exportData.facilityAddressOne && !exportData.facilityTownCity && !exportData.facilityPostcode) {
@@ -147,9 +150,13 @@ export function validateStorageFacility(exportData: any, departureDate: string, 
   } else {
     if (!exportData.facilityAddressOne || validateWhitespace(exportData.facilityAddressOne)) {
       errors[`storageFacilities-facilityAddressOne`] = `sdAddStorageFacilityDetailsErrorEnterTheBuilding`;
+    } else if (containsEmoji(exportData.facilityAddressOne)) {
+      errors[`storageFacilities-facilityAddressOne`] = `emojiCharactersNotPermitted`;
     }
     if (!exportData.facilityTownCity || validateWhitespace(exportData.facilityTownCity)) {
       errors[`storageFacilities-facilityTownCity`] = `sdAddStorageFacilityDetailsErrorEnterTheTown`;
+    } else if (containsEmoji(exportData.facilityTownCity)) {
+      errors[`storageFacilities-facilityTownCity`] = `emojiCharactersNotPermitted`;
     }
     if (!exportData.facilityPostcode || validateWhitespace(exportData.facilityPostcode)) {
       errors[`storageFacilities-facilityPostcode`] = `sdAddStorageFacilityDetailsErrorEnterThePostcode`;
