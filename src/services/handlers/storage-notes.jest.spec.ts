@@ -2978,3 +2978,47 @@ describe("checkNetWeightArrivalNotExceedFisheryWeight - fishery weight exceeds p
   });
 });
 
+describe("validateStorageFacility - emoji validation", () => {
+  it("should return emojiCharactersNotPermitted for facilityName containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank \u{1F600} Marvin",
+        facilityAddressOne: "Fish Quay",
+        facilityTownCity: "Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityName"]).toBe("emojiCharactersNotPermitted");
+  });
+
+  it("should return emojiCharactersNotPermitted for facilityAddressOne containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank Marvin",
+        facilityAddressOne: "\u{1F3E0} Fish Quay",
+        facilityTownCity: "Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityAddressOne"]).toBe("emojiCharactersNotPermitted");
+  });
+
+  it("should return emojiCharactersNotPermitted for facilityTownCity containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank Marvin",
+        facilityAddressOne: "Fish Quay",
+        facilityTownCity: "\u{1F30A} Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityTownCity"]).toBe("emojiCharactersNotPermitted");
+  });
+});
+
