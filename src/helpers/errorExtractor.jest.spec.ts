@@ -125,7 +125,7 @@ describe("errorExtractor", () => {
   it("buildErrorObject() should handle containerNumbers array.unique on the duplicate entry only", () => {
     const data = {
       details: [{ type: "array.unique", path: ["containerNumbers", 1], context: { pos: 1, dupePos: 0, dupeValue: "ABCU1234567" } }],
-      _original: { vehicle: "containerVessel" },
+      _original: { vehicle: "containerVessel", containerNumbers: ["ABCU1234567", "ABCU1234567"] },
     };
 
     const result = buildErrorObject(data);
@@ -134,6 +134,20 @@ describe("errorExtractor", () => {
       "containerNumbers.1": "error.containerNumbers.array.unique",
     });
     expect(result).not.toHaveProperty("containerNumbers.0");
+  });
+
+  it("buildErrorObject() should flag all duplicate container numbers, not just the first", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 2], context: { pos: 2, dupePos: 0, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "containerVessel", containerNumbers: ["ABCU1234567", "ABCJ7654321", "ABCU1234567", "ABCJ7654321"] },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.2": "error.containerNumbers.array.unique",
+      "containerNumbers.3": "error.containerNumbers.array.unique",
+    });
   });
 
   it("buildErrorObject() should use custom message token when provided for a path detail", () => {
