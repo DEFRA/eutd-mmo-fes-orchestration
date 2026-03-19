@@ -41,11 +41,9 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       .min(1)
       .max(10)
       .required()
-      .unique((a, b) => a && b && a.trim() === b.trim())
       .messages({
         'plane.array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
-        'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
-        'array.unique': 'error.containerNumbers.array.unique',
+        'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError'
       }),
     otherwise: Joi.when('vehicle', {
       is: 'containerVessel',
@@ -61,11 +59,9 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         .min(1)
         .max(10)
         .required()
-        .unique((a, b) => a && b && a.trim() === b.trim())
         .messages({
           'container-vessel.array.min': 'ccContainerVesselContainerNumberLabelError',
-          'any.required': 'ccContainerVesselContainerNumberLabelError',
-          'array.unique': 'error.containerNumbers.array.unique',
+          'any.required': 'ccContainerVesselContainerNumberLabelError'
         }),
       otherwise: Joi.when('vehicle', {
         is: Joi.valid('truck', 'train'),
@@ -79,12 +75,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
                 'string.pattern.base': 'error.containerNumbers.string.pattern.base',
               })
           )
-          .unique((a, b) => a && b && a.trim() === b.trim())
           .max(10)
-          .optional()
-          .messages({
-            'array.unique': 'error.containerNumbers.array.unique',
-          }),
+          .optional(),
         otherwise: Joi.forbidden(),
       }),
     }),
@@ -157,8 +149,8 @@ const catchCertificateTransportDetailsSchema = Joi.object({
   }),
   freightBillNumber: Joi.when('$query.draft', {
     is: true,
-  then: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)),
-  otherwise: Joi.string().trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]+$/))
+    then: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)),
+    otherwise: Joi.string().trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]+$/))
   }),
   documents: Joi.array().optional()
 });
