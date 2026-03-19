@@ -42,14 +42,6 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       .max(10)
       .required()
       .unique((a, b) => a && b && a.trim() === b.trim())
-      .custom((value, helpers) => {
-        // Check if all elements are empty
-        const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
-        if (nonEmptyItems.length === 0) {
-          return helpers.error('plane.array.min');
-        }
-        return value;
-      })
       .messages({
         'plane.array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
         'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
@@ -70,14 +62,6 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         .max(10)
         .required()
         .unique((a, b) => a && b && a.trim() === b.trim())
-        .custom((value, helpers) => {
-          // Check if all elements are empty
-          const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
-          if (nonEmptyItems.length === 0) {
-            return helpers.error('container-vessel.array.min');
-          }
-          return value;
-        })
         .messages({
           'container-vessel.array.min': 'ccContainerVesselContainerNumberLabelError',
           'any.required': 'ccContainerVesselContainerNumberLabelError',
