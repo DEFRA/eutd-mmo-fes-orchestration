@@ -18,15 +18,14 @@ export const buildRedirectUrlWithErrorStringInQueryParam = (errorDetailsObj, red
 
 const handleContainerNumbersError = (detail, errorKey, transportType, errorObject, originalData?) => {
   if (detail.path[0] !== 'containerNumbers') return false;
-  
+
   if (detail.type === 'array.min') {
     errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`;
     return true;
   }
-  
+
   if (detail.type === 'string.pattern.base') {
     const errorMessages = {
-      plane: 'ccShippingContainerNumberPatternError',
       containerVessel: 'ccShippingContainerNumberPatternError'
     };
     errorObject[errorKey] = errorMessages[transportType] || `error.${errorKey}.${detail.type}`;
@@ -53,7 +52,7 @@ const handleContainerNumbersError = (detail, errorKey, transportType, errorObjec
     }
     return true;
   }
-  
+
   return false;
 };
 
@@ -64,9 +63,9 @@ export default function buildErrorObject(data)  {
   details.forEach((detail) => {
     if (detail.path.length > 0) {
       const errorKey = detail.path.join().replace(/,/gi,'.');
-      
+
       if (handleContainerNumbersError(detail, errorKey, transportType, errorObject, _original)) return;
-      
+
       if(detail.path[0] === 'exportDate' && detail.type === 'date.min'){
         errorObject[errorKey] = `error.${transportType}.exportDate.any.min`
         return
