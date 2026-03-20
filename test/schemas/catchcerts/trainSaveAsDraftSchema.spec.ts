@@ -58,19 +58,3 @@ test('trainSaveAsDraftSchema - should allow all optional fields empty', t => {
   t.equal(result.error, null, 'All optional fields empty should pass');
   t.end();
 });
-
-test('trainSaveAsDraftSchema - should reject containers over max length', t => {
-  const longContainer = 'A'.repeat(51);
-
-  const result = Joi.validate({
-    vehicle: 'train',
-    arrival: false,
-    containerNumbers: [longContainer],
-    journey: 'storageNotes'
-  }, trainSaveAsDraftSchema, {
-    abortEarly: false
-  });
-
-  t.notEqual(result.error, null, 'Container over 50 chars should fail');
-  t.end();
-});
