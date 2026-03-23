@@ -6641,6 +6641,47 @@ describe('getStorageDocumentProgress', () => {
       expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
     });
 
+    it('should return COMPLETED transportDetails when departure transport details are complete and date is after arrival, even when catches are incomplete (FI0-11073)', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "ABCU1234567",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+      expect((result.progress as StorageDocumentProgress).catches).toBe(ProgressStatus.INCOMPLETE);
+    });
+
     it('should return false when firstDateStr is undefined in isFirstDateAfterSecondDate', () => {
       const result = ProgressService.isFirstDateAfterSecondDate(undefined, '14/01/2026');
       expect(result).toBe(false);

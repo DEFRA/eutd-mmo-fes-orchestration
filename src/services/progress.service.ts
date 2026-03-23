@@ -17,7 +17,7 @@ import * as ProcessingStatement from '../persistence/schema/processingStatement'
 import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
-import { checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent, checkNetWeightFisheryProductDepartureIsZeroPositive, checkNetWeightProductDepartureIsZeroPositive, validateEntry, validateProduct, validateStorageFacility, validateStorageApproval } from './handlers/storage-notes';
+import { validateEntry, validateProduct, validateStorageFacility, validateStorageApproval } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
@@ -637,19 +637,6 @@ export default class ProgressService {
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
-    const hasAtLeastOneCatch = data?.exportData?.catches?.length > 0
-    const catchErrors = hasAtLeastOneCatch ? {} : { "catches": "at least one catch is required" };
-
-    if (hasAtLeastOneCatch) {
-      for (const [index, ctch] of data.exportData.catches.entries()) {
-        checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, catchErrors);
-        checkNetWeightProductDepartureIsZeroPositive(ctch, index, catchErrors);
-        checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, catchErrors);
-      }
-    }
-
-    const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED && isEmpty(catchErrors);
-
     // Check facility validation errors
     const facilityErrors = {};
     const departureDate = data?.exportData?.arrivalTransportation?.departureDate;
@@ -668,7 +655,7 @@ export default class ProgressService {
 
     // Check if departure transportation date is after arrival transportation departure date
     const isDepartureAfterArrival = data?.exportData?.arrivalTransportation ? ProgressService.isDepartureTransportAfterArrivalTransport(data?.exportData?.transportation, data?.exportData?.arrivalTransportation) : true;
-    const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete && isDepartureAfterArrival ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+    const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isDepartureAfterArrival ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
 
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
