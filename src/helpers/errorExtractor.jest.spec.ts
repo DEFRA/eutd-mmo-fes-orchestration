@@ -97,7 +97,7 @@ describe("errorExtractor", () => {
 
     const result = buildErrorObject(data);
 
-    expect(result).toEqual({ containerNumbers: "ccShippingContainerNumberPatternError" });
+    expect(result).toEqual({ containerNumbers: "error.containerNumbers.string.pattern.base" });
   });
 
   it("buildErrorObject() should handle containerNumbers string.pattern.base for containerVessel transport", () => {
@@ -125,7 +125,7 @@ describe("errorExtractor", () => {
   it("buildErrorObject() should handle containerNumbers array.unique on the duplicate entry only", () => {
     const data = {
       details: [{ type: "array.unique", path: ["containerNumbers", 1], context: { pos: 1, dupePos: 0, dupeValue: "ABCU1234567" } }],
-      _original: { vehicle: "containerVessel" },
+      _original: { vehicle: "containerVessel", containerNumbers: ["ABCU1234567", "ABCU1234567"] },
     };
 
     const result = buildErrorObject(data);
@@ -134,6 +134,59 @@ describe("errorExtractor", () => {
       "containerNumbers.1": "error.containerNumbers.array.unique",
     });
     expect(result).not.toHaveProperty("containerNumbers.0");
+  });
+
+  it("buildErrorObject() should flag all duplicate container numbers, not just the first", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 2], context: { pos: 2, dupePos: 0, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "containerVessel", containerNumbers: ["ABCU1234567", "ABCJ7654321", "ABCU1234567", "ABCJ7654321"] },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.2": "error.containerNumbers.array.unique",
+      "containerNumbers.3": "error.containerNumbers.array.unique",
+    });
+  });
+
+  it("buildErrorObject() should skip empty and null container entries when checking for duplicates", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 3], context: { pos: 3, dupePos: 1, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "containerVessel", containerNumbers: ["", null, "ABCU1234567", "ABCU1234567"] },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.3": "error.containerNumbers.array.unique",
+    });
+    expect(result).not.toHaveProperty("containerNumbers.0");
+    expect(result).not.toHaveProperty("containerNumbers.1");
+  });
+
+  it("buildErrorObject() should fall back to context.pos when _original has no containerNumbers", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 2], context: { pos: 2, dupePos: 0, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "containerVessel" },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.2": "error.containerNumbers.array.unique",
+    });
+  });
+
+  it("buildErrorObject() should fall through to default error for unhandled containerNumbers error type", () => {
+    const data = {
+      details: [{ type: "any.required", path: ["containerNumbers", 0], context: {} }],
+      _original: { vehicle: "containerVessel" },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({ "containerNumbers.0": "error.containerNumbers.0.any.required" });
   });
 
   it("buildErrorObject() should use custom message token when provided for a path detail", () => {

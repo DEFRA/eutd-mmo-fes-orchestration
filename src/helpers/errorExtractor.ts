@@ -16,17 +16,16 @@ export const buildRedirectUrlWithErrorStringInQueryParam = (errorDetailsObj, red
     return `${redirectTo}?error=${errQueryString}`;
 }
 
-const handleContainerNumbersError = (detail, errorKey, transportType, errorObject) => {
+const handleContainerNumbersError = (detail, errorKey, transportType, errorObject, originalData?) => {
   if (detail.path[0] !== 'containerNumbers') return false;
-  
+
   if (detail.type === 'array.min') {
     errorObject['containerNumbers.0'] = `error.${errorKey}.${detail.type}`;
     return true;
   }
-  
+
   if (detail.type === 'string.pattern.base') {
     const errorMessages = {
-      plane: 'ccShippingContainerNumberPatternError',
       containerVessel: 'ccShippingContainerNumberPatternError'
     };
     errorObject[errorKey] = errorMessages[transportType] || `error.${errorKey}.${detail.type}`;
@@ -34,11 +33,26 @@ const handleContainerNumbersError = (detail, errorKey, transportType, errorObjec
   }
 
   if (detail.type === 'array.unique') {
-    const pos = detail.context?.pos;
-    errorObject[`containerNumbers.${pos}`] = 'error.containerNumbers.array.unique';
+    const containers: string[] | undefined = originalData?.containerNumbers;
+    if (containers) {
+      // Find ALL duplicate positions, not just the one Joi reported
+      const seen = new Map<string, number>();
+      containers.forEach((val, idx) => {
+        const trimmed = val?.trim();
+        if (!trimmed) return;
+        if (seen.has(trimmed)) {
+          errorObject[`containerNumbers.${idx}`] = 'error.containerNumbers.array.unique';
+        } else {
+          seen.set(trimmed, idx);
+        }
+      });
+    } else {
+      const pos = detail.context?.pos;
+      errorObject[`containerNumbers.${pos}`] = 'error.containerNumbers.array.unique';
+    }
     return true;
   }
-  
+
   return false;
 };
 
@@ -49,9 +63,9 @@ export default function buildErrorObject(data)  {
   details.forEach((detail) => {
     if (detail.path.length > 0) {
       const errorKey = detail.path.join().replace(/,/gi,'.');
-      
-      if (handleContainerNumbersError(detail, errorKey, transportType, errorObject)) return;
-      
+
+      if (handleContainerNumbersError(detail, errorKey, transportType, errorObject, _original)) return;
+
       if(detail.path[0] === 'exportDate' && detail.type === 'date.min'){
         errorObject[errorKey] = `error.${transportType}.exportDate.any.min`
         return

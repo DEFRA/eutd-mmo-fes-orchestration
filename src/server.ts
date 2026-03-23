@@ -65,8 +65,7 @@ export default class Server {
 
       await Server._instance.register([
         { plugin: require('@hapi/inert') },
-        { plugin: require('@hapi/vision') },
-        { plugin: require('hapi-boom-decorators') }
+        { plugin: require('@hapi/vision') }
       ]);
       await Router.loadRoutes(Server._instance);
 

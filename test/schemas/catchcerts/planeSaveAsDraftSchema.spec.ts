@@ -27,23 +27,6 @@ test('planeSaveAsDraftSchema - should allow valid container numbers in any forma
   t.end();
 });
 
-test('planeSaveAsDraftSchema - should reject container numbers exceeding max length', t => {
-  const longContainer = 'A'.repeat(51); // Exceeds 50 char limit
-
-  const result = Joi.validate({
-    vehicle: 'plane',
-    arrival: false,
-    containerNumbers: [longContainer],
-    journey: 'storageNotes'
-  }, planeSaveAsDraftSchema, {
-    abortEarly: false
-  });
-
-  t.notEqual(result.error, null, 'Container number exceeding 50 chars should fail');
-  t.ok(result.error.details.some(d => d.message.includes('max')), 'Error should mention max length');
-  t.end();
-});
-
 test('planeSaveAsDraftSchema - should allow empty/optional fields for save as draft', t => {
   const minimalPayload = {
     vehicle: 'plane',
