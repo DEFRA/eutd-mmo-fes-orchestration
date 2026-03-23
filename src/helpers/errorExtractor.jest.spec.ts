@@ -97,7 +97,7 @@ describe("errorExtractor", () => {
 
     const result = buildErrorObject(data);
 
-    expect(result).toEqual({ containerNumbers: "ccShippingContainerNumberPatternError" });
+    expect(result).toEqual({ containerNumbers: "error.containerNumbers.string.pattern.base" });
   });
 
   it("buildErrorObject() should handle containerNumbers string.pattern.base for containerVessel transport", () => {

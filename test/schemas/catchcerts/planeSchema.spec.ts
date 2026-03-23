@@ -205,15 +205,9 @@ describe('planeSchema - containerNumbers validation', () => {
     expect(err.message).toBe('error.containerNumbers.string.pattern.base');
   });
 
-  it('returns string.max error when an item exceeds 50 characters', () => {
-    // The container number regex only allows 11-char format, so a longer string
-    // triggers the pattern error before max. Use a string that is all digits to
-    // bypass the regex (empty string is allowed, so a non-empty all-digit string
-    // that is > 50 chars will reach the max check).
-    // In practice, Joi evaluates string.max before the regex when .max() precedes .regex().
-    // The schema uses .trim().regex(...).max(50) — regex is evaluated first.
-    // A 51-char string of valid regex chars (e.g. empty-allowed blank is fine, but
-    // a non-matching long string) fails pattern. Accept string.pattern.base here.
+  it('returns string.pattern.base error when item does not match ISO 6346 format', () => {
+    // For the plane schema, the regex /^$|^[A-Z]{3}[UJZR]\d{7}$/ rejects non-matching strings.
+    // A long string of 'A' characters does not match the pattern.
     const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
     const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
     expect(error).toBeDefined();
