@@ -55,6 +55,8 @@ export default {
       checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, errors);
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, errors);
+      checkNetWeightProductDepartureExceedsArrival(ctch, index, errors);
+      checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch, index, errors);
 
       if (isEmpty(errors)) {
         ctch.productWeight = ctch.netWeightProductDeparture ? ctch.netWeightProductDeparture : ctch.netWeightFisheryProductDeparture
@@ -116,6 +118,31 @@ export function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, i
     errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDeparturePositiveMax2Decimal';
   } else if (ctch.netWeightFisheryProductDeparture && !isNotExceed12Digit(ctch.netWeightFisheryProductDeparture)) {
     errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceed12Digit';
+  }
+}
+
+// Scenario 1 & 2: departure weight cannot exceed arrival weight
+export function checkNetWeightProductDepartureExceedsArrival(ctch: any, index: number, errors: any) {
+  if (
+    !errors[`catches-${index}-netWeightProductDeparture`] &&
+    ctch.netWeightProductDeparture &&
+    ctch.netWeightProductArrival &&
+    (+ctch.netWeightProductDeparture) > (+ctch.netWeightProductArrival)
+  ) {
+    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceedsArrival';
+  }
+}
+
+// Scenario 3: fishery product departure weight cannot exceed net product departure weight
+export function checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch: any, index: number, errors: any) {
+  if (
+    !errors[`catches-${index}-netWeightFisheryProductDeparture`] &&
+    !errors[`catches-${index}-netWeightProductDeparture`] &&
+    ctch.netWeightFisheryProductDeparture &&
+    ctch.netWeightProductDeparture &&
+    (+ctch.netWeightFisheryProductDeparture) > (+ctch.netWeightProductDeparture)
+  ) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceedsProductDeparture';
   }
 }
 
