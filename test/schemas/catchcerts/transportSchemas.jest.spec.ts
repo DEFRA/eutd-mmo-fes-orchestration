@@ -439,7 +439,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       });
     });
 
-    it('should reject containerNumbers item exceeding 50 characters for plane', () => {
+    it('should NOT reject containerNumbers item exceeding 50 characters for plane', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
@@ -451,8 +451,7 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
 
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
-      expect(error).toBeDefined();
-      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
+      expect(error).toBeUndefined();
     });
 
     it('should reject containerNumbers with invalid format for plane', () => {

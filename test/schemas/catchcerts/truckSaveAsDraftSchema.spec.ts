@@ -59,19 +59,3 @@ test('truckSaveAsDraftSchema - should allow optional fields for save as draft', 
   t.equal(result.error, null, 'All optional fields empty should pass');
   t.end();
 });
-
-test('truckSaveAsDraftSchema - should reject container numbers exceeding max length', t => {
-  const longContainer = 'A'.repeat(51);
-
-  const result = Joi.validate({
-    vehicle: 'truck',
-    arrival: false,
-    containerNumbers: [longContainer],
-    journey: 'storageNotes'
-  }, truckSaveAsDraftSchema, {
-    abortEarly: false
-  });
-
-  t.notEqual(result.error, null, 'Container exceeding 50 chars should fail');
-  t.end();
-});
