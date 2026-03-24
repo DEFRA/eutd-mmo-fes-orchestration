@@ -946,6 +946,7 @@ export default class ExportPayloadController {
   }
 
   public static async validateExportPayloadAndSaveAsDraft(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal, documentNumber, contactId: string) {
+    logger.info({ userPrincipal }, 'Received a request to validate export payload and save as draft');
     return ExportPayloadController.validate(req, h, true, userPrincipal, documentNumber, contactId);
   }
 

@@ -1,6 +1,7 @@
 import * as Hapi from '@hapi/hapi';
 import Services from '../services/exportLocation.service';
 import acceptsHtml from "../helpers/acceptsHtml";
+import logger from '../logger';
 
 export default class ExportLocationController {
 
@@ -23,6 +24,7 @@ export default class ExportLocationController {
   }
 
   public static async addExportLocationAndSaveAsDraft(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, saveAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
+    logger.info({ userPrincipal }, 'Received a request to add export location and save as draft');
     return ExportLocationController.addExportLocation(req, h, saveAsDraft, userPrincipal, documentNumber, contactId);
   }
 

@@ -114,6 +114,7 @@ export default class ExporterController {
   }
 
   public static async addExporterDetailsAndDraftLink(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
+    logger.info({ userPrincipal }, 'Received a request to add exporter details and save as draft');
     return await ExporterController.addExporterDetails(req, h, true, userPrincipal,documentNumber, contactId);
   }
 }
