@@ -264,10 +264,21 @@ function setCatchFieldsUndefined(ctch: any) {
 
 export async function validateCatchDetails(ctch: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
   validateSpeciesInput(ctch, index, errors);
+  if (!errors[`catches-${index}-species`]) {
+    await validateSpeciesAgainstReferenceData(ctch, index, errors);
+  }
   await validateIssuingCountryForNonUKCatch(ctch, index, errors);
   await validateCatchCertificateNumber(ctch, index, errors, documentNumber, userPrincipal, contactId);
 
   return { errors };
+}
+
+async function validateSpeciesAgainstReferenceData(ctch: any, index: number, errors: any) {
+  const refUrl = applicationConfig.getReferenceServiceUrl();
+  const anyError = await validateSpeciesName(ctch.species, ctch.scientificName, refUrl);
+  if (anyError.isError) {
+    errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
+  }
 }
 
 function validateSpeciesInput(ctch: any, index: number, errors: any) {
@@ -391,3 +402,4 @@ export async function validateProductDescription(product: any, errors: any) {
 
   return { errors };
 }
+

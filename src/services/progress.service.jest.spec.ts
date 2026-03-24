@@ -2655,6 +2655,7 @@ describe('getProcessingStatementProgress', () => {
   let mockValidateSpeciesMissing: jest.SpyInstance;
   let mockValidateCountriesName: jest.SpyInstance;
   let mockLoggerInfo: jest.SpyInstance;
+  let mockValidateSpeciesName: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidateCompletedDocument = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
@@ -2663,6 +2664,8 @@ describe('getProcessingStatementProgress', () => {
     mockValidateSpeciesMissing.mockResolvedValue(true);
     mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
     mockValidateCountriesName.mockResolvedValue({ isError: false });
+    mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
     mockProcessingStatementDraft = jest.spyOn(
       ProcessingStatementService,
       'getDraft'
@@ -4540,6 +4543,50 @@ describe('getProcessingStatementProgress', () => {
       documentNumber,
       contactId
     );
+  });
+
+  it('will return INCOMPLETE processedProductDetails if a catch has an invalid FAO code or species name not found in reference data (UAT-553)', async () => {
+    mockValidateSpeciesName.mockResolvedValue({ isError: true });
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            species: 'InvalidSpecies (XXX)',
+            speciesCode: 'XXX',
+            id: '2342234-1610018899',
+            catchCertificateNumber: '12345',
+            catchCertificateType: 'non_uk',
+            totalWeightLanded: '34',
+            exportWeightBeforeProcessing: '34',
+            exportWeightAfterProcessing: '45',
+            scientificName: 'invalidScientificName',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockValidateSpeciesName).toHaveBeenCalled();
   });
 });
 

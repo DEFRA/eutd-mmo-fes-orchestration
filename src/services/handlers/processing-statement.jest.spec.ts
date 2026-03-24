@@ -395,14 +395,18 @@ it('calling handler for /create-processing-statement/:documentNumber/catch-added
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-details', () => {
   let mockValidateCountriesName: jest.SpyInstance;
+  let mockValidateSpeciesName: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
     mockValidateCountriesName.mockResolvedValue({ isError: false, error: null });
+    mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
   });
 
   afterEach(() => {
     mockValidateCountriesName.mockRestore();
+    mockValidateSpeciesName.mockRestore();
   });
 
   it('should return errors when required props are missing', async () => {
