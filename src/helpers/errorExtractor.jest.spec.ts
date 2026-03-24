@@ -136,6 +136,19 @@ describe("errorExtractor", () => {
     expect(result).not.toHaveProperty("containerNumbers.0");
   });
 
+  it("buildErrorObject() should use same duplicate error key for plane transport", () => {
+    const data = {
+      details: [{ type: "array.unique", path: ["containerNumbers", 1], context: { pos: 1, dupePos: 0, dupeValue: "ABCU1234567" } }],
+      _original: { vehicle: "plane", containerNumbers: ["ABCU1234567", "ABCU1234567"] },
+    };
+
+    const result = buildErrorObject(data);
+
+    expect(result).toEqual({
+      "containerNumbers.1": "error.containerNumbers.array.unique",
+    });
+  });
+
   it("buildErrorObject() should flag all duplicate container numbers, not just the first", () => {
     const data = {
       details: [{ type: "array.unique", path: ["containerNumbers", 2], context: { pos: 2, dupePos: 0, dupeValue: "ABCU1234567" } }],
