@@ -975,71 +975,55 @@ export default class ExportPayloadController {
       logger.info(`[PERF][GET /v1/export-certificates/landings-type] cache=MISS documentNumber=${documentNumber}`);
     } catch (e) {
       // Cache failures should not break the request; fall through to compute.
-      logger.warn(`[LANDINGS-TYPE][CACHE][ERROR][${(e as any)?.message || e}]`);
+      logger.warn(`[LANDINGS-TYPE][CACHE][ERROR][${(e)?.message || e}]`);
     }
 
     const entryOptionStart = performance.now();
     const landingsEntryOption: LandingsEntryOptions = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId);
     const entryOptionMs = Math.round(performance.now() - entryOptionStart);
 
-    if (landingsEntryOption) {
-      const result = { landingsEntryOption, generatedByContent: false };
-      logger.info(`[PERF][GET /v1/export-certificates/landings-type] getEntryOption=${entryOptionMs}ms total=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber}`);
+    // helper to write cache and return result - reduces duplication
+    const writeCacheAndReturn = async (result: { landingsEntryOption: any; generatedByContent: boolean }, extra?: { exportPayloadMs?: number; transportDetailsMs?: number; uniqueLandings?: number }) => {
+      const { exportPayloadMs = 0, transportDetailsMs = 0, uniqueLandings = 0 } = extra || {};
+      logger.info(`[PERF][GET /v1/export-certificates/landings-type] getEntryOption=${entryOptionMs}ms getExportPayload=${exportPayloadMs}ms getTransportDetails=${transportDetailsMs}ms uniqueLandings=${uniqueLandings} total=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber}`);
       try {
         const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
         await sessionStore.writeFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber), result as any, LANDINGS_TYPE_CACHE_TTL_SECONDS);
       } catch (e) {
-        logger.warn(`[LANDINGS-TYPE][CACHE-WRITE][ERROR][${(e as any)?.message || e}]`);
+        logger.warn(`[LANDINGS-TYPE][CACHE-WRITE][ERROR][${(e)?.message || e}]`);
       }
       return result;
-    }
-    else {
-      const exportPayloadStart = performance.now();
-      const exportPayload = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
-      const exportPayloadMs = Math.round(performance.now() - exportPayloadStart);
-      const numberOfUniqueLandings = ExportPayloadController.numberOfUniqueLandings(exportPayload);
-      let isDirectLanding = false;
+    };
 
-      let transportDetailsMs = 0;
-
-      if (numberOfUniqueLandings === 1) {
-        const transportDetailsStart = performance.now();
-        const transportDetails = await TransportService.getTransportDetails(userPrincipal, CATCH_CERTIFICATE_KEY, documentNumber, contactId);
-        transportDetailsMs = Math.round(performance.now() - transportDetailsStart);
-
-        isDirectLanding = numberOfUniqueLandings === 1 && transportDetails.vehicle && transportDetails.vehicle === fishingVessel;
-      }
-
-      if (isDirectLanding) {
-        const result = { landingsEntryOption: LandingsEntryOptions.DirectLanding, generatedByContent: true };
-        logger.info(`[PERF][GET /v1/export-certificates/landings-type] getEntryOption=${entryOptionMs}ms getExportPayload=${exportPayloadMs}ms getTransportDetails=${transportDetailsMs}ms uniqueLandings=${numberOfUniqueLandings} total=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber}`);
-        try {
-          const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
-          await sessionStore.writeFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber), result as any, LANDINGS_TYPE_CACHE_TTL_SECONDS);
-        } catch (e) {
-          logger.warn(`[LANDINGS-TYPE][CACHE-WRITE][ERROR][${(e as any)?.message || e}]`);
-        }
-        return result;
-      }
-      else if (numberOfUniqueLandings > 0) {
-        const result = { landingsEntryOption: LandingsEntryOptions.ManualEntry, generatedByContent: true };
-        logger.info(`[PERF][GET /v1/export-certificates/landings-type] getEntryOption=${entryOptionMs}ms getExportPayload=${exportPayloadMs}ms getTransportDetails=${transportDetailsMs}ms uniqueLandings=${numberOfUniqueLandings} total=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber}`);
-        try {
-          const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
-          await sessionStore.writeFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber), result as any, LANDINGS_TYPE_CACHE_TTL_SECONDS);
-        } catch (e) {
-          logger.warn(`[LANDINGS-TYPE][CACHE-WRITE][ERROR][${(e as any)?.message || e}]`);
-        }
-        return result;
-      }
-      else {
-        // Do not cache null - this is a transient state (no selection made yet) and caching it
-        // would prevent the user from being able to select a landing type on the next page load.
-        logger.info(`[PERF][GET /v1/export-certificates/landings-type] getEntryOption=${entryOptionMs}ms getExportPayload=${exportPayloadMs}ms getTransportDetails=${transportDetailsMs}ms uniqueLandings=${numberOfUniqueLandings} total=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber}`);
-        return { landingsEntryOption: null, generatedByContent: false };
-      }
+    if (landingsEntryOption) {
+      return writeCacheAndReturn({ landingsEntryOption, generatedByContent: false }, { exportPayloadMs: 0, transportDetailsMs: 0, uniqueLandings: 0 });
     }
 
+    const exportPayloadStart = performance.now();
+    const exportPayload = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
+    const exportPayloadMs = Math.round(performance.now() - exportPayloadStart);
+    const numberOfUniqueLandings = ExportPayloadController.numberOfUniqueLandings(exportPayload);
+
+    let transportDetailsMs = 0;
+    let isDirectLanding = false;
+    if (numberOfUniqueLandings === 1) {
+      const transportDetailsStart = performance.now();
+      const transportDetails = await TransportService.getTransportDetails(userPrincipal, CATCH_CERTIFICATE_KEY, documentNumber, contactId);
+      transportDetailsMs = Math.round(performance.now() - transportDetailsStart);
+      isDirectLanding = transportDetails?.vehicle === fishingVessel;
+    }
+
+    if (isDirectLanding) {
+      return writeCacheAndReturn({ landingsEntryOption: LandingsEntryOptions.DirectLanding, generatedByContent: true }, { exportPayloadMs, transportDetailsMs, uniqueLandings: numberOfUniqueLandings });
+    }
+
+    if (numberOfUniqueLandings > 0) {
+      return writeCacheAndReturn({ landingsEntryOption: LandingsEntryOptions.ManualEntry, generatedByContent: true }, { exportPayloadMs, transportDetailsMs, uniqueLandings: numberOfUniqueLandings });
+    }
+
+    // Transient state - do not cache
+    logger.info(`[PERF][GET /v1/export-certificates/landings-type] getEntryOption=${entryOptionMs}ms getExportPayload=${exportPayloadMs}ms getTransportDetails=${transportDetailsMs}ms uniqueLandings=${numberOfUniqueLandings} total=${Math.round(performance.now() - totalStart)}ms documentNumber=${documentNumber}`);
+    return { landingsEntryOption: null, generatedByContent: false };
   }
 
   public static async addLandingsEntryOption(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {
