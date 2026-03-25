@@ -103,8 +103,8 @@ export const validateSpecies = async (
     (commodity: ICommodityCodeExtended) =>
       commodity.code === species.commodity_code
       && `${commodity.faoName} (${species.speciesCode})` === species.species
-      && commodity.presentationLabel && commodity.presentationLabel.toLowerCase() === species.presentationLabel.toLowerCase()
-      && commodity.stateLabel && commodity.stateLabel.toLowerCase() === species.stateLabel.toLowerCase()
+      && commodity.presentationLabel?.toLowerCase() === species.presentationLabel.toLowerCase()
+      && commodity.stateLabel?.toLowerCase() === species.stateLabel.toLowerCase()
   )) {
     return {
       isError: false,
