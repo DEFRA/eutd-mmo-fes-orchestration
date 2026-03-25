@@ -2512,6 +2512,25 @@ describe('getTransportDetails', () => {
     );
   });
 
+  it('should return INCOMPLETE for a plane with a containerNumbers entry exceeding 50 characters', () => {
+    const transport: Transport = {
+      vehicle: 'plane',
+      exportedTo: {
+        officialCountryName: 'Brazil',
+        isoCodeAlpha2: 'BR',
+        isoCodeAlpha3: 'BRA',
+        isoNumericCode: '076',
+      },
+      flightNumber: 'BA123',
+      departurePlace: 'London Heathrow',
+      containerNumbers: ['A'.repeat(51)],
+    };
+
+    expect(ProgressService.getTransportDetails(transport)).toBe(
+      ProgressStatus.INCOMPLETE
+    );
+  });
+
   it('should return INCOMPLETED for a container vessel with a departure place with validation errors', () => {
     const transport: Transport = {
       vehicle: 'containerVessel',
