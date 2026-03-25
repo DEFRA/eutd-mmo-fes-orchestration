@@ -4,6 +4,6 @@ export default function acceptsSortSite(headers: Record<string, any>): boolean {
         return false;
     }
 
-    const acceptToArray = accept.split(',').map(a=>a.trim());
-    return acceptToArray.includes('application/x-ms-application') && acceptToArray.includes('application/x-ms-xbap');
+    const acceptToArray = new Set(accept.split(',').map(a=>a.trim()));
+    return acceptToArray.has('application/x-ms-application') && acceptToArray.has('application/x-ms-xbap');
 }
