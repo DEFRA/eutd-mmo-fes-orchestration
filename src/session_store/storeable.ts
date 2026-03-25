@@ -25,7 +25,7 @@ export interface IStorage<T extends IStoreable> extends
 export interface IUserStorage<T extends IStoreable> {
   readFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string): Promise<T>
   readAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string): Promise<T[]>
-  writeFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T): Promise<void>
+  writeFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T, ttlSeconds?: number): Promise<void>
   writeAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T[]): Promise<void>
   deleteFor(userPrincipal: string, contactId: string, key: string): Promise<void>
 }
@@ -50,6 +50,6 @@ export interface IAllUsersStorage<T extends IStoreable> {
 
 
 export interface IStorageInitializer {
-  initialize(options?: object): void
+  initialize(options?: object): void | Promise<void>
   cleanUp(): void
 }

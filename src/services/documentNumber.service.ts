@@ -84,10 +84,10 @@ export default class DocumentNumberService {
   }
 
   public static async getDraftDocuments(userPrincipal:any, key:string, contactId: string): Promise<CatchCertificateDraft[]|ProcessingStatementDraft[]|StorageDocumentDraft[]> {
-    if (RegExp(processingStatement).exec(key)) {
+    if (new RegExp(processingStatement).exec(key)) {
       return await ProcessingStatementService.getDraftDocumentHeaders(userPrincipal, contactId) || [];
     }
-    else if (RegExp(storageNote).exec(key)) {
+    else if (new RegExp(storageNote).exec(key)) {
       return await StorageDocumentService.getDraftDocumentHeaders(userPrincipal, contactId) || [];
     }
     return await CatchCertService.getDraftCatchCertHeadersForUser(userPrincipal, contactId) || [];
@@ -182,8 +182,8 @@ export default class DocumentNumberService {
 
 function randomId() {
   // taken from https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-  return 'xxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); // tslint:disable-line
+  return 'xxxxxxxxx'.replaceAll(/[xy]/g, (c) => {
+    const r = Math.trunc(Math.random() * 16), v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16).toUpperCase();
   });
 }

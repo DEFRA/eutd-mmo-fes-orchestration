@@ -2655,6 +2655,7 @@ describe('getProcessingStatementProgress', () => {
   let mockValidateSpeciesMissing: jest.SpyInstance;
   let mockValidateCountriesName: jest.SpyInstance;
   let mockLoggerInfo: jest.SpyInstance;
+  let mockValidateSpeciesName: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidateCompletedDocument = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
@@ -2663,6 +2664,8 @@ describe('getProcessingStatementProgress', () => {
     mockValidateSpeciesMissing.mockResolvedValue(true);
     mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
     mockValidateCountriesName.mockResolvedValue({ isError: false });
+    mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
     mockProcessingStatementDraft = jest.spyOn(
       ProcessingStatementService,
       'getDraft'
@@ -4540,6 +4543,50 @@ describe('getProcessingStatementProgress', () => {
       documentNumber,
       contactId
     );
+  });
+
+  it('will return INCOMPLETE processedProductDetails if a catch has an invalid FAO code or species name not found in reference data (UAT-553)', async () => {
+    mockValidateSpeciesName.mockResolvedValue({ isError: true });
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            species: 'InvalidSpecies (XXX)',
+            speciesCode: 'XXX',
+            id: '2342234-1610018899',
+            catchCertificateNumber: '12345',
+            catchCertificateType: 'non_uk',
+            totalWeightLanded: '34',
+            exportWeightBeforeProcessing: '34',
+            exportWeightAfterProcessing: '45',
+            scientificName: 'invalidScientificName',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockValidateSpeciesName).toHaveBeenCalled();
   });
 });
 
@@ -6639,6 +6686,47 @@ describe('getStorageDocumentProgress', () => {
       const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
 
       expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return COMPLETED transportDetails when departure transport details are complete and date is after arrival, even when catches are incomplete (FI0-11073)', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "ABCU1234567",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+      expect((result.progress as StorageDocumentProgress).catches).toBe(ProgressStatus.INCOMPLETE);
     });
 
     it('should return false when firstDateStr is undefined in isFirstDateAfterSecondDate', () => {

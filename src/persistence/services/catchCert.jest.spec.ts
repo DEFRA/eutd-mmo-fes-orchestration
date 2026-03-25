@@ -52,7 +52,7 @@ describe("catchCert - saveDraftCache", () => {
 
     expect(mockGetSessionStore).toHaveBeenCalledTimes(1);
     expect(mockSessionStore.writeFor).toHaveBeenCalledTimes(1);
-    expect(mockSessionStore.writeFor).toHaveBeenCalledWith('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', testData);
+    expect(mockSessionStore.writeFor).toHaveBeenCalledWith('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', testData, undefined);
   });
 });
 
@@ -618,7 +618,7 @@ describe('catchCert - db related', () => {
 
       expect(mockSaveDraftCache).toHaveBeenCalled();
       expect(mockSaveDraftCache).toHaveBeenCalledTimes(1);
-      expect(mockSaveDraftCache).toHaveBeenCalledWith(defaultUser, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, expected);
+      expect(mockSaveDraftCache).toHaveBeenCalledWith(defaultUser, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, expected, 300);
       expect(result).toStrictEqual(expected);
     });
 

@@ -85,7 +85,7 @@ export const validateLanding = async (exportPayload: ProductLanded[]) => {
   try {
     await VesselValidator.checkVesselWithDate(exportPayload);
   } catch (e) {
-    logger.info('[INVALID-LANDING][INVALID-VESSEL-LICENSE]');
+    logger.info(`[INVALID-LANDING][INVALID-VESSEL-LICENSE][${e}]`);
     errors.dateLanded = 'validation.vessel.license.invalid-date';
   }
   const seasonalFishValidationGuard = await validateProducts(exportPayload);
