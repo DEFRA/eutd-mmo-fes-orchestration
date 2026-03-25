@@ -678,6 +678,18 @@ describe("UploadsController", () => {
       expect(mockCode).toHaveBeenCalledWith(200);
     });
 
+    it('addLanding creates new item when none exists', () => {
+      const exportPayload: any = { items: [] };
+      const newLanding: any = { model: { id: 'NEW-L' } };
+      const validLanding: any = { product: { commodity_code: 'C', species: 'S', speciesCode: 'SC', state: 'ST', presentation: 'P' } };
+
+      UploadsController.addLanding(undefined as any, newLanding, 'DOCNUM', validLanding, exportPayload as any);
+
+      expect(exportPayload.items.length).toBe(1);
+      expect(exportPayload.items[0].landings[0]).toBe(newLanding);
+      expect(exportPayload.items[0].product).toBeDefined();
+    });
+
     it('should return 200 OK with start date', async () => {
       const mockReq: any = {
         ...req,
@@ -3404,4 +3416,68 @@ describe("UploadsController", () => {
     });
 
   });
+
+  describe('helper methods', () => {
+    it('getStartDate formats date when present', () => {
+      const res = UploadsController.getStartDate({ startDate: '10/10/2020' } as any);
+      expect(res).toBe('2020-10-10');
+    });
+
+    it('getStartDate returns undefined when absent', () => {
+      const res = UploadsController.getStartDate({ } as any);
+      expect(res).toBeUndefined();
+    });
+
+    it('geGearCategory returns category when present', () => {
+      const res = UploadsController.geGearCategory({ gearCategory: 'Surrounding nets' } as any);
+      expect(res).toBe('Surrounding nets');
+    });
+
+    it('geGearCategory returns undefined when absent', () => {
+      const res = UploadsController.geGearCategory({ } as any);
+      expect(res).toBeUndefined();
+    });
+
+    it('getGearType returns formatted string when gearCode present', () => {
+      const res = UploadsController.getGearType({ gearName: 'Net', gearCode: 'LA' } as any);
+      expect(res).toBe('Net (LA)');
+    });
+
+    it('getGearType returns undefined when no gearCode', () => {
+      const res = UploadsController.getGearType({ gearName: 'Net' } as any);
+      expect(res).toBeUndefined();
+    });
+
+    it('getHighSeaArea returns Yes/No/undefined correctly', () => {
+      expect(UploadsController.getHighSeaArea({ highSeasArea: 'Yes' } as any)).toBe('Yes');
+      expect(UploadsController.getHighSeaArea({ highSeasArea: 'No' } as any)).toBe('No');
+      expect(UploadsController.getHighSeaArea({ } as any)).toBeUndefined();
+    });
+
+    it('getExclusiveEconomicZone returns eezData when eezCode present otherwise empty array', () => {
+      expect(UploadsController.getExclusiveEconomicZone({ eezCode: 'X', eezData: [1,2] } as any)).toEqual([1,2]);
+      expect(UploadsController.getExclusiveEconomicZone({ } as any)).toEqual([]);
+    });
+
+    it('getRfmo returns rfmoName when rfmoCode present otherwise undefined', () => {
+      expect(UploadsController.getRfmo({ rfmoCode: 'IOTC', rfmoName: 'IOTC NAME' } as any)).toBe('IOTC NAME');
+      expect(UploadsController.getRfmo({ } as any)).toBeUndefined();
+    });
+
+    it('getCacheUploadedRows and invalidateCacheUploadedRows delegate to UploadsService', async () => {
+      const mockGet = jest.spyOn(UploadsService, 'getCacheUploadedRows').mockResolvedValue([{ rowNumber: 1 } as any]);
+      const mockInvalidate = jest.spyOn(UploadsService, 'invalidateCacheUploadedRows').mockResolvedValue(undefined as any);
+
+      const rows = await UploadsController.getCacheUploadedRows('Bob', contactId);
+      expect(rows).toEqual([{ rowNumber: 1 } as any]);
+      expect(mockGet).toHaveBeenCalledWith('Bob', contactId);
+
+      await UploadsController.invalidateCacheUploadedRows('Bob', contactId);
+      expect(mockInvalidate).toHaveBeenCalledWith('Bob', contactId);
+
+      mockGet.mockRestore();
+      mockInvalidate.mockRestore();
+    });
+  });
+
 });
