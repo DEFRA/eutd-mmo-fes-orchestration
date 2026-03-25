@@ -29,13 +29,13 @@ import { LandingStatus, ProductLanded, ProductsLanded, getNumberOfUniqueLandings
 import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
 import { LandingsRefreshData } from './interfaces';
 import { CcExportedDetailModel } from '../persistence/schema/frontEndModels/exporterDetails';
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 import { updateConsolidateLandings } from "./landings-consolidate.service";
 import { ExportLocation } from '../persistence/schema/frontEndModels/export-location';
 import * as pdfService from 'mmo-ecc-pdf-svc';
 
-const crypto = require('crypto');
-const https = require('https');
+import * as crypto from 'node:crypto';
+import * as https from 'node:https';
 
 export default class ExportPayloadService {
 
@@ -65,7 +65,7 @@ export default class ExportPayloadService {
       landing.error = sessionLanding.error;
       landing.errors = sessionLanding.errors;
       landing.modelCopy = sessionLanding.modelCopy;
-      landing.model = !sessionLanding.error ? landing.model : sessionLanding.model
+      landing.model = sessionLanding.error ? sessionLanding.model : landing.model
     }
   }
 
@@ -159,9 +159,7 @@ export default class ExportPayloadService {
         throw new Error('cannot update an overridden landing');
       }
 
-      if (!matchedLanding) {
-        matchedItem.landings.push(landing);
-      } else {
+      if (matchedLanding) {
         // preserve the number of submissions
         const numberOfSubmissions = matchedLanding.model.numberOfSubmissions;
 
@@ -173,6 +171,8 @@ export default class ExportPayloadService {
         matchedLanding.error = landing.error;
         matchedLanding.errors = landing.errors;
         matchedLanding.editMode = !!matchedLanding.error;
+      } else {
+        matchedItem.landings.push(landing);
       }
 
       exportPayload.errors = undefined;
@@ -211,12 +211,12 @@ export default class ExportPayloadService {
 
   static readonly upsertLandingGetSessionLanding = (landing: LandingStatus, matchedLanding: LandingStatus): SessionLanding => ({
     landingId: landing.model.id,
-    addMode: !matchedLanding ? landing.addMode : false,
-    editMode: !matchedLanding ? landing.editMode : !!matchedLanding.error,
+    addMode: matchedLanding ? false : landing.addMode,
+    editMode: matchedLanding ? !!matchedLanding.error : landing.editMode,
     error: landing.error,
     errors: landing.errors,
-    modelCopy: !matchedLanding ? landing.modelCopy : matchedLanding.modelCopy,
-    model: !matchedLanding ? landing.model : matchedLanding.model
+    modelCopy: matchedLanding ? matchedLanding.modelCopy : landing.modelCopy,
+    model: matchedLanding ? matchedLanding.model : landing.model
   })
 
   public static async checkCertificate(payloadToValidate, url): Promise<any> {

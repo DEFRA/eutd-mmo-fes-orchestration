@@ -141,6 +141,6 @@ function elementFound(currentLandingIndex: number) {
 const attempt = (actionToExecute) => {
     return actionToExecute
       .then(success => ([success, undefined]))
-      .catch(error => Promise.resolve([undefined, error]));
+      .catch(error => ([undefined, error]));
   };
 

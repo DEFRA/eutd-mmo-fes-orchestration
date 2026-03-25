@@ -45,6 +45,7 @@ export default class ExportPayloadController {
       try {
         await VesselValidator.checkVesselWithDate(exportPayload.items);
       } catch (e) {
+        logger.error(`[VALIDATE][VESSEL-CHECK-ERROR][${e}]`);
         errors['vessel_license'] = 'Please contact support.';
       }
     }
@@ -855,7 +856,7 @@ export default class ExportPayloadController {
 
     let found = false;
     if (newPayload.items && newPayload.items.length > 0) {
-      found = newPayload.items.find(item => item.product.id === product.id);
+      found = newPayload.items.some(item => item.product.id === product.id);
     }
     if (!found) {
       newPayload.items.push({ product });
