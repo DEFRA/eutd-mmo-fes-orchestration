@@ -3268,6 +3268,56 @@ describe('additional ExportPayloadController helper branches', () => {
     jest.restoreAllMocks();
   });
 
+  it('getDirectLandingExportPayloadInvalidRequest persists landing errors to session and handles html redirect', async () => {
+    const mockReq: any = { payload: { currentUri: '/current' }, headers: {} };
+    const mockH: any = { redirect: () => ({ takeover: jest.fn() }), response: () => ({ code: jest.fn(), takeover: jest.fn() }) };
+    const mockPayload = { items: [{ landings: [{ model: { id: 'L1' } }] }] };
+
+    const spyGet = jest.spyOn(ExportPayloadService, 'get').mockResolvedValue(mockPayload as any);
+    const spyErrorExtractor = jest.spyOn(require('../helpers/errorExtractor'), 'default').mockReturnValue({ field: 'err' });
+    const spySession = jest.spyOn(require('../helpers/sessionManager'), 'withUserSessionDataStored').mockResolvedValue(undefined);
+    const spyAccepts = jest.spyOn(AcceptsHTML, 'default').mockReturnValue(true);
+
+    await (SUT as any).getDirectLandingExportPayloadInvalidRequest(mockReq, mockH, { some: 'error' }, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(spyGet).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(spySession).toHaveBeenCalled();
+    expect(spyAccepts).toHaveBeenCalled();
+
+    spyAccepts.mockRestore();
+    spyGet.mockRestore();
+    spyErrorExtractor.mockRestore();
+    spySession.mockRestore();
+  });
+
+  it('getLandingsType returns cached value from session store and logs cache hit; also handles cache write failures gracefully', async () => {
+    const { SessionStoreFactory } = require('../session_store/factory');
+    const mockStore = { readFor: jest.fn().mockResolvedValue({ landingsEntryOption: 'DIRECT', generatedByContent: true }), writeFor: jest.fn() };
+    const spyFactory = jest.spyOn(SessionStoreFactory, 'getSessionStore').mockResolvedValue(mockStore);
+    const spyCatch = jest.spyOn(CatchCertService, 'getLandingsEntryOption').mockResolvedValue(null as any);
+
+    const res = await SUT.getLandingsType(USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(spyFactory).toHaveBeenCalled();
+    expect(res).toStrictEqual({ landingsEntryOption: 'DIRECT', generatedByContent: true });
+    expect(spyCatch).not.toHaveBeenCalled();
+
+    // Now simulate cache write failure path: return no db entry and mock writeFor to throw
+    spyFactory.mockResolvedValue({ readFor: jest.fn().mockResolvedValue(null), writeFor: jest.fn().mockRejectedValue(new Error('cache write failed')) });
+    const spyLoggerWarn = jest.spyOn(require('../logger').default, 'warn').mockImplementation(() => {});
+    const mockNumber = jest.spyOn(SUT, 'numberOfUniqueLandings').mockReturnValue(2);
+    const spyExportPayloadGet = jest.spyOn(ExportPayloadService, 'get').mockResolvedValue({ items: [] });
+
+    await SUT.getLandingsType(USER_ID, DOCUMENT_NUMBER, contactId);
+    expect(spyLoggerWarn).toHaveBeenCalled();
+
+    spyFactory.mockRestore();
+    spyLoggerWarn.mockRestore();
+    spyCatch.mockRestore();
+    mockNumber.mockRestore();
+    spyExportPayloadGet.mockRestore();
+  }, 20000);
+
   it('handleValidateResponse returns result for non-html and no errors', () => {
     const req: any = { headers: {} };
     const payload: any = {};
