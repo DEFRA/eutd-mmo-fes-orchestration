@@ -86,7 +86,6 @@ export default class DocumentController {
 
   public static async getAllDocuments(req: Hapi.Request): Promise<AllDocuments> {
     try {
-      const overallStart = performance.now();
       const monthAndYear = `${req.params.month}-${req.params.year}`;
       let inProgress: DocumentsInProgress;
       let completed: DocumentsCompleted;
@@ -94,34 +93,29 @@ export default class DocumentController {
       const userPrincipal = app.claims.sub;
       const contactId = app.claims.contactId;
 
-      const draftStart = performance.now();
-      const completedStart = performance.now();
-
       switch (req.query.type) {
         case catchCerts:
           [inProgress, completed] = await Promise.all([
-            getDraftCatchCertHeadersForUser(userPrincipal, contactId).then(r => { logger.info(`[PERF][getAllDocuments] drafts(CC): ${(performance.now() - draftStart).toFixed(1)}ms`); return r; }),
-            getAllCatchCertsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId).then(r => { logger.info(`[PERF][getAllDocuments] completed(CC): ${(performance.now() - completedStart).toFixed(1)}ms`); return r; }),
+            getDraftCatchCertHeadersForUser(userPrincipal, contactId),
+            getAllCatchCertsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId),
           ]);
           break;
         case processingStatement:
           [inProgress, completed] = await Promise.all([
-            getDraftProcessingStatementsForUser(userPrincipal, contactId).then(r => { logger.info(`[PERF][getAllDocuments] drafts(PS): ${(performance.now() - draftStart).toFixed(1)}ms`); return r; }),
-            getAllProcessingStatementsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId).then(r => { logger.info(`[PERF][getAllDocuments] completed(PS): ${(performance.now() - completedStart).toFixed(1)}ms`); return r; }),
+            getDraftProcessingStatementsForUser(userPrincipal, contactId),
+            getAllProcessingStatementsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId),
           ]);
           break;
         case storageNote:
           [inProgress, completed] = await Promise.all([
-            getDraftStorageDocumentsForUser(userPrincipal, contactId).then(r => { logger.info(`[PERF][getAllDocuments] drafts(SD): ${(performance.now() - draftStart).toFixed(1)}ms`); return r; }),
-            getAllStorageDocsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId).then(r => { logger.info(`[PERF][getAllDocuments] completed(SD): ${(performance.now() - completedStart).toFixed(1)}ms`); return r; }),
+            getDraftStorageDocumentsForUser(userPrincipal, contactId),
+            getAllStorageDocsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId),
           ]);
           break;
         default:
           inProgress = [];
           completed = [];
       }
-
-      logger.info(`[PERF][getAllDocuments] type=${req.query.type} total: ${(performance.now() - overallStart).toFixed(1)}ms drafts=${(inProgress as any[])?.length || 0} completed=${(completed as any[])?.length || 0}`);
 
       return {
         inProgress,
