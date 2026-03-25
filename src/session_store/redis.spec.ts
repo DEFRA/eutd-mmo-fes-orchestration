@@ -1,6 +1,7 @@
 import { RedisStorage, getRedisOptions } from "./redis";
 import { IStoreable } from "./storeable";
 import Redis from 'ioredis';
+import { CATCH_CERTIFICATE_KEY } from './constants';
 
 jest.mock('ioredis', () => ({
   default: jest.fn(() => ({
@@ -133,6 +134,36 @@ describe("RedisStorage", () => {
       expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data));
     });
 
+  });
+
+  describe('writeFor with TTL', () => {
+    it('should write data to Redis with EX when ttlSeconds provided and contactId present', async () => {
+      const data: any = {test: 'test'};
+
+      await storage.writeFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data, 10);
+
+      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), 'EX', 10);
+    });
+
+    it('should write data to Redis with EX when ttlSeconds provided and contactId missing', async () => {
+      const data: any = {test: 'test'};
+
+      await storage.writeFor('BOB', '', 'GBR-2020-CC-0E42C2DA5', data, 20);
+
+      expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data), 'EX', 20);
+    });
+  });
+
+  describe('tagByDocumentNumber', () => {
+    it('should call sadd with expected keys for catch certificate journey', () => {
+      // ensure mock has sadd
+      (mockRedis as any).sadd = jest.fn();
+
+      storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', CATCH_CERTIFICATE_KEY);
+
+      // current implementation calls sadd with the documentNumber even when keys are empty
+      expect((mockRedis as any).sadd).toHaveBeenCalledWith('DOC-999');
+    });
   });
 
   describe('writeAll', () => {
