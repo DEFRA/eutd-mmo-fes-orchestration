@@ -497,6 +497,72 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       expect(error).toBeDefined();
       expect(error?.details[0].path).toEqual(['containerNumbers']);
     });
+
+    it('should reject a containerNumbers item that contains space-separated values (multiple IDs in one field)', () => {
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'plane',
+        flightNumber: 'FL123',
+        containerNumbers: ['ABC1 ABC2 ABC3'],
+        departurePlace: 'Heathrow'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload, { abortEarly: false });
+
+      expect(error).toBeDefined();
+      const detail = error?.details.find((d: any) => d.path[0] === 'containerNumbers');
+      expect(detail).toBeDefined();
+      expect(detail?.type).toBe('string.multipleContainersNotAllowed');
+      expect(detail?.message).toBe('ccAddTransportationDetailsPlaneContainerMultipleNotAllowedError');
+    });
+
+    it('should reject a containerNumbers item with a single space-separated pair', () => {
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'plane',
+        flightNumber: 'FL123',
+        containerNumbers: ['ABC1 ABC2'],
+        departurePlace: 'Heathrow'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload, { abortEarly: false });
+
+      expect(error).toBeDefined();
+      const detail = error?.details.find((d: any) => d.path[0] === 'containerNumbers');
+      expect(detail).toBeDefined();
+      expect(detail?.type).toBe('string.multipleContainersNotAllowed');
+    });
+
+    it('should accept a single valid containerNumbers item with no spaces', () => {
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'plane',
+        flightNumber: 'FL123',
+        containerNumbers: ['ABC1'],
+        departurePlace: 'Heathrow'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
+
+      expect(error).toBeUndefined();
+    });
+
+    it('should still reject containerNumbers items with non-alphanumeric characters (no spaces)', () => {
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'plane',
+        flightNumber: 'FL123',
+        containerNumbers: ['ABC!@#'],
+        departurePlace: 'Heathrow'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload, { abortEarly: false });
+
+      expect(error).toBeDefined();
+      const detail = error?.details.find((d: any) => d.path[0] === 'containerNumbers');
+      expect(detail).toBeDefined();
+      expect(detail?.type).toBe('string.pattern.base');
+    });
   });
 
   describe('when vehicle is containerVessel', () => {

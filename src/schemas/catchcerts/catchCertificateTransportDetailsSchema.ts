@@ -31,9 +31,19 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       .items(
         Joi.string()
           .trim()
-          .regex(/^$|^[a-zA-Z0-9 ]+$/)
+          .custom((value, helpers) => {
+            if (!value) return value;
+            if (/\s/.test(value.trim())) {
+              return helpers.error('string.multipleContainersNotAllowed');
+            }
+            if (!/^[a-zA-Z0-9]+$/.test(value)) {
+              return helpers.error('string.pattern.base');
+            }
+            return value;
+          })
           .messages({
             'string.pattern.base': 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError',
+            'string.multipleContainersNotAllowed': 'ccAddTransportationDetailsPlaneContainerMultipleNotAllowedError',
           })
       )
       .min(1)
