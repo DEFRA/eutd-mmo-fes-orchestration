@@ -28,16 +28,16 @@ const unwindDocument = (documents: any[]): FlattenedCatches[] => {
           item.certificateNumber = cat.certificateNumber;
           item.species = cat.product;
           item.id = cat.id;
-          item.weight = Number.parseInt(cat.productWeight, 10);
-          item.weightOnCC = cat.weightOnCC ? Number.parseInt(cat.weightOnCC, 10) : 0;
+          item.weight = parseInt(cat.productWeight, 10);
+          item.weightOnCC = cat.weightOnCC ? parseInt(cat.weightOnCC, 10) : 0;
         }
 
         if (doc.__t == "processingStatement") {
           item.certificateNumber = cat.catchCertificateNumber;
           item.species = cat.species;
           item.id = cat.id;
-          item.weight = Number.parseInt(cat.exportWeightBeforeProcessing, 10);
-          item.weightOnCC = Number.parseInt(cat.totalWeightLanded, 10);
+          item.weight = parseInt(cat.exportWeightBeforeProcessing, 10);
+          item.weightOnCC = parseInt(cat.totalWeightLanded, 10);
         }
 
         ret.push(item)

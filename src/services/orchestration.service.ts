@@ -13,7 +13,7 @@ import {
 } from "./constants";
 import { SessionStoreFactory } from "../session_store/factory";
 import { getRedisOptions } from "../session_store/redis";
-import { isArray } from "node:util";
+import { isArray } from "util";
 import * as moment from "moment";
 import ApplicationConfig from "../applicationConfig";
 import SaveAsDraftService from "../services/saveAsDraft.service";
@@ -47,12 +47,12 @@ import { validateCompletedDocument, validateSpecies } from "../validators/docume
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
 export const processingStatement: string = "processingStatement";
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
 
 const { unflatten } = require("flat");
 const flatten = require("flat");
 const _ = require("lodash");
-import * as https from 'node:https';
+const https = require('https');
 
 export default class OrchestrationService {
   public static async get(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
@@ -152,7 +152,7 @@ export default class OrchestrationService {
     );
     const sessionData: any = await OrchestrationService.getSessionData(redisKey, userPrincipal, documentNumber, contactId, sessionStore);
 
-    const originalSessionData = structuredClone(sessionData);
+    const originalSessionData = _.cloneDeep(sessionData);
 
     let data = payload as any;
     if (acceptsHtml(req.headers)) {
@@ -238,15 +238,7 @@ export default class OrchestrationService {
   }
 
   static readonly handleErrors = (errors, data, documentNumber: string, originalSessionData, next, urlsObj, setOnValidationSuccess) => {
-    if (_.isEmpty(errors)) {
-      if (!next) next = urlsObj.nextUrl;
-
-      if (setOnValidationSuccess) {
-        data[setOnValidationSuccess] = true;
-      }
-      delete data.errors;
-      delete data.errorsUrl;
-    } else {
+    if (!_.isEmpty(errors)) {
       data.errors = errors;
       data.errorsUrl = urlsObj.currentUrl.replace(":documentNumber", documentNumber);
 
@@ -258,6 +250,14 @@ export default class OrchestrationService {
 
       // default to set next url to be current url if errors
       if (!next) next = urlsObj.currentUrl;
+    } else {
+      if (!next) next = urlsObj.nextUrl;
+
+      if (setOnValidationSuccess) {
+        data[setOnValidationSuccess] = true;
+      }
+      delete data.errors;
+      delete data.errorsUrl;
     }
     return next;
   }
@@ -607,7 +607,7 @@ export default class OrchestrationService {
 
     // remove any empty elements from arrays
     Object.keys(data).forEach((k) => {
-      if (isArray(data[k])) data[k] = data[k].filter(Boolean);
+      if (isArray(data[k])) data[k] = data[k].filter((d) => d);
     });
 
     delete data.errors;
@@ -750,20 +750,20 @@ export function validateMaximumOneDayFutureDate(date) {
 }
 
 export function validateNumber(num) {
-  return !Number.isNaN(+num) && !num.includes("e");
+  return !isNaN(+num) && num.indexOf("e") === -1;
 }
 
 export function validatePositiveNumber(num) {
-  return !Number.isNaN(+num) && !num.includes("e") && +num >= 0;
+  return !isNaN(+num) && num.indexOf("e") === -1 && +num >= 0;
 }
 
 export function isPositiveNumberWithTwoDecimals(num) {
   const regex = /^(\d+(\.\d{0,2})?|\.?\d{1,2})$/;
-  return !Number.isNaN(+num) && +num >= 0 && regex.test(num);
+  return !isNaN(+num) && +num >= 0 && regex.test(num);
 }
 
 export function isNotExceed12Digit(num) {
-  return !Number.isNaN(+num) && +num >= 0 && +num < 100000000000;
+  return !isNaN(+num) && +num >= 0 && +num < 100000000000;
 }
 
 export function isPositiveWholeNumber(num) {

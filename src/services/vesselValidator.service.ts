@@ -35,7 +35,7 @@ export default class VesselValidator {
 
         const check = await Reference.checkVesselLicense(landing.model.vessel, landing.model.dateLanded);
 
-        if (check.response?.status === 404) {
+        if (check.response && check.response.status === 404) {
 
           return false;
 

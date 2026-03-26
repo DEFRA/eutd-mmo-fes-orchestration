@@ -375,8 +375,8 @@ export default class ProgressService {
     const ctchDetailsErrors = {};
 
     for (const ctch in catches) {
-      await validateCatchDetails(catches[ctch], Number.parseInt(ctch), ctchDetailsErrors, documentNumber, userPrincipal, contactId);
-      validateCatchWeights(catches[ctch], Number.parseInt(ctch), ctchDetailsErrors);
+      await validateCatchDetails(catches[ctch], parseInt(ctch), ctchDetailsErrors, documentNumber, userPrincipal, contactId);
+      validateCatchWeights(catches[ctch], parseInt(ctch), ctchDetailsErrors);
     }
 
     return Object.keys(ctchDetailsErrors).length <= 0 ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;

@@ -25,7 +25,7 @@ export default class UploadsController {
 
     let rows: string[] = await csv({ noheader: true, output: 'line' }).fromString(data);
 
-    rows = rows.filter(item => !isEmpty(item.replaceAll(/^[, ]+$/g, '')));
+    rows = rows.filter(item => !isEmpty(item.replace(/^[, ]+$/g, '')));
     rows = rows.map(item => item.toUpperCase());
 
     if (rows.length > ApplicationConfig._maxLimitLandings) {
@@ -96,7 +96,7 @@ export default class UploadsController {
   public static async saveLandingRows(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, uploadedLandings: IUploadedLanding[]): Promise<Hapi.ResponseObject> {
     const landings = await this.validateLandings(userPrincipal, uploadedLandings);
 
-    const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors?.length === 0 || !landing.errors;
+    const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors && landing.errors.length === 0 || !landing.errors;
     const hasValidLanding = (_: IUploadedLanding[]): boolean => _.some(isValidLanding);
     const failSaveLandingRows = (errorDetailsObj: { file: string } | { file: { key: string, params: { limit: number } } }): Hapi.ResponseObject => {
       if (acceptsHtml(req.headers)) {
@@ -177,7 +177,7 @@ export default class UploadsController {
           exclusiveEconomicZones: this.getExclusiveEconomicZone(validLanding),
           rfmo: this.getRfmo(validLanding),
           gearCategory: UploadsController.geGearCategory(validLanding),
-          gearCode: isEmpty(validLanding.gearCode) ? undefined : validLanding.gearCode,
+          gearCode: !isEmpty(validLanding.gearCode) ? validLanding.gearCode : undefined,
           gearType: UploadsController.getGearType(validLanding),
         }
       };
