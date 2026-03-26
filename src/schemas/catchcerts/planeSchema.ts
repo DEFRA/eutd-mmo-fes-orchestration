@@ -34,7 +34,7 @@ const schema = Joi.object({
   }),
   containerNumber: Joi.string().trim().optional().regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9 ]+$/).messages({
+    .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).messages({
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
       'string.max': 'error.containerNumbers.string.max',
     }))
