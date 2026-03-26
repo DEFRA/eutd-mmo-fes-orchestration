@@ -124,7 +124,6 @@ export default class TransportController {
         return departureDateError;
       }
     }
-
     const data = await Services.addTransport(payload, documentNumber, contactId) as any;
 
     if (acceptsHtml(req.headers)) {
