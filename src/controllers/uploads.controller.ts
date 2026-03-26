@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 import * as Hapi from '@hapi/hapi';
-import { performance } from 'node:perf_hooks';
 import { IUploadedLanding } from "../persistence/schema/uploads";
 import { buildRedirectUrlWithErrorStringInQueryParam } from '../helpers/errorExtractor';
 import { getRandomNumber } from '../helpers/utils/utils';
@@ -95,11 +94,7 @@ export default class UploadsController {
   }
 
   public static async saveLandingRows(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, uploadedLandings: IUploadedLanding[]): Promise<Hapi.ResponseObject> {
-    const totalStart = performance.now();
-
-    const validateStart = performance.now();
     const landings = await this.validateLandings(userPrincipal, uploadedLandings);
-    const validateMs = Math.round(performance.now() - validateStart);
 
     const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors?.length === 0 || !landing.errors;
     const hasValidLanding = (_: IUploadedLanding[]): boolean => _.some(isValidLanding);
@@ -117,7 +112,7 @@ export default class UploadsController {
 
     const validLandings: IUploadedLanding[] = landings.filter(isValidLanding);
 
-    logger.info(`[PERF][POST /v2/save/landings] validateLandings=${validateMs}ms rows=${Array.isArray(uploadedLandings) ? uploadedLandings.length : 0} validRows=${validLandings.length}`);
+    logger.info(`[POST /v2/save/landings] rows=${Array.isArray(uploadedLandings) ? uploadedLandings.length : 0} validRows=${validLandings.length}`);
 
     const exportPayload: ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId) || { items: [] };
     const totalCurrentLandings: LandingStatus[] = exportPayload.items.reduce((acc: LandingStatus[], curr: ProductLanded) => {
@@ -161,7 +156,7 @@ export default class UploadsController {
       ].join('|');
     };
 
-    const mergeStart = performance.now();
+    
     const itemsByKey = new Map<string, ProductLanded>();
     exportPayload.items.forEach((item: ProductLanded) => {
       itemsByKey.set(buildItemKey(item), item);
@@ -203,14 +198,8 @@ export default class UploadsController {
       }
     }
 
-    const mergeMs = Math.round(performance.now() - mergeStart);
-
-    const saveStart = performance.now();
     await ExportPayloadService.save(exportPayload, userPrincipal, documentNumber, contactId);
-
-    const saveMs = Math.round(performance.now() - saveStart);
-    const totalMs = Math.round(performance.now() - totalStart);
-    logger.info(`[PERF][POST /v2/save/landings] mergeRows=${mergeMs}ms saveExportPayload=${saveMs}ms total=${totalMs}ms documentNumber=${documentNumber}`);
+    logger.info(`[POST /v2/save/landings] documentNumber=${documentNumber}`);
 
     return h.response(landings).code(200);
   }
