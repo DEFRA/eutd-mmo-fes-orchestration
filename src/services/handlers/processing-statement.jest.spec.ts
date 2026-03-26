@@ -483,7 +483,6 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
       'catches-0-species': 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
     }
-
     expect(errors).toEqual(expectedErrors);
     expect(data.catches[0].catchCertificateType).toBeUndefined();
   });
