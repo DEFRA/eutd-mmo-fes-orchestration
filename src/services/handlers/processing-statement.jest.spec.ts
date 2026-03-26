@@ -393,6 +393,48 @@ it('calling handler for /create-processing-statement/:documentNumber/catch-added
     expect(errors).toEqual(expected);
 });
 
+it('calling handler for /create-processing-statement/:documentNumber/catch-added with addAnotherCatch "yes" redirects to add-catch-details', async () => {
+  const currentUrl = '/create-processing-statement/:documentNumber/catch-added';
+  const handler = SUT[currentUrl];
+
+  const data = {
+    catches: [
+      { species: 'Atlantic Cod', catchCertificateNumber: 'CT-111111' }
+    ],
+    addAnotherCatch: 'yes'
+  };
+
+  const result = await handler({
+    data: data,
+    currentUrl: currentUrl,
+    errors: {}
+  });
+
+  expect(result.errors).toEqual({});
+  expect(result.next).toBe('/create-processing-statement/add-catch-details/1');
+});
+
+it('calling handler for /create-processing-statement/:documentNumber/catch-added with addAnotherCatch "no" redirects to add-processing-plant-details', async () => {
+  const currentUrl = '/create-processing-statement/:documentNumber/catch-added';
+  const handler = SUT[currentUrl];
+
+  const data = {
+    catches: [
+      { species: 'Atlantic Cod', catchCertificateNumber: 'CT-111111' }
+    ],
+    addAnotherCatch: 'no'
+  };
+
+  const result = await handler({
+    data: data,
+    currentUrl: currentUrl,
+    errors: {}
+  });
+
+  expect(result.errors).toEqual({});
+  expect(result.next).toBe('/create-processing-statement/add-processing-plant-details');
+});
+
 describe('handler for /create-processing-statement/:documentNumber/add-catch-details', () => {
   let mockValidateCountriesName: jest.SpyInstance;
   let mockValidateSpeciesName: jest.SpyInstance;
@@ -1776,6 +1818,70 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
 
     expect(errors).toEqual(expected);
   });
+
+  it("should return error when totalWeightLanded is <= 0 for non_uk catch certificate", async () => {
+    const { errors } = await handler({
+      data: {
+        catches: [{
+          catchCertificateType: 'non_uk',
+          totalWeightLanded: '-1',
+          exportWeightBeforeProcessing: '10',
+          exportWeightAfterProcessing: '5',
+        }]
+      },
+      errors: {},
+    });
+
+    expect(errors['catches-0-totalWeightLanded']).toBe('psAddCatchWeightsErrorTotalWeightGreaterThanNull');
+  });
+
+  it("should return error when totalWeightLanded is missing for non_uk catch certificate", async () => {
+    const { errors } = await handler({
+      data: {
+        catches: [{
+          catchCertificateType: 'non_uk',
+          // totalWeightLanded intentionally absent
+          exportWeightBeforeProcessing: '10',
+          exportWeightAfterProcessing: '5',
+        }]
+      },
+      errors: {},
+    });
+
+    expect(errors['catches-0-totalWeightLanded']).toBe('psAddCatchWeightsErrorEnterTotalWeightLandedInKG');
+  });
+
+  it("should return error when totalWeightLanded has more than 2 decimal places for non_uk catch certificate", async () => {
+    const { errors } = await handler({
+      data: {
+        catches: [{
+          catchCertificateType: 'non_uk',
+          totalWeightLanded: '10.123',
+          exportWeightBeforeProcessing: '5',
+          exportWeightAfterProcessing: '4',
+        }]
+      },
+      errors: {},
+    });
+
+    expect(errors['catches-0-totalWeightLanded']).toBe('psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal');
+  });
+
+  it("should convert valid totalWeightLanded to string for non_uk catch certificate", async () => {
+    const { errors } = await handler({
+      data: {
+        catches: [{
+          catchCertificateType: 'non_uk',
+          totalWeightLanded: '10.12',
+          exportWeightBeforeProcessing: '5',
+          exportWeightAfterProcessing: '4',
+        }]
+      },
+      errors: {},
+    });
+
+    expect(errors).toEqual({});
+  });
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-weights/:catchIndex', () => {
@@ -2098,6 +2204,48 @@ describe('handler for /create-processing-statement/:documentNumber/add-health-ce
 
     expect(errors).toEqual(expectedErrors);
   });
+
+  it('should return error when healthCertificateDate is not a valid date', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-health-certificate';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      healthCertificateNumber: '11/1/111111',
+      healthCertificateDate: '99/99/9999',
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors.healthCertificateDate).toBe('psAddHealthCertificateErrorRealDateHealthCertificateDate');
+  });
+
+  it('should return error when healthCertificateDate exceeds maximum future date', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-health-certificate';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      healthCertificateNumber: '11/1/111111',
+      healthCertificateDate: '01/01/2100',
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors.healthCertificateDate).toBe('psAddHealthCertificateErrorMaxDaysHealthCertificateDate');
+  });
+
+  it('should clean healthCertificateDate when it is a valid past date', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-health-certificate';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      healthCertificateNumber: '11/1/111111',
+      healthCertificateDate: '01/01/2022',
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors.healthCertificateDate).toBeUndefined();
+  });
 });
 
 describe('calling handler for /create-processing-statement/:documentNumber/add-processing-plant-details', () => {
@@ -2345,6 +2493,26 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     expect(errors).toEqual(expected);
   });
 
+  it('with missing plantPostcode validates as error', async () => {
+    const currentUrl =
+      '/create-processing-statement/:documentNumber/add-processing-plant-address';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      plantName: 'Triffid',
+      plantAddressOne: 'Fish Quay',
+      plantTownCity: 'Seaham',
+      // plantPostcode intentionally absent
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors.plantPostcode).toBe('Enter the postcode');
+  });
+
   it('with whitespace personResponsibleForConsignment, plantApprovalNumber validates as error', async () => {
     const currentUrl =
       '/create-processing-statement/:documentNumber/add-processing-plant-details';
@@ -2549,6 +2717,42 @@ describe('validateCatchDetails', () => {
 
     expect(mockValidateSpeciesName).toHaveBeenCalledWith(ctch.species, ctch.scientificName, refUrl);
   });
+
+  it('should return species error when species is present but speciesCode is missing', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      // speciesCode intentionally absent to trigger the speciesCode branch in validateSpeciesInput
+    };
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-species`]).toBe('psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName');
+  });
+
+  it('should return species error when speciesCode is whitespace', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: '   ',
+      // no catchCertificateNumber to avoid network calls
+    };
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-species`]).toBe('psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName');
+  });
+
+  it('should set species error from validateSpeciesAgainstReferenceData when reference data returns isError', async () => {
+    mockValidateSpeciesName.mockResolvedValue({ isError: true });
+
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      // no catchCertificateNumber to avoid extra network calls
+    };
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-species`]).toBe('psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName');
+    expect(mockValidateSpeciesName).toHaveBeenCalled();
+  });
 });
 
 describe('calling handler for /create-processing-statement/:documentNumber/progress (FI0-10647)', () => {
@@ -2704,6 +2908,23 @@ describe('calling handler for /create-processing-statement/:documentNumber/progr
     expect(errors).toEqual({
       products: 'ccProgressPageProductDetailsRequired'
     });
+  });
+
+  it('should skip null or non-object entries in products array without error', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/progress';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      products: [null, undefined, 'not-an-object', 42],
+      catches: []
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {}
+    });
+
+    expect(errors).toEqual({});
   });
 });
 
