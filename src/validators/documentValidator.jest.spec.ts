@@ -1393,7 +1393,79 @@ describe('document validator', () => {
 
     it('should call getProductsCatchCertificate without products', async () => {
       const result = SUT.getProductsCatchCertificate(null);
-      expect(result).toBeTruthy();
+      expect(result).toEqual([]);
+    })
+
+    it('should return empty array for getProductsCatchCertificate with empty array input', async () => {
+      const result = SUT.getProductsCatchCertificate([]);
+      expect(result).toEqual([]);
+    })
+
+    it('should return totalWeight of 0 when caughtBy is an empty array', async () => {
+      const result = SUT.getProductsCatchCertificate([{
+        species: "Atlantic cod (COD)",
+        speciesId: "GBR-2022-CC-1-0",
+        speciesCode: "COD",
+        commodityCode: "03025110",
+        commodityCodeDescription: "Fresh or chilled cod",
+        scientificName: "Gadus morhua",
+        state: { code: "FRE", name: "Fresh" },
+        presentation: { code: "WHL", name: "Whole" },
+        factor: 1,
+        caughtBy: []
+      }]);
+      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 0 }]);
+    })
+
+    it('should skip NaN weight landings and sum only valid weights', async () => {
+      const result = SUT.getProductsCatchCertificate([{
+        species: "Atlantic cod (COD)",
+        speciesId: "GBR-2022-CC-1-0",
+        speciesCode: "COD",
+        commodityCode: "03025110",
+        commodityCodeDescription: "Fresh or chilled cod",
+        scientificName: "Gadus morhua",
+        state: { code: "FRE", name: "Fresh" },
+        presentation: { code: "WHL", name: "Whole" },
+        factor: 1,
+        caughtBy: [
+          { weight: NaN, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-1", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending },
+          { weight: 50, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-2", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }
+        ]
+      }]);
+      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 50 }]);
+    })
+
+    it('should deduplicate products matching by speciesCode when species names differ', async () => {
+      const result = SUT.getProductsCatchCertificate([
+        {
+          species: "Atlantic cod (COD)",
+          speciesId: "GBR-2022-CC-1-0",
+          speciesCode: "COD",
+          commodityCode: "03025110",
+          commodityCodeDescription: "Fresh or chilled cod",
+          scientificName: "Gadus morhua",
+          state: { code: "FRE", name: "Fresh" },
+          presentation: { code: "WHL", name: "Whole" },
+          factor: 1,
+          caughtBy: [{ weight: 100, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-1", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }]
+        },
+        {
+          species: "Cod (COD)",
+          speciesId: "GBR-2022-CC-1-1",
+          speciesCode: "COD",
+          commodityCode: "03025110",
+          commodityCodeDescription: "Fresh or chilled cod",
+          scientificName: "Gadus morhua",
+          state: { code: "FRE", name: "Fresh" },
+          presentation: { code: "GUT", name: "Gutted" },
+          factor: 1,
+          caughtBy: [{ weight: 75, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-2", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }]
+        }
+      ]);
+      expect(result).toHaveLength(1);
+      expect(result[0].totalWeight).toBe(175);
+      expect(result[0].speciesCode).toBe("COD");
     })
 
     it('should call getProductsCatchCertificate with more products', async () => {
@@ -1578,6 +1650,104 @@ describe('document validator', () => {
       ]);
       expect(result).toBeTruthy();
     })
+
+  });
+
+  describe('validate species - additional edge cases', () => {
+
+    it('will return false when speciesCode is an empty string and species name does not match', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      // isEmpty("") is true, so speciesCode comparison is skipped → only species name match attempted
+      const result = await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic herring (HER)', '', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return true when speciesCode is an empty string but species name matches', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      // isEmpty("") is true → falls back to species name match
+      const result = await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', '', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(true);
+    });
+
+    it('will return false when draftCache has the document key but products array is empty', async () => {
+      const redisCache: IDraft = { "GBR-2022-CC-0": { products: [] } };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', 'COD', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+  });
+
+  describe('validate completed document - cache edge cases', () => {
+
+    it('will fall through to DB lookup when draftCache has document key set to an empty object', async () => {
+      // isEmpty({}) === true in lodash → cache hit branch is skipped → DB query attempted
+      const redisCache: any = { "doc-empty-obj": {} };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      // No document exists in DB, so result is false
+      const result = await SUT.validateCompletedDocument('doc-empty-obj', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+      expect(mockSaveDraftCache).not.toHaveBeenCalled();
+    });
+
+    it('will build and save the cache correctly for a CC document looked up via an SD foreign document', async () => {
+      const exportData: CatchCertSchema.ExportData = {
+        exporterDetails: {
+          exporterFullName: 'Alice',
+          exporterCompanyName: 'Fish Co.',
+          addressOne: '1 Harbour St',
+          postcode: 'AB1 2CD',
+          _dynamicsAddress: {},
+          _dynamicsUser: {}
+        },
+        products: [{
+          species: "Atlantic herring (HER)",
+          speciesId: "GBR-2024-CC-HER-0",
+          speciesCode: "HER",
+          commodityCode: "03035100",
+          commodityCodeDescription: "Frozen Atlantic herring",
+          scientificName: "Clupea harengus",
+          state: { code: "FRO", name: "Frozen" },
+          presentation: { code: "WHL", name: "Whole" },
+          factor: 1,
+          caughtBy: [
+            { weight: 200, vessel: "HERRING", pln: "H1", homePort: "Aberdeen", flag: "GBR", cfr: "GBR002", imoNumber: null, licenceNumber: "222", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Ms B", id: "id-her-1", date: "2024-01-10", startDate: "2024-01-09", faoArea: "FAO27", gearCategory: "Cat 2", gearType: "Type 2", highSeasArea: "No", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }
+          ]
+        }],
+        conservation: { conservationReference: "UK Fisheries Policy" },
+        transportation: { vehicle: "truck", exportedFrom: "UK", exportedTo: { officialCountryName: "France", isoCodeAlpha2: "FR", isoCodeAlpha3: "FRA", isoNumericCode: "250" }, cmr: false },
+        transportations: [{ id: 0, vehicle: "truck" }],
+        exportedFrom: "UK",
+        exportedTo: { officialCountryName: "France", isoCodeAlpha2: "FR", isoCodeAlpha3: "FRA", isoNumericCode: "250" }
+      };
+
+      await new CatchCertSchema.CatchCertModel(sampleDocument('GBR-2024-CC-HER', 'COMPLETE', undefined, undefined, undefined, undefined, exportData)).save();
+
+      mockGetDraftCache.mockResolvedValue({});
+
+      const result = await SUT.validateCompletedDocument('GBR-2024-CC-HER', userPrincipal, contactId, storageDocumentNumber);
+      expect(result).toBe(true);
+      expect(mockSaveDraftCache).toHaveBeenCalledWith(
+        userPrincipal,
+        contactId,
+        storageDocumentNumber,
+        { "GBR-2024-CC-HER": { products: [{ species: "Atlantic herring (HER)", speciesCode: "HER", totalWeight: 200 }] } }
+      );
+    });
 
   });
 

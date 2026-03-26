@@ -2064,3 +2064,349 @@ describe('get verifiy remaining methods', () => {
 
 });
 
+describe('checkCertificate', () => {
+  it('should return the online validation report on success', async () => {
+    const mockReport = { isValid: true, rawData: {}, details: {} };
+    mockedAxios.post.mockResolvedValueOnce({ data: mockReport });
+
+    const result = await OrchestrationService.checkCertificate({ catches: [] }, 'http://mock-validation-url', h);
+
+    expect(result).toEqual(mockReport);
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      'http://mock-validation-url',
+      { dataToValidate: { catches: [] } }
+    );
+  });
+
+  it('should throw an error when the axios call fails', async () => {
+    mockedAxios.post.mockRejectedValueOnce(new Error('Network error'));
+
+    await expect(
+      OrchestrationService.checkCertificate({ catches: [] }, 'http://mock-validation-url', h)
+    ).rejects.toThrow();
+  });
+});
+
+describe('checkValidationProcessingStatement', () => {
+  let mockValidateCompletedDocument: jest.SpyInstance;
+  let mockValidateSpecies: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockValidateCompletedDocument = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
+    mockValidateSpecies = jest.spyOn(DocumentValidator, 'validateSpecies');
+  });
+
+  afterEach(() => {
+    mockValidateCompletedDocument.mockRestore();
+    mockValidateSpecies.mockRestore();
+  });
+
+  it('should push a validation error when a uk catch certificate is invalid', async () => {
+    mockValidateCompletedDocument.mockResolvedValue(false);
+    mockValidateSpecies.mockResolvedValue(true);
+
+    const data: any = {
+      catches: [{
+        catchCertificateNumber: 'GBR-2022-CC-INVALID01',
+        species: 'Atlantic Cod',
+        speciesCode: 'COD',
+        catchCertificateType: 'uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationProcessingStatement(data, 'user', 'contact', 'GBR-2022-PS-123456789');
+
+    expect(data.validationErrors).toHaveLength(1);
+    expect(data.validationErrors[0]).toMatchObject({
+      message: 'psAddCatchDetailsErrorUKCCInValid',
+      key: 'catches-0-catchCertificateNumber',
+    });
+  });
+
+  it('should push a validation error when species validation fails for a uk certificate', async () => {
+    mockValidateCompletedDocument.mockResolvedValue(true);
+    mockValidateSpecies.mockResolvedValue(false);
+
+    const data: any = {
+      catches: [{
+        catchCertificateNumber: 'GBR-2022-CC-123456789',
+        species: 'Wrong Species',
+        speciesCode: 'WRG',
+        catchCertificateType: 'uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationProcessingStatement(data, 'user', 'contact', 'GBR-2022-PS-123456789');
+
+    expect(data.validationErrors).toHaveLength(1);
+    expect(data.validationErrors[0]).toMatchObject({
+      message: 'psAddCatchDetailsErrorUKCCInValid',
+      key: 'catches-0-catchCertificateNumber',
+    });
+  });
+
+  it('should not push any errors when a uk certificate and species are both valid', async () => {
+    mockValidateCompletedDocument.mockResolvedValue(true);
+    mockValidateSpecies.mockResolvedValue(true);
+
+    const data: any = {
+      catches: [{
+        catchCertificateNumber: 'GBR-2022-CC-123456789',
+        species: 'Atlantic Cod',
+        speciesCode: 'COD',
+        catchCertificateType: 'uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationProcessingStatement(data, 'user', 'contact', 'GBR-2022-PS-123456789');
+
+    expect(data.validationErrors).toHaveLength(0);
+  });
+
+  it('should not validate non-uk catch certificates', async () => {
+    const data: any = {
+      catches: [{
+        catchCertificateNumber: 'FR-2022-CC-123',
+        species: 'Atlantic Cod',
+        speciesCode: 'COD',
+        catchCertificateType: 'non_uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationProcessingStatement(data, 'user', 'contact', 'GBR-2022-PS-123456789');
+
+    expect(mockValidateCompletedDocument).not.toHaveBeenCalled();
+    expect(data.validationErrors).toHaveLength(0);
+  });
+});
+
+describe('checkValidationStorageNotes', () => {
+  let mockValidateCompletedDocument: jest.SpyInstance;
+  let mockValidateSpecies: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockValidateCompletedDocument = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
+    mockValidateSpecies = jest.spyOn(DocumentValidator, 'validateSpecies');
+  });
+
+  afterEach(() => {
+    mockValidateCompletedDocument.mockRestore();
+    mockValidateSpecies.mockRestore();
+  });
+
+  it('should push sdAddCatchDetailsErrorUKDocumentInvalid when a uk document is invalid', async () => {
+    mockValidateCompletedDocument.mockResolvedValue(false);
+
+    const data: any = {
+      catches: [{
+        certificateNumber: 'GBR-2022-CC-INVALID01',
+        product: 'Atlantic herring',
+        certificateType: 'uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(1);
+    expect(data.validationErrors[0]).toMatchObject({
+      message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
+      key: 'catches-0-certificateNumber',
+      certificateNumber: 'GBR-2022-CC-INVALID01',
+      product: 'Atlantic herring',
+    });
+  });
+
+  it('should push sdAddUKEntryDocumentSpeciesDoesNotExistError when uk document is valid but species does not match', async () => {
+    mockValidateCompletedDocument.mockResolvedValue(true);
+    mockValidateSpecies.mockResolvedValue(false);
+
+    const data: any = {
+      catches: [{
+        certificateNumber: 'GBR-2022-CC-123456789',
+        product: 'Wrong Species',
+        certificateType: 'uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(1);
+    expect(data.validationErrors[0]).toMatchObject({
+      message: 'sdAddUKEntryDocumentSpeciesDoesNotExistError',
+      key: 'catches-0-certificateNumber',
+      certificateNumber: 'GBR-2022-CC-123456789',
+      product: 'Wrong Species',
+    });
+  });
+
+  it('should not push any errors for a valid uk document with matching species', async () => {
+    mockValidateCompletedDocument.mockResolvedValue(true);
+    mockValidateSpecies.mockResolvedValue(true);
+
+    const data: any = {
+      catches: [{
+        certificateNumber: 'GBR-2022-CC-123456789',
+        product: 'Atlantic herring',
+        certificateType: 'uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(0);
+  });
+
+  it('should not validate non-uk certificate types', async () => {
+    const data: any = {
+      catches: [{
+        certificateNumber: 'FR-2022-CC-123',
+        product: 'Atlantic herring',
+        certificateType: 'non_uk',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(mockValidateCompletedDocument).not.toHaveBeenCalled();
+    expect(data.validationErrors).toHaveLength(0);
+  });
+});
+
+describe('clearDataFromJourney', () => {
+  let mockClearSessionData: jest.SpyInstance;
+  let mockCompleteDraftPS: jest.SpyInstance;
+  let mockCompleteDraftSD: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockClearSessionData = jest.spyOn(SessionManager, 'clearSessionDataForCurrentJourney').mockResolvedValue(undefined);
+    mockCompleteDraftPS = jest.spyOn(ProcessingStatementService, 'completeDraft').mockResolvedValue(undefined);
+    mockCompleteDraftSD = jest.spyOn(StorageDocumentService, 'completeDraft').mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    mockClearSessionData.mockRestore();
+    mockCompleteDraftPS.mockRestore();
+    mockCompleteDraftSD.mockRestore();
+  });
+
+  it('should clear session and complete the draft for processingStatement', async () => {
+    const pdf = { uri: 'https://blob.example.com/ps-doc.pdf' };
+    const user = { email: 'user@example.com', principal: 'user123' };
+
+    await OrchestrationService.clearDataFromJourney(processingStatement, 'user123', 'GBR-2022-PS-123456789', pdf, user, 'contact123');
+
+    expect(mockClearSessionData).toHaveBeenCalledWith('user123', 'GBR-2022-PS-123456789', 'contact123');
+    expect(mockCompleteDraftPS).toHaveBeenCalledWith('GBR-2022-PS-123456789', pdf.uri, user.email);
+    expect(mockCompleteDraftSD).not.toHaveBeenCalled();
+  });
+
+  it('should clear session and complete the draft for storageNote', async () => {
+    const pdf = { uri: 'https://blob.example.com/sd-doc.pdf' };
+    const user = { email: 'user@example.com', principal: 'user123' };
+
+    await OrchestrationService.clearDataFromJourney(storageNote, 'user123', 'GBR-2022-SD-123456789', pdf, user, 'contact123');
+
+    expect(mockClearSessionData).toHaveBeenCalledWith('user123', 'GBR-2022-SD-123456789', 'contact123');
+    expect(mockCompleteDraftSD).toHaveBeenCalledWith('GBR-2022-SD-123456789', pdf.uri, user.email);
+    expect(mockCompleteDraftPS).not.toHaveBeenCalled();
+  });
+});
+
+describe('back and removeKey HTML redirect paths', () => {
+  const mockSessionStore: any = {
+    readAllFor: jest.fn(),
+    writeAllFor: jest.fn(),
+  };
+  let mockGetSessionStore: jest.SpyInstance;
+  let mockRedirect: jest.Mock;
+
+  const htmlReq: any = {
+    app: { claims: { sub: 'Bob', contactId: 'contact123' } },
+    query: { c: '/redirect-target', n: '/next-url' },
+    params: { redisKey: processingStatement },
+    payload: {},
+    headers: { accept: 'text/html' },
+  };
+
+  beforeEach(() => {
+    mockGetSessionStore = jest.spyOn(SessionStoreFactory, 'getSessionStore');
+    mockGetSessionStore.mockResolvedValue(mockSessionStore);
+    mockSessionStore.readAllFor.mockResolvedValue({ someData: 'value' });
+    mockRedirect = jest.fn().mockReturnValue('redirected');
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('back() should redirect when request accepts HTML', async () => {
+    const htmlH = { ...h, redirect: mockRedirect } as any;
+
+    await OrchestrationService.back(htmlReq, htmlH);
+
+    expect(mockRedirect).toHaveBeenCalledWith('/redirect-target');
+  });
+
+  it('back() should return data when request does not accept HTML', async () => {
+    const jsonReq: any = {
+      ...htmlReq,
+      headers: { accept: 'application/json' },
+    };
+    const mockData = { someData: 'value' };
+    mockSessionStore.readAllFor.mockResolvedValue(mockData);
+
+    const result = await OrchestrationService.back(jsonReq, h);
+
+    expect(result).toEqual(mockData);
+  });
+
+  it('removeKey() should redirect when request accepts HTML', async () => {
+    const htmlH = { ...h, redirect: mockRedirect } as any;
+    mockSessionStore.readAllFor.mockResolvedValue({});
+
+    await OrchestrationService.removeKey(htmlReq, htmlH);
+
+    expect(mockRedirect).toHaveBeenCalledWith('/redirect-target');
+  });
+
+  it('removeKey() should filter empty array elements from session data', async () => {
+    const jsonReq: any = {
+      ...htmlReq,
+      headers: { accept: 'application/json' },
+      query: { c: '/redirect-target', key: 'toRemove' },
+      payload: {},
+    };
+    mockSessionStore.readAllFor.mockResolvedValue({
+      items: ['first', null, 'second', undefined, 'third'],
+      toRemove: 'some-value',
+    });
+
+    const result: any = await OrchestrationService.removeKey(jsonReq, h);
+
+    expect(result.items).toEqual(['first', 'second', 'third']);
+    expect(result.toRemove).toBeUndefined();
+  });
+
+  it('removeKey() should use n query param as redirect when c is absent', async () => {
+    const htmlH = { ...h, redirect: mockRedirect } as any;
+    const reqWithN: any = {
+      ...htmlReq,
+      query: { n: '/fallback-url', key: 'someKey' },
+    };
+    mockSessionStore.readAllFor.mockResolvedValue({});
+
+    await OrchestrationService.removeKey(reqWithN, htmlH);
+
+    expect(mockRedirect).toHaveBeenCalledWith('/fallback-url');
+  });
+});
+
+
