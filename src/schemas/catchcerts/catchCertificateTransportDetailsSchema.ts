@@ -32,7 +32,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         Joi.string()
           .trim()
           .max(50)
-          .regex(/^$|^[a-zA-Z0-9 ]+$/)
+          .regex(/^$|^[a-zA-Z0-9]+$/)
           .messages({
             'string.pattern.base': 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError',
             'string.max': 'ccContainerIdentificationNumberMaxLength',
