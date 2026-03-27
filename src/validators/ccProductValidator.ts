@@ -72,10 +72,15 @@ export const validateProducts = async (products) => {
       }))))
 }
 
-export const productsAreValid = async (products: ProductLanded[]) => {
-  const res = await validateProducts(products);
-  const fields = ['startDate', 'dateLanded'];
-  const hasSeasonalFishFieldError = (f: string) =>
-    res.some(validation => validation.result.includes(f) && validation.validator === 'seasonalFish');
-  return fields.filter(hasSeasonalFishFieldError);
-};
+export const productsAreValid = async (products: ProductLanded[]) =>
+  await validateProducts(products)
+    .then((res) => {
+      const fields = ['startDate', 'dateLanded'];
+      const validations = [];
+      fields.forEach(f => {
+        if (res.some(validation => (validation.result.some((r) => r === f ) && validation.validator === 'seasonalFish'))) {
+          validations.push(f);
+        }
+      })
+      return validations;
+    });

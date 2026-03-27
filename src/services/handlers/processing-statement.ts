@@ -135,15 +135,13 @@ export default {
 
     if (!data.healthCertificateDate || data.healthCertificateDate === "") {
       errors.healthCertificateDate = "psAddHealthCertificateErrorHealthCertificateDate";
-    } else if (validateDate(data.healthCertificateDate)) {
-      if (validateMaximumFutureDate(data.healthCertificateDate)) {
-        data.healthCertificateDate = cleanDate(data.healthCertificateDate);
-      } else {
-        errors.healthCertificateDate = "psAddHealthCertificateErrorMaxDaysHealthCertificateDate";
-        data.healthCertificateDate = cleanDate(data.healthCertificateDate);
-      }
-    } else {
+    } else if (!validateDate(data.healthCertificateDate)) {
       errors.healthCertificateDate = "psAddHealthCertificateErrorRealDateHealthCertificateDate";
+    } else if (!validateMaximumFutureDate(data.healthCertificateDate)) {
+      errors.healthCertificateDate = "psAddHealthCertificateErrorMaxDaysHealthCertificateDate";
+      data.healthCertificateDate = cleanDate(data.healthCertificateDate);
+    } else {
+      data.healthCertificateDate = cleanDate(data.healthCertificateDate);
     }
     return { errors };
   },
@@ -359,24 +357,22 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing';
   } else if (ctch.exportWeightBeforeProcessing <= 0) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorExportWeightGreaterThanNullBeforeProcessing';
-  } else if (isPositiveNumberWithTwoDecimals(ctch.exportWeightBeforeProcessing)) {
-    if (ctch.totalWeightLanded && ctch.exportWeightBeforeProcessing > Number.parseFloat(ctch.totalWeightLanded)) {
-      errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessingMoreThanTotalWeight'
-    } else {
-      (ctch.exportWeightBeforeProcessing = numberAsString(ctch.exportWeightBeforeProcessing));
-    }
-  } else {
+  } else if (!isPositiveNumberWithTwoDecimals(ctch.exportWeightBeforeProcessing)) {
     errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalBeforeProcessing';
+  } else if (ctch.totalWeightLanded && ctch.exportWeightBeforeProcessing > Number.parseFloat(ctch.totalWeightLanded)) {
+    errors[`catches-${index}-exportWeightBeforeProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessingMoreThanTotalWeight'
+  } else {
+    (ctch.exportWeightBeforeProcessing = numberAsString(ctch.exportWeightBeforeProcessing));
   }
 
   if (!ctch.exportWeightAfterProcessing) {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing';
   } else if (ctch.exportWeightAfterProcessing <= 0) {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorExportWeightGreaterThanNullAfterProcessing';
-  } else if (isPositiveNumberWithTwoDecimals(ctch.exportWeightAfterProcessing)) {
-    (ctch.exportWeightAfterProcessing = numberAsString(ctch.exportWeightAfterProcessing));
-  } else {
+  } else if (!isPositiveNumberWithTwoDecimals(ctch.exportWeightAfterProcessing)) {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalAfterProcessing';
+  } else {
+    (ctch.exportWeightAfterProcessing = numberAsString(ctch.exportWeightAfterProcessing));
   }
   return { errors };
 }
