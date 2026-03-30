@@ -405,11 +405,14 @@ export default class ExportPayloadService {
   }
 
   private static async gatherExportInfo(userPrincipal: string, documentNumber: string, contactId: string) {
-    const exporter = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId));
-    const exportedFrom = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId));
+    const [exporter, exportedFrom, transportations, transportData] = await Promise.all([
+      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportations(userPrincipal, documentNumber, contactId)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId)),
+    ]);
+
     const exporterModel: CcExportedDetailModel = exporter?.model ? exporter.model : {} as CcExportedDetailModel;
-    const transportations: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportations(userPrincipal, documentNumber, contactId));
-    const transportData = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId));
 
     const catchCertificate = {
       transportations: Array.isArray(transportations) ? transportations.map(t => ({ ...t, ...exportedFrom })) : [],
