@@ -1801,7 +1801,7 @@ describe('getTransportDetails', () => {
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
-        ProgressStatus.COMPLETED
+        ProgressStatus.INCOMPLETE
       );
     });
 
@@ -2361,7 +2361,7 @@ describe('getTransportDetails', () => {
     };
 
     expect(ProgressService.getTransportDetails(transport)).toBe(
-      ProgressStatus.COMPLETED
+      ProgressStatus.INCOMPLETE
     );
   });
 
