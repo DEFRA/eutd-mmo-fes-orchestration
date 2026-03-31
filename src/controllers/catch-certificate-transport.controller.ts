@@ -20,7 +20,7 @@ export default class CatchCertificateTransportController {
   }
 
   public static async getTransport(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
-    const id: number = parseInt((req.params as any).transportId);
+    const id: number = Number.parseInt((req.params as any).transportId);
 
     return Service.getTransport(id, userPrincipal, documentNumber, contactId);
   }
@@ -76,7 +76,7 @@ export default class CatchCertificateTransportController {
   }
 
   public static async removeTransportationById(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
-    const id: number = parseInt((req.params as any).transportId);
+    const id: number = Number.parseInt((req.params as any).transportId);
     await Service.removeTransportation(id, userPrincipal, documentNumber, contactId);
   }
 

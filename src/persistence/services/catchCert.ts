@@ -103,8 +103,8 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
 
   const [month, year] = yearAndMonth.split('-');
   const currentDate = new Date();
-  const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
-  const monthInt = month ? parseInt(month) : (currentDate.getUTCMonth() + 1);
+  const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
+  const monthInt = month ? Number.parseInt(month) : (currentDate.getUTCMonth() + 1);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await CatchCertModel.find({
     $or: ownerQuery,
