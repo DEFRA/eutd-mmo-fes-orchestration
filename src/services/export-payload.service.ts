@@ -29,13 +29,13 @@ import { LandingStatus, ProductLanded, ProductsLanded, getNumberOfUniqueLandings
 import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
 import { LandingsRefreshData } from './interfaces';
 import { CcExportedDetailModel } from '../persistence/schema/frontEndModels/exporterDetails';
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 import { updateConsolidateLandings } from "./landings-consolidate.service";
 import { ExportLocation } from '../persistence/schema/frontEndModels/export-location';
 import * as pdfService from 'mmo-ecc-pdf-svc';
 
-const crypto = require('crypto');
-const https = require('https');
+const crypto = require('node:crypto');
+const https = require('node:https');
 
 export default class ExportPayloadService {
 

@@ -6,14 +6,14 @@ import { reportDocumentVoided, submitToCatchSystem } from "./reference-data.serv
 import ApplicationConfig from "../applicationConfig";
 import logger from "../logger";
 import { validateDocumentOwner } from '../validators/documentOwnershipValidator';
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 import { voidConsolidateLandings } from "./landings-consolidate.service";
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import DocumentNumberService from './documentNumber.service';
 import * as pdfService from 'mmo-ecc-pdf-svc';
 import { EuCatchStatus } from '../persistence/schema/catchCert';
 
-const https = require('https');
+const https = require('node:https');
 
 export default class ManageCertsService {
 

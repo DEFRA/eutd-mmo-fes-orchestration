@@ -13,7 +13,6 @@ import {
 } from "./constants";
 import { SessionStoreFactory } from "../session_store/factory";
 import { getRedisOptions } from "../session_store/redis";
-import { isArray } from "util";
 import * as moment from "moment";
 import ApplicationConfig from "../applicationConfig";
 import SaveAsDraftService from "../services/saveAsDraft.service";
@@ -47,12 +46,12 @@ import { validateCompletedDocument, validateSpecies } from "../validators/docume
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
 export const processingStatement: string = "processingStatement";
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 
 const { unflatten } = require("flat");
 const flatten = require("flat");
 const _ = require("lodash");
-const https = require('https');
+const https = require('node:https');
 
 export default class OrchestrationService {
   public static async get(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
@@ -607,7 +606,7 @@ export default class OrchestrationService {
 
     // remove any empty elements from arrays
     Object.keys(data).forEach((k) => {
-      if (isArray(data[k])) data[k] = data[k].filter((d) => d);
+      if (Array.isArray(data[k])) data[k] = data[k].filter((d) => d);
     });
 
     delete data.errors;
