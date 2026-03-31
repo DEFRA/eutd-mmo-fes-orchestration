@@ -3,5 +3,5 @@ export default function(headers: Record<string, any>): boolean {
   if (!accept) {
     return false;
   }
-  return accept.split(',').indexOf('text/html') !== -1;
+  return accept.split(',').includes('text/html');
 }

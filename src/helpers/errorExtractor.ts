@@ -4,7 +4,7 @@ export const buildRedirectUrlWithErrorStringInQueryParam = (errorDetailsObj, red
     const errQueryString = `${JSON.stringify(errorDetailsObj)}`;
 
     // already has open/close id in query string
-    if (redirectTo.indexOf('?') >= 0) {
+    if (redirectTo.includes('?')) {
       const [pageName, fullQueryString] = redirectTo.split('?');
       const existingQueryString = qs.parse(fullQueryString);
       existingQueryString.error = errQueryString;
