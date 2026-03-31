@@ -80,7 +80,7 @@ class ApplicationConfig {
     }
 
 
-    if (isNaN(this._maximumFavouritesPerUser)) {
+    if (Number.isNaN(this._maximumFavouritesPerUser)) {
       logger.error('MAXIMUM_FAVOURITES_PER_USER is not set');
     }
 
