@@ -148,7 +148,7 @@ export const getDraftData = async (userPrincipal: string, path: string, contactI
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
   const results = await StorageDocumentModel.findOne(query, 'draftData', { lean: true });
-  const dataExists = (results && results.draftData && Object.prototype.hasOwnProperty.call(results.draftData, path));
+  const dataExists = results?.draftData && Object.prototype.hasOwnProperty.call(results.draftData, path);
 
   logger.debug(`[SD][getDraftData] data found? ${dataExists}`);
 
@@ -217,7 +217,7 @@ export const getDraftDocumentHeaders = async (userPrincipal: string, contactId: 
 export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.exporterDetails)
+  return draft?.exportData?.exporterDetails
     ? toFrontEndPsAndSdExporterDetails(draft.exportData.exporterDetails)
     : null;
 };
@@ -261,7 +261,7 @@ export const getDraftCertificateNumber = async (userPrincipal: string, contactId
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
   const draft = await StorageDocumentModel.findOne(query, 'documentNumber', { lean: true });
-  const dataExists = (draft && draft.documentNumber);
+  const dataExists = draft?.documentNumber;
 
   return dataExists
     ? draft.documentNumber
@@ -340,7 +340,7 @@ export const upsertExportLocation = async (userPrincipal: string, payload: Expor
 
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<ExportLocation> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
-  return (draft && draft.exportData && draft.exportData.exportedTo) ? { exportedTo: draft.exportData.exportedTo } : null;
+  return draft?.exportData?.exportedTo ? { exportedTo: draft.exportData.exportedTo } : null;
 };
 
 export const upsertUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string) => {
