@@ -606,7 +606,7 @@ export default class OrchestrationService {
 
     // remove any empty elements from arrays
     Object.keys(data).forEach((k) => {
-      if (Array.isArray(data[k])) data[k] = data[k].filter((d) => d);
+      if (Array.isArray(data[k])) data[k] = data[k].filter(Boolean);
     });
 
     delete data.errors;
