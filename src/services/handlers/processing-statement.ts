@@ -112,7 +112,7 @@ export default {
     const ctch = data.catches[index];
     const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
     const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
-    validateNoDuplicateCatch(data.catches, index, catchDetails.errors);
+
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
 
@@ -275,25 +275,6 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
   validateCatchCertificateCommodityCode(ctch, index, errors);
 
   return { errors };
-}
-
-function validateNoDuplicateCatch(catches: any[], index: number, errors: any) {
-  if (errors[`catches-${index}-catchCertificateNumber`]) {
-    return;
-  }
-  const current = catches[index];
-  if (!current.catchCertificateNumber || !current.species || !current.speciesCommodityCode) {
-    return;
-  }
-  const isDuplicate = catches.some((c, i) =>
-    i !== index &&
-    c.catchCertificateNumber === current.catchCertificateNumber &&
-    c.species === current.species &&
-    c.speciesCommodityCode === current.speciesCommodityCode
-  );
-  if (isDuplicate) {
-    errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorDuplicateCatch';
-  }
 }
 
 function validateCatchCertificateCommodityCode(ctch: any, index: number, errors: any) {
