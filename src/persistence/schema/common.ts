@@ -143,6 +143,7 @@ export interface ICommodityCodeExtended extends ICommodityCode {
 export interface IProductDraft {
   species: string,
   speciesCode?: string,
+  commodityCode?: string,
   totalWeight?: number
 }
 
