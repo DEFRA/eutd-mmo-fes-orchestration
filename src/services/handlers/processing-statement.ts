@@ -1,10 +1,12 @@
 import applicationConfig from "../../applicationConfig";
 import {
+  MAX_COMMODITY_CODE_LENGTH,
   MAX_PERSON_RESPONSIBLE_LENGTH,
   MAX_PLANT_NAME_LENGTH,
+  MIN_COMMODITY_CODE_LENGTH,
   MIN_PERSON_RESPONSIBLE_LENGTH,
 } from "../../services/constants";
-import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
+import { validateCompletedDocument, validateSpecies, validateCommodityCode as validateCommodityCodeOnDocument } from "../../validators/documentValidator";
 import { validateCountriesName } from "../../validators/countries.validator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { ICountry } from "../../persistence/schema/common";
@@ -109,6 +111,7 @@ export default {
     const ctch = data.catches[index];
     const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
     const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
+    validateNoDuplicateCatch(data.catches, index, catchDetails.errors);
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
 
@@ -259,8 +262,38 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
   validateSpeciesInput(ctch, index, errors);
   await validateIssuingCountryForNonUKCatch(ctch, index, errors);
   await validateCatchCertificateNumber(ctch, index, errors, documentNumber, userPrincipal, contactId);
+  validateCatchCertificateCommodityCode(ctch, index, errors);
 
   return { errors };
+}
+
+function validateNoDuplicateCatch(catches: any[], index: number, errors: any) {
+  if (errors[`catches-${index}-catchCertificateNumber`]) {
+    return;
+  }
+  const current = catches[index];
+  if (!current.catchCertificateNumber || !current.species || !current.speciesCommodityCode) {
+    return;
+  }
+  const isDuplicate = catches.some((c, i) =>
+    i !== index &&
+    c.catchCertificateNumber === current.catchCertificateNumber &&
+    c.species === current.species &&
+    c.speciesCommodityCode === current.speciesCommodityCode
+  );
+  if (isDuplicate) {
+    errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorDuplicateCatch';
+  }
+}
+
+function validateCatchCertificateCommodityCode(ctch: any, index: number, errors: any) {
+  if (!ctch.speciesCommodityCode || validateWhitespace(ctch.speciesCommodityCode)) {
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorEnterSpeciesCommodityCode';
+  } else if (ctch.speciesCommodityCode.trim().replaceAll(/\s/g, '').length < MIN_COMMODITY_CODE_LENGTH) {
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMinLength';
+  } else if (ctch.speciesCommodityCode.trim().replaceAll(/\s/g, '').length > MAX_COMMODITY_CODE_LENGTH) {
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMaxLength';
+  }
 }
 
 function validateSpeciesInput(ctch: any, index: number, errors: any) {
@@ -268,7 +301,7 @@ function validateSpeciesInput(ctch: any, index: number, errors: any) {
   // species: user-selected value from dropdown
   // speciesCode: FAO code extracted from the species string (only populated when selecting from dropdown)
   // This ensures users can only select from the dropdown and cannot enter free text
-  if (!ctch.species || validateWhitespace(ctch.species) || 
+  if (!ctch.species || validateWhitespace(ctch.species) ||
       !ctch.speciesCode || validateWhitespace(ctch.speciesCode)) {
     errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
   }
@@ -320,6 +353,12 @@ async function validateUKCatchCertificateNumber(ctch: any, index: number, errors
   const isSpeciesValid = await validateSpecies(ctch.catchCertificateNumber, ctch.species, ctch.speciesCode, userPrincipal, contactId, documentNumber);
   if (!isSpeciesValid) {
     errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCSpeciesMissing';
+    return;
+  }
+
+  const isCommodityCodeValid = await validateCommodityCodeOnDocument(ctch.catchCertificateNumber, ctch.speciesCommodityCode, userPrincipal, contactId, documentNumber);
+  if (!isCommodityCodeValid) {
+    errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCCommodityCodeMissing';
   }
 }
 
@@ -331,7 +370,7 @@ function validateNonUKCatchCertificateNumber(ctch: any, index: number, errors: a
 
 export function validateCatchWeights(ctch: any, index: number, errors: any) {
   // Validate totalWeightLanded only for non-UK catch certificates
-  if (ctch.catchCertificateType === 'non_uk') {
+  if (ctch.catchCertificateType !== 'uk') {
     validateCatchWeightsTotalWeightErrors(ctch, index, errors);
   }
 

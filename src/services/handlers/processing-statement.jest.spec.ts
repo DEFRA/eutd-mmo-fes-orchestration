@@ -412,7 +412,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     const data: ProcessingStatement = {
       catches: [{
         id: '',
-        catchCertificateType: undefined
+        catchCertificateType: undefined,
+        speciesCommodityCode: '03023110'
       }],
       consignmentDescription: ' ',
       exportedTo: {
@@ -432,10 +433,11 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
 
     const expectedErrors = {
       "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
-      'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorEnterTheCatchCertificateNumber',
+      "catches-0-catchCertificateNumber": 'psAddCatchDetailsErrorEnterTheCatchCertificateNumber',
       "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
       "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
-      'catches-0-species': 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
+      "catches-0-species": 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
+      "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
     }
 
     expect(errors).toEqual(expectedErrors);
@@ -455,7 +457,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           catchCertificateNumber: 'CT-902-9_(-)_()',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -497,6 +500,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -538,7 +542,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           issuingCountry: { officialCountryName: '' },
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -578,7 +583,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           issuingCountry: { officialCountryName: '' },
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -622,7 +628,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           issuingCountry: 'InvalidCountryName',  // String format to simulate browser input
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -666,7 +673,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           issuingCountry: { officialCountryName: '' },  // Empty country name
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -710,7 +718,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           // issuingCountry: undefined (not set)
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -751,7 +760,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           catchCertificateNumber: 'NOT-A-UK-CATCH-CERTIFICATE',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -792,7 +802,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           catchCertificateType: 'uk',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -833,7 +844,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           catchCertificateType: 'uk',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          exportWeightAfterProcessing: '1110',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -864,6 +876,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     let mockValidateCatchCertificate: jest.SpyInstance;
     let mockValidateSpeciesName: jest.SpyInstance;
     let mockValidateSpecies: jest.SpyInstance;
+    let mockValidateCommodityCode: jest.SpyInstance;
 
     beforeEach(() => {
       mockValidateCatchCertificate = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
@@ -871,12 +884,15 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       mockValidateSpeciesName.mockResolvedValue({ isError: false });
       mockValidateSpecies = jest.spyOn(DocumentValidator, 'validateSpecies');
       mockValidateSpecies.mockResolvedValue(false);
+      mockValidateCommodityCode = jest.spyOn(DocumentValidator, 'validateCommodityCode');
+      mockValidateCommodityCode.mockResolvedValue(true);
     });
 
     afterEach(() => {
       mockValidateCatchCertificate.mockRestore();
       mockValidateSpeciesName.mockRestore();
       mockValidateSpecies.mockRestore();
+      mockValidateCommodityCode.mockRestore();
     });
 
     it('should return a psAddCatchDetailsErrorUKCCNumberNotExist error for a certificate number of a missing COMPLETE document', async () => {
@@ -896,7 +912,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
             catchCertificateType: 'uk',
             totalWeightLanded: '1112',
             exportWeightBeforeProcessing: '1111',
-            exportWeightAfterProcessing: '1110'
+            exportWeightAfterProcessing: '1110',
+            speciesCommodityCode: '03023110'
           }
         ],
         consignmentDescription: '',
@@ -941,7 +958,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
             catchCertificateType: 'uk',
             totalWeightLanded: '1112',
             exportWeightBeforeProcessing: '1111',
-            exportWeightAfterProcessing: '1110'
+            exportWeightAfterProcessing: '1110',
+            speciesCommodityCode: '03023110'
           }
         ],
         consignmentDescription: '',
@@ -986,7 +1004,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
             catchCertificateType: 'uk',
             totalWeightLanded: '1112',
             exportWeightBeforeProcessing: '1111',
-            exportWeightAfterProcessing: '1110'
+            exportWeightAfterProcessing: '1110',
+            speciesCommodityCode: '03023110'
           }
         ],
         consignmentDescription: '',
@@ -1009,6 +1028,95 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
 
       expect(errors).toEqual(expectedErrors);
       expect(data.catches[0].catchCertificateType).toBe('uk');
+    });
+
+
+    it('should return a psAddCatchDetailsErrorUKCCCommodityCodeMissing error when the commodity code is not found on the reference catch certificate', async () => {
+      mockValidateCatchCertificate.mockResolvedValue(true);
+      mockValidateSpecies.mockResolvedValue(true);
+      mockValidateCommodityCode.mockResolvedValue(false);
+
+      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
+      const handler = SUT[currentUrl];
+
+      const data: ProcessingStatement = {
+        catches: [
+          {
+            id: '',
+            species: 'Atlantic Cod',
+            speciesCode: 'COD',
+            catchCertificateNumber: 'GBR-2022-CC-01234ABCD',
+            catchCertificateType: 'uk',
+            totalWeightLanded: '1112',
+            exportWeightBeforeProcessing: '1111',
+            exportWeightAfterProcessing: '1110',
+            speciesCommodityCode: '03023110'
+          }
+        ],
+        consignmentDescription: '',
+        exportedTo: {
+          officialCountryName: ''
+        },
+        error: ''
+      };
+
+      const { errors } = await handler({
+        data: data,
+        errors: {},
+        documentNumber: 'GBR-2023-PS-01234ABCD',
+        userPrincipal: 'bob',
+        contactId: 'contactId',
+        params: { catchIndex: 0 }
+      });
+
+      const expectedErrors = {
+        'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorUKCCCommodityCodeMissing',
+      };
+
+      expect(mockValidateCommodityCode).toHaveBeenCalledWith('GBR-2022-CC-01234ABCD', '03023110', 'bob', 'contactId', 'GBR-2023-PS-01234ABCD');
+      expect(errors).toEqual(expectedErrors);
+      expect(data.catches[0].catchCertificateType).toBe('uk');
+    });
+
+    it('should not check commodity code when species is missing from the catch certificate', async () => {
+      mockValidateCatchCertificate.mockResolvedValue(true);
+      mockValidateSpecies.mockResolvedValue(false);
+
+      const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
+      const handler = SUT[currentUrl];
+
+      const data: ProcessingStatement = {
+        catches: [
+          {
+            id: '',
+            species: 'Atlantic Cod',
+            speciesCode: 'COD',
+            catchCertificateNumber: 'GBR-2022-CC-01234ABCD',
+            catchCertificateType: 'uk',
+            totalWeightLanded: '1112',
+            exportWeightBeforeProcessing: '1111',
+            exportWeightAfterProcessing: '1110',
+            speciesCommodityCode: '03023110'
+          }
+        ],
+        consignmentDescription: '',
+        exportedTo: {
+          officialCountryName: ''
+        },
+        error: ''
+      };
+
+      const { errors } = await handler({
+        data: data,
+        errors: {},
+        documentNumber: 'GBR-2023-PS-01234ABCD',
+        userPrincipal: 'bob',
+        contactId: 'contactId',
+        params: { catchIndex: 0 }
+      });
+
+      expect(mockValidateCommodityCode).not.toHaveBeenCalled();
+      expect(errors['catches-0-catchCertificateNumber']).toBe('psAddCatchDetailsErrorUKCCSpeciesMissing');
     });
   });
 });
@@ -1041,7 +1149,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     const handler = SUT[currentUrl];
 
     const data = {
-      catches: [{}],
+      catches: [{ speciesCommodityCode: '03023110' }],
       consignmentDescription: '',
     };
 
@@ -1055,11 +1163,12 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
     });
 
     const expectedErrors = {
-      'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorEnterTheCatchCertificateNumber',
+      "catches-0-catchCertificateNumber": 'psAddCatchDetailsErrorEnterTheCatchCertificateNumber',
       "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
       "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
       "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
-      'catches-0-species': 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
+      "catches-0-species": 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName',
+      "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
     };
     expect(errors).toEqual(expectedErrors);
   });
@@ -1075,7 +1184,8 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchesCertificateType: 'uk',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -1096,6 +1206,119 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
     };
     expect(errors).toEqual(expectedErrors);
+  });
+
+   describe('when checking for duplicate catches', () => {
+    let mockValidateSpeciesName: jest.SpyInstance;
+    let mockValidateCountriesName: jest.SpyInstance;
+
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex';
+
+    const makeValidNonUKCatch = (overrides = {}) => ({
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      catchCertificateNumber: 'VALID-CERT-001',
+      catchCertificateType: 'non_uk',
+      issuingCountry: { officialCountryName: 'France' },
+      totalWeightLanded: '1000',
+      exportWeightBeforeProcessing: '900',
+      exportWeightAfterProcessing: '800',
+      speciesCommodityCode: '03023110',
+      ...overrides
+    });
+
+    beforeEach(() => {
+      mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
+      mockValidateSpeciesName.mockResolvedValue({ isError: false });
+      mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
+      mockValidateCountriesName.mockResolvedValue({ isError: false, error: null });
+    });
+
+    afterEach(() => {
+      mockValidateSpeciesName.mockRestore();
+      mockValidateCountriesName.mockRestore();
+    });
+
+    it('should return a psAddCatchDetailsErrorDuplicateCatch error when a catch with the same catchCertificateNumber, species and speciesCommodityCode already exists', async () => {
+      const handler = SUT[currentUrl];
+      const data = {
+        catches: [
+          makeValidNonUKCatch(),
+          makeValidNonUKCatch(),
+        ],
+      };
+
+      const { errors } = await handler({
+        data,
+        errors: {},
+        params: { catchIndex: 1 },
+        documentNumber: 'GBR-2023-PS-01234ABCD',
+        userPrincipal: 'bob',
+        contactId: 'contactId',
+      });
+
+      expect(errors['catches-1-catchCertificateNumber']).toBe('psAddCatchDetailsErrorDuplicateCatch');
+    });
+
+    it('should not return a duplicate error when catches share the same catchCertificateNumber but have different species', async () => {
+      const handler = SUT[currentUrl];
+      const data = {
+        catches: [
+          makeValidNonUKCatch({ species: 'Atlantic Herring', speciesCode: 'HER' }),
+          makeValidNonUKCatch(),
+        ],
+      };
+
+      const { errors } = await handler({
+        data,
+        errors: {},
+        params: { catchIndex: 1 },
+        documentNumber: 'GBR-2023-PS-01234ABCD',
+        userPrincipal: 'bob',
+        contactId: 'contactId',
+      });
+
+      expect(errors['catches-1-catchCertificateNumber']).toBeUndefined();
+    });
+
+    it('should not return a duplicate error when catches share the same catchCertificateNumber and species but have different speciesCommodityCode', async () => {
+      const handler = SUT[currentUrl];
+      const data = {
+        catches: [
+          makeValidNonUKCatch({ speciesCommodityCode: '03039990' }),
+          makeValidNonUKCatch(),
+        ],
+      };
+
+      const { errors } = await handler({
+        data,
+        errors: {},
+        params: { catchIndex: 1 },
+        documentNumber: 'GBR-2023-PS-01234ABCD',
+        userPrincipal: 'bob',
+        contactId: 'contactId',
+      });
+
+      expect(errors['catches-1-catchCertificateNumber']).toBeUndefined();
+    });
+
+    it('should not return a duplicate error when there is only one catch', async () => {
+      const handler = SUT[currentUrl];
+      const data = {
+        catches: [makeValidNonUKCatch()],
+      };
+
+      const { errors } = await handler({
+        data,
+        errors: {},
+        params: { catchIndex: 0 },
+        documentNumber: 'GBR-2023-PS-01234ABCD',
+        userPrincipal: 'bob',
+        contactId: 'contactId',
+      });
+
+      expect(errors['catches-0-catchCertificateNumber']).toBeUndefined();
+    });
   });
 });
 
@@ -1567,10 +1790,9 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
     });
 
     const expectedErrors = {
-      "catches-0-exportWeightAfterProcessing":
-        "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
-      "catches-0-exportWeightBeforeProcessing":
-        "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
+      "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
+      "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
+      "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG"
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -1795,6 +2017,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-wei
     const expectedErrors = {
       'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing',
       'catches-0-exportWeightBeforeProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing',
+      'catches-0-totalWeightLanded': "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -2447,7 +2670,8 @@ describe('validateCatchDetails', () => {
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchesCertificateType: 'uk',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -2476,7 +2700,8 @@ describe('validateCatchDetails', () => {
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          scientificName: 'someScientificName'
+          scientificName: 'someScientificName',
+          speciesCommodityCode: '03023110'
         }
       ],
       consignmentDescription: '',
@@ -2544,6 +2769,150 @@ describe('validateCatchDetails', () => {
     await ProcessingStatementService.validateCatchDetails(ctch, index, speciesValidation.errors, documentNumber, userPrincipal, contactId);
 
     expect(mockValidateSpeciesName).toHaveBeenCalledWith(ctch.species, ctch.scientificName, refUrl);
+  });
+
+   it('should return speciesCommodityCode error when speciesCommodityCode is missing', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      // speciesCommodityCode intentionally absent
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorEnterSpeciesCommodityCode');
+  });
+
+  it('should return speciesCommodityCode error when speciesCommodityCode is whitespace', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '   ',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorEnterSpeciesCommodityCode');
+  });
+
+  it('should not return speciesCommodityCode error when speciesCommodityCode is present', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '03023110',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBeUndefined();
+  });
+
+  it('should return speciesCommodityCode min length error when fewer than 6 digits are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '0302',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorSpeciesCommodityCodeMinLength');
+  });
+
+  it('should return speciesCommodityCode min length error when exactly 5 digits are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '03023',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorSpeciesCommodityCodeMinLength');
+  });
+
+  it('should not return speciesCommodityCode min length error when exactly 6 digits are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '030231',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBeUndefined();
+  });
+
+  it('should return speciesCommodityCode max length error when more than 10 digits are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '03023110999',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorSpeciesCommodityCodeMaxLength');
+  });
+
+  it('should return speciesCommodityCode max length error when exactly 11 digits are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '03023110991',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorSpeciesCommodityCodeMaxLength');
+  });
+
+  it('should not return speciesCommodityCode max length error when exactly 10 digits are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '0302311099',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBeUndefined();
   });
 });
 

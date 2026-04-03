@@ -363,10 +363,12 @@ describe('document validator', () => {
           products: [{
             species: "Atlantic cod (COD)",
             speciesCode: "COD",
+            commodityCode: "03025110",
             totalWeight: 201
           },{
             species: "Atlantic herring (HER)",
             speciesCode: "HER",
+            commodityCode: "03025110",
             totalWeight: 150
           }]
         }
@@ -549,6 +551,7 @@ describe('document validator', () => {
           products: [{
             species: "Atlantic cod (COD)",
             speciesCode: "COD",
+            commodityCode: "03025110",
             totalWeight: 351
           }]
         }
@@ -731,6 +734,7 @@ describe('document validator', () => {
           products: [{
             species: "Atlantic cod (COD)",
             speciesCode: "COD",
+            commodityCode: "03025110",
             totalWeight: 351
           }]
         }
@@ -1393,7 +1397,79 @@ describe('document validator', () => {
 
     it('should call getProductsCatchCertificate without products', async () => {
       const result = SUT.getProductsCatchCertificate(null);
-      expect(result).toBeTruthy();
+      expect(result).toEqual([]);
+    })
+
+    it('should return empty array for getProductsCatchCertificate with empty array input', async () => {
+      const result = SUT.getProductsCatchCertificate([]);
+      expect(result).toEqual([]);
+    })
+
+    it('should return totalWeight of 0 when caughtBy is an empty array', async () => {
+      const result = SUT.getProductsCatchCertificate([{
+        species: "Atlantic cod (COD)",
+        speciesId: "GBR-2022-CC-1-0",
+        speciesCode: "COD",
+        commodityCode: "03025110",
+        commodityCodeDescription: "Fresh or chilled cod",
+        scientificName: "Gadus morhua",
+        state: { code: "FRE", name: "Fresh" },
+        presentation: { code: "WHL", name: "Whole" },
+        factor: 1,
+        caughtBy: []
+      }]);
+      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 0 }]);
+    })
+
+    it('should skip NaN weight landings and sum only valid weights', async () => {
+      const result = SUT.getProductsCatchCertificate([{
+        species: "Atlantic cod (COD)",
+        speciesId: "GBR-2022-CC-1-0",
+        speciesCode: "COD",
+        commodityCode: "03025110",
+        commodityCodeDescription: "Fresh or chilled cod",
+        scientificName: "Gadus morhua",
+        state: { code: "FRE", name: "Fresh" },
+        presentation: { code: "WHL", name: "Whole" },
+        factor: 1,
+        caughtBy: [
+          { weight: NaN, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-1", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending },
+          { weight: 50, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-2", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }
+        ]
+      }]);
+      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 50 }]);
+    })
+
+    it('should deduplicate products matching by speciesCode when species names differ', async () => {
+      const result = SUT.getProductsCatchCertificate([
+        {
+          species: "Atlantic cod (COD)",
+          speciesId: "GBR-2022-CC-1-0",
+          speciesCode: "COD",
+          commodityCode: "03025110",
+          commodityCodeDescription: "Fresh or chilled cod",
+          scientificName: "Gadus morhua",
+          state: { code: "FRE", name: "Fresh" },
+          presentation: { code: "WHL", name: "Whole" },
+          factor: 1,
+          caughtBy: [{ weight: 100, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-1", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }]
+        },
+        {
+          species: "Cod (COD)",
+          speciesId: "GBR-2022-CC-1-1",
+          speciesCode: "COD",
+          commodityCode: "03025110",
+          commodityCodeDescription: "Fresh or chilled cod",
+          scientificName: "Gadus morhua",
+          state: { code: "FRE", name: "Fresh" },
+          presentation: { code: "GUT", name: "Gutted" },
+          factor: 1,
+          caughtBy: [{ weight: 75, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-2", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }]
+        }
+      ]);
+      expect(result).toHaveLength(1);
+      expect(result[0].totalWeight).toBe(175);
+      expect(result[0].speciesCode).toBe("COD");
     })
 
     it('should call getProductsCatchCertificate with more products', async () => {
@@ -1578,6 +1654,110 @@ describe('document validator', () => {
       ]);
       expect(result).toBeTruthy();
     })
+
+  });
+
+  describe('validate commodity code', () => {
+
+    it('will check REDIS to confirm the presence of commodity code on completed catch certificate', async () => {
+      const result = await SUT.validateCommodityCode('doc1', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(mockGetDraftCache).toHaveBeenCalledTimes(1);
+      expect(mockGetDraftCache).toHaveBeenCalledWith('bob', 'bobContactId', 'GBR-2023-PS-ABCD01234');
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the processing statement has no completed certificate in REDIS', async () => {
+      const redisCache: IDraft = {};
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('doc1', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if a completed catch certificate cannot be found', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('doc1', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the commodity code cannot be found within the completed catch certificate', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '99999999', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return true if the commodity code is found within the completed catch certificate', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(true);
+    });
+
+    it('will return true if the commodity code is found in one of multiple products', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [
+            { species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 },
+            { species: "Atlantic herring (HER)", speciesCode: "HER", commodityCode: "03035290", totalWeight: 50 }
+          ]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03035290', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(true);
+    });
+
+    it('will return false if the commodity code is an empty string', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the product has no commodity code', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the products array is empty', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": { products: [] }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
 
   });
 

@@ -12,7 +12,7 @@ export const PROTECTIVE_MONITORING_DOWNLOADED_TRANSACTION: string = 'DOWNLOAD';
 export const PROTECTIVE_MONITORING_VOID_TRANSACTION: string = 'VOID';
 
 export const MIN_COMMODITY_CODE_LENGTH: number = 6;
-export const MAX_COMMODITY_CODE_LENGTH: number = 12;
+export const MAX_COMMODITY_CODE_LENGTH: number = 10;
 export const MIN_PERSON_RESPONSIBLE_LENGTH: number = 1;
 export const MAX_PERSON_RESPONSIBLE_LENGTH: number = 50;
 export const MAX_PLANT_NAME_LENGTH: number = 54;

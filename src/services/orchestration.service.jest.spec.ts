@@ -1772,7 +1772,7 @@ describe('OrchestrationService', () => {
     result = isInvalidLength('1234567890123', min, max);
     expect(result).toBeTruthy();
 
-    result = isInvalidLength('123456789012', min, max);
+    result = isInvalidLength('1234567890', min, max);
     expect(result).toBeFalsy();
 });
 

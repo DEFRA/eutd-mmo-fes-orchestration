@@ -334,6 +334,7 @@ export default class ProgressService {
         'exportWeightBeforeProcessing',
         'exportWeightAfterProcessing',
         'catchCertificateType',
+        'speciesCommodityCode'
       ].every((key: string) => {
         return ProgressService.isEmptyAndTrimSpaces(singleCatch[key])
       })
