@@ -204,7 +204,7 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData, use
   }
 
   return {
-    catches: exportData && exportData.catches ? exportData.catches.map(catchSD => toFrontEndCatchStorageDocument(catchSD)) : [],
+    catches: exportData?.catches ? exportData.catches.map(catchSD => toFrontEndCatchStorageDocument(catchSD)) : [],
     validationErrors: [],
     addAnotherProduct: "No",
     transport: exportData.transportation ? toFrontEndTransport(exportData.transportation) : undefined,
@@ -249,14 +249,14 @@ export const cloneStorageDocument = (original: StorageDocument, newDocumentNumbe
 };
 
 export const cloneExportData = (original: ExportData): ExportData => {
-  const firstStorage = (original.storageFacilities && original.storageFacilities.length)
+  const firstStorage = original.storageFacilities?.length
     ? original.storageFacilities[0]
     : undefined;
 
   return {
     ...original,
     exportedTo: toExportedTo(original.exportedTo),
-    catches: (original.catches && original.catches.length)
+    catches: original.catches?.length
       ? original.catches.map((ctch: Catch) => cloneCatches(ctch))
       : original.catches,
     transportation: (original.transportation && typeof original.transportation.exportedTo === 'string')

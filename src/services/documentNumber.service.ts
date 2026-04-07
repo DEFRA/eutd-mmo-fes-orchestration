@@ -50,7 +50,7 @@ export default class DocumentNumberService {
   }
 
   public static getServiceNameFromDocumentNumber(documentNumber: string): ServiceNames {
-    if (documentNumber && documentNumber.length > 11) {
+    if (documentNumber?.length > 11) {
       switch (documentNumber.substring(9, 11)) {
         case 'CC': return ServiceNames.CC
         case 'PS': return ServiceNames.PS

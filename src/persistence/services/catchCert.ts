@@ -415,7 +415,7 @@ export const getCertificateStatus = async (
 ): Promise<string> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft && draft.status ? draft.status : null;
+  return draft?.status ? draft.status : null;
 };
 
 export const getSpecies = async (
@@ -425,7 +425,7 @@ export const getSpecies = async (
 ): Promise<FrontEndSpecies.Product[]> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft && draft.exportData && draft.exportData.products
+  return draft?.exportData?.products
     ? draft.exportData.products.map((_) => toFrontEndSpecies(_))
     : null;
 };
@@ -465,7 +465,7 @@ export const getDirectExportPayload = async (
 ): Promise<DirectLanding> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft && draft.exportData && draft.exportData.products
+  return draft?.exportData?.products
     ? toFrontEndDirectLanding(draft.exportData.products)
     : null;
 };
@@ -473,7 +473,7 @@ export const getDirectExportPayload = async (
 export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<Transport> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.transportation)
+  return draft?.exportData?.transportation
     ? toFrontEndTransport(draft.exportData.transportation)
     : null;
 };
@@ -481,7 +481,7 @@ export const getTransportDetails = async (userPrincipal: string, documentNumber:
 export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.exporterDetails)
+  return draft?.exportData?.exporterDetails
     ? toFrontEndCcExporterDetails(draft.exportData.exporterDetails)
     : null;
 };
@@ -517,7 +517,7 @@ export const deleteTransportDetails = async (userPrincipal: string, documentNumb
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData)
+  return draft?.exportData
     ? toFrontEndExportLocation(draft.exportData)
     : null;
 };
@@ -534,7 +534,7 @@ export const upsertConservation = async (userPrincipal: string, payload: FrontEn
 export const getConservation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.conservation)
+  return draft?.exportData?.conservation
     ? toFrontEndConservation(draft.exportData.conservation)
     : null;
 };
@@ -551,7 +551,7 @@ export const updateProductScientificName = async (product: Product, documentNumb
       const data = await getSpeciesByFaoCode(speciesCode);
       const species = data.find((item) => item.faoCode === speciesCode);
 
-      if (species && species.scientificName) {
+      if (species?.scientificName) {
         product.scientificName = species.scientificName;
       }
     } catch (error) {

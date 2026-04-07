@@ -30,19 +30,19 @@ export default class ExporterValidateRoutes {
               const addressOne = (address: any): string | undefined => {
                 const addressLineOne: string[] = [];
 
-                if (address && address.buildingNumber && address.buildingNumber.trim()) {
+                if (address?.buildingNumber?.trim()) {
                   addressLineOne.push(address.buildingNumber.trim());
                 }
 
-                if (address && address.subBuildingName && address.subBuildingName.trim()) {
+                if (address?.subBuildingName?.trim()) {
                   addressLineOne.push(address.subBuildingName.trim());
                 }
 
-                if (address && address.buildingName && address.buildingName.trim()) {
+                if (address?.buildingName?.trim()) {
                   addressLineOne.push(address.buildingName.trim());
                 }
 
-                if (address && address.streetName && address.streetName.trim()) {
+                if (address?.streetName?.trim()) {
                   addressLineOne.push(address.streetName.trim());
                 }
 

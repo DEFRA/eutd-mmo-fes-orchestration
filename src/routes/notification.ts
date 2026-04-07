@@ -13,7 +13,7 @@ export default class NotificationRoutes {
             handler: async function(_: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>) {
               const notification = await NotificationService.get();
 
-              return (notification && notification.isPublished)
+              return notification?.isPublished
                 ? h.response({
                     title: notification.title,
                     message: notification.message
