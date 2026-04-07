@@ -381,6 +381,8 @@ export default class ExportPayloadService {
   public static readonly catchSubmissionForCC = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
     const landingsEntryOption: LandingsEntryOptions = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId);
     if (landingsEntryOption !== LandingsEntryOptions.DirectLanding) {
+      CatchCertService.setCatchSubmissionInProgress(documentNumber)
+        .catch(e => logger.error(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}][ERROR][${e}]`));
       submitToCatchSystem(documentNumber, 'submit')
         .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
     }

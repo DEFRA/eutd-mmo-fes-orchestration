@@ -2100,6 +2100,7 @@ describe('createExportCerticate', () => {
     // ensure exportedTo resolves to an EU country
     jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
     const submitSpy = jest.spyOn(require('./reference-data.service'), 'submitToCatchSystem').mockResolvedValue(undefined);
+    const setCatchSpy = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
 
     stubGetBlockingStatus.onCall(0).returns(false);
     stubGetBlockingStatus.onCall(1).returns(false);
@@ -2107,8 +2108,10 @@ describe('createExportCerticate', () => {
 
     await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
 
+    expect(setCatchSpy).toHaveBeenCalledWith('GBR-2020-CC-F9F69D192');
     expect(submitSpy).toHaveBeenCalledWith('GBR-2020-CC-F9F69D192', 'submit');
     submitSpy.mockRestore();
+    setCatchSpy.mockRestore();
   });
 
   it('should NOT submit to EU CATCH when exportedTo is not an EU country', async () => {
@@ -2130,6 +2133,7 @@ describe('createExportCerticate', () => {
     const getLocSpy = jest.spyOn(CatchCertService, 'getExportLocation').mockResolvedValue({ exportedTo: { officialCountryName: 'Spain' } });
     const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
     const submitSpy = jest.spyOn(require('./reference-data.service'), 'submitToCatchSystem').mockResolvedValue(undefined);
+    const setCatchSpy = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
 
     stubGetBlockingStatus.onCall(0).returns(false);
     stubGetBlockingStatus.onCall(1).returns(false);
@@ -2144,6 +2148,7 @@ describe('createExportCerticate', () => {
     submitSpy.mockRestore();
     isEuSpy.mockRestore();
     getLocSpy.mockRestore();
+    setCatchSpy.mockRestore();
   });
 
   it('should not create an export certificate when CC_3c is true for an export without a matching species on a landing', async () => {
@@ -3348,11 +3353,14 @@ describe('catchSubmissionForCC', () => {
 
   let mockGetLandingsEntryOption: jest.SpyInstance;
   let mockSubmitToCatchSystem: jest.SpyInstance;
+  let mockSetCatchSubmissionInProgress: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetLandingsEntryOption = jest.spyOn(CatchCertService, 'getLandingsEntryOption');
     mockSubmitToCatchSystem = jest.spyOn(ReferenceDataService, 'submitToCatchSystem');
     mockSubmitToCatchSystem.mockResolvedValue(undefined);
+    mockSetCatchSubmissionInProgress = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress');
+    mockSetCatchSubmissionInProgress.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -3365,6 +3373,7 @@ describe('catchSubmissionForCC', () => {
     await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
 
     expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
   });
 
@@ -3374,6 +3383,7 @@ describe('catchSubmissionForCC', () => {
     await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
 
     expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
   });
 
@@ -3383,6 +3393,7 @@ describe('catchSubmissionForCC', () => {
     await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
 
     expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSetCatchSubmissionInProgress).not.toHaveBeenCalled();
     expect(mockSubmitToCatchSystem).not.toHaveBeenCalled();
   });
 
@@ -3394,6 +3405,7 @@ describe('catchSubmissionForCC', () => {
     await expect(ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID)).resolves.not.toThrow();
 
     expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
   });
 });

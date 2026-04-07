@@ -41,7 +41,7 @@ import {
 } from "../persistence/schema/frontEndModels/storageDocument";
 import { toFrontEndStorageDocumentExportData } from "../persistence/schema/storageDoc";
 import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
-import { invalidateDraftCache } from '../persistence/services/catchCert'
+import { invalidateDraftCache, setCatchSubmissionInProgress } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
 
 export const catchCerts: string = "catchCertificate";
@@ -472,7 +472,8 @@ export default class OrchestrationService {
     void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch((e) => logger.error(`[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
 
     if (ApplicationConfig.enableNmdPsEuCatch) {
-      submitToCatchSystem(documentNumber, 'submit')
+      setCatchSubmissionInProgress(documentNumber)
+        .then(() => submitToCatchSystem(documentNumber, 'submit'))
         .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
     }
 

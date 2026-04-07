@@ -308,6 +308,43 @@ describe('catchCert - db related', () => {
 
   });
 
+  describe('setCatchSubmissionInProgress', () => {
+
+    it('should set catchSubmission to IN_PROGRESS for a completed document without catchSubmission', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-INPROG1', 'COMPLETE', defaultUser, {}, 'My Reference')).save();
+
+      await CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG1');
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+      expect(result).toHaveLength(1);
+      expect((result[0] as any).catchSubmission).toBeDefined();
+      expect((result[0] as any).catchSubmission.status).toBe('IN_PROGRESS');
+    });
+
+    it('should not overwrite existing catchSubmission', async () => {
+      const doc = sampleDocument('GBR-2020-CC-INPROG2', 'COMPLETE', defaultUser, {}, 'My Reference');
+      doc['catchSubmission'] = { status: 'SUCCESS', reference: 'REF123' };
+      await new CatchCertModel(doc).save();
+
+      await CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG2');
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+      expect(result).toHaveLength(1);
+      expect((result[0] as any).catchSubmission.status).toBe('SUCCESS');
+      expect((result[0] as any).catchSubmission.reference).toBe('REF123');
+    });
+
+    it('should not update a draft document', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-INPROG3', 'DRAFT', defaultUser, {})).save();
+
+      await CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG3');
+
+      const draft = await CatchCertService.getDraft(defaultUser, 'GBR-2020-CC-INPROG3', contactId);
+      expect((draft as any).catchSubmission).toBeUndefined();
+    });
+
+  });
+
   describe('getAllCatchCertsForUserByYearAndMonth', () => {
 
     it('should not return draft or void certificates', async () => {

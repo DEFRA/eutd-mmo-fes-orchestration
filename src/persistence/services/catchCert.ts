@@ -2,7 +2,8 @@ import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 
 import { Condition, StrictUpdateFilter } from 'mongodb';
-import { CatchCertificate, CatchCertModel, CatchCertificateModel, toFrontEndSpecies, toFrontEndConservation, DocumentStatuses, cloneCatchCertificate as cloneCC, LandingsEntryOptions, Product } from '../schema/catchCert';
+import { CatchCertificate, CatchCertModel, CatchCertificateModel, toFrontEndSpecies, toFrontEndConservation, DocumentStatuses, cloneCatchCertificate as cloneCC, LandingsEntryOptions, Product, EuCatchStatus } from '../schema/catchCert';
+import { BaseModel } from '../schema/base';
 import logger from '../../logger';
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
@@ -388,6 +389,16 @@ export const completeDraft = async (userPrincipal: string, documentNumber: strin
   );
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
+};
+
+export const setCatchSubmissionInProgress = async (documentNumber: string): Promise<void> => {
+  await BaseModel.findOneAndUpdate(
+    { documentNumber, status: DocumentStatuses.Complete, catchSubmission: { $exists: false } },
+    { $set: { 'catchSubmission': { status: EuCatchStatus.Progress } } },
+    { strict: false }
+  );
+
+  logger.info(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}]`);
 };
 
 export const updateCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string, status: DocumentStatuses): Promise<void> => {
