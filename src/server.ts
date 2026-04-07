@@ -213,7 +213,7 @@ export default class Server {
 
       if (response.isBoom && acceptsHtml(request.headers))
         return h.redirect('/there-is-a-problem-with-the-service');
-      else if (request && request.response && request.response.headers) {
+      else if (request?.response?.headers) {
         request.response.headers['cache-control'] = 'no-store';
         request.response.headers['Pragma'] = 'no-store';
       }

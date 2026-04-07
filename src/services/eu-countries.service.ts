@@ -16,7 +16,7 @@ const loadFromReference = async (): Promise<string[]> => {
           const raw = (typeof c === 'string') ? c :'';
           return raw ? raw.toString().trim().toUpperCase() : '';
         })
-        .filter((s: string) => s && s.length > 0);
+        .filter((s: string) => s.length > 0);
 
       // dedupe while preserving insertion order
       return Array.from(new Set(mapped));

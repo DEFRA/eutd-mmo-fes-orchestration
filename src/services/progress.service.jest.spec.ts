@@ -1853,7 +1853,7 @@ describe('getTransportDetails', () => {
       };
 
       expect(ProgressService.getTransportDetails(transport, "storageNotes")).toBe(
-        ProgressStatus.COMPLETED
+        ProgressStatus.INCOMPLETE
       );
     });
 
@@ -2413,7 +2413,7 @@ describe('getTransportDetails', () => {
     };
 
     expect(ProgressService.getTransportDetails(transport)).toBe(
-      ProgressStatus.COMPLETED
+      ProgressStatus.INCOMPLETE
     );
   });
 
@@ -4456,6 +4456,7 @@ describe('getProcessingStatementProgress', () => {
             speciesCode: 'HER',
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
+            speciesCommodityCode: '012345',
             totalWeightLanded: '34',
             exportWeightBeforeProcessing: '34',
             exportWeightAfterProcessing: '45',
@@ -4556,6 +4557,7 @@ describe('getProcessingStatementProgress', () => {
             id: '2342234-1610018899',
             catchCertificateNumber: '12345',
             catchCertificateType: 'non_uk',
+            speciesCommodityCode: '012345',
             totalWeightLanded: '34',
             exportWeightBeforeProcessing: '34',
             exportWeightAfterProcessing: '45',

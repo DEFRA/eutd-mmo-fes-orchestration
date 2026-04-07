@@ -55,6 +55,7 @@ export interface Catch {
   productId?: string;
   productDescription?: string;
   productCommodityCode?: string;
+  speciesCommodityCode?: string;
 }
 
 export interface Product {
@@ -88,6 +89,7 @@ export const toBackEndCatchProcessingStatement = (catches: Catch[]): BackEndProc
         productId: cat.productId,
         productDescription: cat.productDescription,
         productCommodityCode: cat.productCommodityCode,
+        speciesCommodityCode: cat.speciesCommodityCode
       }
     })
     : [];
@@ -170,8 +172,8 @@ export const toBackEndProcessingStatementExportData = (
   return mappedProperties;
 }
 
-const getCatches = (processingStatement: ProcessingStatement) => (processingStatement && Array.isArray(processingStatement.catches)) ? toBackEndCatchProcessingStatement(processingStatement.catches) : undefined;
+const getCatches = (processingStatement: ProcessingStatement) => (Array.isArray(processingStatement?.catches)) ? toBackEndCatchProcessingStatement(processingStatement.catches) : undefined;
 const getExporterDetails = (exporterDetails: Exporter | null) => exporterDetails ? toBackEndPsAndSdExporterDetails(exporterDetails) : undefined;
-const getProducts = (processingStatement: ProcessingStatement, documentNumber) => (processingStatement && Array.isArray(processingStatement.products)) ? toBackEndProductProcessingStatement(processingStatement.products, documentNumber) : undefined;
+const getProducts = (processingStatement: ProcessingStatement, documentNumber) => (Array.isArray(processingStatement?.products)) ? toBackEndProductProcessingStatement(processingStatement.products, documentNumber) : undefined;
 const getHealthCertificateNumber = (processingStatement: ProcessingStatement) => processingStatement?.healthCertificateNumber ? processingStatement.healthCertificateNumber : undefined;
 const getHealthCertificateDate = (processingStatement: ProcessingStatement) => processingStatement?.healthCertificateDate ? processingStatement.healthCertificateDate : undefined;

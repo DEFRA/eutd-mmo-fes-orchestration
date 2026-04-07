@@ -95,7 +95,7 @@ export const getDraftData = async (userPrincipal: string, path: string, contactI
   };
   const draft = await ProcessingStatementModel.findOne(query, 'draftData', { lean: true });
 
-  const dataExists = draft && draft.draftData && Object.prototype.hasOwnProperty.call(draft.draftData, path);
+  const dataExists = draft?.draftData && Object.prototype.hasOwnProperty.call(draft.draftData, path);
 
   return dataExists
     ? draft.draftData[path]
@@ -167,7 +167,7 @@ export const getDraftCertificateNumber = async (userPrincipal: string, contactId
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const query = { $or: ownerQuery, status: 'DRAFT' };
   const draft = await ProcessingStatementModel.findOne(query, 'documentNumber', { lean: true });
-  const dataExists = (draft && draft.documentNumber);
+  const dataExists = draft?.documentNumber;
 
   return dataExists
     ? draft.documentNumber
@@ -278,7 +278,7 @@ export const deleteDraftStatement = async (userPrincipal: string, documentNumber
 export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.exporterDetails)
+  return draft?.exportData?.exporterDetails
     ? toFrontEndPsAndSdExporterDetails(draft.exportData.exporterDetails)
     : null;
 };
@@ -289,7 +289,7 @@ export const upsertUserReference = async (userPrincipal: string, documentNumber:
 
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
-  return (draft && draft.exportData) ? { exportedTo: draft.exportData.exportedTo, pointOfDestination: draft.exportData.pointOfDestination } : null
+  return draft?.exportData ? { exportedTo: draft.exportData.exportedTo, pointOfDestination: draft.exportData.pointOfDestination } : null
 };
 
 export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber: string, contactId: string) => {

@@ -173,7 +173,7 @@ export const searchVessel = async (searchTerm: string, date: string, httpClient?
 
 export const getVesselByPlnDate = async (pln: string, date: string, httpClient?: AxiosInstance): Promise<Vessel> => {
   const vesselsFound: Vessel[] = await searchVessel(pln, date, httpClient) || [];
-  if (vesselsFound && vesselsFound.length > 1) {
+  if (vesselsFound?.length > 1) {
     logger.error(`[GET-VESSEL-BY-PLN-DATE][ERROR][Multiple vessels with same PLN Date: ${JSON.stringify(vesselsFound)?.[0]}]`);
     return;
   }

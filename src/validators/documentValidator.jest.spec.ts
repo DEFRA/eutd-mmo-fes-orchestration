@@ -363,10 +363,12 @@ describe('document validator', () => {
           products: [{
             species: "Atlantic cod (COD)",
             speciesCode: "COD",
+            commodityCode: "03025110",
             totalWeight: 201
           },{
             species: "Atlantic herring (HER)",
             speciesCode: "HER",
+            commodityCode: "03025110",
             totalWeight: 150
           }]
         }
@@ -549,6 +551,7 @@ describe('document validator', () => {
           products: [{
             species: "Atlantic cod (COD)",
             speciesCode: "COD",
+            commodityCode: "03025110",
             totalWeight: 351
           }]
         }
@@ -731,6 +734,7 @@ describe('document validator', () => {
           products: [{
             species: "Atlantic cod (COD)",
             speciesCode: "COD",
+            commodityCode: "03025110",
             totalWeight: 351
           }]
         }
@@ -1414,7 +1418,7 @@ describe('document validator', () => {
         factor: 1,
         caughtBy: []
       }]);
-      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 0 }]);
+      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 0 }]);
     })
 
     it('should skip NaN weight landings and sum only valid weights', async () => {
@@ -1433,7 +1437,7 @@ describe('document validator', () => {
           { weight: 50, vessel: "BOAT", pln: "N1", homePort: "Dover", flag: "GBR", cfr: "GBR001", imoNumber: null, licenceNumber: "111", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr A", id: "id-2", date: "2022-12-12", startDate: "2022-12-11", faoArea: "FAO18", gearCategory: "Cat 1", gearType: "Type 1", highSeasArea: "Yes", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }
         ]
       }]);
-      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 50 }]);
+      expect(result).toEqual([{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 50 }]);
     })
 
     it('should deduplicate products matching by speciesCode when species names differ', async () => {
@@ -1691,6 +1695,110 @@ describe('document validator', () => {
 
   });
 
+  describe('validate commodity code', () => {
+
+    it('will check REDIS to confirm the presence of commodity code on completed catch certificate', async () => {
+      const result = await SUT.validateCommodityCode('doc1', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(mockGetDraftCache).toHaveBeenCalledTimes(1);
+      expect(mockGetDraftCache).toHaveBeenCalledWith('bob', 'bobContactId', 'GBR-2023-PS-ABCD01234');
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the processing statement has no completed certificate in REDIS', async () => {
+      const redisCache: IDraft = {};
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('doc1', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if a completed catch certificate cannot be found', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('doc1', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the commodity code cannot be found within the completed catch certificate', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '99999999', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return true if the commodity code is found within the completed catch certificate', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(true);
+    });
+
+    it('will return true if the commodity code is found in one of multiple products', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [
+            { species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 },
+            { species: "Atlantic herring (HER)", speciesCode: "HER", commodityCode: "03035290", totalWeight: 50 }
+          ]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03035290', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(true);
+    });
+
+    it('will return false if the commodity code is an empty string', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", commodityCode: "03025110", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the product has no commodity code', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": {
+          products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 100 }]
+        }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+    it('will return false if the products array is empty', async () => {
+      const redisCache: IDraft = {
+        "GBR-2022-CC-0": { products: [] }
+      };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateCommodityCode('GBR-2022-CC-0', '03025110', userPrincipal, contactId, processingStatementDocumentNumber);
+      expect(result).toBe(false);
+    });
+
+  });
+
   describe('validate completed document - cache edge cases', () => {
 
     it('will fall through to DB lookup when draftCache has document key set to an empty object', async () => {
@@ -1745,7 +1853,7 @@ describe('document validator', () => {
         userPrincipal,
         contactId,
         storageDocumentNumber,
-        { "GBR-2024-CC-HER": { products: [{ species: "Atlantic herring (HER)", speciesCode: "HER", totalWeight: 200 }] } }
+        { "GBR-2024-CC-HER": { products: [{ species: "Atlantic herring (HER)", speciesCode: "HER", commodityCode: "03035100", totalWeight: 200 }] } }
       );
     });
 

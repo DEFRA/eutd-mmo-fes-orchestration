@@ -12,6 +12,6 @@ export default class ValidationFilterService {
                 report.failures = report.failures.filter(_ => enabledValidationRules.includes(_));
                 return report;
             }
-        }).filter(_ => _)
+        }).filter(Boolean)
     }
 }
