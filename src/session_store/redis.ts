@@ -203,7 +203,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
         RedisStorage._buildKeyForUser(userId, STORAGE_NOTES_KEY + '/' + EXPORTER_KEY),
       ]
     };
-    const keys = journeyKeys.hasOwnProperty.call(journey) ? journeyKeys[journey] : [];
+    const keys = Object.hasOwn(journeyKeys, journey) ? journeyKeys[journey] : [];
     this.connection.sadd(documentNumber, ...keys);
   }
 
