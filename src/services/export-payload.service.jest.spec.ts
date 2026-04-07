@@ -3419,4 +3419,34 @@ describe('catchSubmissionForCC', () => {
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
   });
+
+  it('should log error when setCatchSubmissionInProgress rejects', async () => {
+    const loggerErrorSpy = jest.spyOn(logger, 'error');
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.UploadEntry);
+    mockSetCatchSubmissionInProgress.mockRejectedValue(new Error('db write failed'));
+
+    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    await new Promise(process.nextTick);
+
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${DOCUMENT_NUMBER}][ERROR]`)
+    );
+
+    loggerErrorSpy.mockRestore();
+  });
+
+  it('should log error when submitToCatchSystem rejects', async () => {
+    const loggerErrorSpy = jest.spyOn(logger, 'error');
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.ManualEntry);
+    mockSubmitToCatchSystem.mockRejectedValue(new Error('submit failed'));
+
+    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+    await new Promise(process.nextTick);
+
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining(`[SUBMIT-TO-CATCH-SYSTEM][${DOCUMENT_NUMBER}][ERROR]`)
+    );
+
+    loggerErrorSpy.mockRestore();
+  });
 });
