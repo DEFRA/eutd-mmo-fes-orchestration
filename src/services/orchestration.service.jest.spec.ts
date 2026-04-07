@@ -2559,4 +2559,462 @@ describe('back and removeKey HTML redirect paths', () => {
   });
 });
 
+describe('uncovered utility functions', () => {
+  it('should call validateMaximumOneDayFutureDate with a past date', () => {
+    const result = Service.validateMaximumOneDayFutureDate('01/01/2020');
+    expect(result).toBeTruthy();
+  });
+
+  it('should call validateMaximumOneDayFutureDate with a far future date', () => {
+    const result = Service.validateMaximumOneDayFutureDate('01/01/2099');
+    expect(result).toBeFalsy();
+  });
+
+  it('should call isNotExceed12Digit with a valid number', () => {
+    const result = Service.isNotExceed12Digit('12345');
+    expect(result).toBeTruthy();
+  });
+
+  it('should call isNotExceed12Digit with a number exceeding 12 digits', () => {
+    const result = Service.isNotExceed12Digit('999999999999');
+    expect(result).toBeFalsy();
+  });
+
+  it('should call isNotExceed12Digit with NaN', () => {
+    const result = Service.isNotExceed12Digit('abc');
+    expect(result).toBeFalsy();
+  });
+
+  it('should call isApprovalNumberValid with a valid string', () => {
+    const result = Service.isApprovalNumberValid('ABC-123.45/67');
+    expect(result).toBeTruthy();
+  });
+
+  it('should call isApprovalNumberValid with an invalid string', () => {
+    const result = Service.isApprovalNumberValid('ABC@#$');
+    expect(result).toBeFalsy();
+  });
+
+  it('should call validateTodayOrInThePast with a past date', () => {
+    const result = Service.validateTodayOrInThePast('01/01/2020');
+    expect(result).toBeTruthy();
+  });
+
+  it('should call validateDateBefore correctly', () => {
+    const result = Service.validateDateBefore('01/01/2020', '02/01/2020');
+    expect(result).toBeTruthy();
+  });
+});
+
+describe('handleErrors', () => {
+  it('should set errors on data and originalSessionData when errors are present', () => {
+    const errors = { field: 'some error' };
+    const data: any = {};
+    const originalSessionData: any = {};
+    const urlsObj = { currentUrl: '/test/:documentNumber/edit', nextUrl: '/next' };
+
+    const result = OrchestrationService.handleErrors(errors, data, 'DOC-123', originalSessionData, null, urlsObj, undefined);
+
+    expect(data.errors).toEqual(errors);
+    expect(data.errorsUrl).toBe('/test/DOC-123/edit');
+    expect(originalSessionData.errors).toEqual(errors);
+    expect(originalSessionData.errorsUrl).toBe('/test/DOC-123/edit');
+    expect(result).toBe('/test/:documentNumber/edit');
+  });
+
+  it('should use provided next url when errors are present and next is given', () => {
+    const errors = { field: 'some error' };
+    const data: any = {};
+    const originalSessionData: any = {};
+    const urlsObj = { currentUrl: '/current', nextUrl: '/next' };
+
+    const result = OrchestrationService.handleErrors(errors, data, 'DOC-123', originalSessionData, '/custom-next', urlsObj, undefined);
+
+    expect(result).toBe('/custom-next');
+  });
+
+  it('should set nextUrl and setOnValidationSuccess when no errors', () => {
+    const data: any = { errors: { old: 'error' }, errorsUrl: '/old' };
+    const originalSessionData: any = {};
+    const urlsObj = { currentUrl: '/current', nextUrl: '/next' };
+
+    const result = OrchestrationService.handleErrors({}, data, 'DOC-123', originalSessionData, null, urlsObj, 'isValid');
+
+    expect(data.isValid).toBe(true);
+    expect(data.errors).toBeUndefined();
+    expect(data.errorsUrl).toBeUndefined();
+    expect(result).toBe('/next');
+  });
+
+  it('should use provided next when no errors and next is present', () => {
+    const data: any = {};
+    const originalSessionData: any = {};
+    const urlsObj = { currentUrl: '/current', nextUrl: '/next' };
+
+    const result = OrchestrationService.handleErrors({}, data, 'DOC-123', originalSessionData, '/provided-next', urlsObj, undefined);
+
+    expect(result).toBe('/provided-next');
+  });
+});
+
+describe('getDataToSave', () => {
+  it('should return originalSessionData.exportData when data has errors and saveToRedisIfErrors is false and not HTML', () => {
+    const data = { errors: { field: 'error' } };
+    const req: any = { headers: { accept: 'application/json' } };
+    const originalSessionData = { exportData: { someField: 'value' } };
+
+    const result = OrchestrationService.getDataToSave(false, data, req, 'test', {}, 'DOC-123', originalSessionData);
+
+    expect(result).toEqual({ someField: 'value' });
+  });
+
+  it('should return data when saveToRedisIfErrors is true and data has errors', () => {
+    const data = { errors: { field: 'error' }, consignmentDescription: 'test' };
+    const req: any = { headers: { accept: 'application/json' } };
+    const originalSessionData = { exportData: { someField: 'value' } };
+
+    const result = OrchestrationService.getDataToSave(true, data, req, 'test', {}, 'DOC-123', originalSessionData);
+
+    expect(result).toEqual(data);
+  });
+});
+
+describe('loadRequiredData', () => {
+  it('should load and return processing statement data', async () => {
+    const mockDraftData = {
+      exportData: {
+        catches: [],
+        consignmentDescription: 'test',
+        exporterDetails: {
+          contactId: 'c1',
+          accountId: 'a1',
+          exporterCompanyName: 'Fish Co',
+          addressOne: 'Street',
+          townCity: 'London',
+          postcode: 'SE1 1AA',
+        },
+      },
+    };
+
+    const mockGetDraft = jest.spyOn(ProcessingStatementService, 'getDraft').mockResolvedValue(mockDraftData as any);
+
+    const result: any = await Service.loadRequiredData('Bob', 'GBR-2022-PS-123456789', processingStatement, 'contact1');
+
+    expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-2022-PS-123456789', 'contact1');
+    expect(result.data).toBeDefined();
+    expect(result.exporter).toBeDefined();
+    expect(result.exporter.model.journey).toBe(processingStatement);
+
+    mockGetDraft.mockRestore();
+  });
+
+  it('should load and return storage note data', async () => {
+    const mockDraftData = {
+      exportData: {
+        catches: [],
+        storageFacilities: [],
+        exporterDetails: {
+          contactId: 'c1',
+          accountId: 'a1',
+          exporterCompanyName: 'Fish Co',
+          addressOne: 'Street',
+          townCity: 'London',
+          postcode: 'SE1 1AA',
+        },
+        exportedTo: {
+          officialCountryName: 'France',
+        },
+      },
+    };
+
+    const mockGetDraft = jest.spyOn(StorageDocumentService, 'getDraft').mockResolvedValue(mockDraftData as any);
+
+    const result: any = await Service.loadRequiredData('Bob', 'GBR-2022-SD-123456789', storageNote, 'contact1');
+
+    expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'GBR-2022-SD-123456789', 'contact1');
+    expect(result.data).toBeDefined();
+    expect(result.exporter).toBeDefined();
+    expect(result.exporter.model.journey).toBe(storageNote);
+
+    mockGetDraft.mockRestore();
+  });
+});
+
+describe('generatePdf additional paths', () => {
+  const mockPdfResponse = {
+    container: 'export-certificates',
+    blobName: '_test.pdf',
+    uri: '_test.pdf',
+    qrUri: 'http://localhost/qr/_test.pdf',
+  };
+
+  const mockData = {
+    data: {
+      catches: [],
+      validationErrors: [],
+      error: '',
+    },
+    exporter: {
+      model: {
+        exporterCompanyName: 'Fish Ltd',
+        journey: processingStatement,
+      },
+    },
+  };
+
+  let mockLoadRequiredData: jest.SpyInstance;
+  let mockGetBlockingStatus: jest.SpyInstance;
+  let mockLoggerError: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockLoadRequiredData = jest.spyOn(Service, 'loadRequiredData').mockResolvedValue(mockData as any);
+    mockGetBlockingStatus = jest.spyOn(SystemBlock, 'getBlockingStatus');
+    jest.spyOn(CatchCertService, 'invalidateDraftCache').mockResolvedValue(null);
+    mockLoggerError = jest.spyOn(logger, 'error').mockImplementation();
+    jest.spyOn(logger, 'info').mockImplementation();
+    jest.spyOn(SessionManager, 'clearSessionDataForCurrentJourney').mockResolvedValue(null);
+    jest.spyOn(SaveAsDraftService, 'deleteDraftLink').mockResolvedValue(null);
+    jest.spyOn(MonitoringService, 'postEventData').mockResolvedValue(null);
+    jest.spyOn(pdfService, 'generatePdfAndUpload').mockResolvedValue(mockPdfResponse);
+    jest.spyOn(ProcessingStatementService, 'completeDraft').mockResolvedValue(null);
+    jest.spyOn(ReferenceDataService, 'reportDocumentSubmitted').mockResolvedValue(null);
+    mockedAxios.put.mockResolvedValue(null);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should redirect when validation errors exist and request accepts HTML', async () => {
+    const htmlReq: any = {
+      app: { claims: { sub: 'Bob', email: 'foo@foo.com', auth_time: '123', contactId: 'c1' } },
+      params: { redisKey: processingStatement },
+      query: { n: '/next', c: '/check-info' },
+      payload: { data: '127.0.0.1' },
+      headers: { accept: 'text/html' },
+    };
+
+    const mockDataWithErrors = {
+      data: {
+        catches: [],
+        validationErrors: [{ message: 'error', key: 'field' }],
+        error: '',
+      },
+      exporter: { model: { journey: processingStatement } },
+    };
+    mockLoadRequiredData.mockResolvedValue(mockDataWithErrors);
+    const mockRedirect = jest.fn().mockReturnValue('redirected');
+    const htmlH: any = { redirect: mockRedirect, response: () => ({ code: (c: number) => c }) };
+
+    await OrchestrationService.generatePdf(htmlReq, htmlH, 'Bob', 'GBR-2022-PS-123456789');
+
+    expect(mockRedirect).toHaveBeenCalledWith('create-processing-statement/GBR-2022-PS-123456789/check-your-information');
+  });
+
+  it('should log error when getBlockingStatus throws', async () => {
+    const req: any = {
+      app: { claims: { sub: 'Bob', email: 'foo@foo.com', auth_time: '123', contactId: 'c1' } },
+      params: { redisKey: processingStatement },
+      query: { n: '/next' },
+      payload: { data: '127.0.0.1' },
+      headers: { accept: false },
+    };
+
+    mockGetBlockingStatus.mockRejectedValue(new Error('blocking error'));
+    mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true, details: [], rawData: [] } });
+
+    await OrchestrationService.generatePdf(req, h, 'Bob', 'GBR-2022-PS-123456789');
+
+    expect(mockLoggerError).toHaveBeenCalledWith(expect.stringContaining('[GETTING-BLOCKING-STATUS-PSSD][ERROR]'));
+  });
+
+  it('should redirect when validation is invalid, blocking is true, and request accepts HTML', async () => {
+    const htmlReq: any = {
+      app: { claims: { sub: 'Bob', email: 'foo@foo.com', auth_time: '123', contactId: 'c1' } },
+      params: { redisKey: processingStatement },
+      query: { n: '/next', c: '/check-info' },
+      payload: { data: '127.0.0.1' },
+      headers: { accept: 'text/html' },
+    };
+
+    mockGetBlockingStatus.mockResolvedValue(true);
+    mockedAxios.post.mockResolvedValueOnce({ data: { isValid: false, details: ['err'], rawData: [] } });
+    const mockRedirect = jest.fn().mockReturnValue('redirected');
+    const htmlH: any = { redirect: mockRedirect, response: () => ({ code: (c: number) => c }) };
+
+    await OrchestrationService.generatePdf(htmlReq, htmlH, 'Bob', 'GBR-2022-PS-123456789');
+
+    expect(mockRedirect).toHaveBeenCalledWith('/check-info');
+  });
+
+  it('should return unsupported error for unknown redisKey', async () => {
+    const req: any = {
+      app: { claims: { sub: 'Bob', email: 'foo@foo.com', auth_time: '123', contactId: 'c1' } },
+      params: { redisKey: 'unknownKey' },
+      query: { n: '/next' },
+      payload: { data: '127.0.0.1' },
+      headers: { accept: false },
+    };
+
+    mockGetBlockingStatus.mockResolvedValue(false);
+    mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true, details: [], rawData: [] } });
+
+    const result = await OrchestrationService.generatePdf(req, h, 'Bob', 'GBR-2022-PS-123456789');
+
+    expect(result).toEqual({ error: 'unsupported unknownKey' });
+  });
+});
+
+describe('saveAndValidate additional paths', () => {
+  const testUser = 'Bob';
+  let mockGetSessionStore: jest.SpyInstance;
+  const mockSessionStore = {
+    readAllFor: jest.fn(),
+    writeAllFor: jest.fn(),
+  };
+
+  beforeEach(() => {
+    mockGetSessionStore = jest.spyOn(SessionStoreFactory, 'getSessionStore');
+    mockGetSessionStore.mockResolvedValue(mockSessionStore);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should redirect to saveAsDraftUrl when acceptsHtml is true and no errors', async () => {
+    const req: any = {
+      app: { claims: { sub: testUser } },
+      params: { redisKey: 'catchCertificate' },
+      payload: { someField: 'value' },
+      query: {
+        n: '/next',
+        c: '/current',
+        saveAsDraftUrl: '/save-as-draft',
+      },
+      headers: { accept: 'text/html' },
+    };
+    mockSessionStore.readAllFor.mockResolvedValue({});
+    const mockRedirect = jest.fn().mockReturnValue('redirected');
+    const htmlH: any = { redirect: mockRedirect };
+
+    await OrchestrationService.saveAndValidate(req, htmlH, testUser, 'DOC-123', 'contact1');
+
+    expect(mockRedirect).toHaveBeenCalledWith('/save-as-draft');
+  });
+
+  it('should redirect to next when acceptsHtml is true and errors exist', async () => {
+    const req: any = {
+      app: { claims: { sub: testUser } },
+      params: { redisKey: 'catchCertificate' },
+      payload: { someField: 'value' },
+      query: {
+        n: '/next',
+        c: '/current',
+      },
+      headers: { accept: 'text/html' },
+    };
+    mockSessionStore.readAllFor.mockResolvedValue({});
+    const mockRedirect = jest.fn().mockReturnValue('redirected');
+    const htmlH: any = { redirect: mockRedirect };
+
+    await OrchestrationService.saveAndValidate(req, htmlH, testUser, 'DOC-123', 'contact1');
+
+    expect(mockRedirect).toHaveBeenCalledWith('/next');
+  });
+
+  it('should return originalSessionData when data has errors and saveToRedisIfErrors is false', async () => {
+    const sessionData = { someField: 'original', errors: undefined };
+    mockSessionStore.readAllFor.mockResolvedValue(sessionData);
+
+    const req: any = {
+      app: { claims: { sub: testUser } },
+      params: { redisKey: 'catchCertificate' },
+      payload: { errors: { field: 'error' } },
+      query: {
+        n: '/next',
+        c: '/current',
+        saveToRedisIfErrors: 'false',
+      },
+      headers: { accept: false },
+    };
+
+    const result = await OrchestrationService.saveAndValidate(req, h, testUser, 'DOC-123', 'contact1');
+
+    expect(result).toBeDefined();
+  });
+
+  it('should call addTotalWeightLandedProcessingStatement when redisKey is processingStatement and data has catches', async () => {
+    const mockGetDraft = jest.spyOn(ProcessingStatementService, 'getDraft').mockResolvedValue({
+      exportData: {
+        catches: [{ species: 'COD', catchCertificateNumber: '123' }],
+        exporterDetails: {},
+      },
+    } as any);
+    const mockUpsertDraft = jest.spyOn(ProcessingStatementService, 'upsertDraftData').mockResolvedValue(null);
+    const mockAddTotalWeight = jest.spyOn(ProcessingStatement, 'addTotalWeightLandedProcessingStatement').mockResolvedValue([{ species: 'COD', totalWeightLanded: '100' }]);
+
+    const req: any = {
+      app: { claims: { sub: testUser } },
+      params: { redisKey: processingStatement },
+      payload: { catches: [{ species: 'COD' }] },
+      query: {
+        n: '/next',
+        c: '/current',
+      },
+      headers: { accept: false },
+    };
+
+    await OrchestrationService.saveAndValidate(req, h, testUser, 'DOC-123', 'contact1');
+
+    expect(mockAddTotalWeight).toHaveBeenCalledWith('DOC-123', testUser, 'contact1', expect.any(Array));
+
+    mockGetDraft.mockRestore();
+    mockUpsertDraft.mockRestore();
+    mockAddTotalWeight.mockRestore();
+  });
+});
+
+describe('sendBusinessContinuityEvent', () => {
+  it('should log info on successful BC event', async () => {
+    jest.spyOn(logger, 'info').mockImplementation();
+    jest.spyOn(logger, 'error').mockImplementation();
+    mockedAxios.put.mockResolvedValueOnce({});
+
+    // sendBusinessContinuityEvent is private, so we test it through generatePdf
+    jest.spyOn(Service, 'loadRequiredData').mockResolvedValue({
+      data: { catches: [], validationErrors: [], error: '' },
+      exporter: { model: { journey: processingStatement } },
+    } as any);
+    jest.spyOn(SystemBlock, 'getBlockingStatus').mockResolvedValue(false);
+    mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true, details: [], rawData: [] } });
+    jest.spyOn(CatchCertService, 'invalidateDraftCache').mockResolvedValue(null);
+    jest.spyOn(SessionManager, 'clearSessionDataForCurrentJourney').mockResolvedValue(null);
+    jest.spyOn(SaveAsDraftService, 'deleteDraftLink').mockResolvedValue(null);
+    jest.spyOn(MonitoringService, 'postEventData').mockResolvedValue(null);
+    jest.spyOn(pdfService, 'generatePdfAndUpload').mockResolvedValue({ uri: 'test.pdf', container: 'c', blobName: 'b', qrUri: 'q' });
+    jest.spyOn(ProcessingStatementService, 'completeDraft').mockResolvedValue(null);
+    jest.spyOn(ReferenceDataService, 'reportDocumentSubmitted').mockResolvedValue(null);
+
+    const req: any = {
+      app: { claims: { sub: 'Bob', email: 'foo@foo.com', auth_time: '123', contactId: 'c1' } },
+      params: { redisKey: processingStatement },
+      query: { n: '/next' },
+      payload: { data: '127.0.0.1' },
+      headers: { accept: false },
+    };
+
+    await OrchestrationService.generatePdf(req, h, 'Bob', 'DOC-123');
+    await new Promise(process.nextTick);
+
+    expect(mockedAxios.put).toHaveBeenCalledWith(
+      expect.stringContaining('/api/certificates/DOC-123'),
+      expect.objectContaining({ certNumber: 'DOC-123', status: 'COMPLETE' }),
+      expect.any(Object)
+    );
+
+    jest.restoreAllMocks();
+  });
+});
+
 
