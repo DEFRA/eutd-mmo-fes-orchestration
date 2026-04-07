@@ -82,14 +82,14 @@ const getProductsStorageDocument = (ctchArray: ProcessingStatementSchema.Catch[]
 export const getProductsCatchCertificate = (productsArray: CatchCertSchema.Product[]) => Array.isArray(productsArray) ? productsArray?.reduce((productDrafts: IProductDraft[], product: CatchCertSchema.Product) => {
     const index = productDrafts.findIndex((addedProduct: IProductDraft) => addedProduct.species === product.species || (!isEmpty(product.speciesCode) && addedProduct.speciesCode === product.speciesCode));
     if (index >= 0) {
-      productDrafts[index].totalWeight += product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0);
+      productDrafts[index].totalWeight += product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => landing.weight == null || Number.isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0);
       return productDrafts;
     }
     return [...productDrafts, {
       species: product.species,
       speciesCode: product.speciesCode,
       commodityCode: product.commodityCode,
-      totalWeight: product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0)
+      totalWeight: product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => landing.weight == null || Number.isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0)
     }]
   }, []) : []
 
