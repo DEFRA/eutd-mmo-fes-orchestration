@@ -50,7 +50,9 @@ export const postEventData = async (
     const eventDataBatch = await client.createBatch();
     const isAdded = eventDataBatch.tryAdd(eventData);
 
-    isAdded && logger.info(`[PROTECTIVE-MONITORING-SERVICE][DATA][${JSON.stringify(eventData.body)}]`);
+    if (isAdded) {
+      logger.info(`[PROTECTIVE-MONITORING-SERVICE][DATA][${JSON.stringify(eventData.body)}]`);
+    }
 
     await client.sendBatch(eventDataBatch);
 

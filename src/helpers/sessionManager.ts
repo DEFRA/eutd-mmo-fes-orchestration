@@ -131,7 +131,9 @@ function processSessionLandings(currentSessionData: SessionStore, payload: Sessi
 }
 
 function removeUndefinedProperties(currentSessionStoreData: SessionStore) {
-    Object.keys(currentSessionStoreData).forEach(key => currentSessionStoreData[key] === undefined && delete currentSessionStoreData[key]);
+    Object.keys(currentSessionStoreData).forEach(key => {
+        if (currentSessionStoreData[key] === undefined) delete currentSessionStoreData[key];
+    });
 }
 
 function elementFound(currentLandingIndex: number) {

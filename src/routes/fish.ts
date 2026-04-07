@@ -52,7 +52,7 @@ export default class FishRoutes {
                 logger.error(`[ADDING-SPECIES][FAILED-ACTION][/v1/fish/add]`);
                 let errorDetailsObj = errorExtractor(error);
 
-                if ((req.payload as any).isFavourite && Object.prototype.hasOwnProperty.call(errorDetailsObj, 'species') && errorDetailsObj['species'] === 'error.species.any.invalid') {
+                if ((req.payload as any).isFavourite && Object.hasOwn(errorDetailsObj, 'species') && errorDetailsObj['species'] === 'error.species.any.invalid') {
                   await FavouritesController.removeInvalidFavouriteProduct((req.app as HapiRequestApplicationStateExtended).claims.sub, (req.payload as any).id);
 
                   errorDetailsObj = {

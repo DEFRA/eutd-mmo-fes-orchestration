@@ -203,7 +203,21 @@ describe("RedisStorage", () => {
 
       storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', CATCH_CERTIFICATE_KEY);
 
-      // current implementation calls sadd with the documentNumber even when keys are empty
+      expect((mockRedis as any).sadd).toHaveBeenCalledWith('DOC-999',
+        `${CONTACT_ID}:catchCertificate`,
+        `${CONTACT_ID}:species`,
+        `${CONTACT_ID}:catches`,
+        `${CONTACT_ID}:catchCertificate/exporter`,
+        `${CONTACT_ID}:conservation`,
+        `${CONTACT_ID}:catchCertificate/export-payload`
+      );
+    });
+
+    it('should call sadd with no keys for unknown journey', () => {
+      (mockRedis as any).sadd = jest.fn();
+
+      storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', 'unknownJourney');
+
       expect((mockRedis as any).sadd).toHaveBeenCalledWith('DOC-999');
     });
   });

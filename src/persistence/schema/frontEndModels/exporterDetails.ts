@@ -185,8 +185,9 @@ export const toBackEndNewPsAndSdExporterDetails = (exporterDetails: ExporterDeta
   }
 }
 
-const getBuildingNumber = (exporterDetails: ExporterDetails) => exporterDetails._dynamicsAddress && exporterDetails._dynamicsAddress.defra_premises !== 'null'
-? exporterDetails._dynamicsAddress.defra_premises : null
+const getBuildingNumber = (exporterDetails: ExporterDetails) => exporterDetails._dynamicsAddress
+  && exporterDetails._dynamicsAddress.defra_premises !== 'null'
+  ? exporterDetails._dynamicsAddress.defra_premises : null
 
 const getConutry = (exporterDetails: ExporterDetails) => exporterDetails._dynamicsAddress
 ? exporterDetails._dynamicsAddress._defra_country_value_OData_Community_Display_V1_FormattedValue
