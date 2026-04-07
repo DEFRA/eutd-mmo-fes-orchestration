@@ -85,7 +85,8 @@ describe('processingStatement schema - cloneExportData', () => {
         catchCertificateType: 'uk',
         totalWeightLanded: '100',
         exportWeightBeforeProcessing: '90',
-        exportWeightAfterProcessing: '80'
+        exportWeightAfterProcessing: '80',
+        speciesCommodityCode: '03023110'
       }],
       products: [],
       consignmentDescription: 'Test consignment',
@@ -108,6 +109,7 @@ describe('processingStatement schema - cloneExportData', () => {
     const clonedExportData = cloneExportData(originalExportData);
 
     expect(clonedExportData.pointOfDestination).toBe('Port of Calais');
+    expect(clonedExportData.catches[0].speciesCommodityCode).toBe('03023110');
   });
 
   it('should handle undefined pointOfDestination when cloning export data', () => {
@@ -153,7 +155,8 @@ describe('processingStatement schema - cloneProcessingStatement', () => {
           catchCertificateType: 'uk',
           totalWeightLanded: '100',
           exportWeightBeforeProcessing: '90',
-          exportWeightAfterProcessing: '80'
+          exportWeightAfterProcessing: '80',
+          speciesCommodityCode: '03023110'
         }],
         products: [],
         consignmentDescription: 'Test consignment',
@@ -177,6 +180,7 @@ describe('processingStatement schema - cloneProcessingStatement', () => {
     const clonedPS = cloneProcessingStatement(originalPS, 'GBR-2020-PS-67890', false, false);
 
     expect(clonedPS.exportData.pointOfDestination).toBe('Port of Marseille');
+    expect(clonedPS.exportData.catches[0].speciesCommodityCode).toBe('03023110');
     expect(clonedPS.documentNumber).toBe('GBR-2020-PS-67890');
     expect(clonedPS.status).toBe('DRAFT');
     expect(clonedPS.clonedFrom).toBe('GBR-2020-PS-12345');
