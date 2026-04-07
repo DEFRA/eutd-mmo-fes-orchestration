@@ -12,6 +12,7 @@ import * as ReferenceDataService from '../services/reference-data.service';
 import * as MonitoringService from "../services/protective-monitoring.service";
 import * as SystemBlock from '../persistence/services/systemBlock';
 import * as SessionManager from '../helpers/sessionManager';
+import ApplicationConfig from '../applicationConfig';
 import * as ProcessingStatement from '../persistence/schema/processingStatement';
 import * as DocumentValidator from '../validators/documentValidator';
 import { toFrontEndProcessingStatementExportData } from '../persistence/schema/processingStatement';
@@ -832,6 +833,106 @@ describe('generatePdf', () => {
       });
     });
 
+    it('should set catch submission in progress and submit to catch when EU catch feature is enabled', async () => {
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-PS-3434-3434';
+      const mockValidResponse = {
+        data: {
+          isValid: true,
+          details: [],
+          rawData: []
+        }
+      };
+
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
+      const mockSetCatchSubmissionInProgress = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
+      const mockSubmitToCatchSystem = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
+      mockGetBlockingStatus.mockResolvedValue(false);
+      mockedAxios.post.mockResolvedValueOnce(mockValidResponse);
+
+      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+      await new Promise(process.nextTick);
+
+      expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(documentNumber);
+      expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(documentNumber, 'submit');
+    });
+
+    it('should log and continue when setting catch submission in progress fails', async () => {
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-PS-3434-3434';
+      const mockValidResponse = {
+        data: {
+          isValid: true,
+          details: [],
+          rawData: []
+        }
+      };
+
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
+      const mockSetCatchSubmissionInProgress = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockRejectedValue(new Error('set status failed'));
+      const mockSubmitToCatchSystem = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
+      mockGetBlockingStatus.mockResolvedValue(false);
+      mockedAxios.post.mockResolvedValueOnce(mockValidResponse);
+
+      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+      await new Promise(process.nextTick);
+
+      expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(documentNumber);
+      expect(mockSubmitToCatchSystem).not.toHaveBeenCalled();
+      expect(mockLoggerError).toHaveBeenCalledWith('[CATCH-SYSTEM-SUBMIT][GBR-3434-PS-3434-3434][ERROR][set status failed]');
+    });
+
+    it('should not submit to catch when EU catch feature is disabled', async () => {
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-PS-3434-3434';
+      const mockValidResponse = {
+        data: {
+          isValid: true,
+          details: [],
+          rawData: []
+        }
+      };
+
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(false);
+      const mockSetCatchSubmissionInProgress = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
+      const mockSubmitToCatchSystem = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
+      mockGetBlockingStatus.mockResolvedValue(false);
+      mockedAxios.post.mockResolvedValueOnce(mockValidResponse);
+
+      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+      await new Promise(process.nextTick);
+
+      expect(mockSetCatchSubmissionInProgress).not.toHaveBeenCalled();
+      expect(mockSubmitToCatchSystem).not.toHaveBeenCalled();
+    });
+
+    it('should log error when submitToCatchSystem fails for PS', async () => {
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-PS-3434-3434';
+      const mockValidResponse = {
+        data: {
+          isValid: true,
+          details: [],
+          rawData: []
+        }
+      };
+
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
+      jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
+      jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockRejectedValue(new Error('submit failed'));
+
+      mockGetBlockingStatus.mockResolvedValue(false);
+      mockedAxios.post.mockResolvedValueOnce(mockValidResponse);
+
+      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+      await new Promise(process.nextTick);
+
+      expect(mockLoggerError).toHaveBeenCalledWith('[CATCH-SYSTEM-SUBMIT][GBR-3434-PS-3434-3434][ERROR][submit failed]');
+    });
+
     it('should gracefully handle a SUBMIT event failure', async () => {
         const userPrincipal = 'Bob';
         const documentNumber = 'GBR-3434-PS-3434-3434';
@@ -1472,6 +1573,55 @@ describe('generatePdf', () => {
       });
 
       expect(mockLoggerError).toHaveBeenCalledWith('[REPORT-SD-PS-DOCUMENT-SUBMIT][GBR-3434-SD-3434-3434][ERROR][Error: error]');
+    });
+
+    it('should set catch submission in progress and submit to catch when EU catch feature is enabled for SD', async () => {
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-SD-3434-3434';
+      const mockValidResponse = {
+        data: {
+          isValid: true,
+          details: [],
+          rawData: []
+        }
+      };
+
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
+      const mockSetCatchSubmissionInProgress = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
+      const mockSubmitToCatchSystem = jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockResolvedValue(undefined);
+
+      mockGetBlockingStatus.mockResolvedValue(false);
+      mockedAxios.post.mockResolvedValueOnce(mockValidResponse);
+
+      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+      await new Promise(process.nextTick);
+
+      expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(documentNumber);
+      expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(documentNumber, 'submit');
+    });
+
+    it('should log error when submitToCatchSystem fails for SD', async () => {
+      const userPrincipal = 'Bob';
+      const documentNumber = 'GBR-3434-SD-3434-3434';
+      const mockValidResponse = {
+        data: {
+          isValid: true,
+          details: [],
+          rawData: []
+        }
+      };
+
+      jest.spyOn(ApplicationConfig, 'enableNmdPsEuCatch', 'get').mockReturnValue(true);
+      jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
+      jest.spyOn(ReferenceDataService, 'submitToCatchSystem').mockRejectedValue(new Error('submit failed'));
+
+      mockGetBlockingStatus.mockResolvedValue(false);
+      mockedAxios.post.mockResolvedValueOnce(mockValidResponse);
+
+      await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+      await new Promise(process.nextTick);
+
+      expect(mockLoggerError).toHaveBeenCalledWith('[CATCH-SYSTEM-SUBMIT][GBR-3434-SD-3434-3434][ERROR][submit failed]');
     });
 
     it('should return 400 if there are validation errors', async () => {

@@ -3408,4 +3408,15 @@ describe('catchSubmissionForCC', () => {
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
   });
+
+  it('should still call submitToCatchSystem when setCatchSubmissionInProgress fails', async () => {
+    mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.UploadEntry);
+    mockSetCatchSubmissionInProgress.mockRejectedValue(new Error('set in progress failed'));
+
+    await expect(ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID)).resolves.not.toThrow();
+    await Promise.resolve();
+
+    expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
+    expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
+  });
 });
