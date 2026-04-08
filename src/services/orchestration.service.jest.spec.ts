@@ -20,6 +20,7 @@ import { toFrontEndStorageDocumentExportData } from '../persistence/schema/stora
 import * as moment from 'moment';
 import { MAX_COMMODITY_CODE_LENGTH, MIN_COMMODITY_CODE_LENGTH } from '../../src/services/constants';
 import * as pdfService from 'mmo-ecc-pdf-svc';
+import * as EuCountriesService from './eu-countries.service';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -727,6 +728,7 @@ describe('generatePdf', () => {
     let mockValidateCompletedDocument: jest.SpyInstance;
     let mockValidateSpecies: jest.SpyInstance;
     let mockLoggerInfo: jest.SpyInstance;
+    let mockIsEuCountry: jest.SpyInstance;
 
     beforeEach(() => {
       mockReportDocumentSubmitted = jest.spyOn(ReferenceDataService, 'reportDocumentSubmitted');
@@ -740,7 +742,8 @@ describe('generatePdf', () => {
       mockCompleteDraft = jest.spyOn(ProcessingStatementService, 'completeDraft');
       mockLoggerError = jest.spyOn(logger, 'error');
       mockLoggerInfo = jest.spyOn(logger, "info");
-
+      mockIsEuCountry = jest.spyOn(EuCountriesService, 'isEuCountry');
+      mockIsEuCountry.mockResolvedValue(true);
       mockLoadRequiredData.mockResolvedValue(mockData);
       mockClearSessionDataForCurrentJourney.mockResolvedValue(null);
       mockInvalidateDraftCache.mockResolvedValue(null);
@@ -1301,6 +1304,7 @@ describe('generatePdf', () => {
     let mockValidateCompletedDocument: jest.SpyInstance;
     let mockValidateSpecies: jest.SpyInstance;
     let mockLoggerInfo: jest.SpyInstance;
+    let mockIsEuCountry: jest.SpyInstance;
 
     beforeEach(() => {
       mockReportDocumentSubmitted = jest.spyOn(ReferenceDataService, 'reportDocumentSubmitted');
@@ -1314,6 +1318,8 @@ describe('generatePdf', () => {
       mockCompleteDraft = jest.spyOn(StorageDocumentService, 'completeDraft');
       mockLoggerError = jest.spyOn(logger, 'error');
       mockLoggerInfo = jest.spyOn(logger, 'info');
+      mockIsEuCountry = jest.spyOn(EuCountriesService, 'isEuCountry');
+      mockIsEuCountry.mockResolvedValue(true);
 
       mockLoadRequiredData.mockResolvedValue(mockData);
       mockClearSessionDataForCurrentJourney.mockResolvedValue(null);
