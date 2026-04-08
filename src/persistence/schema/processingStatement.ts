@@ -42,6 +42,7 @@ export interface Catch {
   productId?                    : string,
   productDescription?           : string;
   productCommodityCode?         : string;
+  speciesCommodityCode?         : string;
 }
 
 export interface Product {
@@ -114,6 +115,7 @@ const CatchesSchema = new Schema({
   productId                     : { type: String },
   productDescription            : { type: String },
   productCommodityCode          : { type: String },
+  speciesCommodityCode          : { type: String },
 }, { _id : true });
 
 const ProductsSchema = new Schema({
@@ -294,7 +296,8 @@ export const cloneCatch = (original: Catch): Catch => {
     scientificName,
     productDescription,
     productCommodityCode,
-    productId
+    productId,
+    speciesCommodityCode
   } = original;
 
   const result = {
@@ -310,7 +313,8 @@ export const cloneCatch = (original: Catch): Catch => {
     scientificName,
     productDescription,
     productCommodityCode,
-    productId
+    productId,
+    speciesCommodityCode
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);

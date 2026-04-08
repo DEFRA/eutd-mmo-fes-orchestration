@@ -20,7 +20,8 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       scientificName: "some scientific name",
       productId: undefined,
       productDescription: undefined,
-      productCommodityCode: undefined
+      productCommodityCode: undefined,
+      speciesCommodityCode: undefined
     }];
 
     const catches : FrontEndProcessingStatement.Catch[] = [{
@@ -55,7 +56,8 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
       totalWeightLanded: undefined,
       productId: undefined,
       productDescription: undefined,
-      productCommodityCode: undefined
+      productCommodityCode: undefined,
+      speciesCommodityCode: undefined
     }];
 
     const catches : FrontEndProcessingStatement.Catch[] = [{
@@ -91,7 +93,8 @@ describe('toBackEndProcessingStatement mapping Processing Statement front end to
             scientificName: "some scientific name",
             productId: undefined,
             productDescription: undefined,
-            productCommodityCode: undefined
+            productCommodityCode: undefined,
+            speciesCommodityCode: undefined
           },
         ],
         exporterDetails: {

@@ -9,8 +9,10 @@ import { getDraftCache, saveDraftCache } from "../persistence/services/catchCert
 import DocumentNumberService from "../services/documentNumber.service";
 import ServiceNames from "./interfaces/service.name.enum";
 
+type DraftCache = CatchCertSchema.CatchCertificate | CatchCertificateDraft[] | IDraft;
+
 export const validateCompletedDocument = async (documentNumber: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string): Promise<boolean> => {
-  const draftCache: CatchCertSchema.CatchCertificate | CatchCertificateDraft[] | IDraft = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
+  const draftCache: DraftCache = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
 
   if (!isEmpty(draftCache?.[documentNumber])) return true;
 
@@ -86,12 +88,24 @@ export const getProductsCatchCertificate = (productsArray: CatchCertSchema.Produ
     return [...productDrafts, {
       species: product.species,
       speciesCode: product.speciesCode,
+      commodityCode: product.commodityCode,
       totalWeight: product.caughtBy.reduce((totalLandingWeight: number, landing: CatchCertSchema.Catch) => isNaN(landing.weight) ? totalLandingWeight : totalLandingWeight + landing.weight, 0)
     }]
   }, []) : []
 
+export const validateCommodityCode = async (documentNumber: string, commodityCode: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string): Promise<boolean> => {
+  const draftCache: DraftCache = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
+
+  if (isEmpty(draftCache?.[documentNumber]))
+    return false;
+
+  return draftCache?.[documentNumber]?.products.some(
+    (product: IProductDraft) => !isEmpty(product.commodityCode) && product.commodityCode === commodityCode
+  );
+}
+
 export const validateSpecies = async (documentNumber: string, species: string, speciesCode: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string): Promise<boolean> => {
-  const draftCache: CatchCertSchema.CatchCertificate | CatchCertificateDraft[] | IDraft = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
+  const draftCache: DraftCache = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
 
   if (isEmpty(draftCache?.[documentNumber]))
     return false;

@@ -1,8 +1,8 @@
+import setupInsights from './azureAppInsights';
 import * as Hapi from '@hapi/hapi';
 import * as DotEnv from 'dotenv';
 import * as mongo from './persistence/mongo';
 
-import setupInsights from './azureAppInsights';
 import Router from './router';
 import logger from './logger';
 
@@ -23,8 +23,8 @@ export default class Server {
 
   public static async start(port?: number): Promise<Hapi.Server<Hapi.ServerApplicationState>> {
     try {
-      setupInsights();
       DotEnv.config();
+      setupInsights();
 
       Server._instance = Hapi.server({
         host: ApplicationConfig._host,

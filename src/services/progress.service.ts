@@ -219,14 +219,7 @@ export default class ProgressService {
     journey === "storageNotes" ? ProgressStatus.INCOMPLETE : ProgressStatus.CANNOT_START;
 
   public static readonly getTransportDetailsStatus = (transportation: Transport, journey?: string, arrival?: boolean) => {
-    const isTruck = transportation.vehicle === 'truck';
-    const hasCmr = isTruck && transportation.cmr === 'true';
-
-    if (hasCmr) {
-      return ProgressStatus.COMPLETED;
-    }
-
-    let schema;
+    let schema: any;
 
     switch (transportation.vehicle) {
       case truck:
@@ -281,26 +274,26 @@ export default class ProgressService {
 
       const transportationIsIncomplete: boolean = (await Promise.all(transportations.map(async (transportation: CatchCertificateTransport) => {
         const frontEndTransportation: FrontEndCatchCertificateTransport.CatchCertificateTransport = FrontEndCatchCertificateTransport.toFrontEndTransport(transportation);
-        
+
         // Check for plane and containerVessel that at least one valid container number exists
         const requiresContainerNumbers = frontEndTransportation.vehicle === 'plane' || frontEndTransportation.vehicle === 'containerVessel';
         const hasValidContainerNumber = frontEndTransportation.containerNumbers?.some(cn => cn?.trim());
-        
+
         // If requires containerNumbers and none are valid, mark as incomplete
         if (requiresContainerNumbers && !hasValidContainerNumber) {
           return true;
         }
-        
+
         const bypassForTruckCMR = frontEndTransportation.cmr === 'false' || !frontEndTransportation.cmr;
         const payload = { ...frontEndTransportation };
         delete payload.cmr;
-        
+
         // If containerNumbers has valid values, remove containerNumber (singular) from validation to avoid conflicts
         if (hasValidContainerNumber) {
           delete payload.containerNumber;
           delete payload.containerIdentificationNumber;
         }
-        
+
         const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
         // Check if the vehicle is truck, if so, check if Nationality of vehicle is a valid country
@@ -313,7 +306,7 @@ export default class ProgressService {
         const hasValidationError = bypassForTruckCMR && (error || nationalityErrors.length > 0);
         const missingTransportationDetails = bypassForTruckCMR && !frontEndTransportation.departurePlace
         const transportationDocumentIncomplete = bypassForTruckCMR && Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);
-        
+
         return hasValidationError || missingTransportationDetails || transportationDocumentIncomplete;
       }))).some(Boolean);
 
@@ -341,6 +334,7 @@ export default class ProgressService {
         'exportWeightBeforeProcessing',
         'exportWeightAfterProcessing',
         'catchCertificateType',
+        'speciesCommodityCode'
       ].every((key: string) => {
         return ProgressService.isEmptyAndTrimSpaces(singleCatch[key])
       })
@@ -398,7 +392,7 @@ export default class ProgressService {
       const productCatches = exportData.catches.filter(
         (catchItem: ProcessingStatement.Catch) => catchItem.productId === product.id
       );
-      
+
       // Product must have at least one catch
       return productCatches.length > 0;
     });
@@ -483,7 +477,7 @@ export default class ProgressService {
     // Parse dates with DD/MM/YYYY format
     const firstDate = moment(firstDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
     const secondDate = moment(secondDateStr, ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"], true);
-    
+
     // Return true if first date is after or same as second date
     return firstDate.isValid() && secondDate.isValid() && firstDate.isSameOrAfter(secondDate);
   };
@@ -498,7 +492,7 @@ export default class ProgressService {
 
     // Get departure date from arrival transportation
     const transportDepartureDate = (arrivalTransportation as BackEndTransport)?.departureDate;
-    
+
     if (!transportDepartureDate) {
       return false;
     }
@@ -518,7 +512,7 @@ export default class ProgressService {
     // Get departure dates from both transportations
     const departureDateStr = departureTransportation.exportDate;
     const arrivalDepartureDateStr = (arrivalTransportation as BackEndTransport)?.departureDate;
-    
+
     if (!departureDateStr || !arrivalDepartureDateStr) {
       return false;
     }
@@ -629,7 +623,7 @@ export default class ProgressService {
     // Check facility validation errors
     const facilityErrors = {};
     const departureDate = data?.exportData?.arrivalTransportation?.departureDate;
-    
+
     if (data?.exportData) {
       validateStorageFacility(data.exportData, departureDate, facilityErrors);
       validateStorageApproval(data.exportData, facilityErrors);

@@ -55,6 +55,7 @@ export interface Catch {
   productId?: string;
   productDescription?: string;
   productCommodityCode?: string;
+  speciesCommodityCode?: string;
 }
 
 export interface Product {
@@ -88,6 +89,7 @@ export const toBackEndCatchProcessingStatement = (catches: Catch[]): BackEndProc
         productId: cat.productId,
         productDescription: cat.productDescription,
         productCommodityCode: cat.productCommodityCode,
+        speciesCommodityCode: cat.speciesCommodityCode
       }
     })
     : [];
