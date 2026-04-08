@@ -31,13 +31,13 @@ describe('eu-countries.service', () => {
   });
 
   it('isEuCountry returns true for string and object inputs (case-insensitive)', async () => {
-    const payload = ['Spain', 'France'];
+    const payload = ['SP', 'FR'];
     mockedAxios.get.mockResolvedValue({ data: payload });
 
-    const ok1 = await EuCountries.isEuCountry('Spain');
+    const ok1 = await EuCountries.isEuCountry('SP');
     expect(ok1).toBe(true);
 
-    const ok2 = await EuCountries.isEuCountry({ officialCountryName: 'france' });
+    const ok2 = await EuCountries.isEuCountry('fr');
     expect(ok2).toBe(true);
 
     const no = await EuCountries.isEuCountry('NotACountry');
@@ -49,7 +49,7 @@ describe('eu-countries.service', () => {
     const list = await EuCountries.getEuCountries();
     expect(list).toEqual([]);
 
-    const ok = await EuCountries.isEuCountry('Spain');
+    const ok = await EuCountries.isEuCountry('SP');
     expect(ok).toBe(false);
   });
 
@@ -65,14 +65,14 @@ describe('eu-countries.service', () => {
   });
 
   it('maps non-string array items to empty and trims raw strings', async () => {
-    mockedAxios.get.mockResolvedValue({ data: [' spain ', 123, null, 'FRANCE'] } as any);
+    mockedAxios.get.mockResolvedValue({ data: [' SP ', 123, null, 'FR'] } as any);
     const list = await EuCountries.getEuCountries();
-    expect(list).toEqual(['SPAIN', 'FRANCE']);
+    expect(list).toEqual(['SP', 'FR']);
   });
 
   it('isEuCountry returns false for object without officialCountryName', async () => {
-    mockedAxios.get.mockResolvedValue({ data: ['SPAIN'] } as any);
-    const ok = await EuCountries.isEuCountry({ someProp: 'x' } as any);
+    mockedAxios.get.mockResolvedValue({ data: ['SP'] } as any);
+    const ok = await EuCountries.isEuCountry('x');
     expect(ok).toBe(false);
   });
 });
