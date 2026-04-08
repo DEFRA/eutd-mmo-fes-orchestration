@@ -33,6 +33,7 @@ import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
 import { updateConsolidateLandings } from "./landings-consolidate.service";
 import { ExportLocation } from '../persistence/schema/frontEndModels/export-location';
 import * as pdfService from 'mmo-ecc-pdf-svc';
+import { toExportedTo } from '../persistence/schema/common';
 
 const crypto = require('crypto');
 const https = require('https');
@@ -391,8 +392,9 @@ export default class ExportPayloadService {
   private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string): Promise<void> {
     try {
       const exportLocation: ExportLocation = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId);
-      const exportedTo = exportLocation?.exportedTo ?? exportLocation;
-      const isEuCountry = await EuCountriesService.isEuCountry(exportedTo);
+      const isoCodeAlpha2 = toExportedTo(exportLocation.exportedTo)?.isoCodeAlpha2;
+      const isEuCountry = await EuCountriesService.isEuCountry(isoCodeAlpha2);
+      logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);
       if (isEuCountry) {
         ExportPayloadService.catchSubmissionForCC(userPrincipal, documentNumber, contactId)
           .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));

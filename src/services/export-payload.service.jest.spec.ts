@@ -2074,7 +2074,7 @@ describe('createExportCerticate', () => {
       exportedFrom: 'United Kingdom',
       exportedTo: { officialCountryName: 'SPAIN', isoCodeAlpha2: 'A1', isoCodeAlpha3: 'A3', isoNumericCode: 'SP' }
     });
-    mockGetExportLocation.mockResolvedValueOnce({ exportedTo: { exportedTo: { isoCodeAlpha2: 'ES' } } });
+    mockGetExportLocation.mockResolvedValueOnce({ exportedTo: { isoCodeAlpha2: 'ES' }});
 
     const mockIsEu = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
     const mockCatchSubmit = jest.spyOn(ExportPayloadService, 'catchSubmissionForCC').mockResolvedValue(undefined as any);
@@ -2088,7 +2088,7 @@ describe('createExportCerticate', () => {
     await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
 
     // Assert: isEuCountry called with the exportedTo wrapper containing the inner exportedTo
-    expect(mockIsEu).toHaveBeenCalledWith({ exportedTo: { isoCodeAlpha2: 'ES' } });
+    expect(mockIsEu).toHaveBeenCalledWith('ES');
     expect(mockCatchSubmit).toHaveBeenCalledWith('Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID);
 
     // Cleanup
@@ -2130,7 +2130,7 @@ describe('createExportCerticate', () => {
 
   it('should pass exportedTo.exportedTo to isEuCountry when export location contains exportedTo property', async () => {
     // prepare spies
-    const getLocSpy = jest.spyOn(CatchCertService, 'getExportLocation').mockResolvedValue({ exportedTo: { officialCountryName: 'Spain' } });
+    const getLocSpy = jest.spyOn(CatchCertService, 'getExportLocation').mockResolvedValue({ exportedTo: { officialCountryName: 'Spain', isoCodeAlpha2: 'ES' }});
     const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
     const submitSpy = jest.spyOn(require('./reference-data.service'), 'submitToCatchSystem').mockResolvedValue(undefined);
     const setCatchSpy = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress').mockResolvedValue(undefined);
@@ -2142,7 +2142,7 @@ describe('createExportCerticate', () => {
     await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
 
     expect(getLocSpy).toHaveBeenCalled();
-    expect(isEuSpy).toHaveBeenCalledWith({ officialCountryName: 'Spain' });
+    expect(isEuSpy).toHaveBeenCalledWith('ES');
 
     // cleanup
     submitSpy.mockRestore();

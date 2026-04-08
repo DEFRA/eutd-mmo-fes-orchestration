@@ -34,15 +34,12 @@ export const getEuCountries = async (): Promise<string[]> => {
   return cached;
 };
 
-export const isEuCountry = async (country: any): Promise<boolean> => {
-  if (!country) return false;
+export const isEuCountry = async (isoCodeAlpha2: string): Promise<boolean> => {
+  if (!isoCodeAlpha2) return false;
   const countries = await getEuCountries();
   if (!countries || countries.length === 0) return false;
 
-  const name = (typeof country === 'string') ? country : country?.officialCountryName;
-  if (!name) return false;
-
-  return countries.includes(name.toUpperCase());
+  return countries.includes(isoCodeAlpha2.toUpperCase());
 };
 
 export default { getEuCountries, isEuCountry };
