@@ -436,6 +436,185 @@ describe("TransportController", () => {
       expect(mockResponse).not.toHaveBeenCalledWith({ departureDate: 'errorContainerVesselDepartureDateAnyMax' });
     });
 
+    it("should error with TodayMax when no facilityArrivalDate and departure date is in the future (truck)", async () => {
+      mockGet.mockResolvedValueOnce({ ...storageDocument, facilityArrivalDate: undefined });
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dd = String(tomorrow.getDate()).padStart(2, '0');
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const yyyy = tomorrow.getFullYear();
+
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "truck",
+          departureDate: `${dd}/${mm}/${yyyy}`,
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).toHaveBeenCalledWith({ departureDate: 'errorTruckDepartureDateTodayMax' });
+    });
+
+    it("should error with TodayMax when no facilityArrivalDate and departure date is in the future (plane)", async () => {
+      mockGet.mockResolvedValueOnce({ ...storageDocument, facilityArrivalDate: undefined });
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dd = String(tomorrow.getDate()).padStart(2, '0');
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const yyyy = tomorrow.getFullYear();
+
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "plane",
+          departureDate: `${dd}/${mm}/${yyyy}`,
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).toHaveBeenCalledWith({ departureDate: 'errorPlaneDepartureDateTodayMax' });
+    });
+
+    it("should error with TodayMax when no facilityArrivalDate and departure date is in the future (train)", async () => {
+      mockGet.mockResolvedValueOnce({ ...storageDocument, facilityArrivalDate: undefined });
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dd = String(tomorrow.getDate()).padStart(2, '0');
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const yyyy = tomorrow.getFullYear();
+
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "train",
+          departureDate: `${dd}/${mm}/${yyyy}`,
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).toHaveBeenCalledWith({ departureDate: 'errorTrainDepartureDateTodayMax' });
+    });
+
+    it("should error with TodayMax when no facilityArrivalDate and departure date is in the future (containerVessel)", async () => {
+      mockGet.mockResolvedValueOnce({ ...storageDocument, facilityArrivalDate: undefined });
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dd = String(tomorrow.getDate()).padStart(2, '0');
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const yyyy = tomorrow.getFullYear();
+
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "containerVessel",
+          departureDate: `${dd}/${mm}/${yyyy}`,
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).toHaveBeenCalledWith({ departureDate: 'errorContainerVesselDepartureDateTodayMax' });
+    });
+
+    it("should not error with TodayMax when no facilityArrivalDate and departure date is today", async () => {
+      mockGet.mockResolvedValueOnce({ ...storageDocument, facilityArrivalDate: undefined });
+
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "truck",
+          departureDate: `${dd}/${mm}/${yyyy}`,
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ departureDate: 'errorTruckDepartureDateTodayMax' });
+    });
+
+    it("should not error with TodayMax when storage document is null and departure date is null", async () => {
+      mockGet.mockResolvedValueOnce(null);
+
+      const req = {
+        ...mockReq,
+        payload: {
+          ...mockReq.payload,
+          vehicle: "truck",
+          departureDate: undefined,
+          arrival: true,
+          journey: "storageNotes"
+        }
+      }
+      await TransportController.addTransportDetails(
+        req,
+        h,
+        false,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(mockResponse).not.toHaveBeenCalledWith({ departureDate: 'errorTruckDepartureDateTodayMax' });
+    });
+
     it("should not validate when storage document is null", async () => {
       mockGet.mockResolvedValueOnce(null);
       
