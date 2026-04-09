@@ -128,7 +128,13 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         departurePlace: "London",
         exportDate: "25/11/2019",
         departureDate: "",
-        containerNumbers: []
+        containerNumbers: [],
+        exportedTo: {
+          isoCodeAlpha2: "A1",
+          isoCodeAlpha3: "A3",
+          isoNumericCode: "SP",
+          officialCountryName: "SPAIN",
+        }
       },
       arrivalTransport: undefined,
       exportedTo: {
@@ -186,7 +192,13 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       nationalityOfVehicle: "British",
       registrationNumber: "WE78ERF",
       departurePlace: "London",
-      exportDate: "25/11/2019"
+      exportDate: "25/11/2019",
+      exportedTo: {
+        officialCountryName: "SPAIN",
+        isoCodeAlpha2: "A1",
+        isoCodeAlpha3: "A3",
+        isoNumericCode: "SP"
+      }
     }
 
     const exportData: BackEndStorageDocument.ExportData = {

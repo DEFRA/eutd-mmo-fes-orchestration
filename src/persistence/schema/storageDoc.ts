@@ -135,7 +135,7 @@ const StorageFacilitySchema = new Schema({
   facilityCounty            : { type: String },
   facilityCountry           : { type: String },
   facilityApprovalNumber    : { type: String, required: false },
-  facilityStorage           : { type: String }, 
+  facilityStorage           : { type: String },
   facilityArrivalDate       : { type: String, required: false}
 }, { _id : false } );
 
@@ -209,7 +209,7 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData, use
     addAnotherProduct: "No",
     transport: exportData.transportation ? toFrontEndTransport(exportData.transportation) : undefined,
     arrivalTransport: exportData.arrivalTransportation ? toFrontEndTransport(exportData.arrivalTransportation) : undefined,
-    exportedTo: toExportedTo(exportData.exportedTo),
+    exportedTo: toExportedTo(exportData.transportation?.exportedTo),
     facilityName: exportData.facilityName,
     facilityAddressOne: exportData.facilityAddressOne,
     facilityTownCity: exportData.facilityTownCity,

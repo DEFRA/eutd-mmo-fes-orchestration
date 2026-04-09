@@ -505,6 +505,11 @@ describe('saveAndValidate', () => {
         facilityStorage: "Chilled",
         _facilityUpdated: false,
         facilityArrivalDate: "20/11/2023",
+        transportation: {
+          exportedTo: {
+            officialCountryName: "some-exported-to"
+          }
+        }
       }
     };
 
