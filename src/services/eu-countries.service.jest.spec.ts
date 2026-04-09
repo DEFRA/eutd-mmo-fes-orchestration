@@ -42,6 +42,9 @@ describe('eu-countries.service', () => {
 
     const no = await EuCountries.isEuCountry('NotACountry');
     expect(no).toBe(false);
+
+    const not_defined = await EuCountries.isEuCountry(undefined);
+    expect(not_defined).toBe(false);
   });
 
   it('handles non-array responses gracefully', async () => {
