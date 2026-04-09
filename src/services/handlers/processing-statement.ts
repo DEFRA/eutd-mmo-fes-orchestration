@@ -274,6 +274,8 @@ function validateCatchCertificateCommodityCode(ctch: any, index: number, errors:
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMinLength';
   } else if (ctch.speciesCommodityCode.trim().replaceAll(/\s/g, '').length > MAX_COMMODITY_CODE_LENGTH) {
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMaxLength';
+  } else if (!/^\d+$/.test(ctch.speciesCommodityCode.trim().replaceAll(/\s/g, ''))) {
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorValidSpeciesCommodityCode';
   }
 }
 

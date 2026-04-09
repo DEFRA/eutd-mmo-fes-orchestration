@@ -2690,6 +2690,22 @@ describe('validateCatchDetails', () => {
     expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorEnterSpeciesCommodityCode');
   });
 
+  it('should return speciesCommodityCode format error when speciesCommodityCode contains non-numeric characters', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '03023A',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorValidSpeciesCommodityCode');
+  });
+
   it('should not return speciesCommodityCode error when speciesCommodityCode is present', async () => {
     const ctch: any = {
       species: 'Atlantic Cod',
