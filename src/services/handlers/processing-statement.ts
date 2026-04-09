@@ -109,8 +109,7 @@ export default {
   "/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex": async ({ data, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = params.catchIndex;
     const ctch = data.catches[index];
-    const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
-    const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
+    const catchDetails = await validateCatchDetails(ctch, index, errors, documentNumber, userPrincipal, contactId);
 
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
@@ -260,6 +259,7 @@ function setCatchFieldsUndefined(ctch: any) {
 
 export async function validateCatchDetails(ctch: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
   validateSpeciesInput(ctch, index, errors);
+  validateCatchType(ctch, index, errors);
   await validateIssuingCountryForNonUKCatch(ctch, index, errors);
   await validateCatchCertificateNumber(ctch, index, errors, documentNumber, userPrincipal, contactId);
   validateCatchCertificateCommodityCode(ctch, index, errors);

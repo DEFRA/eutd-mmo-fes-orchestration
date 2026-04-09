@@ -1184,7 +1184,6 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk',
           speciesCommodityCode: '03023110'
         }
       ],
@@ -1754,7 +1753,7 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: "1",
           exportWeightBeforeProcessing: "10",
           exportWeightAfterProcessing: "10",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -1782,7 +1781,7 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: 1,
           exportWeightBeforeProcessing: 10,
           exportWeightAfterProcessing: 10,
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -1810,7 +1809,7 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: "10.00",
           exportWeightBeforeProcessing: "10.01",
           exportWeightAfterProcessing: 10,
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: "A description",
@@ -1838,7 +1837,7 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: 10.01,
           exportWeightBeforeProcessing: 10.02,
           exportWeightAfterProcessing: 10,
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -1866,7 +1865,7 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: "10",
           exportWeightBeforeProcessing: "10.00",
           exportWeightAfterProcessing: "10",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -1922,7 +1921,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: "1",
           exportWeightBeforeProcessing: "10",
           exportWeightAfterProcessing: "10",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
         {
           species: "Atlantic Herring",
@@ -1930,7 +1929,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: "1",
           exportWeightBeforeProcessing: "11",
           exportWeightAfterProcessing: "10",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -1964,7 +1963,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: "1",
           exportWeightBeforeProcessing: "10",
           exportWeightAfterProcessing: "10",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
         {
           species: "Atlantic Herring",
@@ -1972,7 +1971,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-wei
           totalWeightLanded: "11.56",
           exportWeightBeforeProcessing: "11.57",
           exportWeightAfterProcessing: "10",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
       consignmentDescription: "A description",
@@ -2031,7 +2030,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       personResponsibleForConsignment: 'Ivina The first of her name mother of the cats and the coffee lover',
@@ -2063,7 +2062,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       personResponsibleForConsignment: 'Ivin@ The f1rst 0f her n@m£',
@@ -2096,7 +2095,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       personResponsibleForConsignment: 'Personal Responsible',
@@ -2128,7 +2127,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       personResponsibleForConsignment: 'Personal Responsible',
@@ -2161,7 +2160,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       personResponsibleForConsignment: 'Personal Responsible',
@@ -2220,7 +2219,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2259,7 +2258,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2301,7 +2300,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2342,7 +2341,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2380,7 +2379,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2422,7 +2421,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2464,7 +2463,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2504,7 +2503,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         }
       ],
       consignmentDescription: 'Consignment 1',
@@ -2557,7 +2556,7 @@ describe('validateCatchDetails', () => {
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
-          catchesCertificateType: 'uk',
+          catchCertificateType: 'uk',
           speciesCommodityCode: '03023110'
         }
       ],
@@ -2584,6 +2583,7 @@ describe('validateCatchDetails', () => {
         {
           species: '1&$223&883',
           catchCertificateNumber: '432(_)223',
+          catchCertificateType: 'uk',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110',
@@ -2619,7 +2619,7 @@ describe('validateCatchDetails', () => {
           totalWeightLanded: "1112",
           exportWeightBeforeProcessing: "1111",
           exportWeightAfterProcessing: "1110",
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
     };
@@ -2643,7 +2643,7 @@ describe('validateCatchDetails', () => {
           exportWeightBeforeProcessing: "1111",
           exportWeightAfterProcessing: "1110",
           scientificName: 'someScientificName',
-          catchesCertificateType: 'uk'
+          catchCertificateType: 'uk'
         },
       ],
     };
