@@ -278,12 +278,14 @@ export const cloneExportData = (original: ExportData): ExportData => (
     ...original,
     exportedTo: toExportedTo(original.exportedTo),
     catches: (original.catches?.length)
-      ? original.catches.map((ctch: Catch) => cloneCatch(ctch))
+      ? original.catches
+        .map((ctch: Catch) => cloneCatch(ctch))
+        .filter((ctch): ctch is Catch => !!ctch)
       : original.catches
   }
 );
 
-export const cloneCatch = (original: Catch): Catch => {
+export const cloneCatch = (original: Catch): Catch | undefined => {
   const {
     species,
     speciesCode,
@@ -299,6 +301,10 @@ export const cloneCatch = (original: Catch): Catch => {
     productId,
     speciesCommodityCode
   } = original;
+
+  if (!productId || !productDescription) {
+    return undefined;
+  }
 
   const result = {
     id: catchCertificateNumber + '-' + getRandomNumber(),
