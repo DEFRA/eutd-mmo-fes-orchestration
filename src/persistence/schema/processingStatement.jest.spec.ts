@@ -754,6 +754,8 @@ describe('cloneProcessingStatement', () => {
         id: '2342234-1610018899',
         catchCertificateNumber: "12345",
         catchCertificateType: "uk",
+        productId: 'product-1',
+        productDescription: 'Atlantic herring product',
         totalWeightLanded: "34",
         exportWeightBeforeProcessing: "34",
         exportWeightAfterProcessing: "45",
@@ -859,6 +861,8 @@ describe('cloneExportData', () => {
       species: "Atlantic herring (HER)",
       id: '2342234-1610018899',
       catchCertificateNumber: "12345",
+      productId: 'product-1',
+      productDescription: 'Atlantic herring product',
       totalWeightLanded: "34",
       exportWeightBeforeProcessing: "34",
       exportWeightAfterProcessing: "45",
@@ -869,6 +873,8 @@ describe('cloneExportData', () => {
       species: "Cod",
       id: '2342234-1610018855',
       catchCertificateNumber: "12345",
+      productId: 'product-2',
+      productDescription: 'Cod product',
       totalWeightLanded: "34",
       exportWeightBeforeProcessing: "34",
       exportWeightAfterProcessing: "45",
@@ -986,6 +992,8 @@ describe('cloneCatch', () => {
     id: '2342234-1610018899',
     catchCertificateNumber: "GBR-2022-CC-0123456789",
     catchCertificateType: 'uk',
+    productId: 'product-1',
+    productDescription: 'Atlantic herring product',
     totalWeightLanded: "34",
     exportWeightBeforeProcessing: "34",
     exportWeightAfterProcessing: "45",
@@ -997,20 +1005,27 @@ describe('cloneCatch', () => {
     mockGetRandomDigits = jest.spyOn(Utils, 'getRandomNumber');
     mockGetRandomDigits.mockReturnValue(1234567890);
     const clone1 = cloneCatch(original);
-    expect(clone1.id).toBe('GBR-2022-CC-0123456789-' + 1234567890);
+    expect(clone1).toBeDefined();
+    expect(clone1!.id).toBe('GBR-2022-CC-0123456789-' + 1234567890);
   });
 
   it('will keep all the other fields the same', () => {
     const clone2 = cloneCatch(original);
+    expect(clone2).toBeDefined();
 
-    expect(clone2.species).toBe(original.species);
-    expect(clone2.catchCertificateNumber).toBe(original.catchCertificateNumber);
-    expect(clone2.catchCertificateType).toBe('uk');
-    expect(clone2.totalWeightLanded).toBe(original.totalWeightLanded);
-    expect(clone2.exportWeightBeforeProcessing).toBe(original.exportWeightBeforeProcessing);
-    expect(clone2.exportWeightAfterProcessing).toBe(original.exportWeightAfterProcessing);
-    expect(clone2.scientificName).toBe(original.scientificName);
-    expect(clone2.speciesCode).toBe(original.speciesCode);
+    expect(clone2!.species).toBe(original.species);
+    expect(clone2!.catchCertificateNumber).toBe(original.catchCertificateNumber);
+    expect(clone2!.catchCertificateType).toBe('uk');
+    expect(clone2!.totalWeightLanded).toBe(original.totalWeightLanded);
+    expect(clone2!.exportWeightBeforeProcessing).toBe(original.exportWeightBeforeProcessing);
+    expect(clone2!.exportWeightAfterProcessing).toBe(original.exportWeightAfterProcessing);
+    expect(clone2!.scientificName).toBe(original.scientificName);
+    expect(clone2!.speciesCode).toBe(original.speciesCode);
+  });
+
+  it('will not clone catches missing productId or productDescription', () => {
+    expect(cloneCatch({ ...original, productId: undefined })).toBeUndefined();
+    expect(cloneCatch({ ...original, productDescription: undefined })).toBeUndefined();
   });
 });
 
