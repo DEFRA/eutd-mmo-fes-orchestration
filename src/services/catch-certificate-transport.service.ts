@@ -102,13 +102,6 @@ export default class CatchCertificateTransportService {
       } else {
         const draftTransport = transportations[index];
         const vehicleHasChanged = payload.vehicle?.toLowerCase() !== draftTransport.vehicle?.toLowerCase();
-        if (draftTransport.vehicle === truck && typeof payload.cmr !== 'string' && typeof (draftTransport as BackEndModels.CatchCertificateTruck).cmr === 'boolean') {
-          // retain cmr value from previous edits if updating details
-          payload.cmr = (draftTransport as BackEndModels.CatchCertificateTruck).cmr.toString();
-        } else if (draftTransport.vehicle === truck && typeof payload.cmr === 'string') {
-          // keep details from existing transport if changing the CMR value (this can only happen for trucks)
-          payload = { ...toFrontEndTransport({ ...transportations[index], cmr: payload.cmr === 'true' }) };
-        }
         transportations[index] = toBackEndTransport({ ...payload, documents: vehicleHasChanged ? [] : draftTransport.transportDocuments });
         await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.transportations': transportations } }, contactId);
       }
