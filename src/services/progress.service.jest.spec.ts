@@ -646,7 +646,7 @@ describe('get', () => {
     );
   });
 
-  it('will return COMPLETED transportationDetails if the user adds a truck vehicle with cmr flag set to true and no vehicle details', async () => {
+  it('will return INCOMPLETE transportationDetails if the user adds a truck vehicle with cmr flag set to true and no vehicle details', async () => {
     mockGetDraft.mockResolvedValue({
       exportData: {
         transportations: [{
@@ -681,10 +681,10 @@ describe('get', () => {
         conservation: 'INCOMPLETE',
         exportJourney: 'COMPLETED',
         transportType: 'COMPLETED',
-        transportDetails: 'COMPLETED',
+        transportDetails: 'INCOMPLETE',
       },
       requiredSections: 7,
-      completedSections: 3,
+      completedSections: 2,
     });
     expect(mockGetDraft).toHaveBeenCalledWith(
       userPrincipal,
@@ -1788,7 +1788,7 @@ describe('getTransportDetails', () => {
       );
     });
 
-    it('should return COMPLETED for a truck with a cmr', () => {
+    it('should return INCOMPLETE for a truck with a cmr', () => {
       const transport: Transport = {
         vehicle: 'truck',
         exportedTo: {
@@ -2348,7 +2348,7 @@ describe('getTransportDetails', () => {
     );
   });
 
-  it('should return COMPLETED for a truck with a cmr', () => {
+  it('should return INCOMPLETE for a truck with a cmr', () => {
     const transport: Transport = {
       vehicle: 'truck',
       exportedTo: {
@@ -2460,7 +2460,7 @@ describe('getTransportDetails', () => {
     );
   });
 
-  it('should return INCOMPLETED for a container vessel with a departure place with validation errors', () => {
+  it('should return INCOMPLETE for a container vessel with a departure place with validation errors', () => {
     const transport: Transport = {
       vehicle: 'containerVessel',
       exportedTo: {

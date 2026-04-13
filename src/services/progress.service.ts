@@ -284,7 +284,6 @@ export default class ProgressService {
           return true;
         }
 
-        const bypassForTruckCMR = frontEndTransportation.cmr === 'false' || !frontEndTransportation.cmr;
         const payload = { ...frontEndTransportation };
         delete payload.cmr;
 
@@ -303,9 +302,9 @@ export default class ProgressService {
           false // Not draft mode - we need to check for errors
         );
 
-        const hasValidationError = bypassForTruckCMR && (error || nationalityErrors.length > 0);
-        const missingTransportationDetails = bypassForTruckCMR && !frontEndTransportation.departurePlace
-        const transportationDocumentIncomplete = bypassForTruckCMR && Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);
+        const hasValidationError = error || nationalityErrors.length > 0;
+        const missingTransportationDetails = !frontEndTransportation.departurePlace;
+        const transportationDocumentIncomplete = Array.isArray(frontEndTransportation.documents) && !frontEndTransportation.documents.every(isValidTransportDocument);
 
         return hasValidationError || missingTransportationDetails || transportationDocumentIncomplete;
       }))).some(Boolean);

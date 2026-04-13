@@ -43,6 +43,7 @@ import { toFrontEndStorageDocumentExportData } from "../persistence/schema/stora
 import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
 import { invalidateDraftCache } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
+import * as EuCountriesService from './eu-countries.service';
 
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
@@ -471,7 +472,10 @@ export default class OrchestrationService {
 
     void reportDocumentSubmitted(reportUrl, validationStatus.rawData).catch((e) => logger.error(`[REPORT-SD-PS-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
 
-    if (ApplicationConfig.enableNmdPsEuCatch) {
+    const isoCodeAlpha2 = data.exportedTo?.isoCodeAlpha2;
+    const isEuCountry = await EuCountriesService.isEuCountry(isoCodeAlpha2);
+    logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);
+    if (isEuCountry) {
       submitToCatchSystem(documentNumber, 'submit')
         .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
     }
