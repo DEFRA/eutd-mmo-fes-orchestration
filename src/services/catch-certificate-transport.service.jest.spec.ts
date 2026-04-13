@@ -626,7 +626,6 @@ describe('CatchCertificateTransportService - updateTransport', () => {
     const expected: BackEndCatchCertificateTransport = {
       id: 0,
       vehicle: "truck",
-      cmr: false,
       nationalityOfVehicle: "blah",
       transportDocuments: [{
         name: 'truck doc 1',
@@ -680,9 +679,6 @@ describe('CatchCertificateTransportService - updateTransport', () => {
       id: 0,
       vehicle: "truck",
       cmr: false,
-      nationalityOfVehicle: "adsf",
-      registrationNumber: "asdsfsd",
-      departurePlace: "Aylesbury",
       transportDocuments: [{
         name: 'truck doc 1',
         reference: 'TRK00001'
