@@ -1,7 +1,7 @@
 const BaseJoi = require('joi');
 const Extension = require('@joi/date');
 const Joi = BaseJoi.extend(Extension);
-const { createEmojiAwarePatternValidator } = require('../../validators/emojiValidator');
+const { createEmojiAwarePatternValidator, validateNoEmoji } = require('../../validators/emojiValidator');
 
 const truckSaveAsDraftSchema = Joi.object({
   vehicle: Joi.string().optional(),
@@ -20,8 +20,8 @@ const truckSaveAsDraftSchema = Joi.object({
   cmr: Joi.string().optional(),
   nationalityOfVehicle: Joi.when('arrival', {
     is: true,
-    then: Joi.string().trim().allow('').optional(),
-    otherwise: Joi.string().trim().optional()
+    then: Joi.string().trim().allow('').optional().custom(validateNoEmoji),
+    otherwise: Joi.string().trim().optional().custom(validateNoEmoji)
   }),
   registrationNumber: Joi.when('arrival', {
     is: true,

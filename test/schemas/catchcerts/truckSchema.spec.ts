@@ -245,3 +245,26 @@ describe('truckSchema - pointOfDestination validation', () => {
     });
   });
 });
+
+describe('truckSchema - nationalityOfVehicle emoji validation', () => {
+  const validPayload = {
+    ...basePayload,
+    departureDate: '01/01/2020',
+    pointOfDestination: 'Rotterdam',
+  };
+
+  it('returns string.emoji error when nationalityOfVehicle contains emoji', () => {
+    const payload = { ...validPayload, nationalityOfVehicle: 'GB 😀' };
+    const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const emojiErr = error.details.find((d: any) => d.path.join('.') === 'nationalityOfVehicle');
+    expect(emojiErr).toBeDefined();
+    expect(emojiErr.type).toBe('string.emoji');
+  });
+
+  it('passes validation with valid nationalityOfVehicle', () => {
+    const payload = { ...validPayload, nationalityOfVehicle: 'United Kingdom' };
+    const { error } = truckSchemaDefult.validate(payload, { abortEarly: false });
+    expect(error).toBeUndefined();
+  });
+});

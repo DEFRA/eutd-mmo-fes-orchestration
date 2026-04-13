@@ -59,3 +59,38 @@ test('truckSaveAsDraftSchema - should allow optional fields for save as draft', 
   t.equal(result.error, null, 'All optional fields empty should pass');
   t.end();
 });
+
+test('truckSaveAsDraftSchema - should reject nationalityOfVehicle containing emoji', t => {
+  const payload = {
+    vehicle: 'truck',
+    arrival: false,
+    journey: 'storageNotes',
+    nationalityOfVehicle: 'GB 😀',
+  };
+
+  const result = Joi.validate(payload, truckSaveAsDraftSchema, {
+    abortEarly: false
+  });
+
+  t.ok(result.error, 'Should have validation error');
+  const emojiErr = result.error.details.find(d => d.path.join('.') === 'nationalityOfVehicle');
+  t.ok(emojiErr, 'Should have nationalityOfVehicle error');
+  t.equal(emojiErr.type, 'string.emoji', 'Error type should be string.emoji');
+  t.end();
+});
+
+test('truckSaveAsDraftSchema - should allow valid nationalityOfVehicle', t => {
+  const payload = {
+    vehicle: 'truck',
+    arrival: false,
+    journey: 'storageNotes',
+    nationalityOfVehicle: 'United Kingdom',
+  };
+
+  const result = Joi.validate(payload, truckSaveAsDraftSchema, {
+    abortEarly: false
+  });
+
+  t.equal(result.error, null, 'Valid nationality should pass');
+  t.end();
+});

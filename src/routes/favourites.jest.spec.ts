@@ -98,6 +98,32 @@ describe("favourites routes", () => {
         });
       });
     });
+
+    describe("with emoji in commodity_code_description", () => {
+      const payload = {
+        species: "Atlantic COD",
+        speciesCode: "COD",
+        scientificName: "THE COD",
+        state: "FRE",
+        stateLabel: "Fresh",
+        presentation: "HED",
+        presentationLabel: "Headed",
+        commodity_code: "21294949045",
+        commodity_code_description: "many letters 😀 here"
+      };
+
+      it("will return 400 bad request when commodity_code_description contains emoji", async () => {
+        const response = await server.inject({ ...request, payload: { ...payload } });
+        expect(response.statusCode).toBe(400);
+      });
+
+      it("will return string.emoji error for commodity_code_description", async () => {
+        const response = await server.inject({ ...request, payload: { ...payload } });
+        expect(JSON.parse(response.payload)).toEqual({
+          commodity_code_description: "error.commodity_code_description.string.emoji",
+        });
+      });
+    });
   });
 
   describe("GET /favourites", () => {
