@@ -439,13 +439,29 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       });
     });
 
-    it('should NOT reject containerNumbers item exceeding 50 characters for plane', () => {
+    it('should reject containerNumbers item exceeding 50 characters for plane', () => {
       const longValue = 'A'.repeat(51);
       const payload = {
         id: 'transport-123',
         vehicle: 'plane',
         flightNumber: 'FL123',
         containerNumbers: [longValue],
+        departurePlace: 'Heathrow'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
+
+      expect(error).toBeDefined();
+      expect(error?.details[0].type).toBe('string.max');
+    });
+
+    it('should accept containerNumbers item with exactly 50 characters for plane', () => {
+      const value = 'A'.repeat(50);
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'plane',
+        flightNumber: 'FL123',
+        containerNumbers: [value],
         departurePlace: 'Heathrow'
       };
 

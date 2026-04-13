@@ -34,7 +34,8 @@ const schema = Joi.object({
   }),
   containerNumber: Joi.string().trim().optional().regex(/^[a-zA-Z0-9 ]+$/).optional(),
   containerNumbers: Joi.array()
-    .items(Joi.string().trim().regex(/^[a-zA-Z0-9]+$/).messages({
+    .items(Joi.string().trim().max(50).regex(/^[a-zA-Z0-9]+$/).messages({
+      'string.max': 'error.containerNumbers.string.max',
       'string.pattern.base': 'error.containerNumbers.string.pattern.base',
     }))
     .unique((a, b) => a && b && a.trim() === b.trim())

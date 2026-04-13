@@ -205,14 +205,18 @@ describe('planeSchema - containerNumbers validation', () => {
     expect(err.message).toBe('error.containerNumbers.string.pattern.base');
   });
 
-  it('returns string.pattern.base error when item does not match ISO 6346 format', () => {
-    // For the plane schema, the regex /^$|^[A-Z]{3}[UJZR]\d{7}$/ rejects non-matching strings.
-    // A long string of 'A' characters does not match the pattern.
+  it('returns string.max error when item exceeds 50 characters', () => {
     const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
     const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
     expect(error).toBeDefined();
     const err = error.details.find((d: any) => d.path[0] === 'containerNumbers');
     expect(err).toBeDefined();
-    expect(err.message).toBe('error.containerNumbers.string.pattern.base');
+    expect(err.type).toBe('string.max');
+  });
+
+  it('accepts containerNumbers item with exactly 50 characters', () => {
+    const payload = { ...validPayload, containerNumbers: ['A'.repeat(50)] };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeUndefined();
   });
 });
