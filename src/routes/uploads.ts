@@ -33,6 +33,7 @@ export default class UploadsRoutes {
                 }
 
                 const fileHasVirus = await virusDetected(getFileName(payload.file),csv,documentNumber);
+
                 if (fileHasVirus === true) {
                   return h.response(getFileValidationError("error.upload.invalid-columns")).code(400);
                 }
@@ -190,8 +191,6 @@ export default class UploadsRoutes {
 
               const response: Hapi.ResponseObject = await UploadsController.saveLandingRows(req, h, userPrincipal, documentNumber, contactId, rows);
               UploadsController.invalidateCacheUploadedRows(userPrincipal, contactId);
-
-              logger.info(`[POST /v2/save/landings] documentNumber=${documentNumber}`);
               return response;
             }).catch(error => {
               logger.error(`[SAVE-UPLOAD-FILE][ERROR][${error}]`);
