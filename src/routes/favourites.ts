@@ -2,6 +2,7 @@ import * as Hapi from "@hapi/hapi";
 import * as Joi from "joi";
 
 import errorExtractor from '../helpers/errorExtractor';
+import { validateNoEmoji } from '../validators/emojiValidator';
 import FavouritesController from '../controllers/favourites.controller';
 import logger from '../logger';
 import ApplicationConfig from "../applicationConfig";
@@ -42,7 +43,7 @@ export default class FavouritesRoutes {
                   presentation: Joi.string().trim().required(),
                   presentationLabel: Joi.string().trim().allow(''),
                   commodity_code: Joi.string().trim().required(),
-                  commodity_code_description: Joi.string().trim().allow(''),
+                  commodity_code_description: Joi.string().trim().allow('').custom(validateNoEmoji),
               });
 
               const errors = schema.validate(value, {
