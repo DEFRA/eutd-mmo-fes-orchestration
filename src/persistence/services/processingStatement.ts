@@ -111,8 +111,8 @@ export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYe
 
   const [month, year] = monthAndYear.split('-');
   const currentDate = new Date();
-  const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
-  const monthInt = month ? parseInt(month) : currentDate.getUTCMonth();
+  const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
+  const monthInt = month ? Number.parseInt(month) : currentDate.getUTCMonth();
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await ProcessingStatementModel.find({
     $or: ownerQuery,

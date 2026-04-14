@@ -520,7 +520,7 @@ export default class ExportPayloadController {
           gearType: payload.gearType,
           gearCode: payload.gearCode,
           highSeasArea: payload.highSeasArea,
-          exclusiveEconomicZones:payload.exclusiveEconomicZones,   
+          exclusiveEconomicZones:payload.exclusiveEconomicZones,
           faoArea: payload.faoArea,
           rfmo: payload.rfmo
         }
@@ -642,7 +642,7 @@ export default class ExportPayloadController {
     await SummaryErrorsService.clearErrors(documentNumber);
 
     if (newLanding.error) {
-     
+
 
       return h.response(result).code(400);
     }
@@ -921,7 +921,7 @@ export default class ExportPayloadController {
     }
 
     return landings.reduce((acc, cur) => {
-      if (acc.find(_ => _.pln === cur.pln &&
+      if (acc.some(_ => _.pln === cur.pln &&
         _.dateLanded === cur.dateLanded)) {
         return acc;
       }

@@ -140,10 +140,10 @@ export default {
       errors.healthCertificateDate = "psAddHealthCertificateErrorHealthCertificateDate";
     } else if (!validateDate(data.healthCertificateDate)) {
       errors.healthCertificateDate = "psAddHealthCertificateErrorRealDateHealthCertificateDate";
-    } else if (!validateMaximumFutureDate(data.healthCertificateDate)) {
-      errors.healthCertificateDate = "psAddHealthCertificateErrorMaxDaysHealthCertificateDate";
+    } else if (validateMaximumFutureDate(data.healthCertificateDate)) {
       data.healthCertificateDate = cleanDate(data.healthCertificateDate);
     } else {
+      errors.healthCertificateDate = "psAddHealthCertificateErrorMaxDaysHealthCertificateDate";
       data.healthCertificateDate = cleanDate(data.healthCertificateDate);
     }
     return { errors };
@@ -389,10 +389,10 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing';
   } else if (ctch.exportWeightAfterProcessing <= 0) {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorExportWeightGreaterThanNullAfterProcessing';
-  } else if (!isPositiveNumberWithTwoDecimals(ctch.exportWeightAfterProcessing)) {
-    errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalAfterProcessing';
-  } else {
+  } else if (isPositiveNumberWithTwoDecimals(ctch.exportWeightAfterProcessing)) {
     (ctch.exportWeightAfterProcessing = numberAsString(ctch.exportWeightAfterProcessing));
+  } else {
+    errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalAfterProcessing';
   }
   return { errors };
 }
@@ -402,10 +402,10 @@ function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
   } else if (ctch.totalWeightLanded <= 0) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
-  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
-  } else {
+  } else if (isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
     (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
+  } else {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
   }
 }
 

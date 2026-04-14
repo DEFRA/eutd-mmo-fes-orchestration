@@ -78,7 +78,7 @@ export const productsAreValid = async (products: ProductLanded[]) =>
       const fields = ['startDate', 'dateLanded'];
       const validations = [];
       fields.forEach(f => {
-        if (res.some(validation => (validation.result.some((r) => r === f ) && validation.validator === 'seasonalFish'))) {
+        if (res.some(validation => (validation.result.includes(f ) && validation.validator === 'seasonalFish'))) {
           validations.push(f);
         }
       })
