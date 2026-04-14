@@ -141,7 +141,7 @@ export default class ExporterValidateRoutes {
     private handleValidationError(req: any, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, error: any): any {
       const errorObject = errorExtractor(error);
       if (acceptsHtml(req.headers)) {
-        return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
+        return h.redirect(`${(req.payload).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
       }
       // API consumers expect array format
       const errorArray = Object.values(errorObject);
