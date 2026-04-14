@@ -71,7 +71,7 @@ export default class DocumentRoutes {
                 abortEarly: false
               },
               params: Joi.object({
-                documentNumber: Joi.string().required().regex(/^GBR-(19|20|21)[0-9]{2}-(CC|PS|SD)-[A-Z0-9]{9}$/)
+                documentNumber: Joi.string().required().regex(/^GBR-(19|20|21)\d{2}-(CC|PS|SD)-[A-Z\d]{9}$/)
               })
             }
           }

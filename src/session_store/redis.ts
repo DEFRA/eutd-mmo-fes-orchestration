@@ -20,7 +20,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   private connectionOptions: RedisOptions;
   private connection: Redis;
 
-  public constructor(connection?: Redis) {// allow for optional dependency injection for testing purposes 
+  public constructor(connection?: Redis) {// allow for optional dependency injection for testing purposes
     if (connection) {
       this.connection = connection;
     }
@@ -88,7 +88,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
     await this.connection.set(key, JSON.stringify(data));
   }
 
-  async initialize(options?: object): Promise<void> {
+  initialize(options?: object): void {
     this.connectionOptions = <RedisOptions>options;
     logger.info('Attempt to initialize redis cache connection to', this.connectionOptions.host);
     this.startConnection();
@@ -119,7 +119,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
 
   async readAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string): Promise<T[]> {
     let data;
-    
+
     if(contactId) {
       const fullKey = RedisStorage._buildKeyForUser(contactId, key);
       data = await this.connection.get(fullKey);
@@ -180,7 +180,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
     }
 
     const fullKey = RedisStorage._buildKeyForUser(userPrincipal, key);
-    await this.connection.del(fullKey);    
+    await this.connection.del(fullKey);
   }
 
   async tagByDocumentNumber(userPrincipal: string, contactId: string, documentNumber: string, journey: string): Promise<void> {

@@ -79,7 +79,6 @@ export default class FishRoutes {
                 }
                 if (value.add_new &&
                   value.redirect &&
-                  // TODO: Once commodity code flow is decided we can enable this back on
                   // !val.commodity_code &&
                   !value.species &&
                   !value.state) {

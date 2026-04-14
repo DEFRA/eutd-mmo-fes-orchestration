@@ -13,7 +13,7 @@ export class MongoConnection {
       try {
         MongoConnection.mongo = await mongoose.connect(connectionUri, {
           dbName,
-          maxPoolSize: parseInt(pool)
+          maxPoolSize: Number.parseInt(pool)
         });
 
       } catch(e) {

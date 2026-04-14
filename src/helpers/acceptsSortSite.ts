@@ -1,9 +1,9 @@
-export default function (headers: Record<string, any>): boolean {
+export default function acceptsSortSite (headers: Record<string, any>): boolean {
     const accept: string = headers.accept;
     if (!accept) {
         return false;
     }
 
-    const acceptToArray = accept.split(',').map(a=>a.trim());
-    return acceptToArray.indexOf('application/x-ms-application') !== -1 && acceptToArray.indexOf('application/x-ms-xbap') !== -1;
+    const acceptToArray = new Set(accept.split(',').map(a=>a.trim()));
+    return acceptToArray.has('application/x-ms-application') && acceptToArray.has('application/x-ms-xbap');
 }
