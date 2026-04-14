@@ -25,7 +25,7 @@ export default class UploadsController {
 
     let rows: string[] = await csv({ noheader: true, output: 'line' }).fromString(data);
 
-    rows = rows.filter(item => !isEmpty(item.replace(/^[, ]+$/g, '')));
+    rows = rows.filter(item => !isEmpty(item.replaceAll(/^[, ]+$/g, '')));
     rows = rows.map(item => item.toUpperCase());
 
     if (rows.length > ApplicationConfig._maxLimitLandings) {

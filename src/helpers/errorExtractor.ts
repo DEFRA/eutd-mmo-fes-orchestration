@@ -62,7 +62,7 @@ export default function buildErrorObject(data)  {
   const errorObject = {};
   details.forEach((detail) => {
     if (detail.path.length > 0) {
-      const errorKey = detail.path.join().replace(/,/gi,'.');
+      const errorKey = detail.path.join().replaceAll(',','.');
 
       if (handleContainerNumbersError(detail, errorKey, transportType, errorObject, _original)) return;
 
@@ -96,7 +96,7 @@ export function buildNonJsErrorObject(standardError, njError)  {
     if (standardError) {
       const { details } = standardError;
       details.map((detail) => {
-        const errorKey = detail.path.join().replace(/,/gi,'.');
+        const errorKey = detail.path.join().replaceAll(',','.');
         errorObject[errorKey] = `error.${errorKey}.${detail.type}`
       });
    }
