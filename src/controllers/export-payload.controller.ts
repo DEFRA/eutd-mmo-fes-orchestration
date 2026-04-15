@@ -50,7 +50,7 @@ export default class ExportPayloadController {
     if (Object.keys(errors).length === 0) {
       try {
         await VesselValidator.checkVesselWithDate(exportPayload.items);
-      } catch (e) {
+      } catch {
         errors['vessel_license'] = 'Please contact support.';
       }
     }

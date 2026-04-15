@@ -18,23 +18,11 @@ import trainSaveAsDraftSchema from '../schemas/catchcerts/trainSaveAsDraftSchema
 import truckSaveAsDraftSchema from '../schemas/catchcerts/truckSaveAsDraftSchema';
 import planeSaveAsDraftSchema from '../schemas/catchcerts/planeSaveAsDraftSchema';
 import containerVesselSaveAsDraftSchema from '../schemas/catchcerts/containerVesselSaveAsDraftSchema';
+import { nonJSInputHistory } from '../helpers/utils/utils';
 
 export default class TransportRoutes {
 
   public async register(server: Hapi.Server): Promise<any> {
-
-    function nonJSInputHistory(fieldParam, dataObject, arrayOfInputFields) {
-      const keys = Object.keys(fieldParam)
-      for (const key of keys) {
-        if (arrayOfInputFields.includes(key)) {
-          const fieldChar = "temp" + key.charAt(0).toUpperCase() + key.substring(1, key.length);
-
-          if (fieldParam[key].length !== 0)
-            dataObject.transportDetails.push({ field: fieldChar, value: fieldParam[key] });
-        }
-      }
-      return dataObject;
-    }
 
     return new Promise(resolve => {
 
@@ -62,9 +50,9 @@ export default class TransportRoutes {
               },
               failAction: function (req, h, error) {
                 const errorObject = errorExtractor(error) as any;
-                
+
                 if (errorObject.vehicle && req.payload && (req.payload as any).arrival === true) {
-                   errorObject.vehicle = 'error.arrivalVehicle.any.required';
+                  errorObject.vehicle = 'error.arrivalVehicle.any.required';
                 }
 
                 if (acceptsHtml(req.headers)) {
@@ -140,7 +128,7 @@ export default class TransportRoutes {
                 const errorObject = errorExtractor(error);
 
                 if (isHtml) {
-                  const inputFields = ["registrationNumber", "nationalityOfVehicle", "departurePlace", "exportDate","facilityArrivalDate"];
+                  const inputFields = ["registrationNumber", "nationalityOfVehicle", "departurePlace", "exportDate", "facilityArrivalDate"];
                   const result = nonJSInputHistory(req.payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
@@ -183,7 +171,7 @@ export default class TransportRoutes {
                 const isHtml = acceptsHtml(req.headers);
 
                 if (isHtml) {
-                  const inputFields = ["flightNumber", "containerNumber", "departurePlace", "exportDate","facilityArrivalDate"];
+                  const inputFields = ["flightNumber", "containerNumber", "departurePlace", "exportDate", "facilityArrivalDate"];
                   const result = nonJSInputHistory(req.payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 

@@ -136,7 +136,7 @@ export default class DocumentController {
   ): Promise<any> {
     const userPrincipal = <string>(req as any).app.claims.sub;
     const contactId = <string>(req as any).app.claims.contactId;
-    const documentType = <string>req.params.documentType;
+    const documentType = req.params.documentType;
     const pageNumber = (req.query.pageNumber as string) ?? '1';
     const pageLimit = (req.query.pageLimit as string) ?? '50';
 

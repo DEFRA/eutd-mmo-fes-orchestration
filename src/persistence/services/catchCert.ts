@@ -104,8 +104,8 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
 
   const [month, year] = yearAndMonth.split('-');
   const currentDate = new Date();
-  const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
-  const monthInt = month ? parseInt(month) : (currentDate.getUTCMonth() + 1);
+  const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
+  const monthInt = month ? Number.parseInt(month) : (currentDate.getUTCMonth() + 1);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await CatchCertModel.find({
     $or: ownerQuery,
@@ -233,11 +233,10 @@ export const upsertDraftData = async (
   }
 };
 
-// TODO: Not used by CatchCertificate, refactor for PS & SD
 export const getDraftCertificateNumber = async (userPrincipal: string): Promise<string> => {
   const query = { createdBy: userPrincipal, status: DocumentStatuses.Draft };
   const draft = await CatchCertModel.findOne(query, 'documentNumber', { lean: true });
-  const dataExists = (draft && draft.documentNumber);
+  const dataExists = (draft?.documentNumber);
 
   return dataExists
     ? draft.documentNumber
@@ -560,12 +559,12 @@ export const updateProductScientificName = async (product: Product, documentNumb
     const speciesCode = product.speciesCode;
     try {
       const data = await getSpeciesByFaoCode(speciesCode);
-      const species = data.find((item) => item.faoCode === speciesCode);
+      const species = data.find((item: any) => item.faoCode === speciesCode);
 
       if (species?.scientificName) {
         product.scientificName = species.scientificName;
       }
-    } catch (error) {
+    } catch {
       logger.
         info(`[GET-COPY][DOCUMENT-NUMBER][${documentNumber}][PRODUCT][${product}][GET-FAO-CODE][${speciesCode}]`);
     }
