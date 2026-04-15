@@ -1,9 +1,9 @@
-import DocumentNumberService, { processingStatement, storageNote } from './documentNumber.service';
+import DocumentNumberService from './documentNumber.service';
 import * as CatchCertService from "../persistence/services/catchCert";
 import * as ProcessingStatementService from "../persistence/services/processingStatement";
 import * as StorageDocumentService from "../persistence/services/storageDoc";
 import { SessionStoreFactory } from '../session_store/factory';
-import { DOCUMENT_NUMBER_KEY } from '../session_store/constants';
+import { DOCUMENT_NUMBER_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY } from '../session_store/constants';
 import ServiceNames from '../validators/interfaces/service.name.enum';
 
 describe('getDraftDocument', () => {
@@ -59,7 +59,7 @@ describe('getDraftDocument', () => {
   it('should call the PS service if the key contains processingStatement', async () => {
     mockGetPSHeaders.mockReturnValue(expected);
 
-    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${processingStatement}/${DOCUMENT_NUMBER_KEY}`, contactId);
+    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${PROCESSING_STATEMENT_KEY}/${DOCUMENT_NUMBER_KEY}`, contactId);
 
     expect(mockGetCCHeaders).not.toHaveBeenCalled();
     expect(mockGetPSHeaders).toHaveBeenCalled();
@@ -70,7 +70,7 @@ describe('getDraftDocument', () => {
   it('should return an empty array if PS service returns null', async () => {
     mockGetPSHeaders.mockReturnValue(null);
 
-    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${processingStatement}/${DOCUMENT_NUMBER_KEY}`, contactId);
+    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${PROCESSING_STATEMENT_KEY}/${DOCUMENT_NUMBER_KEY}`, contactId);
 
     expect(mockGetPSHeaders).toHaveBeenCalled();
     expect(result).toStrictEqual([]);
@@ -79,7 +79,7 @@ describe('getDraftDocument', () => {
   it('should call the SD service if the key contains storageNote', async () => {
     mockGetSDHeaders.mockReturnValue(expected);
 
-    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${storageNote}/${DOCUMENT_NUMBER_KEY}`, contactId);
+    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${STORAGE_NOTES_KEY}/${DOCUMENT_NUMBER_KEY}`, contactId);
 
     expect(mockGetCCHeaders).not.toHaveBeenCalled();
     expect(mockGetPSHeaders).not.toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe('getDraftDocument', () => {
   it('should return an empty array if SD service returns null', async () => {
     mockGetSDHeaders.mockReturnValue(null);
 
-    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${storageNote}/${DOCUMENT_NUMBER_KEY}`, contactId);
+    const result = await DocumentNumberService.getDraftDocuments(defaultUser, `${STORAGE_NOTES_KEY}/${DOCUMENT_NUMBER_KEY}`, contactId);
 
     expect(mockGetSDHeaders).toHaveBeenCalled();
     expect(result).toStrictEqual([]);

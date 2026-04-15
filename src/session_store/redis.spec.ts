@@ -196,7 +196,7 @@ describe("RedisStorage", () => {
     });
   });
 
-  describe('tagByDocumentNumber', () => {
+  describe('tagByDocumentNumber - 1', () => {
     it('should call sadd with expected keys for catch certificate journey', () => {
       // ensure mock has sadd
       (mockRedis as any).sadd = jest.fn();
@@ -323,7 +323,7 @@ describe("RedisStorage", () => {
     });
   });
 
-  describe('writeFor with TTL', () => {
+  describe('writeFor with TTL - 1', () => {
     it('should write data with expiry when ttlSeconds provided', async () => {
       const data: any = {test: 'test'};
 

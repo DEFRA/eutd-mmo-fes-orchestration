@@ -1,7 +1,7 @@
 import * as Hapi from '@hapi/hapi';
 import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimatelyOwned';
 import { ProgressStatus } from '../persistence/schema/common';
-import { catchCerts, storageNote, processingStatement } from '../services/documentNumber.service';
+import { CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY } from '../session_store/constants';
 import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/catchCertificate";
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
@@ -19,11 +19,11 @@ export default class ProgressRoutes {
     journey: string
   ): Promise<any> {
     switch (journey) {
-      case catchCerts:
+      case CATCH_CERTIFICATE_KEY:
         return ProgressService.get(userPrincipal, documentNumber, contactId);
-      case processingStatement:
+      case PROCESSING_STATEMENT_KEY:
         return ProgressService.getProcessingStatementProgress(userPrincipal, documentNumber, contactId);
-      case storageNote:
+      case STORAGE_NOTES_KEY:
         return ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
       default:
         return null;
@@ -88,15 +88,15 @@ export default class ProgressRoutes {
     h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>
   ): Promise<any> {
     switch (journey) {
-      case catchCerts: {
+      case CATCH_CERTIFICATE_KEY: {
         const { completedSections, requiredSections, progress } = await ProgressService.get(userPrincipal, documentNumber, contactId);
         return completeProgressHandler(progress, completedSections, requiredSections, h);
       }
-      case processingStatement: {
+      case PROCESSING_STATEMENT_KEY: {
         const { completedSections, requiredSections, progress } = await ProgressService.getProcessingStatementProgress(userPrincipal, documentNumber, contactId);
         return this.handlePsCompleteProgress(userPrincipal, documentNumber, contactId, completedSections, requiredSections, progress as ProcessingStatementProgress, h);
       }
-      case storageNote: {
+      case STORAGE_NOTES_KEY: {
         const { completedSections, requiredSections, progress } = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
         return completeProgressHandler(progress, completedSections, requiredSections, h);
       }
