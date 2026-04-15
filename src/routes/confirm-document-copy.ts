@@ -69,7 +69,7 @@ export default class ConfirmDocumentCopyRoutes {
                         newDocumentNumber = await StorageDocumentService.cloneStorageDocument(documentNumber, userPrincipal, contactId, requestByAdmin, voidOriginal);
                         break;
                       default:
-                        throw 'JOURNEY-UNKNOWN'
+                        throw new Error('JOURNEY-UNKNOWN')
                     }
 
                     logger.debug(`[COPY-CERTIFICATE][${documentNumber}][COPIED][${newDocumentNumber}]`);
@@ -99,7 +99,7 @@ export default class ConfirmDocumentCopyRoutes {
                           voided = await StorageDocumentService.voidStorageDocument(documentNumber, userPrincipal, contactId);
                           break;
                         default:
-                          throw 'JOURNEY-UNKNOWN'
+                          throw new Error('JOURNEY-UNKNOWN')
                       }
 
                       logger.debug(`[COPY-VOID-CERTIFICATE][${documentNumber}][VOIDED]`);
@@ -178,7 +178,7 @@ export default class ConfirmDocumentCopyRoutes {
                       canCopy = !!await StorageDocumentService.checkDocument(documentNumber, userPrincipal, contactId);
                       break;
                     default:
-                      throw 'INVALID-SERVICE-NAME';
+                      throw new Error('INVALID-SERVICE-NAME');
                   }
 
                   logger.debug(`[CHECK-COPY-CERTIFICATE][${documentNumber}][SUCCESS][${canCopy}]`);

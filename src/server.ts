@@ -7,15 +7,13 @@ import Router from './router';
 import logger from './logger';
 
 import { SessionStoreFactory } from './session_store/factory';
-import { IStorage } from './session_store/storeable';
-import { IStoreable } from './session_store/storeable';
+import { IStorage, IStoreable } from './session_store/storeable';
 import { getRedisOptions } from './session_store/redis';
 import { HapiRequestApplicationStateExtended } from './types';
 
 import ApplicationConfig from './applicationConfig';
 import acceptsHtml from "./helpers/acceptsHtml";
 import { verify as jwtVerify, Jwt, JwtPayload } from 'jsonwebtoken';
-import applicationConfig from './applicationConfig';
 import { isRequestByAdmin } from './helpers/auth';
 
 export default class Server {
@@ -193,7 +191,7 @@ export default class Server {
       const { response } = request;
 
       logger.info({
-        requestId: (request as any).id,
+        requestId: (request).id,
         data: {
           method: request.method,
           path: request.path,
@@ -266,7 +264,7 @@ export default class Server {
 
           const { iss, roles } = decoded.payload as JwtPayload;
           const isAdminRole = Array.isArray(roles) && isRequestByAdmin(roles);
-          const authIssuer = applicationConfig.getAuthIssuer();
+          const authIssuer = ApplicationConfig.getAuthIssuer();
           const isKnownIssuer = authIssuer && authIssuer === iss;
 
           const isValidToken = isAdminRole || isKnownIssuer;
