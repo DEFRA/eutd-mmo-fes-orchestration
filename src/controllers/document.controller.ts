@@ -1,7 +1,7 @@
 import * as Hapi from '@hapi/hapi';
 import logger from '../logger';
-import DocumentNumberService, { catchCerts, storageNote, processingStatement }  from '../services/documentNumber.service';
-import { DOCUMENT_NUMBER_KEY } from '../session_store/constants';
+import DocumentNumberService from '../services/documentNumber.service';
+import { DOCUMENT_NUMBER_KEY, CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY } from '../session_store/constants';
 
 import {
   getAllCatchCertsForUserByYearAndMonth,
@@ -94,19 +94,19 @@ export default class DocumentController {
       const contactId = app.claims.contactId;
 
       switch (req.query.type) {
-        case catchCerts:
+        case CATCH_CERTIFICATE_KEY:
           [inProgress, completed] = await Promise.all([
             getDraftCatchCertHeadersForUser(userPrincipal, contactId),
             getAllCatchCertsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId),
           ]);
           break;
-        case processingStatement:
+        case PROCESSING_STATEMENT_KEY:
           [inProgress, completed] = await Promise.all([
             getDraftProcessingStatementsForUser(userPrincipal, contactId),
             getAllProcessingStatementsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId),
           ]);
           break;
-        case storageNote:
+        case STORAGE_NOTES_KEY:
           [inProgress, completed] = await Promise.all([
             getDraftStorageDocumentsForUser(userPrincipal, contactId),
             getAllStorageDocsForUserByYearAndMonth(monthAndYear, userPrincipal, contactId),

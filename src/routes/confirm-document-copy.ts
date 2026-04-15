@@ -6,14 +6,19 @@ import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimate
 import { reportDraftCreated } from '../services/reference-data.service';
 import { DocumentStatuses } from '../persistence/schema/catchCert';
 import * as Joi from 'joi';
-import DocumentNumberService, { catchCerts, processingStatement, storageNote } from '../services/documentNumber.service';
+import DocumentNumberService from '../services/documentNumber.service';
 import { postEventData } from '../services/protective-monitoring.service';
 import {
   JOURNEY,
   PROTECTIVE_MONITORING_PRIORITY_NORMAL,
   PROTECTIVE_MONITORING_VOID_TRANSACTION,
-  PROTECTIVE_MONITORING_PRIORITY_UNUSUAL
+  PROTECTIVE_MONITORING_PRIORITY_UNUSUAL,
 } from '../services/constants';
+import {
+  CATCH_CERTIFICATE_KEY,
+  PROCESSING_STATEMENT_KEY,
+  STORAGE_NOTES_KEY
+} from '../session_store/constants';
 import acceptsHtml from '../helpers/acceptsHtml';
 import errorExtractor from '../helpers/errorExtractor';
 import logger from '../logger';
@@ -51,16 +56,16 @@ export default class ConfirmDocumentCopyRoutes {
                   let newDocumentNumber: string;
 
                   const canCreateDraft = await userCanCreateDraft(userPrincipal, journey, contactId);
-       
+
                   if (canCreateDraft) {
                     switch (journey) {
-                      case catchCerts:
+                      case CATCH_CERTIFICATE_KEY:
                         newDocumentNumber = await CatchCertService.cloneCatchCertificate(documentNumber, userPrincipal, excludeLandings, contactId, requestByAdmin, voidOriginal);
                         break;
-                      case processingStatement:
+                      case PROCESSING_STATEMENT_KEY:
                         newDocumentNumber = await ProcessingStatmentService.cloneProcessingStatement(documentNumber, userPrincipal, contactId, requestByAdmin, voidOriginal);
                         break;
-                      case storageNote:
+                      case STORAGE_NOTES_KEY:
                         newDocumentNumber = await StorageDocumentService.cloneStorageDocument(documentNumber, userPrincipal, contactId, requestByAdmin, voidOriginal);
                         break;
                       default:
@@ -84,13 +89,13 @@ export default class ConfirmDocumentCopyRoutes {
                       let voided = false;
 
                       switch (journey) {
-                        case catchCerts:
+                        case CATCH_CERTIFICATE_KEY:
                           voided = await CatchCertService.voidCatchCertificate(documentNumber, userPrincipal, contactId);
                           break;
-                        case processingStatement:
+                        case PROCESSING_STATEMENT_KEY:
                           voided = await ProcessingStatmentService.voidProcessingStatement(documentNumber, userPrincipal, contactId);
                           break;
-                        case storageNote:
+                        case STORAGE_NOTES_KEY:
                           voided = await StorageDocumentService.voidStorageDocument(documentNumber, userPrincipal, contactId);
                           break;
                         default:
@@ -116,7 +121,7 @@ export default class ConfirmDocumentCopyRoutes {
 
                     return h.response({ documentNumber, newDocumentNumber, voidOriginal, copyDocumentAcknowledged });
                   }
-                  return h.response({message: 'unauthorised'}).code(403);  
+                  return h.response({message: 'unauthorised'}).code(403);
                 },
                 [DocumentStatuses.Complete]
               ).catch(error => {

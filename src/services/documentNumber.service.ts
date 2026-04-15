@@ -2,12 +2,6 @@ import * as moment from 'moment';
 import { SessionStoreFactory } from '../session_store/factory';
 import { getRedisOptions } from '../session_store/redis';
 import { STATUS_DRAFT } from '../services/constants';
-export {
-  CATCH_CERTIFICATE_KEY as catchCerts,
-  PROCESSING_STATEMENT_KEY as processingStatement,
-  STORAGE_NOTES_KEY as storageNote
-} from '../session_store/constants';
-
 import {
   PROCESSING_STATEMENT_KEY,
   STORAGE_NOTES_KEY

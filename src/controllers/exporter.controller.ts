@@ -1,7 +1,7 @@
 import * as Hapi from '@hapi/hapi';
 import acceptsHtml from '../helpers/acceptsHtml';
-import { EXPORTER_KEY, DOCUMENT_NUMBER_KEY } from '../session_store/constants';
-import DocumentNumberService, { catchCerts, storageNote, processingStatement } from '../services/documentNumber.service';
+import { EXPORTER_KEY, DOCUMENT_NUMBER_KEY, CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY } from '../session_store/constants';
+import DocumentNumberService from '../services/documentNumber.service';
 import { CatchCertificateDraft } from '../persistence/schema/frontEndModels/catchCertificate';
 import { ProcessingStatementDraft } from '../persistence/schema/frontEndModels/processingStatement';
 import { StorageDocumentDraft } from '../persistence/schema/frontEndModels/storageDocument';
@@ -17,16 +17,16 @@ export default class ExporterController {
 
   public static async getExporterDetails(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const journey = req.params.journey;
-    let result;
+    let result: any;
 
     switch (journey) {
-      case processingStatement:
+      case PROCESSING_STATEMENT_KEY:
         result = await ProcessingStatementService.getExporterDetails(userPrincipal, documentNumber, contactId);
         break;
-      case catchCerts:
+      case CATCH_CERTIFICATE_KEY:
         result = await CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId);
         break;
-      case storageNote:
+      case STORAGE_NOTES_KEY:
         result = await StorageDocumentService.getExporterDetails(userPrincipal, documentNumber, contactId);
         break;
       default:
@@ -65,15 +65,15 @@ export default class ExporterController {
     if (Object.keys(document).length === 0) {
       let serviceName = '';
       switch (journey) {
-        case catchCerts : {
+        case CATCH_CERTIFICATE_KEY: {
           serviceName = ServiceNames.CC;
           break;
         }
-        case storageNote : {
+        case STORAGE_NOTES_KEY: {
           serviceName = ServiceNames.SD;
           break;
         }
-        case processingStatement : {
+        case PROCESSING_STATEMENT_KEY: {
           serviceName = ServiceNames.PS;
           break;
         }

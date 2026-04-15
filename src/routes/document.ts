@@ -4,8 +4,7 @@ import * as Hapi from '@hapi/hapi';
 import * as Joi from 'joi';
 import DocumentController from '../controllers/document.controller';
 import { defineAuthStrategies } from '../helpers/auth';
-import { catchCerts, storageNote, processingStatement } from '../services/documentNumber.service';
-
+import { CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY } from '../session_store/constants';
 
 export default class DocumentRoutes {
 
@@ -27,7 +26,7 @@ export default class DocumentRoutes {
                 abortEarly: false
               },
               query: Joi.object({
-                type: Joi.string().required().valid(catchCerts, storageNote, processingStatement)
+                type: Joi.string().required().valid(CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY)
               }),
               params: Joi.object({
                 year: Joi.number().integer().min(1900).max(2200).required(),
@@ -51,7 +50,7 @@ export default class DocumentRoutes {
                 abortEarly: false
               },
               query: Joi.object({
-                service: Joi.string().required().valid(catchCerts, storageNote, processingStatement)
+                service: Joi.string().required().valid(CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY)
               })
             }
           }
@@ -107,7 +106,7 @@ export default class DocumentRoutes {
                 pageLimit: Joi.number().integer(),
               }),
               params: Joi.object({
-                documentType: Joi.string().required().valid(catchCerts, storageNote, processingStatement)
+                documentType: Joi.string().required().valid(CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY)
               })
             }
           }
