@@ -60,18 +60,37 @@ test('truckSaveAsDraftSchema - should allow optional fields for save as draft', 
   t.end();
 });
 
-test('truckSaveAsDraftSchema - should reject container numbers exceeding max length', t => {
-  const longContainer = 'A'.repeat(51);
-
-  const result = Joi.validate({
+test('truckSaveAsDraftSchema - should reject nationalityOfVehicle containing emoji', t => {
+  const payload = {
     vehicle: 'truck',
     arrival: false,
-    containerNumbers: [longContainer],
-    journey: 'storageNotes'
-  }, truckSaveAsDraftSchema, {
+    journey: 'storageNotes',
+    nationalityOfVehicle: 'GB 😀',
+  };
+
+  const result = Joi.validate(payload, truckSaveAsDraftSchema, {
     abortEarly: false
   });
 
-  t.notEqual(result.error, null, 'Container exceeding 50 chars should fail');
+  t.ok(result.error, 'Should have validation error');
+  const emojiErr = result.error.details.find(d => d.path.join('.') === 'nationalityOfVehicle');
+  t.ok(emojiErr, 'Should have nationalityOfVehicle error');
+  t.equal(emojiErr.type, 'string.emoji', 'Error type should be string.emoji');
+  t.end();
+});
+
+test('truckSaveAsDraftSchema - should allow valid nationalityOfVehicle', t => {
+  const payload = {
+    vehicle: 'truck',
+    arrival: false,
+    journey: 'storageNotes',
+    nationalityOfVehicle: 'United Kingdom',
+  };
+
+  const result = Joi.validate(payload, truckSaveAsDraftSchema, {
+    abortEarly: false
+  });
+
+  t.equal(result.error, null, 'Valid nationality should pass');
   t.end();
 });

@@ -6,6 +6,7 @@ import { loadRequiredData, processingStatement, storageNote } from './orchestrat
 import { toFrontEndProcessingStatementExportData } from '../persistence/schema/processingStatement'
 import * as StorageDocumentService from '../persistence/services/storageDoc'
 import { toFrontEndStorageDocumentExportData } from '../persistence/schema/storageDoc'
+import * as moment from 'moment'
 
 describe('helper functions', () => {
   const contactId = 'contactBob';
@@ -306,6 +307,85 @@ describe('helper functions', () => {
       const result = await loadRequiredData('user-principal', 'document-number', storageNote, contactId);
 
       expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('validateDateBefore()', () => {
+    it('should return true when first date is strictly before second date', () => {
+      expect(Service.validateDateBefore('01/01/2020', '02/01/2020')).toBeTruthy();
+    });
+
+    it('should return false when first date is after second date', () => {
+      expect(Service.validateDateBefore('02/01/2020', '01/01/2020')).toBeFalsy();
+    });
+
+    it('should return false when both dates are the same', () => {
+      expect(Service.validateDateBefore('15/06/2021', '15/06/2021')).toBeFalsy();
+    });
+  });
+
+  describe('validateMaximumOneDayFutureDate()', () => {
+    it('should return true for a past date', () => {
+      expect(Service.validateMaximumOneDayFutureDate('01/01/2020')).toBeTruthy();
+    });
+
+    it('should return true for today', () => {
+      const today = moment().format('DD/MM/YYYY');
+      expect(Service.validateMaximumOneDayFutureDate(today)).toBeTruthy();
+    });
+
+    it('should return true when date is exactly 1 day in the future', () => {
+      const tomorrow = moment().add(1, 'day').format('DD/MM/YYYY');
+      expect(Service.validateMaximumOneDayFutureDate(tomorrow)).toBeTruthy();
+    });
+
+    it('should return false when date is 2 or more days in the future', () => {
+      const twoDaysFromNow = moment().add(2, 'days').format('DD/MM/YYYY');
+      expect(Service.validateMaximumOneDayFutureDate(twoDaysFromNow)).toBeFalsy();
+    });
+  });
+
+  describe('isNotExceed12Digit()', () => {
+    it('should return true for a valid number under the limit', () => {
+      expect(Service.isNotExceed12Digit('99999999999')).toBeTruthy();
+    });
+
+    it('should return true for zero', () => {
+      expect(Service.isNotExceed12Digit('0')).toBeTruthy();
+    });
+
+    it('should return false for a number equal to the limit (100000000000)', () => {
+      expect(Service.isNotExceed12Digit('100000000000')).toBeFalsy();
+    });
+
+    it('should return false for a number exceeding the limit', () => {
+      expect(Service.isNotExceed12Digit('999999999999')).toBeFalsy();
+    });
+
+    it('should return false for a non-numeric string', () => {
+      expect(Service.isNotExceed12Digit('abc')).toBeFalsy();
+    });
+
+    it('should return false for a negative number', () => {
+      expect(Service.isNotExceed12Digit('-1')).toBeFalsy();
+    });
+  });
+
+  describe('isApprovalNumberValid()', () => {
+    it('should return true for valid approval number characters', () => {
+      expect(Service.isApprovalNumberValid('UK-123-A.B/C')).toBeTruthy();
+      expect(Service.isApprovalNumberValid('AB 123')).toBeTruthy();
+      expect(Service.isApprovalNumberValid('UK.123/code')).toBeTruthy();
+    });
+
+    it('should return false for disallowed special characters', () => {
+      expect(Service.isApprovalNumberValid('AB_123')).toBeFalsy();
+      expect(Service.isApprovalNumberValid('AB@123')).toBeFalsy();
+      expect(Service.isApprovalNumberValid('AB#123')).toBeFalsy();
+    });
+
+    it('should return true for empty string', () => {
+      expect(Service.isApprovalNumberValid('')).toBeTruthy();
     });
   });
 });

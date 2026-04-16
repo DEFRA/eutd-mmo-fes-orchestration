@@ -1,5 +1,6 @@
 import * as Hapi from '@hapi/hapi';
 import logger from '../logger';
+
 import acceptsHtml from '../helpers/acceptsHtml';
 import { cloneDeep } from 'lodash';
 import { getVessel } from "../services/reference-data.service";
@@ -15,6 +16,7 @@ import {
 } from '../services/constants';
 import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../session_store/constants';
 import errorExtractor from '../helpers/errorExtractor';
+import { withUserSessionDataStored, SessionData } from '../helpers/sessionManager';
 import ExportPayloadService from '../services/export-payload.service';
 import * as PayloadSchema from '../persistence/schema/frontEndModels/payload';
 import { fishingVessel } from '../persistence/schema/frontEndModels/transport';
@@ -31,6 +33,11 @@ import { NotifyService } from '../services/notify.service';
 import { HapiRequestApplicationStateExtended } from '../types';
 import { ProductsLanded, LandingStatus, ProductLanded } from '../persistence/schema/frontEndModels/payload';
 import { ICountry } from '../persistence/schema/common';
+import { SessionStoreFactory } from '../session_store/factory';
+import { getRedisOptions } from '../session_store/redis';
+
+const LANDINGS_TYPE_CACHE_TTL_SECONDS = 60;
+const landingsTypeCacheKey = (documentNumber: string) => `export-certificates/landings-type/${documentNumber}`;
 
 export default class ExportPayloadController {
 
@@ -43,7 +50,7 @@ export default class ExportPayloadController {
     if (Object.keys(errors).length === 0) {
       try {
         await VesselValidator.checkVesselWithDate(exportPayload.items);
-      } catch (e) {
+      } catch {
         errors['vessel_license'] = 'Please contact support.';
       }
     }
@@ -513,7 +520,7 @@ export default class ExportPayloadController {
           gearType: payload.gearType,
           gearCode: payload.gearCode,
           highSeasArea: payload.highSeasArea,
-          exclusiveEconomicZones:payload.exclusiveEconomicZones,   
+          exclusiveEconomicZones:payload.exclusiveEconomicZones,
           faoArea: payload.faoArea,
           rfmo: payload.rfmo
         }
@@ -635,7 +642,7 @@ export default class ExportPayloadController {
     await SummaryErrorsService.clearErrors(documentNumber);
 
     if (newLanding.error) {
-     
+
 
       return h.response(result).code(400);
     }
@@ -660,6 +667,70 @@ export default class ExportPayloadController {
       return h.redirect(req.payload.currentUri).takeover();
     } else {
       return h.response(result).code(400).takeover();
+    }
+  }
+
+  /**
+   * failAction handler for the direct-landing validate route.
+   * Unlike getExportPayloadInvalidRequest, this also persists the error state to the
+   * session store so that getLandingsStatus correctly returns INCOMPLETE when the
+   * landing has outstanding validation failures (FI0-10996).
+   */
+  public static async getDirectLandingExportPayloadInvalidRequest(
+    req: any,
+    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>,
+    error: any,
+    userPrincipal: string,
+    documentNumber: string,
+    contactId: string
+  ) {
+    let result;
+
+    if (req.payload) {
+      result = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
+      result.error = 'invalid';
+      result.errors = errorExtractor(error);
+      await ExportPayloadController.persistDirectLandingErrorsToSession(result, error, userPrincipal, documentNumber, contactId);
+    }
+
+    if (acceptsHtml(req.headers)) {
+      return h.redirect(req.payload.currentUri).takeover();
+    } else {
+      return h.response(result).code(400).takeover();
+    }
+  }
+
+  /**
+   * Persists error: 'invalid' to the session for every landing in the current payload,
+   * so that getLandingsStatus can correctly return INCOMPLETE (FI0-10996).
+   */
+  private static async persistDirectLandingErrorsToSession(
+    result: any,
+    error: any,
+    userPrincipal: string,
+    documentNumber: string,
+    contactId: string
+  ) {
+    if (!result?.items) return;
+
+    const landingErrors = errorExtractor(error);
+    for (const item of result.items) {
+      if (!Array.isArray(item.landings)) continue;
+      for (const landing of item.landings) {
+        if (!landing?.model?.id) continue;
+        const sessionData: SessionData = {
+          documentNumber,
+          landing: {
+            landingId: landing.model.id,
+            addMode: false,
+            editMode: true,
+            error: 'invalid',
+            errors: landingErrors,
+            model: landing.model
+          }
+        };
+        await withUserSessionDataStored(userPrincipal, sessionData, contactId);
+      }
     }
   }
 
@@ -850,7 +921,7 @@ export default class ExportPayloadController {
     }
 
     return landings.reduce((acc, cur) => {
-      if (acc.find(_ => _.pln === cur.pln &&
+      if (acc.some(_ => _.pln === cur.pln &&
         _.dateLanded === cur.dateLanded)) {
         return acc;
       }
@@ -886,33 +957,56 @@ export default class ExportPayloadController {
 
   public static async getLandingsType(userPrincipal: string, documentNumber: string, contactId: string): Promise<{ landingsEntryOption: string, generatedByContent: boolean }> {
 
+    // Short-lived cache to reduce DB load under concurrency
+    try {
+      const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
+      const cached = (await sessionStore.readFor<any>(
+        userPrincipal,
+        contactId,
+        landingsTypeCacheKey(documentNumber)
+      )) as { landingsEntryOption: string; generatedByContent: boolean } | null;
+      if (cached) {
+        return cached;
+      }
+    } catch (e) {
+      // Cache failures should not break the request; fall through to compute.
+      logger.warn(`[LANDINGS-TYPE][CACHE][ERROR][${(e)?.message || e}]`);
+    }
     const landingsEntryOption: LandingsEntryOptions = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId);
 
+    // helper to write cache and return result - reduces duplication
+    const writeCacheAndReturn = async (result: { landingsEntryOption: any; generatedByContent: boolean }) => {
+      try {
+        const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
+        await sessionStore.writeFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber), result as any, LANDINGS_TYPE_CACHE_TTL_SECONDS);
+      } catch (e) {
+        logger.warn(`[LANDINGS-TYPE][CACHE-WRITE][ERROR][${(e)?.message || e}]`);
+      }
+      return result;
+    };
+
     if (landingsEntryOption) {
-      return { landingsEntryOption, generatedByContent: false };
-    }
-    else {
-      const exportPayload = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
-      const numberOfUniqueLandings = ExportPayloadController.numberOfUniqueLandings(exportPayload);
-      let isDirectLanding = false;
-
-      if (numberOfUniqueLandings === 1) {
-        const transportDetails = await TransportService.getTransportDetails(userPrincipal, CATCH_CERTIFICATE_KEY, documentNumber, contactId);
-
-        isDirectLanding = numberOfUniqueLandings === 1 && transportDetails.vehicle && transportDetails.vehicle === fishingVessel;
-      }
-
-      if (isDirectLanding) {
-        return { landingsEntryOption: LandingsEntryOptions.DirectLanding, generatedByContent: true };
-      }
-      else if (numberOfUniqueLandings > 0) {
-        return { landingsEntryOption: LandingsEntryOptions.ManualEntry, generatedByContent: true };
-      }
-      else {
-        return { landingsEntryOption: null, generatedByContent: false };
-      }
+      return writeCacheAndReturn({ landingsEntryOption, generatedByContent: false });
     }
 
+    const exportPayload = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
+    const numberOfUniqueLandings = ExportPayloadController.numberOfUniqueLandings(exportPayload);
+
+    let isDirectLanding = false;
+    if (numberOfUniqueLandings === 1) {
+      const transportDetails = await TransportService.getTransportDetails(userPrincipal, CATCH_CERTIFICATE_KEY, documentNumber, contactId);
+      isDirectLanding = transportDetails?.vehicle === fishingVessel;
+    }
+
+    if (isDirectLanding) {
+      return writeCacheAndReturn({ landingsEntryOption: LandingsEntryOptions.DirectLanding, generatedByContent: true });
+    }
+
+    if (numberOfUniqueLandings > 0) {
+      return writeCacheAndReturn({ landingsEntryOption: LandingsEntryOptions.ManualEntry, generatedByContent: true });
+    }
+
+    return { landingsEntryOption: null, generatedByContent: false };
   }
 
   public static async addLandingsEntryOption(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {

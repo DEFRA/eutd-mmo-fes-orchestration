@@ -1,6 +1,10 @@
 import { SessionStoreFactory } from '../session_store/factory';
 import { getRedisOptions } from '../session_store/redis';
-import { processingStatement, catchCerts,  storageNote } from './documentNumber.service';
+import {
+  CATCH_CERTIFICATE_KEY,
+  PROCESSING_STATEMENT_KEY,
+  STORAGE_NOTES_KEY
+} from '../session_store/constants';
 import * as ProcessingStatementService from '../persistence/services/processingStatement';
 import * as CatchCertService from '../persistence/services/catchCert';
 import * as StorageDocumentService from '../persistence/services/storageDoc';
@@ -43,11 +47,11 @@ export default class ExporterService {
   public static async save(payload, userPrincipal, documentNumber, key, contactId: string) : Promise<any> {
     let data;
 
-    if (key.startsWith(catchCerts)) {
+    if (key.startsWith(CATCH_CERTIFICATE_KEY)) {
       data = await ExporterService.executeSave(userPrincipal, documentNumber, key, payload, CatchCertService, contactId);
-    } else if (key.startsWith(processingStatement)) {
+    } else if (key.startsWith(PROCESSING_STATEMENT_KEY)) {
       data = await ExporterService.executeSave(userPrincipal, documentNumber, key, payload, ProcessingStatementService, contactId);
-    } else if (key.startsWith(storageNote)) {
+    } else if (key.startsWith(STORAGE_NOTES_KEY)) {
       data = await ExporterService.executeSave(userPrincipal,documentNumber, key, payload, StorageDocumentService, contactId);
     }
 

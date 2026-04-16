@@ -6,6 +6,7 @@ import errorExtractor from "../helpers/errorExtractor";
 import {withDocumentLegitimatelyOwned} from "../helpers/withDocumentLegitimatelyOwned";
 import logger from "../logger";
 import { defineAuthStrategies } from "../helpers/auth";
+import { createEmojiAwarePatternValidator } from "../validators/emojiValidator";
 
 export default class ExporterRoutes {
   public async register(server: Hapi.Server): Promise<any> {
@@ -65,13 +66,13 @@ export default class ExporterRoutes {
                     exporterFullName: Joi.string()
                       .trim()
                       .max(70)
-                      .pattern(/^[a-zA-Z .']+$/)
+                      .custom(createEmojiAwarePatternValidator(/^[a-zA-Z .']+$/))
                       .required(),
                     exporterCompanyName: Joi.string()
                       .trim()
                       .label("Company name")
                       .max(250)
-                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9 .'\-()[\]]+$/))
                       .required(),
                     postcode: Joi.string().trim().label("Postcode").required()
                   });
@@ -81,7 +82,7 @@ export default class ExporterRoutes {
                       .trim()
                       .label("Company name")
                       .max(250)
-                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9 .'\-()[\]]+$/))
                       .required(),
                     postcode: Joi.string().trim().label("Postcode").required()
                   });
@@ -136,13 +137,13 @@ export default class ExporterRoutes {
                     exporterFullName: Joi.string()
                       .trim()
                       .max(70)
-                      .pattern(/^[a-zA-Z .']+$/)
+                      .custom(createEmojiAwarePatternValidator(/^[a-zA-Z .']+$/))
                       .required(),
                     exporterCompanyName: Joi.string()
                       .trim()
                       .label("Company name")
                       .max(250)
-                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9 .'\-()[\]]+$/))
                       .required(),
                     addressOne: Joi.string().trim().label("Building and street").required(),
                     townCity: Joi.string().trim().label("Town or city").required()
@@ -153,7 +154,7 @@ export default class ExporterRoutes {
                       .trim()
                       .label("Company name")
                       .max(250)
-                      .pattern(/^[a-zA-Z0-9 .'\-()[\]]+$/)
+                      .custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9 .'\-()[\]]+$/))
                       .required(),
                     addressOne: Joi.string().trim().label("Building and street").required(),
                     townCity: Joi.string().trim().label("Town or city").required()

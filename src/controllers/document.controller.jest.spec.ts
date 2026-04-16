@@ -6,8 +6,8 @@ import * as CatchCertService from "../persistence/services/catchCert"
 import * as StorageDocService from "../persistence/services/storageDoc"
 import * as ProcessingStatementService from "../persistence/services/processingStatement"
 import * as ReferenceDataService from "../services/reference-data.service"
-import DocumentNumberService, { catchCerts, processingStatement, storageNote } from '../services/documentNumber.service'
-import { DOCUMENT_NUMBER_KEY } from "../session_store/constants";
+import DocumentNumberService from '../services/documentNumber.service'
+import { DOCUMENT_NUMBER_KEY, CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY } from '../session_store/constants';
 
 const h = {
   response: () => {
@@ -809,19 +809,19 @@ describe("Document controller", () => {
       };
 
       mockGetDraftCatchCertHeadersForUser = jest.spyOn(CatchCertService, 'getDraftCatchCertHeadersForUser');
-      mockGetDraftCatchCertHeadersForUser.mockReturnValue(inProgressCC);
+      mockGetDraftCatchCertHeadersForUser.mockResolvedValue(inProgressCC);
       mockGetAllCatchCertsForUserByYearAndMonth = jest.spyOn(CatchCertService, 'getAllCatchCertsForUserByYearAndMonth');
-      mockGetAllCatchCertsForUserByYearAndMonth.mockReturnValue(completedCC);
+      mockGetAllCatchCertsForUserByYearAndMonth.mockResolvedValue(completedCC);
 
       mockGetDraftProcessingStatementsForUser = jest.spyOn(ProcessingStatementService, 'getDraftDocumentHeaders');
-      mockGetDraftProcessingStatementsForUser.mockReturnValue(inProgressPS);
+      mockGetDraftProcessingStatementsForUser.mockResolvedValue(inProgressPS);
       mockGetAllProcessingStatementsForUserByYearAndMonth = jest.spyOn(ProcessingStatementService, 'getAllProcessingStatementsForUserByYearAndMonth');
-      mockGetAllProcessingStatementsForUserByYearAndMonth.mockReturnValue(completedPS);
+      mockGetAllProcessingStatementsForUserByYearAndMonth.mockResolvedValue(completedPS);
 
       mockGetDraftStorageDocumentsForUser = jest.spyOn(StorageDocService, 'getDraftDocumentHeaders');
-      mockGetDraftStorageDocumentsForUser.mockReturnValue(inProgressSD);
+      mockGetDraftStorageDocumentsForUser.mockResolvedValue(inProgressSD);
       mockGetAllStorageDocsForUserByYearAndMonth = jest.spyOn(StorageDocService, 'getAllStorageDocsForUserByYearAndMonth');
-      mockGetAllStorageDocsForUserByYearAndMonth.mockReturnValue(completedSD);
+      mockGetAllStorageDocsForUserByYearAndMonth.mockResolvedValue(completedSD);
     });
 
     afterAll(() => {
@@ -844,7 +844,7 @@ describe("Document controller", () => {
 
     it('case catchCerts', async () => {
       // Arrange
-      mockReq.query.type = catchCerts;
+      mockReq.query.type = CATCH_CERTIFICATE_KEY;
 
       // Act
       const response = await DocumentController.getAllDocuments(mockReq);
@@ -864,7 +864,7 @@ describe("Document controller", () => {
 
     it('case processingStatement', async () => {
       // Arrange
-      mockReq.query.type = processingStatement;
+      mockReq.query.type = PROCESSING_STATEMENT_KEY;
 
       // Act
       const response = await DocumentController.getAllDocuments(mockReq);
@@ -884,7 +884,7 @@ describe("Document controller", () => {
 
     it('case storageNote', async () => {
       // Arrange
-      mockReq.query.type = storageNote;
+      mockReq.query.type = STORAGE_NOTES_KEY;
 
       // Act
       const response = await DocumentController.getAllDocuments(mockReq);
@@ -905,7 +905,7 @@ describe("Document controller", () => {
     it("when exception thrown", async () => {
       // Arrange
       const error = new Error("error message");
-      mockReq.query.type = catchCerts;
+      mockReq.query.type = CATCH_CERTIFICATE_KEY;
       mockGetDraftCatchCertHeadersForUser = jest.spyOn(
         CatchCertService,
         "getDraftCatchCertHeadersForUser"

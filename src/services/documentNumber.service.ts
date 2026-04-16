@@ -3,7 +3,6 @@ import { SessionStoreFactory } from '../session_store/factory';
 import { getRedisOptions } from '../session_store/redis';
 import { STATUS_DRAFT } from '../services/constants';
 import {
-  CATCH_CERTIFICATE_KEY,
   PROCESSING_STATEMENT_KEY,
   STORAGE_NOTES_KEY
 } from '../session_store/constants';
@@ -18,10 +17,6 @@ import { ProcessingStatementDraft } from '../persistence/schema/frontEndModels/p
 import { StorageDocumentDraft } from '../persistence/schema/frontEndModels/storageDocument';
 import { ProcessingStatement } from '../persistence/schema/processingStatement';
 import { StorageDocument } from '../persistence/schema/storageDoc';
-
-export const catchCerts = CATCH_CERTIFICATE_KEY;
-export const storageNote = STORAGE_NOTES_KEY;
-export const processingStatement = PROCESSING_STATEMENT_KEY;
 
 export default class DocumentNumberService {
 
@@ -50,7 +45,7 @@ export default class DocumentNumberService {
   }
 
   public static getServiceNameFromDocumentNumber(documentNumber: string): ServiceNames {
-    if (documentNumber && documentNumber.length > 11) {
+    if (documentNumber?.length > 11) {
       switch (documentNumber.substring(9, 11)) {
         case 'CC': return ServiceNames.CC
         case 'PS': return ServiceNames.PS
@@ -84,10 +79,10 @@ export default class DocumentNumberService {
   }
 
   public static async getDraftDocuments(userPrincipal:any, key:string, contactId: string): Promise<CatchCertificateDraft[]|ProcessingStatementDraft[]|StorageDocumentDraft[]> {
-    if (RegExp(processingStatement).exec(key)) {
+    if (new RegExp(PROCESSING_STATEMENT_KEY).exec(key)) {
       return await ProcessingStatementService.getDraftDocumentHeaders(userPrincipal, contactId) || [];
     }
-    else if (RegExp(storageNote).exec(key)) {
+    else if (new RegExp(STORAGE_NOTES_KEY).exec(key)) {
       return await StorageDocumentService.getDraftDocumentHeaders(userPrincipal, contactId) || [];
     }
     return await CatchCertService.getDraftCatchCertHeadersForUser(userPrincipal, contactId) || [];
@@ -182,8 +177,8 @@ export default class DocumentNumberService {
 
 function randomId() {
   // taken from https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-  return 'xxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); // tslint:disable-line
+  return 'xxxxxxxxx'.replaceAll(/[xy]/g, (c) => {
+    const r = Math.trunc(Math.random() * 16), v = c == 'x' ? r : (r & 0x3 | 0x8); // tslint:disable-line
     return v.toString(16).toUpperCase();
   });
 }

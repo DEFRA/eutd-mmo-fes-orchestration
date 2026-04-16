@@ -7,6 +7,7 @@ import * as FishValidator from '../validators/fish.validator';
 import * as CommodityCodeValidator from '../validators/pssdCommodityCode.validator';
 import * as CountriesValidator from '../validators/countries.validator';
 import SummaryErrorsService from './summaryErrors.service';
+import * as SessionManager from '../helpers/sessionManager';
 import { ProgressStatus } from '../persistence/schema/common';
 import { Progress } from '../persistence/schema/frontEndModels/payload';
 import logger from '../logger';
@@ -1513,10 +1514,14 @@ describe('getLandingStatus', () => {
   let mockGetSummaryErrors: jest.SpyInstance;
   let mockHasLandingData: jest.SpyInstance;
   let mockFilterErrors: jest.SpyInstance;
+  let mockGetCurrentSessionData: jest.SpyInstance;
 
   beforeEach(() => {
     mockGetSummaryErrors = jest.spyOn(SummaryErrorsService, 'get');
     mockGetSummaryErrors.mockResolvedValue(null);
+
+    mockGetCurrentSessionData = jest.spyOn(SessionManager, 'getCurrentSessionData');
+    mockGetCurrentSessionData.mockResolvedValue(undefined);
 
     mockHasLandingData = jest.spyOn(ProgressService, 'hasLandingData');
     mockHasLandingData.mockReturnValue(false);
@@ -1585,6 +1590,53 @@ describe('getLandingStatus', () => {
       userPrincipal,
       documentNumber,
       products,
+      contactId
+    );
+
+    expect(result).toBe(ProgressStatus.COMPLETED);
+  });
+
+  it('will return INCOMPLETE when session has a landing with error "invalid" and the landing ID matches a current caughtBy entry (FI0-10996)', async () => {
+    mockHasLandingData.mockReturnValue(true);
+    const productsWithCaughtBy = [
+      { caughtBy: [{ id: 'landing-1' }] }
+    ] as any[];
+    mockGetCurrentSessionData.mockResolvedValue({
+      documentNumber,
+      landings: [
+        { landingId: 'landing-1', error: 'invalid', errors: { 'weights': 'ccDirectLandingTotalExportWeightExceeded' }, model: {} as any }
+      ]
+    });
+
+    const result = await ProgressService.getLandingsStatus(
+      userPrincipal,
+      documentNumber,
+      productsWithCaughtBy,
+      contactId
+    );
+
+    expect(result).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('will return COMPLETE when session has a stale error for a landing ID that no longer exists in caughtBy (FI0-10996 - correcting an invalid weight generates a new ID)', async () => {
+    mockHasLandingData.mockReturnValue(true);
+    const productsWithNewId = [
+      { caughtBy: [{ id: 'landing-new-id' }] }
+    ] as any[];
+    mockGetCurrentSessionData.mockResolvedValue({
+      documentNumber,
+      landings: [
+        // Stale entry from the previous invalid submission (old landing ID)
+        { landingId: 'landing-old-id', error: 'invalid', errors: { 'weights': 'ccDirectLandingTotalExportWeightExceeded' }, model: {} as any },
+        // New successful submission entry
+        { landingId: 'landing-new-id', error: '', errors: {}, model: {} as any }
+      ]
+    });
+
+    const result = await ProgressService.getLandingsStatus(
+      userPrincipal,
+      documentNumber,
+      productsWithNewId,
       contactId
     );
 
@@ -2603,6 +2655,7 @@ describe('getProcessingStatementProgress', () => {
   let mockValidateSpeciesMissing: jest.SpyInstance;
   let mockValidateCountriesName: jest.SpyInstance;
   let mockLoggerInfo: jest.SpyInstance;
+  let mockValidateSpeciesName: jest.SpyInstance;
 
   beforeEach(() => {
     mockValidateCompletedDocument = jest.spyOn(DocumentValidator, 'validateCompletedDocument');
@@ -2611,6 +2664,8 @@ describe('getProcessingStatementProgress', () => {
     mockValidateSpeciesMissing.mockResolvedValue(true);
     mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
     mockValidateCountriesName.mockResolvedValue({ isError: false });
+    mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
     mockProcessingStatementDraft = jest.spyOn(
       ProcessingStatementService,
       'getDraft'
@@ -4489,6 +4544,51 @@ describe('getProcessingStatementProgress', () => {
       documentNumber,
       contactId
     );
+  });
+
+  it('will return INCOMPLETE processedProductDetails if a catch has an invalid FAO code or species name not found in reference data (UAT-553)', async () => {
+    mockValidateSpeciesName.mockResolvedValue({ isError: true });
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            species: 'InvalidSpecies (XXX)',
+            speciesCode: 'XXX',
+            id: '2342234-1610018899',
+            catchCertificateNumber: '12345',
+            catchCertificateType: 'non_uk',
+            speciesCommodityCode: '012345',
+            totalWeightLanded: '34',
+            exportWeightBeforeProcessing: '34',
+            exportWeightAfterProcessing: '45',
+            scientificName: 'invalidScientificName',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 6,
+    };
+
+    expect(result).toStrictEqual(expected);
+    expect(mockValidateSpeciesName).toHaveBeenCalled();
   });
 });
 
@@ -6588,6 +6688,47 @@ describe('getStorageDocumentProgress', () => {
       const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
 
       expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.INCOMPLETE);
+    });
+
+    it('should return COMPLETED transportDetails when departure transport details are complete and date is after arrival, even when catches are incomplete (FI0-11073)', async () => {
+      mockStorageDocumentDraft.mockResolvedValue({
+        exportData: {
+          arrivalTransportation: {
+            departureDate: '14/01/2026',
+            exportedTo: {
+              officialCountryName: 'UK',
+              isoCodeAlpha2: 'GB',
+              isoCodeAlpha3: 'GBR',
+              isoNumericCode: '826'
+            },
+            pointOfDestination: 'London Port',
+            vehicle: 'truck',
+            departurePlace: 'port',
+            cmr: 'false'
+          },
+          transportation: {
+            exportedTo: {
+              officialCountryName: "Algeria",
+              isoCodeAlpha2: "DZ",
+              isoCodeAlpha3: "DZA",
+              isoNumericCode: "012"
+            },
+            pointOfDestination: "Algiers Port",
+            vehicle: "containerVessel",
+            departurePlace: "port",
+            vesselName: "Felicity Ace",
+            flagState: "Greece",
+            containerNumbers: "ABCU1234567",
+            exportDate: "22/01/2026",
+            freightBillNumber: ""
+          },
+        }
+      });
+
+      const result = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+
+      expect((result.progress as StorageDocumentProgress).transportDetails).toBe(ProgressStatus.COMPLETED);
+      expect((result.progress as StorageDocumentProgress).catches).toBe(ProgressStatus.INCOMPLETE);
     });
 
     it('should return false when firstDateStr is undefined in isFirstDateAfterSecondDate', () => {

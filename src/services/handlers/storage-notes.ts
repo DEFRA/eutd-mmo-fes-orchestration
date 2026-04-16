@@ -14,6 +14,7 @@ import {
 } from "../orchestration.service";
 
 import ApplicationConfig from '../../applicationConfig';
+import { containsEmoji } from '../../validators/emojiValidator';
 import { validateCompletedDocument, validateSpecies } from "../../validators/documentValidator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { validateCountriesName } from "../../validators/countries.validator";
@@ -54,6 +55,8 @@ export default {
       checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, errors);
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, errors);
+      checkNetWeightProductDepartureExceedsArrival(ctch, index, errors);
+      checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch, index, errors);
 
       if (isEmpty(errors)) {
         ctch.productWeight = ctch.netWeightProductDeparture ? ctch.netWeightProductDeparture : ctch.netWeightFisheryProductDeparture
@@ -118,6 +121,31 @@ export function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, i
   }
 }
 
+// Scenario 1 & 2: departure weight cannot exceed arrival weight
+export function checkNetWeightProductDepartureExceedsArrival(ctch: any, index: number, errors: any) {
+  if (
+    !errors[`catches-${index}-netWeightProductDeparture`] &&
+    ctch.netWeightProductDeparture &&
+    ctch.netWeightProductArrival &&
+    (+ctch.netWeightProductDeparture) > (+ctch.netWeightProductArrival)
+  ) {
+    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceedsArrival';
+  }
+}
+
+// Scenario 3: fishery product departure weight cannot exceed net product departure weight
+export function checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch: any, index: number, errors: any) {
+  if (
+    !errors[`catches-${index}-netWeightFisheryProductDeparture`] &&
+    !errors[`catches-${index}-netWeightProductDeparture`] &&
+    ctch.netWeightFisheryProductDeparture &&
+    ctch.netWeightProductDeparture &&
+    (+ctch.netWeightFisheryProductDeparture) > (+ctch.netWeightProductDeparture)
+  ) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceedsProductDeparture';
+  }
+}
+
 function checkFacilityArrivalDateError(exportData: any, departureDate: string, errors) {
   if (!validateDate(exportData.facilityArrivalDate)) {
     errors[`storageFacilities-facilityArrivalDate`] = "sdArrivalDateValidationError";
@@ -140,6 +168,8 @@ export function validateStorageFacility(exportData: any, departureDate: string, 
 
   if (!exportData.facilityName || validateWhitespace(exportData.facilityName)) {
     errors[`storageFacilities-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
+  } else if (containsEmoji(exportData.facilityName)) {
+    errors[`storageFacilities-facilityName`] = `emojiCharactersNotPermitted`;
   }
 
   if (!exportData.facilityAddressOne && !exportData.facilityTownCity && !exportData.facilityPostcode) {
@@ -147,9 +177,13 @@ export function validateStorageFacility(exportData: any, departureDate: string, 
   } else {
     if (!exportData.facilityAddressOne || validateWhitespace(exportData.facilityAddressOne)) {
       errors[`storageFacilities-facilityAddressOne`] = `sdAddStorageFacilityDetailsErrorEnterTheBuilding`;
+    } else if (containsEmoji(exportData.facilityAddressOne)) {
+      errors[`storageFacilities-facilityAddressOne`] = `emojiCharactersNotPermitted`;
     }
     if (!exportData.facilityTownCity || validateWhitespace(exportData.facilityTownCity)) {
       errors[`storageFacilities-facilityTownCity`] = `sdAddStorageFacilityDetailsErrorEnterTheTown`;
+    } else if (containsEmoji(exportData.facilityTownCity)) {
+      errors[`storageFacilities-facilityTownCity`] = `emojiCharactersNotPermitted`;
     }
     if (!exportData.facilityPostcode || validateWhitespace(exportData.facilityPostcode)) {
       errors[`storageFacilities-facilityPostcode`] = `sdAddStorageFacilityDetailsErrorEnterThePostcode`;
@@ -281,7 +315,6 @@ export async function validateEntry(product: any, index: number, errors, documen
   checkWeightOnCCErrors(product, errors, index);
   checkNetWeightArrival(product, errors, index);
   checkNetFisheryWeightArrival(product, errors, index);
-
   return { errors };
 }
 
@@ -402,5 +435,7 @@ function checkNetFisheryWeightArrival(product: any, errors: any, index: number) 
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal';
   } else if (!isNotExceed12Digit(product.netWeightFisheryProductArrival)) {
     errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightProductFisheryArrivalExceed12Digit';
+  } else if (!errors[`catches-${index}-netWeightProductArrival`] && (+product.netWeightFisheryProductArrival) > (+product.netWeightProductArrival)) {
+    errors[`catches-${index}-netWeightFisheryProductArrival`] = 'sdNetWeightFisheryProductArrivalExceedsProductArrival';
   }
 }

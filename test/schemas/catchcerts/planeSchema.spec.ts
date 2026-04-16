@@ -137,112 +137,86 @@ describe('planeSchema - pointOfDestination validation', () => {
 describe('planeSchema - containerNumbers validation', () => {
   const validPayload = {
     ...basePayload,
-    departureDate: '01/01/2020',
-    pointOfDestination: 'Charles de Gaulle Airport'
+    pointOfDestination: 'Charles de Gaulle Airport',
+    departureDate: '01/01/2020'
   };
 
-  describe('pattern validation', () => {
-    it('accepts alphanumeric container numbers with spaces', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT123', 'ABC456 789'] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts single alphanumeric container number', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONTAINER1'] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts container numbers at 50 character boundary', () => {
-      const payload = { ...validPayload, containerNumbers: ['A'.repeat(50)] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('returns string.max error when container number exceeds 50 chars', () => {
-      const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.max');
-    });
-
-    it('accepts empty string in array', () => {
-      const payload = { ...validPayload, containerNumbers: [''] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('rejects container numbers with special characters', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT@123', 'ABC#456'] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
-    });
-
-    it('rejects container numbers with hyphens', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT-123'] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.message.includes('containerNumbers'));
-      expect(cnErr).toBeDefined();
-      expect(cnErr.message).toBe('error.containerNumbers.string.pattern.base');
-    });
+  it('returns any.required error when containerNumbers is missing', () => {
+    const { containerNumbers, ...payload } = validPayload;
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const err = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
+    expect(err).toBeDefined();
+    expect(err.type).toBe('any.required');
   });
 
-  describe('array constraints', () => {
-    it('accepts array with exactly 1 element', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT123'] };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('accepts array with 10 elements (max boundary)', () => {
-      const payload = { 
-        ...validPayload, 
-        containerNumbers: Array(10).fill('CONT123')
-      };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
-
-    it('rejects array with more than 10 elements', () => {
-      const payload = { 
-        ...validPayload, 
-        containerNumbers: Array(11).fill('CONT123')
-      };
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeDefined();
-      const cnErr = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
-      expect(cnErr).toBeDefined();
-      expect(cnErr.type).toBe('array.max');
-    });
-
-    it('passes validation when containerNumbers is optional and missing', () => {
-      const payload = { ...validPayload };
-      delete payload.containerNumbers;
-      const { error } = planeSchemaDefault.default.validate(payload, { abortEarly: false });
-      expect(error).toBeUndefined();
-    });
+  it('returns array.min error when containerNumbers is an empty array', () => {
+    const payload = { ...validPayload, containerNumbers: [] };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const err = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
+    expect(err).toBeDefined();
+    expect(err.type).toBe('array.min');
   });
 
-  describe('nonJS error mode', () => {
-    it('returns correct error key when container number exceeds max length', () => {
-      const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
-      const errors = validateNonJs(payload);
-      expect(errors).toBeDefined();
-      expect((errors as any).containerNumbers).toBe('error.containerNumbers.string.max');
-    });
+  it('passes validation with one valid container number', () => {
+    const payload = { ...validPayload, containerNumbers: ['ABCU1234567'] };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeUndefined();
+  });
 
-    it('returns correct error key when container number has invalid pattern', () => {
-      const payload = { ...validPayload, containerNumbers: ['CONT@123'] };
-      const errors = validateNonJs(payload);
-      expect(errors).toBeDefined();
-      expect((errors as any).containerNumbers).toBe('error.containerNumbers.string.pattern.base');
-    });
+  it('passes validation with an empty string item (allowed blank)', () => {
+    const payload = { ...validPayload, containerNumbers: [''] };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeUndefined();
+  });
+
+  it('passes validation with exactly 10 container numbers (boundary)', () => {
+    const payload = {
+      ...validPayload,
+      containerNumbers: ['ABCU1234567', 'ABCJ1234567', 'ABCZ1234567', 'ABCR1234567',
+                         'DEFU1234567', 'DEFJ1234567', 'DEFZ1234567', 'DEFR1234567',
+                         'GHIU1234567', 'GHIJ1234567']
+    };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeUndefined();
+  });
+
+  it('returns array.max error when containerNumbers has more than 10 items', () => {
+    const payload = {
+      ...validPayload,
+      containerNumbers: ['ABCU1234567', 'ABCJ1234567', 'ABCZ1234567', 'ABCR1234567',
+                         'DEFU1234567', 'DEFJ1234567', 'DEFZ1234567', 'DEFR1234567',
+                         'GHIU1234567', 'GHIJ1234567', 'GHIZ1234567']
+    };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const err = error.details.find((d: any) => d.path.join('.') === 'containerNumbers');
+    expect(err).toBeDefined();
+    expect(err.type).toBe('array.max');
+  });
+
+  it('returns string.pattern.base error when item does not match the container number format', () => {
+    const payload = { ...validPayload, containerNumbers: ['INVALID-NUMBER'] };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const err = error.details.find((d: any) => d.path[0] === 'containerNumbers');
+    expect(err).toBeDefined();
+    expect(err.message).toBe('error.containerNumbers.string.pattern.base');
+  });
+
+  it('returns string.max error when item exceeds 50 characters', () => {
+    const payload = { ...validPayload, containerNumbers: ['A'.repeat(51)] };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeDefined();
+    const err = error.details.find((d: any) => d.path[0] === 'containerNumbers');
+    expect(err).toBeDefined();
+    expect(err.type).toBe('string.max');
+  });
+
+  it('accepts containerNumbers item with exactly 50 characters', () => {
+    const payload = { ...validPayload, containerNumbers: ['A'.repeat(50)] };
+    const { error } = planeSchemaDefault.validate(payload, { abortEarly: false });
+    expect(error).toBeUndefined();
   });
 });

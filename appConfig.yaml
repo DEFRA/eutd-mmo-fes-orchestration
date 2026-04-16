@@ -1,0 +1,194 @@
+appSettings:
+  - key: AZURE_STORAGE_CONNECTION_STRING
+    value: 'EXPORTCERT-STORAGE-CONNECTION-STRING'
+    type: secret
+  
+  - key: BLOB_STORAGE_CONNECTION
+    value: 'EXPORTCERT-STORAGE-CONNECTION-STRING'
+    type: secret
+  
+  - key: BUSINESS_CONTINUITY_KEY
+    value: '#{{ businessContinuityKey }}'
+    type: config
+  
+  - key: BUSINESS_CONTINUITY_URL
+    value: '#{{ businessContinuityUrl }}'
+    type: config
+  
+  - key: COSMOS_DB_RW_CONNECTION_URI
+    value: 'COSMOS-DB-RW-CONNECTION-URI'
+    type: secret
+  
+  - key: DB_CONNECTION_POOL
+    value: '25'
+    type: config
+  
+  - key: DB_NAME
+    value: 'mmo_exportcert'
+    type: config
+  
+  - key: DISABLE_AUTH
+    value: 'false'
+    type: config
+  
+  - key: ENABLE_PDF_GEN
+    value: 'true'
+    type: config
+  
+  - key: ENABLE_EU_CATCH_PS_NMD
+    value: '#{{ ENABLE_EU_CATCH_PS_NMD }}'
+    type: config
+  
+  - key: eventHubConnectionString
+    value: 'EVENTHUB-CONNECTION-STRING'
+    type: secret
+  
+  - key: eventHubNamespace
+    value: 'insights-application-logs'
+    type: config
+  
+  - key: EU_CATCH_MAX_EEZ
+    value: '5'
+    type: config
+  
+  - key: FES_API_MASTER_PASSWORD
+    value: 'FES-API-MASTER-PASSWORD'
+    type: secret
+  
+  - key: FES_NOTIFY_API_KEY
+    value: 'FES-NOTIFY-API-KEY'
+    type: secret
+  
+  - key: FES_NOTIFY_FAILURE_TEMPLATE_ID
+    value: '#{{ FES_NOTIFY_FAILURE_TEMPLATE_ID }}'
+    type: config
+  
+  - key: FES_NOTIFY_SUCCESS_TEMPLATE_ID
+    value: '#{{ FES_NOTIFY_SUCCESS_TEMPLATE_ID }}'
+    type: config
+  
+  - key: FES_NOTIFY_TECHNICAL_ERROR_TEMPLATE_ID
+    value: '#{{ FES_NOTIFY_TECHNICAL_ERROR_TEMPLATE_ID }}'
+    type: config
+  
+  - key: IDENTITY_APP_URL
+    value: '#{{ ORCH_IDENTITY_APP_URL }}'
+    type: config
+  
+  - key: IDENTITY_DEFAULT_POLICY
+    value: '#{{ IDENTITY_DEFAULT_POLICY }}'
+    type: config
+  
+  - key: INSTRUMENTATION_CLOUD_ROLE
+    value: '#{{ repoName5 }}'
+    type: config
+    stagingValue: '#{{ repoName5 }}-staging'
+    slotSetting: true
+  
+  - key: LANDING_LIMIT_DAYS_IN_THE_FUTURE
+    value: '7'
+    type: config
+  
+  - key: LAST_UPDATED_COOKIE_POLICY
+    value: '#{{ LAST_UPDATED_COOKIE_POLICY }}'
+    type: config
+  
+  - key: LAST_UPDATED_PRIVACY_STATEMENT
+    value: '#{{ LAST_UPDATED_PRIVACY_STATEMENT }}'
+    type: config
+  
+  - key: LIMIT_ADD_LANDINGS
+    value: '100'
+    type: config
+  
+  - key: MAX_AUTH_RETRIES
+    value: '2'
+    type: config
+  
+  - key: MAX_UPLOAD_FILE_SIZE
+    value: '10000'
+    type: config
+  
+  - key: MAXIMUM_CONCURRENT_DRAFTS
+    value: '50'
+    type: config
+  
+  - key: MAXIMUM_FAVOURITES_PER_USER
+    value: '50'
+    type: config
+  
+  - key: MAXIMUM_LANDINGS_FOR_ONLINE_VALIDATION
+    value: '10'
+    type: config
+  
+  - key: MMO_CC_LANDINGS_CONSOLIDATION_SVC_URL
+    value: 'https://#{{ environment }}-#{{ repoName4 }}-#{{ nc-resource-webapp }}.azurewebsites.net'
+    type: config
+    stagingValue: 'https://#{{ environment }}-#{{ repoName4 }}-#{{ nc-resource-webapp }}-staging.azurewebsites.net'
+    slotSetting: true
+  
+  - key: MMO_ECC_REFERENCE_SVC_URL
+    value: 'https://#{{ environment }}-#{{ repoName6 }}-#{{ nc-resource-webapp }}.azurewebsites.net'
+    type: config
+    stagingValue: 'https://#{{ environment }}-#{{ repoName6 }}-#{{ nc-resource-webapp }}-staging.azurewebsites.net'
+    slotSetting: true
+  
+  - key: NODE_ENV
+    value: 'production'
+    type: config
+  
+  - key: PORT
+    value: '5500'
+    type: config
+  
+  - key: REDIS_HOST_NAME
+    value: '#{{ environment }}#{{ nc-deptService }}#{{ nc-function-infrastructure }}#{{ nc-resource-rediscachename }}#{{ nc-region-id }}01.redis.cache.windows.net'
+    type: config
+  
+  - key: REDIS_PASSWORD
+    value: 'REDIS-PASSWORD'
+    type: secret
+  
+  - key: REDIS_TLS_HOST_NAME
+    value: '#{{ environment }}#{{ nc-deptService }}#{{ nc-function-infrastructure }}#{{ nc-resource-rediscachename }}#{{ nc-region-id }}01.redis.cache.windows.net'
+    type: config
+  
+  - key: REF_SERVICE_BASIC_AUTH_PASSWORD
+    value: 'REF-SERVICE-BASIC-AUTH-PASSWORD'
+    type: secret
+  
+  - key: REF_SERVICE_BASIC_AUTH_USER
+    value: 'REF-SERVICE-BASIC-AUTH-USER'
+    type: secret
+  
+  - key: SERVICE_URL
+    value: '#{{ externalFrontendBaseUrl }}'
+    type: config
+    stagingValue: '#{{ externalFrontendStgBaseUrl }}'
+    slotSetting: true
+  
+  - key: WEBSITE_HEALTHCHECK_MAXPINGFAILURES
+    value: '5'
+    type: config
+  
+  - key: WEBSITE_HEALTHCHECK_MAXUNHEALTHYWORKERPERCENT
+    value: '50'
+    type: config
+  
+  - key: WEBSITE_NAME
+    value: '#{{ environment }}-#{{ repoName5 }}-#{{ nc-resource-webapp }}'
+    type: config
+    stagingValue: '#{{ environment }}-#{{ repoName5 }}-#{{ nc-resource-webapp }}-staging'
+    slotSetting: true
+  
+  - key: WEBSITE_WARMUP_PATH
+    value: '/health'
+    type: config
+  
+  - key: WEBSITES_CONTAINER_START_TIME_LIMIT
+    value: '300'
+    type: config
+  
+  - key: WEBSITES_PORT
+    value: '5500'
+    type: config

@@ -100,6 +100,28 @@ describe("MemoryStorage", () => {
     });
   });
 
+  describe("tagging and keys", () => {
+    it('should create an empty tag for a document number and retrieve keys', async () => {
+      await memoryStorage.tagByDocumentNumber(USER_ID, 'DOC-123', 'journey');
+      const keys = await memoryStorage.getKeysForTag('DOC-123');
+
+      expect(keys).toEqual([]);
+    });
+
+    it('should remove a tag and return undefined for keys afterwards', async () => {
+      await memoryStorage.tagByDocumentNumber(USER_ID, 'DOC-456', 'journey');
+      await memoryStorage.removeTag('DOC-456');
+
+      const keys = await memoryStorage.getKeysForTag('DOC-456');
+      expect(keys).toBeUndefined();
+    });
+
+    it('getDocument should return null by default', async () => {
+      const doc = await memoryStorage.getDocument('SOME-DOC');
+      expect(doc).toBeNull();
+    });
+  });
+
   describe("deleteFor", () => {
     test("should return blank after delete", async () => {
       const mockData = [

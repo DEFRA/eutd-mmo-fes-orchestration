@@ -1,19 +1,7 @@
 ---
 name: Orchestration Reviewer
 description: 'QA code reviewer for MMO FES Orchestration - read-only middleware analysis with findings table output'
-tools:
-  [
-    'search/codebase',
-    'fetch',
-    'githubRepo',
-    'openSimpleBrowser',
-    'problems',
-    'search',
-    'search/searchResults',
-    'runCommands/terminalLastCommand',
-    'usages',
-    'vscodeAPI',
-  ]
+tools: [vscode, read, search, web, todo]
 ---
 
 # MMO FES Orchestration - QA Code Reviewer Mode

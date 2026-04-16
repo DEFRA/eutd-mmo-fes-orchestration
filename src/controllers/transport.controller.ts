@@ -1,4 +1,5 @@
 import * as Hapi from '@hapi/hapi';
+import * as moment from 'moment';
 import logger from '../logger';
 import Services from "../services/transport.service";
 import acceptsHtml from "../helpers/acceptsHtml";
@@ -74,17 +75,20 @@ export default class TransportController {
     }
 
     const storageDocument = await OrchestrationService.getFromMongo(userPrincipal, documentNumber, storageNote, contactId);
+    const arrivalDepartureDate = parseDate(payload.departureDate);
+    const vehicleCapitalized = payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1);
+
     if (!storageDocument?.facilityArrivalDate) {
+      if (arrivalDepartureDate.isAfter(moment(), 'day')) {
+        return h.response({ departureDate: `error${vehicleCapitalized}DepartureDateTodayMax` }).code(400).takeover();
+      }
       return null;
     }
 
-    const arrivalDepartureDate = parseDate(payload.departureDate);
     const storageFacilityArrivalDate = parseDate(storageDocument.facilityArrivalDate);
 
     if (arrivalDepartureDate.isAfter(storageFacilityArrivalDate, 'day')) {
-      const vehicleCapitalized = payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1);
-      const errorKey = `error${vehicleCapitalized}DepartureDateAnyMax`;
-      return h.response({ departureDate: errorKey }).code(400).takeover();
+      return h.response({ departureDate: `error${vehicleCapitalized}DepartureDateAnyMax` }).code(400).takeover();
     }
 
     return null;
@@ -124,7 +128,6 @@ export default class TransportController {
         return departureDateError;
       }
     }
-
     const data = await Services.addTransport(payload, documentNumber, contactId) as any;
 
     if (acceptsHtml(req.headers)) {

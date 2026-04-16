@@ -34,12 +34,12 @@ const createEmptyZoneError = (index: number): Joi.ValidationError => {
   ], null);
 };
 
-const handleEmptyZone = (isHighSeasNo: boolean, index: number, validationErrors: any[], indicesToRemove: number[]): void => {
-  if (isHighSeasNo) {
-    validationErrors.push(createEmptyZoneError(index));
-  } else {
-    indicesToRemove.push(index);
-  }
+const handleEmptyZoneWhenHighSeasNo = (index: number, validationErrors: any[]): void => {
+  validationErrors.push(createEmptyZoneError(index));
+};
+
+const handleEmptyZoneWhenHighSeasYes = (index: number, indicesToRemove: number[]): void => {
+  indicesToRemove.push(index);
 };
 
 const handleNonEmptyZone = async (zone: any, refUrl: string, index: number, validationErrors: any[]): Promise<void> => {
@@ -72,7 +72,11 @@ export const validateExclusiveEconomicZones = async (value: any): Promise<any[]>
     const isEmpty = isZoneEmpty(zone);
 
     if (isEmpty) {
-      handleEmptyZone(isHighSeasNo, i, validationErrors, indicesToRemove);
+      if (isHighSeasNo) {
+        handleEmptyZoneWhenHighSeasNo(i, validationErrors);
+      } else {
+        handleEmptyZoneWhenHighSeasYes(i, indicesToRemove);
+      }
     } else {
       await handleNonEmptyZone(zone, refUrl, i, validationErrors);
     }

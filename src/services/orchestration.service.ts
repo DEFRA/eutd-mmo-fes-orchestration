@@ -13,7 +13,6 @@ import {
 } from "./constants";
 import { SessionStoreFactory } from "../session_store/factory";
 import { getRedisOptions } from "../session_store/redis";
-import { isArray } from "util";
 import * as moment from "moment";
 import ApplicationConfig from "../applicationConfig";
 import SaveAsDraftService from "../services/saveAsDraft.service";
@@ -41,7 +40,7 @@ import {
 } from "../persistence/schema/frontEndModels/storageDocument";
 import { toFrontEndStorageDocumentExportData } from "../persistence/schema/storageDoc";
 import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
-import { invalidateDraftCache } from '../persistence/services/catchCert'
+import { invalidateDraftCache, setCatchSubmissionInProgress } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
 import * as EuCountriesService from './eu-countries.service';
 
@@ -239,7 +238,15 @@ export default class OrchestrationService {
   }
 
   static readonly handleErrors = (errors, data, documentNumber: string, originalSessionData, next, urlsObj, setOnValidationSuccess) => {
-    if (!_.isEmpty(errors)) {
+    if (_.isEmpty(errors)) {
+      if (!next) next = urlsObj.nextUrl;
+
+      if (setOnValidationSuccess) {
+        data[setOnValidationSuccess] = true;
+      }
+      delete data.errors;
+      delete data.errorsUrl;
+    } else {
       data.errors = errors;
       data.errorsUrl = urlsObj.currentUrl.replace(":documentNumber", documentNumber);
 
@@ -251,14 +258,6 @@ export default class OrchestrationService {
 
       // default to set next url to be current url if errors
       if (!next) next = urlsObj.currentUrl;
-    } else {
-      if (!next) next = urlsObj.nextUrl;
-
-      if (setOnValidationSuccess) {
-        data[setOnValidationSuccess] = true;
-      }
-      delete data.errors;
-      delete data.errorsUrl;
     }
     return next;
   }
@@ -476,7 +475,8 @@ export default class OrchestrationService {
     const isEuCountry = await EuCountriesService.isEuCountry(isoCodeAlpha2);
     logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);
     if (isEuCountry) {
-      submitToCatchSystem(documentNumber, 'submit')
+      setCatchSubmissionInProgress(documentNumber)
+        .then(() => submitToCatchSystem(documentNumber, 'submit'))
         .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
     }
 
@@ -611,7 +611,7 @@ export default class OrchestrationService {
 
     // remove any empty elements from arrays
     Object.keys(data).forEach((k) => {
-      if (isArray(data[k])) data[k] = data[k].filter((d) => d);
+      if (Array.isArray(data[k])) data[k] = data[k].filter(Boolean);
     });
 
     delete data.errors;
@@ -754,20 +754,20 @@ export function validateMaximumOneDayFutureDate(date) {
 }
 
 export function validateNumber(num) {
-  return !isNaN(+num) && num.indexOf("e") === -1;
+  return !Number.isNaN(+num) && !num.includes("e");
 }
 
 export function validatePositiveNumber(num) {
-  return !isNaN(+num) && num.indexOf("e") === -1 && +num >= 0;
+  return !Number.isNaN(+num) && !num.includes("e") && +num >= 0;
 }
 
 export function isPositiveNumberWithTwoDecimals(num) {
   const regex = /^(\d+(\.\d{0,2})?|\.?\d{1,2})$/;
-  return !isNaN(+num) && +num >= 0 && regex.test(num);
+  return !Number.isNaN(+num) && +num >= 0 && regex.test(num);
 }
 
 export function isNotExceed12Digit(num) {
-  return !isNaN(+num) && +num >= 0 && +num < 100000000000;
+  return !Number.isNaN(+num) && +num >= 0 && +num < 100000000000;
 }
 
 export function isPositiveWholeNumber(num) {

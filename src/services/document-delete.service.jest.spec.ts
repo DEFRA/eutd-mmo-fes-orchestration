@@ -3,7 +3,11 @@ import * as ProcessingStatementService from '../persistence/services/processingS
 import * as CatchCertService from '../persistence/services/catchCert';
 import * as StorageDocumentService from '../persistence/services/storageDoc';
 import * as SessionManager from "../helpers/sessionManager";
-import { catchCerts, storageNote, processingStatement } from '../services/documentNumber.service';
+import {
+  CATCH_CERTIFICATE_KEY,
+  PROCESSING_STATEMENT_KEY,
+  STORAGE_NOTES_KEY
+} from '../session_store/constants';
 import SummaryErrorsService from "../services/summaryErrors.service";
 
 describe('deleteDocument', () => {
@@ -39,7 +43,7 @@ describe('deleteDocument', () => {
     mockDeleteCC.mockResolvedValue(null);
     mockSessionDelete.mockResolvedValue(true);
 
-    await DocumentDeleteService.deleteDocument('Bob', 'GBR-344234-23423423-4234234', catchCerts, contactId);
+    await DocumentDeleteService.deleteDocument('Bob', 'GBR-344234-23423423-4234234', CATCH_CERTIFICATE_KEY, contactId);
 
     expect(mockSessionDelete).toHaveBeenCalledTimes(1);
     expect(mockDeleteCC).toHaveBeenCalledTimes(1);
@@ -55,7 +59,7 @@ describe('deleteDocument', () => {
     mockDeletePS.mockResolvedValue(null);
     mockSessionDelete.mockResolvedValue(true);
 
-    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', processingStatement, contactId);
+    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', PROCESSING_STATEMENT_KEY, contactId);
 
     expect(mockSessionDelete).toHaveBeenCalledTimes(1);
     expect(mockDeletePS).toHaveBeenCalledTimes(1);
@@ -70,7 +74,7 @@ describe('deleteDocument', () => {
     mockDeleteSD.mockResolvedValue(null);
     mockSessionDelete.mockResolvedValue(true);
 
-    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', storageNote, contactId);
+    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', STORAGE_NOTES_KEY, contactId);
 
     expect(mockSessionDelete).toHaveBeenCalledTimes(1);
     expect(mockDeleteSD).toHaveBeenCalledTimes(1);
@@ -85,7 +89,7 @@ describe('deleteDocument', () => {
     mockDeleteCC.mockResolvedValue(null);
     mockSessionDelete.mockResolvedValue(true);
 
-    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', catchCerts, contactId);
+    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', CATCH_CERTIFICATE_KEY, contactId);
 
     expect(mockSessionDelete).toHaveBeenCalledTimes(1);
     expect(mockDeleteCC).toHaveBeenCalledTimes(1);
@@ -96,7 +100,7 @@ describe('deleteDocument', () => {
     mockDeletePS.mockResolvedValue(null);
     mockSessionDelete.mockResolvedValue(true);
 
-    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', processingStatement, contactId);
+    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', PROCESSING_STATEMENT_KEY, contactId);
 
     expect(mockSessionDelete).toHaveBeenCalledTimes(1);
     expect(mockDeletePS).toHaveBeenCalledTimes(1);
@@ -107,7 +111,7 @@ describe('deleteDocument', () => {
     mockDeleteSD.mockResolvedValue(null);
     mockSessionDelete.mockResolvedValue(true);
 
-    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', storageNote, contactId);
+    await DocumentDeleteService.deleteDocument('Bob','GBR-REAACA-E4343-34FASD', STORAGE_NOTES_KEY, contactId);
 
     expect(mockSessionDelete).toHaveBeenCalledTimes(1);
     expect(mockDeleteSD).toHaveBeenCalledTimes(1);

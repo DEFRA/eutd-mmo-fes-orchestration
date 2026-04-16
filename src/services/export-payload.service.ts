@@ -29,14 +29,14 @@ import { LandingStatus, ProductLanded, ProductsLanded, getNumberOfUniqueLandings
 import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
 import { LandingsRefreshData } from './interfaces';
 import { CcExportedDetailModel } from '../persistence/schema/frontEndModels/exporterDetails';
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 import { updateConsolidateLandings } from "./landings-consolidate.service";
 import { ExportLocation } from '../persistence/schema/frontEndModels/export-location';
 import * as pdfService from 'mmo-ecc-pdf-svc';
 import { toExportedTo } from '../persistence/schema/common';
 
-const crypto = require('crypto');
-const https = require('https');
+const crypto = require('node:crypto');
+const https = require('node:https');
 
 export default class ExportPayloadService {
 
@@ -66,7 +66,7 @@ export default class ExportPayloadService {
       landing.error = sessionLanding.error;
       landing.errors = sessionLanding.errors;
       landing.modelCopy = sessionLanding.modelCopy;
-      landing.model = !sessionLanding.error ? landing.model : sessionLanding.model
+      landing.model = sessionLanding.error ? sessionLanding.model : landing.model
     }
   }
 
@@ -160,9 +160,7 @@ export default class ExportPayloadService {
         throw new Error('cannot update an overridden landing');
       }
 
-      if (!matchedLanding) {
-        matchedItem.landings.push(landing);
-      } else {
+      if (matchedLanding) {
         // preserve the number of submissions
         const numberOfSubmissions = matchedLanding.model.numberOfSubmissions;
 
@@ -174,6 +172,8 @@ export default class ExportPayloadService {
         matchedLanding.error = landing.error;
         matchedLanding.errors = landing.errors;
         matchedLanding.editMode = !!matchedLanding.error;
+      } else {
+        matchedItem.landings.push(landing);
       }
 
       exportPayload.errors = undefined;
@@ -212,12 +212,12 @@ export default class ExportPayloadService {
 
   static readonly upsertLandingGetSessionLanding = (landing: LandingStatus, matchedLanding: LandingStatus): SessionLanding => ({
     landingId: landing.model.id,
-    addMode: !matchedLanding ? landing.addMode : false,
-    editMode: !matchedLanding ? landing.editMode : !!matchedLanding.error,
+    addMode: matchedLanding ? false : landing.addMode,
+    editMode: matchedLanding ? !!matchedLanding.error : landing.editMode,
     error: landing.error,
     errors: landing.errors,
-    modelCopy: !matchedLanding ? landing.modelCopy : matchedLanding.modelCopy,
-    model: !matchedLanding ? landing.model : matchedLanding.model
+    modelCopy: matchedLanding ? matchedLanding.modelCopy : landing.modelCopy,
+    model: matchedLanding ? matchedLanding.model : landing.model
   })
 
   public static async checkCertificate(payloadToValidate, url): Promise<any> {
@@ -382,6 +382,8 @@ export default class ExportPayloadService {
   public static readonly catchSubmissionForCC = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
     const landingsEntryOption: LandingsEntryOptions = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId);
     if (landingsEntryOption !== LandingsEntryOptions.DirectLanding) {
+      CatchCertService.setCatchSubmissionInProgress(documentNumber)
+        .catch(e => logger.error(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}][ERROR][${e}]`));
       submitToCatchSystem(documentNumber, 'submit')
         .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
     }
@@ -407,11 +409,14 @@ export default class ExportPayloadService {
   }
 
   private static async gatherExportInfo(userPrincipal: string, documentNumber: string, contactId: string) {
-    const exporter = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId));
-    const exportedFrom = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId));
+    const [exporter, exportedFrom, transportations, transportData] = await Promise.all([
+      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportations(userPrincipal, documentNumber, contactId)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId)),
+    ]);
+
     const exporterModel: CcExportedDetailModel = exporter?.model ? exporter.model : {} as CcExportedDetailModel;
-    const transportations: any = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportations(userPrincipal, documentNumber, contactId));
-    const transportData = await ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId));
 
     const catchCertificate = {
       transportations: Array.isArray(transportations) ? transportations.map(t => ({ ...t, ...exportedFrom })) : [],
