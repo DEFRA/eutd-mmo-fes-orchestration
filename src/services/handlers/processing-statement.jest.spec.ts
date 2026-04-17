@@ -1024,7 +1024,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       });
 
       const expectedErrors = {
-        'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorUKCCSpeciesMissing',
+        'catches-0-species': 'psAddCatchDetailsErrorUKCCSpeciesMissing',
       };
 
       expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-2022-CC-01234ABCD', 'Atlantic Cod', 'COD', 'bob', 'contactId', 'GBR-2023-PS-01234ABCD');
@@ -1114,7 +1114,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       });
 
       const expectedErrors = {
-        'catches-0-catchCertificateNumber': 'psAddCatchDetailsErrorUKCCCommodityCodeMissing',
+        'catches-0-speciesCommodityCode': 'psAddCatchDetailsErrorUKCCCommodityCodeMissing',
       };
 
       expect(mockValidateCommodityCode).toHaveBeenCalledWith('GBR-2022-CC-01234ABCD', '03023110', 'bob', 'contactId', 'GBR-2023-PS-01234ABCD');
@@ -1160,7 +1160,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-det
       });
 
       expect(mockValidateCommodityCode).not.toHaveBeenCalled();
-      expect(errors['catches-0-catchCertificateNumber']).toBe('psAddCatchDetailsErrorUKCCSpeciesMissing');
+      expect(errors['catches-0-species']).toBe('psAddCatchDetailsErrorUKCCSpeciesMissing');
     });
   });
 });

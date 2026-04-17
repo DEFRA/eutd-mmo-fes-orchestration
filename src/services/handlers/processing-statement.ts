@@ -351,13 +351,13 @@ async function validateUKCatchCertificateNumber(ctch: any, index: number, errors
 
   const isSpeciesValid = await validateSpecies(ctch.catchCertificateNumber, ctch.species, ctch.speciesCode, userPrincipal, contactId, documentNumber);
   if (!isSpeciesValid) {
-    errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCSpeciesMissing';
+    errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorUKCCSpeciesMissing';
     return;
   }
 
   const isCommodityCodeValid = await validateCommodityCodeOnDocument(ctch.catchCertificateNumber, ctch.speciesCommodityCode, userPrincipal, contactId, documentNumber);
   if (!isCommodityCodeValid) {
-    errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCCommodityCodeMissing';
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorUKCCCommodityCodeMissing';
   }
 }
 
