@@ -58,7 +58,7 @@ const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEnd
   const cmrIsSet = typeof transport.cmr === 'string';
   const hasCmr = transport.cmr === 'true';
   const result = {
-    id: parseInt(transport.id),
+    id: Number.parseInt(transport.id),
     vehicle: transport.vehicle,
     cmr: cmrIsSet ? hasCmr : undefined,
     nationalityOfVehicle: cmrIsSet && hasCmr ? undefined : transport.nationalityOfVehicle,
@@ -72,7 +72,7 @@ const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEnd
 };
 
 const getPlaneBackEndTransport = (transport: CatchCertificateTransport) => ({
-  id: parseInt(transport.id),
+  id: Number.parseInt(transport.id),
   vehicle: transport.vehicle,
   flightNumber: transport.flightNumber,
   containerNumber: transport.containerNumber,
@@ -83,7 +83,7 @@ const getPlaneBackEndTransport = (transport: CatchCertificateTransport) => ({
 });
 
 const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
-  id: parseInt(transport.id),
+  id: Number.parseInt(transport.id),
   vehicle: transport.vehicle,
   railwayBillNumber: transport.railwayBillNumber,
   containerIdentificationNumber: transport.containerIdentificationNumber,
@@ -93,7 +93,7 @@ const getTrainBackEndTransport = (transport: CatchCertificateTransport) => ({
 });
 
 const getContainerVesselBackEndTransport = (transport: CatchCertificateTransport) => ({
-  id: parseInt(transport.id),
+  id: Number.parseInt(transport.id),
   vehicle: transport.vehicle,
   vesselName: transport.vesselName,
   flagState: transport.flagState,

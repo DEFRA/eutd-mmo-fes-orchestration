@@ -52,7 +52,7 @@ describe("catchCert - saveDraftCache", () => {
 
     expect(mockGetSessionStore).toHaveBeenCalledTimes(1);
     expect(mockSessionStore.writeFor).toHaveBeenCalledTimes(1);
-    expect(mockSessionStore.writeFor).toHaveBeenCalledWith('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', testData);
+    expect(mockSessionStore.writeFor).toHaveBeenCalledWith('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', testData, undefined);
   });
 });
 
@@ -304,6 +304,43 @@ describe('catchCert - db related', () => {
       expect(result).toHaveLength(1);
       expect(result[0].documentNumber).toBe('GBR-2020-CC-1');
       expect(result[0].status).toBe('COMPLETE');
+    });
+
+  });
+
+  describe('setCatchSubmissionInProgress', () => {
+
+    it('should set catchSubmission to IN_PROGRESS for a completed document without catchSubmission', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-INPROG1', 'COMPLETE', defaultUser, {}, 'My Reference')).save();
+
+      await CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG1');
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+      expect(result).toHaveLength(1);
+      expect((result[0] as any).catchSubmission).toBeDefined();
+      expect((result[0] as any).catchSubmission.status).toBe('IN_PROGRESS');
+    });
+
+    it('should not overwrite existing catchSubmission', async () => {
+      const doc = sampleDocument('GBR-2020-CC-INPROG2', 'COMPLETE', defaultUser, {}, 'My Reference');
+      doc['catchSubmission'] = { status: 'SUCCESS', reference: 'REF123' };
+      await new CatchCertModel(doc).save();
+
+      await CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG2');
+
+      const result = await CatchCertService.getCompletedDocuments(defaultUser, contactId, 10, 1);
+      expect(result).toHaveLength(1);
+      expect((result[0] as any).catchSubmission.status).toBe('SUCCESS');
+      expect((result[0] as any).catchSubmission.reference).toBe('REF123');
+    });
+
+    it('should not update a draft document', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-INPROG3', 'DRAFT', defaultUser, {})).save();
+
+      await CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG3');
+
+      const draft = await CatchCertService.getDraft(defaultUser, 'GBR-2020-CC-INPROG3', contactId);
+      expect((draft as any).catchSubmission).toBeUndefined();
     });
 
   });
@@ -618,7 +655,7 @@ describe('catchCert - db related', () => {
 
       expect(mockSaveDraftCache).toHaveBeenCalled();
       expect(mockSaveDraftCache).toHaveBeenCalledTimes(1);
-      expect(mockSaveDraftCache).toHaveBeenCalledWith(defaultUser, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, expected);
+      expect(mockSaveDraftCache).toHaveBeenCalledWith(defaultUser, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, expected, 300);
       expect(result).toStrictEqual(expected);
     });
 

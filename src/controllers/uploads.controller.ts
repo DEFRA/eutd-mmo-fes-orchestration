@@ -14,6 +14,7 @@ import ApplicationConfig from '../applicationConfig'
 import { readFavouritesProducts } from '../persistence/services/favourites';
 import { IProduct } from '../persistence/schema/userAttributes';
 import FavouritesController from './favourites.controller';
+import logger from '../logger';
 
 export default class UploadsController {
 
@@ -24,7 +25,7 @@ export default class UploadsController {
 
     let rows: string[] = await csv({ noheader: true, output: 'line' }).fromString(data);
 
-    rows = rows.filter(item => !isEmpty(item.replace(/^[, ]+$/g, '')));
+    rows = rows.filter(item => !isEmpty(item.replaceAll(/^[, ]+$/g, '')));
     rows = rows.map(item => item.toUpperCase());
 
     if (rows.length > ApplicationConfig._maxLimitLandings) {
@@ -95,7 +96,7 @@ export default class UploadsController {
   public static async saveLandingRows(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, uploadedLandings: IUploadedLanding[]): Promise<Hapi.ResponseObject> {
     const landings = await this.validateLandings(userPrincipal, uploadedLandings);
 
-    const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors && landing.errors.length === 0 || !landing.errors;
+    const isValidLanding = (landing: IUploadedLanding): boolean => landing.errors?.length === 0 || !landing.errors;
     const hasValidLanding = (_: IUploadedLanding[]): boolean => _.some(isValidLanding);
     const failSaveLandingRows = (errorDetailsObj: { file: string } | { file: { key: string, params: { limit: number } } }): Hapi.ResponseObject => {
       if (acceptsHtml(req.headers)) {
@@ -110,6 +111,9 @@ export default class UploadsController {
     }
 
     const validLandings: IUploadedLanding[] = landings.filter(isValidLanding);
+
+    logger.info(`[POST /v2/save/landings] rows=${Array.isArray(uploadedLandings) ? uploadedLandings.length : 0} validRows=${validLandings.length}`);
+
     const exportPayload: ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId) || { items: [] };
     const totalCurrentLandings: LandingStatus[] = exportPayload.items.reduce((acc: LandingStatus[], curr: ProductLanded) => {
       if (curr.landings && curr.landings.length > 0) {
@@ -131,16 +135,36 @@ export default class UploadsController {
       });
     }
 
-    const findLanding = (currentLanding: IUploadedLanding, items: ProductLanded[]): ProductLanded =>
-      items.find((item: ProductLanded) =>
-        currentLanding.product.species === item.product.species.label &&
-        currentLanding.product.speciesCode === item.product.species.code &&
-        currentLanding.product.state === item.product.state.code &&
-        currentLanding.product.presentation === item.product.presentation.code &&
-        currentLanding.product.commodity_code === item.product.commodityCode);
+    const buildLandingKey = (landing: IUploadedLanding) => {
+      const product = landing.product;
+      return [
+        product?.species,
+        product?.speciesCode,
+        product?.state,
+        product?.presentation,
+        product?.commodity_code
+      ].join('|');
+    };
+
+    const buildItemKey = (item: ProductLanded) => {
+      return [
+        item?.product?.species?.label,
+        item?.product?.species?.code,
+        item?.product?.state?.code,
+        item?.product?.presentation?.code,
+        item?.product?.commodityCode
+      ].join('|');
+    };
+
+
+    const itemsByKey = new Map<string, ProductLanded>();
+    exportPayload.items.forEach((item: ProductLanded) => {
+      itemsByKey.set(buildItemKey(item), item);
+    });
 
     for (const validLanding of validLandings) {
-      const item: ProductLanded = findLanding(validLanding, exportPayload.items);
+      const key = buildLandingKey(validLanding);
+      const item: ProductLanded | undefined = itemsByKey.get(key);
       const newLanding: LandingStatus = {
         model: {
           id: `${documentNumber}-${getRandomNumber()}`,
@@ -153,15 +177,29 @@ export default class UploadsController {
           exclusiveEconomicZones: this.getExclusiveEconomicZone(validLanding),
           rfmo: this.getRfmo(validLanding),
           gearCategory: UploadsController.geGearCategory(validLanding),
-          gearCode: !isEmpty(validLanding.gearCode) ? validLanding.gearCode : undefined,
+          gearCode: isEmpty(validLanding.gearCode) ? undefined : validLanding.gearCode,
           gearType: UploadsController.getGearType(validLanding),
         }
       };
 
-      UploadsController.addLanding(item, newLanding, documentNumber, validLanding, exportPayload);
+      if (item && Array.isArray(item.landings)) {
+        item.landings.push(newLanding);
+      } else if (item) {
+        item.landings = [newLanding];
+      } else {
+        const productId = `${documentNumber}-${uuidv4()}`;
+        const product: Product = toProduct({ ...validLanding, id: productId });
+        const newItem: ProductLanded = {
+          product,
+          landings: [newLanding]
+        };
+        exportPayload.items.push(newItem);
+        itemsByKey.set(key, newItem);
+      }
     }
 
     await ExportPayloadService.save(exportPayload, userPrincipal, documentNumber, contactId);
+    logger.info(`[POST /v2/save/landings] documentNumber=${documentNumber}`);
 
     return h.response(landings).code(200);
   }

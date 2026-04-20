@@ -1,5 +1,6 @@
 import * as Hapi from '@hapi/hapi';
 import * as Joi from 'joi';
+import { createEmojiAwarePatternValidator } from '../validators/emojiValidator';
 import Controller from '../controllers/exportLocation.controller';
 import logger from '../logger';
 import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimatelyOwned';
@@ -45,7 +46,7 @@ export default class ExportLocationRoutes {
                   'any.required': 'error.exportDestination.any.required',
                   'string.empty': 'error.exportDestination.any.required'
                 }),
-                pointOfDestination: Joi.string().required().max(100).regex(/^[a-zA-Z0-9\-'\s/]+$/).messages({
+                pointOfDestination: Joi.string().required().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'\s/]+$/)).messages({
                   'any.required': 'error.pointOfDestination.any.required',
                   'string.empty': 'error.pointOfDestination.any.required',
                   'string.max': 'error.pointOfDestination.string.max',
@@ -89,7 +90,7 @@ export default class ExportLocationRoutes {
                 return h.response(errorDetailsObj).code(400).takeover();
               },
               payload: Joi.object({
-                pointOfDestination: Joi.string().trim().allow('').allow(null).optional().max(100).regex(/^[a-zA-Z0-9\-' /]+$/)
+                pointOfDestination: Joi.string().trim().allow('').allow(null).optional().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' /]+$/))
               })
             }
           }

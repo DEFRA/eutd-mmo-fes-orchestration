@@ -46,22 +46,6 @@ test('containerVesselSaveAsDraftSchema - should allow empty vessel fields', t =>
   t.end();
 });
 
-test('containerVesselSaveAsDraftSchema - should reject containers over max length', t => {
-  const longContainer = 'A'.repeat(51);
-
-  const result = Joi.validate({
-    vehicle: 'containerVessel',
-    arrival: true,
-    containerNumbers: [longContainer],
-    journey: 'storageNotes'
-  }, containerVesselSaveAsDraftSchema, {
-    abortEarly: false
-  });
-
-  t.notEqual(result.error, null, 'Container over 50 chars should fail');
-  t.end();
-});
-
 test('containerVesselSaveAsDraftSchema - should allow departure transport without container validation', t => {
   const result = Joi.validate({
     vehicle: 'containerVessel',

@@ -1,7 +1,7 @@
 import * as appInsights from 'applicationinsights';
 import ApplicationConfig from './applicationConfig';
 
-export default () => {
+const initializeApplicationInsights = () => {
   const instrumentationKey = ApplicationConfig._instrumentationKey;
 
   if (instrumentationKey) {
@@ -20,3 +20,5 @@ export default () => {
     console.info('Application Insights disabled');
   }
 };
+
+export default initializeApplicationInsights;

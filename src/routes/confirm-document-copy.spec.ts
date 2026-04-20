@@ -709,7 +709,7 @@ describe('confirm document copy routes', () => {
       it('will return 500 with the error', async () => {
         const response = await server.inject(request);
 
-        expect(mockLogError).toHaveBeenCalledWith('[COPY-CERTIFICATE][ERROR][JOURNEY-UNKNOWN]');
+        expect(mockLogError).toHaveBeenCalledWith(expect.stringContaining('[COPY-CERTIFICATE][ERROR][Error: JOURNEY-UNKNOWN'));
 
         expect(response.statusCode).toBe(500);
         expect(response.result).toBeNull();
@@ -1097,7 +1097,7 @@ describe('confirm document copy routes', () => {
       it('will return 500 with the error', async () => {
         const response = await server.inject(request);
 
-        expect(mockLogError).toHaveBeenCalledWith('[COPY-CERTIFICATE][ERROR][JOURNEY-UNKNOWN]');
+        expect(mockLogError).toHaveBeenCalledWith(expect.stringContaining('[COPY-CERTIFICATE][ERROR][Error: JOURNEY-UNKNOWN'));
 
         expect(response.statusCode).toBe(500);
         expect(response.result).toBeNull();
@@ -1626,7 +1626,7 @@ describe('confirm document copy routes', () => {
         const response = await server.inject(request);
 
         expect(mockLogDebug).toHaveBeenCalledWith(`[CHECK-COPY-CERTIFICATE][${documentNumber}][START]`);
-        expect(mockLogError).toHaveBeenCalledWith('[CHECK-COPY-CERTIFICATE][ERROR][INVALID-SERVICE-NAME]');
+        expect(mockLogError).toHaveBeenCalledWith(expect.stringContaining('[CHECK-COPY-CERTIFICATE][ERROR][Error: INVALID-SERVICE-NAME'));
         expect(mockLogDebug).not.toHaveBeenCalledWith(`[CHECK-COPY-CERTIFICATE][${documentNumber}][SUCCESS][true]`);
 
         expect(response.statusCode).toBe(500);

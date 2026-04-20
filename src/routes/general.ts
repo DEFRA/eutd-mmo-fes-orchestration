@@ -1,12 +1,12 @@
 import * as Hapi from '@hapi/hapi';
-import * as fs from 'fs'
+import * as fs from 'node:fs'
 
 
 const gitHash = (() => {
   try {
     return fs.readFileSync('./githash', 'utf8').trim();
   }
-  catch( err) {
+  catch {
     return '';
   }
 })();

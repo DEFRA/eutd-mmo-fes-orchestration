@@ -452,7 +452,22 @@ describe('catchCertificateTransportDetailsSchema - containerIdentificationNumber
       const { error } = catchCertificateTransportDetailsSchema.validate(payload);
 
       expect(error).toBeDefined();
-      expect(error?.details[0].path).toEqual(['containerNumbers', 0]);
+      expect(error?.details[0].type).toBe('string.max');
+    });
+
+    it('should accept containerNumbers item with exactly 50 characters for plane', () => {
+      const value = 'A'.repeat(50);
+      const payload = {
+        id: 'transport-123',
+        vehicle: 'plane',
+        flightNumber: 'FL123',
+        containerNumbers: [value],
+        departurePlace: 'Heathrow'
+      };
+
+      const { error } = catchCertificateTransportDetailsSchema.validate(payload);
+
+      expect(error).toBeUndefined();
     });
 
     it('should reject containerNumbers with invalid format for plane', () => {

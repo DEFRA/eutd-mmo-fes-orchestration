@@ -29,6 +29,7 @@ import {
   isPlantApprovalNumberFormatValid
 } from "../orchestration.service";
 import { isEmpty } from "lodash";
+import { containsEmoji } from '../../validators/emojiValidator';
 
 export const initialState = {
   processingStatement: {
@@ -109,7 +110,8 @@ export default {
   "/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex": async ({ data, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = params.catchIndex;
     const ctch = data.catches[index];
-    const catchDetails = await validateCatchDetails(ctch, index, errors, documentNumber, userPrincipal, contactId);
+    const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
+    const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
 
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
@@ -138,10 +140,10 @@ export default {
       errors.healthCertificateDate = "psAddHealthCertificateErrorHealthCertificateDate";
     } else if (!validateDate(data.healthCertificateDate)) {
       errors.healthCertificateDate = "psAddHealthCertificateErrorRealDateHealthCertificateDate";
-    } else if (!validateMaximumFutureDate(data.healthCertificateDate)) {
-      errors.healthCertificateDate = "psAddHealthCertificateErrorMaxDaysHealthCertificateDate";
+    } else if (validateMaximumFutureDate(data.healthCertificateDate)) {
       data.healthCertificateDate = cleanDate(data.healthCertificateDate);
     } else {
+      errors.healthCertificateDate = "psAddHealthCertificateErrorMaxDaysHealthCertificateDate";
       data.healthCertificateDate = cleanDate(data.healthCertificateDate);
     }
     return { errors };
@@ -165,6 +167,8 @@ export default {
 
     if (!data.personResponsibleForConsignment || validateWhitespace(data.personResponsibleForConsignment)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignment";
+    } else if (containsEmoji(data.personResponsibleForConsignment)) {
+      errors['personResponsibleForConsignment'] = "emojiCharactersNotPermitted";
     } else if (isInvalidLength(data.personResponsibleForConsignment, MIN_PERSON_RESPONSIBLE_LENGTH, MAX_PERSON_RESPONSIBLE_LENGTH)) {
       errors['personResponsibleForConsignment'] = "psAddProcessingPDErrorPersonResponsibleForConsignmentLength";
     } else if (!validatePersonResponsibleForConsignmentFormat(data.personResponsibleForConsignment)) {
@@ -185,7 +189,9 @@ export default {
     if (!data.plantAddressOne && !data.plantAddressTwo && !data.plantTownCity && !data.plantPostcode) errors['plantAddressOne'] = "psAddProcessingPlantAddressErrorAddress";
     else {
       if (!data.plantAddressOne || validateWhitespace(data.plantAddressOne)) errors['plantAddressOne'] = "Enter the building and street (address line 1 of 2)";
+      else if (containsEmoji(data.plantAddressOne)) errors['plantAddressOne'] = "emojiCharactersNotPermitted";
       if (!data.plantTownCity || validateWhitespace(data.plantTownCity)) errors['plantTownCity'] = "Enter the town or city";
+      else if (containsEmoji(data.plantTownCity)) errors['plantTownCity'] = "emojiCharactersNotPermitted";
       if (!data.plantPostcode || validateWhitespace(data.plantPostcode)) errors['plantPostcode'] = "Enter the postcode";
     }
 
@@ -197,6 +203,8 @@ export default {
 function addProcessingPlantAddressErrors(data, errors) {
   if (!data.plantName || validateWhitespace(data.plantName)) {
     errors['plantName'] = "psAddProcessingPlantAddressErrorNullPlantName";
+  } else if (containsEmoji(data.plantName)) {
+    errors['plantName'] = "emojiCharactersNotPermitted";
   } else if (data.plantName.length > MAX_PLANT_NAME_LENGTH) {
     errors['plantName'] = "psAddProcessingPlantAddressErrorMaxLimitPlantName";
   } else if (!isPsPlantNameValid(data.plantName)) {
@@ -259,7 +267,9 @@ function setCatchFieldsUndefined(ctch: any) {
 
 export async function validateCatchDetails(ctch: any, index: number, errors: any, documentNumber: string, userPrincipal: string, contactId: string) {
   validateSpeciesInput(ctch, index, errors);
-  validateCatchType(ctch, index, errors);
+  if (!errors[`catches-${index}-species`]) {
+    await validateSpeciesAgainstReferenceData(ctch, index, errors);
+  }
   await validateIssuingCountryForNonUKCatch(ctch, index, errors);
   await validateCatchCertificateNumber(ctch, index, errors, documentNumber, userPrincipal, contactId);
   validateCatchCertificateCommodityCode(ctch, index, errors);
@@ -274,8 +284,14 @@ function validateCatchCertificateCommodityCode(ctch: any, index: number, errors:
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMinLength';
   } else if (ctch.speciesCommodityCode.trim().replaceAll(/\s/g, '').length > MAX_COMMODITY_CODE_LENGTH) {
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMaxLength';
-  } else if (!/^\d+$/.test(ctch.speciesCommodityCode.trim().replaceAll(/\s/g, ''))) {
-    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorValidSpeciesCommodityCode';
+  }
+}
+
+async function validateSpeciesAgainstReferenceData(ctch: any, index: number, errors: any) {
+  const refUrl = applicationConfig.getReferenceServiceUrl();
+  const anyError = await validateSpeciesName(ctch.species, ctch.scientificName, refUrl);
+  if (anyError.isError) {
+    errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName';
   }
 }
 
@@ -335,13 +351,13 @@ async function validateUKCatchCertificateNumber(ctch: any, index: number, errors
 
   const isSpeciesValid = await validateSpecies(ctch.catchCertificateNumber, ctch.species, ctch.speciesCode, userPrincipal, contactId, documentNumber);
   if (!isSpeciesValid) {
-    errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCSpeciesMissing';
+    errors[`catches-${index}-species`] = 'psAddCatchDetailsErrorUKCCSpeciesMissing';
     return;
   }
 
   const isCommodityCodeValid = await validateCommodityCodeOnDocument(ctch.catchCertificateNumber, ctch.speciesCommodityCode, userPrincipal, contactId, documentNumber);
   if (!isCommodityCodeValid) {
-    errors[`catches-${index}-catchCertificateNumber`] = 'psAddCatchDetailsErrorUKCCCommodityCodeMissing';
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorUKCCCommodityCodeMissing';
   }
 }
 
@@ -373,10 +389,10 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing';
   } else if (ctch.exportWeightAfterProcessing <= 0) {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorExportWeightGreaterThanNullAfterProcessing';
-  } else if (!isPositiveNumberWithTwoDecimals(ctch.exportWeightAfterProcessing)) {
-    errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalAfterProcessing';
-  } else {
+  } else if (isPositiveNumberWithTwoDecimals(ctch.exportWeightAfterProcessing)) {
     (ctch.exportWeightAfterProcessing = numberAsString(ctch.exportWeightAfterProcessing));
+  } else {
+    errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalAfterProcessing';
   }
   return { errors };
 }
@@ -386,10 +402,10 @@ function validateCatchWeightsTotalWeightErrors(ctch, index, errors) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG';
   } else if (ctch.totalWeightLanded <= 0) {
     errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorTotalWeightGreaterThanNull';
-  } else if (!isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
-    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
-  } else {
+  } else if (isPositiveNumberWithTwoDecimals(ctch.totalWeightLanded)) {
     (ctch.totalWeightLanded = numberAsString(ctch.totalWeightLanded));
+  } else {
+    errors[`catches-${index}-totalWeightLanded`] = 'psAddCatchWeightsErrorEnterTotalWeightMaximum2Decimal';
   }
 }
 
@@ -406,3 +422,4 @@ export async function validateProductDescription(product: any, errors: any) {
 
   return { errors };
 }
+

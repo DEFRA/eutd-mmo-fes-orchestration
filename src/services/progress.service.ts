@@ -11,12 +11,13 @@ import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/st
 import { checkTransportDataFrontEnd, toFrontEndTransport, Transport, truck, train, plane, containerVessel } from "../persistence/schema/frontEndModels/transport";
 import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
+import { getCurrentSessionData, SessionLanding } from '../helpers/sessionManager';
 import { utc } from 'moment';
 import * as ProcessingStatement from '../persistence/schema/processingStatement';
 import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
-import { checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent, checkNetWeightFisheryProductDepartureIsZeroPositive, checkNetWeightProductDepartureIsZeroPositive, validateEntry, validateProduct, validateStorageFacility, validateStorageApproval } from './handlers/storage-notes';
+import { validateEntry, validateProduct, validateStorageFacility, validateStorageApproval } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
@@ -121,6 +122,29 @@ export default class ProgressService {
     if (filteredErrors.length > 0) {
       return ProgressStatus.ERROR;
     }
+
+    // Check session data for any outstanding landing errors (e.g. Joi schema validation
+    // failures on the direct-landing form that are not persisted to the database).
+    // Without this check, a previously-valid direct landing remains in MongoDB and
+    // getLandingsStatus would incorrectly return COMPLETED (FI0-10996).
+    // We only flag a session error as relevant if the landing ID still exists in the
+    // current products' caughtBy – stale entries from a prior edit (where a new
+    // random ID was assigned on successful re-save) are therefore safely ignored.
+    const sessionData = await getCurrentSessionData(userPrincipal, documentNumber, contactId);
+    if (sessionData?.landings?.some((l: SessionLanding) => l.error === 'invalid')) {
+      const currentLandingIds = new Set<string>(
+        (products || []).flatMap((p: Product) =>
+          ((p as any).caughtBy || []).map((c: any) => c.id).filter(Boolean)
+        )
+      );
+      const hasSessionLandingErrors = sessionData.landings.some(
+        (l: SessionLanding) => l.error === 'invalid' && currentLandingIds.has(l.landingId)
+      );
+      if (hasSessionLandingErrors) {
+        return ProgressStatus.INCOMPLETE;
+      }
+    }
+
     if (products && products.length > 0 && !ProgressService.hasLandingData(products)) {
       return ProgressStatus.INCOMPLETE;
     }
@@ -344,8 +368,8 @@ export default class ProgressService {
     const ctchDetailsErrors = {};
 
     for (const ctch in catches) {
-      await validateCatchDetails(catches[ctch], parseInt(ctch), ctchDetailsErrors, documentNumber, userPrincipal, contactId);
-      validateCatchWeights(catches[ctch], parseInt(ctch), ctchDetailsErrors);
+      await validateCatchDetails(catches[ctch], Number.parseInt(ctch), ctchDetailsErrors, documentNumber, userPrincipal, contactId);
+      validateCatchWeights(catches[ctch], Number.parseInt(ctch), ctchDetailsErrors);
     }
 
     return Object.keys(ctchDetailsErrors).length <= 0 ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
@@ -606,19 +630,6 @@ export default class ProgressService {
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
-    const hasAtLeastOneCatch = data?.exportData?.catches?.length > 0
-    const catchErrors = hasAtLeastOneCatch ? {} : { "catches": "at least one catch is required" };
-
-    if (hasAtLeastOneCatch) {
-      for (const [index, ctch] of data.exportData.catches.entries()) {
-        checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, catchErrors);
-        checkNetWeightProductDepartureIsZeroPositive(ctch, index, catchErrors);
-        checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, catchErrors);
-      }
-    }
-
-    const isArrivalDepartureWeightsComplete: boolean = catchesStatus === ProgressStatus.COMPLETED && isEmpty(catchErrors);
-
     // Check facility validation errors
     const facilityErrors = {};
     const departureDate = data?.exportData?.arrivalTransportation?.departureDate;
@@ -637,7 +648,7 @@ export default class ProgressService {
 
     // Check if departure transportation date is after arrival transportation departure date
     const isDepartureAfterArrival = data?.exportData?.arrivalTransportation ? ProgressService.isDepartureTransportAfterArrivalTransport(data?.exportData?.transportation, data?.exportData?.arrivalTransportation) : true;
-    const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isArrivalDepartureWeightsComplete && isDepartureAfterArrival ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+    const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isDepartureAfterArrival ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
 
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),

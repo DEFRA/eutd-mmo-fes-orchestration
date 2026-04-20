@@ -1,5 +1,6 @@
 import * as Joi from 'joi';
 import * as moment from "moment";
+import { validateNoEmoji } from '../../validators/emojiValidator';
 import ApplicationConfig from "../../applicationConfig";
 import { decimalPlacesValidator } from "../../helpers/customValidators";
 import { getFAOAreaList } from '../../helpers/utils/utils';
@@ -54,10 +55,10 @@ const directLandingsSchema = Joi.object({
   }, 'Start Date Validator').required(),
   faoArea: Joi.string().trim().label("Catch area").valid(...getFAOAreaList()).required(),
   vessel: Joi.object().keys({
-    vesselName: Joi.string().trim().custom((value: string, helpers: any) => {
-      if (typeof value !== 'string') {
+    vesselName: Joi.string().trim().custom(validateNoEmoji).custom((value: string, helpers: any) => {
+      if (typeof value === 'string') { return value; } else {
         return helpers.error('directLanding.any.required');
-      } else { return value; }
+      }
     }).label("vessel.vesselName").required(),
     isListed: Joi.boolean().custom((value: boolean, helpers: any) => {
       if (value === false) {

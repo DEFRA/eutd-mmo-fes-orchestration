@@ -1,4 +1,4 @@
-import { validateTruckNationality } from './transportValidation';
+import { validateTruckNationality, validateContainerNumbers } from './transportValidation';
 import axios from 'axios';
 import ApplicationConfig from '../applicationConfig';
 
@@ -90,6 +90,56 @@ describe('Transport Validation Helpers', () => {
           message: 'error.nationalityOfVehicle.any.invalid'
         }
       ]);
+    });
+  });
+
+  describe('validateContainerNumbers', () => {
+    it('should return empty array when containerNumbers is undefined', () => {
+      const errors = validateContainerNumbers(undefined);
+      expect(errors).toEqual([]);
+    });
+
+    it('should return empty array when containerNumbers is empty', () => {
+      const errors = validateContainerNumbers([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('should return empty array for valid unique container numbers', () => {
+      const errors = validateContainerNumbers(['ABCU1234567', 'ABCJ7654321']);
+      expect(errors).toEqual([]);
+    });
+
+    it('should return format error for invalid container number', () => {
+      const errors = validateContainerNumbers(['INVALID']);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].details[0].message).toBe('sdShippingContainerInvalidFormat');
+    });
+
+    it('should return duplicate error when same container number appears twice', () => {
+      const errors = validateContainerNumbers(['ABCU1234567', 'ABCU1234567']);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].details[0].message).toBe('sdShippingContainerDuplicateError');
+      expect(errors[0].details[0].path).toEqual(['containerNumbers.1']);
+    });
+
+    it('should return duplicate error for third occurrence of same container number', () => {
+      const errors = validateContainerNumbers(['ABCU1234567', 'ABCJ7654321', 'ABCU1234567']);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].details[0].message).toBe('sdShippingContainerDuplicateError');
+      expect(errors[0].details[0].path).toEqual(['containerNumbers.2']);
+    });
+
+    it('should not flag empty strings as duplicates', () => {
+      const errors = validateContainerNumbers(['', '', 'ABCU1234567']);
+      expect(errors).toEqual([]);
+    });
+
+    it('should return both format and duplicate errors when applicable', () => {
+      const errors = validateContainerNumbers(['INVALID', 'ABCU1234567', 'ABCU1234567']);
+      expect(errors).toHaveLength(2);
+      const messageTypes = errors.map(e => e.details[0].message);
+      expect(messageTypes).toContain('sdShippingContainerInvalidFormat');
+      expect(messageTypes).toContain('sdShippingContainerDuplicateError');
     });
   });
 });

@@ -1,4 +1,5 @@
 import * as Joi from "joi";
+import { validateNoEmoji, createEmojiAwarePatternValidator } from '../../validators/emojiValidator';
 
 const catchCertificateTransportDetailsSchema = Joi.object({
   id: Joi.string().required(),
@@ -20,7 +21,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\- ]+$/).required(),
+      otherwise: Joi.string().trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/)).required(),
     }),
     otherwise: Joi.forbidden(),
   }),
@@ -30,28 +31,19 @@ const catchCertificateTransportDetailsSchema = Joi.object({
       .items(
         Joi.string()
           .trim()
-          .allow('')
-          .regex(/^$|^[a-zA-Z0-9 ]+$/)
           .max(50)
+          .regex(/^$|^[a-zA-Z0-9]+$/)
           .messages({
+            'string.max': 'ccPlaneContainerIdentificationNumberMaxLength',
             'string.pattern.base': 'ccAddTransportationDetailsContainerIdentificationNumberOnlyNumLettersError',
-            'string.max': 'error.containerNumbers.string.max',
           })
       )
       .min(1)
       .max(10)
       .required()
-      .custom((value, helpers) => {
-        // Check if all elements are empty
-        const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
-        if (nonEmptyItems.length === 0) {
-          return helpers.error('plane.array.min');
-        }
-        return value;
-      })
       .messages({
         'plane.array.min': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
-        'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError',
+        'any.required': 'commonAddTransportationDetailsPlaneContainerNumberLabelError'
       }),
     otherwise: Joi.when('vehicle', {
       is: 'containerVessel',
@@ -59,7 +51,6 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         .items(
           Joi.string()
             .trim()
-            .allow('')
             .regex(/^$|^[A-Z]{3}[UJZR]\d{7}$/)
             .messages({
               'string.pattern.base': 'ccShippingContainerNumberPatternError',
@@ -68,17 +59,9 @@ const catchCertificateTransportDetailsSchema = Joi.object({
         .min(1)
         .max(10)
         .required()
-        .custom((value, helpers) => {
-          // Check if all elements are empty
-          const nonEmptyItems = value.filter((item: string) => item && item.trim().length > 0);
-          if (nonEmptyItems.length === 0) {
-            return helpers.error('container-vessel.array.min');
-          }
-          return value;
-        })
         .messages({
           'container-vessel.array.min': 'ccContainerVesselContainerNumberLabelError',
-          'any.required': 'ccContainerVesselContainerNumberLabelError',
+          'any.required': 'ccContainerVesselContainerNumberLabelError'
         }),
       otherwise: Joi.when('vehicle', {
         is: Joi.valid('truck', 'train'),
@@ -110,7 +93,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().alphanum().max(15).required(),
+      otherwise: Joi.string().trim().custom(validateNoEmoji).alphanum().max(15).required(),
     }),
     otherwise: Joi.forbidden(),
   }),
@@ -119,7 +102,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().allow('').max(50).regex(/^[a-zA-Z0-9-./]+$/).optional()
+      otherwise: Joi.string().trim().allow('').max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]+$/)).optional()
     }),
     otherwise: Joi.forbidden(),
   }),
@@ -137,7 +120,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().alphanum().max(15).required(),
+      otherwise: Joi.string().trim().custom(validateNoEmoji).alphanum().max(15).required(),
     }),
     otherwise: Joi.forbidden(),
   }),
@@ -146,7 +129,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'`() ]+$/).required(),
+      otherwise: Joi.string().trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'`() ]+$/)).required(),
     }),
     otherwise: Joi.forbidden()
   }),
@@ -162,12 +145,12 @@ const catchCertificateTransportDetailsSchema = Joi.object({
   departurePlace: Joi.when('$query.draft', {
     is: true,
     then: Joi.any(),
-    otherwise: Joi.string().trim().max(50).regex(/^[a-zA-Z0-9\-'` ]+$/).required(),
+    otherwise: Joi.string().trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'` ]+$/)).required(),
   }),
   freightBillNumber: Joi.when('$query.draft', {
     is: true,
-    then: Joi.string().allow('').trim().max(60).regex(/^[a-zA-Z0-9-./]*$/),
-    otherwise: Joi.string().trim().max(60).regex(/^[a-zA-Z0-9-./]+$/)
+    then: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)),
+    otherwise: Joi.string().trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]+$/))
   }),
   documents: Joi.array().optional()
 });

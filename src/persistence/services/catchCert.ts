@@ -2,7 +2,8 @@ import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 
 import { Condition, StrictUpdateFilter } from 'mongodb';
-import { CatchCertificate, CatchCertModel, CatchCertificateModel, toFrontEndSpecies, toFrontEndConservation, DocumentStatuses, cloneCatchCertificate as cloneCC, LandingsEntryOptions, Product } from '../schema/catchCert';
+import { CatchCertificate, CatchCertModel, CatchCertificateModel, toFrontEndSpecies, toFrontEndConservation, DocumentStatuses, cloneCatchCertificate as cloneCC, LandingsEntryOptions, Product, EuCatchStatus } from '../schema/catchCert';
+import { BaseModel } from '../schema/base';
 import logger from '../../logger';
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
@@ -95,10 +96,16 @@ export const countCompletedDocuments = async (
 };
 
 export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string, userPrincipal: string, contactId: string): Promise<CatchCertificateModel[]> => {
+  const cacheKey = `${CATCH_CERTIFICATE_KEY}/completed/${yearAndMonth}`;
+  const cached = await getDraftCache(userPrincipal, contactId, cacheKey) as unknown as CatchCertificateModel[];
+  if (cached !== null && Array.isArray(cached)) {
+    return cached;
+  }
+
   const [month, year] = yearAndMonth.split('-');
   const currentDate = new Date();
-  const yearInt = year ? parseInt(year) : currentDate.getUTCFullYear();
-  const monthInt = month ? parseInt(month) : (currentDate.getUTCMonth() + 1);
+  const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
+  const monthInt = month ? Number.parseInt(month) : (currentDate.getUTCMonth() + 1);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
   const data = await CatchCertModel.find({
     $or: ownerQuery,
@@ -107,7 +114,10 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
       '$gte': new Date(yearInt, monthInt - 1, 1),
       '$lt': new Date(yearInt, monthInt, 1)
     } as Condition<any>
-  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']);
+  }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
+
+  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 60);
+
   return data;
 };
 
@@ -148,8 +158,10 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
     }
   ];
 
-  const result = await CatchCertModel.aggregate(query).sort({ createdAt: 'desc' });
-  const systemErrors: SystemFailure[] = await SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId);
+  const [result, systemErrors] = await Promise.all([
+    CatchCertModel.aggregate(query).sort({ createdAt: 'desc' }),
+    SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId)
+  ]);
   const data: CatchCertificateDraft[] = result.map(catchCert => ({
     documentNumber: catchCert.documentNumber,
     status: catchCert.status,
@@ -158,7 +170,7 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
     isFailed: systemErrors.some((systemFailure: SystemFailure) => systemFailure.documentNumber === catchCert.documentNumber) || catchCert.isFailed
   }));
 
-  void saveDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, data);
+  void saveDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, data, 300);
 
   return data;
 }
@@ -221,11 +233,10 @@ export const upsertDraftData = async (
   }
 };
 
-// TODO: Not used by CatchCertificate, refactor for PS & SD
 export const getDraftCertificateNumber = async (userPrincipal: string): Promise<string> => {
   const query = { createdBy: userPrincipal, status: DocumentStatuses.Draft };
   const draft = await CatchCertModel.findOne(query, 'documentNumber', { lean: true });
-  const dataExists = (draft && draft.documentNumber);
+  const dataExists = (draft?.documentNumber);
 
   return dataExists
     ? draft.documentNumber
@@ -302,12 +313,13 @@ export const saveDraftCache = async (
   userPrincipal: string,
   contactId: string,
   key: string,
-  cacheData: CatchCertificate | CatchCertificateDraft[] | IDraft
+  cacheData: CatchCertificate | CatchCertificateDraft[] | IDraft,
+  ttlSeconds?: number
 ): Promise<void> => {
   const sessionStore = await SessionStoreFactory.getSessionStore(
     getRedisOptions()
   );
-  await sessionStore.writeFor(userPrincipal, contactId, key, cacheData as any);
+  await sessionStore.writeFor(userPrincipal, contactId, key, cacheData as any, ttlSeconds);
 };
 
 export const invalidateDraftCache = async (
@@ -378,6 +390,16 @@ export const completeDraft = async (userPrincipal: string, documentNumber: strin
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 };
 
+export const setCatchSubmissionInProgress = async (documentNumber: string): Promise<void> => {
+  await BaseModel.findOneAndUpdate(
+    { documentNumber, status: DocumentStatuses.Complete, catchSubmission: { $exists: false } },
+    { $set: { 'catchSubmission': { status: EuCatchStatus.Progress } } },
+    { strict: false }
+  );
+
+  logger.info(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}]`);
+};
+
 export const updateCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string, status: DocumentStatuses): Promise<void> => {
   const update: StrictUpdateFilter<CatchCertificate> = {
     $set: {
@@ -403,7 +425,7 @@ export const getCertificateStatus = async (
 ): Promise<string> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft && draft.status ? draft.status : null;
+  return draft?.status ? draft.status : null;
 };
 
 export const getSpecies = async (
@@ -413,7 +435,7 @@ export const getSpecies = async (
 ): Promise<FrontEndSpecies.Product[]> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft && draft.exportData && draft.exportData.products
+  return draft?.exportData?.products
     ? draft.exportData.products.map((_) => toFrontEndSpecies(_))
     : null;
 };
@@ -453,7 +475,7 @@ export const getDirectExportPayload = async (
 ): Promise<DirectLanding> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft && draft.exportData && draft.exportData.products
+  return draft?.exportData?.products
     ? toFrontEndDirectLanding(draft.exportData.products)
     : null;
 };
@@ -461,7 +483,7 @@ export const getDirectExportPayload = async (
 export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<Transport> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.transportation)
+  return draft?.exportData?.transportation
     ? toFrontEndTransport(draft.exportData.transportation)
     : null;
 };
@@ -469,7 +491,7 @@ export const getTransportDetails = async (userPrincipal: string, documentNumber:
 export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.exporterDetails)
+  return draft?.exportData?.exporterDetails
     ? toFrontEndCcExporterDetails(draft.exportData.exporterDetails)
     : null;
 };
@@ -505,7 +527,7 @@ export const deleteTransportDetails = async (userPrincipal: string, documentNumb
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData)
+  return draft?.exportData
     ? toFrontEndExportLocation(draft.exportData)
     : null;
 };
@@ -522,7 +544,7 @@ export const upsertConservation = async (userPrincipal: string, payload: FrontEn
 export const getConservation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
 
-  return (draft && draft.exportData && draft.exportData.conservation)
+  return draft?.exportData?.conservation
     ? toFrontEndConservation(draft.exportData.conservation)
     : null;
 };
@@ -537,12 +559,12 @@ export const updateProductScientificName = async (product: Product, documentNumb
     const speciesCode = product.speciesCode;
     try {
       const data = await getSpeciesByFaoCode(speciesCode);
-      const species = data.find((item) => item.faoCode === speciesCode);
+      const species = data.find((item: any) => item.faoCode === speciesCode);
 
-      if (species && species.scientificName) {
+      if (species?.scientificName) {
         product.scientificName = species.scientificName;
       }
-    } catch (error) {
+    } catch {
       logger.
         info(`[GET-COPY][DOCUMENT-NUMBER][${documentNumber}][PRODUCT][${product}][GET-FAO-CODE][${speciesCode}]`);
     }

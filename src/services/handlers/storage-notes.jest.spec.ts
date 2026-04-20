@@ -1,4 +1,4 @@
-import StorageNotes from "./storage-notes";
+import StorageNotes, { validateDocumentType, validateStorageFacility } from "./storage-notes";
 import * as FishValidator from "../../validators/fish.validator";
 import * as CommodityCodeValidator from "../../validators/pssdCommodityCode.validator";
 import * as CountriesValidator from "../../validators/countries.validator";
@@ -2277,6 +2277,94 @@ describe("/create-non-manipulation-document/:documentNumber/departure-product-su
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
   });
+
+  it("Scenario 1: returns error when netWeightProductDeparture exceeds netWeightProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "20",
+          netWeightProductArrival: "10",
+          netWeightFisheryProductDeparture: "5",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightProductDeparture"]).toBe("sdNetWeightProductDepartureExceedsArrival");
+  });
+
+  it("Scenario 2: no error when netWeightProductDeparture is less than or equal to netWeightProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const dataEqual = {
+      catches: [
+        {
+          netWeightProductDeparture: "10",
+          netWeightProductArrival: "10",
+          netWeightFisheryProductDeparture: "5",
+        },
+      ],
+    };
+
+    const dataLess = {
+      catches: [
+        {
+          netWeightProductDeparture: "8",
+          netWeightProductArrival: "10",
+          netWeightFisheryProductDeparture: "5",
+        },
+      ],
+    };
+
+    const { errors: errorsEqual } = await handler({ data: dataEqual, errors: {} });
+    const { errors: errorsLess } = await handler({ data: dataLess, errors: {} });
+
+    expect(errorsEqual["catches-0-netWeightProductDeparture"]).toBeUndefined();
+    expect(errorsLess["catches-0-netWeightProductDeparture"]).toBeUndefined();
+  });
+
+  it("Scenario 3: returns error when netWeightFisheryProductDeparture exceeds netWeightProductDeparture", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "10",
+          netWeightProductArrival: "20",
+          netWeightFisheryProductDeparture: "15",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBe("sdNetWeightFisheryProductDepartureExceedsProductDeparture");
+  });
+
+  it("Scenario 3: no error when netWeightFisheryProductDeparture is equal to netWeightProductDeparture", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "10",
+          netWeightProductArrival: "20",
+          netWeightFisheryProductDeparture: "10",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
+  });
 });
 
 describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-details", () => {
@@ -2788,5 +2876,237 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
 
 });
 
+});
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Additional tests to cover remaining uncovered lines
+// ────────────────────────────────────────────────────────────────────────────────
+
+describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent - else-if branch", () => {
+  it("should set fishery weight error when netWeightProductDeparture is present but netWeightFisheryProductDeparture is missing", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "10",
+          // netWeightFisheryProductDeparture intentionally omitted
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors).toEqual({
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+    });
+  });
+});
+
+describe("validateStorageFacility - maximum future date validation (8+ days)", () => {
+  const handler = StorageNotes["/create-non-manipulation-document/:documentNumber/add-storage-facility-details"];
+
+  it("should set sdArrivalDateValidationError for a date that is 8+ days in the future", () => {
+    const eightDaysLater = new Date();
+    eightDaysLater.setDate(eightDaysLater.getDate() + 8);
+    const formatted = `${String(eightDaysLater.getDate()).padStart(2, '0')}/${String(eightDaysLater.getMonth() + 1).padStart(2, '0')}/${eightDaysLater.getFullYear()}`;
+
+    const data = {
+      facilityArrivalDate: formatted,
+      facilityName: "Test Facility",
+      facilityAddressOne: "123 Main St",
+      facilityTownCity: "London",
+      facilityPostcode: "EC1A 1BB",
+    };
+
+    const { errors } = handler({ data, errors: {}, _currentUrl: "", _nextUrl: "", _params: {} });
+    expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateValidationError");
+  });
+});
+
+describe("validateStorageFacility - partial address field validation", () => {
+  it("should set facilityAddressOne building error when facilityAddressOne is empty but other address fields are present", () => {
+    const today = new Date();
+    const todayFormatted = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
+    const { errors } = validateStorageFacility(
+      {
+        facilityArrivalDate: todayFormatted,
+        facilityName: "Test Facility",
+        facilityAddressOne: "",
+        facilityTownCity: "London",
+        facilityPostcode: "EC1A 1BB",
+      },
+      undefined,
+      {}
+    );
+
+    expect(errors["storageFacilities-facilityAddressOne"]).toBe("sdAddStorageFacilityDetailsErrorEnterTheBuilding");
+    expect(errors["storageFacilities-facilityTownCity"]).toBeUndefined();
+    expect(errors["storageFacilities-facilityPostcode"]).toBeUndefined();
+  });
+
+  it("should set facilityTownCity and facilityPostcode errors when facilityAddressOne is present but town/postcode are empty", () => {
+    const today = new Date();
+    const todayFormatted = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
+    const { errors } = validateStorageFacility(
+      {
+        facilityArrivalDate: todayFormatted,
+        facilityName: "Test Facility",
+        facilityAddressOne: "123 Main Street",
+        facilityTownCity: "",
+        facilityPostcode: "",
+      },
+      undefined,
+      {}
+    );
+
+    expect(errors["storageFacilities-facilityTownCity"]).toBe("sdAddStorageFacilityDetailsErrorEnterTheTown");
+    expect(errors["storageFacilities-facilityPostcode"]).toBe("sdAddStorageFacilityDetailsErrorEnterThePostcode");
+    expect(errors["storageFacilities-facilityAddressOne"]).toBeUndefined();
+  });
+
+  it("should return sdAddStorageFacilityDetailsErrorEditTheStorageFacility when isStorageFacilitiesPage is true and all address fields missing", () => {
+    const today = new Date();
+    const todayFormatted = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
+    const { errors } = validateStorageFacility(
+      {
+        facilityArrivalDate: todayFormatted,
+        facilityName: "Test Facility",
+      },
+      undefined,
+      {},
+      true
+    );
+
+    expect(errors["storageFacilities-facilityAddressOne"]).toBe("sdAddStorageFacilityDetailsErrorEditTheStorageFacility");
+  });
+});
+
+describe("validateDocumentType", () => {
+  it("should set error when certificateType is undefined", () => {
+    const errors = {};
+    const result = validateDocumentType({ certificateType: undefined }, 0, errors);
+    expect(result.errors["document-0-certificateType"]).toBe("sdAddCatchTypeErrorSelectCertificateType");
+  });
+
+  it("should set error when certificateType has an invalid value", () => {
+    const errors = {};
+    const result = validateDocumentType({ certificateType: "invalid_type" }, 0, errors);
+    expect(result.errors["document-0-certificateType"]).toBe("sdAddCatchTypeErrorCertificateTypeInvalid");
+  });
+
+  it("should not set error for valid certificateType 'uk'", () => {
+    const errors = {};
+    const result = validateDocumentType({ certificateType: "uk" }, 0, errors);
+    expect(result.errors["document-0-certificateType"]).toBeUndefined();
+  });
+
+  it("should not set error for valid certificateType 'non_uk'", () => {
+    const errors = {};
+    const result = validateDocumentType({ certificateType: "non_uk" }, 1, errors);
+    expect(result.errors["document-1-certificateType"]).toBeUndefined();
+  });
+});
+
+describe("checkNetWeightArrivalNotExceedFisheryWeight - fishery weight exceeds product weight", () => {
+  let mockValidatorSpeciesName: jest.SpyInstance;
+  let mockValidatorCommodityCode: jest.SpyInstance;
+  let mockValidateCountriesName: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockValidatorSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
+    mockValidatorSpeciesName.mockResolvedValue({ isError: false });
+    mockValidatorCommodityCode = jest.spyOn(CommodityCodeValidator, 'validateCommodityCode');
+    mockValidatorCommodityCode.mockResolvedValue({ isError: false });
+    mockValidateCountriesName = jest.spyOn(CountriesValidator, 'validateCountriesName');
+    mockValidateCountriesName.mockResolvedValue({ isError: false, error: null });
+  });
+
+  afterEach(() => {
+    mockValidatorSpeciesName.mockRestore();
+    mockValidatorCommodityCode.mockRestore();
+    mockValidateCountriesName.mockRestore();
+  });
+
+  it("should error when netWeightFisheryProductArrival exceeds netWeightProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          weightOnCC: "100",
+          product: "Atlantic Cod (COD)",
+          productDescription: "Fresh cod fillets",
+          commodityCode: "03023210",
+          certificateNumber: "CC-12345",
+          scientificName: "Gadus morhua",
+          certificateType: "non_uk",
+          netWeightProductArrival: "5",
+          netWeightFisheryProductArrival: "10",
+        },
+      ],
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: "SD",
+      userPrincipal: "bob",
+      contactId: "bob-contact-id",
+    });
+
+    expect(errors["catches-0-netWeightFisheryProductArrival"]).toBe("sdNetWeightFisheryProductArrivalExceedsProductArrival");
+  });
+});
+
+describe("validateStorageFacility - emoji validation", () => {
+  it("should return emojiCharactersNotPermitted for facilityName containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank \u{1F600} Marvin",
+        facilityAddressOne: "Fish Quay",
+        facilityTownCity: "Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityName"]).toBe("emojiCharactersNotPermitted");
+  });
+
+  it("should return emojiCharactersNotPermitted for facilityAddressOne containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank Marvin",
+        facilityAddressOne: "\u{1F3E0} Fish Quay",
+        facilityTownCity: "Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityAddressOne"]).toBe("emojiCharactersNotPermitted");
+  });
+
+  it("should return emojiCharactersNotPermitted for facilityTownCity containing emoji", () => {
+    const { errors } = validateStorageFacility(
+      {
+        facilityName: "Hank Marvin",
+        facilityAddressOne: "Fish Quay",
+        facilityTownCity: "\u{1F30A} Seaham",
+        facilityPostcode: "SE11EA",
+      },
+      undefined,
+      {}
+    );
+    expect(errors["storageFacilities-facilityTownCity"]).toBe("emojiCharactersNotPermitted");
+  });
 });
 
