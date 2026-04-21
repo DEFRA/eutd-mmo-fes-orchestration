@@ -387,7 +387,7 @@ export const submitToCatchSystem = async (
 
     logger.info(`[DOCUMENT-SUBMISSION][${documentNumber}][${operation.toUpperCase()}][SUCCESS]`);
   } catch (e) {
-    logger.error(`DOCUMENT-SUBMISSION][${documentNumber}][${operation.toUpperCase()}][ERROR] ${e}`);
+    logger.error(`[DOCUMENT-SUBMISSION][${documentNumber}][${operation.toUpperCase()}][ERROR] ${e}`);
     throw e;
   }
 };
