@@ -391,7 +391,7 @@ export default class ExportPayloadService {
   private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string, exportLocation: ExportLocation): Promise<void> {
     try {
       if (exportLocation === null) {
-        logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][EXPORT-LOCATION][${exportLocation}]`);
+        logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][EXPORT-LOCATION][null]`);
         return;
       }
 
