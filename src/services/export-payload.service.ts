@@ -60,7 +60,6 @@ export default class ExportPayloadService {
     const sessionLanding = sessionData.landings.find(_ => _.landingId === landing.model.id);
 
     if (sessionLanding) {
-      logger.info(`[GET-EXPORT-PAYLOAD][APPLYING-SESSION-DATA][${sessionLanding.landingId}`);
       landing.addMode = sessionLanding.addMode;
       landing.editMode = sessionLanding.editMode;
       landing.error = sessionLanding.error;
@@ -303,7 +302,7 @@ export default class ExportPayloadService {
           },
           documentNumber
         );
-
+        const exportLocation: ExportLocation = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId);
         await CatchCertService.completeDraft(userPrincipal, documentNumber, storageInfo.uri, email, contactId)
         await clearSessionDataForCurrentJourney(userPrincipal, documentNumber, contactId)
           .catch(e => { logger.error(`[CLEAR-SESSION-DATA][ERROR][${e}]`) });
@@ -331,7 +330,7 @@ export default class ExportPayloadService {
         updateConsolidateLandings(documentNumber)
           .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
 
-        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId);
+        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId, exportLocation);
         result.documentNumber = documentNumber;
         result.uri = storageInfo.uri;
 
@@ -389,9 +388,13 @@ export default class ExportPayloadService {
     }
   }
 
-  private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string): Promise<void> {
+  private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string, exportLocation: ExportLocation): Promise<void> {
     try {
-      const exportLocation: ExportLocation = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId);
+      if (exportLocation === null) {
+        logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][EXPORT-LOCATION][${exportLocation}]`);
+        return;
+      }
+
       const isoCodeAlpha2 = toExportedTo(exportLocation.exportedTo)?.isoCodeAlpha2;
       const isEuCountry = await EuCountriesService.isEuCountry(isoCodeAlpha2);
       logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);

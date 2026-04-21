@@ -112,6 +112,14 @@ describe('getItemByProductId', () => {
       .toThrow(`[PRODUCT-NOT-FOUND][PRODUCT-ID:${invalidId}]`);
   });
 
+  it('should throw product-not-found when exportPayload has no items (exportPayload?.items is falsy)', async () => {
+    mockGetDraftData.mockReturnValue(null); // becomes {} after || {}; {}.items is undefined
+
+    await expect(ExportPayloadService.getItemByProductId(USER_ID, PRODUCT_ID, undefined, CONTACT_ID))
+      .rejects
+      .toThrow(`[PRODUCT-NOT-FOUND][PRODUCT-ID:${PRODUCT_ID}]`);
+  });
+
 });
 
 describe('get', () => {
@@ -687,6 +695,18 @@ describe('get', () => {
     const result = await ExportPayloadService.get('User 1', undefined, CONTACT_ID);
 
     expect(result.items[0].landings[0]).toStrictEqual(expected);
+  });
+
+  it('should not merge session data when exportPayload has no items (exportPayload?.items is falsy)', async () => {
+    mockGetDocNumber.mockReturnValue("GB-3423423-432423-432");
+    mockGetDraftData.mockReturnValue({}); // no items property
+    mockGetSessionData.mockReturnValue(sessionStore); // sessionStore has landings — truthy
+
+    const result = await ExportPayloadService.get('User 1', undefined, CONTACT_ID);
+
+    // sessionData?.landings is truthy but exportPayload?.items is undefined,
+    // so the merge forEach is skipped and the bare {} is returned
+    expect(result).toStrictEqual({});
   });
 
 });
@@ -1546,6 +1566,46 @@ describe('upsertLanding', () => {
     });
   });
 
+  it('should skip session-data merge and return payload with empty items when exportPayload has no items (exportPayload?.items is falsy)', async () => {
+    mockGetDraftData.mockReturnValue({}); // no items property
+    mockSessionData.mockReturnValue({ landings: [{ landingId: 'test', addMode: true }] });
+
+    const result = await ExportPayloadService.upsertLanding('someProdId', { model: { id: 'newId' } }, 'Bob', 'GB-34324-34234-234234', CONTACT_ID);
+
+    // exportPayload?.items is undefined → forEach skipped; then !exportPayload.items sets items = []
+    expect(result).toStrictEqual({ items: [] });
+    expect(mockUpsertDraftData).not.toHaveBeenCalled();
+  });
+
+  it('should replace an empty-slot landing when lnd.model?.id is undefined (second find path)', async () => {
+    const existingPayload = {
+      items: [{
+        product: { id: 'someProdId' },
+        landings: [{
+          model: { id: undefined, numberOfSubmissions: 2 }
+        }]
+      }]
+    };
+    const newLanding = {
+      model: { id: 'newLandingId', numberOfSubmissions: 0 },
+      error: null,
+      errors: null
+    };
+    mockGetDraftData.mockReturnValue(existingPayload);
+    mockSessionData.mockReturnValue({ test: 'test' }); // no landings → sessionData?.landings falsy
+    mockUpsertDraftData.mockReturnValue(null);
+    mockReadAllFor.mockResolvedValue(existingPayload);
+    mockWriteAllFor.mockReturnValue(existingPayload);
+
+    const result = await ExportPayloadService.upsertLanding('someProdId', newLanding, 'Bob', 'GB-34324-34234-234234', CONTACT_ID);
+
+    // first find: lnd.model.id (undefined) !== 'newLandingId' → no match
+    // second find: lnd.model?.id === undefined → true → empty slot found and replaced
+    expect(result.items[0].landings[0].model.id).toBe('newLandingId');
+    // numberOfSubmissions preserved from the empty slot
+    expect(result.items[0].landings[0].model.numberOfSubmissions).toBe(2);
+  });
+
 });
 
 describe('save', () => {
@@ -1794,6 +1854,7 @@ describe('createExportCerticate', () => {
   let mockLoggerInfo: jest.SpyInstance;
   let mockClearSessionData: jest.SpyInstance;
   let mockUpdateConsolidateLandings: jest.SpyInstance;
+  let mockSetCatchSubmissionInProgress: jest.SpyInstance;
 
   beforeAll(() => {
     const mockGetExporterDetails = jest.spyOn(CatchCertService, 'getExporterDetails');
@@ -2008,7 +2069,10 @@ describe('createExportCerticate', () => {
     mockRefreshParallel.mockResolvedValue(null);
     mockRefreshSerial.mockResolvedValue(null);
     mockUpdateConsolidateLandings = jest.spyOn(LandingsConsolidateService, 'updateConsolidateLandings');
-    mockUpdateConsolidateLandings.mockResolvedValue(undefined)
+    mockUpdateConsolidateLandings.mockResolvedValue(undefined);
+
+    mockSetCatchSubmissionInProgress = jest.spyOn(CatchCertService, 'setCatchSubmissionInProgress');
+    mockSetCatchSubmissionInProgress.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -2023,7 +2087,9 @@ describe('createExportCerticate', () => {
 
     mockClearSessionData.mockRestore();
     mockCheckCertificate.mockRestore();
-    mockUpdateConsolidateLandings.mockRestore()
+    mockUpdateConsolidateLandings.mockRestore();
+
+    mockSetCatchSubmissionInProgress.mockRestore();
 
     if (mockGetDraft) mockGetDraft.mockRestore();
 
@@ -2461,6 +2527,17 @@ describe('createExportCerticate', () => {
       expect(mockLoggerError).toHaveBeenCalledWith(`[GETTING-BLOCKING-STATUS-CC][ERROR][${error}]`);
     });
 
+    it("should throw with empty message when error has no message property (e?.message is undefined)", async () => {
+      const error = {}; // no message, no stack properties
+      stubGetBlockingStatus.onCall(2).throws(error);
+
+      // e?.message is undefined → new Error(undefined) is thrown → message is ""
+      await expect(() => ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID)).rejects.toThrow();
+
+      expect(mockUpdateCertificateStatus).toHaveBeenCalledWith('Bob', 'GBR-2020-CC-F9F69D192', 'contactBob', 'DRAFT');
+      expect(mockLoggerError).toHaveBeenCalledWith(`[GETTING-BLOCKING-STATUS-CC][ERROR][${error}]`);
+    });
+
     it("should save any errors thrown whilst setting status to DRAFT", async () => {
       const error = new Error('an error has occurred');
       stubGetBlockingStatus.onCall(2).throws(error);
@@ -2720,6 +2797,77 @@ describe('createExportCerticate', () => {
 
     expect(result).toBeDefined();
     expect(result.documentNumber).toBe('GBR-2020-CC-F9F69D192');
+  });
+
+  it('should not call isEuCountry and should log export location when exportLocation is null', async () => {
+    const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
+
+    await (ExportPayloadService as any).submitToCatchIfEu('Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID, null);
+
+    expect(isEuSpy).not.toHaveBeenCalled();
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      '[SUBMIT-TO-CATCH-SYSTEM][GBR-2020-CC-F9F69D192][EXPORT-LOCATION][null]'
+    );
+
+    isEuSpy.mockRestore();
+  });
+
+  it('should log CHECK-EU-ERROR and not rethrow when isEuCountry check throws', async () => {
+    const euError = new Error('EU country check failed');
+    jest.spyOn(EuCountriesService, 'isEuCountry').mockRejectedValue(euError);
+
+    await (ExportPayloadService as any).submitToCatchIfEu(
+      'Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID,
+      { exportedTo: { isoCodeAlpha2: 'ES' } }
+    );
+
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      `[SUBMIT-TO-CATCH-SYSTEM][GBR-2020-CC-F9F69D192][CHECK-EU-ERROR][${euError}]`
+    );
+  });
+
+  it('should call isEuCountry with the isoCodeAlpha2 extracted from an exportedTo object (line 403)', async () => {
+    const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
+
+    await (ExportPayloadService as any).submitToCatchIfEu(
+      'Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID,
+      { exportedTo: { isoCodeAlpha2: 'FR', officialCountryName: 'France' } }
+    );
+
+    expect(isEuSpy).toHaveBeenCalledWith('FR');
+
+    isEuSpy.mockRestore();
+  });
+
+  it('should call isEuCountry with undefined when exportedTo is a legacy string (line 403)', async () => {
+    const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
+
+    await (ExportPayloadService as any).submitToCatchIfEu(
+      'Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID,
+      { exportedTo: 'France' }
+    );
+
+    // toExportedTo('France') returns { officialCountryName: 'France' } which has no isoCodeAlpha2
+    expect(isEuSpy).toHaveBeenCalledWith(undefined);
+
+    isEuSpy.mockRestore();
+  });
+
+  it('should log SET-CATCH-SUBMISSION-IN-PROGRESS error when setCatchSubmissionInProgress rejects during createExportCertificate', async () => {
+    const error = new Error('setCatchSubmissionInProgress failed');
+    mockSetCatchSubmissionInProgress.mockRejectedValue(error);
+    jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+    await new Promise(process.nextTick);
+
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      `[SET-CATCH-SUBMISSION-IN-PROGRESS][GBR-2020-CC-F9F69D192][ERROR][${error}]`
+    );
   });
 });
 
@@ -3448,5 +3596,165 @@ describe('catchSubmissionForCC', () => {
     );
 
     loggerErrorSpy.mockRestore();
+  });
+});
+
+describe('saveSystemError', () => {
+  const USER_PRINCIPAL = 'test-user';
+  const DOCUMENT_NUMBER = 'GBR-2020-CC-TEST123';
+
+  let mockUpdateCertificateStatus: jest.SpyInstance;
+  let mockSaveSystemError: jest.SpyInstance;
+  let mockLoggerInfo: jest.SpyInstance;
+  let mockLoggerError: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockUpdateCertificateStatus = jest.spyOn(CatchCertService, 'updateCertificateStatus');
+    mockSaveSystemError = jest.spyOn(SummaryErrorsService, 'saveSystemError');
+    mockLoggerInfo = jest.spyOn(logger, 'info');
+    mockLoggerError = jest.spyOn(logger, 'error');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should update certificate status to DRAFT', async () => {
+    mockUpdateCertificateStatus.mockResolvedValue(null);
+    mockSaveSystemError.mockResolvedValue(undefined);
+
+    await ExportPayloadService.saveSystemError(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockUpdateCertificateStatus).toHaveBeenCalledWith(
+      USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, DocumentStatuses.Draft
+    );
+  });
+
+  it('should log success after updating certificate status to DRAFT', async () => {
+    mockUpdateCertificateStatus.mockResolvedValue(null);
+    mockSaveSystemError.mockResolvedValue(undefined);
+
+    await ExportPayloadService.saveSystemError(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[CREATE-EXPORT-CERTIFICATE][${DOCUMENT_NUMBER}][UPDATED-STATUS][${DocumentStatuses.Draft}]`
+    );
+  });
+
+  it('should save system error with the correct failure object', async () => {
+    mockUpdateCertificateStatus.mockResolvedValue(null);
+    mockSaveSystemError.mockResolvedValue(undefined);
+
+    await ExportPayloadService.saveSystemError(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockSaveSystemError).toHaveBeenCalledWith(
+      USER_PRINCIPAL, DOCUMENT_NUMBER, { error: 'SYSTEM_ERROR' }, CONTACT_ID
+    );
+  });
+
+  it('should log error when updateCertificateStatus fails', async () => {
+    const error = new Error('update failed');
+    mockUpdateCertificateStatus.mockRejectedValue(error);
+    mockSaveSystemError.mockResolvedValue(undefined);
+
+    await ExportPayloadService.saveSystemError(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      `[CREATE-EXPORT-CERTIFICATE][${DOCUMENT_NUMBER}][UPDATE-STATUS][${DocumentStatuses.Draft}][ERROR], ${error}`
+    );
+  });
+
+  it('should continue to save system error even when updateCertificateStatus fails', async () => {
+    const error = new Error('update failed');
+    mockUpdateCertificateStatus.mockRejectedValue(error);
+    mockSaveSystemError.mockResolvedValue(undefined);
+
+    await ExportPayloadService.saveSystemError(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockSaveSystemError).toHaveBeenCalledWith(
+      USER_PRINCIPAL, DOCUMENT_NUMBER, { error: 'SYSTEM_ERROR' }, CONTACT_ID
+    );
+  });
+
+  it('should log error when saveSystemError fails', async () => {
+    const error = new Error('save failed');
+    mockUpdateCertificateStatus.mockResolvedValue(null);
+    mockSaveSystemError.mockRejectedValue(error);
+
+    await ExportPayloadService.saveSystemError(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID);
+
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      `[CREATE-EXPORT-CERTIFICATE][${DOCUMENT_NUMBER}][SAVE-ERRORS], ${error}`
+    );
+  });
+});
+
+describe('checkCertificate', () => {
+  const VALIDATION_URL = 'http://reference-service/v1/catchcertificates/validation/online';
+  const payloadToValidate = { documentNumber: 'GBR-2020-CC-TEST123', exportPayload: {} };
+
+  let mockLoggerInfo: jest.SpyInstance;
+  let mockLoggerError: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockLoggerInfo = jest.spyOn(logger, 'info').mockImplementation(() => {});
+    mockLoggerError = jest.spyOn(logger, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should call axios.post with the correct url and wrapped payload', async () => {
+    mockedAxios.post.mockResolvedValue({ data: { report: [], rawData: {} } });
+
+    await ExportPayloadService.checkCertificate(payloadToValidate, VALIDATION_URL);
+
+    expect(mockedAxios.post).toHaveBeenCalledWith(VALIDATION_URL, { dataToValidate: payloadToValidate });
+  });
+
+  it('should return res.data on a successful response', async () => {
+    const mockResponseData = { report: [{ failures: ['3C'] }], rawData: { certNumber: 'GBR-2020-CC-TEST123' } };
+    mockedAxios.post.mockResolvedValue({ data: mockResponseData });
+
+    const result = await ExportPayloadService.checkCertificate(payloadToValidate, VALIDATION_URL);
+
+    expect(result).toEqual(mockResponseData);
+  });
+
+  it('should log the report and rawData on success', async () => {
+    const mockResponseData = { report: [{ failures: ['3C'] }], rawData: { certNumber: 'GBR-2020-CC-TEST123' } };
+    mockedAxios.post.mockResolvedValue({ data: mockResponseData });
+
+    await ExportPayloadService.checkCertificate(payloadToValidate, VALIDATION_URL);
+
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[EXPORT-PAYLOAD-SERVICE][CHECK-CERTIFICATE] Report: ${JSON.stringify(mockResponseData.report)}`
+    );
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      `[EXPORT-PAYLOAD-SERVICE][CHECK-CERTIFICATE] Raw Data: ${JSON.stringify(mockResponseData.rawData)}`
+    );
+  });
+
+  it('should log the error and rethrow when axios.post rejects', async () => {
+    const error = new Error('network failure');
+    mockedAxios.post.mockRejectedValue(error);
+
+    await expect(ExportPayloadService.checkCertificate(payloadToValidate, VALIDATION_URL))
+      .rejects
+      .toThrow('network failure');
+
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      expect.stringContaining('[EXPORT-PAYLOAD-SERVICE][CHECK-CERTIFICATE][ERROR]')
+    );
+  });
+
+  it('should throw a new Error wrapping the original error on failure', async () => {
+    const error = new Error('upstream error');
+    mockedAxios.post.mockRejectedValue(error);
+
+    await expect(ExportPayloadService.checkCertificate(payloadToValidate, VALIDATION_URL))
+      .rejects
+      .toBeInstanceOf(Error);
   });
 });
