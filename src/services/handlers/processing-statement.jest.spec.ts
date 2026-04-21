@@ -1901,6 +1901,21 @@ describe("handler for /create-processing-statement/:documentNumber/add-catch-wei
     expect(errors).toEqual(expected);
   });
 
+  it("should return error when after-processing weight exceeds before-processing weight", async () => {
+    const { errors } = await handler({
+      data: {
+        catches: [{
+          catchCertificateType: 'uk',
+          exportWeightBeforeProcessing: '10',
+          exportWeightAfterProcessing: '11',
+        }]
+      },
+      errors: {},
+    });
+
+    expect(errors['catches-0-exportWeightAfterProcessing']).toBe('psAddCatchWeightsErrorExportWeightAfterProcessingExceedsBeforeProcessing');
+  });
+
   it("should return no errors", async () => {
     data = {
       catches: [
@@ -2100,6 +2115,41 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-wei
     };
 
     expect(errors).toEqual(expected);
+  });
+
+  it("should return error when after-processing weight exceeds before-processing weight for the corresponding catch", async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-catch-weights/:catchIndex';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          species: "Atlantic Cod",
+          catchCertificateNumber: "CT-111111",
+          catchCertificateType: 'uk',
+          exportWeightBeforeProcessing: "10",
+          exportWeightAfterProcessing: "5",
+        },
+        {
+          species: "Atlantic Herring",
+          catchCertificateNumber: "CT-222222",
+          catchCertificateType: 'uk',
+          exportWeightBeforeProcessing: "8",
+          exportWeightAfterProcessing: "9",
+        },
+      ],
+      consignmentDescription: "A description",
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {},
+      params: { catchIndex: 1 }
+    });
+
+    expect(errors).toEqual({
+      "catches-1-exportWeightAfterProcessing": "psAddCatchWeightsErrorExportWeightAfterProcessingExceedsBeforeProcessing"
+    });
   });
 });
 
