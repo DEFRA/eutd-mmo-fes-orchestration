@@ -93,7 +93,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().custom(validateNoEmoji).alphanum().max(15).required(),
+      otherwise: Joi.string().trim().max(15).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9]+$/)).required(),
     }),
     otherwise: Joi.forbidden(),
   }),
@@ -138,7 +138,7 @@ const catchCertificateTransportDetailsSchema = Joi.object({
     then: Joi.when('$query.draft', {
       is: true,
       then: Joi.any(),
-      otherwise: Joi.string().trim().required(),
+      otherwise: Joi.string().trim().custom(validateNoEmoji).required(),
     }),
     otherwise: Joi.forbidden()
   }),
