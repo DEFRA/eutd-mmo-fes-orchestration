@@ -55,7 +55,7 @@ const containerVesselSchema = Joi.object({
   freightBillNumber: Joi.string().allow('').trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),
   departurePort: Joi.string().trim().allow('').optional().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'\s]+$/)),
   journey: Joi.string(),
-  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY','D/M/YYYY']).optional(),
+  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY','D/M/YYYY']).max('now').optional(),
   exportDateTo: Joi.when('arrival', {
     is: true,
     then: Joi.date().optional(),

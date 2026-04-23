@@ -123,16 +123,28 @@ export default class TransportRoutes {
                   transportDetails: [
                   ]
                 }
-
+                const payload = req.payload as any;
                 const isHtml = acceptsHtml(req.headers);
                 const errorObject = errorExtractor(error);
+                const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
 
+                if (errorObject['departureDate'] && vehicleCapitalized) {
+                  errorObject['departureDate'] = payload.facilityArrivalDate
+                    ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                    : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                }
                 if (isHtml) {
                   const inputFields = ["registrationNumber", "nationalityOfVehicle", "departurePlace", "exportDate", "facilityArrivalDate"];
-                  const result = nonJSInputHistory(req.payload, params, inputFields);
+                  const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
+                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                    jsErrorObject['departureDate'] = payload.facilityArrivalDate
+                      ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                      : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                  }
+
+                  return h.redirect(`${payload.currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
                 }
 
                 return h.response(errorObject).code(400).takeover();
@@ -166,16 +178,29 @@ export default class TransportRoutes {
                 const params = {
                   transportDetails: []
                 }
-
+                const payload = req.payload as any;
                 const errorObject = errorExtractor(error);
                 const isHtml = acceptsHtml(req.headers);
+                const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
+
+                if (errorObject['departureDate'] && vehicleCapitalized) {
+                  errorObject['departureDate'] = payload.facilityArrivalDate
+                    ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                    : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                }
 
                 if (isHtml) {
                   const inputFields = ["flightNumber", "containerNumber", "departurePlace", "exportDate", "facilityArrivalDate"];
-                  const result = nonJSInputHistory(req.payload, params, inputFields);
+                  const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
+                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                    jsErrorObject['departureDate'] = payload.facilityArrivalDate
+                      ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                      : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                  }
+
+                  return h.redirect(`${payload.currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
                 }
 
                 return h.response(errorObject).code(400).takeover();
@@ -209,17 +234,31 @@ export default class TransportRoutes {
               failAction: function (req, h, error) {
                 const errorObject = errorExtractor(error);
                 const isHtml = acceptsHtml(req.headers);
+                const payload = req.payload as any;
                 const params = {
                   transportDetails: [
                   ]
                 }
+                const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
+
+                if (errorObject['departureDate'] && vehicleCapitalized) {
+                  errorObject['departureDate'] = payload.facilityArrivalDate
+                    ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                    : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                }
 
                 if (isHtml) {
                   const inputFields = ["railwayBillNumber", "departurePlace", "exportDate", "facilityArrivalDate"];
-                  const result = nonJSInputHistory(req.payload, params, inputFields);
+                  const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
+                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                    jsErrorObject['departureDate'] = payload.facilityArrivalDate
+                      ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                      : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                  }
+
+                  return h.redirect(`${payload.currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
                 }
 
                 return h.response(errorObject).code(400).takeover();
@@ -252,17 +291,31 @@ export default class TransportRoutes {
               failAction: function (req, h, error) {
                 const errorObject = errorExtractor(error);
                 const isHtml = acceptsHtml(req.headers);
+                const payload = req.payload as any;
                 const params = {
                   transportDetails: [
                   ]
                 }
+                const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
+
+                if (errorObject['departureDate'] && vehicleCapitalized) {
+                  errorObject['departureDate'] = payload.facilityArrivalDate
+                    ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                    : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                }
 
                 if (isHtml) {
                   const inputFields = ["vesselName", "flagState", "containerNumber", "departurePlace", "exportDate"];
-                  const result = nonJSInputHistory(req.payload, params, inputFields);
+                  const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
+                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                    jsErrorObject['departureDate'] = payload.facilityArrivalDate
+                      ? `error${vehicleCapitalized}DepartureDateAnyMax`
+                      : `error${vehicleCapitalized}DepartureDateTodayMax`;
+                  }
+
+                  return h.redirect(`${payload.currentUri}?error=` + JSON.stringify(jsErrorObject)).takeover();
                 }
                 return h.response(errorObject).code(400).takeover();
               },
