@@ -88,7 +88,7 @@ const containerVesselSchema = Joi.object({
     then: Joi.when('facilityArrivalDate', {
       is: Joi.exist(),
       then: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max(Joi.ref('facilityArrivalDate')).empty('').required(),
-      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max('now').empty('').required()
+      otherwise: Joi.date().format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).empty('').required()
     }),
     otherwise: Joi.date().allow('').allow(null).format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max('now').optional()
   })
