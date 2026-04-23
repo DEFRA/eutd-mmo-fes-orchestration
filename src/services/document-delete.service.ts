@@ -4,6 +4,7 @@ import * as ProcessingStatementService from '../persistence/services/processingS
 import * as StorageDocumentService from '../persistence/services/storageDoc'
 import {
   CATCH_CERTIFICATE_KEY,
+  DRAFT_HEADERS_KEY,
   PROCESSING_STATEMENT_KEY,
   STORAGE_NOTES_KEY
 } from '../session_store/constants';
@@ -36,7 +37,12 @@ export default class DocumentDeleteService {
       }
 
       await clearSessionDataForCurrentJourney(userPrincipal, documentNumber, contactId);
-      void CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
+
+      const draftHeadersKey = `${journey}/${DRAFT_HEADERS_KEY}`;
+      await Promise.all([
+        CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId),
+        CatchCertService.invalidateDraftCache(userPrincipal, draftHeadersKey, contactId),
+      ]);
     } catch (e) {
       logger.error(`[DELETING-DRAFT][ERROR: ${e}]`);
       throw new Error(e.message);
