@@ -47,12 +47,12 @@ import * as EuCountriesService from './eu-countries.service';
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
 export const processingStatement: string = "processingStatement";
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 
 const { unflatten } = require("flat");
 const flatten = require("flat");
 const _ = require("lodash");
-const https = require('https');
+const https = require('node:https');
 
 export default class OrchestrationService {
   public static async get(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {

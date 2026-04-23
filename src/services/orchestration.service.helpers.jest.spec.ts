@@ -388,4 +388,65 @@ describe('helper functions', () => {
       expect(Service.isApprovalNumberValid('')).toBeTruthy();
     });
   });
+
+  describe('OrchestrationService.handleErrors()', () => {
+    it('should set errors on data and originalSessionData when errors are present', () => {
+      const errors = { field: 'error.field.required' };
+      const data: any = {};
+      const originalSessionData: any = {};
+      const urlsObj = { currentUrl: '/page/:documentNumber', nextUrl: '/next/:documentNumber' };
+
+      const next = Service.default.handleErrors(errors, data, 'DOC123', originalSessionData, null, urlsObj, null);
+
+      expect(data.errors).toEqual(errors);
+      expect(data.errorsUrl).toBe('/page/DOC123');
+      expect(originalSessionData.errors).toEqual(errors);
+      expect(next).toBe('/page/:documentNumber');
+    });
+
+    it('should set next to provided value when errors exist and next is given', () => {
+      const errors = { field: 'error' };
+      const data: any = {};
+      const originalSessionData: any = {};
+      const urlsObj = { currentUrl: '/page/:documentNumber', nextUrl: '/next' };
+
+      const next = Service.default.handleErrors(errors, data, 'DOC123', originalSessionData, '/custom', urlsObj, null);
+
+      expect(next).toBe('/custom');
+    });
+
+    it('should delete errors and set next to nextUrl when no errors', () => {
+      const data: any = { errors: 'old', errorsUrl: 'old' };
+      const originalSessionData: any = {};
+      const urlsObj = { currentUrl: '/page', nextUrl: '/next' };
+
+      const next = Service.default.handleErrors(null, data, 'DOC123', originalSessionData, null, urlsObj, null);
+
+      expect(data.errors).toBeUndefined();
+      expect(data.errorsUrl).toBeUndefined();
+      expect(next).toBe('/next');
+    });
+
+    it('should set setOnValidationSuccess key on data when no errors', () => {
+      const data: any = {};
+      const originalSessionData: any = {};
+      const urlsObj = { currentUrl: '/page', nextUrl: '/next' };
+
+      Service.default.handleErrors(null, data, 'DOC123', originalSessionData, null, urlsObj, 'validated');
+
+      expect(data.validated).toBe(true);
+    });
+  });
+
+  describe('OrchestrationService.checkSaveToRedis()', () => {
+    it('should return true when saveToRedisIfErrors query param is set', () => {
+      const req = { query: { saveToRedisIfErrors: 'true' } } as any;
+      expect(Service.default.checkSaveToRedis(req)).toBeTruthy();
+    });
+
+    it('should return falsy when saveToRedisIfErrors query param is not set', () => {
+      const req = { query: {} } as any;
+      expect(Service.default.checkSaveToRedis(req)).toBeFalsy();
+    });
+  });
 });
