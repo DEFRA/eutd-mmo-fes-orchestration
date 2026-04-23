@@ -127,8 +127,11 @@ export default class TransportRoutes {
                 const isHtml = acceptsHtml(req.headers);
                 const errorObject = errorExtractor(error);
                 const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
+                const hasDepartureDateMaxError = (error as any)?.details?.some(
+                  (d: any) => d.path?.[0] === 'departureDate' && d.type === 'date.max'
+                );
 
-                if (errorObject['departureDate'] && vehicleCapitalized) {
+                if (hasDepartureDateMaxError && vehicleCapitalized) {
                   errorObject['departureDate'] = payload.facilityArrivalDate
                     ? `error${vehicleCapitalized}DepartureDateAnyMax`
                     : `error${vehicleCapitalized}DepartureDateTodayMax`;
@@ -138,7 +141,7 @@ export default class TransportRoutes {
                   const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                  if (hasDepartureDateMaxError && vehicleCapitalized) {
                     jsErrorObject['departureDate'] = payload.facilityArrivalDate
                       ? `error${vehicleCapitalized}DepartureDateAnyMax`
                       : `error${vehicleCapitalized}DepartureDateTodayMax`;
@@ -182,8 +185,11 @@ export default class TransportRoutes {
                 const errorObject = errorExtractor(error);
                 const isHtml = acceptsHtml(req.headers);
                 const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
+                const hasDepartureDateMaxError = (error as any)?.details?.some(
+                  (d: any) => d.path?.[0] === 'departureDate' && d.type === 'date.max'
+                );
 
-                if (errorObject['departureDate'] && vehicleCapitalized) {
+                if (hasDepartureDateMaxError && vehicleCapitalized) {
                   errorObject['departureDate'] = payload.facilityArrivalDate
                     ? `error${vehicleCapitalized}DepartureDateAnyMax`
                     : `error${vehicleCapitalized}DepartureDateTodayMax`;
@@ -194,7 +200,7 @@ export default class TransportRoutes {
                   const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                  if (hasDepartureDateMaxError && vehicleCapitalized) {
                     jsErrorObject['departureDate'] = payload.facilityArrivalDate
                       ? `error${vehicleCapitalized}DepartureDateAnyMax`
                       : `error${vehicleCapitalized}DepartureDateTodayMax`;
@@ -240,8 +246,11 @@ export default class TransportRoutes {
                   ]
                 }
                 const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
+                const hasDepartureDateMaxError = (error as any)?.details?.some(
+                  (d: any) => d.path?.[0] === 'departureDate' && d.type === 'date.max'
+                );
 
-                if (errorObject['departureDate'] && vehicleCapitalized) {
+                if (hasDepartureDateMaxError && vehicleCapitalized) {
                   errorObject['departureDate'] = payload.facilityArrivalDate
                     ? `error${vehicleCapitalized}DepartureDateAnyMax`
                     : `error${vehicleCapitalized}DepartureDateTodayMax`;
@@ -252,7 +261,7 @@ export default class TransportRoutes {
                   const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                  if (hasDepartureDateMaxError && vehicleCapitalized) {
                     jsErrorObject['departureDate'] = payload.facilityArrivalDate
                       ? `error${vehicleCapitalized}DepartureDateAnyMax`
                       : `error${vehicleCapitalized}DepartureDateTodayMax`;
@@ -297,8 +306,11 @@ export default class TransportRoutes {
                   ]
                 }
                 const vehicleCapitalized = payload?.vehicle ? payload.vehicle.charAt(0).toUpperCase() + payload.vehicle.slice(1) : '';
+                const hasDepartureDateMaxError = (error as any)?.details?.some(
+                  (d: any) => d.path?.[0] === 'departureDate' && d.type === 'date.max'
+                );
 
-                if (errorObject['departureDate'] && vehicleCapitalized) {
+                if (hasDepartureDateMaxError && vehicleCapitalized) {
                   errorObject['departureDate'] = payload.facilityArrivalDate
                     ? `error${vehicleCapitalized}DepartureDateAnyMax`
                     : `error${vehicleCapitalized}DepartureDateTodayMax`;
@@ -309,7 +321,7 @@ export default class TransportRoutes {
                   const result = nonJSInputHistory(payload, params, inputFields);
                   const jsErrorObject = buildNonJsErrorObject(error, result);
 
-                  if (jsErrorObject['departureDate'] && vehicleCapitalized) {
+                  if (hasDepartureDateMaxError && vehicleCapitalized) {
                     jsErrorObject['departureDate'] = payload.facilityArrivalDate
                       ? `error${vehicleCapitalized}DepartureDateAnyMax`
                       : `error${vehicleCapitalized}DepartureDateTodayMax`;
