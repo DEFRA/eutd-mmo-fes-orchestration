@@ -623,7 +623,7 @@ describe("transport routes", () => {
             expect(mockAddTransport).not.toHaveBeenCalled();
         });
 
-        it('returns 200 when we POST an arrival when departureDate is past today\'s date /v1/transport/truck/details (date max validation moved to controller)', async () => {
+        it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/truck/details', async () => {
             const body = {
               journey: "storageNotes",
               nationalityOfVehicle: "UK",
@@ -639,9 +639,9 @@ describe("transport routes", () => {
 
             const request = createRequestObj('/v1/transport/truck/details', body, 'POST')
             const response = await server.inject(request);
-            expect(response.statusCode).toBe(200);
-            expect(mockAddTransport).toHaveBeenCalled();
-            expect(response.result).toEqual({ some: 'data' });
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({ departureDate: "errorTruckDepartureDateTodayMax" });
         });
 
         it('returns 400 when we POST an arrival when registrationNumber and placeOfUnloading are past empty to /v1/transport/truck/details', async () => {
@@ -693,7 +693,7 @@ describe("transport routes", () => {
             expect(response.result).toEqual({ some: 'data' });
         });
 
-        it('returns 200 when we POST an arrival when departureDate is past today\'s date /v1/transport/train/details (date max validation moved to controller)', async () => {
+        it('returns 400 when we POST an arrival when departureDate is past today\'s date /v1/transport/train/details', async () => {
             const body = {
               journey: "storageNotes",
               railwayBillNumber: "RAIL1111",
@@ -708,9 +708,9 @@ describe("transport routes", () => {
 
             const request = createRequestObj('/v1/transport/train/details', body, 'POST')
             const response = await server.inject(request);
-            expect(response.statusCode).toBe(200);
-            expect(mockAddTransport).toHaveBeenCalled();
-            expect(response.result).toEqual({ some: 'data' });
+            expect(response.statusCode).toBe(400);
+            expect(mockAddTransport).not.toHaveBeenCalled();
+            expect(response.result).toEqual({ departureDate: "errorTrainDepartureDateTodayMax" });
         });
 
         it('returns 400 when we POST an arrival when placeOfUnloading, railwayBillNumber and required arrival fields are empty /v1/transport/train/details', async () => {
@@ -779,6 +779,7 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
+                departureDate: "errorContainerVesselDepartureDateTodayMax",
                 departureCountry: "error.departureCountry.any.required",
                 departurePort: "error.departurePort.any.required",
                 placeOfUnloading: "error.placeOfUnloading.any.required",
@@ -907,6 +908,7 @@ describe("transport routes", () => {
             expect(response.statusCode).toBe(400);
             expect(mockAddTransport).not.toHaveBeenCalled();
             expect(response.result).toEqual({
+                departureDate: "errorPlaneDepartureDateTodayMax",
                 flightNumber: "error.flightNumber.string.empty",
                 departureCountry: "error.departureCountry.string.empty",
                 departurePort: "error.departurePort.string.empty",
