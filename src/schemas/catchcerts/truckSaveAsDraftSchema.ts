@@ -60,7 +60,7 @@ const truckSaveAsDraftSchema = Joi.object({
   }),
   departureCountry: Joi.string().allow('').optional(),
   departurePort: Joi.string().allow('').trim().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-"' ]+$/)).optional(),
-  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).optional()
+  departureDate: Joi.date().allow('').format(['DD/MM/YYYY', 'DD/M/YYYY', 'D/MM/YYYY', 'D/M/YYYY']).max('now').optional()
 })
 
 export default truckSaveAsDraftSchema;

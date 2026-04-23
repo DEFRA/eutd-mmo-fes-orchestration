@@ -331,7 +331,12 @@ export const upsertTransportDetails = async (userPrincipal: string, payload: Tra
 export const getTransportDetails = async (userPrincipal: string, documentNumber: string, contactId: string, arrival?: boolean): Promise<Transport> => {
   const draft = await getDraft(userPrincipal, documentNumber, contactId);
   const transportation = arrival ? draft?.exportData?.arrivalTransportation : draft?.exportData?.transportation;
-  return transportation ? toFrontEndTransport(transportation) : null;
+  if (!transportation) return null;
+  const frontEndTransport = toFrontEndTransport(transportation);
+  if (frontEndTransport && draft?.exportData?.facilityArrivalDate) {
+    frontEndTransport.facilityArrivalDate = draft.exportData.facilityArrivalDate;
+  }
+  return frontEndTransport;
 };
 
 export const upsertExportLocation = async (userPrincipal: string, payload: ExportLocation, documentNumber: string, contactId: string) => {
