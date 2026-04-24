@@ -5324,11 +5324,11 @@ describe('getStorageDocumentProgress', () => {
         exporter: ProgressStatus.COMPLETED,
         reference: ProgressStatus.COMPLETED,
         catches: ProgressStatus.COMPLETED,
-        storageFacilities: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.COMPLETED,
         transportDetails: ProgressStatus.INCOMPLETE,
         arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 2,
+      completedSections: 3,
       requiredSections: 5
     };
 

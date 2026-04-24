@@ -644,7 +644,10 @@ export default class ProgressService {
     // Check if facility arrival date is after the departure date from arrival transportation
     const facilityStatus = ProgressService.getStorageFacilityStatus(data?.exportData?.facilityName, data?.exportData?.facilityAddressOne, data?.exportData?.facilityTownCity, data?.exportData?.facilityPostcode, data?.exportData?.facilityArrivalDate, data?.exportData?.facilityStorage);
     const isFacilityArrivalDateAfterDeparture = ProgressService.isFacilityArrivalAfterTransportDeparture(data?.exportData?.arrivalTransportation, data?.exportData?.facilityArrivalDate);
-    const storageFacilitiesStatus = data?.exportData?.arrivalTransportation && isFacilityArrivalDateAfterDeparture && !hasFacilityValidationErrors ? facilityStatus : ProgressStatus.INCOMPLETE;
+    const storageFacilitiesStatus = !hasFacilityValidationErrors &&
+      (!data?.exportData?.arrivalTransportation || isFacilityArrivalDateAfterDeparture)
+        ? facilityStatus
+        : ProgressStatus.INCOMPLETE;
 
     // Check if departure transportation date is after arrival transportation departure date
     const isDepartureAfterArrival = data?.exportData?.arrivalTransportation ? ProgressService.isDepartureTransportAfterArrivalTransport(data?.exportData?.transportation, data?.exportData?.arrivalTransportation) : true;
