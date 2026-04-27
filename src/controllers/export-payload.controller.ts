@@ -1015,6 +1015,12 @@ export default class ExportPayloadController {
       const transport = await TransportService.getTransportData(userPrincipal, 'catchCertificate', documentNumber, contactId);
       await CatchCertService.upsertTransportDetails(userPrincipal, { ...transport, vehicle: fishingVessel }, documentNumber, contactId);
     }
+    try {
+      const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
+      await sessionStore.deleteFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber));
+    } catch (e) {
+      logger.warn(`[LANDINGS-TYPE][CACHE-INVALIDATE][ERROR][${(e)?.message || e}]`);
+    }
   }
 
   public static async confirmLandingsType(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {
