@@ -1010,11 +1010,13 @@ export default class ExportPayloadController {
   }
 
   public static async addLandingsEntryOption(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {
-    await CatchCertService.upsertLandingsEntryOption(userPrincipal, documentNumber, landingsEntryOption, contactId);
-    if (landingsEntryOption === fishingVessel) {
-      const transport = await TransportService.getTransportData(userPrincipal, 'catchCertificate', documentNumber, contactId);
-      await CatchCertService.upsertTransportDetails(userPrincipal, { ...transport, vehicle: fishingVessel }, documentNumber, contactId);
-    }
+      await CatchCertService.upsertLandingsEntryOption(userPrincipal, documentNumber, landingsEntryOption, contactId);
+      if (landingsEntryOption === fishingVessel) {
+        const transport = await TransportService.getTransportData(userPrincipal, 'catchCertificate', documentNumber, contactId);
+        await CatchCertService.upsertTransportDetails(userPrincipal, { ...transport, vehicle: fishingVessel }, documentNumber, contactId);
+      }
+      const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
+      await sessionStore.deleteFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber));
   }
 
   public static async confirmLandingsType(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {
