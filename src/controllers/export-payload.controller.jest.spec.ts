@@ -3196,6 +3196,17 @@ describe('addLandingsEntryOption', () => {
       SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId)
     ).resolves.not.toThrow();
   });
+
+  it('should log a warning if cache invalidation throws', async () => {
+    const cacheError = new Error('cache error');
+    spyFactory.mockResolvedValue({ deleteFor: jest.fn().mockRejectedValue(cacheError) });
+    const mockWarn = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+
+    await SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
+
+    expect(mockWarn).toHaveBeenCalledWith(`[LANDINGS-TYPE][CACHE-INVALIDATE][ERROR][${cacheError.message}]`);
+    mockWarn.mockRestore();
+  });
 });
 
 describe("confirmLandingsType", () => {
