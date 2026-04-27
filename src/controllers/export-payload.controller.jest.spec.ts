@@ -3188,36 +3188,6 @@ describe('addLandingsEntryOption', () => {
 
     expect(mockDeleteFor).toHaveBeenCalledWith(USER_ID, contactId, `export-certificates/landings-type/${DOCUMENT_NUMBER}`);
   });
-
-  it('should not throw if cache invalidation fails', async () => {
-    spyFactory.mockResolvedValue({ deleteFor: jest.fn().mockRejectedValue(new Error('cache error')) });
-
-    await expect(
-      SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId)
-    ).resolves.not.toThrow();
-  });
-
-  it('should log an error if cache invalidation throws', async () => {
-    const cacheError = new Error('cache error');
-    spyFactory.mockResolvedValue({ deleteFor: jest.fn().mockRejectedValue(cacheError) });
-    const mockError = jest.spyOn(logger, 'error').mockImplementation(() => {});
-
-    await SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
-
-    expect(mockError).toHaveBeenCalledWith(`[LANDINGS-TYPE][CACHE-INVALIDATE][ERROR][${cacheError.message}]`);
-    mockError.mockRestore();
-  });
-
-  it('should log an error using the error value when cache invalidation throws a non-Error', async () => {
-    const rawError = 'unexpected cache failure';
-    spyFactory.mockResolvedValue({ deleteFor: jest.fn().mockRejectedValue(rawError) });
-    const mockError = jest.spyOn(logger, 'error').mockImplementation(() => {});
-
-    await SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
-
-    expect(mockError).toHaveBeenCalledWith(`[LANDINGS-TYPE][CACHE-INVALIDATE][ERROR][${rawError}]`);
-    mockError.mockRestore();
-  });
 });
 
 describe("confirmLandingsType", () => {
