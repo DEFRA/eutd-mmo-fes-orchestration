@@ -3207,6 +3207,17 @@ describe('addLandingsEntryOption', () => {
     expect(mockWarn).toHaveBeenCalledWith(`[LANDINGS-TYPE][CACHE-INVALIDATE][ERROR][${cacheError.message}]`);
     mockWarn.mockRestore();
   });
+
+  it('should log a warning using the error value when cache invalidation throws a non-Error', async () => {
+    const rawError = 'unexpected cache failure';
+    spyFactory.mockResolvedValue({ deleteFor: jest.fn().mockRejectedValue(rawError) });
+    const mockWarn = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+
+    await SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
+
+    expect(mockWarn).toHaveBeenCalledWith(`[LANDINGS-TYPE][CACHE-INVALIDATE][ERROR][${rawError}]`);
+    mockWarn.mockRestore();
+  });
 });
 
 describe("confirmLandingsType", () => {
