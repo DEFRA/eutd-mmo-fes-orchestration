@@ -1010,7 +1010,6 @@ export default class ExportPayloadController {
   }
 
   public static async addLandingsEntryOption(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {
-    try {
       await CatchCertService.upsertLandingsEntryOption(userPrincipal, documentNumber, landingsEntryOption, contactId);
       if (landingsEntryOption === fishingVessel) {
         const transport = await TransportService.getTransportData(userPrincipal, 'catchCertificate', documentNumber, contactId);
@@ -1018,9 +1017,6 @@ export default class ExportPayloadController {
       }
       const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
       await sessionStore.deleteFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber));
-    } catch (e) {
-      logger.error(`[LANDINGS-TYPE][CACHE-INVALIDATE][ERROR][${(e)?.message || e}]`);
-    }
   }
 
   public static async confirmLandingsType(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {
