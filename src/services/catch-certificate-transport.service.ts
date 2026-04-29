@@ -23,9 +23,9 @@ export default class CatchCertificateTransportService {
     return null;
   }
 
-  public static async getTransportations(userPrincipal: string, documentNumber: string, contactId: string): Promise<CatchCertificateTransport[]> {
-    const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
-    const transportations: BackEndModels.CatchCertificateTransport[] = draft.exportData.transportations;
+  public static async getTransportations(userPrincipal: string, documentNumber: string, contactId: string, draft?: BackEndModels.CatchCertificate): Promise<CatchCertificateTransport[]> {
+    const doc: BackEndModels.CatchCertificate = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
+    const transportations: BackEndModels.CatchCertificateTransport[] = doc.exportData.transportations;
 
     if (Array.isArray(transportations)) {
       return transportations.map((transportation: BackEndModels.CatchCertificateTransport) => toFrontEndTransport(transportation));
@@ -34,17 +34,17 @@ export default class CatchCertificateTransportService {
     return [];
   }
 
-  public static async getTransportationDetails(userPrincipal: string, documentNumber: string, contactId: string): Promise<CatchCertificateTransport | Transport.Transport> {
-    const draft: BackEndModels.CatchCertificate = await getDraft(userPrincipal, documentNumber, contactId);
-    const transportations: BackEndModels.CatchCertificateTransport[] = draft.exportData.transportations;
+  public static async getTransportationDetails(userPrincipal: string, documentNumber: string, contactId: string, draft?: BackEndModels.CatchCertificate): Promise<CatchCertificateTransport | Transport.Transport> {
+    const doc: BackEndModels.CatchCertificate = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
+    const transportations: BackEndModels.CatchCertificateTransport[] = doc.exportData.transportations;
 
     if (Array.isArray(transportations) && transportations.length > 0) {
       const _ = transportations.find((t: BackEndModels.CatchCertificateTransport) => t.departurePlace || t.vehicle === truck && (t as BackEndModels.CatchCertificateTruck).cmr);
       return toFrontEndTransport(_);
     }
 
-    return (draft?.exportData?.transportation)
-      ? Transport.toFrontEndTransport(draft.exportData.transportation)
+    return (doc?.exportData?.transportation)
+      ? Transport.toFrontEndTransport(doc.exportData.transportation)
       : null;
   }
 
