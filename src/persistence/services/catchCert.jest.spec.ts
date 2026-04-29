@@ -1550,6 +1550,23 @@ describe('catchCert - db related', () => {
 
       expect(res).toEqual('mapped');
     });
+
+    it('should use pre-fetched draft and not call getDraft', async () => {
+      const draft = createDraft({
+        products: [{ speciesId: '1' } as any],
+        transportation: null,
+        transportations: null,
+        conservation: null,
+        exporterDetails: null
+      });
+      mockGetDraft.mockClear();
+      mockMap.mockReturnValue('mapped');
+
+      const res = await CatchCertService.getExportPayload('Bob', 'doc-prefetched', contactId, draft);
+
+      expect(mockGetDraft).not.toHaveBeenCalled();
+      expect(res).toEqual('mapped');
+    });
   });
 
   describe('getDirectExportPayload', () => {
@@ -1717,6 +1734,24 @@ describe('catchCert - db related', () => {
       expect(res).toStrictEqual('mapped');
       expect(mockGetDraft).toHaveBeenCalledWith(defaultUser, 'GBR-3444-42356-64834', contactId);
       expect(mockMap).toHaveBeenCalledWith(draft?.exportData);
+    });
+
+    it('should use pre-fetched draft and not call getDraft', async () => {
+      const draft = createDraft({
+        products: null,
+        transportation: null,
+        transportations: null,
+        conservation: null,
+        exporterDetails: null,
+        exportedFrom: 'UK',
+        exportedTo: { officialCountryName: 'Spain', isoCodeAlpha2: 'ES', isoCodeAlpha3: 'ESP', isoNumericCode: '724' }
+      } as any);
+      mockGetDraft.mockClear();
+      mockMap.mockReturnValue('mapped');
+
+      await CatchCertService.getExportLocation(defaultUser, 'doc-prefetched', contactId, draft);
+
+      expect(mockGetDraft).not.toHaveBeenCalled();
     });
   });
 
@@ -2406,6 +2441,23 @@ describe('catchCert - db related', () => {
         expect(mockGet).toHaveBeenCalledWith(defaultUser, 'GBR-3444-42356-64834', contactId);
         expect(mockMap).toHaveBeenCalledWith(draft?.exportData.conservation);
       });
+
+      it('should use pre-fetched draft and not call getDraft', async () => {
+        const draft = createDraft({
+          products: null,
+          transportation: null,
+          transportations: null,
+          conservation: { conservationReference: 'UK Fisheries Policy' } as any,
+          exporterDetails: null
+        });
+        mockGet.mockClear();
+        mockMap.mockReturnValue('mapped');
+
+        const res = await CatchCertService.getConservation(defaultUser, 'doc-prefetched', contactId, draft);
+
+        expect(mockGet).not.toHaveBeenCalled();
+        expect(res).toEqual('mapped');
+      });
     });
 
     describe('upsertExporterDetails', () => {
@@ -2570,6 +2622,22 @@ describe('catchCert - db related', () => {
         await CatchCertService.getExporterDetails(defaultUser, 'GBR-34344234-24323423-234234', contactId);
 
         expect(mockGet).toHaveBeenCalledWith("Bob", "GBR-34344234-24323423-234234", contactId);
+      });
+
+      it('should use pre-fetched draft and not call getDraft', async () => {
+        const draft = createDraft({
+          products: null,
+          transportation: null,
+          transportations: null,
+          conservation: null,
+          exporterDetails: { exporterFullName: 'Test Exporter' } as any
+        });
+        mockGet.mockClear();
+        mockMap.mockReturnValue({ model: { exporterFullName: 'Test Exporter' } });
+
+        await CatchCertService.getExporterDetails(defaultUser, 'doc-prefetched', contactId, draft);
+
+        expect(mockGet).not.toHaveBeenCalled();
       });
     });
 
@@ -2997,6 +3065,25 @@ describe('getLandingsEntryOption', () => {
 
     expect(result).toBe(CatchCertSchema.LandingsEntryOptions.ManualEntry);
     expect(mockGetDraft).toHaveBeenCalledWith(userPrincipal, documentNumber, contactId);
+  });
+
+  it('should use pre-fetched draft and not call getDraft', async () => {
+    const draft = {
+      documentNumber: documentNumber,
+      status: 'DRAFT',
+      createdAt: '',
+      createdBy: userPrincipal,
+      createdByEmail: '',
+      exportData: {
+        landingsEntryOption: CatchCertSchema.LandingsEntryOptions.UploadEntry
+      }
+    } as any;
+    mockGetDraft.mockClear();
+
+    const result = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId, draft);
+
+    expect(mockGetDraft).not.toHaveBeenCalled();
+    expect(result).toBe(CatchCertSchema.LandingsEntryOptions.UploadEntry);
   });
 
 });

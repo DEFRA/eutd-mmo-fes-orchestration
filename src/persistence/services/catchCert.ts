@@ -459,12 +459,13 @@ export const upsertSpecies = async (
 export const getExportPayload = async (
   userPrincipal: string,
   documentNumber: string,
-  contactId: string
+  contactId: string,
+  draft?: CatchCertificate
 ): Promise<ProductsLanded> => {
-  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+  const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft?.exportData?.products
-    ? toFrontEndProductsLanded(draft.exportData.products)
+  return doc?.exportData?.products
+    ? toFrontEndProductsLanded(doc.exportData.products)
     : null;
 };
 
@@ -488,18 +489,18 @@ export const getTransportDetails = async (userPrincipal: string, documentNumber:
     : null;
 };
 
-export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string) => {
-  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+export const getExporterDetails = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: CatchCertificate) => {
+  const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft?.exportData?.exporterDetails
-    ? toFrontEndCcExporterDetails(draft.exportData.exporterDetails)
+  return doc?.exportData?.exporterDetails
+    ? toFrontEndCcExporterDetails(doc.exportData.exporterDetails)
     : null;
 };
 
-export const getLandingsEntryOption = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<LandingsEntryOptions> => {
-  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+export const getLandingsEntryOption = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: CatchCertificate): Promise<LandingsEntryOptions> => {
+  const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft?.exportData?.landingsEntryOption;
+  return doc?.exportData?.landingsEntryOption;
 }
 
 export const upsertExporterDetails = async (userPrincipal: string, documentNumber: string, payload: CcExporter, contactId: string) => {
@@ -524,11 +525,11 @@ export const deleteTransportDetails = async (userPrincipal: string, documentNumb
   await upsertDraftData(userPrincipal, documentNumber, { '$unset': { 'exportData.transportation': '' } }, contactId);
 }
 
-export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
-  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: CatchCertificate) => {
+  const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft?.exportData
-    ? toFrontEndExportLocation(draft.exportData)
+  return doc?.exportData
+    ? toFrontEndExportLocation(doc.exportData)
     : null;
 };
 
@@ -541,11 +542,11 @@ export const upsertConservation = async (userPrincipal: string, payload: FrontEn
   await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'exportData.conservation': conservation } }, contactId);
 };
 
-export const getConservation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
-  const draft = await getDraft(userPrincipal, documentNumber, contactId);
+export const getConservation = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: CatchCertificate) => {
+  const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
-  return draft?.exportData?.conservation
-    ? toFrontEndConservation(draft.exportData.conservation)
+  return doc?.exportData?.conservation
+    ? toFrontEndConservation(doc.exportData.conservation)
     : null;
 };
 
