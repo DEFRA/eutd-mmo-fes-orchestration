@@ -17,7 +17,17 @@ import * as ProcessingStatement from '../persistence/schema/processingStatement'
 import * as StorageDocument from '../persistence/schema/storageDoc';
 import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
-import { validateEntry, validateProduct, validateStorageFacility, validateStorageApproval } from './handlers/storage-notes';
+import {
+  validateEntry,
+  validateProduct,
+  validateStorageFacility,
+  validateStorageApproval,
+  checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent,
+  checkNetWeightProductDepartureIsZeroPositive,
+  checkNetWeightFisheryProductDepartureIsZeroPositive,
+  checkNetWeightProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsProductDeparture,
+} from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
@@ -457,6 +467,16 @@ export default class ProgressService {
     const productErrors: { errors: any } = await validateProduct(singleCatch, index, {});
     const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {}, documentNumber, userPrincipal, contactId);
     const weightsErrors: { [key: string]: any } = {};
+
+    // Departure weights must be confirmed before the catches section can be marked complete.
+    // Without this, an NMD that was copied (or whose arrival weights were edited after
+    // confirming departure weights) can be submitted with no departure weights set, leaving
+    // the corresponding fields blank on the generated PDF (DEFECT-592 / FI0-11257).
+    checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(singleCatch, index, weightsErrors);
+    checkNetWeightProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
+    checkNetWeightFisheryProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
+    checkNetWeightProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
+    checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, index, weightsErrors);
 
     const hasRequiredProperties = ProgressService.hasRequiredSDCatchProperties(singleCatch);
     const hasNoErrors = ProgressService.hasNoValidationErrors(productErrors, entryErrors, weightsErrors);
