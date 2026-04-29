@@ -386,7 +386,7 @@ export default class ExportPayloadService {
       return { isCatchCertBlockOn, isBlocking3CEnabled, isBlocking3DEnabled, isBlocking4AEnabled };
     } catch (e) {
       logger.error(`[GETTING-BLOCKING-STATUS-CC][ERROR][${e.stack || e}]`);
-      throw new Error(e?.message);
+      throw new Error(e.message);
     }
   }
 
