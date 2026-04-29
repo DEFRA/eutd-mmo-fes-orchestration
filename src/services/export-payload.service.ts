@@ -26,7 +26,7 @@ import {
 import { addIsLegallyDue, reportDocumentSubmitted, submitToCatchSystem } from './reference-data.service';
 import * as EuCountriesService from './eu-countries.service';
 import { LandingStatus, ProductLanded, ProductsLanded, getNumberOfUniqueLandings, DirectLanding, toFrontEndValidationFailure, SystemFailure } from '../persistence/schema/frontEndModels/payload';
-import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
+import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from '../persistence/schema/catchCert';
 import { LandingsRefreshData } from './interfaces';
 import { CcExportedDetailModel } from '../persistence/schema/frontEndModels/exporterDetails';
 import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
@@ -256,10 +256,14 @@ export default class ExportPayloadService {
 
       await CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
 
+      // FI0-11132: single getDraft() after cache bust — extract all Phase-2 fields (was 3 separate getDraft() calls)
+      const phase2Draft: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
+      const landingsEntryOption: LandingsEntryOptions = phase2Draft?.exportData?.landingsEntryOption;
+
       // FI0-11132: parallelize getExportPayload with getConservation (both independent reads)
       const [exportPayload, conservationData] = await Promise.all([
-        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId)),
-        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId)),
+        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId, phase2Draft)),
+        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId, phase2Draft)),
       ]);
 
       // refresh landings according to offline/online validation strategy
@@ -344,7 +348,7 @@ export default class ExportPayloadService {
           .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
 
         // FI0-11132: reuse exportedFrom from gatherExportInfo instead of redundant getExportLocation() call
-        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId, exportedFrom);
+        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId, exportedFrom, landingsEntryOption);
         result.documentNumber = documentNumber;
         result.uri = storageInfo.uri;
 
@@ -390,8 +394,8 @@ export default class ExportPayloadService {
     }
   }
 
-  public static readonly catchSubmissionForCC = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
-    const landingsEntryOption: LandingsEntryOptions = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId);
+  // FI0-11132: accept landingsEntryOption as param — avoids getDraft() call after completeDraft() changes status to Complete
+  public static readonly catchSubmissionForCC = async (userPrincipal: string, documentNumber: string, contactId: string, landingsEntryOption: LandingsEntryOptions): Promise<void> => {
     if (landingsEntryOption !== LandingsEntryOptions.DirectLanding) {
       CatchCertService.setCatchSubmissionInProgress(documentNumber)
         .catch(e => logger.error(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}][ERROR][${e}]`));
@@ -400,7 +404,7 @@ export default class ExportPayloadService {
     }
   }
 
-  private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string, exportLocation: ExportLocation): Promise<void> {
+  private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string, exportLocation: ExportLocation, landingsEntryOption: LandingsEntryOptions): Promise<void> {
     try {
       if (exportLocation === null) {
         logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][EXPORT-LOCATION][null]`);
@@ -411,7 +415,7 @@ export default class ExportPayloadService {
       const isEuCountry = await EuCountriesService.isEuCountry(isoCodeAlpha2);
       logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);
       if (isEuCountry) {
-        ExportPayloadService.catchSubmissionForCC(userPrincipal, documentNumber, contactId)
+        ExportPayloadService.catchSubmissionForCC(userPrincipal, documentNumber, contactId, landingsEntryOption)
           .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
       }
     } catch (e) {
@@ -424,11 +428,13 @@ export default class ExportPayloadService {
   }
 
   private static async gatherExportInfo(userPrincipal: string, documentNumber: string, contactId: string) {
+    // FI0-11132: single getDraft() call serves all 4 Phase-1 extractions (was 4 separate getDraft() calls)
+    const phase1Draft: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
     const [exporter, exportedFrom, transportations, transportData] = await Promise.all([
-      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId)),
-      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId)),
-      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportations(userPrincipal, documentNumber, contactId)),
-      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId, phase1Draft)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId, phase1Draft)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportations(userPrincipal, documentNumber, contactId, phase1Draft)),
+      ExportPayloadService.awaitValueOrEmpty(CatchCertificateTransport.getTransportationDetails(userPrincipal, documentNumber, contactId, phase1Draft)),
     ]);
 
     const exporterModel: CcExportedDetailModel = exporter?.model ? exporter.model : {} as CcExportedDetailModel;
