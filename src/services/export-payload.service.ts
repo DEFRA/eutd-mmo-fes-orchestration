@@ -11,7 +11,7 @@ import * as CatchCertService from "../persistence/services/catchCert";
 import CatchCertificateTransport from "./catch-certificate-transport.service";
 import ValidationFilterService from './onlineValidationReportFilter';
 import SummaryErrorsService from '../services/summaryErrors.service';
-import { getBlockingStatus } from '../persistence/services/systemBlock';
+import { getBlockingStatuses } from '../persistence/services/systemBlock';
 import { ValidationRules } from '../persistence/schema/systemBlock';
 import { IExportCertificateResults } from '../persistence/schema/exportCertificateResults'
 import { IOnlineValidationReportItem } from '../persistence/schema/onlineValidationReport'
@@ -248,18 +248,23 @@ export default class ExportPayloadService {
       if (!email) logger.error(`[EXPORT-PAYLOAD-SERVICE][CREATE-EXPORT-CERTIFICATE][ERROR]Missing email for user[${userPrincipal}]`);
       logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][START]`);
 
-      // gather export-related info (exporter, transport, and exported-from location)
-      const { exporterModel, transportData, catchCertificate } = await ExportPayloadService.gatherExportInfo(userPrincipal, documentNumber, contactId);
+      // FI0-11132: parallelize gatherExportInfo with addIsLegallyDue (independent)
+      const [{ exporterModel, exportedFrom, transportData, catchCertificate }] = await Promise.all([
+        ExportPayloadService.gatherExportInfo(userPrincipal, documentNumber, contactId),
+        addIsLegallyDue(documentNumber),
+      ]);
 
-      await addIsLegallyDue(documentNumber);
       await CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
 
-      const exportPayload: ProductsLanded = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId));
+      // FI0-11132: parallelize getExportPayload with getConservation (both independent reads)
+      const [exportPayload, conservationData] = await Promise.all([
+        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId)),
+        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId)),
+      ]);
 
       // refresh landings according to offline/online validation strategy
       const offlineValidation = await ExportPayloadService.refreshLandingsIfNeeded(documentNumber, exportPayload);
 
-      const conservationData = await ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId));
       const validationPayload = {
         exportPayload: exportPayload,
         documentNumber: documentNumber,
@@ -270,10 +275,14 @@ export default class ExportPayloadService {
 
       const baseUrl = ApplicationConfig.getReferenceServiceUrl();
       const base = `${baseUrl}/v1/catchcertificates/validation/online`;
-      const certificateData = await ExportPayloadService.checkCertificate(validationPayload, base);
+
+      // FI0-11132: parallelize online validation call with blocking flags fetch (independent)
+      const [certificateData, { isCatchCertBlockOn, isBlocking3CEnabled, isBlocking3DEnabled, isBlocking4AEnabled }] = await Promise.all([
+        ExportPayloadService.checkCertificate(validationPayload, base),
+        ExportPayloadService.getBlockingFlags(),
+      ]);
       const onlineValidationReport: IOnlineValidationReportItem[] = certificateData.report;
 
-      const { isCatchCertBlockOn, isBlocking3CEnabled, isBlocking3DEnabled, isBlocking4AEnabled } = await ExportPayloadService.getBlockingFlags();
       const validationFilteringSvc = new ValidationFilterService();
 
       const result: IExportCertificateResults = {
@@ -302,10 +311,14 @@ export default class ExportPayloadService {
           },
           documentNumber
         );
-        const exportLocation: ExportLocation = await CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId);
-        await CatchCertService.completeDraft(userPrincipal, documentNumber, storageInfo.uri, email, contactId)
-        await clearSessionDataForCurrentJourney(userPrincipal, documentNumber, contactId)
-          .catch(e => { logger.error(`[CLEAR-SESSION-DATA][ERROR][${e}]`) });
+
+        // FI0-11132: parallelize completeDraft with clearSessionData (independent: DB update vs Redis delete)
+        await Promise.all([
+          CatchCertService.completeDraft(userPrincipal, documentNumber, storageInfo.uri, email, contactId),
+          clearSessionDataForCurrentJourney(userPrincipal, documentNumber, contactId)
+            .catch(e => { logger.error(`[CLEAR-SESSION-DATA][ERROR][${e}]`) }),
+        ]);
+
         const data = {
           "certNumber": documentNumber,
           "timestamp": new Date().toISOString().toString(),
@@ -330,7 +343,8 @@ export default class ExportPayloadService {
         updateConsolidateLandings(documentNumber)
           .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
 
-        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId, exportLocation);
+        // FI0-11132: reuse exportedFrom from gatherExportInfo instead of redundant getExportLocation() call
+        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId, exportedFrom);
         result.documentNumber = documentNumber;
         result.uri = storageInfo.uri;
 
@@ -345,8 +359,8 @@ export default class ExportPayloadService {
           .catch((e) => { logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATE-STATUS][${DocumentStatuses.Draft}][ERROR], ${e}`) });
       }
 
-      const reportUrl = '/v1/catchcertificates/data-hub/submit';
-      await reportDocumentSubmitted(reportUrl, certificateData.rawData)
+      // FI0-11132: fire-and-forget reportDocumentSubmitted (non-critical reporting)
+      reportDocumentSubmitted('/v1/catchcertificates/data-hub/submit', certificateData.rawData)
         .catch(e => logger.error(`[REPORT-CC-DOCUMENT-SUBMIT][${documentNumber}][ERROR][${e}]`));
 
       return result;
@@ -358,24 +372,22 @@ export default class ExportPayloadService {
   }
 
   private static async getBlockingFlags(): Promise<{ isCatchCertBlockOn: boolean; isBlocking3CEnabled: boolean; isBlocking3DEnabled: boolean; isBlocking4AEnabled: boolean }> {
-    let isBlocking3CEnabled = false;
-    let isBlocking3DEnabled = false;
-    let isBlocking4AEnabled = false;
     const isBlockingNoDataSubmittedEnabled = true;
     const isBlockingNoLicenceHolderEnabled = true;
 
     try {
-      isBlocking3CEnabled = await getBlockingStatus(ValidationRules.THREE_C);
-      isBlocking3DEnabled = await getBlockingStatus(ValidationRules.THREE_D);
-      isBlocking4AEnabled = await getBlockingStatus(ValidationRules.FOUR_A);
+      const statusMap = await getBlockingStatuses([ValidationRules.THREE_C, ValidationRules.THREE_D, ValidationRules.FOUR_A]);
+      const isBlocking3CEnabled = statusMap.get(ValidationRules.THREE_C) || false;
+      const isBlocking3DEnabled = statusMap.get(ValidationRules.THREE_D) || false;
+      const isBlocking4AEnabled = statusMap.get(ValidationRules.FOUR_A) || false;
+
+      const isCatchCertBlockOn = isBlocking3CEnabled || isBlocking3DEnabled || isBlocking4AEnabled || isBlockingNoDataSubmittedEnabled || isBlockingNoLicenceHolderEnabled;
+
+      return { isCatchCertBlockOn, isBlocking3CEnabled, isBlocking3DEnabled, isBlocking4AEnabled };
     } catch (e) {
       logger.error(`[GETTING-BLOCKING-STATUS-CC][ERROR][${e.stack || e}]`);
       throw new Error(e?.message);
     }
-
-    const isCatchCertBlockOn = isBlocking3CEnabled || isBlocking3DEnabled || isBlocking4AEnabled || isBlockingNoDataSubmittedEnabled || isBlockingNoLicenceHolderEnabled;
-
-    return { isCatchCertBlockOn, isBlocking3CEnabled, isBlocking3DEnabled, isBlocking4AEnabled };
   }
 
   public static readonly catchSubmissionForCC = async (userPrincipal: string, documentNumber: string, contactId: string): Promise<void> => {
