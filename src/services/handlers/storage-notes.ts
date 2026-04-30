@@ -38,6 +38,8 @@ export default {
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
 
+    clearStaleDepartureDerivedFields(product, index, entryErrors);
+
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
@@ -46,6 +48,8 @@ export default {
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+
+    clearStaleDepartureDerivedFields(product, index, entryErrors);
 
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
@@ -92,6 +96,29 @@ export default {
     return validateStorageApproval(data, errors)
   },
 };
+
+/**
+ * Clears `productWeight` and the two departure weights when the user
+ * re-submits arrival weights for a product. Any previously-confirmed
+ * departure weights are stale because they were validated against the prior
+ * arrival weights, and `productWeight` is derived from them on
+ * /departure-product-summary. Without this, /check-your-information can show
+ * a stale "Export weight" row and the document can be submitted with blank
+ * departure weights on the generated PDF (FI0-11257 / DEFECT-592).
+ *
+ * Skipped when arrival weight validation failed for this catch — the user
+ * has not actually changed the persisted arrival weights yet.
+ */
+export function clearStaleDepartureDerivedFields(product: any, index: number, errors: any) {
+  const arrivalErrored =
+    errors[`catches-${index}-netWeightProductArrival`] ||
+    errors[`catches-${index}-netWeightFisheryProductArrival`];
+  if (arrivalErrored) return;
+
+  product.netWeightProductDeparture = undefined;
+  product.netWeightFisheryProductDeparture = undefined;
+  product.productWeight = undefined;
+}
 
 export function checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
   if (!ctch.netWeightProductDeparture) {
