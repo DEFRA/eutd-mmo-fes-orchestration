@@ -88,7 +88,7 @@ export default class ExporterValidateRoutes {
         townCity: Joi.string().trim().custom(validateNoEmoji).regex(/^[A-Za-z0-9'/\-., &!]+$/).required(),
         county: Joi.string().allow('').custom(validateNoEmoji).regex(/^[A-Za-z0-9'/\-., &!]+$/),
         postcode: Joi.string().regex(/^[a-zA-Z0-9\-, ]+$/).required().min(5).max(8),
-        country: Joi.string().custom(validateNoEmoji).required()
+        country: Joi.string().custom(validateNoEmoji).regex(/^[A-Za-zÀ-ÖØ-öø-ÿ0-9''\-., ()&]+$/).required()
       });
 
       const errors = schema.validate(value, {
