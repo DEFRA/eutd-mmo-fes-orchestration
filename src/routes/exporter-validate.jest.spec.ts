@@ -640,5 +640,95 @@ describe('exporter validate routes', () => {
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
     });
+
+    it('should return 400 if country contains emoji characters', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          postcode: "SE16 5HL",
+          buildingNumber: "2",
+          streetName: "High Street",
+          buildingName: "The Point",
+          townCity: "Newcastle",
+          county: "Tyneside",
+          country: "🇬🇧",
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+    });
+
+    // FI0-11275: country field should reject invalid special characters (e.g. '@')
+    it('should return 400 with country pattern error when country contains invalid characters like @', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: '/v1/exporter-validate',
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          buildingNumber: '12',
+          buildingName: 'Lancaster House',
+          streetName: 'Hampshire Court',
+          townCity: 'Newcastle',
+          county: 'Tyneside',
+          postcode: 'NE4 7YH',
+          country: '@',
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(mockValidateCountriesName).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toEqual(['error.country.string.pattern.base']);
+    });
+
+    // FI0-11275: submitting an empty form should return all validation errors
+    it('should return all validation errors when all required fields are empty', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: '/v1/exporter-validate',
+        headers: {
+          documentnumber: documentNumber,
+        },
+        app: {
+          claims: {
+            sub: 'Bob',
+          },
+        },
+        payload: {
+          subBuildingName: '',
+          buildingNumber: '',
+          buildingName: '',
+          streetName: '',
+          townCity: '',
+          county: '',
+          postcode: '',
+          country: '',
+        },
+      });
+
+      expect(mockAddExporterDetails).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toContain('error.townCity.string.empty');
+      expect(response.result).toContain('error.postcode.string.empty');
+      expect(response.result).toContain('error.country.string.empty');
+      expect(response.result).toContain('error.addressFirstPart.any.required');
+    });
   });
 });

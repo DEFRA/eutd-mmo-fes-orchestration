@@ -3138,6 +3138,8 @@ describe('addLandingsEntryOption', () => {
   let mockGetTransportData: jest.SpyInstance;
   let mockUpsertTransportDetails: jest.SpyInstance;
   let mockUpsertLandingsEntryOption: jest.SpyInstance;
+  let mockDeleteFor: jest.Mock;
+  let spyFactory: jest.SpyInstance;
 
   beforeEach(() => {
     mockUpsertLandingsEntryOption = jest.spyOn(CatchCertService, 'upsertLandingsEntryOption');
@@ -3148,6 +3150,14 @@ describe('addLandingsEntryOption', () => {
 
     mockUpsertTransportDetails = jest.spyOn(CatchCertService, "upsertTransportDetails");
     mockUpsertTransportDetails.mockResolvedValue({});
+
+    mockDeleteFor = jest.fn().mockResolvedValue(undefined);
+    const { SessionStoreFactory } = require('../session_store/factory');
+    spyFactory = jest.spyOn(SessionStoreFactory, 'getSessionStore').mockResolvedValue({ deleteFor: mockDeleteFor });
+  });
+
+  afterEach(() => {
+    spyFactory.mockRestore();
   });
 
   it('should not upsert transportation data if landingsEntryOption is not directLanding', async ()=> {
@@ -3166,6 +3176,18 @@ describe('addLandingsEntryOption', () => {
     expect(mockUpsertTransportDetails).toHaveBeenCalledTimes(1);
     expect(mockUpsertTransportDetails).toHaveBeenCalledWith(USER_ID,{some: 'data',vehicle: fishingVessel},DOCUMENT_NUMBER, contactId);
   });
+
+  it('should invalidate the landingsType cache after updating the landing entry option', async () => {
+    await SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);
+
+    expect(mockDeleteFor).toHaveBeenCalledWith(USER_ID, contactId, `export-certificates/landings-type/${DOCUMENT_NUMBER}`);
+  });
+
+  it('should invalidate the landingsType cache when switching to directLanding', async () => {
+    await SUT.addLandingsEntryOption(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.DirectLanding, contactId);
+
+    expect(mockDeleteFor).toHaveBeenCalledWith(USER_ID, contactId, `export-certificates/landings-type/${DOCUMENT_NUMBER}`);
+  });
 });
 
 describe("confirmLandingsType", () => {
@@ -3181,6 +3203,7 @@ describe("confirmLandingsType", () => {
   let mockAddExportLocation: jest.SpyInstance;
   let mockUpsertLandingsEntryOption: jest.SpyInstance;
   let mockAddLandingsEntryOption: jest.SpyInstance;
+  let mockSessionStoreFactory: jest.SpyInstance;
 
   const items = [
     {
@@ -3248,6 +3271,9 @@ describe("confirmLandingsType", () => {
     mockUpsertLandingsEntryOption.mockResolvedValue(undefined);
 
     mockAddLandingsEntryOption = jest.spyOn(SUT, 'addLandingsEntryOption');
+
+    const { SessionStoreFactory } = require('../session_store/factory');
+    mockSessionStoreFactory = jest.spyOn(SessionStoreFactory, 'getSessionStore').mockResolvedValue({ deleteFor: jest.fn().mockResolvedValue(undefined) });
   })
 
   afterEach(() => {
@@ -3258,6 +3284,7 @@ describe("confirmLandingsType", () => {
     mockTransportServiceRemove.mockRestore();
     mockCatchCertificateTransportServiceRemove.mockRestore();
     mockLogger.mockRestore();
+    mockSessionStoreFactory.mockRestore();
     mockAddLandingsEntryOption.mockRestore();
   });
 

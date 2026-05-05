@@ -1,6 +1,6 @@
 import * as Hapi from '@hapi/hapi';
 import * as Joi from 'joi';
-import { createEmojiAwarePatternValidator } from '../validators/emojiValidator';
+import { createEmojiAwarePatternValidator, validateNoEmoji } from '../validators/emojiValidator';
 import Controller from '../controllers/exportLocation.controller';
 import logger from '../logger';
 import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimatelyOwned';
@@ -42,7 +42,7 @@ export default class ExportLocationRoutes {
                 return h.response(errorDetailsObj).code(400).takeover();
               },
               payload: Joi.object({
-                exportDestination: Joi.string().required().messages({
+                exportDestination: Joi.string().required().custom(validateNoEmoji).messages({
                   'any.required': 'error.exportDestination.any.required',
                   'string.empty': 'error.exportDestination.any.required'
                 }),

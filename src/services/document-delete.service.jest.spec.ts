@@ -5,6 +5,7 @@ import * as StorageDocumentService from '../persistence/services/storageDoc';
 import * as SessionManager from "../helpers/sessionManager";
 import {
   CATCH_CERTIFICATE_KEY,
+  DRAFT_HEADERS_KEY,
   PROCESSING_STATEMENT_KEY,
   STORAGE_NOTES_KEY
 } from '../session_store/constants';
@@ -49,7 +50,8 @@ describe('deleteDocument', () => {
     expect(mockDeleteCC).toHaveBeenCalledTimes(1);
     expect(mockDeleteCC).toHaveBeenCalledWith('Bob','GBR-344234-23423423-4234234', contactId);
     expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', 'GBR-344234-23423423-4234234', contactId);
-    expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
+    expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
+    expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
     expect(mockClearErrors).toHaveBeenCalled();
     expect(mockClearErrors).toHaveBeenCalledTimes(1);
     expect(mockClearErrors).toHaveBeenCalledWith('GBR-344234-23423423-4234234');
@@ -65,8 +67,9 @@ describe('deleteDocument', () => {
     expect(mockDeletePS).toHaveBeenCalledTimes(1);
     expect(mockDeletePS).toHaveBeenCalledWith('Bob','GBR-REAACA-E4343-34FASD', contactId);
     expect(mockInvalidateDraftCache).toHaveBeenCalled();
-    expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
     expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', 'GBR-REAACA-E4343-34FASD', 'contactBob');
+    expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', `${PROCESSING_STATEMENT_KEY}/${DRAFT_HEADERS_KEY}`, 'contactBob');
+    expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
     expect(mockClearErrors).not.toHaveBeenCalled();
   });
 
@@ -80,8 +83,9 @@ describe('deleteDocument', () => {
     expect(mockDeleteSD).toHaveBeenCalledTimes(1);
     expect(mockDeleteSD).toHaveBeenCalledWith('Bob','GBR-REAACA-E4343-34FASD', 'contactBob');
     expect(mockInvalidateDraftCache).toHaveBeenCalled();
-    expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
     expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', 'GBR-REAACA-E4343-34FASD', 'contactBob');
+    expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', `${STORAGE_NOTES_KEY}/${DRAFT_HEADERS_KEY}`, 'contactBob');
+    expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
     expect(mockClearErrors).not.toHaveBeenCalled();
   });
 

@@ -233,3 +233,24 @@ describe('Export Location - saveAsDraft validation', () => {
     });
   });
 });
+
+describe('Export Location - exportDestination emoji validation (Issue 3)', () => {
+  // Mirrors the validateNoEmoji custom validator applied to exportDestination in the POST /v1/export-location route.
+  const { containsEmoji } = require('../validators/emojiValidator');
+
+  it('detects emoji in exportDestination value', () => {
+    expect(containsEmoji('🇫🇷')).toBe(true);
+  });
+
+  it('detects mixed text and emoji in exportDestination value', () => {
+    expect(containsEmoji('France 🇫🇷')).toBe(true);
+  });
+
+  it('does not flag plain country name as containing emoji', () => {
+    expect(containsEmoji('France')).toBe(false);
+  });
+
+  it('does not flag empty string as containing emoji', () => {
+    expect(containsEmoji('')).toBe(false);
+  });
+});

@@ -1,6 +1,98 @@
 import { describe, it, expect } from '@jest/globals';
 import catchCertificateTransportDetailsSchema from '../../../src/schemas/catchcerts/catchCertificateTransportDetailsSchema';
 
+describe('catchCertificateTransportDetailsSchema - flightNumber emoji/pattern validation (Issue 5)', () => {
+  const basePlanePayload = {
+    id: 'transport-id-123',
+    vehicle: 'plane',
+    departurePlace: 'Heathrow',
+    containerNumber: 'ABC123',
+  };
+  const context = { query: { draft: false } };
+
+  it('returns emoji error (not max-length error) when emojis are entered in flightNumber', () => {
+    // Use 3 emojis (6 JS chars) — well within max(15) so only the emoji check fires.
+    // createEmojiAwarePatternValidator surfaces emoji input as string.emoji.
+    const payload = { ...basePlanePayload, flightNumber: '😀😀😀' };
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    expect(error).toBeDefined();
+    const flightErr = error.details.find((d: any) => d.path.join('.') === 'flightNumber');
+    expect(flightErr).toBeDefined();
+    expect(flightErr.type).toBe('string.emoji');
+  });
+
+  it('returns max-length error when flightNumber exceeds 15 characters (no emoji)', () => {
+    const payload = { ...basePlanePayload, flightNumber: 'ABCDEFGHIJKLMNOP' }; // 16 chars
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    expect(error).toBeDefined();
+    const flightErr = error.details.find((d: any) => d.path.join('.') === 'flightNumber');
+    expect(flightErr).toBeDefined();
+    expect(flightErr.type).toBe('string.max');
+  });
+
+  it('returns pattern error for non-alphanumeric characters (no emoji)', () => {
+    const payload = { ...basePlanePayload, flightNumber: 'BA-123' };
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    expect(error).toBeDefined();
+    const flightErr = error.details.find((d: any) => d.path.join('.') === 'flightNumber');
+    expect(flightErr).toBeDefined();
+    expect(flightErr.type).toBe('string.pattern.base');
+  });
+
+  it('passes validation for a valid alphanumeric flightNumber', () => {
+    const payload = { ...basePlanePayload, flightNumber: 'BA1234' };
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    const flightErr = error?.details.find((d: any) => d.path.join('.') === 'flightNumber');
+    expect(flightErr).toBeUndefined();
+  });
+});
+
+describe('catchCertificateTransportDetailsSchema - flagState emoji validation (Issue 6)', () => {
+  const baseContainerVesselPayload = {
+    id: 'transport-id-123',
+    vehicle: 'containerVessel',
+    vesselName: 'MS Maersk',
+    containerNumber: 'ABCJ0123456',
+    departurePlace: 'Southampton',
+  };
+  const context = { query: { draft: false } };
+
+  it('returns emoji error when flagState contains emoji characters', () => {
+    // validateNoEmoji produces string.emoji for emoji input.
+    const payload = { ...baseContainerVesselPayload, flagState: '🇬🇧' };
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    expect(error).toBeDefined();
+    const flagErr = error.details.find((d: any) => d.path.join('.') === 'flagState');
+    expect(flagErr).toBeDefined();
+    expect(flagErr.type).toBe('string.emoji');
+  });
+
+  it('returns emoji error when flagState contains mixed text and emoji', () => {
+    const payload = { ...baseContainerVesselPayload, flagState: 'UK 🏴' };
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    expect(error).toBeDefined();
+    const flagErr = error.details.find((d: any) => d.path.join('.') === 'flagState');
+    expect(flagErr).toBeDefined();
+    expect(flagErr.type).toBe('string.emoji');
+  });
+
+  it('passes validation for a valid flagState without emoji', () => {
+    const payload = { ...baseContainerVesselPayload, flagState: 'United Kingdom' };
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    const flagErr = error?.details.find((d: any) => d.path.join('.') === 'flagState');
+    expect(flagErr).toBeUndefined();
+  });
+
+  it('still returns required error when flagState is empty', () => {
+    const payload = { ...baseContainerVesselPayload, flagState: '' };
+    const { error } = catchCertificateTransportDetailsSchema.validate(payload, { context, abortEarly: false });
+    expect(error).toBeDefined();
+    const flagErr = error.details.find((d: any) => d.path.join('.') === 'flagState');
+    expect(flagErr).toBeDefined();
+    expect(flagErr.type).toBe('string.empty');
+  });
+});
+
 describe('catchCertificateTransportDetailsSchema - containerNumber validation', () => {
   const basePayload = {
     id: 'transport-id-123',

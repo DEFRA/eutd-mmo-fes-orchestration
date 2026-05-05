@@ -190,10 +190,13 @@ export default class ExportPayloadController {
       }
     }
 
-    const vesselsAreValid = await VesselValidator.vesselsAreValid(exportPayload.items);
+    // FI0-11132: parallelize vessel and seasonal fish validations (independent)
+    const [vesselsAreValid, seasonalFishValidationErrors] = await Promise.all([
+      VesselValidator.vesselsAreValid(exportPayload.items),
+      ProductValidator.productsAreValid(exportPayload.items),
+    ]);
     logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][CHECKED-VESSELS][VALID: ${vesselsAreValid}]`);
 
-    const seasonalFishValidationErrors = await ProductValidator.productsAreValid(exportPayload.items);
     const seasonalFishAreValid = seasonalFishValidationErrors.length === 0;
     logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][VALIDATED-SEASONAL-FISH][VALID: ${seasonalFishAreValid}]`);
 
@@ -273,8 +276,11 @@ export default class ExportPayloadController {
   }
 
   public static async submitExportCertificate(userPrincipal: string, userEmail: string, documentNumber: string, clientIp: string, sessionId: string, contactId: string, offline: boolean): Promise<IExportCertificateResults> {
-    await SummaryErrorsService.clearErrors(documentNumber);
-    await SummaryErrorsService.clearSystemError(userPrincipal, documentNumber, contactId);
+    // FI0-11132: parallelize independent cache clearing operations
+    await Promise.all([
+      SummaryErrorsService.clearErrors(documentNumber),
+      SummaryErrorsService.clearSystemError(userPrincipal, documentNumber, contactId),
+    ]);
 
     try {
 
@@ -1010,11 +1016,13 @@ export default class ExportPayloadController {
   }
 
   public static async addLandingsEntryOption(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {
-    await CatchCertService.upsertLandingsEntryOption(userPrincipal, documentNumber, landingsEntryOption, contactId);
-    if (landingsEntryOption === fishingVessel) {
-      const transport = await TransportService.getTransportData(userPrincipal, 'catchCertificate', documentNumber, contactId);
-      await CatchCertService.upsertTransportDetails(userPrincipal, { ...transport, vehicle: fishingVessel }, documentNumber, contactId);
-    }
+      await CatchCertService.upsertLandingsEntryOption(userPrincipal, documentNumber, landingsEntryOption, contactId);
+      if (landingsEntryOption === fishingVessel) {
+        const transport = await TransportService.getTransportData(userPrincipal, 'catchCertificate', documentNumber, contactId);
+        await CatchCertService.upsertTransportDetails(userPrincipal, { ...transport, vehicle: fishingVessel }, documentNumber, contactId);
+      }
+      const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
+      await sessionStore.deleteFor(userPrincipal, contactId, landingsTypeCacheKey(documentNumber));
   }
 
   public static async confirmLandingsType(userPrincipal: string, documentNumber: string, landingsEntryOption: LandingsEntryOptions, contactId: string): Promise<void> {

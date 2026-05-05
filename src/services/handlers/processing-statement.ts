@@ -394,6 +394,15 @@ export function validateCatchWeights(ctch: any, index: number, errors: any) {
   } else {
     errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorEnterExportWeightMaximum2DecimalAfterProcessing';
   }
+
+  if (
+    !errors[`catches-${index}-exportWeightAfterProcessing`] &&
+    !errors[`catches-${index}-exportWeightBeforeProcessing`] &&
+    Number.parseFloat(ctch.exportWeightAfterProcessing) > Number.parseFloat(ctch.exportWeightBeforeProcessing)
+  ) {
+    errors[`catches-${index}-exportWeightAfterProcessing`] = 'psAddCatchWeightsErrorExportWeightAfterProcessingExceedsBeforeProcessing';
+  }
+
   return { errors };
 }
 
