@@ -76,6 +76,108 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
     expect(errors).toEqual({});
   });
 
+  it("clears stale departure-derived fields on the catch when arrival weights validate (FI0-11257)", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const catchWithStaleDepartureData: any = {
+      weightOnCC: "2222",
+      product: "Arctic char (ACH)",
+      productDescription: 'Some product description',
+      commodityCode: "34234324",
+      certificateNumber: "CC-11111",
+      productWeight: "999", // stale — derived from previous departure weights
+      netWeightProductDeparture: "999", // stale
+      netWeightFisheryProductDeparture: "999", // stale
+      dateOfUnloading: "29/01/2019",
+      placeOfUnloading: "Dover",
+      transportUnloadedFrom: "TRANS-IN-001",
+      scientificName: 'Salvelinus alpinus',
+      certificateType: 'non_uk',
+      netWeightProductArrival: "500", // user just changed this from 999 → 500
+      netWeightFisheryProductArrival: "500",
+      issuingCountry: {
+        officialCountryName: 'SPAIN',
+        isoCodeAlpha2: 'ES',
+        isoCodeAlpha3: 'ESP',
+        isoNumericCode: '724',
+      },
+    };
+
+    const data = {
+      catches: [catchWithStaleDepartureData],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors).toEqual({});
+    expect(catchWithStaleDepartureData.productWeight).toBeUndefined();
+    expect(catchWithStaleDepartureData.netWeightProductDeparture).toBeUndefined();
+    expect(catchWithStaleDepartureData.netWeightFisheryProductDeparture).toBeUndefined();
+  });
+
+  it("does NOT clear departure-derived fields when arrival weight validation fails (FI0-11257)", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const catchWithInvalidArrival: any = {
+      weightOnCC: "2222",
+      product: "Arctic char (ACH)",
+      productDescription: 'Some product description',
+      commodityCode: "34234324",
+      certificateNumber: "CC-11111",
+      productWeight: "999",
+      netWeightProductDeparture: "999",
+      netWeightFisheryProductDeparture: "999",
+      dateOfUnloading: "29/01/2019",
+      placeOfUnloading: "Dover",
+      transportUnloadedFrom: "TRANS-IN-001",
+      scientificName: 'Salvelinus alpinus',
+      certificateType: 'non_uk',
+      // arrival weights missing — validation will fail
+      issuingCountry: {
+        officialCountryName: 'SPAIN',
+        isoCodeAlpha2: 'ES',
+        isoCodeAlpha3: 'ESP',
+        isoNumericCode: '724',
+      },
+    };
+
+    const data = {
+      catches: [catchWithInvalidArrival],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors[`catches-0-netWeightProductArrival`]).toBeDefined();
+    // Stale departure data preserved so user doesn't lose data when fixing the form
+    expect(catchWithInvalidArrival.productWeight).toBe("999");
+    expect(catchWithInvalidArrival.netWeightProductDeparture).toBe("999");
+    expect(catchWithInvalidArrival.netWeightFisheryProductDeparture).toBe("999");
+  });
+
   it("with invalid commodity code", async () => {
     mockValidatorCommodityCode.mockResolvedValue({
       isError: true

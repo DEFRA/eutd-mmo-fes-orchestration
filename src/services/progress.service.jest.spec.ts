@@ -4875,7 +4875,8 @@ describe('getStorageDocumentProgress', () => {
             id: 'dsfdsf-1643629199',
             netWeightProductArrival: '1',
             netWeightFisheryProductArrival: '1',
-            netWeightProductDeparture: '700',
+            netWeightProductDeparture: '1',
+            netWeightFisheryProductDeparture: '1',
           },
         ],
       },
@@ -4909,6 +4910,91 @@ describe('getStorageDocumentProgress', () => {
       documentNumber,
       contactId
     );
+  });
+
+  // FI0-11257 / DEFECT-592: catches must not be marked COMPLETED until departure
+  // weights have been confirmed. Without this guard, a copied NMD (whose departure
+  // weights are cleared on copy) or an original NMD where the user navigates away
+  // from the departure-product-summary page via "Back to your progress" can be
+  // submitted with blank departure weights on the generated PDF.
+  it('will return INCOMPLETE catches if departure weights have not been confirmed', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            // No netWeightProductDeparture / netWeightFisheryProductDeparture
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.INCOMPLETE });
+    expect(result.completedSections).toBe(0);
+  });
+
+  it('will return INCOMPLETE catches if departure weight exceeds arrival weight', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            netWeightProductDeparture: '700',
+            netWeightFisheryProductDeparture: '700',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.INCOMPLETE });
   });
 
   it('will return INCOMPLETED catches if any of the weights are invalid', async () => {
@@ -5110,8 +5196,8 @@ describe('getStorageDocumentProgress', () => {
             },
             supportingDocuments: [],
             productDescription: 'Some product description',
-            netWeightProductArrival: "1",
-            netWeightFisheryProductArrival: "1",
+            netWeightProductArrival: "100",
+            netWeightFisheryProductArrival: "100",
             netWeightProductDeparture: "100",
             netWeightFisheryProductDeparture: "100"
           }
@@ -5243,8 +5329,8 @@ describe('getStorageDocumentProgress', () => {
             dateOfUnloading: '24/01/2022',
             transportUnloadedFrom: 'sfdfd',
             id: 'dsfdsf-1643629199',
-            netWeightProductArrival: '1',
-            netWeightFisheryProductArrival: '1',
+            netWeightProductArrival: '700',
+            netWeightFisheryProductArrival: '700',
             netWeightProductDeparture: '700',
             netWeightFisheryProductDeparture: '700'
           },
