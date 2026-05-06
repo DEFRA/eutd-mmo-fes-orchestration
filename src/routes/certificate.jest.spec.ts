@@ -196,11 +196,11 @@ describe('Certificates routes', () => {
 
   });
 
-  describe('GET /v1/certificate/eu-data-integration/{status}', () => {
+  describe('GET /v1/certificate/eu-data-integration/check-status', () => {
 
     const request: any = {
       method: 'GET',
-      url: '/v1/certificate/eu-data-integration/SUCCESS',
+      url: '/v1/certificate/eu-data-integration/check-status',
       app: {
         claims: {
           sub: 'Bob',

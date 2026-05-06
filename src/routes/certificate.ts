@@ -35,7 +35,7 @@ export default class CertificateRoutes {
         },
         {
           method: 'GET',
-          path: '/v1/certificate/eu-data-integration/{status}',
+          path: '/v1/certificate/eu-data-integration/check-status',
           options: {
             security: true,
             cors: true,
