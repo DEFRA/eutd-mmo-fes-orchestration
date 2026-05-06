@@ -42,7 +42,6 @@ export default class CertificateController {
 
   public static async getEuDataIntegrationStatus(req: Hapi.Request, userPrincipal: string, documentNumber: string): Promise<ICatchStatus | null> {
     const contactId = <string>(req as any).app.claims.contactId;
-    const params = {...(req.params as any) };
     const documentType = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
 
     let document = null;
@@ -73,7 +72,7 @@ export default class CertificateController {
         break;
     }
 
-    if (!document?.catchSubmission || document.catchSubmission.status !== params.status) {
+    if (!document?.catchSubmission) {
       logger.info(`[GET-EU-DATA-INTEGRATION-STATUS][${documentNumber}][NOT-FOUND]`);
       return null;
     }
