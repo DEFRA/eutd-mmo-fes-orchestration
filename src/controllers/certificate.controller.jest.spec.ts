@@ -686,7 +686,7 @@ describe('Certificate Controller', () => {
       expect(mockInfo).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${documentNumber}][NOT-FOUND]`);
     });
 
-    it('will return null if catchSubmission status does not match params status', async () => {
+    it('will return catchSubmission status does not match params status', async () => {
       const docWithEuRef: BackEnd.CatchCertificate = {
         ...backEndCc,
         catchSubmission: { status: 'SUCCESS', reference: 'EU-CATCH-2024-12345' }
@@ -702,8 +702,7 @@ describe('Certificate Controller', () => {
       const result = await CertificateController.getEuDataIntegrationStatus(reqWithDifferentStatus, 'Bob', documentNumber);
 
       expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
-      expect(result).toBeNull();
-      expect(mockInfo).toHaveBeenCalledWith(`[GET-EU-DATA-INTEGRATION-STATUS][${documentNumber}][NOT-FOUND]`);
+      expect(result).toEqual({ "reference": "EU-CATCH-2024-12345", "status": "SUCCESS" });
     });
 
     it('will return catchSubmission when available and status matches', async () => {
