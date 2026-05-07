@@ -4912,12 +4912,11 @@ describe('getStorageDocumentProgress', () => {
     );
   });
 
-  // FI0-11257 / DEFECT-592: catches must not be marked COMPLETED until departure
-  // weights have been confirmed. Without this guard, a copied NMD (whose departure
-  // weights are cleared on copy) or an original NMD where the user navigates away
-  // from the departure-product-summary page via "Back to your progress" can be
-  // submitted with blank departure weights on the generated PDF.
-  it('will return INCOMPLETE catches if departure weights have not been confirmed', async () => {
+  // FI0-11257 / DEFECT-592: when departure weights have not been confirmed, the
+  // "Departure from storage facility" section (transportDetails) should be INCOMPLETE,
+  // NOT the "Products" section (catches). Departure weights are confirmed on
+  // /departure-product-summary which is part of the departure journey.
+  it('will return INCOMPLETE transportDetails (not catches) when departure weights have not been confirmed', async () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
         catches: [
@@ -4953,11 +4952,12 @@ describe('getStorageDocumentProgress', () => {
       'contactBob'
     );
 
-    expect(result.progress).toMatchObject({ catches: ProgressStatus.INCOMPLETE });
-    expect(result.completedSections).toBe(0);
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+    expect(result.completedSections).toBe(1);
   });
 
-  it('will return INCOMPLETE catches if departure weight exceeds arrival weight', async () => {
+  it('will return INCOMPLETE transportDetails (not catches) when departure weight exceeds arrival weight', async () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
         catches: [
@@ -4994,7 +4994,8 @@ describe('getStorageDocumentProgress', () => {
       'contactBob'
     );
 
-    expect(result.progress).toMatchObject({ catches: ProgressStatus.INCOMPLETE });
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
   });
 
   it('will return INCOMPLETED catches if any of the weights are invalid', async () => {
