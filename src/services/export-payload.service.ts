@@ -347,7 +347,7 @@ export default class ExportPayloadService {
           .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
 
         // FI0-11132: reuse exportedFrom from gatherExportInfo instead of redundant getExportLocation() call
-        ExportPayloadService.submitToCatchIfEu(userPrincipal, documentNumber, contactId, exportedFrom);
+        ExportPayloadService.submitToCatchIfEu(documentNumber, exportedFrom);
         result.documentNumber = documentNumber;
         result.uri = storageInfo.uri;
 
@@ -394,14 +394,14 @@ export default class ExportPayloadService {
   }
 
   // FI0-11243: All landing entry types (DirectLanding, ManualEntry, UploadEntry) are submitted to EU CATCH
-  public static readonly catchSubmissionForCC = async (userPrincipal: string, documentNumber: string, _contactId: string): Promise<void> => {
+  public static readonly catchSubmissionForCC = async (documentNumber: string): Promise<void> => {
     CatchCertService.setCatchSubmissionInProgress(documentNumber)
       .catch(e => logger.error(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}][ERROR][${e}]`));
     submitToCatchSystem(documentNumber, 'submit')
       .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
   }
 
-  private static async submitToCatchIfEu(userPrincipal: string, documentNumber: string, contactId: string, exportLocation: ExportLocation): Promise<void> {
+  private static async submitToCatchIfEu(documentNumber: string, exportLocation: ExportLocation): Promise<void> {
     try {
       if (exportLocation === null) {
         logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][EXPORT-LOCATION][null]`);
@@ -412,7 +412,7 @@ export default class ExportPayloadService {
       const isEuCountry = await EuCountriesService.isEuCountry(isoCodeAlpha2);
       logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);
       if (isEuCountry) {
-        ExportPayloadService.catchSubmissionForCC(userPrincipal, documentNumber, contactId)
+        ExportPayloadService.catchSubmissionForCC(documentNumber)
           .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
       }
     } catch (e) {
