@@ -10,7 +10,7 @@ function validate(obj) {
   return buildErrorObject( res.error );
 }
 
-test('Should assert mandatory fields when empty', t => {
+test('Should assert mandatory fields when empty', t => { // NOSONAR
   t.deepEqual( validate({}), {watersCaughtIn: 'error.watersCaughtIn.object.missing'});
   t.deepEqual( validate({caughtInUKWaters: 'Y'}), null);
   t.deepEqual( validate({caughtInEUWaters: 'Y'}), null);
@@ -20,7 +20,7 @@ test('Should assert mandatory fields when empty', t => {
   t.end();
 });
 
-test('Should reject emoji characters in otherWaters', t => {
+test('Should reject emoji characters in otherWaters', t => { // NOSONAR
   t.deepEqual( validate({caughtInOtherWaters: 'Y', otherWaters: 'Atlantic 🐟' }), {otherWaters: 'error.otherWaters.string.emoji'});
   t.deepEqual( validate({caughtInOtherWaters: 'Y', otherWaters: 'ValidWaters' }), null);
   t.ok(validate({caughtInOtherWaters: 'Y', otherWaters: 'Atlantic 🐟'}) !== null, 'emoji in otherWaters should fail validation');
