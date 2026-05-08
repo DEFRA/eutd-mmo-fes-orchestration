@@ -23,5 +23,7 @@ test('Should assert mandatory fields when empty', t => {
 test('Should reject emoji characters in otherWaters', t => {
   t.deepEqual( validate({caughtInOtherWaters: 'Y', otherWaters: 'Atlantic 🐟' }), {otherWaters: 'error.otherWaters.string.emoji'});
   t.deepEqual( validate({caughtInOtherWaters: 'Y', otherWaters: 'ValidWaters' }), null);
+  t.ok(validate({caughtInOtherWaters: 'Y', otherWaters: 'Atlantic 🐟'}) !== null, 'emoji in otherWaters should fail validation');
+  t.ok(validate({caughtInOtherWaters: 'Y', otherWaters: 'ValidWaters'}) === null, 'valid otherWaters should pass validation');
   t.end();
 });
