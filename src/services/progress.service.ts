@@ -466,22 +466,35 @@ export default class ProgressService {
   ): Promise<boolean> => {
     const productErrors: { errors: any } = await validateProduct(singleCatch, index, {});
     const entryErrors: { errors: any } = await validateEntry(singleCatch, index, {}, documentNumber, userPrincipal, contactId);
-    const weightsErrors: { [key: string]: any } = {};
-
-    // Departure weights must be confirmed before the catches section can be marked complete.
-    // Without this, an NMD that was copied (or whose arrival weights were edited after
-    // confirming departure weights) can be submitted with no departure weights set, leaving
-    // the corresponding fields blank on the generated PDF (DEFECT-592 / FI0-11257).
-    checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(singleCatch, index, weightsErrors);
-    checkNetWeightProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
-    checkNetWeightFisheryProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
-    checkNetWeightProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
-    checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, index, weightsErrors);
+    const emptyWeightsErrors: { [key: string]: any } = {};
 
     const hasRequiredProperties = ProgressService.hasRequiredSDCatchProperties(singleCatch);
-    const hasNoErrors = ProgressService.hasNoValidationErrors(productErrors, entryErrors, weightsErrors);
+    const hasNoErrors = ProgressService.hasNoValidationErrors(productErrors, entryErrors, emptyWeightsErrors);
 
     return hasRequiredProperties && hasNoErrors;
+  }
+
+  // Returns false if any catch is missing or has invalid departure weights.
+  // This drives the "Departure from storage facility" section status (FI0-11257):
+  // departure weights are confirmed on /departure-product-summary, which is part
+  // of the departure journey — not the products section.
+  private static readonly catchesHaveValidDepartureWeights = (catches: StorageDocument.Catch[]): boolean => {
+    if (!Array.isArray(catches) || catches.length === 0) {
+      // No products yet — don't block departure transport section from being started
+      return true;
+    }
+    for (const [index, singleCatch] of catches.entries()) {
+      const weightsErrors: { [key: string]: any } = {};
+      checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(singleCatch, index, weightsErrors);
+      checkNetWeightProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
+      checkNetWeightFisheryProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
+      checkNetWeightProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
+      checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, index, weightsErrors);
+      if (Object.keys(weightsErrors).length > 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public static readonly getSDCatchStatus = async (catches: StorageDocument.Catch[], userPrincipal: string, documentNumber: string, contactId: string): Promise<ProgressStatus> => {
@@ -668,7 +681,11 @@ export default class ProgressService {
 
     // Check if departure transportation date is after arrival transportation departure date
     const isDepartureAfterArrival = data?.exportData?.arrivalTransportation ? ProgressService.isDepartureTransportAfterArrivalTransport(data?.exportData?.transportation, data?.exportData?.arrivalTransportation) : true;
-    const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isDepartureAfterArrival ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
+    // Departure weights (confirmed on /departure-product-summary) are part of the
+    // "Departure from storage facility" section — missing/invalid weights mark section 5
+    // INCOMPLETE, not section 2 (Products). (FI0-11257 / DEFECT-592)
+    const hasDepartureWeights = ProgressService.catchesHaveValidDepartureWeights(data?.exportData?.catches);
+    const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isDepartureAfterArrival && hasDepartureWeights ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
 
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),
