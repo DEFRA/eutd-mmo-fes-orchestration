@@ -16,4 +16,3 @@ export const SAVE_DRAFT_KEY: string = 'saveAsDraft';
 export const SUMMARY_ERRORS_KEY: string = 'summary-errors:';
 export const DRAFT_HEADERS_KEY: string = 'draftHeadersForUser';
 export const UPLOAD_ROWS_KEY: string = 'upload-rows';
-export const USER_ATTRIBUTES_KEY: string = 'userAttributes';
