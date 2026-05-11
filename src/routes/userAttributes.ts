@@ -60,22 +60,19 @@ export default class UserAttributesRoutes {
             handler: async (req: Hapi.Request) => {
               const allUserAttributes: IUserAttributes | null = await find((req.app as HapiRequestApplicationStateExtended).claims.sub);
               if (allUserAttributes?.attributes) {
-                const privacyThreshold = isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement)
-                  ? null
-                  : moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement);
-                const cookieThreshold = isEmpty(ApplicationConfig._lastUpdatedCookiePolicy)
-                  ? null
-                  : moment.utc(ApplicationConfig._lastUpdatedCookiePolicy);
+                return allUserAttributes.attributes.reduce((attributes: IAttribute[], attribute: IAttribute, ) => {
+                  if (attribute.name === "privacy_statement") {
+                    const shouldIncludePrivacyAttribute = moment.utc(ApplicationConfig._lastUpdatedPrivacyStatement).isSameOrBefore(attribute.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedPrivacyStatement);
+                    return shouldIncludePrivacyAttribute ? [ ...attributes, attribute] : attributes;
+                  }
 
-                return allUserAttributes.attributes.filter((attribute: IAttribute) => {
-                  if (attribute.name === 'privacy_statement') {
-                    return !privacyThreshold || privacyThreshold.isSameOrBefore(attribute.modifiedAt);
+                  if (attribute.name === "accepts_cookies") {
+                    const shouldIncludeCookieAttribute = moment.utc(ApplicationConfig._lastUpdatedCookiePolicy).isSameOrBefore(attribute.modifiedAt) || isEmpty(ApplicationConfig._lastUpdatedCookiePolicy);
+                    return shouldIncludeCookieAttribute ? [ ...attributes, attribute] : attributes;
                   }
-                  if (attribute.name === 'accepts_cookies') {
-                    return !cookieThreshold || cookieThreshold.isSameOrBefore(attribute.modifiedAt);
-                  }
-                  return true;
-                });
+
+                  return [ ...attributes, attribute];
+                }, []);
               }
               return [];
             },
