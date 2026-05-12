@@ -324,7 +324,7 @@ export default class ExportPayloadController {
       }
 
       void CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
-
+      void CatchCertService.invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
       void SaveAsDraftService
         .deleteDraftLink(userPrincipal, documentNumber, 'catchCertificate', contactId)
         .catch((e) => {

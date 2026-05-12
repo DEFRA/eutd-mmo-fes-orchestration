@@ -13,6 +13,7 @@ import {
 } from "./constants";
 import { SessionStoreFactory } from "../session_store/factory";
 import { getRedisOptions } from "../session_store/redis";
+import { DRAFT_HEADERS_KEY } from "../session_store/constants";
 import * as moment from "moment";
 import ApplicationConfig from "../applicationConfig";
 import SaveAsDraftService from "../services/saveAsDraft.service";
@@ -454,6 +455,7 @@ export default class OrchestrationService {
     await OrchestrationService.clearDataFromJourney(redisKey, userPrincipal, documentNumber, pdf, user, contactId);
 
     void invalidateDraftCache(userPrincipal, documentNumber, contactId);
+    void invalidateDraftCache(userPrincipal, `${redisKey}/${DRAFT_HEADERS_KEY}`, contactId);
     await SaveAsDraftService.deleteDraftLink(userPrincipal, documentNumber, redisKey, contactId);
 
     data.documentUri = pdf.uri;

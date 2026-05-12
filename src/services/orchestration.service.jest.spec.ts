@@ -816,7 +816,7 @@ describe('generatePdf', () => {
       expect(mockGetBlockingStatus).toHaveBeenCalledWith('PS_SD_4b');
       expect(mockClearSessionDataForCurrentJourney).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(3);
       expect(mockDeleteDraftLink).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', 'processingStatement', '03fece4e-61e4-e911-a978-000d3a28d891');
       expect(mockPostEventData).toHaveBeenCalled();
       expect(mockPostEventData).toHaveBeenCalledWith(
@@ -983,7 +983,7 @@ describe('generatePdf', () => {
         expect(mockGetBlockingStatus).toHaveBeenCalledWith('PS_SD_4b');
         expect(mockClearSessionDataForCurrentJourney).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
         expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
-        expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
+        expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(3);
         expect(mockDeleteDraftLink).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', 'processingStatement', '03fece4e-61e4-e911-a978-000d3a28d891');
         expect(mockPostEventData).toHaveBeenCalled();
         expect(mockPostEventData).toHaveBeenCalledWith(
@@ -1489,7 +1489,7 @@ describe('generatePdf', () => {
       expect(mockGetBlockingStatus).toHaveBeenCalledWith('PS_SD_4b');
       expect(mockClearSessionDataForCurrentJourney).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(3);
       expect(mockDeleteDraftLink).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', storageNote, '03fece4e-61e4-e911-a978-000d3a28d891');
       expect(mockPostEventData).toHaveBeenCalled();
       expect(mockPostEventData).toHaveBeenCalledWith(
@@ -1560,7 +1560,7 @@ describe('generatePdf', () => {
       expect(mockGetBlockingStatus).toHaveBeenCalledWith('PS_SD_4b');
       expect(mockClearSessionDataForCurrentJourney).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
       expect(mockInvalidateDraftCache).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(2);
+      expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(3);
       expect(mockDeleteDraftLink).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', storageNote, '03fece4e-61e4-e911-a978-000d3a28d891');
       expect(mockPostEventData).toHaveBeenCalled();
       expect(mockPostEventData).toHaveBeenCalledWith(
