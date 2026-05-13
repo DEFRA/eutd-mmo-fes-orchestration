@@ -26,6 +26,7 @@ import {
   checkNetWeightProductDepartureIsZeroPositive,
   checkNetWeightFisheryProductDepartureIsZeroPositive,
   checkNetWeightProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsArrival,
   checkNetWeightFisheryProductDepartureExceedsProductDeparture,
 } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
@@ -489,6 +490,7 @@ export default class ProgressService {
       checkNetWeightProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
       checkNetWeightProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
+      checkNetWeightFisheryProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, index, weightsErrors);
       if (Object.keys(weightsErrors).length > 0) {
         return false;

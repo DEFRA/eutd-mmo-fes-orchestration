@@ -60,6 +60,7 @@ export default {
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightProductDepartureExceedsArrival(ctch, index, errors);
+      checkNetWeightFisheryProductDepartureExceedsArrival(ctch, index, errors);
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch, index, errors);
 
       if (isEmpty(errors)) {
@@ -157,6 +158,18 @@ export function checkNetWeightProductDepartureExceedsArrival(ctch: any, index: n
     (+ctch.netWeightProductDeparture) > (+ctch.netWeightProductArrival)
   ) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceedsArrival';
+  }
+}
+
+// Scenario 5: fishery product departure weight cannot exceed fishery product arrival weight
+export function checkNetWeightFisheryProductDepartureExceedsArrival(ctch: any, index: number, errors: any) {
+  if (
+    !errors[`catches-${index}-netWeightFisheryProductDeparture`] &&
+    ctch.netWeightFisheryProductDeparture &&
+    ctch.netWeightFisheryProductArrival &&
+    (+ctch.netWeightFisheryProductDeparture) > (+ctch.netWeightFisheryProductArrival)
+  ) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceedsArrival';
   }
 }
 
