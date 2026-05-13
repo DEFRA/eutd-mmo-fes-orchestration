@@ -350,6 +350,7 @@ export const getExportLocation = async (userPrincipal: string, documentNumber: s
 
 export const upsertUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string) => {
   await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'userReference': userReference } }, contactId);
+  void invalidateDraftCache(userPrincipal, `${STORAGE_NOTES_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 };
 
 export const cloneStorageDocument = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal?: boolean): Promise<string> => {
