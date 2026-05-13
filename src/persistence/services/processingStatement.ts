@@ -285,6 +285,7 @@ export const getExporterDetails = async (userPrincipal: string, documentNumber: 
 
 export const upsertUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string) => {
   await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'userReference': userReference } }, contactId);
+  void invalidateDraftCache(userPrincipal, `${PROCESSING_STATEMENT_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 };
 
 export const getExportLocation = async (userPrincipal: string, documentNumber: string, contactId: string) => {
