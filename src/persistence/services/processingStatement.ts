@@ -103,12 +103,6 @@ export const getDraftData = async (userPrincipal: string, path: string, contactI
 };
 
 export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYear: string, userPrincipal: string, contactId: string): Promise<IProcessingStatementModel[]> => {
-  const cacheKey = `${PROCESSING_STATEMENT_KEY}/completed/${monthAndYear}`;
-  const cached = await getDraftCache(userPrincipal, contactId, cacheKey) as unknown as IProcessingStatementModel[];
-  if (cached !== null && Array.isArray(cached)) {
-    return cached;
-  }
-
   const [month, year] = monthAndYear.split('-');
   const currentDate = new Date();
   const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
@@ -122,8 +116,6 @@ export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYe
       "$lt": new Date(yearInt, monthInt, 1)
     } as Condition<any>
   }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
-
-  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 60);
 
   return data;
 };

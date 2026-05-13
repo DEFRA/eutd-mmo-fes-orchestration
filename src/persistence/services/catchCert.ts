@@ -96,12 +96,6 @@ export const countCompletedDocuments = async (
 };
 
 export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string, userPrincipal: string, contactId: string): Promise<CatchCertificateModel[]> => {
-  const cacheKey = `${CATCH_CERTIFICATE_KEY}/completed/${yearAndMonth}`;
-  const cached = await getDraftCache(userPrincipal, contactId, cacheKey) as unknown as CatchCertificateModel[];
-  if (cached !== null && Array.isArray(cached)) {
-    return cached;
-  }
-
   const [month, year] = yearAndMonth.split('-');
   const currentDate = new Date();
   const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
@@ -115,8 +109,6 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
       '$lt': new Date(yearInt, monthInt, 1)
     } as Condition<any>
   }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
-
-  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 60);
 
   return data;
 };
