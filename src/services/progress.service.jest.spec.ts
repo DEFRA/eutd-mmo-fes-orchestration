@@ -4998,6 +4998,47 @@ describe('getStorageDocumentProgress', () => {
     expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
   });
 
+  it('will return INCOMPLETE transportDetails when fishery departure weight exceeds fishery arrival weight with valid product departure weight (FI0-11277 Scenario 5)', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '100',
+            netWeightFisheryProductArrival: '80',
+            netWeightProductDeparture: '100',   // valid: equals arrival
+            netWeightFisheryProductDeparture: '90', // invalid: 90 > 80 (fishery arrival)
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+  });
+
   it('will return INCOMPLETED catches if any of the weights are invalid', async () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {

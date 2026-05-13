@@ -47,7 +47,7 @@ import {
   checkNetWeightProductDepartureExceedsArrival,
   checkNetWeightFisheryProductDepartureExceedsArrival,
   checkNetWeightFisheryProductDepartureExceedsProductDeparture,
-} from './handlers/storage-notes';
+} from '../validators/storageWeightValidator';
 import * as EuCountriesService from './eu-countries.service';
 
 export const catchCerts: string = "catchCertificate";

@@ -25,10 +25,12 @@ import {
   checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent,
   checkNetWeightProductDepartureIsZeroPositive,
   checkNetWeightFisheryProductDepartureIsZeroPositive,
+} from './handlers/storage-notes';
+import {
   checkNetWeightProductDepartureExceedsArrival,
   checkNetWeightFisheryProductDepartureExceedsArrival,
   checkNetWeightFisheryProductDepartureExceedsProductDeparture,
-} from './handlers/storage-notes';
+} from '../validators/storageWeightValidator';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
