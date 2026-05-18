@@ -33,7 +33,7 @@ export default class ExportLocationRoutes {
             },
             validate: {
               options: { abortEarly: false },
-              failAction: function(req, h, error) {
+              failAction: function (req, h, error) {
                 const errorDetailsObj = errorExtractor(error);
                 if (acceptsHtml(req.headers)) {
                   const url = buildRedirectUrlWithErrorStringInQueryParam(errorDetailsObj, (req.payload as any).redirect);
@@ -41,25 +41,46 @@ export default class ExportLocationRoutes {
                 }
                 return h.response(errorDetailsObj).code(400).takeover();
               },
-              payload: Joi.object({
-                exportDestination: Joi.string().required().custom(validateNoEmoji).messages({
-                  'any.required': 'error.exportDestination.any.required',
-                  'string.empty': 'error.exportDestination.any.required'
-                }),
-                pointOfDestination: Joi.string().required().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'\s/]+$/)).messages({
-                  'any.required': 'error.pointOfDestination.any.required',
-                  'string.empty': 'error.pointOfDestination.any.required',
-                  'string.max': 'error.pointOfDestination.string.max',
-                  'string.pattern.base': 'error.pointOfDestination.string.pattern.base'
-                })
-              }).unknown(true).external(async (value) => {
+              payload: async function (value, _options) {
+
+                const schema = Joi.object()
+                  .keys({
+                    exportDestination: Joi.string().required().custom(validateNoEmoji).messages({
+                      'any.required': 'error.exportDestination.any.required',
+                      'string.empty': 'error.exportDestination.any.required'
+                    }),
+                    pointOfDestination: Joi.string().required().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-'\s/]+$/)).messages({
+                      'any.required': 'error.pointOfDestination.any.required',
+                      'string.empty': 'error.pointOfDestination.any.required',
+                      'string.max': 'error.pointOfDestination.string.max',
+                      'string.pattern.base': 'error.pointOfDestination.string.pattern.base'
+                    })
+                  });
+
+                if (!schema) {
+                  const e = new Error('I am not sure what\'s going on') as any;
+                  return e;
+                }
+                const errors = schema.validate(value, {
+                  abortEarly: false,
+                  allowUnknown: true
+                });
+
                 const refUrl = ApplicationConfig.getReferenceServiceUrl();
-                const anyError = await validateCountriesName(value.exportedTo, refUrl);
-                if (anyError.isError) {
+                const anyError = await validateCountriesName((value as any).exportedTo, refUrl);
+
+                if (errors.error && anyError.isError) {
+                  const combined = errors.error;
+                  combined.details = [...combined.details, ...(anyError.error?.details ?? [])];
+                  throw combined;
+                } else if (errors.error) {
+                  throw errors.error;
+                } else if (anyError.isError) {
                   throw anyError.error;
                 }
+
                 return value;
-              })
+              }
             }
           }
         },
@@ -81,7 +102,7 @@ export default class ExportLocationRoutes {
             },
             validate: {
               options: { abortEarly: false },
-              failAction: function(req, h, error) {
+              failAction: function (req, h, error) {
                 const errorDetailsObj = errorExtractor(error);
                 if (acceptsHtml(req.headers)) {
                   const url = buildRedirectUrlWithErrorStringInQueryParam(errorDetailsObj, (req.payload as any).redirect);
@@ -105,10 +126,10 @@ export default class ExportLocationRoutes {
             handler: async (request, h) => {
               return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
                 return await Controller.getExportLocation(userPrincipal, documentNumber, contactId)
-                .catch(error => {
-                  logger.error(`[GET-EXPORT-LOCATION][ERROR][${error.stack || error}]`);
-                  return h.response().code(500);
-                })
+                  .catch(error => {
+                    logger.error(`[GET-EXPORT-LOCATION][ERROR][${error.stack || error}]`);
+                    return h.response().code(500);
+                  })
               })
             },
           }
