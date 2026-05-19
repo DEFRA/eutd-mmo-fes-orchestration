@@ -11,7 +11,9 @@ import {
   PROTECTIVE_MONITORING_VOID_TRANSACTION,
   PROTECTIVE_MONITORING_PRIORITY_UNUSUAL
 } from '../services/constants';
+import { DRAFT_HEADERS_KEY } from '../session_store/constants';
 import { HapiRequestApplicationStateExtended } from '../types';
+import { invalidateDraftCache } from '../persistence/services/catchCert';
 
 export default class ManageCertificatesController {
 
@@ -52,6 +54,7 @@ export default class ManageCertificatesController {
         const journey = payload.journey;
         const documentNumber = payload.documentNumber;
         const voidResult = await ManageCertsService.voidCertificate(documentNumber, userPrincipal, contactId);
+        void invalidateDraftCache(userPrincipal, `${journey}/${DRAFT_HEADERS_KEY}`, contactId);
         const message = voidResult ? `User voided a ${JOURNEY[journey]}` :
           `An attempt was made to void a ${JOURNEY[journey]} not created by the current user`;
         const monitoringInfo = `void/${JOURNEY[journey]}/dn:${documentNumber}`;

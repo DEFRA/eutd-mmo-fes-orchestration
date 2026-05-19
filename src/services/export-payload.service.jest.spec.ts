@@ -2162,7 +2162,7 @@ describe('createExportCerticate', () => {
 
     // Assert: isEuCountry called with the isoCodeAlpha2 from exportedTo
     expect(mockIsEu).toHaveBeenCalledWith('ES');
-    expect(mockCatchSubmit).toHaveBeenCalledWith('Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID, LandingsEntryOptions.UploadEntry);
+    expect(mockCatchSubmit).toHaveBeenCalledWith('GBR-2020-CC-F9F69D192');
 
     // Cleanup
     mockIsEu.mockRestore();
@@ -2822,7 +2822,7 @@ describe('createExportCerticate', () => {
   it('should not call isEuCountry and should log export location when exportLocation is null', async () => {
     const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
 
-    await (ExportPayloadService as any).submitToCatchIfEu('Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID, null);
+    await (ExportPayloadService as any).submitToCatchIfEu('GBR-2020-CC-F9F69D192', null);
 
     expect(isEuSpy).not.toHaveBeenCalled();
     expect(mockLoggerInfo).toHaveBeenCalledWith(
@@ -2836,10 +2836,7 @@ describe('createExportCerticate', () => {
     const euError = new Error('EU country check failed');
     jest.spyOn(EuCountriesService, 'isEuCountry').mockRejectedValue(euError);
 
-    await (ExportPayloadService as any).submitToCatchIfEu(
-      'Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID,
-      { exportedTo: { isoCodeAlpha2: 'ES' } }
-    );
+    await (ExportPayloadService as any).submitToCatchIfEu('GBR-2020-CC-F9F69D192', { exportedTo: { isoCodeAlpha2: 'ES' } });
 
     expect(mockLoggerError).toHaveBeenCalledWith(
       `[SUBMIT-TO-CATCH-SYSTEM][GBR-2020-CC-F9F69D192][CHECK-EU-ERROR][${euError}]`
@@ -2849,10 +2846,7 @@ describe('createExportCerticate', () => {
   it('should call isEuCountry with the isoCodeAlpha2 extracted from an exportedTo object (line 403)', async () => {
     const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
 
-    await (ExportPayloadService as any).submitToCatchIfEu(
-      'Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID,
-      { exportedTo: { isoCodeAlpha2: 'FR', officialCountryName: 'France' } }
-    );
+    await (ExportPayloadService as any).submitToCatchIfEu('GBR-2020-CC-F9F69D192', { exportedTo: { isoCodeAlpha2: 'FR', officialCountryName: 'France' } });
 
     expect(isEuSpy).toHaveBeenCalledWith('FR');
 
@@ -2862,10 +2856,7 @@ describe('createExportCerticate', () => {
   it('should call isEuCountry with undefined when exportedTo is a legacy string (line 403)', async () => {
     const isEuSpy = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(false);
 
-    await (ExportPayloadService as any).submitToCatchIfEu(
-      'Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID,
-      { exportedTo: 'France' }
-    );
+    await (ExportPayloadService as any).submitToCatchIfEu('GBR-2020-CC-F9F69D192', { exportedTo: 'France' });
 
     // toExportedTo('France') returns { officialCountryName: 'France' } which has no isoCodeAlpha2
     expect(isEuSpy).toHaveBeenCalledWith(undefined);
@@ -3519,9 +3510,7 @@ describe('getLandingsToRefresh', () => {
 
 // FI0-11132: catchSubmissionForCC now accepts landingsEntryOption as a parameter
 describe('catchSubmissionForCC', () => {
-  const USER_PRINCIPAL = 'test-user';
   const DOCUMENT_NUMBER = 'GBR-2020-CC-TEST123';
-  const CONTACT_ID = 'test-contact';
 
   let mockSubmitToCatchSystem: jest.SpyInstance;
   let mockSetCatchSubmissionInProgress: jest.SpyInstance;
@@ -3537,32 +3526,19 @@ describe('catchSubmissionForCC', () => {
     jest.restoreAllMocks();
   });
 
-  it('should call submitToCatchSystem when landingsEntryOption is UploadEntry', async () => {
-    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, LandingsEntryOptions.UploadEntry);
+  // FI0-11243: all landing entry types submit to EU CATCH — no filtering by entry type
+  it('should call setCatchSubmissionInProgress and submitToCatchSystem', async () => {
+    await ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER);
 
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
-  });
-
-  it('should call submitToCatchSystem when landingsEntryOption is ManualEntry', async () => {
-    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, LandingsEntryOptions.ManualEntry);
-
-    expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
-    expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
-  });
-
-  it('should NOT call submitToCatchSystem when landingsEntryOption is DirectLanding', async () => {
-    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, LandingsEntryOptions.DirectLanding);
-
-    expect(mockSetCatchSubmissionInProgress).not.toHaveBeenCalled();
-    expect(mockSubmitToCatchSystem).not.toHaveBeenCalled();
   });
 
   it('should handle errors from submitToCatchSystem gracefully', async () => {
     mockSubmitToCatchSystem.mockRejectedValue(new Error('submission failed'));
 
     // Should not throw - errors are caught and logged
-    await expect(ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, LandingsEntryOptions.UploadEntry)).resolves.not.toThrow();
+    await expect(ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER)).resolves.not.toThrow();
 
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
@@ -3571,7 +3547,7 @@ describe('catchSubmissionForCC', () => {
   it('should still call submitToCatchSystem when setCatchSubmissionInProgress fails', async () => {
     mockSetCatchSubmissionInProgress.mockRejectedValue(new Error('set in progress failed'));
 
-    await expect(ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, LandingsEntryOptions.UploadEntry)).resolves.not.toThrow();
+    await expect(ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER)).resolves.not.toThrow();
     await Promise.resolve();
 
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
@@ -3582,7 +3558,7 @@ describe('catchSubmissionForCC', () => {
     const loggerErrorSpy = jest.spyOn(logger, 'error');
     mockSetCatchSubmissionInProgress.mockRejectedValue(new Error('db write failed'));
 
-    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, LandingsEntryOptions.UploadEntry);
+    await ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER);
     await new Promise(process.nextTick);
 
     expect(loggerErrorSpy).toHaveBeenCalledWith(
@@ -3596,7 +3572,7 @@ describe('catchSubmissionForCC', () => {
     const loggerErrorSpy = jest.spyOn(logger, 'error');
     mockSubmitToCatchSystem.mockRejectedValue(new Error('submit failed'));
 
-    await ExportPayloadService.catchSubmissionForCC(USER_PRINCIPAL, DOCUMENT_NUMBER, CONTACT_ID, LandingsEntryOptions.ManualEntry);
+    await ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER);
     await new Promise(process.nextTick);
 
     expect(loggerErrorSpy).toHaveBeenCalledWith(

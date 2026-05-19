@@ -108,12 +108,6 @@ export const saveStorageDoc = async (dataToPersist: TransientData): Promise<void
 }
 
 export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: string, userPrincipal: string, contactId: string): Promise<StorageDocumentModel[]> => {
-  const cacheKey = `${STORAGE_NOTES_KEY}/completed/${monthAndYear}`;
-  const cached = await getDraftCache(userPrincipal, contactId, cacheKey) as unknown as StorageDocumentModel[];
-  if (cached !== null && Array.isArray(cached)) {
-    return cached;
-  }
-
   const [month, year] = monthAndYear.split('-');
   const currentDate = new Date();
   const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
@@ -127,8 +121,6 @@ export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: strin
       "$lt": new Date(yearInt, monthInt, 1)
     } as Condition<any>
   }).sort({createdAt: 'desc'}).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
-
-  void saveDraftCache(userPrincipal, contactId, cacheKey, data as any, 60);
 
   return data;
 }
@@ -350,6 +342,7 @@ export const getExportLocation = async (userPrincipal: string, documentNumber: s
 
 export const upsertUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string) => {
   await upsertDraftData(userPrincipal, documentNumber, { '$set': { 'userReference': userReference } }, contactId);
+  void invalidateDraftCache(userPrincipal, `${STORAGE_NOTES_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 };
 
 export const cloneStorageDocument = async (documentNumber: string, userPrincipal: string, contactId: string, requestByAdmin: boolean, voidOriginal?: boolean): Promise<string> => {
