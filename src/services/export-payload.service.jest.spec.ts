@@ -14,7 +14,7 @@ import VesselLandingsRefresher from "./vesselLandingsRefresher.service";
 import * as SystemBlocks from "../persistence/services/systemBlock";
 import * as ReferenceDataService from '../services/reference-data.service';
 import SummaryErrorsService from '../services/summaryErrors.service';
-import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
+import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from '../persistence/schema/catchCert';
 import { IExportCertificateResults } from '../persistence/schema/exportCertificateResults';
 import * as crypto from "crypto";
 import applicationConfig from '../applicationConfig';
@@ -416,7 +416,7 @@ describe('get', () => {
           }]
         }]
       }
-    };
+    } as any as CatchCertificate;
 
     const mockGetExportPayload = jest.spyOn(CatchCertService, 'getExportPayload');
     mockGetSessionData.mockReturnValue({ landings: [] });
@@ -450,7 +450,7 @@ describe('get', () => {
           }]
         }]
       }
-    };
+    } as any as CatchCertificate;
 
     const sessionData = {
       landings: [{

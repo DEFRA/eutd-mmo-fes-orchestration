@@ -13,7 +13,7 @@ import * as SessionManager from "../helpers/sessionManager";
 import * as Utils from "../helpers/utils/utils";
 import SUT from "./export-payload.controller";
 import logger from "../logger";
-import { DocumentStatuses, LandingsEntryOptions } from "../persistence/schema/catchCert";
+import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from "../persistence/schema/catchCert";
 import { fishingVessel, truck } from '../persistence/schema/frontEndModels/transport';
 import applicationConfig from "../applicationConfig";
 import SummaryErrorsService from "../services/summaryErrors.service";
@@ -464,7 +464,7 @@ describe("createExportCertificate", () => {
         products: [],
         landingsEntryOption: 'manualEntry'
       }
-    };
+    } as CatchCertificate;
 
     mockGetFromDraft.mockClear();
     mockGetFromDraft.mockResolvedValue({ items: [] } as any);
@@ -689,7 +689,7 @@ describe('preCheckCertificate', () => {
       status: 'DRAFT',
       documentNumber,
       exportData: {}
-    };
+    } as CatchCertificate;
 
     mockGetCertificateStatus.mockClear();
 
@@ -706,7 +706,7 @@ describe('preCheckCertificate', () => {
       status: 'LOCKED',
       documentNumber,
       exportData: {}
-    };
+    } as CatchCertificate;
 
     mockGetCertificateStatus.mockClear();
 
@@ -3242,7 +3242,7 @@ describe('getLandingType', () => {
           exportData: {
             landingsEntryOption: LandingsEntryOptions.DirectLanding
           }
-        };
+        } as CatchCertificate;
 
         // Mock session store to return null (no cache)
         const mockGetSessionStore = jest.spyOn(require('../session_store/factory').SessionStoreFactory, 'getSessionStore');

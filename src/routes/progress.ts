@@ -5,10 +5,12 @@ import { CATCH_CERTIFICATE_KEY, PROCESSING_STATEMENT_KEY, STORAGE_NOTES_KEY } fr
 import { CatchCertificateProgress } from "../persistence/schema/frontEndModels/catchCertificate";
 import { ProcessingStatementProgress } from "../persistence/schema/frontEndModels/processingStatement";
 import { StorageDocumentProgress } from "../persistence/schema/frontEndModels/storageDocument";
+import { CatchCertificate, DocumentStatuses } from '../persistence/schema/catchCert';
+import { ProcessingStatement } from '../persistence/schema/processingStatement';
+import { StorageDocument } from '../persistence/schema/storageDoc';
 import ProgressService from '../services/progress.service';
 import * as ProcessingStatementService from '../persistence/services/processingStatement';
 import logger from '../logger';
-import { DocumentStatuses } from '../persistence/schema/catchCert';
 
 export default class ProgressRoutes {
 
@@ -17,16 +19,18 @@ export default class ProgressRoutes {
     documentNumber: string,
     contactId: string,
     journey: string,
-    providedDocument?: any
+    providedDocument?: CatchCertificate | ProcessingStatement | StorageDocument
   ): Promise<any> {
     switch (journey) {
       case CATCH_CERTIFICATE_KEY:
         // P1 optimization: pass provided document to avoid duplicate read
-        return ProgressService.get(userPrincipal, documentNumber, contactId, providedDocument);
+        return ProgressService.get(userPrincipal, documentNumber, contactId, providedDocument as CatchCertificate);
       case PROCESSING_STATEMENT_KEY:
-        return ProgressService.getProcessingStatementProgress(userPrincipal, documentNumber, contactId);
+        // P1 optimization: pass provided document to avoid duplicate read
+        return ProgressService.getProcessingStatementProgress(userPrincipal, documentNumber, contactId, providedDocument as ProcessingStatement);
       case STORAGE_NOTES_KEY:
-        return ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+        // P1 optimization: pass provided document to avoid duplicate read
+        return ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId, providedDocument as StorageDocument);
       default:
         return null;
     }
@@ -55,12 +59,13 @@ export default class ProgressRoutes {
     userPrincipal: string,
     documentNumber: string,
     contactId: string,
-    completedSections: number,
-    requiredSections: number,
-    progress: ProcessingStatementProgress,
-    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>
+    result: { completedSections?: number; requiredSections?: number; progress: ProcessingStatementProgress },
+    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>,
+    providedDocument?: ProcessingStatement
   ): Promise<any> {
-    const psData = await ProcessingStatementService.getDraft(userPrincipal, documentNumber, contactId);
+    const { completedSections, requiredSections, progress } = result;
+    // P1 optimization: use provided document to avoid duplicate read
+    const psData = providedDocument ?? await ProcessingStatementService.getDraft(userPrincipal, documentNumber, contactId);
     const products = psData?.exportData?.products || [];
     const catches = psData?.exportData?.catches || [];
     const hasDescriptionOnlyProduct = this.hasProductWithoutCatches(products, catches);
@@ -87,19 +92,22 @@ export default class ProgressRoutes {
     documentNumber: string,
     contactId: string,
     journey: string,
-    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>
+    h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>,
+    providedDocument?: CatchCertificate | ProcessingStatement | StorageDocument
   ): Promise<any> {
     switch (journey) {
       case CATCH_CERTIFICATE_KEY: {
-        const { completedSections, requiredSections, progress } = await ProgressService.get(userPrincipal, documentNumber, contactId);
+        const { completedSections, requiredSections, progress } = await ProgressService.get(userPrincipal, documentNumber, contactId, providedDocument as CatchCertificate);
         return completeProgressHandler(progress, completedSections, requiredSections, h);
       }
       case PROCESSING_STATEMENT_KEY: {
-        const { completedSections, requiredSections, progress } = await ProgressService.getProcessingStatementProgress(userPrincipal, documentNumber, contactId);
-        return this.handlePsCompleteProgress(userPrincipal, documentNumber, contactId, completedSections, requiredSections, progress as ProcessingStatementProgress, h);
+        // P1 optimization: pass provided document to avoid duplicate reads
+        const { completedSections, requiredSections, progress } = await ProgressService.getProcessingStatementProgress(userPrincipal, documentNumber, contactId, providedDocument as ProcessingStatement);
+        return this.handlePsCompleteProgress(userPrincipal, documentNumber, contactId, { completedSections, requiredSections, progress: progress as ProcessingStatementProgress }, h, providedDocument as ProcessingStatement);
       }
       case STORAGE_NOTES_KEY: {
-        const { completedSections, requiredSections, progress } = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId);
+        // P1 optimization: pass provided document to avoid duplicate reads
+        const { completedSections, requiredSections, progress } = await ProgressService.getStorageDocumentProgress(userPrincipal, documentNumber, contactId, providedDocument as StorageDocument);
         return completeProgressHandler(progress, completedSections, requiredSections, h);
       }
       default:
@@ -137,8 +145,9 @@ export default class ProgressRoutes {
         security: true,
         cors: true,
         handler: async (request, h) => {
-          return withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-            return this.getCompleteProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey, h);
+          return withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
+            // P1 optimization: pass document from ownership validation
+            return this.getCompleteProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey, h, document);
           }, [DocumentStatuses.Draft, DocumentStatuses.Locked])
           .catch((e) => {
             logger.error(`[GET-COMPLETE-PROGRESS][ERROR][${e.stack || e}]`);
