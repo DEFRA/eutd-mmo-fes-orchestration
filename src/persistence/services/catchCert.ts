@@ -452,7 +452,7 @@ export const getExportPayload = async (
   userPrincipal: string,
   documentNumber: string,
   contactId: string,
-  draft?: CatchCertificate
+  draft?: Partial<CatchCertificate>
 ): Promise<ProductsLanded> => {
   const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
@@ -489,7 +489,7 @@ export const getExporterDetails = async (userPrincipal: string, documentNumber: 
     : null;
 };
 
-export const getLandingsEntryOption = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: CatchCertificate): Promise<LandingsEntryOptions> => {
+export const getLandingsEntryOption = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: Partial<CatchCertificate>): Promise<LandingsEntryOptions> => {
   const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
   return doc?.exportData?.landingsEntryOption;

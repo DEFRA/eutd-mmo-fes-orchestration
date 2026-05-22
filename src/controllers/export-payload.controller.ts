@@ -22,7 +22,7 @@ import * as PayloadSchema from '../persistence/schema/frontEndModels/payload';
 import { fishingVessel } from '../persistence/schema/frontEndModels/transport';
 import { IExportCertificateResults } from '../persistence/schema/exportCertificateResults';
 import applicationConfig from '../applicationConfig';
-import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
+import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from '../persistence/schema/catchCert';
 import { getRandomNumber } from '../helpers/utils/utils';
 import SummaryErrorsService from '../services/summaryErrors.service';
 import TransportService from '../services/transport.service';
@@ -157,7 +157,7 @@ export default class ExportPayloadController {
     }
   }
 
-  public static async preCheckCertificate(userPrincipal: string, documentNumber: string, exportPayload: PayloadSchema.ProductsLanded, contactId: string, providedDraft?: any):
+  public static async preCheckCertificate(userPrincipal: string, documentNumber: string, exportPayload: PayloadSchema.ProductsLanded, contactId: string, providedDraft?: Partial<CatchCertificate>):
     Promise<{ response: any, url: string, code: number } | null> {
 
     // P1/P2 optimization: reuse provided draft for status check
@@ -212,7 +212,7 @@ export default class ExportPayloadController {
     return null;
   }
 
-  public static async createExportCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: any) {
+  public static async createExportCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: Partial<CatchCertificate>) {
     try {
       logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][START]`);
       
@@ -972,7 +972,7 @@ export default class ExportPayloadController {
     return ExportPayloadController.validate(req, h, true, userPrincipal, documentNumber, contactId);
   }
 
-  public static async getLandingsType(userPrincipal: string, documentNumber: string, contactId: string, providedDraft?: any): Promise<{ landingsEntryOption: string, generatedByContent: boolean }> {
+  public static async getLandingsType(userPrincipal: string, documentNumber: string, contactId: string, providedDraft?: Partial<CatchCertificate>): Promise<{ landingsEntryOption: string, generatedByContent: boolean }> {
 
     // Short-lived cache to reduce DB load under concurrency
     try {

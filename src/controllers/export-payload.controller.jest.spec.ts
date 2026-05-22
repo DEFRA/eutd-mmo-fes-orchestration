@@ -472,7 +472,7 @@ describe("createExportCertificate", () => {
     mockPreCheckCertificate.mockClear();
     mockPreCheckCertificate.mockResolvedValue(null);
 
-    await SUT.createExportCertificate(req, h, USER_ID, DOCUMENT_NUMBER, contactId, providedDocument);
+    await SUT.createExportCertificate(req, h, USER_ID, DOCUMENT_NUMBER, contactId, providedDocument as any);
 
     // Verify: invalidateDraftCache was NOT called (optimization working)
     expect(mockInvalidateDraft).not.toHaveBeenCalled();
@@ -693,7 +693,7 @@ describe('preCheckCertificate', () => {
 
     mockGetCertificateStatus.mockClear();
 
-    const result = await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId, providedDraft);
+    const result = await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId, providedDraft as any);
 
     // Verify: getCertificateStatus was NOT called (optimization working)
     expect(mockGetCertificateStatus).not.toHaveBeenCalled();
@@ -710,7 +710,7 @@ describe('preCheckCertificate', () => {
 
     mockGetCertificateStatus.mockClear();
 
-    const result = await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId, lockedDraft);
+    const result = await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId, lockedDraft as any);
 
     // Verify: getCertificateStatus was NOT called
     expect(mockGetCertificateStatus).not.toHaveBeenCalled();
@@ -3253,7 +3253,7 @@ describe('getLandingType', () => {
 
         mockGetLandingsEntryOption.mockClear();
 
-        const result = await SUT.getLandingsType(USER_ID, DOCUMENT_NUMBER, contactId, providedDraft);
+        const result = await SUT.getLandingsType(USER_ID, DOCUMENT_NUMBER, contactId, providedDraft as any);
 
         // Verify: getLandingsEntryOption was NOT called (optimization working)
         expect(mockGetLandingsEntryOption).not.toHaveBeenCalled();

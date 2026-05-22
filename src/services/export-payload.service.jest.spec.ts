@@ -421,7 +421,7 @@ describe('get', () => {
     const mockGetExportPayload = jest.spyOn(CatchCertService, 'getExportPayload');
     mockGetSessionData.mockReturnValue({ landings: [] });
 
-    const result = await ExportPayloadService.getFromDraft(providedDraft, 'User1', 'GBR-2020-CC-TEST123', CONTACT_ID);
+    const result = await ExportPayloadService.getFromDraft(providedDraft as any, 'User1', 'GBR-2020-CC-TEST123', CONTACT_ID);
 
     // Verify: getExportPayload was called with the provided draft (not fetching from DB)
     expect(mockGetExportPayload).toHaveBeenCalledWith('User1', 'GBR-2020-CC-TEST123', CONTACT_ID, providedDraft);
@@ -480,7 +480,7 @@ describe('get', () => {
     } as any);
     mockGetSessionData.mockReturnValue(sessionData);
 
-    const result = await ExportPayloadService.getFromDraft(providedDraft, 'User1', 'DOC-123', CONTACT_ID);
+    const result = await ExportPayloadService.getFromDraft(providedDraft as any, 'User1', 'DOC-123', CONTACT_ID);
 
     // Verify: session data was applied to landings
     expect(result.items[0].landings[0].addMode).toBe(true);
