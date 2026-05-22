@@ -1991,18 +1991,20 @@ describe('catchCert - db related', () => {
 
     it('should call the findOne mongoose method with the correct parameters', async () => {
       const conditions = { documentNumber: undefined, status: { $in: ['DRAFT', 'PENDING', 'LOCKED'] } };
+      const options = { maxTimeMS: 30000, lean: true };
 
       await CatchCertService.getDraft('Bob', undefined, undefined);
 
-      expect(mockFind).toHaveBeenCalledWith(conditions);
+      expect(mockFind).toHaveBeenCalledWith(conditions, null, options);
     });
 
     it('should be able to fetch by documentNumber', async () => {
       const conditions = { documentNumber: 'GBR-343434-234234-2344', status: { $in: ['DRAFT', 'PENDING', 'LOCKED'] } };
+      const options = { maxTimeMS: 30000, lean: true };
 
       await CatchCertService.getDraft('Bob', 'GBR-343434-234234-2344', contactId);
 
-      expect(mockFind).toHaveBeenCalledWith(conditions);
+      expect(mockFind).toHaveBeenCalledWith(conditions, null, options);
     });
 
     test('cache returns empty', async () => {

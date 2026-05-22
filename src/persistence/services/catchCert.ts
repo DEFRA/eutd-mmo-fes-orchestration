@@ -339,18 +339,23 @@ export const getDraft = async (
   if (isEmpty(doc)) {
     logger.info(`[GET-DRAFT][DOCUMENT-NUMBER][${documentNumber}][GET-DRAFT-CACHE-EMPTY]`);
 
-    doc = await CatchCertModel.findOne({
-      status: {
-        $in: [
-          DocumentStatuses.Draft,
-          DocumentStatuses.Pending,
-          DocumentStatuses.Locked,
-        ],
+    doc = await CatchCertModel.findOne(
+      {
+        status: {
+          $in: [
+            DocumentStatuses.Draft,
+            DocumentStatuses.Pending,
+            DocumentStatuses.Locked,
+          ],
+        },
+        documentNumber: documentNumber,
       },
-      documentNumber: documentNumber,
-    })
-    .maxTimeMS(30000) // 30 second query timeout
-    .lean(); // Return plain JavaScript object for better performance
+      null,
+      { 
+        maxTimeMS: 30000, // 30 second query timeout
+        lean: true // Return plain JavaScript object for better performance
+      }
+    );
 
     if (!doc) {
       return null;
