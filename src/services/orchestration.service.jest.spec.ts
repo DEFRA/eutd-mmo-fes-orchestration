@@ -2433,6 +2433,56 @@ describe('checkValidationStorageNotes', () => {
     expect(mockValidateCompletedDocument).not.toHaveBeenCalled();
     expect(data.validationErrors).toHaveLength(0);
   });
+
+  it('should push weight validation errors when departure weights exceed arrival weights', async () => {
+    const data: any = {
+      catches: [{
+        certificateNumber: 'GBR-2022-CC-123456789',
+        product: 'Atlantic herring',
+        certificateType: 'non_uk',
+        netWeightProductArrival: '10',
+        netWeightProductDeparture: '11',
+        netWeightFisheryProductArrival: '20',
+        netWeightFisheryProductDeparture: '21',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(2);
+    expect(data.validationErrors[0]).toMatchObject({
+      message: 'sdNetWeightProductDepartureExceedsArrival',
+      key: 'catches-0-netWeightProductDeparture',
+      certificateNumber: 'GBR-2022-CC-123456789',
+      product: 'Atlantic herring',
+    });
+    expect(data.validationErrors[1]).toMatchObject({
+      message: 'sdNetWeightProductDepartureExceedsArrival',
+      key: 'catches-0-netWeightFisheryProductDeparture',
+      certificateNumber: 'GBR-2022-CC-123456789',
+      product: 'Atlantic herring',
+    });
+  });
+
+  it('should not push weight validation errors when departure weights are less than or equal to arrival weights', async () => {
+    const data: any = {
+      catches: [{
+        certificateNumber: 'GBR-2022-CC-123456789',
+        product: 'Atlantic herring',
+        certificateType: 'non_uk',
+        netWeightProductArrival: '10',
+        netWeightProductDeparture: '10',
+        netWeightFisheryProductArrival: '20',
+        netWeightFisheryProductDeparture: '19',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(0);
+  });
 });
 
 describe('clearDataFromJourney', () => {
