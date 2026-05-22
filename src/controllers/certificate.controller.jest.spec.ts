@@ -642,6 +642,35 @@ describe('Certificate Controller', () => {
       expect(mockError).toHaveBeenCalledWith(`[GET-SUMMARY-CERTIFICATE][GET-SUMMARY-ERRORS][ERROR][${error}]`);
     });
 
+    it('P1 optimization: should reuse provided document and NOT call getDocument', async () => {
+      // Setup: provide document directly (as from ownership validation)
+      const providedDocument = backEndCc;
+      mockGetSummaryErrors.mockResolvedValue(summaryErrors);
+
+      // Call with provided document
+      const result = await CertificateController.getSummaryCertificate(req, h, 'Bob', documentNumber, providedDocument as any);
+
+      // Verify: getDocument was NOT called (optimization working)
+      expect(mockGetDocument).not.toHaveBeenCalled();
+      // Verify: summary errors still called
+      expect(mockGetSummaryErrors).toHaveBeenCalledWith('Bob', documentNumber, contactId);
+      // Verify: result is correct
+      expect(result).toBeDefined();
+      expect(result.documentNumber).toBe(documentNumber);
+    });
+
+    it('P1 optimization: should fall back to getDocument when no document provided', async () => {
+      mockGetDocument.mockResolvedValue(backEndCc);
+      mockGetSummaryErrors.mockResolvedValue(summaryErrors);
+
+      // Call without provided document (backward compatibility)
+      await CertificateController.getSummaryCertificate(req, h, 'Bob', documentNumber);
+
+      // Verify: getDocument WAS called (fallback working)
+      expect(mockGetDocument).toHaveBeenCalledWith(documentNumber, 'Bob', contactId);
+      expect(mockGetSummaryErrors).toHaveBeenCalledWith('Bob', documentNumber, contactId);
+    });
+
   });
 
   describe('getEuDataIntegrationStatus', () => {

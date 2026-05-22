@@ -96,7 +96,8 @@ describe("Progress routes", () => {
 
       await server.inject(request);
 
-      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", 'contactBob');
+      // P1 optimization: now includes 4th parameter (document from ownership validation)
+      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", 'contactBob', expect.anything());
     });
   });
 
@@ -175,7 +176,8 @@ describe("Progress routes", () => {
 
       await server.inject(request);
 
-      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", "contactBob");
+      // P1 optimization: now includes 4th parameter (document from ownership validation)
+      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", "contactBob", expect.anything());
     });
   });
 
@@ -253,7 +255,8 @@ describe("Progress routes", () => {
 
       await server.inject(request);
 
-      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", undefined);
+      // P1 optimization: now includes 4th parameter (document from ownership validation)
+      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", undefined, expect.anything());
     });
   });
 
@@ -365,7 +368,7 @@ describe("Progress routes", () => {
     it("will return 200 if all sections are complete", async () => {
       const response = await server.inject(request);
       expect(response.statusCode).toBe(200);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
       expect(mockLogError).not.toHaveBeenCalled();
     });
 
@@ -388,7 +391,7 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(incompleteData);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
       expect(response.payload).toStrictEqual(JSON.stringify(error));
     });
 
@@ -412,7 +415,7 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(incompleteData);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
       expect(response.payload).toStrictEqual(JSON.stringify(error));
     });
 
@@ -487,7 +490,19 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(data);
       mockLogError = jest.spyOn(logger, "error");
       mockValidateDocumentOwnership = jest.spyOn(DocumentOwnershipValidator, "validateDocumentOwnership");
-      mockValidateDocumentOwnership.mockResolvedValue(true);
+      // P1 optimization: mock must return document object, not boolean
+      mockValidateDocumentOwnership.mockResolvedValue({
+        documentNumber: 'DOCUMENT123',
+        status: 'DRAFT',
+        exportData: {
+          products: [
+            { id: 'product-1', description: 'Product 1' }
+          ],
+          catches: [
+            { productId: 'product-1', species: 'COD', weight: 100 }
+          ]
+        }
+      } as any);
       
       // Mock getDraft to return valid products with catches
       mockGetDraft = jest.spyOn(ProcessingStatementService, "getDraft");
@@ -510,7 +525,7 @@ describe("Progress routes", () => {
     it("will return 200 if all sections are complete", async () => {
       const response = await server.inject(request);
       expect(response.statusCode).toBe(200);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
       expect(mockLogError).not.toHaveBeenCalled();
     });
 
@@ -533,7 +548,7 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(incompleteData);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
       expect(response.payload).toStrictEqual(JSON.stringify(error));
     });
 
@@ -559,7 +574,9 @@ describe("Progress routes", () => {
 
     // FI0-10647: Product validation tests
     it("will return 400 with processedProductDetails error when products have description but no catches", async () => {
-      mockGetDraft.mockResolvedValue({
+      mockValidateDocumentOwnership.mockResolvedValue({
+        documentNumber: 'DOCUMENT123',
+        status: 'DRAFT',
         exportData: {
           products: [
             { id: 'product-1', description: 'Product without catches' }
@@ -570,8 +587,9 @@ describe("Progress routes", () => {
 
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
-      expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
+      // P1 optimization: getDraft should NOT be called when document is provided
+      expect(mockGetDraft).not.toHaveBeenCalled();
       
       const responsePayload = JSON.parse(response.payload);
       expect(responsePayload.processedProductDetails).toBe('error.processedProductDetails.incomplete');
@@ -594,7 +612,9 @@ describe("Progress routes", () => {
       };
 
       mockGetProgress.mockResolvedValue(incompleteData);
-      mockGetDraft.mockResolvedValue({
+      mockValidateDocumentOwnership.mockResolvedValue({
+        documentNumber: 'DOCUMENT123',
+        status: 'DRAFT',
         exportData: {
           products: [
             { id: 'product-1', description: 'Product without catches' }
@@ -613,7 +633,9 @@ describe("Progress routes", () => {
     });
 
     it("will return 200 when all sections complete and products have matching catches", async () => {
-      mockGetDraft.mockResolvedValue({
+      mockValidateDocumentOwnership.mockResolvedValue({
+        documentNumber: 'DOCUMENT123',
+        status: 'DRAFT',
         exportData: {
           products: [
             { id: 'product-1', description: 'Valid Product' }
@@ -626,11 +648,14 @@ describe("Progress routes", () => {
 
       const response = await server.inject(request);
       expect(response.statusCode).toBe(200);
-      expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      // P1 optimization: getDraft should NOT be called when document is provided
+      expect(mockGetDraft).not.toHaveBeenCalled();
     });
 
     it("will return 400 when one product has catches but another does not", async () => {
-      mockGetDraft.mockResolvedValue({
+      mockValidateDocumentOwnership.mockResolvedValue({
+        documentNumber: 'DOCUMENT123',
+        status: 'DRAFT',
         exportData: {
           products: [
             { id: 'product-1', description: 'Product with catches' },
@@ -740,7 +765,7 @@ describe("Progress routes", () => {
     it("will return 200 if all sections are complete", async () => {
       const response = await server.inject(request);
       expect(response.statusCode).toBe(200);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
       expect(mockLogError).not.toHaveBeenCalled();
     });
 
@@ -762,7 +787,7 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(incompleteData);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
       expect(response.payload).toStrictEqual(JSON.stringify(error));
     });
 
