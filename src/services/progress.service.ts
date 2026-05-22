@@ -25,9 +25,12 @@ import {
   checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent,
   checkNetWeightProductDepartureIsZeroPositive,
   checkNetWeightFisheryProductDepartureIsZeroPositive,
-  checkNetWeightProductDepartureExceedsArrival,
-  checkNetWeightFisheryProductDepartureExceedsProductDeparture,
 } from './handlers/storage-notes';
+import {
+  checkNetWeightProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsProductDeparture,
+} from '../validators/storageWeightValidator';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
 import * as FrontEndCatchCertificateTransport from "../persistence/schema/frontEndModels/catchCertificateTransport";
 import catchCertificateTransportDetailsSchema from "../schemas/catchcerts/catchCertificateTransportDetailsSchema";
@@ -489,6 +492,7 @@ export default class ProgressService {
       checkNetWeightProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
       checkNetWeightProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
+      checkNetWeightFisheryProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, index, weightsErrors);
       if (Object.keys(weightsErrors).length > 0) {
         return false;

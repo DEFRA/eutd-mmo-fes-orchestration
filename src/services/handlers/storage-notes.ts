@@ -23,6 +23,21 @@ import { validateCommodityCode } from "../../validators/pssdCommodityCode.valida
 import { BusinessError, SpeciesSuggestionError } from "../../validators/validationErrors";
 import { ICountry } from "../../persistence/schema/common";
 import { isEmpty } from "lodash";
+// Import departure vs arrival weight comparisons from the shared validator.
+// They are defined there (not here) to avoid a circular dependency with
+// orchestration.service.ts, which also needs to call them at submission time.
+import {
+  checkNetWeightProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsProductDeparture,
+} from '../../validators/storageWeightValidator';
+// Re-export so existing consumers (progress.service, tests) can continue to
+// import these from storage-notes without code changes.
+export {
+  checkNetWeightProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsProductDeparture,
+} from '../../validators/storageWeightValidator';
 
 export const initialState = {
   storageNotes: {
@@ -60,6 +75,7 @@ export default {
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightProductDepartureExceedsArrival(ctch, index, errors);
+      checkNetWeightFisheryProductDepartureExceedsArrival(ctch, index, errors);
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch, index, errors);
 
       if (isEmpty(errors)) {
@@ -145,31 +161,6 @@ export function checkNetWeightFisheryProductDepartureIsZeroPositive(ctch: any, i
     errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDeparturePositiveMax2Decimal';
   } else if (ctch.netWeightFisheryProductDeparture && !isNotExceed12Digit(ctch.netWeightFisheryProductDeparture)) {
     errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceed12Digit';
-  }
-}
-
-// Scenario 1 & 2: departure weight cannot exceed arrival weight
-export function checkNetWeightProductDepartureExceedsArrival(ctch: any, index: number, errors: any) {
-  if (
-    !errors[`catches-${index}-netWeightProductDeparture`] &&
-    ctch.netWeightProductDeparture &&
-    ctch.netWeightProductArrival &&
-    (+ctch.netWeightProductDeparture) > (+ctch.netWeightProductArrival)
-  ) {
-    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceedsArrival';
-  }
-}
-
-// Scenario 3: fishery product departure weight cannot exceed net product departure weight
-export function checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch: any, index: number, errors: any) {
-  if (
-    !errors[`catches-${index}-netWeightFisheryProductDeparture`] &&
-    !errors[`catches-${index}-netWeightProductDeparture`] &&
-    ctch.netWeightFisheryProductDeparture &&
-    ctch.netWeightProductDeparture &&
-    (+ctch.netWeightFisheryProductDeparture) > (+ctch.netWeightProductDeparture)
-  ) {
-    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceedsProductDeparture';
   }
 }
 

@@ -2433,6 +2433,71 @@ describe('checkValidationStorageNotes', () => {
     expect(mockValidateCompletedDocument).not.toHaveBeenCalled();
     expect(data.validationErrors).toHaveLength(0);
   });
+
+  it('should push error when netWeightProductDeparture exceeds netWeightProductArrival at submission (FI0-11277)', async () => {
+    const data: any = {
+      catches: [{
+        certificateNumber: 'FR-2022-CC-123',
+        product: 'Atlantic herring',
+        certificateType: 'non_uk',
+        netWeightProductArrival: '100',
+        netWeightFisheryProductArrival: '80',
+        netWeightProductDeparture: '120',
+        netWeightFisheryProductDeparture: '70',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(1);
+    expect(data.validationErrors[0]).toMatchObject({
+      message: 'sdNetWeightProductDepartureExceedsArrival',
+      key: 'catches-0-netWeightProductDeparture',
+    });
+  });
+
+  it('should push error when netWeightFisheryProductDeparture exceeds netWeightFisheryProductArrival at submission (FI0-11277)', async () => {
+    const data: any = {
+      catches: [{
+        certificateNumber: 'FR-2022-CC-123',
+        product: 'Atlantic herring',
+        certificateType: 'non_uk',
+        netWeightProductArrival: '100',
+        netWeightFisheryProductArrival: '80',
+        netWeightProductDeparture: '100',
+        netWeightFisheryProductDeparture: '90',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(1);
+    expect(data.validationErrors[0]).toMatchObject({
+      message: 'sdNetWeightFisheryProductDepartureExceedsArrival',
+      key: 'catches-0-netWeightFisheryProductDeparture',
+    });
+  });
+
+  it('should not push weight errors when all weights are valid at submission (FI0-11277)', async () => {
+    const data: any = {
+      catches: [{
+        certificateNumber: 'FR-2022-CC-123',
+        product: 'Atlantic herring',
+        certificateType: 'non_uk',
+        netWeightProductArrival: '100',
+        netWeightFisheryProductArrival: '80',
+        netWeightProductDeparture: '100',
+        netWeightFisheryProductDeparture: '80',
+      }],
+      validationErrors: [],
+    };
+
+    await OrchestrationService.checkValidationStorageNotes(data, 'user', 'contact', 'GBR-2022-SD-123456789');
+
+    expect(data.validationErrors).toHaveLength(0);
+  });
 });
 
 describe('clearDataFromJourney', () => {

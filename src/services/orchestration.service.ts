@@ -43,6 +43,11 @@ import { toFrontEndStorageDocumentExportData } from "../persistence/schema/stora
 import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
 import { invalidateDraftCache, setCatchSubmissionInProgress } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
+import {
+  checkNetWeightProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsArrival,
+  checkNetWeightFisheryProductDepartureExceedsProductDeparture,
+} from '../validators/storageWeightValidator';
 import * as EuCountriesService from './eu-countries.service';
 
 export const catchCerts: string = "catchCertificate";
@@ -502,23 +507,35 @@ export default class OrchestrationService {
 
   static readonly checkValidationStorageNotes = async (data, userPrincipal: string, contactId: string, documentNumber: string) => {
     for (const ctch in data.catches) {
-      const documentCertificateNumber = data.catches[ctch].certificateNumber;
-      const species = data.catches[ctch].product;
+      const singleCatch = data.catches[ctch];
+      const documentCertificateNumber = singleCatch.certificateNumber;
+      const species = singleCatch.product;
       const speciesCode = null;
-      if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber))) {
+      if (singleCatch.certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber))) {
         data.validationErrors.push({
           message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
           key: `catches-${ctch}-certificateNumber`,
           certificateNumber: documentCertificateNumber,
           product: species
         });
-      } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber)) {
+      } else if (singleCatch.certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber)) {
         data.validationErrors.push({
           message: 'sdAddUKEntryDocumentSpeciesDoesNotExistError',
           key: `catches-${ctch}-certificateNumber`,
           certificateNumber: documentCertificateNumber,
           product: species
         });
+      }
+
+      // Re-validate departure vs arrival weight relationships at submission time.
+      // Catches user-edited arrival weights that bypassed the departure-product-summary
+      // page (FI0-11277).
+      const weightErrors: { [key: string]: any } = {};
+      checkNetWeightProductDepartureExceedsArrival(singleCatch, +ctch, weightErrors);
+      checkNetWeightFisheryProductDepartureExceedsArrival(singleCatch, +ctch, weightErrors);
+      checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, +ctch, weightErrors);
+      for (const [key, message] of Object.entries(weightErrors)) {
+        data.validationErrors.push({ message, key });
       }
     }
   }

@@ -2467,6 +2467,59 @@ describe("/create-non-manipulation-document/:documentNumber/departure-product-su
 
     expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
   });
+
+  it("Scenario 5: returns error when netWeightFisheryProductDeparture exceeds netWeightFisheryProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "100",
+          netWeightProductArrival: "100",
+          netWeightFisheryProductArrival: "80",
+          netWeightFisheryProductDeparture: "90",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBe("sdNetWeightFisheryProductDepartureExceedsArrival");
+  });
+
+  it("Scenario 5: no error when netWeightFisheryProductDeparture is equal to netWeightFisheryProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const dataEqual = {
+      catches: [
+        {
+          netWeightProductDeparture: "100",
+          netWeightProductArrival: "100",
+          netWeightFisheryProductArrival: "80",
+          netWeightFisheryProductDeparture: "80",
+        },
+      ],
+    };
+
+    const dataLess = {
+      catches: [
+        {
+          netWeightProductDeparture: "100",
+          netWeightProductArrival: "100",
+          netWeightFisheryProductArrival: "80",
+          netWeightFisheryProductDeparture: "70",
+        },
+      ],
+    };
+
+    const { errors: errorsEqual } = await handler({ data: dataEqual, errors: {} });
+    const { errors: errorsLess } = await handler({ data: dataLess, errors: {} });
+
+    expect(errorsEqual["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
+    expect(errorsLess["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
+  });
 });
 
 describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-details", () => {
