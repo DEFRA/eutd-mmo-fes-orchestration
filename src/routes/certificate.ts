@@ -1,6 +1,6 @@
 import * as Hapi from "@hapi/hapi";
 import Controller from '../controllers/certificate.controller';
-import { DocumentStatuses } from "../persistence/schema/catchCert";
+import { CatchCertificate, DocumentStatuses } from "../persistence/schema/catchCert";
 import { withDocumentLegitimatelyOwned } from '../helpers/withDocumentLegitimatelyOwned';
 import logger from '../logger';
 
@@ -16,8 +16,9 @@ export default class CertificateRoutes {
             security: true,
             cors: true,
             handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>) => {
-              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber) => {
-                const documentSummary = await Controller.getSummaryCertificate(request,h,userPrincipal,documentNumber);
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
+                // P1 optimization: pass document from ownership validation to avoid duplicate read
+                const documentSummary = await Controller.getSummaryCertificate(request, h, userPrincipal, documentNumber, document as Partial<CatchCertificate>);
 
                 if (!documentSummary) {
                   return h.response().code(404);

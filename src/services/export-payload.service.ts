@@ -40,6 +40,23 @@ const https = require('node:https');
 
 export default class ExportPayloadService {
 
+  // P1/P2 optimization: get export payload from provided draft to avoid duplicate DB reads
+  public static async getFromDraft(draft: Partial<CatchCertificate>, userId: string, documentNumber: string, contactId: string): Promise<ProductsLanded> {
+    logger.info(`[GET-EXPORT-PAYLOAD][RETRIEVING-SESSION-DATA][DOCUMENT-NUMBER][${documentNumber}]`);
+    const sessionData: SessionStore = await getCurrentSessionData(userId, documentNumber, contactId);
+    const exportPayload: ProductsLanded = await CatchCertService.getExportPayload(userId, documentNumber, contactId, draft);
+
+    if (sessionData?.landings && exportPayload?.items) {
+      exportPayload.items.forEach(item => {
+        if (Array.isArray(item.landings)) {
+          item.landings.forEach(landing => ExportPayloadService.applySessionDataToLanding(sessionData, landing))
+        }
+      })
+    }
+
+    return exportPayload;
+  }
+
   public static async get(userId: string, documentNumber: string, contactId: string): Promise<ProductsLanded> {
     logger.info(`[GET-EXPORT-PAYLOAD][RETRIEVING-SESSION-DATA][DOCUMENT-NUMBER][${documentNumber}]`);
     const sessionData: SessionStore = await getCurrentSessionData(userId, documentNumber, contactId);
