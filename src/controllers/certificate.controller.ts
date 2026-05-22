@@ -13,9 +13,11 @@ import logger from '../logger';
 import DocumentNumberService from '../services/documentNumber.service';
 
 export default class CertificateController {
-  public static async getSummaryCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string): Promise<CertificateSummary> {
+  public static async getSummaryCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, providedDocument?: Partial<CatchCertificate>): Promise<CertificateSummary> {
     const contactId = <string>(req as any).app.claims.contactId;
-    const document: CatchCertificate = await getDocument(documentNumber, userPrincipal, contactId)
+    
+    // P1 optimization: reuse document from ownership validation if available
+    const document = providedDocument as CatchCertificate ?? await getDocument(documentNumber, userPrincipal, contactId)
       .catch(e => {
         logger.error(`[GET-SUMMARY-CERTIFICATE][GET-DOCUMENT][ERROR][${e}]`);
         throw new Error(e);

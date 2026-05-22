@@ -40,10 +40,11 @@ import { validateTruckNationality } from '../helpers/transportValidation';
 
 export default class ProgressService {
 
-  public static async get(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
+  public static async get(userPrincipal: string, documentNumber: string, contactId: string, providedDraft?: Partial<CatchCertificate>): Promise<Progress> {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-CC-PROGRESS][STARTED]`);
 
-    const data: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
+    // P1 optimization: reuse provided draft to avoid duplicate read
+    const data = providedDraft as CatchCertificate ?? await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
 
     if (data?.exportData?.landingsEntryOption) {
       const { landingsEntryOption, exporterDetails, products, conservation, transportation, transportations, exportedFrom, exportedTo, pointOfDestination } = data.exportData;
@@ -596,10 +597,11 @@ export default class ProgressService {
     return hasCountry ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
-  public static async getProcessingStatementProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
+  public static async getProcessingStatementProgress(userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: ProcessingStatement.ProcessingStatement): Promise<Progress> {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`);
 
-    const data = await ProcessingStatementService.getDraft(userPrincipal, documentNumber, contactId);
+    // P1 optimization: use provided document to avoid duplicate read
+    const data = providedDocument ?? await ProcessingStatementService.getDraft(userPrincipal, documentNumber, contactId);
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
@@ -654,10 +656,11 @@ export default class ProgressService {
     };
   }
 
-  public static async getStorageDocumentProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
+  public static async getStorageDocumentProgress(userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: StorageDocument.StorageDocument): Promise<Progress> {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`);
 
-    const data = await StorageDocumentService.getDraft(userPrincipal, documentNumber, contactId);
+    // P1 optimization: use provided document to avoid duplicate read
+    const data = providedDocument ?? await StorageDocumentService.getDraft(userPrincipal, documentNumber, contactId);
     const catchesStatus: ProgressStatus = await ProgressService.getSDCatchStatus(data?.exportData?.catches, userPrincipal, documentNumber, contactId);
     const departureTransportation: ProgressStatus = ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data?.exportData?.transportation)), "storageNotes");
 
