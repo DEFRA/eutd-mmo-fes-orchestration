@@ -501,10 +501,51 @@ export default class OrchestrationService {
   }
 
   static readonly checkValidationStorageNotes = async (data, userPrincipal: string, contactId: string, documentNumber: string) => {
+    const parseWeight = (value: string | number | null | undefined): number | undefined => {
+      if (value === undefined || value === null || value === '') {
+        return undefined;
+      }
+
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
     for (const ctch in data.catches) {
       const documentCertificateNumber = data.catches[ctch].certificateNumber;
       const species = data.catches[ctch].product;
       const speciesCode = null;
+
+      const arrivalProductWeight = parseWeight(data.catches[ctch].netWeightProductArrival);
+      const departureProductWeight = parseWeight(data.catches[ctch].netWeightProductDeparture);
+      const arrivalFisheryWeight = parseWeight(data.catches[ctch].netWeightFisheryProductArrival);
+      const departureFisheryWeight = parseWeight(data.catches[ctch].netWeightFisheryProductDeparture);
+
+      if (
+        arrivalProductWeight !== undefined &&
+        departureProductWeight !== undefined &&
+        departureProductWeight > arrivalProductWeight
+      ) {
+        data.validationErrors.push({
+          message: 'sdNetWeightProductDepartureExceedsArrival',
+          key: `catches-${ctch}-netWeightProductDeparture`,
+          certificateNumber: documentCertificateNumber,
+          product: species,
+        });
+      }
+
+      if (
+        arrivalFisheryWeight !== undefined &&
+        departureFisheryWeight !== undefined &&
+        departureFisheryWeight > arrivalFisheryWeight
+      ) {
+        data.validationErrors.push({
+          message: 'sdNetWeightProductDepartureExceedsArrival',
+          key: `catches-${ctch}-netWeightFisheryProductDeparture`,
+          certificateNumber: documentCertificateNumber,
+          product: species,
+        });
+      }
+
       if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber))) {
         data.validationErrors.push({
           message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
