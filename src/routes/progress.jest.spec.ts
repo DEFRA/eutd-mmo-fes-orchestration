@@ -96,7 +96,8 @@ describe("Progress routes", () => {
 
       await server.inject(request);
 
-      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", 'contactBob');
+      // P1 optimization: now includes 4th parameter (document from ownership validation)
+      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", 'contactBob', expect.anything());
     });
   });
 

@@ -153,8 +153,9 @@ export default class ExportPayloadRoutes {
             security: true,
             cors: true,
             handler: async (request, h) => {
-              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-                return await Controller.createExportCertificate(request, h, userPrincipal, documentNumber, contactId);
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
+                // P1/P2 optimization: pass document from ownership validation to eliminate duplicate reads
+                return await Controller.createExportCertificate(request, h, userPrincipal, documentNumber, contactId, document);
               }, [DocumentStatuses.Draft, DocumentStatuses.Locked]).catch(error => {
                 logger.error(`[CREATING-CC][ERROR][${error.stack || error}`);
                 return h.response([{ error: SYSTEM_ERROR }]).code(500);
@@ -430,10 +431,11 @@ export default class ExportPayloadRoutes {
             security: true,
             cors: true,
             handler: async (request, h) => {
-              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
                 const service = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
                 if (service === ServiceNames.CC) {
-                  return await Controller.getLandingsType(userPrincipal, documentNumber, contactId);
+                  // P1 optimization: pass document from ownership validation
+                  return await Controller.getLandingsType(userPrincipal, documentNumber, contactId, document);
                 }
                 return h.response(['error.landingsEntryOption.any.invalid']).code(400);
               }).catch(error => {
