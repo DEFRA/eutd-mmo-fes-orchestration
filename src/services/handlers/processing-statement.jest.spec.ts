@@ -387,7 +387,7 @@ it('calling handler for /create-processing-statement/:documentNumber/catch-added
     });
 
     const expected = {
-      addAnotherCatch: 'psCatchAddedErrorAddAnotherCatch'
+      addAnotherCatch: 'ccLandingTypeSelectOption'
     };
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
