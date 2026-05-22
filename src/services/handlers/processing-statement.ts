@@ -152,7 +152,7 @@ export default {
   "/create-processing-statement/:documentNumber/catch-added": async ({ data, currentUrl, errors }) => {
     const addAnotherCatch = data.addAnotherCatch;
     if (!addAnotherCatch || addAnotherCatch === "" || addAnotherCatch === "notset") {
-      errors.addAnotherCatch = 'psCatchAddedErrorAddAnotherCatch';
+      errors.addAnotherCatch = 'ccLandingTypeSelectOption';
       return { errors, next: currentUrl };
     }
 

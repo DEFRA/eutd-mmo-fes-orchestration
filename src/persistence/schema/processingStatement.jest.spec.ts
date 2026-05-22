@@ -133,7 +133,7 @@ describe('When mapping a back end Processing statement to front end', () => {
        description: 'Fresh or chilled albacore'
       }],
       error: "",
-      addAnotherCatch: "No",
+      addAnotherCatch: "",
       personResponsibleForConsignment: "Isaac",
       plantApprovalNumber: "456456",
       plantName: "Plant Name",
@@ -220,7 +220,7 @@ describe('When mapping a back end Processing statement to front end', () => {
 
   it('Will return a valid front end export data object with the minimum required data', () => {
     const expected : FrontEndModels.ProcessingStatement = {
-      addAnotherCatch: "No",
+      addAnotherCatch: "",
       catches: [],
       products: null,
       consignmentDescription: "code",
@@ -268,7 +268,7 @@ describe('When mapping a back end Processing statement to front end', () => {
 
   it('Will return a valid front end export data object with an old exportedTo property', () => {
     const expected : FrontEndModels.ProcessingStatement = {
-      addAnotherCatch: "No",
+      addAnotherCatch: "",
       catches: [],
       products: null,
       consignmentDescription: "code",
