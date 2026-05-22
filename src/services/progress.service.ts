@@ -597,10 +597,11 @@ export default class ProgressService {
     return hasCountry ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }
 
-  public static async getProcessingStatementProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
+  public static async getProcessingStatementProgress(userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: ProcessingStatement.ProcessingStatement): Promise<Progress> {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][STARTED]`);
 
-    const data = await ProcessingStatementService.getDraft(userPrincipal, documentNumber, contactId);
+    // P1 optimization: use provided document to avoid duplicate read
+    const data = providedDocument ?? await ProcessingStatementService.getDraft(userPrincipal, documentNumber, contactId);
 
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-PS-PROGRESS][SUCCEEDED][${JSON.stringify(data)}]`);
 
@@ -655,10 +656,11 @@ export default class ProgressService {
     };
   }
 
-  public static async getStorageDocumentProgress(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
+  public static async getStorageDocumentProgress(userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: StorageDocument.StorageDocument): Promise<Progress> {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-SD-PROGRESS][STARTED]`);
 
-    const data = await StorageDocumentService.getDraft(userPrincipal, documentNumber, contactId);
+    // P1 optimization: use provided document to avoid duplicate read
+    const data = providedDocument ?? await StorageDocumentService.getDraft(userPrincipal, documentNumber, contactId);
     const catchesStatus: ProgressStatus = await ProgressService.getSDCatchStatus(data?.exportData?.catches, userPrincipal, documentNumber, contactId);
     const departureTransportation: ProgressStatus = ProgressService.getTransportDetails(checkTransportDataFrontEnd(toFrontEndTransport(data?.exportData?.transportation)), "storageNotes");
 
