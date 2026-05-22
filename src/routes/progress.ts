@@ -16,11 +16,13 @@ export default class ProgressRoutes {
     userPrincipal: string,
     documentNumber: string,
     contactId: string,
-    journey: string
+    journey: string,
+    providedDocument?: any
   ): Promise<any> {
     switch (journey) {
       case CATCH_CERTIFICATE_KEY:
-        return ProgressService.get(userPrincipal, documentNumber, contactId);
+        // P1 optimization: pass provided document to avoid duplicate read
+        return ProgressService.get(userPrincipal, documentNumber, contactId, providedDocument);
       case PROCESSING_STATEMENT_KEY:
         return ProgressService.getProcessingStatementProgress(userPrincipal, documentNumber, contactId);
       case STORAGE_NOTES_KEY:
@@ -113,8 +115,9 @@ export default class ProgressRoutes {
         security: true,
         cors: true,
         handler: async (request, h) => {
-          return withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-            return this.getProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey);
+          return withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
+            // P1 optimization: pass document from ownership validation
+            return this.getProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey, document);
           }).catch((e) => {
             logger.error(`[GET-PROGRESS][ERROR][${e.stack || e}]`);
             return h.response().code(500);

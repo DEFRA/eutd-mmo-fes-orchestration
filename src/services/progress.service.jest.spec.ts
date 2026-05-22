@@ -1503,6 +1503,64 @@ describe('get', () => {
       contactId
     );
   });
+
+  it('P1 optimization: should use provided draft and NOT call getDraft', async () => {
+    const providedDraft = {
+      exportData: {
+        landingsEntryOption: 'manualEntry',
+        exporterDetails: {
+          exporterName: 'Test Exporter',
+          addressOne: '123 Test St'
+        },
+        products: [{
+          id: 'product-1',
+          species: { label: 'COD', value: 'COD' }
+        }],
+        conservation: [{ species: 'COD' }],
+        transportation: {
+          vehicle: 'truck',
+          departurePlace: 'London'
+        },
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Spain',
+          isoCodeAlpha2: 'ES'
+        },
+        pointOfDestination: 'Madrid'
+      }
+    };
+
+    mockGetDraft.mockClear();
+
+    const result = await ProgressService.get(userPrincipal, documentNumber, contactId, providedDraft as any);
+
+    // Verify: getDraft was NOT called (optimization working)
+    expect(mockGetDraft).not.toHaveBeenCalled();
+    // Verify: result is valid progress object
+    expect(result).toBeDefined();
+    expect(result.progress).toBeDefined();
+    expect(result.requiredSections).toBeDefined();
+    expect(result.completedSections).toBeDefined();
+  });
+
+  it('P1 optimization: should fall back to getDraft when no draft provided', async () => {
+    mockGetDraft.mockClear();
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        landingsEntryOption: 'manualEntry',
+        exporterDetails: {},
+        products: [],
+        conservation: null,
+        transportation: {},
+        exportedFrom: null
+      }
+    });
+
+    await ProgressService.get(userPrincipal, documentNumber, contactId);
+
+    // Verify: getDraft WAS called (fallback working)
+    expect(mockGetDraft).toHaveBeenCalledWith(userPrincipal, documentNumber, contactId);
+  });
 });
 
 describe('getLandingStatus', () => {

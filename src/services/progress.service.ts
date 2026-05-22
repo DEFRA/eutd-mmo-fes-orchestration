@@ -30,10 +30,11 @@ import { validateTruckNationality } from '../helpers/transportValidation';
 
 export default class ProgressService {
 
-  public static async get(userPrincipal: string, documentNumber: string, contactId: string): Promise<Progress> {
+  public static async get(userPrincipal: string, documentNumber: string, contactId: string, providedDraft?: CatchCertificate): Promise<Progress> {
     logger.info(`[PROGRESS][${documentNumber}-${userPrincipal}][GET-CC-PROGRESS][STARTED]`);
 
-    const data: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
+    // P1 optimization: reuse provided draft to avoid duplicate read
+    const data: CatchCertificate = providedDraft ?? await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
 
     if (data?.exportData?.landingsEntryOption) {
       const { landingsEntryOption, exporterDetails, products, conservation, transportation, transportations, exportedFrom, exportedTo, pointOfDestination } = data.exportData;
