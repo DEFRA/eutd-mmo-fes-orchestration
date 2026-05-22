@@ -13,7 +13,14 @@ export class MongoConnection {
       try {
         MongoConnection.mongo = await mongoose.connect(connectionUri, {
           dbName,
-          maxPoolSize: Number.parseInt(pool)
+          maxPoolSize: Number.parseInt(pool) || 50, // Default to 50 if not set
+          minPoolSize: 10, // Maintain minimum connections
+          maxIdleTimeMS: 30000,
+          socketTimeoutMS: 45000, // 45 seconds
+          serverSelectionTimeoutMS: 30000, // 30 seconds for server selection
+          connectTimeoutMS: 30000, // 30 seconds for initial connection
+          retryWrites: true,
+          retryReads: true,
         });
 
       } catch(e) {

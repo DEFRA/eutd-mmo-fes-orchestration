@@ -210,7 +210,9 @@ export const upsertDraftData = async (
   const options = {
     upsert: true,
     omitUndefined: true,
-    new: true
+    new: true,
+    lean: true, // Return plain object for better performance
+    maxTimeMS: 30000 // 30 second query timeout
   };
   logger.debug(
     `[UPSERT-DRAFT-DATA][CONTACT-ID][${contactId}][DOCUMENT-NUMBER][${documentNumber}][UPDATE][${JSON.stringify(
@@ -346,7 +348,9 @@ export const getDraft = async (
         ],
       },
       documentNumber: documentNumber,
-    });
+    })
+    .maxTimeMS(30000) // 30 second query timeout
+    .lean(); // Return plain JavaScript object for better performance
 
     if (!doc) {
       return null;
@@ -376,7 +380,8 @@ export const completeDraft = async (userPrincipal: string, documentNumber: strin
 
   await CatchCertModel.findOneAndUpdate(
     { documentNumber: documentNumber, status: { $in: [DocumentStatuses.Draft, DocumentStatuses.Pending] } },
-    update
+    update,
+    { maxTimeMS: 30000 } // 30 second query timeout
   );
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
@@ -404,7 +409,8 @@ export const updateCertificateStatus = async (userPrincipal: string, documentNum
       documentNumber: documentNumber,
       status: { $ne: DocumentStatuses.Complete }
     },
-    update
+    update,
+    { maxTimeMS: 30000 } // 30 second query timeout
   );
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
