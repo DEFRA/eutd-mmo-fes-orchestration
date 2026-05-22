@@ -198,7 +198,7 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData, use
     return {
       catches: [],
       validationErrors: [{}],
-      addAnotherProduct: "No",
+      addAnotherProduct: "",
       userReference
     }
   }
@@ -206,7 +206,7 @@ export const toFrontEndStorageDocumentExportData = (exportData : ExportData, use
   return {
     catches: exportData?.catches ? exportData.catches.map(catchSD => toFrontEndCatchStorageDocument(catchSD)) : [],
     validationErrors: [],
-    addAnotherProduct: "No",
+    addAnotherProduct: "",
     transport: exportData.transportation ? toFrontEndTransport(exportData.transportation) : undefined,
     arrivalTransport: exportData.arrivalTransportation ? toFrontEndTransport(exportData.arrivalTransportation) : undefined,
     exportedTo: toExportedTo(exportData.transportation?.exportedTo),

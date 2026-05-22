@@ -119,7 +119,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         }
       ],
       validationErrors: [],
-      addAnotherProduct: "No",
+      addAnotherProduct: "",
       transport: {
         vehicle: "truck",
         cmr: "false",
@@ -245,7 +245,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
         }
       ],
       validationErrors: [],
-      addAnotherProduct: "No",
+      addAnotherProduct: "",
       transport: {
         vehicle: "truck",
         cmr: "false",
@@ -367,7 +367,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
     const expected = {
       catches: [],
       validationErrors: [{}],
-      addAnotherProduct: "No",
+      addAnotherProduct: "",
       userReference: undefined
     };
 
@@ -397,7 +397,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
     const expected = {
       catches: [],
       validationErrors: [{}],
-      addAnotherProduct: "No",
+      addAnotherProduct: "",
       userReference: undefined
     };
 
@@ -435,7 +435,7 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
       facilityTownCity: "London",
       facilityPostcode: "SE37 6YH",
       validationErrors: [],
-      addAnotherProduct: "No",
+      addAnotherProduct: "",
       arrivalTransport: undefined,
       transport: null,
       exportedTo: undefined,

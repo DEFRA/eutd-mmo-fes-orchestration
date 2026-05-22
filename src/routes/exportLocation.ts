@@ -45,6 +45,11 @@ export default class ExportLocationRoutes {
 
                 const schema = Joi.object()
                   .keys({
+                    exportedFrom: Joi.string().valid('United Kingdom', 'Guernsey', 'Isle Of Man', 'Jersey').required().messages({
+                      'any.required': 'error.exportedFrom.any.required',
+                      'string.empty': 'error.exportedFrom.any.required',
+                      'any.only': 'error.exportedFrom.any.only'
+                    }),
                     exportDestination: Joi.string().required().custom(validateNoEmoji).messages({
                       'any.required': 'error.exportDestination.any.required',
                       'string.empty': 'error.exportDestination.any.required'
