@@ -88,6 +88,26 @@ describe("Export location service", () => {
     expect(result).toEqual({"exportedFrom": "Invalid", "exportedTo": undefined});
   });
 
+  it("Will not throw for PS export location without exportedFrom field", async () => {
+    mockGetExportLocationDataPS.mockResolvedValue({});
+    mockSaveExportLocationDataPS.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
+
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedTo": "France" }, 'GBR-2022-PS-123456', contactId);
+
+    expect(result).toEqual({"exportedFrom": undefined, "exportedTo": "France"});
+  });
+
+  it("Will not throw for PS export location with empty exportedFrom", async () => {
+    mockGetExportLocationDataPS.mockResolvedValue({});
+    mockSaveExportLocationDataPS.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
+
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "" }, 'GBR-2022-PS-123456', contactId);
+
+    expect(result).toEqual({"exportedFrom": "", "exportedTo": undefined});
+  });
+
   it("Will not throw for SD export location with an invalid exportedFrom", async () => {
     mockGetExportLocationDataSD.mockResolvedValue({});
     mockSaveExportLocationDataSD.mockResolvedValue({});
@@ -96,6 +116,26 @@ describe("Export location service", () => {
     const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId);
 
     expect(result).toEqual({"exportedFrom": "Invalid", "exportedTo": undefined});
+  });
+
+  it("Will not throw for SD export location without exportedFrom field", async () => {
+    mockGetExportLocationDataSD.mockResolvedValue({});
+    mockSaveExportLocationDataSD.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
+
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedTo": "Germany" }, 'GBR-2022-SD-123456', contactId);
+
+    expect(result).toEqual({"exportedFrom": undefined, "exportedTo": "Germany"});
+  });
+
+  it("Will not throw for SD export location with empty exportedFrom", async () => {
+    mockGetExportLocationDataSD.mockResolvedValue({});
+    mockSaveExportLocationDataSD.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
+
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "" }, 'GBR-2022-SD-123456', contactId);
+
+    expect(result).toEqual({"exportedFrom": "", "exportedTo": undefined});
   });
 
   it("Will retrieve the SD export location from mongo", async () => {

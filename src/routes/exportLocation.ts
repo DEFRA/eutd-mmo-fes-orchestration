@@ -41,15 +41,24 @@ export default class ExportLocationRoutes {
                 }
                 return h.response(errorDetailsObj).code(400).takeover();
               },
-              payload: async function (value, _options) {
+              payload: async function (value, options) {
+                // Get document number from request headers to determine service type
+                const documentNumber = (options.context.headers['documentnumber'] as string)?.toUpperCase();
+                const isCatchCertificate = documentNumber?.substring(9, 11) === 'CC';
 
+                // For Catch Certificates, exportedFrom is required
+                // For Processing Statements and Storage Documents, it's optional
                 const schema = Joi.object()
                   .keys({
-                    exportedFrom: Joi.string().valid('United Kingdom', 'Guernsey', 'Isle Of Man', 'Jersey').required().messages({
-                      'any.required': 'error.exportedFrom.any.required',
-                      'string.empty': 'error.exportedFrom.any.required',
-                      'any.only': 'error.exportedFrom.any.only'
-                    }),
+                    exportedFrom: isCatchCertificate 
+                      ? Joi.string().valid('United Kingdom', 'Guernsey', 'Isle Of Man', 'Jersey').required().messages({
+                          'any.required': 'error.exportedFrom.any.required',
+                          'string.empty': 'error.exportedFrom.any.required',
+                          'any.only': 'error.exportedFrom.any.only'
+                        })
+                      : Joi.string().valid('United Kingdom', 'Guernsey', 'Isle Of Man', 'Jersey').optional().allow('').messages({
+                          'any.only': 'error.exportedFrom.any.only'
+                        }),
                     exportDestination: Joi.string().required().custom(validateNoEmoji).messages({
                       'any.required': 'error.exportDestination.any.required',
                       'string.empty': 'error.exportDestination.any.required'
