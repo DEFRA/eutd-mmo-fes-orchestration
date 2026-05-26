@@ -492,7 +492,6 @@ export default class ProgressService {
       checkNetWeightProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, index, weightsErrors);
       if (Object.keys(weightsErrors).length > 0) {
-        logger.info(`[PROGRESS][DEPARTURE-WEIGHTS][FAIL] catch[${index}] errors=${JSON.stringify(weightsErrors)}, data=${JSON.stringify({ netWeightProductDeparture: singleCatch.netWeightProductDeparture, netWeightFisheryProductDeparture: singleCatch.netWeightFisheryProductDeparture, netWeightProductArrival: singleCatch.netWeightProductArrival, netWeightFisheryProductArrival: singleCatch.netWeightFisheryProductArrival })}`);
         return false;
       }
     }
@@ -690,10 +689,6 @@ export default class ProgressService {
     // INCOMPLETE, not section 2 (Products). (FI0-11257 / DEFECT-592)
     const hasDepartureWeights = ProgressService.catchesHaveValidDepartureWeights(data?.exportData?.catches);
     const transportDetailsStatus = departureTransportation === ProgressStatus.COMPLETED && isDepartureAfterArrival && hasDepartureWeights ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
-    logger.info(`[PROGRESS][${documentNumber}][TRANSPORT-DETAILS] status=${transportDetailsStatus} | departureTransport=${departureTransportation} | isDepartureAfterArrival=${isDepartureAfterArrival} | hasDepartureWeights=${hasDepartureWeights}`);
-    if (transportDetailsStatus === ProgressStatus.INCOMPLETE) {
-      logger.info(`[PROGRESS][${documentNumber}][TRANSPORT-DETAILS][RAW] transportation=${JSON.stringify(data?.exportData?.transportation)}, arrivalTransportation=${JSON.stringify(data?.exportData?.arrivalTransportation)}, catches=${JSON.stringify(data?.exportData?.catches?.map((c: any) => ({ netWeightProductDeparture: c.netWeightProductDeparture, netWeightFisheryProductDeparture: c.netWeightFisheryProductDeparture, netWeightProductArrival: c.netWeightProductArrival, netWeightFisheryProductArrival: c.netWeightFisheryProductArrival })))}`);
-    }
 
     const sdProgress = {
       reference: ProgressService.getUserReference(data?.userReference),

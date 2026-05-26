@@ -188,5 +188,10 @@ export const toExportedTo = (exportedTo: any): ICountry =>
   exportedTo && (typeof exportedTo === 'string')
   ? {
     officialCountryName: exportedTo
+  } : exportedTo ? {
+    officialCountryName: exportedTo.officialCountryName,
+    isoCodeAlpha2: exportedTo.isoCodeAlpha2,
+    isoCodeAlpha3: exportedTo.isoCodeAlpha3,
+    isoNumericCode: exportedTo.isoNumericCode,
   } : exportedTo;
 
