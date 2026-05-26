@@ -94,10 +94,8 @@ export default {
 };
 
 export function checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
-  if (!ctch.netWeightProductDeparture) {
+  if (!ctch.netWeightProductDeparture && !ctch.netWeightFisheryProductDeparture) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
-  } else if (!ctch.netWeightFisheryProductDeparture) {
-    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
   }
 }
 

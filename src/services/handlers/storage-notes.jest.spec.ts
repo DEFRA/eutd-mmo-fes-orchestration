@@ -2882,8 +2882,8 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
 // Additional tests to cover remaining uncovered lines
 // ────────────────────────────────────────────────────────────────────────────────
 
-describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent - else-if branch", () => {
-  it("should set fishery weight error when netWeightProductDeparture is present but netWeightFisheryProductDeparture is missing", async () => {
+describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent - either-or validation", () => {
+  it("should NOT error when netWeightProductDeparture is present but netWeightFisheryProductDeparture is missing (either weight suffices)", async () => {
     const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
@@ -2898,8 +2898,43 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
 
     const { errors } = await handler({ data, errors: {} });
 
+    expect(errors).toEqual({});
+  });
+
+  it("should NOT error when netWeightFisheryProductDeparture is present but netWeightProductDeparture is missing", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightFisheryProductDeparture: "10",
+          // netWeightProductDeparture intentionally omitted
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors).toEqual({});
+  });
+
+  it("should error when NEITHER departure weight is present", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          // both departure weights intentionally omitted
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
     expect(errors).toEqual({
-      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
     });
   });
 });
