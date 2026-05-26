@@ -141,16 +141,20 @@ appSettings:
     value: '5500'
     type: config
   
+  - key: REDIS_CONNECTION_STRING
+    value: 'REDIS-CONNECTION-STRING'
+    type: secret
+
   - key: REDIS_HOST_NAME
-    value: '#{{ environment }}#{{ nc-deptService }}#{{ nc-function-infrastructure }}#{{ nc-resource-rediscachename }}#{{ nc-region-id }}01.redis.cache.windows.net'
-    type: config
-  
-  - key: REDIS_PASSWORD
-    value: 'REDIS-PASSWORD'
+    value: 'REDIS-HOST-NAME'
     type: secret
   
-  - key: REDIS_TLS_HOST_NAME
-    value: '#{{ environment }}#{{ nc-deptService }}#{{ nc-function-infrastructure }}#{{ nc-resource-rediscachename }}#{{ nc-region-id }}01.redis.cache.windows.net'
+  - key: REDIS_PORT
+    value: '10000'
+    type: config
+  
+  - key: REDIS_TLS_ENABLED
+    value: 'true'
     type: config
   
   - key: REF_SERVICE_BASIC_AUTH_PASSWORD

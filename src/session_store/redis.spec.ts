@@ -1,28 +1,49 @@
-import { RedisStorage, getRedisOptions } from "./redis";
+import { createClient } from 'redis';
+
+import { RedisStorage } from "./redis";
+import { buildRedisConnectionUrl } from './redisConnectionConfig';
 import { IStoreable } from "./storeable";
-import Redis from 'ioredis';
 import { CATCH_CERTIFICATE_KEY } from './constants';
 
-jest.mock('ioredis', () => ({
-  default: jest.fn(() => ({
-    del: jest.fn(),
-    get: jest.fn(),
-    set: jest.fn(),
-    sadd: jest.fn(),
-    disconnect: jest.fn(),
-    smembers: jest.fn(),
-  }))
+jest.mock('redis', () => ({
+  createClient: jest.fn(),
 }));
 
-describe("RedisStorage", () => {
+type MockRedisClient = {
+  connect: jest.MockedFunction<() => Promise<void>>;
+  del: jest.MockedFunction<any>;
+  destroy: jest.MockedFunction<() => void>;
+  get: jest.MockedFunction<any>;
+  isOpen: boolean;
+  on: jest.MockedFunction<any>;
+  sAdd: jest.MockedFunction<any>;
+  set: jest.MockedFunction<any>;
+  sMembers: jest.MockedFunction<any>;
+};
 
-  const mockRedis = new Redis(getRedisOptions()) as jest.Mocked<Redis>;
+describe("RedisStorage", () => {
+  const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
+
+  const mockRedis = {
+    connect: jest.fn().mockResolvedValue(undefined),
+    del: jest.fn(),
+    destroy: jest.fn(),
+    get: jest.fn(),
+    isOpen: true,
+    on: jest.fn(),
+    sAdd: jest.fn(),
+    set: jest.fn(),
+    sMembers: jest.fn(),
+  } as unknown as MockRedisClient;
+
   let storage: RedisStorage<IStoreable>;
 
   const CONTACT_ID = 'contactBob';
 
   beforeEach(() => {
-    storage = new RedisStorage(mockRedis);
+    mockRedis.on.mockReturnThis();
+    mockCreateClient.mockReturnValue(mockRedis as unknown as ReturnType<typeof createClient>);
+    storage = new RedisStorage(mockRedis as unknown as ReturnType<typeof createClient>);
     mockRedis.del.mockResolvedValue(0);
   });
 
@@ -34,7 +55,8 @@ describe("RedisStorage", () => {
   describe('initialize', () => {
     it('should create a new Redis connection if one does not exist', async () => {
       await new RedisStorage().initialize({ blah: true });
-      expect(Redis).toHaveBeenCalledWith({ blah: true });
+      expect(mockCreateClient).toHaveBeenCalledWith({ blah: true });
+      expect(mockRedis.connect).toHaveBeenCalled();
     });
 
     it('should warn when attempting to start connection again if connection exists', async () => {
@@ -46,12 +68,21 @@ describe("RedisStorage", () => {
 
       expect(spyWarn).toHaveBeenCalledWith('Attempt to start redis connection again!');
     });
+
+    it('should log the redis host when a url is provided', async () => {
+      const mockLogger = require('../logger').default;
+      const spyInfo = jest.spyOn(mockLogger, 'info').mockImplementation(() => {});
+
+      await new RedisStorage().initialize({ url: 'redis://myhost:6379' });
+
+      expect(spyInfo).toHaveBeenCalledWith('Attempt to initialize redis cache connection to', 'myhost:6379');
+    });
   });
 
   describe('cleanup', () => {
     it('should close the Redis connection', () => {
       storage.cleanUp();
-      expect(mockRedis.disconnect).toHaveBeenCalled();
+      expect(mockRedis.destroy).toHaveBeenCalled();
     });
   });
 
@@ -75,6 +106,22 @@ describe("RedisStorage", () => {
       const result = await storage.readAll('blah');
 
       expect(result).toEqual([{one:1},{two:2}]);
+    });
+
+    it('returns null when the key does not exist in Redis', async () => {
+      mockRedis.get.mockResolvedValue(null);
+
+      const result = await storage.readAll('missing-key');
+
+      expect(result).toBeNull();
+    });
+
+    it('handles a Buffer response from Redis', async () => {
+      mockRedis.get.mockResolvedValue(Buffer.from('[{"one":1}]'));
+
+      const result = await storage.readAll('buf-key');
+
+      expect(result).toEqual([{one:1}]);
     });
   });
 
@@ -151,7 +198,7 @@ describe("RedisStorage", () => {
 
       await storage.writeAllFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data, 120);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), 'EX', 120);
+      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), { EX: 120 });
     });
   });
 
@@ -160,9 +207,18 @@ describe("RedisStorage", () => {
       const constants = require('./constants');
       await storage.tagByDocumentNumber('BOB', CONTACT_ID, 'doc-123', constants.CATCH_CERTIFICATE_KEY);
 
-      expect(mockRedis.sadd).toHaveBeenCalled();
-      const call = (mockRedis.sadd as jest.Mock).mock.calls[0];
+      expect(mockRedis.sAdd).toHaveBeenCalled();
+      const call = (mockRedis.sAdd as jest.Mock).mock.calls[0];
       expect(call[0]).toBe('doc-123');
+    });
+
+    it('uses userPrincipal when contactId is null', async () => {
+      (mockRedis.sAdd as jest.Mock).mockClear();
+
+      await storage.tagByDocumentNumber('BOB', null as any, 'DOC-888', CATCH_CERTIFICATE_KEY);
+
+      const call = (mockRedis.sAdd as jest.Mock).mock.calls[0];
+      expect(call[1]).toContain('BOB:catchCertificate');
     });
   });
 
@@ -176,6 +232,14 @@ describe("RedisStorage", () => {
       expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data));
     });
 
+    it('should write data with no contactId and no TTL', async () => {
+      const data: any = {test: 'test'};
+
+      await storage.writeFor('BOB', '', 'GBR-2020-CC-0E42C2DA5', data);
+
+      expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data));
+    });
+
   });
 
   describe('writeFor with TTL', () => {
@@ -184,7 +248,7 @@ describe("RedisStorage", () => {
 
       await storage.writeFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data, 10);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), 'EX', 10);
+      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), { EX: 10 });
     });
 
     it('should write data to Redis with EX when ttlSeconds provided and contactId missing', async () => {
@@ -192,33 +256,32 @@ describe("RedisStorage", () => {
 
       await storage.writeFor('BOB', '', 'GBR-2020-CC-0E42C2DA5', data, 20);
 
-      expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data), 'EX', 20);
+      expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data), { EX: 20 });
     });
   });
 
   describe('tagByDocumentNumber - 1', () => {
     it('should call sadd with expected keys for catch certificate journey', () => {
-      // ensure mock has sadd
-      (mockRedis as any).sadd = jest.fn();
+      (mockRedis.sAdd as jest.Mock).mockClear();
 
       storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', CATCH_CERTIFICATE_KEY);
 
-      expect((mockRedis as any).sadd).toHaveBeenCalledWith('DOC-999',
+      expect(mockRedis.sAdd).toHaveBeenCalledWith('DOC-999', [
         `${CONTACT_ID}:catchCertificate`,
         `${CONTACT_ID}:species`,
         `${CONTACT_ID}:catches`,
         `${CONTACT_ID}:catchCertificate/exporter`,
         `${CONTACT_ID}:conservation`,
         `${CONTACT_ID}:catchCertificate/export-payload`
-      );
+      ]);
     });
 
     it('should call sadd with no keys for unknown journey', () => {
-      (mockRedis as any).sadd = jest.fn();
+      (mockRedis.sAdd as jest.Mock).mockClear();
 
       storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', 'unknownJourney');
 
-      expect((mockRedis as any).sadd).toHaveBeenCalledWith('DOC-999');
+      expect(mockRedis.sAdd).not.toHaveBeenCalled();
     });
   });
 
@@ -247,6 +310,14 @@ describe("RedisStorage", () => {
       expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data));
     });
 
+    it('should write all data with no contactId and TTL', async () => {
+      const data: any[] = [{ one: 1 }];
+
+      await storage.writeAllFor('BOB', '', 'GBR-2020-CC-0E42C2DA5', data, 60);
+
+      expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data), { EX: 60 });
+    });
+
   });
 
   describe('removeTag', () => {
@@ -259,17 +330,24 @@ describe("RedisStorage", () => {
 
   describe('keysForTag', () => {
     it('retrieves keys from Redis', async () => {
-      mockRedis.smembers.mockResolvedValue(['12345', 'abcde'])
+      mockRedis.sMembers.mockResolvedValue(['12345', 'abcde'])
       const keys = await storage.getKeysForTag('abcde');
 
       expect(keys).toEqual(['12345','abcde']);
+    });
+
+    it('handles Buffer members returned by sMembers', async () => {
+      mockRedis.sMembers.mockResolvedValue([Buffer.from('k1'), 'k2']);
+      const keys = await storage.getKeysForTag('doc-buf');
+
+      expect(keys).toEqual(['k1', 'k2']);
     });
   });
 
   describe('getDocument', () => {
 
     it('should return document from Redis when key exists', async () => {
-      mockRedis.smembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
+      mockRedis.sMembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
       mockRedis.get.mockResolvedValueOnce('{"id":"12345"}')
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
 
@@ -283,14 +361,14 @@ describe("RedisStorage", () => {
     });
 
     it('should return null from Redis when key does not exist', async () => {
-      mockRedis.smembers.mockResolvedValueOnce([]);
+      mockRedis.sMembers.mockResolvedValueOnce([]);
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
 
       expect(doc).toBeNull();
     });
 
     it('should handle keys that do not contain the delimiter', async () => {
-      mockRedis.smembers.mockResolvedValueOnce(["BOBINVALIDKEY"]);
+      mockRedis.sMembers.mockResolvedValueOnce(["BOBINVALIDKEY"]);
       mockRedis.get.mockResolvedValueOnce('{"id":"12345"}');
 
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
@@ -301,7 +379,7 @@ describe("RedisStorage", () => {
     });
 
     it('should set userPrincipal even when stored json is falsy', async () => {
-      mockRedis.smembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
+      mockRedis.sMembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
       mockRedis.get.mockResolvedValueOnce(null as any);
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
 
@@ -329,54 +407,100 @@ describe("RedisStorage", () => {
 
       await storage.writeFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data, 60);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), 'EX', 60);
+      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), { EX: 60 });
+    });
+  });
+
+  describe('buildRedisConnectionUrl', () => {
+    it('uses the connection string when TLS is disabled', () => {
+      const url = buildRedisConnectionUrl({
+        connectionString: 'redis://:secret@localhost:6379',
+        hostName: 'managed.redis.azure.net',
+        port: '10000',
+        tlsEnabled: 'false',
+      });
+
+      expect(url).toBe('redis://:secret@localhost:6379');
+    });
+
+    it('overrides the host and port when TLS is enabled', () => {
+      const url = buildRedisConnectionUrl({
+        connectionString: 'redis://:secret@localhost:6379',
+        hostName: 'managed.redis.azure.net',
+        port: '10000',
+        tlsEnabled: 'true',
+      });
+
+      expect(url).toBe('rediss://:secret@managed.redis.azure.net:10000');
+    });
+
+    it('treats boolean true as TLS enabled', () => {
+      const url = buildRedisConnectionUrl({
+        connectionString: 'redis://:secret@localhost:6379',
+        hostName: 'managed.redis.azure.net',
+        port: '10000',
+        tlsEnabled: true,
+      });
+
+      expect(url).toBe('rediss://:secret@managed.redis.azure.net:10000');
+    });
+
+    it('treats boolean false as TLS disabled', () => {
+      const url = buildRedisConnectionUrl({
+        connectionString: 'redis://:secret@localhost:6379',
+        hostName: 'managed.redis.azure.net',
+        port: '10000',
+        tlsEnabled: false,
+      });
+
+      expect(url).toBe('redis://:secret@localhost:6379');
+    });
+
+    it('builds a URL from host and port when no connection string is provided', () => {
+      const url = buildRedisConnectionUrl({
+        hostName: 'myhost',
+        port: '6379',
+        tlsEnabled: null,
+      });
+
+      expect(url).toBe('redis://myhost:6379');
     });
   });
 
   describe('getRedisOptions', () => {
     const ApplicationConfig = require('../applicationConfig').default;
+    const originalConnectionString = ApplicationConfig._redisConnectionString;
     const originalHost = ApplicationConfig._redisHostName;
     const originalPort = ApplicationConfig._redisPort;
-    const originalPassword = ApplicationConfig._redisPassword;
     const originalTlsEnabled = ApplicationConfig._redisTlsEnabled;
-    const originalTlsHost = ApplicationConfig._redisTlsHostName;
 
     afterEach(() => {
+      ApplicationConfig._redisConnectionString = originalConnectionString;
       ApplicationConfig._redisHostName = originalHost;
       ApplicationConfig._redisPort = originalPort;
-      ApplicationConfig._redisPassword = originalPassword;
       ApplicationConfig._redisTlsEnabled = originalTlsEnabled;
-      ApplicationConfig._redisTlsHostName = originalTlsHost;
     });
 
     it('returns options with tls when enabled', () => {
+      ApplicationConfig._redisConnectionString = 'redis://:secret@localhost:6379';
       ApplicationConfig._redisHostName = 'host1';
       ApplicationConfig._redisPort = 1234 as any;
-      ApplicationConfig._redisPassword = 'pwd';
       ApplicationConfig._redisTlsEnabled = 'true';
-      ApplicationConfig._redisTlsHostName = 'tls-host';
 
       const opts = require('./redis').getRedisOptions();
 
-      expect(opts.host).toBe('host1');
-      expect(opts.port).toBe(1234);
-      expect(opts.password).toBe('pwd');
-      expect(opts.tls).toBeDefined();
-      expect(opts.tls.host).toBe('tls-host');
+      expect(opts.url).toBe('rediss://:secret@host1:1234');
     });
 
     it('returns options without tls when disabled', () => {
+      ApplicationConfig._redisConnectionString = 'redis://:secret@host2:2222';
       ApplicationConfig._redisHostName = 'host2';
       ApplicationConfig._redisPort = 2222 as any;
-      ApplicationConfig._redisPassword = undefined as any;
       ApplicationConfig._redisTlsEnabled = 'false';
 
       const opts = require('./redis').getRedisOptions();
 
-      expect(opts.host).toBe('host2');
-      expect(opts.port).toBe(2222);
-      expect(opts.password).toBeUndefined();
-      expect(opts.tls).toBeUndefined();
+      expect(opts.url).toBe('redis://:secret@host2:2222');
     });
   });
 

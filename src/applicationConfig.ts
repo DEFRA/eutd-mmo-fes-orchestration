@@ -8,11 +8,10 @@ class ApplicationConfig {
   _referenceServiceHost: string;
   _host: string;
   _port: any;
+  _redisConnectionString: string;
   _redisHostName: string;
   _redisPort: any;
   _redisTlsEnabled: string;
-  _redisTlsHostName: string;
-  _redisPassword: string;
   _instrumentationKey: string;
   _cloudRoleName: string;
   _refServiceBasicAuthUser: string;
@@ -50,10 +49,10 @@ class ApplicationConfig {
     this._referenceServiceHost = process.env.MMO_ECC_REFERENCE_SVC_URL;
     this._host = process.env.HOST;
     this._port = process.env.PORT || 5500;
+    this._redisConnectionString = process.env.REDIS_CONNECTION_STRING;
     this._redisHostName = process.env.REDIS_HOST_NAME;
-    this._redisPort = process.env.REDIS_PORT || 6380;
+    this._redisPort = process.env.REDIS_PORT;
     this._redisTlsEnabled = process.env.REDIS_TLS_ENABLED;
-    this._redisTlsHostName = process.env.REDIS_TLS_HOST_NAME;
     this._instrumentationKey = process.env.INSTRUMENTATION_KEY;
     this._cloudRoleName = process.env.INSTRUMENTATION_CLOUD_ROLE;
     this._enablePdfGen = process.env.ENABLE_PDF_GEN === 'true';
@@ -87,7 +86,6 @@ class ApplicationConfig {
     // dynamic props
     this._refServiceBasicAuthUser = process.env.REF_SERVICE_BASIC_AUTH_USER;
     this._refServiceBasicAuthPassword = process.env.REF_SERVICE_BASIC_AUTH_PASSWORD;
-    this._redisPassword = process.env.REDIS_PASSWORD ?? process.env.ORCH_REDIS_PASSWORD;
 
     // DB settings
     this._dbName = process.env.DB_NAME;

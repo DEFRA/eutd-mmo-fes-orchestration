@@ -1,4 +1,4 @@
-import Redis, { RedisOptions } from 'ioredis';
+import { createClient } from 'redis';
 
 import { IStorage, IStoreable } from './storeable';
 import logger from '../logger';
@@ -13,22 +13,31 @@ import {
   EXPORT_PAYLOAD_KEY
 } from './constants';
 import ApplicationConfig from '../applicationConfig';
+import { buildRedisConnectionUrl } from './redisConnectionConfig';
 
 const DELIMITER = ':';
 
-export class RedisStorage<T extends IStoreable> implements IStorage<T> {
-  private connectionOptions: RedisOptions;
-  private connection: Redis;
+export interface RedisConnectionOptions {
+  url?: string;
+}
 
-  public constructor(connection?: Redis) {// allow for optional dependency injection for testing purposes
+type RedisClient = ReturnType<typeof createClient>;
+
+export class RedisStorage<T extends IStoreable> implements IStorage<T> {
+  private connectionOptions: RedisConnectionOptions;
+  private connection: RedisClient;
+
+  public constructor(connection?: RedisClient) {// allow for optional dependency injection for testing purposes
     if (connection) {
       this.connection = connection;
     }
   }
 
-  private startConnection(): void {
+  private async startConnection(): Promise<void> {
     if (this.connection === undefined || this.connection === null) {
-      this.connection = new Redis(this.connectionOptions);
+      this.connection = createClient(this.connectionOptions);
+      this.connection.on('error', (error) => logger.error(`[REDIS][CLIENT][ERROR][${error}]`));
+      await this.connection.connect();
 
     } else {
       logger.warn('Attempt to start redis connection again!');
@@ -36,11 +45,35 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   public closeConnection(): void {
-    this.connection.disconnect();
+    if (this.connection) {
+      this.connection.destroy();
+    }
+  }
+
+  private toStoredString(data: string | Buffer | null): string | null {
+    if (data === null) {
+      return null;
+    }
+
+    return typeof data === 'string' ? data : data.toString();
+  }
+
+  private normalizeMembers(members: Array<string | Buffer> | Set<string | Buffer>): string[] {
+    return Array.from(members, (member) => typeof member === 'string' ? member : member.toString());
+  }
+
+  private parseStoredValue<V>(data: string | Buffer | null): V {
+    const storedValue = this.toStoredString(data);
+
+    if (storedValue === null) {
+      return null;
+    }
+
+    return JSON.parse(storedValue) as V;
   }
 
   async getDocument(documentNumber: string) {
-    const redisKeys = await this.connection.smembers(documentNumber);
+    const redisKeys = this.normalizeMembers(await this.connection.sMembers(documentNumber));
 
     if(redisKeys.length > 0) {
       const document: any = {
@@ -58,7 +91,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
           const userPrincipal = keyParts[0];
           const modKey = keyParts[1];
           if (json) {
-            document[modKey] = JSON.parse(json);
+            document[modKey] = this.parseStoredValue(json);
           }
           document['userPrincipal'] = userPrincipal;
 
@@ -76,22 +109,26 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
     // Setting and getting all users...
     const data = await this.connection.get(key);
     // This is not a good pattern but will do for now...
-    return <T[]>JSON.parse(data);
+    return this.parseStoredValue<T[]>(data);
   }
 
   async read<T extends IStoreable>(key: string): Promise<T> {
     const data = await this.connection.get(key);
-    return <T>JSON.parse(data);
+    return this.parseStoredValue<T>(data);
   }
 
   async writeAll<T extends IStoreable>(key: string, data: T[]): Promise<void> {
     await this.connection.set(key, JSON.stringify(data));
   }
 
-  initialize(options?: object): void {
-    this.connectionOptions = <RedisOptions>options;
-    logger.info('Attempt to initialize redis cache connection to', this.connectionOptions.host);
-    this.startConnection();
+  async initialize(options?: object): Promise<void> {
+    this.connectionOptions = <RedisConnectionOptions>options;
+    const connectionTarget = this.connectionOptions?.url
+      ? new URL(this.connectionOptions.url).host
+      : 'unknown-host';
+
+    logger.info('Attempt to initialize redis cache connection to', connectionTarget);
+    await this.startConnection();
     logger.info('Redis cache connection initialized');
   }
 
@@ -102,7 +139,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   async readFor<T extends IStoreable>(userPrincipal: string, contactId: string,  key: string): Promise<T> {
-    let data;
+    let data: string | Buffer | null = null;
 
     if(contactId) {
       const fullKey = RedisStorage._buildKeyForUser(contactId, key);
@@ -114,11 +151,11 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
       data = await this.connection.get(fullKey);
     }
 
-    return <T>JSON.parse(data);
+    return this.parseStoredValue<T>(data);
   }
 
   async readAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string): Promise<T[]> {
-    let data;
+    let data: string | Buffer | null = null;
 
     if(contactId) {
       const fullKey = RedisStorage._buildKeyForUser(contactId, key);
@@ -130,7 +167,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
       data = await this.connection.get(fullKey);
     }
 
-    return <T[]>JSON.parse(data);
+    return this.parseStoredValue<T[]>(data);
   }
 
   async writeFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T, ttlSeconds?: number): Promise<void> {
@@ -139,14 +176,14 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
     if(contactId) {
       const fullKey = RedisStorage._buildKeyForUser(contactId, key);
       if (ttlSeconds) {
-        await this.connection.set(fullKey, stringifiedData, 'EX', ttlSeconds);
+        await this.connection.set(fullKey, stringifiedData, { EX: ttlSeconds });
       } else {
         await this.connection.set(fullKey, stringifiedData);
       }
     } else {
       const fullKey = RedisStorage._buildKeyForUser(userPrincipal, key);
       if (ttlSeconds) {
-        await this.connection.set(fullKey, stringifiedData, 'EX', ttlSeconds);
+        await this.connection.set(fullKey, stringifiedData, { EX: ttlSeconds });
       } else {
         await this.connection.set(fullKey, stringifiedData);
       }
@@ -159,14 +196,14 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
     if(contactId) {
       const fullKey = RedisStorage._buildKeyForUser(contactId, key);
       if (ttlSeconds) {
-        await this.connection.set(fullKey, stringifiedDataForWriteAll, 'EX', ttlSeconds);
+        await this.connection.set(fullKey, stringifiedDataForWriteAll, { EX: ttlSeconds });
       } else {
         await this.connection.set(fullKey, stringifiedDataForWriteAll);
       }
     } else {
       const fullKey = RedisStorage._buildKeyForUser(userPrincipal, key);
       if (ttlSeconds) {
-        await this.connection.set(fullKey, stringifiedDataForWriteAll, 'EX', ttlSeconds);
+        await this.connection.set(fullKey, stringifiedDataForWriteAll, { EX: ttlSeconds });
       } else {
         await this.connection.set(fullKey, stringifiedDataForWriteAll);
       }
@@ -204,7 +241,12 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
       ]
     };
     const keys = Object.hasOwn(journeyKeys, journey) ? journeyKeys[journey] : [];
-    this.connection.sadd(documentNumber, ...keys);
+
+    if (keys.length === 0) {
+      return;
+    }
+
+    await this.connection.sAdd(documentNumber, keys);
   }
 
   async removeTag(documentNumber: string): Promise<void> {
@@ -212,7 +254,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   async getKeysForTag(documentNumber: string): Promise<string[]> {
-    return await this.connection.smembers(documentNumber);
+    return this.normalizeMembers(await this.connection.sMembers(documentNumber));
   }
 
   static _buildKeyForUser(userPrincipal: string, key: string): string {
@@ -220,25 +262,13 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   }
 }
 
-export function getRedisOptions(): RedisOptions {
-  const options = <RedisOptions>{
-    host: ApplicationConfig._redisHostName,
-    port: ApplicationConfig._redisPort
+export function getRedisOptions(): RedisConnectionOptions {
+  return {
+    url: buildRedisConnectionUrl({
+      connectionString: ApplicationConfig._redisConnectionString,
+      hostName: ApplicationConfig._redisHostName,
+      port: ApplicationConfig._redisPort,
+      tlsEnabled: ApplicationConfig._redisTlsEnabled,
+    })
   };
-
-  if (ApplicationConfig._redisPassword) {
-    options.password = ApplicationConfig._redisPassword;
-  }
-
-  let redisTlsEnabled = true;
-  if(ApplicationConfig._redisTlsEnabled) {
-    redisTlsEnabled = (ApplicationConfig._redisTlsEnabled == 'true');
-  }
-
-  if (redisTlsEnabled) {
-    options.tls = {
-      host: ApplicationConfig._redisTlsHostName
-    };
-  }
-  return options;
 }
