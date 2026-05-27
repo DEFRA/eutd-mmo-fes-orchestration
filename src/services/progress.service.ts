@@ -465,6 +465,34 @@ export default class ProgressService {
     return hasRequiredProperties && hasNoErrors;
   }
 
+  // Returns false if any catch is missing or has invalid departure weights.
+  // This drives the "Departure from storage facility" section status (FI0-11257):
+  // departure weights are confirmed on /departure-product-summary, which is part
+  // of the departure journey — not the products section.
+  private static readonly catchesHaveValidDepartureWeights = (catches: StorageDocument.Catch[]): boolean => {
+    if (!Array.isArray(catches) || catches.length === 0) {
+      // No products yet — don't block departure transport section from being started
+      return true;
+    }
+    for (const [index, singleCatch] of catches.entries()) {
+      // productWeight is derived from departure weights on /departure-product-summary.
+      // If it exists, departure weights were already confirmed — skip granular checks
+      // (handles older documents that only have productWeight without the explicit fields).
+      if (singleCatch.productWeight) continue;
+
+      const weightsErrors: { [key: string]: any } = {};
+      checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(singleCatch, index, weightsErrors);
+      checkNetWeightProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
+      checkNetWeightFisheryProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);
+      checkNetWeightProductDepartureExceedsArrival(singleCatch, index, weightsErrors);
+      checkNetWeightFisheryProductDepartureExceedsProductDeparture(singleCatch, index, weightsErrors);
+      if (Object.keys(weightsErrors).length > 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public static readonly getSDCatchStatus = async (catches: StorageDocument.Catch[], userPrincipal: string, documentNumber: string, contactId: string): Promise<ProgressStatus> => {
     if (!catches || catches.length === 0) {
       return ProgressStatus.INCOMPLETE;

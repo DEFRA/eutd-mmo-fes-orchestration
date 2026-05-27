@@ -7118,6 +7118,54 @@ describe('Storage Document Progress - transportDetails with all conditions met',
 
     expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
   });
+
+  it('should mark transportDetails as COMPLETED when catches have productWeight but no departure weight fields', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Cod',
+            id: 'catch-1',
+            commodityCode: '03026110',
+            certificateNumber: 'GBR-2022-CC-123456',
+            netWeightProductArrival: '50',
+            productWeight: '50',
+            // No netWeightProductDeparture or netWeightFisheryProductDeparture
+          }
+        ],
+        transportation: {
+          vehicle: 'truck',
+          cmr: false,
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'AB12 CDE',
+          departurePlace: 'Hull',
+          exportDate: '20/05/2026',
+          pointOfDestination: 'Calais',
+          exportedTo: {
+            officialCountryName: 'France',
+            isoCodeAlpha2: 'FR',
+            isoCodeAlpha3: 'FRA',
+            isoNumericCode: '250'
+          }
+        },
+        arrivalTransportation: {
+          vehicle: 'truck',
+          cmr: false,
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'AB12 CDE',
+          departurePlace: 'Dover',
+          departureDate: '15/05/2026',
+          departureCountry: 'France',
+          departurePort: 'Calais Port',
+          placeOfUnloading: 'London Billingsgate'
+        }
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-PW', 'contact123');
+
+    expect(result.progress['transportDetails']).toBe(ProgressStatus.COMPLETED);
+  });
 });
 
 describe('hasLandingData - EU2026 mandatory fields validation', () => {
