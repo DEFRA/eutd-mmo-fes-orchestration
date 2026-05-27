@@ -12,9 +12,10 @@ import { checkTransportDataFrontEnd, toFrontEndTransport, Transport, truck, trai
 import { Catch, Product, CcExporterDetails, CatchCertificate, CatchCertificateTransport } from "../persistence/schema/catchCert";
 import SummaryErrorsService from "./summaryErrors.service";
 import { getCurrentSessionData, SessionLanding } from '../helpers/sessionManager';
+import { utc } from 'moment';
 import * as ProcessingStatement from '../persistence/schema/processingStatement';
 import * as StorageDocument from '../persistence/schema/storageDoc';
-import moment, { utc } from "moment";
+import * as moment from "moment";
 import { validateCatchDetails, validateCatchWeights } from './handlers/processing-statement';
 import { validateEntry, validateProduct, validateStorageFacility, validateStorageApproval } from './handlers/storage-notes';
 import { isInvalidLength, validateWhitespace } from './orchestration.service';
