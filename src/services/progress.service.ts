@@ -485,6 +485,11 @@ export default class ProgressService {
       return true;
     }
     for (const [index, singleCatch] of catches.entries()) {
+      // productWeight is derived from departure weights on /departure-product-summary.
+      // If it exists, departure weights were already confirmed — skip granular checks
+      // (handles older documents that only have productWeight without the explicit fields).
+      if (singleCatch.productWeight) continue;
+
       const weightsErrors: { [key: string]: any } = {};
       checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(singleCatch, index, weightsErrors);
       checkNetWeightProductDepartureIsZeroPositive(singleCatch, index, weightsErrors);

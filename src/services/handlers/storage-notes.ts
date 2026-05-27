@@ -99,9 +99,14 @@ export default {
 
 /**
  * Clears `productWeight` and the two departure weights when the user
- * re-submits arrival weights for a product. Any previously-confirmed
- * departure weights are stale because they were validated against the prior
- * arrival weights, and `productWeight` is derived from them on
+ * re-submits arrival weights for a product AND the departure weights
+ * would become invalid (departure exceeds new arrival).
+ *
+ * Previously-confirmed departure weights are only stale when the new
+ * arrival weights are lower — if they stay the same or increase, the
+ * departure weights remain valid.
+ *
+ * `productWeight` is derived from departure weights on
  * /departure-product-summary. Without this, /check-your-information can show
  * a stale "Export weight" row and the document can be submitted with blank
  * departure weights on the generated PDF (FI0-11257 / DEFECT-592).
@@ -115,9 +120,17 @@ export function clearStaleDepartureDerivedFields(product: any, index: number, er
     errors[`catches-${index}-netWeightFisheryProductArrival`];
   if (arrivalErrored) return;
 
-  product.netWeightProductDeparture = undefined;
-  product.netWeightFisheryProductDeparture = undefined;
-  product.productWeight = undefined;
+  const departureExceedsArrival =
+    (product.netWeightProductDeparture && product.netWeightProductArrival &&
+      (+product.netWeightProductDeparture) > (+product.netWeightProductArrival)) ||
+    (product.netWeightFisheryProductDeparture && product.netWeightFisheryProductArrival &&
+      (+product.netWeightFisheryProductDeparture) > (+product.netWeightFisheryProductArrival));
+
+  if (departureExceedsArrival) {
+    product.netWeightProductDeparture = undefined;
+    product.netWeightFisheryProductDeparture = undefined;
+    product.productWeight = undefined;
+  }
 }
 
 export function checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
