@@ -37,6 +37,7 @@ export default {
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    clearStaleDepartureDerivedFields(product, index, entryErrors);
 
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
@@ -46,6 +47,7 @@ export default {
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    clearStaleDepartureDerivedFields(product, index, entryErrors);
 
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
