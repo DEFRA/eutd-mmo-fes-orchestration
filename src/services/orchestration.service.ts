@@ -140,6 +140,9 @@ export default class OrchestrationService {
     const nextUrl = req.query.n;
     const saveAsDraftUrl = req.query.saveAsDraftUrl as string;
     const currentUrl = req.query.c;
+
+
+
     let saveToRedisIfErrors = false;
 
     if (req.query.saveToRedisIfErrors) {
@@ -186,6 +189,8 @@ export default class OrchestrationService {
       currentUrl,
       nextUrl
     }
+
+
     next = OrchestrationService.handleErrors(errors, data, documentNumber, originalSessionData, next, urlsObj, setOnValidationSuccess);
 
     const dataToSave: any = OrchestrationService.getDataToSave(
@@ -539,7 +544,7 @@ export default class OrchestrationService {
         departureFisheryWeight > arrivalFisheryWeight
       ) {
         data.validationErrors.push({
-          message: 'sdNetWeightProductDepartureExceedsArrival',
+          message: 'sdNetWeightFisheryProductDepartureExceedsArrival',
           key: `catches-${ctch}-netWeightFisheryProductDeparture`,
           certificateNumber: documentCertificateNumber,
           product: species,
