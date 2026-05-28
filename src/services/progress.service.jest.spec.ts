@@ -4969,6 +4969,133 @@ describe('getStorageDocumentProgress', () => {
     );
   });
 
+  // FI0-11257 / DEFECT-592: when departure weights have not been confirmed, the
+  // "Departure from storage facility" section (transportDetails) should be INCOMPLETE,
+  // NOT the "Products" section (catches). Departure weights are confirmed on
+  // /departure-product-summary which is part of the departure journey.
+  it('will return INCOMPLETE transportDetails (not catches) when departure weights have not been confirmed', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            // No netWeightProductDeparture / netWeightFisheryProductDeparture
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+    expect(result.completedSections).toBe(1);
+  });
+
+  it('will return INCOMPLETE transportDetails (not catches) when departure weight exceeds arrival weight', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            netWeightProductDeparture: '700',
+            netWeightFisheryProductDeparture: '700',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+  });
+
+  it('will return INCOMPLETE transportDetails when fishery departure weight exceeds fishery arrival weight', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '100',
+            netWeightFisheryProductArrival: '30',
+            netWeightProductDeparture: '50',
+            netWeightFisheryProductDeparture: '40',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+  });
+
   it('will return INCOMPLETED catches if any of the weights are invalid', async () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
