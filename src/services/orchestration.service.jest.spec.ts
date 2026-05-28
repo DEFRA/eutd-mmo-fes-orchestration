@@ -2458,7 +2458,7 @@ describe('checkValidationStorageNotes', () => {
       product: 'Atlantic herring',
     });
     expect(data.validationErrors[1]).toMatchObject({
-      message: 'sdNetWeightProductDepartureExceedsArrival',
+      message: 'sdNetWeightFisheryProductDepartureExceedsArrival',
       key: 'catches-0-netWeightFisheryProductDeparture',
       certificateNumber: 'GBR-2022-CC-123456789',
       product: 'Atlantic herring',
