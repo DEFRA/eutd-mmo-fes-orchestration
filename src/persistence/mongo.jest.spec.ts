@@ -34,8 +34,20 @@ describe('MongoConnection', () => {
     const mockConnectionUri = 'mongodb://localhost:27017';
     const mockDbName = 'testdb';
 
-    describe('with small pool size (local development)', () => {
-      it('should use basic connection options when pool size is less than 10', async () => {
+    describe('pool size parsing', () => {
+      it('should parse pool size string to number for maxPoolSize', async () => {
+        const poolSize = '10';
+        mockConnect.mockResolvedValue({} as any);
+
+        await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
+
+        expect(mockConnect).toHaveBeenCalledWith(mockConnectionUri, {
+          dbName: mockDbName,
+          maxPoolSize: 10,
+        });
+      });
+
+      it('should correctly parse single digit pool size', async () => {
         const poolSize = '5';
         mockConnect.mockResolvedValue({} as any);
 
@@ -47,85 +59,48 @@ describe('MongoConnection', () => {
         });
       });
 
-      it('should use basic connection options when pool size is 1', async () => {
-        const poolSize = '1';
+      it('should correctly parse large pool size', async () => {
+        const poolSize = '100';
         mockConnect.mockResolvedValue({} as any);
 
         await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
 
         expect(mockConnect).toHaveBeenCalledWith(mockConnectionUri, {
           dbName: mockDbName,
-          maxPoolSize: 1,
+          maxPoolSize: 100,
         });
       });
 
-      it('should default to maxPoolSize 50 and add advanced options when pool string is empty', async () => {
+      it('should handle empty string and result in NaN for maxPoolSize', async () => {
         const poolSize = '';
         mockConnect.mockResolvedValue({} as any);
 
         await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
 
         const calledOptions = mockConnect.mock.calls[0][1];
-        expect(calledOptions.maxPoolSize).toBe(50);
-        expect(calledOptions.minPoolSize).toBe(10); // 20% of 50
-        expect(calledOptions.socketTimeoutMS).toBe(45000);
-        expect(calledOptions.retryWrites).toBe(true);
+        expect(calledOptions.maxPoolSize).toBeNaN();
       });
-    });
 
-    describe('with large pool size (production)', () => {
-      it('should include advanced options when pool size is 10 or greater', async () => {
-        const poolSize = '10';
+      it('should handle invalid string and result in NaN for maxPoolSize', async () => {
+        const poolSize = 'invalid';
         mockConnect.mockResolvedValue({} as any);
 
         await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
 
-        const expectedOptions = {
+        const calledOptions = mockConnect.mock.calls[0][1];
+        expect(calledOptions.maxPoolSize).toBeNaN();
+      });
+
+      it('should parse string with leading number correctly', async () => {
+        const poolSize = '25abc';
+        mockConnect.mockResolvedValue({} as any);
+
+        await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
+
+        expect(mockConnect).toHaveBeenCalledWith(mockConnectionUri, {
           dbName: mockDbName,
-          maxPoolSize: 10,
-          minPoolSize: 5, // Math.max(5, Math.floor(10 * 0.2)) = Math.max(5, 2) = 5
-          maxIdleTimeMS: 30000,
-          socketTimeoutMS: 45000,
-          serverSelectionTimeoutMS: 30000,
-          connectTimeoutMS: 30000,
-          retryWrites: true,
-          retryReads: true,
-        };
-
-        expect(mockConnect).toHaveBeenCalledWith(mockConnectionUri, expectedOptions);
-      });
-
-      it('should calculate minPoolSize as 20% of maxPoolSize with minimum 5 for pool size 50', async () => {
-        const poolSize = '50';
-        mockConnect.mockResolvedValue({} as any);
-
-        await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
-
-        const calledOptions = mockConnect.mock.calls[0][1];
-        expect(calledOptions.maxPoolSize).toBe(50);
-        expect(calledOptions.minPoolSize).toBe(10); // Math.max(5, Math.floor(50 * 0.2)) = Math.max(5, 10) = 10
-      });
-
-      it('should calculate minPoolSize as 20% of maxPoolSize with minimum 5 for pool size 100', async () => {
-        const poolSize = '100';
-        mockConnect.mockResolvedValue({} as any);
-
-        await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
-
-        const calledOptions = mockConnect.mock.calls[0][1];
-        expect(calledOptions.maxPoolSize).toBe(100);
-        expect(calledOptions.minPoolSize).toBe(20); // Math.max(5, Math.floor(100 * 0.2)) = Math.max(5, 20) = 20
-      });
-
-      it('should use minimum minPoolSize of 5 when 20% calculation is less than 5', async () => {
-        const poolSize = '15';
-        mockConnect.mockResolvedValue({} as any);
-
-        await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
-
-        const calledOptions = mockConnect.mock.calls[0][1];
-        expect(calledOptions.maxPoolSize).toBe(15);
-        expect(calledOptions.minPoolSize).toBe(5); // Math.max(5, Math.floor(15 * 0.2)) = Math.max(5, 3) = 5
+          maxPoolSize: 25,
+        });
       });
     });
 
@@ -141,14 +116,16 @@ describe('MongoConnection', () => {
         expect(mockConnect).toHaveBeenCalledTimes(1);
       });
 
-      it('should handle NaN pool size by defaulting to 50', async () => {
-        const poolSize = 'invalid';
+      it('should only pass dbName and maxPoolSize in connection options', async () => {
+        const poolSize = '20';
         mockConnect.mockResolvedValue({} as any);
 
         await MongoConnection.connect(mockConnectionUri, mockDbName, poolSize);
 
         const calledOptions = mockConnect.mock.calls[0][1];
-        expect(calledOptions.maxPoolSize).toBe(50);
+        expect(Object.keys(calledOptions)).toEqual(['dbName', 'maxPoolSize']);
+        expect(calledOptions.dbName).toBe(mockDbName);
+        expect(calledOptions.maxPoolSize).toBe(20);
       });
     });
 

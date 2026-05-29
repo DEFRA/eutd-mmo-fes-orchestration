@@ -11,26 +11,10 @@ export class MongoConnection {
   public static async connect(connectionUri: string, dbName: string, pool: string): Promise<void | Error> {
     if(MongoConnection.mongo === undefined) {
       try {
-        const maxPoolSize = Number.parseInt(pool) || 50;
-        
-        // Build connection options - minPoolSize is optional for local dev compatibility
-        const connectionOptions: any = {
+        MongoConnection.mongo = await mongoose.connect(connectionUri, {
           dbName,
-          maxPoolSize,
-        };
-        
-        // Only add advanced options if we have a reasonable pool size (production environment)
-        if (maxPoolSize >= 10) {
-          connectionOptions.minPoolSize = Math.max(5, Math.floor(maxPoolSize * 0.2)); // 20% of max, minimum 5
-          connectionOptions.maxIdleTimeMS = 30000;
-          connectionOptions.socketTimeoutMS = 45000;
-          connectionOptions.serverSelectionTimeoutMS = 30000;
-          connectionOptions.connectTimeoutMS = 30000;
-          connectionOptions.retryWrites = true;
-          connectionOptions.retryReads = true;
-        }
-        
-        MongoConnection.mongo = await mongoose.connect(connectionUri, connectionOptions);
+          maxPoolSize: Number.parseInt(pool)
+        });
 
       } catch(e) {
         logger.error('[MONGO-CONNECTION-ERROR]', e);
