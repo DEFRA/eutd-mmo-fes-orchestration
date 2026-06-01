@@ -14,7 +14,7 @@ import VesselLandingsRefresher from "./vesselLandingsRefresher.service";
 import * as SystemBlocks from "../persistence/services/systemBlock";
 import * as ReferenceDataService from '../services/reference-data.service';
 import SummaryErrorsService from '../services/summaryErrors.service';
-import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
+import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from '../persistence/schema/catchCert';
 import { IExportCertificateResults } from '../persistence/schema/exportCertificateResults';
 import * as crypto from "crypto";
 import applicationConfig from '../applicationConfig';
@@ -395,6 +395,98 @@ describe('get', () => {
     const result = await ExportPayloadService.get('User 1', undefined, CONTACT_ID);
 
     expect(result.items[0].landings).toEqual(undefined);
+  });
+
+  it('P1/P2 optimization: getFromDraft should use provided draft and NOT call getExportPayload DB fetch', async () => {
+    const providedDraft = {
+      documentNumber: 'GBR-2020-CC-TEST123',
+      exportData: {
+        products: [{
+          id: 'product-1',
+          species: { label: 'COD', value: 'COD' },
+          state: { label: 'FRE', value: 'FRE' },
+          presentation: { label: 'WHL', value: 'WHL' },
+          commodityCode: '03025110',
+          caughtBy: [{
+            id: 'landing-1',
+            vessel: { label: 'WIRON 5 (PLN2674)', value: 'PLN2674' },
+            faoArea: 'FAO27',
+            dateLanded: '2020-01-01',
+            exportWeight: 100
+          }]
+        }]
+      }
+    } as any as CatchCertificate;
+
+    const mockGetExportPayload = jest.spyOn(CatchCertService, 'getExportPayload');
+    mockGetSessionData.mockReturnValue({ landings: [] });
+
+    const result = await ExportPayloadService.getFromDraft(providedDraft as any, 'User1', 'GBR-2020-CC-TEST123', CONTACT_ID);
+
+    // Verify: getExportPayload was called with the provided draft (not fetching from DB)
+    expect(mockGetExportPayload).toHaveBeenCalledWith('User1', 'GBR-2020-CC-TEST123', CONTACT_ID, providedDraft);
+    // Verify: result contains expected data
+    expect(result).toBeDefined();
+    expect(result.items).toBeDefined();
+
+    mockGetExportPayload.mockRestore();
+  });
+
+  it('P1/P2 optimization: getFromDraft should merge session data same as get method', async () => {
+    const providedDraft = {
+      exportData: {
+        products: [{
+          id: 'product-1',
+          species: { label: 'COD', value: 'COD' },
+          state: { label: 'FRE', value: 'FRE' },
+          presentation: { label: 'WHL', value: 'WHL' },
+          commodityCode: '03025110',
+          caughtBy: [{
+            id: 'landing-1',
+            vessel: { label: 'WIRON 5 (PLN2674)', value: 'PLN2674' },
+            faoArea: 'FAO27',
+            dateLanded: '2020-01-01',
+            exportWeight: 100
+          }]
+        }]
+      }
+    } as any as CatchCertificate;
+
+    const sessionData = {
+      landings: [{
+        landingId: 'landing-1',
+        addMode: true,
+        editMode: false,
+        error: null
+      }]
+    };
+
+    const mockGetExportPayload = jest.spyOn(CatchCertService, 'getExportPayload');
+    mockGetExportPayload.mockReturnValue({
+      items: [{
+        product: providedDraft.exportData.products[0],
+        landings: [{
+          model: {
+            id: 'landing-1',
+            vessel: { label: 'WIRON 5 (PLN2674)', value: 'PLN2674' },
+            faoArea: 'FAO27',
+            dateLanded: '2020-01-01',
+            exportWeight: 100
+          },
+          addMode: false,
+          editMode: false
+        }]
+      }]
+    } as any);
+    mockGetSessionData.mockReturnValue(sessionData);
+
+    const result = await ExportPayloadService.getFromDraft(providedDraft as any, 'User1', 'DOC-123', CONTACT_ID);
+
+    // Verify: session data was applied to landings
+    expect(result.items[0].landings[0].addMode).toBe(true);
+    expect(result.items[0].landings[0].editMode).toBe(false);
+
+    mockGetExportPayload.mockRestore();
   });
 
   it('should retrieve multiple related session data for landings and merge it into draft data', async () => {

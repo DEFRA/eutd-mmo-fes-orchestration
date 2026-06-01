@@ -17,7 +17,7 @@ export class MongoConnection {
         });
 
       } catch(e) {
-        logger.error(e);
+        logger.error('[MONGO-CONNECTION-ERROR]', e);
         throw new Error('Cannot connect to given database');
       }
     }

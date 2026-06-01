@@ -1503,6 +1503,64 @@ describe('get', () => {
       contactId
     );
   });
+
+  it('P1 optimization: should use provided draft and NOT call getDraft', async () => {
+    const providedDraft = {
+      exportData: {
+        landingsEntryOption: 'manualEntry',
+        exporterDetails: {
+          exporterName: 'Test Exporter',
+          addressOne: '123 Test St'
+        },
+        products: [{
+          id: 'product-1',
+          species: { label: 'COD', value: 'COD' }
+        }],
+        conservation: [{ species: 'COD' }],
+        transportation: {
+          vehicle: 'truck',
+          departurePlace: 'London'
+        },
+        exportedFrom: 'United Kingdom',
+        exportedTo: {
+          officialCountryName: 'Spain',
+          isoCodeAlpha2: 'ES'
+        },
+        pointOfDestination: 'Madrid'
+      }
+    };
+
+    mockGetDraft.mockClear();
+
+    const result = await ProgressService.get(userPrincipal, documentNumber, contactId, providedDraft as any);
+
+    // Verify: getDraft was NOT called (optimization working)
+    expect(mockGetDraft).not.toHaveBeenCalled();
+    // Verify: result is valid progress object
+    expect(result).toBeDefined();
+    expect(result.progress).toBeDefined();
+    expect(result.requiredSections).toBeDefined();
+    expect(result.completedSections).toBeDefined();
+  });
+
+  it('P1 optimization: should fall back to getDraft when no draft provided', async () => {
+    mockGetDraft.mockClear();
+    mockGetDraft.mockResolvedValue({
+      exportData: {
+        landingsEntryOption: 'manualEntry',
+        exporterDetails: {},
+        products: [],
+        conservation: null,
+        transportation: {},
+        exportedFrom: null
+      }
+    });
+
+    await ProgressService.get(userPrincipal, documentNumber, contactId);
+
+    // Verify: getDraft WAS called (fallback working)
+    expect(mockGetDraft).toHaveBeenCalledWith(userPrincipal, documentNumber, contactId);
+  });
 });
 
 describe('getLandingStatus', () => {
@@ -4911,6 +4969,133 @@ describe('getStorageDocumentProgress', () => {
     );
   });
 
+  // FI0-11257 / DEFECT-592: when departure weights have not been confirmed, the
+  // "Departure from storage facility" section (transportDetails) should be INCOMPLETE,
+  // NOT the "Products" section (catches). Departure weights are confirmed on
+  // /departure-product-summary which is part of the departure journey.
+  it('will return INCOMPLETE transportDetails (not catches) when departure weights have not been confirmed', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            // No netWeightProductDeparture / netWeightFisheryProductDeparture
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+    expect(result.completedSections).toBe(1);
+  });
+
+  it('will return INCOMPLETE transportDetails (not catches) when departure weight exceeds arrival weight', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '1',
+            netWeightFisheryProductArrival: '1',
+            netWeightProductDeparture: '700',
+            netWeightFisheryProductDeparture: '700',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+  });
+
+  it('will return INCOMPLETE transportDetails when fishery departure weight exceeds fishery arrival weight', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Atlantic cod (COD)',
+            productDescription: 'Some product description',
+            commodityCode: '45345454354',
+            certificateNumber: 'DSFDSF',
+            certificateType: 'non_uk',
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            productWeight: '5',
+            weightOnCC: '5',
+            placeOfUnloading: 'sdfdf',
+            dateOfUnloading: '24/01/2022',
+            transportUnloadedFrom: 'sfdfd',
+            id: 'dsfdsf-1643629199',
+            netWeightProductArrival: '100',
+            netWeightFisheryProductArrival: '30',
+            netWeightProductDeparture: '50',
+            netWeightFisheryProductDeparture: '40',
+          },
+        ],
+      },
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      'contactBob'
+    );
+
+    expect(result.progress).toMatchObject({ catches: ProgressStatus.COMPLETED });
+    expect(result.progress).toMatchObject({ transportDetails: ProgressStatus.INCOMPLETE });
+  });
+
   it('will return INCOMPLETED catches if any of the weights are invalid', async () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
@@ -7059,6 +7244,54 @@ describe('Storage Document Progress - transportDetails with all conditions met',
     const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-123', 'contact123');
 
     expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('should mark transportDetails as COMPLETED when catches have productWeight but no departure weight fields', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Cod',
+            id: 'catch-1',
+            commodityCode: '03026110',
+            certificateNumber: 'GBR-2022-CC-123456',
+            netWeightProductArrival: '50',
+            productWeight: '50',
+            // No netWeightProductDeparture or netWeightFisheryProductDeparture
+          }
+        ],
+        transportation: {
+          vehicle: 'truck',
+          cmr: false,
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'AB12 CDE',
+          departurePlace: 'Hull',
+          exportDate: '20/05/2026',
+          pointOfDestination: 'Calais',
+          exportedTo: {
+            officialCountryName: 'France',
+            isoCodeAlpha2: 'FR',
+            isoCodeAlpha3: 'FRA',
+            isoNumericCode: '250'
+          }
+        },
+        arrivalTransportation: {
+          vehicle: 'truck',
+          cmr: false,
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'AB12 CDE',
+          departurePlace: 'Dover',
+          departureDate: '15/05/2026',
+          departureCountry: 'France',
+          departurePort: 'Calais Port',
+          placeOfUnloading: 'London Billingsgate'
+        }
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-PW', 'contact123');
+
+    expect(result.progress['transportDetails']).toBe(ProgressStatus.COMPLETED);
   });
 });
 

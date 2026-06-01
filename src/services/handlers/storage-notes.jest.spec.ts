@@ -76,6 +76,212 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
     expect(errors).toEqual({});
   });
 
+  it("clears stale departure-derived fields on the catch when arrival weights validate (FI0-11257)", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const catchWithStaleDepartureData: any = {
+      weightOnCC: "2222",
+      product: "Arctic char (ACH)",
+      productDescription: 'Some product description',
+      commodityCode: "34234324",
+      certificateNumber: "CC-11111",
+      productWeight: "999", // stale — derived from previous departure weights
+      netWeightProductDeparture: "999", // stale
+      netWeightFisheryProductDeparture: "999", // stale
+      dateOfUnloading: "29/01/2019",
+      placeOfUnloading: "Dover",
+      transportUnloadedFrom: "TRANS-IN-001",
+      scientificName: 'Salvelinus alpinus',
+      certificateType: 'non_uk',
+      netWeightProductArrival: "500", // user just changed this from 999 → 500
+      netWeightFisheryProductArrival: "500",
+      issuingCountry: {
+        officialCountryName: 'SPAIN',
+        isoCodeAlpha2: 'ES',
+        isoCodeAlpha3: 'ESP',
+        isoNumericCode: '724',
+      },
+    };
+
+    const data = {
+      catches: [catchWithStaleDepartureData],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors).toEqual({});
+    expect(catchWithStaleDepartureData.productWeight).toBeUndefined();
+    expect(catchWithStaleDepartureData.netWeightProductDeparture).toBeUndefined();
+    expect(catchWithStaleDepartureData.netWeightFisheryProductDeparture).toBeUndefined();
+  });
+
+  it("does NOT clear departure-derived fields when arrival weight validation fails (FI0-11257)", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const catchWithInvalidArrival: any = {
+      weightOnCC: "2222",
+      product: "Arctic char (ACH)",
+      productDescription: 'Some product description',
+      commodityCode: "34234324",
+      certificateNumber: "CC-11111",
+      productWeight: "999",
+      netWeightProductDeparture: "999",
+      netWeightFisheryProductDeparture: "999",
+      dateOfUnloading: "29/01/2019",
+      placeOfUnloading: "Dover",
+      transportUnloadedFrom: "TRANS-IN-001",
+      scientificName: 'Salvelinus alpinus',
+      certificateType: 'non_uk',
+      // arrival weights missing — validation will fail
+      issuingCountry: {
+        officialCountryName: 'SPAIN',
+        isoCodeAlpha2: 'ES',
+        isoCodeAlpha3: 'ESP',
+        isoNumericCode: '724',
+      },
+    };
+
+    const data = {
+      catches: [catchWithInvalidArrival],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors[`catches-0-netWeightProductArrival`]).toBeDefined();
+    // Stale departure data preserved so user doesn't lose data when fixing the form
+    expect(catchWithInvalidArrival.productWeight).toBe("999");
+    expect(catchWithInvalidArrival.netWeightProductDeparture).toBe("999");
+    expect(catchWithInvalidArrival.netWeightFisheryProductDeparture).toBe("999");
+  });
+
+  it("does NOT clear departure fields when departure weights do not exceed arrival (FI0-11257)", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const catchWithValidDeparture: any = {
+      weightOnCC: "2222",
+      product: "Arctic char (ACH)",
+      productDescription: 'Some product description',
+      commodityCode: "34234324",
+      certificateNumber: "CC-11111",
+      productWeight: "400",
+      netWeightProductDeparture: "400",
+      netWeightFisheryProductDeparture: "400",
+      dateOfUnloading: "29/01/2019",
+      placeOfUnloading: "Dover",
+      transportUnloadedFrom: "TRANS-IN-001",
+      scientificName: 'Salvelinus alpinus',
+      certificateType: 'non_uk',
+      netWeightProductArrival: "500", // arrival >= departure, so no clearing needed
+      netWeightFisheryProductArrival: "500",
+      issuingCountry: {
+        officialCountryName: 'SPAIN',
+        isoCodeAlpha2: 'ES',
+        isoCodeAlpha3: 'ESP',
+        isoNumericCode: '724',
+      },
+    };
+
+    const data = {
+      catches: [catchWithValidDeparture],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors).toEqual({});
+    // Departure fields preserved because they don't exceed arrival
+    expect(catchWithValidDeparture.productWeight).toBe("400");
+    expect(catchWithValidDeparture.netWeightProductDeparture).toBe("400");
+    expect(catchWithValidDeparture.netWeightFisheryProductDeparture).toBe("400");
+  });
+
+  it("clears departure fields when only fishery product departure exceeds fishery arrival (FI0-11257)", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const catchWithFisheryExceeding: any = {
+      weightOnCC: "2222",
+      product: "Arctic char (ACH)",
+      productDescription: 'Some product description',
+      commodityCode: "34234324",
+      certificateNumber: "CC-11111",
+      productWeight: "999",
+      netWeightProductDeparture: "400", // does NOT exceed arrival
+      netWeightFisheryProductDeparture: "999", // exceeds fishery arrival
+      dateOfUnloading: "29/01/2019",
+      placeOfUnloading: "Dover",
+      transportUnloadedFrom: "TRANS-IN-001",
+      scientificName: 'Salvelinus alpinus',
+      certificateType: 'non_uk',
+      netWeightProductArrival: "500",
+      netWeightFisheryProductArrival: "500", // fishery departure 999 > 500
+      issuingCountry: {
+        officialCountryName: 'SPAIN',
+        isoCodeAlpha2: 'ES',
+        isoCodeAlpha3: 'ESP',
+        isoNumericCode: '724',
+      },
+    };
+
+    const data = {
+      catches: [catchWithFisheryExceeding],
+      storageFacilities: [{}],
+      addAnotherProduct: "notset",
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id'
+    });
+
+    expect(errors).toEqual({});
+    // Cleared because fishery departure exceeds fishery arrival
+    expect(catchWithFisheryExceeding.productWeight).toBeUndefined();
+    expect(catchWithFisheryExceeding.netWeightProductDeparture).toBeUndefined();
+    expect(catchWithFisheryExceeding.netWeightFisheryProductDeparture).toBeUndefined();
+  });
+
   it("with invalid commodity code", async () => {
     mockValidatorCommodityCode.mockResolvedValue({
       isError: true
@@ -2365,6 +2571,59 @@ describe("/create-non-manipulation-document/:documentNumber/departure-product-su
 
     expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
   });
+
+  it("Scenario 5: returns error when netWeightFisheryProductDeparture exceeds netWeightFisheryProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightProductDeparture: "20",
+          netWeightProductArrival: "30",
+          netWeightFisheryProductDeparture: "40",
+          netWeightFisheryProductArrival: "30",
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors["catches-0-netWeightFisheryProductDeparture"]).toBe("sdNetWeightFisheryProductDepartureExceedsArrival");
+  });
+
+  it("Scenario 5: no error when netWeightFisheryProductDeparture is less than or equal to netWeightFisheryProductArrival", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const dataEqual = {
+      catches: [
+        {
+          netWeightProductDeparture: "30",
+          netWeightProductArrival: "30",
+          netWeightFisheryProductDeparture: "30",
+          netWeightFisheryProductArrival: "30",
+        },
+      ],
+    };
+
+    const dataLess = {
+      catches: [
+        {
+          netWeightProductDeparture: "30",
+          netWeightProductArrival: "30",
+          netWeightFisheryProductDeparture: "25",
+          netWeightFisheryProductArrival: "30",
+        },
+      ],
+    };
+
+    const { errors: errorsEqual } = await handler({ data: dataEqual, errors: {} });
+    const { errors: errorsLess } = await handler({ data: dataLess, errors: {} });
+
+    expect(errorsEqual["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
+    expect(errorsLess["catches-0-netWeightFisheryProductDeparture"]).toBeUndefined();
+  });
 });
 
 describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-details", () => {
@@ -2882,8 +3141,8 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
 // Additional tests to cover remaining uncovered lines
 // ────────────────────────────────────────────────────────────────────────────────
 
-describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent - else-if branch", () => {
-  it("should set fishery weight error when netWeightProductDeparture is present but netWeightFisheryProductDeparture is missing", async () => {
+describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent - either-or validation", () => {
+  it("should NOT error when netWeightProductDeparture is present but netWeightFisheryProductDeparture is missing (either weight suffices)", async () => {
     const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
@@ -2898,8 +3157,43 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
 
     const { errors } = await handler({ data, errors: {} });
 
+    expect(errors).toEqual({});
+  });
+
+  it("should NOT error when netWeightFisheryProductDeparture is present but netWeightProductDeparture is missing", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          netWeightFisheryProductDeparture: "10",
+          // netWeightProductDeparture intentionally omitted
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors).toEqual({});
+  });
+
+  it("should error when NEITHER departure weight is present", async () => {
+    const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          // both departure weights intentionally omitted
+        },
+      ],
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
     expect(errors).toEqual({
-      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
     });
   });
 });

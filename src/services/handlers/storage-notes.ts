@@ -37,6 +37,7 @@ export default {
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    clearStaleDepartureDerivedFields(product, index, entryErrors);
 
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
@@ -46,6 +47,7 @@ export default {
     const product = data.catches[index];
     const { errors: productErrors } = await validateProduct(product, index, errors, data.isNonJs);
     const { errors: entryErrors } = await validateEntry(product, index, productErrors, documentNumber, userPrincipal, contactId)
+    clearStaleDepartureDerivedFields(product, index, entryErrors);
 
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
@@ -56,6 +58,7 @@ export default {
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightFisheryProductDepartureIsZeroPositive(ctch, index, errors);
       checkNetWeightProductDepartureExceedsArrival(ctch, index, errors);
+      checkNetWeightFisheryProductDepartureExceedsArrival(ctch, index, errors);
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch, index, errors);
 
       if (isEmpty(errors)) {
@@ -93,11 +96,45 @@ export default {
   },
 };
 
+/**
+ * Clears `productWeight` and the two departure weights when the user
+ * re-submits arrival weights for a product AND the departure weights
+ * would become invalid (departure exceeds new arrival).
+ *
+ * Previously-confirmed departure weights are only stale when the new
+ * arrival weights are lower — if they stay the same or increase, the
+ * departure weights remain valid.
+ *
+ * `productWeight` is derived from departure weights on
+ * /departure-product-summary. Without this, /check-your-information can show
+ * a stale "Export weight" row and the document can be submitted with blank
+ * departure weights on the generated PDF (FI0-11257 / DEFECT-592).
+ *
+ * Skipped when arrival weight validation failed for this catch — the user
+ * has not actually changed the persisted arrival weights yet.
+ */
+export function clearStaleDepartureDerivedFields(product: any, index: number, errors: any) {
+  const arrivalErrored =
+    errors[`catches-${index}-netWeightProductArrival`] ||
+    errors[`catches-${index}-netWeightFisheryProductArrival`];
+  if (arrivalErrored) return;
+
+  const departureExceedsArrival =
+    (product.netWeightProductDeparture && product.netWeightProductArrival &&
+      (+product.netWeightProductDeparture) > (+product.netWeightProductArrival)) ||
+    (product.netWeightFisheryProductDeparture && product.netWeightFisheryProductArrival &&
+      (+product.netWeightFisheryProductDeparture) > (+product.netWeightFisheryProductArrival));
+
+  if (departureExceedsArrival) {
+    product.netWeightProductDeparture = undefined;
+    product.netWeightFisheryProductDeparture = undefined;
+    product.productWeight = undefined;
+  }
+}
+
 export function checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
-  if (!ctch.netWeightProductDeparture) {
+  if (!ctch.netWeightProductDeparture && !ctch.netWeightFisheryProductDeparture) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
-  } else if (!ctch.netWeightFisheryProductDeparture) {
-    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
   }
 }
 
@@ -130,6 +167,18 @@ export function checkNetWeightProductDepartureExceedsArrival(ctch: any, index: n
     (+ctch.netWeightProductDeparture) > (+ctch.netWeightProductArrival)
   ) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureExceedsArrival';
+  }
+}
+
+// Scenario 5: fishery product departure weight cannot exceed fishery product arrival weight
+export function checkNetWeightFisheryProductDepartureExceedsArrival(ctch: any, index: number, errors: any) {
+  if (
+    !errors[`catches-${index}-netWeightFisheryProductDeparture`] &&
+    ctch.netWeightFisheryProductDeparture &&
+    ctch.netWeightFisheryProductArrival &&
+    (+ctch.netWeightFisheryProductDeparture) > (+ctch.netWeightFisheryProductArrival)
+  ) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureExceedsArrival';
   }
 }
 
