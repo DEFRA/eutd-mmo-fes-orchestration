@@ -1170,19 +1170,28 @@ describe('/create-processing-statement/:documentNumber/add-catch-details/:produc
   const handler = SUT[currentUrl];
 
   it('adds error when catches missing', async () => {
-    const result = await handler({ data: {}, errors: {}, params: { productId: 'prod-1' } });
-    expect(result.errors).toEqual({ 'catches-0-species': 'psCatchCertificateDescription' });
+    const result = await handler({ data: {}, errors: {}, params: { productId: 'prod-1' }, documentNumber: 'GBR-2023-PS-01234ABCD', userPrincipal: 'bob', contactId: 'contactId' });
+    console.log('result.errors', result.errors);
+    expect(result.errors).toEqual({ 
+      "catches-0-catchCertificateNumber": "psAddCatchDetailsErrorEnterTheCatchCertificateNumber",
+      "catches-0-catchCertificateType": "psAddCatchTypeErrorSelectCatchCertificateType",
+      "catches-0-exportWeightAfterProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing",
+      "catches-0-exportWeightBeforeProcessing": "psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing",
+      "catches-0-species": "psAddCatchDetailsErrorEnterTheFAOCodeOrSpeciesName",
+      "catches-0-speciesCommodityCode": "psAddCatchDetailsErrorEnterSpeciesCommodityCode",
+      "catches-0-totalWeightLanded": "psAddCatchWeightsErrorEnterTotalWeightLandedInKG",
+    });
   });
 
   it('adds error when no catch matches productId', async () => {
     const data = { catches: [{ productId: 'other' }] };
-    const result = await handler({ data, errors: {}, params: { productId: 'prod-1' } });
+    const result = await handler({ data, errors: {}, params: { productId: 'prod-1' }, documentNumber: 'GBR-2023-PS-01234ABCD', userPrincipal: 'bob', contactId: 'contactId' });
     expect(result.errors).toEqual({ 'catches-0-species': 'psCatchCertificateDescription' });
   });
 
   it('does not add error when first catch exists and productId matches', async () => {
     const data = { catches: [{ productId: 'prod-1' }] };
-    const result = await handler({ data, errors: {}, params: { productId: 'prod-1' } });
+    const result = await handler({ data, errors: {}, params: { productId: 'prod-1' }, documentNumber: 'GBR-2023-PS-01234ABCD', userPrincipal: 'bob', contactId: 'contactId' });
     expect(result.errors).toEqual({});
   });
 });
