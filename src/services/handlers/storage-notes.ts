@@ -22,6 +22,7 @@ import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_PRODUCT_DESCRIPTION } from "../constant
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
 import { BusinessError, SpeciesSuggestionError } from "../../validators/validationErrors";
 import { ICountry } from "../../persistence/schema/common";
+import { isEmpty } from "lodash";
 
 export const initialState = {
   storageNotes: {
@@ -62,11 +63,8 @@ export default {
       checkNetWeightFisheryProductDepartureExceedsArrival(ctch, index, errors);
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch, index, errors);
 
-      const catchHasErrors = Object.keys(errors).some(k => k.startsWith(`catches-${index}-`));
-      if (catchHasErrors) {
-        ctch.productWeight = undefined;
-      } else {
-        ctch.productWeight = ctch.netWeightProductDeparture ? ctch.netWeightProductDeparture : ctch.netWeightFisheryProductDeparture;
+      if (isEmpty(errors)) {
+        ctch.productWeight = ctch.netWeightProductDeparture ? ctch.netWeightProductDeparture : ctch.netWeightFisheryProductDeparture
       }
     }
 

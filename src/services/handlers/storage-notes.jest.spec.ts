@@ -2376,7 +2376,6 @@ describe("/create-non-manipulation-document/:documentNumber/departure-product-su
 
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
-    expect(data.catches[0].productWeight).toBeUndefined();
   });
 
   it("checks netWeightProductDeparture, netWeightProductDeparture and validates as -1", async () => {
