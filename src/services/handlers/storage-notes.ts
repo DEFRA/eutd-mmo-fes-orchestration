@@ -135,8 +135,11 @@ export function clearStaleDepartureDerivedFields(product: any, index: number, er
 }
 
 export function checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
-  if (!ctch.netWeightProductDeparture && !ctch.netWeightFisheryProductDeparture) {
+  if (!ctch.netWeightProductDeparture) {
     errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
+  }
+  if (!ctch.netWeightFisheryProductDeparture) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
   }
 }
 
