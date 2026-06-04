@@ -97,13 +97,11 @@ export default {
     const index = 0;
     const productId = params.productId;
 
-    if (!data.catches?.[index]) {
+    if (!data.catches?.[index] || data.catches.filter((c) => c.productId === productId).length <= 0) {
       const ctch = [];
       const { errors: catchTypeErrors } = validateCatchType([], index, errors);
       const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
       return validateCatchWeights(ctch, index, catchDetails.errors);
-    } else if (data.catches.filter((c) => c.productId === productId).length <= 0) {
-       errors[`catches-${index}-species`] = 'psCatchCertificateDescription';
     }
 
     return { errors }
