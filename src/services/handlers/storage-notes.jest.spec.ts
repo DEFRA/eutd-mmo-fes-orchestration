@@ -2370,11 +2370,13 @@ describe("/create-non-manipulation-document/:documentNumber/departure-product-su
     });
 
     const expected = {
-      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture"
+      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
     };
 
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
+    expect(data.catches[0].productWeight).toBeUndefined();
   });
 
   it("checks netWeightProductDeparture, netWeightProductDeparture and validates as -1", async () => {
@@ -3141,8 +3143,8 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
 // Additional tests to cover remaining uncovered lines
 // ────────────────────────────────────────────────────────────────────────────────
 
-describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent - either-or validation", () => {
-  it("should NOT error when netWeightProductDeparture is present but netWeightFisheryProductDeparture is missing (either weight suffices)", async () => {
+describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent - both fields required", () => {
+  it("should error on fishery product weight when netWeightProductDeparture is present but netWeightFisheryProductDeparture is missing", async () => {
     const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
@@ -3157,10 +3159,12 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
 
     const { errors } = await handler({ data, errors: {} });
 
-    expect(errors).toEqual({});
+    expect(errors).toEqual({
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+    });
   });
 
-  it("should NOT error when netWeightFisheryProductDeparture is present but netWeightProductDeparture is missing", async () => {
+  it("should error on net product weight when netWeightFisheryProductDeparture is present but netWeightProductDeparture is missing", async () => {
     const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
@@ -3175,10 +3179,12 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
 
     const { errors } = await handler({ data, errors: {} });
 
-    expect(errors).toEqual({});
+    expect(errors).toEqual({
+      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+    });
   });
 
-  it("should error when NEITHER departure weight is present", async () => {
+  it("should error on both fields when NEITHER departure weight is present", async () => {
     const currentUrl = "/create-non-manipulation-document/:documentNumber/departure-product-summary";
     const handler = StorageNotes[currentUrl];
 
@@ -3194,6 +3200,7 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
 
     expect(errors).toEqual({
       "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
     });
   });
 });

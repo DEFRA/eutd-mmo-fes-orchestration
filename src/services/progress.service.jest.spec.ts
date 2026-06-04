@@ -7246,7 +7246,7 @@ describe('Storage Document Progress - transportDetails with all conditions met',
     expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
   });
 
-  it('should mark transportDetails as COMPLETED when catches have productWeight but no departure weight fields', async () => {
+  it('should mark transportDetails as INCOMPLETE when catches have productWeight but no departure weight fields', async () => {
     mockStorageDocumentDraft.mockResolvedValue({
       exportData: {
         catches: [
@@ -7291,7 +7291,68 @@ describe('Storage Document Progress - transportDetails with all conditions met',
 
     const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-PW', 'contact123');
 
-    expect(result.progress['transportDetails']).toBe(ProgressStatus.COMPLETED);
+    expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('should mark transportDetails as INCOMPLETE when one of two catches has stale productWeight but null departure weights', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({
+      exportData: {
+        catches: [
+          {
+            product: 'Cod',
+            id: 'catch-1',
+            commodityCode: '03026110',
+            certificateNumber: 'GBR-2022-CC-123456',
+            netWeightProductArrival: '50',
+            netWeightFisheryProductArrival: '40',
+            netWeightProductDeparture: '45',
+            netWeightFisheryProductDeparture: '35',
+            productWeight: '45',
+          },
+          {
+            product: 'Haddock',
+            id: 'catch-2',
+            commodityCode: '03026110',
+            certificateNumber: 'GBR-2022-CC-654321',
+            netWeightProductArrival: '80',
+            netWeightFisheryProductArrival: '70',
+            netWeightProductDeparture: null,   // user cleared this
+            netWeightFisheryProductDeparture: null, // user cleared this
+            productWeight: '80',               // stale from previous valid submission
+          }
+        ],
+        transportation: {
+          vehicle: 'truck',
+          cmr: false,
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'AB12 CDE',
+          departurePlace: 'Hull',
+          exportDate: '20/05/2026',
+          pointOfDestination: 'Calais',
+          exportedTo: {
+            officialCountryName: 'France',
+            isoCodeAlpha2: 'FR',
+            isoCodeAlpha3: 'FRA',
+            isoNumericCode: '250'
+          }
+        },
+        arrivalTransportation: {
+          vehicle: 'truck',
+          cmr: false,
+          nationalityOfVehicle: 'UK',
+          registrationNumber: 'AB12 CDE',
+          departurePlace: 'Dover',
+          departureDate: '15/05/2026',
+          departureCountry: 'France',
+          departurePort: 'Calais Port',
+          placeOfUnloading: 'London Billingsgate'
+        }
+      }
+    });
+
+    const result = await ProgressService.getStorageDocumentProgress('user123', 'DOC-SD-STALE', 'contact123');
+
+    expect(result.progress['transportDetails']).toBe(ProgressStatus.INCOMPLETE);
   });
 });
 
