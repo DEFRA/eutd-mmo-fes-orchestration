@@ -63,10 +63,10 @@ export default {
       checkNetWeightFisheryProductDepartureExceedsProductDeparture(ctch, index, errors);
 
       const catchHasErrors = Object.keys(errors).some(k => k.startsWith(`catches-${index}-`));
-      if (!catchHasErrors) {
-        ctch.productWeight = ctch.netWeightProductDeparture ? ctch.netWeightProductDeparture : ctch.netWeightFisheryProductDeparture;
-      } else {
+      if (catchHasErrors) {
         ctch.productWeight = undefined;
+      } else {
+        ctch.productWeight = ctch.netWeightProductDeparture ? ctch.netWeightProductDeparture : ctch.netWeightFisheryProductDeparture;
       }
     }
 
