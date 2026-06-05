@@ -621,7 +621,7 @@ export const checkDocument = async (
 ): Promise<boolean> => {
   const document = await CatchCertModel.findOne({
     documentNumber: documentNumber,
-  });
+  }).lean();
 
   if (!document) {
     return false;

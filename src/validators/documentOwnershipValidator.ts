@@ -68,7 +68,7 @@ export const getOwnerFromMongo = async (documentNumber: string, statuses: Docume
 
     logger.debug(`[GET-OWNER-FROM-MONGO][DOCUMENT][${documentNumber}][QUERY][${JSON.stringify(query)}]`);
 
-    document = await model.findOne(query);
+    document = await model.findOne(query).lean();
 
     if (!document) {
       return null;
