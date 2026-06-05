@@ -515,7 +515,7 @@ test('/create-non-manipulation-document/you-have-added-a-product with unselected
     });
 
     const expected = {
-      addAnotherProduct: 'Select yes if you need to add another product'
+      addAnotherProduct: 'addAnotherProductNullError'
     };
 
     t.true(errors);

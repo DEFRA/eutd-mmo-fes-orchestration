@@ -2271,7 +2271,7 @@ describe("/create-non-manipulation-document/:documentNumber/you-have-added-a-pro
     });
 
     const expectedErrors = {
-      addAnotherProduct: "Select yes if you need to add another product",
+      addAnotherProduct: "addAnotherProductNullError",
     };
     expect(errors).toEqual(expectedErrors);
   });
