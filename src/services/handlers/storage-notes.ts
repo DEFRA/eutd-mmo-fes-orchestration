@@ -78,7 +78,7 @@ export default {
 
     const addAnotherProduct = data.addAnotherProduct;
     if (!addAnotherProduct || addAnotherProduct === "" || addAnotherProduct === "notset") {
-      errors.addAnotherProduct = 'Select yes if you need to add another product';
+      errors.addAnotherProduct = 'addAnotherProductNullError';
       return { errors, next: currentUrl };
     }
 
