@@ -2370,8 +2370,8 @@ describe("/create-non-manipulation-document/:documentNumber/departure-product-su
     });
 
     const expected = {
-      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
-      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightProductDeparture": "sdNetWeightProductDepartureErrorNull",
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDepartureErrorNull",
     };
 
     expect(errors).toBeTruthy();
@@ -3159,7 +3159,7 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
     const { errors } = await handler({ data, errors: {} });
 
     expect(errors).toEqual({
-      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDepartureErrorNull",
     });
   });
 
@@ -3179,7 +3179,7 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
     const { errors } = await handler({ data, errors: {} });
 
     expect(errors).toEqual({
-      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightProductDeparture": "sdNetWeightProductDepartureErrorNull",
     });
   });
 
@@ -3198,8 +3198,8 @@ describe("checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartur
     const { errors } = await handler({ data, errors: {} });
 
     expect(errors).toEqual({
-      "catches-0-netWeightProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
-      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightOrFisheryWeightProductDeparture",
+      "catches-0-netWeightProductDeparture": "sdNetWeightProductDepartureErrorNull",
+      "catches-0-netWeightFisheryProductDeparture": "sdNetWeightFisheryProductDepartureErrorNull",
     });
   });
 });
