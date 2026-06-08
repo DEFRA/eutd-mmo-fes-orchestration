@@ -347,7 +347,13 @@ describe('catchCert - db related', () => {
 
   describe('getAllCatchCertsForUserByYearAndMonth', () => {
 
+    afterEach(() => {
+      mockSessionStore.readFor.mockReset();
+      mockSessionStore.writeFor.mockReset();
+    });
+
     it('should not return draft or void certificates', async () => {
+      mockSessionStore.readFor.mockResolvedValue(undefined);
       await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA5', 'COMPLETE', defaultUser, {}, 'My Completed Reference')).save();
       await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA6', 'DRAFT')).save();
       await new CatchCertModel(sampleDocument('GBR-2020-CC-0E42C2DA7', 'VOID')).save();
@@ -357,6 +363,28 @@ describe('catchCert - db related', () => {
       expect(result).toHaveLength(1);
       expect(result[0].documentNumber).toBe('GBR-2020-CC-0E42C2DA5');
       expect(result[0].userReference).toBe('My Completed Reference');
+      expect(mockSessionStore.readFor).toHaveBeenCalledTimes(1);
+      expect(mockSessionStore.writeFor).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return cached month data when present', async () => {
+      const cached = [
+        {
+          documentNumber: 'GBR-2020-CC-CACHED',
+          status: 'COMPLETE',
+          userReference: 'Cached Ref'
+        }
+      ];
+      mockSessionStore.readFor.mockResolvedValue(cached);
+
+      const findSpy = jest.spyOn(CatchCertModel, 'find');
+      const result = await CatchCertService.getAllCatchCertsForUserByYearAndMonth('01-2020', defaultUser, contactId);
+
+      expect(result).toEqual(cached);
+      expect(mockSessionStore.readFor).toHaveBeenCalledTimes(1);
+      expect(mockSessionStore.writeFor).not.toHaveBeenCalled();
+      expect(findSpy).not.toHaveBeenCalled();
+      findSpy.mockRestore();
     });
 
     it('should not return pending certificates', async () => {
