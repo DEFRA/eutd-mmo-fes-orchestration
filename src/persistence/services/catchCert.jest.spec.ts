@@ -687,6 +687,33 @@ describe('catchCert - db related', () => {
       expect(result).toStrictEqual(expected);
     });
 
+    it('should include additive catch-certificate summary fields for P5', async () => {
+      await new CatchCertModel(sampleDocument('doc-p5', 'DRAFT', 'Juan', {}, 'Ref P5', undefined, {
+        products: [],
+        conservation: { conservationReference: 'CR-1' },
+        exporterDetails: {},
+        landingsEntryOption: 'manualEntry',
+        transportation: {
+          vehicle: 'truck',
+          exportedFrom: 'GB',
+          exportedTo: { officialCountryName: 'France' },
+          pointOfDestination: 'Paris'
+        },
+        transportations: []
+      })).save();
+
+      const result = await CatchCertService.getDraftCatchCertHeadersForUser('Juan', contactId);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          documentNumber: 'doc-p5',
+          status: 'DRAFT',
+          landingsEntryOption: 'manualEntry',
+          transportSummary: 'truck • GB • France • Paris'
+        })
+      ]);
+    });
+
     it('should return all DRAFTS for a user', async () => {
       await new CatchCertModel(sampleDocument('test1', 'DRAFT', 'Juan')).save();
       await new CatchCertModel(sampleDocument('test2', 'DRAFT', 'Juan')).save();

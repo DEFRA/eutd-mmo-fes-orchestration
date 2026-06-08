@@ -147,7 +147,17 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
     $or: ownerQuery,
     status: { $in: [DocumentStatuses.Draft, DocumentStatuses.Pending, DocumentStatuses.Locked] }
   })
-    .select(['documentNumber', 'status', 'userReference', 'createdAt'])
+    .select([
+      'documentNumber',
+      'status',
+      'userReference',
+      'createdAt',
+      'exportData.landingsEntryOption',
+      'exportData.transportation.vehicle',
+      'exportData.transportation.exportedFrom',
+      'exportData.transportation.exportedTo',
+      'exportData.transportation.pointOfDestination',
+    ])
     .sort({ createdAt: 'desc' })
     .lean();
 
@@ -164,15 +174,35 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
 
   const failedDocNumberSet = new Set(failedDocs.map((failed: any) => failed.documentNumber));
 
-  const data: CatchCertificateDraft[] = result.map(catchCert => ({
-    documentNumber: catchCert.documentNumber,
-    status: catchCert.status,
-    userReference: catchCert.userReference,
-    startedAt: moment.utc(catchCert.createdAt).format('DD MMM YYYY'),
-    isFailed:
-      systemErrors.some((systemFailure: SystemFailure) => systemFailure.documentNumber === catchCert.documentNumber)
-      || (catchCert.status === DocumentStatuses.Draft && failedDocNumberSet.has(catchCert.documentNumber))
-  }));
+  const data: CatchCertificateDraft[] = result.map(catchCert => {
+    const exportData = catchCert.exportData as any;
+    const transportSummary = [
+      exportData?.transportation?.vehicle,
+      exportData?.transportation?.exportedFrom,
+      exportData?.transportation?.exportedTo?.officialCountryName || exportData?.transportation?.exportedTo,
+      exportData?.transportation?.pointOfDestination,
+    ].filter(Boolean).join(' • ') || null;
+
+    const draft: CatchCertificateDraft = {
+      documentNumber: catchCert.documentNumber,
+      status: catchCert.status,
+      userReference: catchCert.userReference,
+      startedAt: moment.utc(catchCert.createdAt).format('DD MMM YYYY'),
+      isFailed:
+        systemErrors.some((systemFailure: SystemFailure) => systemFailure.documentNumber === catchCert.documentNumber)
+        || (catchCert.status === DocumentStatuses.Draft && failedDocNumberSet.has(catchCert.documentNumber)),
+    };
+
+    if (exportData?.landingsEntryOption) {
+      draft.landingsEntryOption = exportData.landingsEntryOption;
+    }
+
+    if (transportSummary) {
+      draft.transportSummary = transportSummary;
+    }
+
+    return draft;
+  });
 
   void saveDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, data, 300);
 
