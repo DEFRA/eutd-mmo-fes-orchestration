@@ -36,6 +36,30 @@ export default class CertificateRoutes {
         },
         {
           method: 'GET',
+          path: '/v1/certificate/catchCertificate/pre-submit',
+          options: {
+            security: true,
+            cors: true,
+            handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
+                const preSubmitBundle = await Controller.getCatchCertificatePreSubmit(request, userPrincipal, documentNumber, document as Partial<CatchCertificate>);
+
+                if (!preSubmitBundle) {
+                  return h.response().code(404);
+                }
+
+                return preSubmitBundle;
+              }, [DocumentStatuses.Draft, DocumentStatuses.Locked]).catch(e => {
+                logger.error(`[GET-CC-PRE-SUBMIT][ERROR][${e.stack || e}]`);
+                return h.response().code(500);
+              });
+            },
+            description: 'Get consolidated catch certificate pre-submit payload',
+            tags: ['api', 'certificate', 'pre-submit']
+          }
+        },
+        {
+          method: 'GET',
           path: '/v1/certificate/eu-data-integration/check-status',
           options: {
             security: true,

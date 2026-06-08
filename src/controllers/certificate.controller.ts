@@ -11,8 +11,38 @@ import { toFrontEndCatchCert } from '../persistence/schema/frontEndModels/catchC
 import SummaryErrorsService from '../services/summaryErrors.service';
 import logger from '../logger';
 import DocumentNumberService from '../services/documentNumber.service';
+import ProgressService from '../services/progress.service';
 
 export default class CertificateController {
+  public static async getCatchCertificatePreSubmit(req: Hapi.Request, userPrincipal: string, documentNumber: string, providedDocument?: Partial<CatchCertificate>): Promise<any> {
+    const contactId = <string>(req as any).app.claims.contactId;
+
+    const document = providedDocument as CatchCertificate ?? await getDocument(documentNumber, userPrincipal, contactId)
+      .catch(e => {
+        logger.error(`[GET-CC-PRE-SUBMIT][GET-DOCUMENT][ERROR][${e}]`);
+        throw new Error(e);
+      });
+
+    if (!document) {
+      return null;
+    }
+
+    const [summaryErrors, progressData] = await Promise.all([
+      SummaryErrorsService.get(userPrincipal, documentNumber, contactId),
+      ProgressService.get(userPrincipal, documentNumber, contactId, document)
+    ]);
+
+    return {
+      summary: {
+        ...toFrontEndDocumentNumber(document),
+        ...toFrontEndCatchCert(document),
+        validationErrors: summaryErrors,
+        userReference: document.userReference
+      },
+      completeness: progressData
+    };
+  }
+
   public static async getSummaryCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, providedDocument?: Partial<CatchCertificate>): Promise<CertificateSummary> {
     const contactId = <string>(req as any).app.claims.contactId;
     
