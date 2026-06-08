@@ -152,6 +152,7 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
         currentUri: "Test",
         nextUri: "Test"
       },
+      "transportSummary": null,
       transportations: [{
         id: "0",
         vehicle: "truck"
@@ -356,6 +357,7 @@ describe('toFrontEndCatchCert Mapping BackEnd Certificate to frontEnd', () => {
           isoNumericCode: "SP"
         }
       },
+      "transportSummary": "directLanding • United Kingdom • SPAIN",
       transportations: [],
       exportLocation: {
         exportedFrom: "United Kingdom",
