@@ -330,7 +330,6 @@ describe('Certificate Controller', () => {
           vehicle: "directLanding",
           exportDate: ""
         },
-        "transportSummary": "directLanding • United Kingdom • SPAIN",
         transportations: [{
           id: "0",
           vehicle: "truck"
@@ -458,7 +457,6 @@ describe('Certificate Controller', () => {
           vehicle: "directLanding",
           exportDate: ""
         },
-        "transportSummary": "directLanding • United Kingdom • SPAIN",
         transportations: [{
           id: "0",
           vehicle: "truck"
@@ -595,7 +593,6 @@ describe('Certificate Controller', () => {
           vehicle: "directLanding",
           exportDate: ""
         },
-        "transportSummary": "directLanding • United Kingdom • SPAIN",
         transportations: [{
           id: "0",
           vehicle: "truck"

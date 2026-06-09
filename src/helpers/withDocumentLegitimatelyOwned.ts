@@ -43,8 +43,5 @@ export const withDocumentLegitimatelyOwned = async (
   }
 
   logger.info(`[DOCUMENT-VALIDATOR][CHECK-USER-OWNERSHIP][${documentNumber}][SUCCESS]`);
-  // Ownership validation may return a lightweight projected document.
-  // Only pass it through when it contains business payload fields expected by downstream handlers.
-  const hasBusinessPayload = !!(document as any)?.exportData || !!(document as any)?.catches || !!(document as any)?.transportation;
-  return executeTransaction(userPrincipal, documentNumber, contactId, hasBusinessPayload ? document : undefined);
+  return executeTransaction(userPrincipal, documentNumber, contactId, document);
 };
