@@ -68,7 +68,16 @@ export const getOwnerFromMongo = async (documentNumber: string, statuses: Docume
 
     logger.debug(`[GET-OWNER-FROM-MONGO][DOCUMENT][${documentNumber}][QUERY][${JSON.stringify(query)}]`);
 
-    document = await model.findOne(query);
+    // Project only the fields required for ownership validation to reduce payload and CPU
+    const projection = {
+      createdBy: 1,
+      contactId: 1,
+      'exportData.exporterDetails.contactId': 1,
+      documentNumber: 1,
+      status: 1
+    };
+
+    document = await model.findOne(query, projection, { maxTimeMS: 30000, lean: true });
 
     if (!document) {
       return null;

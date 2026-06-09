@@ -97,7 +97,7 @@ describe("Progress routes", () => {
       await server.inject(request);
 
       // P1 optimization: now includes 4th parameter (document from ownership validation)
-      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", 'contactBob', expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", 'contactBob', undefined);
     });
   });
 
@@ -177,7 +177,7 @@ describe("Progress routes", () => {
       await server.inject(request);
 
       // P1 optimization: now includes 4th parameter (document from ownership validation)
-      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", "contactBob", expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", "contactBob", undefined);
     });
   });
 
@@ -256,7 +256,7 @@ describe("Progress routes", () => {
       await server.inject(request);
 
       // P1 optimization: now includes 4th parameter (document from ownership validation)
-      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", undefined, expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith("Bob", "DOCUMENT123", undefined, undefined);
     });
   });
 
@@ -368,7 +368,7 @@ describe("Progress routes", () => {
     it("will return 200 if all sections are complete", async () => {
       const response = await server.inject(request);
       expect(response.statusCode).toBe(200);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', undefined);
       expect(mockLogError).not.toHaveBeenCalled();
     });
 
@@ -391,7 +391,7 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(incompleteData);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', undefined);
       expect(response.payload).toStrictEqual(JSON.stringify(error));
     });
 
@@ -415,7 +415,7 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(incompleteData);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', undefined);
       expect(response.payload).toStrictEqual(JSON.stringify(error));
     });
 
@@ -765,7 +765,7 @@ describe("Progress routes", () => {
     it("will return 200 if all sections are complete", async () => {
       const response = await server.inject(request);
       expect(response.statusCode).toBe(200);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', undefined);
       expect(mockLogError).not.toHaveBeenCalled();
     });
 
@@ -787,7 +787,7 @@ describe("Progress routes", () => {
       mockGetProgress.mockResolvedValue(incompleteData);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', expect.anything());
+      expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob', undefined);
       expect(response.payload).toStrictEqual(JSON.stringify(error));
     });
 
