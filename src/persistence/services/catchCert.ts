@@ -23,7 +23,6 @@ import { validateDocumentOwner } from '../../validators/documentOwnershipValidat
 import { CATCH_CERTIFICATE_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
 import { userCanCreateDraft } from '../../validators/draftCreationValidator';
 import { getSpeciesByFaoCode } from '../../services/reference-data.service';
-import { FailedOnlineCertificates } from '../schema/onlineValidationResult';
 
 export const getDocument = async (
   documentNumber: string,
@@ -102,14 +101,6 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
   const yearInt = year ? Number.parseInt(year) : currentDate.getUTCFullYear();
   const monthInt = month ? Number.parseInt(month) : (currentDate.getUTCMonth() + 1);
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  // Try read from per-user month cache first
-  const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
-  const cacheKey = `dashboard:${userPrincipal}:${monthInt}-${yearInt}`;
-  const cached: any = await sessionStore.readFor(userPrincipal, contactId, cacheKey);
-  if (cached) {
-    return cached as CatchCertificateModel[];
-  }
-
   const data = await CatchCertModel.find({
     $or: ownerQuery,
     status: DocumentStatuses.Complete,
@@ -118,13 +109,6 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
       '$lt': new Date(yearInt, monthInt, 1)
     } as Condition<any>
   }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
-
-  // save to cache for short TTL (10 minutes)
-  try {
-    await sessionStore.writeFor(userPrincipal, contactId, cacheKey, data as any, 600);
-  } catch (err) {
-    logger.warn(`[DASHBOARD-CACHE-WRITE-FAILED][${cacheKey}][${err}]`);
-  }
 
   return data;
 };
@@ -140,69 +124,43 @@ export const getDraftCatchCertHeadersForUser = async (userPrincipal: string, con
   logger.info(`[GET-DRAFT-CATCH-CERTIFICATE-HEADERS-FROM-MONGO][${cacheResults}]`);
 
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  // Fetch system errors once, then do a lightweight projected find for headers
-  const systemErrors = await SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId);
-
-  const result = await CatchCertModel.find({
-    $or: ownerQuery,
-    status: { $in: [DocumentStatuses.Draft, DocumentStatuses.Pending, DocumentStatuses.Locked] }
-  })
-    .select([
-      'documentNumber',
-      'status',
-      'userReference',
-      'createdAt',
-      'exportData.landingsEntryOption',
-      'exportData.transportation.vehicle',
-      'exportData.transportation.exportedFrom',
-      'exportData.transportation.exportedTo',
-      'exportData.transportation.pointOfDestination',
-    ])
-    .sort({ createdAt: 'desc' })
-    .lean();
-
-  const draftDocNumbers = result
-    .filter(catchCert => catchCert.status === DocumentStatuses.Draft)
-    .map(catchCert => catchCert.documentNumber);
-
-  const failedDocs = draftDocNumbers.length > 0
-    ? await FailedOnlineCertificates
-      .find({ documentNumber: { $in: draftDocNumbers } })
-      .select(['documentNumber'])
-      .lean()
-    : [];
-
-  const failedDocNumberSet = new Set(failedDocs.map((failed: any) => failed.documentNumber));
-
-  const data: CatchCertificateDraft[] = result.map(catchCert => {
-    const exportData = catchCert.exportData as any;
-    const transportSummary = [
-      exportData?.transportation?.vehicle,
-      exportData?.transportation?.exportedFrom,
-      exportData?.transportation?.exportedTo?.officialCountryName || exportData?.transportation?.exportedTo,
-      exportData?.transportation?.pointOfDestination,
-    ].filter(Boolean).join(' • ') || null;
-
-    const draft: CatchCertificateDraft = {
-      documentNumber: catchCert.documentNumber,
-      status: catchCert.status,
-      userReference: catchCert.userReference,
-      startedAt: moment.utc(catchCert.createdAt).format('DD MMM YYYY'),
-      isFailed:
-        systemErrors.some((systemFailure: SystemFailure) => systemFailure.documentNumber === catchCert.documentNumber)
-        || (catchCert.status === DocumentStatuses.Draft && failedDocNumberSet.has(catchCert.documentNumber)),
-    };
-
-    if (exportData?.landingsEntryOption) {
-      draft.landingsEntryOption = exportData.landingsEntryOption;
+  const query = [
+    {
+      $match: {
+        $or: ownerQuery,
+        status: { $in: [DocumentStatuses.Draft, DocumentStatuses.Pending, DocumentStatuses.Locked] }
+      }
+    },
+    {
+      $lookup: {
+        from: 'failedonlinecertificates',
+        localField: 'documentNumber',
+        foreignField: 'documentNumber',
+        as: 'isFailed'
+      }
+    },
+    {
+      $project: {
+        documentNumber: true,
+        status: true,
+        userReference: true,
+        createdAt: true,
+        isFailed: { $and: [{ $anyElementTrue: ["$isFailed"] }, { $eq: ["$status", DocumentStatuses.Draft] }] }
+      }
     }
+  ];
 
-    if (transportSummary) {
-      draft.transportSummary = transportSummary;
-    }
-
-    return draft;
-  });
+  const [result, systemErrors] = await Promise.all([
+    CatchCertModel.aggregate(query).sort({ createdAt: 'desc' }),
+    SummaryErrorsService.getAllSystemErrors(userPrincipal, contactId)
+  ]);
+  const data: CatchCertificateDraft[] = result.map(catchCert => ({
+    documentNumber: catchCert.documentNumber,
+    status: catchCert.status,
+    userReference: catchCert.userReference,
+    startedAt: moment.utc(catchCert.createdAt).format('DD MMM YYYY'),
+    isFailed: systemErrors.some((systemFailure: SystemFailure) => systemFailure.documentNumber === catchCert.documentNumber) || catchCert.isFailed
+  }));
 
   void saveDraftCache(userPrincipal, contactId, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, data, 300);
 
@@ -431,18 +389,7 @@ export const completeDraft = async (userPrincipal: string, documentNumber: strin
     { maxTimeMS: 30000 } // 30 second query timeout
   );
 
-  // Invalidate draft header cache and month-based dashboard cache for this user
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
-  try {
-    const sessionStore = await SessionStoreFactory.getSessionStore(getRedisOptions());
-    const now = new Date();
-    const month = now.getUTCMonth() + 1;
-    const year = now.getUTCFullYear();
-    const cacheKey = `dashboard:${userPrincipal}:${month}-${year}`;
-    await sessionStore.deleteFor(userPrincipal, contactId, cacheKey);
-  } catch (err) {
-    logger.warn(`[DASHBOARD-CACHE-INVALIDATE-FAILED][${userPrincipal}][${contactId}][${err}]`);
-  }
 };
 
 export const setCatchSubmissionInProgress = async (documentNumber: string): Promise<void> => {
@@ -674,7 +621,7 @@ export const checkDocument = async (
 ): Promise<boolean> => {
   const document = await CatchCertModel.findOne({
     documentNumber: documentNumber,
-  }).lean();
+  });
 
   if (!document) {
     return false;
