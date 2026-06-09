@@ -155,7 +155,6 @@ export interface CertificateSummary {
   exportPayload: ProductsLanded,
   conservation: Conservation,
   transport?: Transport,
-  transportSummary?: string | null,
   transportations?: CatchCertificateTransport[],
   exportLocation: ExportLocation,
   landingsEntryOption: BackEndModels.LandingsEntryOptions

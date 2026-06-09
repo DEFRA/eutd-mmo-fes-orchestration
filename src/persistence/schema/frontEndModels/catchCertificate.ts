@@ -13,9 +13,7 @@ export interface CatchCertificateDraft {
   status: string,
   userReference: string,
   startedAt: string,
-  isFailed: boolean,
-  landingsEntryOption?: string | null,
-  transportSummary?: string | null
+  isFailed: boolean
 }
 
 export interface CatchCertificate {
@@ -25,8 +23,7 @@ export interface CatchCertificate {
   transport?: Transport,
   transportations?: CatchCertificateTransport.CatchCertificateTransport[],
   exportLocation: ExportLocation,
-  landingsEntryOption: LandingsEntryOptions,
-  transportSummary?: string | null
+  landingsEntryOption: LandingsEntryOptions
 }
 export interface CatchCertificateProgress extends BaseProgress {
   dataUpload?: string;
@@ -37,18 +34,6 @@ export interface CatchCertificateProgress extends BaseProgress {
   transportType?: ProgressStatus;
   transportDetails?: ProgressStatus;
 }
-
-const getTransportSummary = (exportData: BackEndCertificate.ExportData): string | null => {
-  const transport = exportData?.transportation;
-  const summary = [
-    transport?.vehicle,
-    transport?.exportedFrom,
-    transport?.exportedTo?.officialCountryName || transport?.exportedTo,
-    transport?.pointOfDestination,
-  ].filter(Boolean).join(' • ');
-
-  return summary || null;
-};
 
 export const toFrontEndCatchCert = (
   certificate: BackEndCertificate.CatchCertificate
@@ -68,7 +53,6 @@ export const toFrontEndCatchCert = (
           certificate.exportData
         ),
         landingsEntryOption: certificate.exportData.landingsEntryOption,
-        transportSummary: getTransportSummary(certificate.exportData),
         transport: toFrontEndTransport(certificate.exportData.transportation),
         transportations: Array.isArray(certificate.exportData.transportations) ? certificate.exportData.transportations.map((t: BackEndCertificate.CatchCertificateTransport) => CatchCertificateTransport.toFrontEndTransport(t)) : []
       }
