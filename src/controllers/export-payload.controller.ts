@@ -215,16 +215,16 @@ export default class ExportPayloadController {
   public static async createExportCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: Partial<CatchCertificate>) {
     try {
       logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][START]`);
-      
+
       // P1/P2 optimization: use provided document from ownership validation if available
       let draft = providedDocument;
-      
+
       // Only invalidate cache if we don't have the document yet
       if (!draft) {
         await CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
         draft = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
       }
-      
+
       logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][USING-${providedDocument ? 'PROVIDED' : 'FETCHED'}-DOCUMENT]`);
 
       const exportPayload: PayloadSchema.ProductsLanded = await ExportPayloadService.getFromDraft(draft, userPrincipal, documentNumber, contactId);
@@ -989,7 +989,7 @@ export default class ExportPayloadController {
       // Cache failures should not break the request; fall through to compute.
       logger.warn(`[LANDINGS-TYPE][CACHE][ERROR][${(e)?.message || e}]`);
     }
-    
+
     // P1 optimization: if draft already has landingsEntryOption, use it directly
     let landingsEntryOption: LandingsEntryOptions;
     if (providedDraft?.exportData?.landingsEntryOption) {
