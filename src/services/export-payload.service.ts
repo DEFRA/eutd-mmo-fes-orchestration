@@ -265,21 +265,22 @@ export default class ExportPayloadService {
       if (!email) logger.error(`[EXPORT-PAYLOAD-SERVICE][CREATE-EXPORT-CERTIFICATE][ERROR]Missing email for user[${userPrincipal}]`);
       logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][START]`);
 
-      // FI0-11132: parallelize gatherExportInfo with addIsLegallyDue (independent)
-      const [{ exporterModel, exportedFrom, transportData, catchCertificate }] = await Promise.all([
-        ExportPayloadService.gatherExportInfo(userPrincipal, documentNumber, contactId),
-        addIsLegallyDue(documentNumber),
-      ]);
+      // addIsLegallyDue mutates landing-level data in Mongo, so it must complete before the draft is read
+      await addIsLegallyDue(documentNumber);
 
       await CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
 
-      // FI0-11132: single getDraft() after cache bust — extract all Phase-2 fields (was 3 separate getDraft() calls)
-      const phase2Draft: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
+      // FI0-11132: single getDraft() after cache bust serves BOTH Phase-1 (exporter/transport/location)
+      // and Phase-2 (export payload/conservation) extractions. Phase-1 fields are not mutated by
+      // addIsLegallyDue, so deriving them from this draft removes the previously redundant getDraft() read.
+      const draft: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
 
-      // FI0-11132: parallelize getExportPayload with getConservation (both independent reads)
+      const { exporterModel, exportedFrom, transportData, catchCertificate } = await ExportPayloadService.gatherExportInfo(userPrincipal, documentNumber, contactId, draft);
+
+      // FI0-11132: derive export payload and conservation from the already-loaded draft (no extra reads)
       const [exportPayload, conservationData] = await Promise.all([
-        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId, phase2Draft)),
-        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId, phase2Draft)),
+        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportPayload(userPrincipal, documentNumber, contactId, draft)),
+        ExportPayloadService.awaitValueOrEmpty(CatchCertService.getConservation(userPrincipal, documentNumber, contactId, draft)),
       ]);
 
       // refresh landings according to offline/online validation strategy
@@ -441,9 +442,10 @@ export default class ExportPayloadService {
     return await functionCall || {}
   }
 
-  private static async gatherExportInfo(userPrincipal: string, documentNumber: string, contactId: string) {
-    // FI0-11132: single getDraft() call serves all 4 Phase-1 extractions (was 4 separate getDraft() calls)
-    const phase1Draft: CatchCertificate = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
+  private static async gatherExportInfo(userPrincipal: string, documentNumber: string, contactId: string, providedDraft?: Partial<CatchCertificate>) {
+    // FI0-11132: reuse the already-loaded draft when provided; Phase-1 fields (exporter/transport/location)
+    // are unaffected by addIsLegallyDue, so no separate getDraft() read is required.
+    const phase1Draft: CatchCertificate = (providedDraft as CatchCertificate) ?? await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
     const [exporter, exportedFrom, transportations, transportData] = await Promise.all([
       ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExporterDetails(userPrincipal, documentNumber, contactId, phase1Draft)),
       ExportPayloadService.awaitValueOrEmpty(CatchCertService.getExportLocation(userPrincipal, documentNumber, contactId, phase1Draft)),
