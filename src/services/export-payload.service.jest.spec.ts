@@ -2232,6 +2232,22 @@ describe('createExportCerticate', () => {
     expect(mockAddIsLegallyDue).toHaveBeenCalledTimes(1);
   });
 
+  it('should fall back to fetching the draft inside gatherExportInfo when the initial draft is null', async () => {
+    // Force the initial getDraft() in createExportCertificate to resolve null so that gatherExportInfo
+    // receives a null draft and exercises the `?? await CatchCertService.getDraft(...)` fallback branch.
+    mockGetDraft.mockResolvedValueOnce(null);
+
+    stubGetBlockingStatus.onCall(0).returns(false);
+    stubGetBlockingStatus.onCall(1).returns(false);
+    stubGetBlockingStatus.onCall(2).returns(false);
+
+    await ExportPayloadService.createExportCertificate('Bob', 'GBR-2020-CC-F9F69D192', 'foo@foo.com', CONTACT_ID);
+
+    // getDraft is called twice: once in createExportCertificate (null) and once via the gatherExportInfo fallback
+    expect(mockGetDraft).toHaveBeenCalledTimes(2);
+    expect(mockGetDraft).toHaveBeenLastCalledWith('Bob', 'GBR-2020-CC-F9F69D192', CONTACT_ID);
+  });
+
   it('passes exportedTo.exportedTo to isEuCountry when export location contains exportedTo property', async () => {
     // FI0-11132: getExportLocation is now called once in gatherExportInfo and the result is reused
     mockGetExportLocation.mockResolvedValueOnce({
