@@ -83,8 +83,8 @@ export default class ProcessingStatementRoutes {
             security: true,
             cors: true,
             handler: async function(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>) {
-              return await withDocumentLegitimatelyOwned(req,h,async (userPrincipal, documentNumber) => {
-                return await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
+              return await withDocumentLegitimatelyOwned(req,h,async (userPrincipal, documentNumber, _contactId, document) => {
+                return await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber, document);
               }).catch(error => {
                 logger.error(`[CREATING-PS-SD][ERROR][${error.stack || error}]`);
                 return h.response().code(500);
