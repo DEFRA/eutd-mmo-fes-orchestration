@@ -1060,7 +1060,7 @@ describe('generatePdf', () => {
       const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
 
       expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', 'processingStatement', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("1234", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-PS-3434-3434");
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("1234", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-PS-3434-3434", expect.any(Object));
       expect(mockValidateSpecies).not.toHaveBeenCalled();
       expect(mockLoggerInfo).toHaveBeenCalledWith('[DOCUMENT-NUMBER: GBR-3434-PS-3434-3434][PS-SD-CHECKING-ERRORS][{"message":"psAddCatchDetailsErrorUKCCInValid","key":"catches-0-catchCertificateNumber"}]');
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
@@ -1123,8 +1123,8 @@ describe('generatePdf', () => {
       const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
 
       expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', 'processingStatement', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("1234", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-PS-3434-3434");
-      expect(mockValidateSpecies).toHaveBeenCalledWith('1234', 'Atlantic herring (HER)', 'HER', 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-PS-3434-3434');
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("1234", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-PS-3434-3434", expect.any(Object));
+      expect(mockValidateSpecies).toHaveBeenCalledWith('1234', 'Atlantic herring (HER)', 'HER', 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-PS-3434-3434', expect.any(Object));
       expect(mockLoggerInfo).toHaveBeenCalledWith('[DOCUMENT-NUMBER: GBR-3434-PS-3434-3434][PS-SD-CHECKING-ERRORS][{"message":"psAddCatchDetailsErrorUKCCInValid","key":"catches-0-catchCertificateNumber"}]');
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(result).toEqual(400);
@@ -1217,8 +1217,8 @@ describe('generatePdf', () => {
       const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
 
       expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-PS-3434-3434', 'processingStatement', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-PS-3434-3434");
-      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', 'COD', 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-PS-3434-3434');
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-PS-3434-3434", expect.any(Object));
+      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', 'COD', 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-PS-3434-3434', expect.any(Object));
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(mockReportDocumentSubmitted).toHaveBeenCalled();
       expect(result).toEqual(400);
@@ -1687,7 +1687,7 @@ describe('generatePdf', () => {
       const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
 
       expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', 'storageNotes', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-SD-3434-3434");
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-SD-3434-3434", expect.any(Object));
       expect(mockValidateSpecies).not.toHaveBeenCalled();
       expect(mockLoggerInfo).toHaveBeenCalledWith('[DOCUMENT-NUMBER: GBR-3434-SD-3434-3434][PS-SD-CHECKING-ERRORS][{"message":"sdAddCatchDetailsErrorUKDocumentInvalid","key":"catches-0-certificateNumber","certificateNumber":"GBR-DOCUMENT-NUMBER","product":"Atlantic cod (COD)"}]');
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
@@ -1752,8 +1752,8 @@ describe('generatePdf', () => {
       const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
 
       expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', 'storageNotes', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-SD-3434-3434");
-      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', null, 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-SD-3434-3434');
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-SD-3434-3434", expect.any(Object));
+      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', null, 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-SD-3434-3434', expect.any(Object));
       expect(mockLoggerInfo).toHaveBeenCalledWith('[DOCUMENT-NUMBER: GBR-3434-SD-3434-3434][PS-SD-CHECKING-ERRORS][{"message":"sdAddUKEntryDocumentSpeciesDoesNotExistError","key":"catches-0-certificateNumber","certificateNumber":"GBR-DOCUMENT-NUMBER","product":"Atlantic cod (COD)"}]');
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(result).toEqual(400);
@@ -1847,8 +1847,8 @@ describe('generatePdf', () => {
       const result = await OrchestrationService.generatePdf(req, h, userPrincipal, documentNumber);
 
       expect(mockLoadRequiredData).toHaveBeenCalledWith('Bob', 'GBR-3434-SD-3434-3434', 'storageNotes', '03fece4e-61e4-e911-a978-000d3a28d891');
-      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-SD-3434-3434");
-      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', null, 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-SD-3434-3434');
+      expect(mockValidateCompletedDocument).toHaveBeenCalledWith("GBR-DOCUMENT-NUMBER", "Bob", "03fece4e-61e4-e911-a978-000d3a28d891", "GBR-3434-SD-3434-3434", expect.any(Object));
+      expect(mockValidateSpecies).toHaveBeenCalledWith('GBR-DOCUMENT-NUMBER', 'Atlantic cod (COD)', null, 'Bob', '03fece4e-61e4-e911-a978-000d3a28d891', 'GBR-3434-SD-3434-3434', expect.any(Object));
       expect(mockInvalidateDraftCache).toHaveBeenCalledTimes(1);
       expect(mockReportDocumentSubmitted).toHaveBeenCalled();
       expect(result).toEqual(400);

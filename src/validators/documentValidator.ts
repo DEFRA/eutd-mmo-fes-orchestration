@@ -11,8 +11,37 @@ import ServiceNames from "./interfaces/service.name.enum";
 
 type DraftCache = CatchCertSchema.CatchCertificate | CatchCertificateDraft[] | IDraft;
 
-export const validateCompletedDocument = async (documentNumber: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string): Promise<boolean> => {
-  const draftCache: DraftCache = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
+/**
+ * A request-scoped, lazily-loaded reference to the draft cache for a single
+ * parent document. Passing the same ref to multiple validator calls ensures the
+ * underlying Redis key is read at most once per request instead of once per
+ * validator invocation.
+ */
+export interface DraftCacheRef {
+  loaded: boolean;
+  data?: DraftCache;
+}
+
+const resolveDraftCache = async (
+  userPrincipal: string,
+  contactId: string,
+  foreignDocumentNumber: string,
+  cacheRef?: DraftCacheRef
+): Promise<DraftCache> => {
+  if (!cacheRef) {
+    return getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
+  }
+
+  if (!cacheRef.loaded) {
+    cacheRef.data = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
+    cacheRef.loaded = true;
+  }
+
+  return cacheRef.data;
+};
+
+export const validateCompletedDocument = async (documentNumber: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string, cacheRef?: DraftCacheRef): Promise<boolean> => {
+  const draftCache: DraftCache = await resolveDraftCache(userPrincipal, contactId, foreignDocumentNumber, cacheRef);
 
   if (!isEmpty(draftCache?.[documentNumber])) return true;
 
@@ -64,6 +93,8 @@ export const validateCompletedDocument = async (documentNumber: string, userPrin
 
   await saveDraftCache(userPrincipal, contactId, foreignDocumentNumber, cachedData);
 
+  if (cacheRef) cacheRef.data = cachedData;
+
   return true;
 }
 
@@ -104,8 +135,8 @@ export const validateCommodityCode = async (documentNumber: string, commodityCod
   );
 }
 
-export const validateSpecies = async (documentNumber: string, species: string, speciesCode: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string): Promise<boolean> => {
-  const draftCache: DraftCache = await getDraftCache(userPrincipal, contactId, foreignDocumentNumber);
+export const validateSpecies = async (documentNumber: string, species: string, speciesCode: string, userPrincipal: string, contactId: string, foreignDocumentNumber: string, cacheRef?: DraftCacheRef): Promise<boolean> => {
+  const draftCache: DraftCache = await resolveDraftCache(userPrincipal, contactId, foreignDocumentNumber, cacheRef);
 
   if (isEmpty(draftCache?.[documentNumber]))
     return false;
