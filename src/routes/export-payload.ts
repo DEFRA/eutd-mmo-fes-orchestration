@@ -11,7 +11,7 @@ import saveAsDraftSchema from '../schemas/catchcerts/saveAsDraftSchema';
 import landingsTypeChangeSchema from '../schemas/catchcerts/landingsTypeChangeSchema';
 import directLandingsSchema from "../schemas/catchcerts/directLandingsSchema";
 import manualLandingsSchema from "../schemas/catchcerts/manualLandingsSchema";
-import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from "../persistence/schema/catchCert";
+import { DocumentStatuses, LandingsEntryOptions } from "../persistence/schema/catchCert";
 import { withDocumentLegitimatelyOwned } from "../helpers/withDocumentLegitimatelyOwned";
 import { decimalPlacesValidator, validateExclusiveEconomicZones } from '../helpers/customValidators';
 import DocumentNumberService from '../services/documentNumber.service';
@@ -153,9 +153,8 @@ export default class ExportPayloadRoutes {
             security: true,
             cors: true,
             handler: async (request, h) => {
-              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
-                // P1/P2 optimization: pass document from ownership validation to eliminate duplicate reads
-                return await Controller.createExportCertificate(request, h, userPrincipal, documentNumber, contactId, document as Partial<CatchCertificate>);
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
+                return await Controller.createExportCertificate(request, h, userPrincipal, documentNumber, contactId);
               }, [DocumentStatuses.Draft, DocumentStatuses.Locked]).catch(error => {
                 logger.error(`[CREATING-CC][ERROR][${error.stack || error}`);
                 return h.response([{ error: SYSTEM_ERROR }]).code(500);
@@ -431,11 +430,10 @@ export default class ExportPayloadRoutes {
             security: true,
             cors: true,
             handler: async (request, h) => {
-              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId, document) => {
+              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
                 const service = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
                 if (service === ServiceNames.CC) {
-                  // P1 optimization: pass document from ownership validation
-                  return await Controller.getLandingsType(userPrincipal, documentNumber, contactId, document as Partial<CatchCertificate>);
+                  return await Controller.getLandingsType(userPrincipal, documentNumber, contactId);
                 }
                 return h.response(['error.landingsEntryOption.any.invalid']).code(400);
               }).catch(error => {
