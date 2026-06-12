@@ -1,5 +1,5 @@
 import * as Joi from 'joi';
-import { validateNoEmoji } from '../../validators/emojiValidator';
+import { createEmojiAwarePatternValidator } from '../../validators/emojiValidator';
 
 const conservationSaveAsDraftSchema = Joi.object().keys({
   caughtInUKWaters: Joi.any(),
@@ -10,7 +10,7 @@ const conservationSaveAsDraftSchema = Joi.object().keys({
   dashboardUri: Joi.string().trim().required(),
   otherWaters: Joi.when('caughtInOtherWaters', {
     is: 'Y',
-    then: Joi.string().custom(validateNoEmoji).required(),
+    then: Joi.string().custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' ]+$/)).required(),
     otherwise: Joi.any()
   })
 }).or( 'caughtInUKWaters', 'caughtInEUWaters', 'caughtInOtherWaters' ).label('watersCaughtIn');
