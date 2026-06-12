@@ -210,9 +210,7 @@ export const upsertDraftData = async (
   const options = {
     upsert: true,
     omitUndefined: true,
-    new: true,
-    lean: true, // Return plain object for better performance
-    maxTimeMS: 30000 // 30 second query timeout
+    new: true
   };
   logger.debug(
     `[UPSERT-DRAFT-DATA][CONTACT-ID][${contactId}][DOCUMENT-NUMBER][${documentNumber}][UPDATE][${JSON.stringify(
@@ -339,23 +337,16 @@ export const getDraft = async (
   if (isEmpty(doc)) {
     logger.info(`[GET-DRAFT][DOCUMENT-NUMBER][${documentNumber}][GET-DRAFT-CACHE-EMPTY]`);
 
-    doc = await CatchCertModel.findOne(
-      {
-        status: {
-          $in: [
-            DocumentStatuses.Draft,
-            DocumentStatuses.Pending,
-            DocumentStatuses.Locked,
-          ],
-        },
-        documentNumber: documentNumber,
+    doc = await CatchCertModel.findOne({
+      status: {
+        $in: [
+          DocumentStatuses.Draft,
+          DocumentStatuses.Pending,
+          DocumentStatuses.Locked,
+        ],
       },
-      null,
-      { 
-        maxTimeMS: 30000, // 30 second query timeout
-        lean: true // Return plain JavaScript object for better performance
-      }
-    );
+      documentNumber: documentNumber,
+    });
 
     if (!doc) {
       return null;
@@ -385,8 +376,7 @@ export const completeDraft = async (userPrincipal: string, documentNumber: strin
 
   await CatchCertModel.findOneAndUpdate(
     { documentNumber: documentNumber, status: { $in: [DocumentStatuses.Draft, DocumentStatuses.Pending] } },
-    update,
-    { maxTimeMS: 30000 } // 30 second query timeout
+    update
   );
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
@@ -414,8 +404,7 @@ export const updateCertificateStatus = async (userPrincipal: string, documentNum
       documentNumber: documentNumber,
       status: { $ne: DocumentStatuses.Complete }
     },
-    update,
-    { maxTimeMS: 30000 } // 30 second query timeout
+    update
   );
 
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
@@ -463,7 +452,7 @@ export const getExportPayload = async (
   userPrincipal: string,
   documentNumber: string,
   contactId: string,
-  draft?: Partial<CatchCertificate>
+  draft?: CatchCertificate
 ): Promise<ProductsLanded> => {
   const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
@@ -500,7 +489,7 @@ export const getExporterDetails = async (userPrincipal: string, documentNumber: 
     : null;
 };
 
-export const getLandingsEntryOption = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: Partial<CatchCertificate>): Promise<LandingsEntryOptions> => {
+export const getLandingsEntryOption = async (userPrincipal: string, documentNumber: string, contactId: string, draft?: CatchCertificate): Promise<LandingsEntryOptions> => {
   const doc = draft ?? await getDraft(userPrincipal, documentNumber, contactId);
 
   return doc?.exportData?.landingsEntryOption;
