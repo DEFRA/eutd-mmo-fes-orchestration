@@ -13,21 +13,21 @@ describe("createExportPayloadForValidation", () => {
     });
 
     it("should transform a product and landing into an export payload without a start date", () => {
-      const payload = createExportPayloadForValidation(product, landing);
+        const payload = createExportPayloadForValidation(product, landing);
 
-      expect(payload[0].landings[0].model.startDate).toBeUndefined();
+        expect(payload[0].landings[0].model.startDate).toBeUndefined();
     });
 
     it("should format startDate when it is provided", () => {
-      const landingWithStartDate = {
-        ...landing,
-        dateLanded: '2019-03-27T00:00:00.000Z',
-        startDate: '2019-01-01T00:00:00.000Z',
-      };
-      const payload = createExportPayloadForValidation(product, landingWithStartDate);
+        const landingWithStartDate = {
+            ...landing,
+            dateLanded: '2019-03-27T00:00:00.000Z',
+            startDate: '2019-01-01T00:00:00.000Z',
+        };
+        const payload = createExportPayloadForValidation(product, landingWithStartDate);
 
-      expect(payload[0].landings[0].model.startDate).toBe('2019-01-01');
-      expect(payload[0].landings[0].model.dateLanded).toBe('2019-03-27');
+        expect(payload[0].landings[0].model.startDate).toBe('2019-01-01');
+        expect(payload[0].landings[0].model.dateLanded).toBe('2019-03-27');
     });
 });
 
@@ -35,23 +35,23 @@ describe("validateLanding", () => {
     let mockCheckVesselWithDate: jest.SpyInstance;
     let mockValidateProducts: jest.SpyInstance;
     let mockIsValidGearType: jest.SpyInstance;
-        let mockLoggerError: jest.SpyInstance;
+    let mockLoggerError: jest.SpyInstance;
 
     beforeEach(() => {
-      mockCheckVesselWithDate = jest.spyOn(VesselValidator, 'checkVesselWithDate');
-      mockCheckVesselWithDate.mockResolvedValue(undefined);
-      mockValidateProducts = jest.spyOn(ProductValidator, 'validateProducts');
-      mockValidateProducts.mockResolvedValue([]);
-      mockIsValidGearType = jest.spyOn(ReferenceDataService, 'isValidGearType');
-      mockIsValidGearType.mockResolvedValue(true);
-            mockLoggerError = jest.spyOn(logger, 'error').mockImplementation(() => undefined);
+        mockCheckVesselWithDate = jest.spyOn(VesselValidator, 'checkVesselWithDate');
+        mockCheckVesselWithDate.mockResolvedValue(undefined);
+        mockValidateProducts = jest.spyOn(ProductValidator, 'validateProducts');
+        mockValidateProducts.mockResolvedValue([]);
+        mockIsValidGearType = jest.spyOn(ReferenceDataService, 'isValidGearType');
+        mockIsValidGearType.mockResolvedValue(true);
+        mockLoggerError = jest.spyOn(logger, 'error').mockImplementation(() => undefined);
     });
 
     afterEach(() => {
-      mockCheckVesselWithDate.mockRestore();
-      mockValidateProducts.mockRestore();
-            mockLoggerError.mockRestore();
-            jest.restoreAllMocks();
+        mockCheckVesselWithDate.mockRestore();
+        mockValidateProducts.mockRestore();
+        mockLoggerError.mockRestore();
+        jest.restoreAllMocks();
     });
 
     it("should pass", async () => {
@@ -63,34 +63,34 @@ describe("validateLanding", () => {
         mockCheckVesselWithDate.mockRejectedValueOnce(new Error('Vessel WIRON 5 has no valid license'));
 
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' } });
     });
 
     it("should error on startDate if vessel validation fails for start date", async () => {
         mockCheckVesselWithDate.mockRejectedValueOnce({ field: 'startDate', cause: new Error('Vessel WIRON 5 has no valid license') });
 
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: { startDate: 'error.startDate.vesselPln.any.invalid' }});
+        expect(result).toStrictEqual({ error: 'invalid', errors: { startDate: 'error.startDate.vesselPln.any.invalid' } });
     });
 
-        it("should error on both date fields if vessel validation fails for both dates", async () => {
-                mockCheckVesselWithDate.mockRejectedValueOnce({ fields: ['dateLanded', 'startDate'] });
+    it("should error on both date fields if vessel validation fails for both dates", async () => {
+        mockCheckVesselWithDate.mockRejectedValueOnce({ fields: ['dateLanded', 'startDate'] });
 
-                const result = await validateLanding(exportPayload);
-                expect(result).toStrictEqual({
-                    error: 'invalid',
-                    errors: {
-                        dateLanded: 'validation.vessel.license.invalid-date',
-                        startDate: 'error.startDate.vesselPln.any.invalid'
-                    }
-                });
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({
+            error: 'invalid',
+            errors: {
+                dateLanded: 'validation.vessel.license.invalid-date',
+                startDate: 'error.startDate.vesselPln.any.invalid'
+            }
         });
+    });
 
     it("should error on dateLanded when vessel validation fails with dateLanded field", async () => {
         mockCheckVesselWithDate.mockRejectedValueOnce({ field: 'dateLanded', cause: new Error('Vessel has no valid license') });
 
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' } });
     });
 
     it("should error with cause stack in error log when cause has stack property", async () => {
@@ -98,7 +98,7 @@ describe("validateLanding", () => {
         mockCheckVesselWithDate.mockRejectedValueOnce({ field: 'dateLanded', cause: causeError });
 
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' } });
         expect(mockLoggerError).toHaveBeenCalledWith({
             requestId: 'validateLanding',
             data: { error: causeError.stack }
@@ -109,7 +109,7 @@ describe("validateLanding", () => {
         mockCheckVesselWithDate.mockRejectedValueOnce('raw rejection value');
 
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' } });
         expect(mockLoggerError).toHaveBeenCalledWith({
             requestId: 'validateLanding',
             data: { error: 'raw rejection value' }
@@ -118,12 +118,12 @@ describe("validateLanding", () => {
 
     it("should error if product validation fails", async () => {
         mockValidateProducts.mockResolvedValueOnce([{
-          result: ['dateLanded'],
-          validator: 'seasonalFish'
-      }])
+            result: ['dateLanded'],
+            validator: 'seasonalFish'
+        }])
 
-      const result = await validateLanding(exportPayload);
-      expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'error.seasonalFish.invalidate' }});
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'error.seasonalFish.invalidate' } });
     });
 
     it("should error if product validation fails on start date", async () => {
@@ -133,13 +133,13 @@ describe("validateLanding", () => {
         }])
 
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'error.seasonalFish.invalidate', startDate: 'error.startDate.seasonalFish.invalidate' }});
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'error.seasonalFish.invalidate', startDate: 'error.startDate.seasonalFish.invalidate' } });
     });
 
     it("should return error for invalid gear type/category pair", async () => {
         mockIsValidGearType.mockReturnValueOnce(false);
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: { gearType: 'error.gearType.invalid' }});
+        expect(result).toStrictEqual({ error: 'invalid', errors: { gearType: 'error.gearType.invalid' } });
     });
 
     it("should not call isValidGearType if no gear info is present", async () => {
@@ -285,10 +285,12 @@ describe("validateLanding", () => {
         ]);
 
         const result = await validateLanding(exportPayload);
-        expect(result).toStrictEqual({ error: 'invalid', errors: {
-            startDate: 'error.startDate.seasonalFish.invalidate',
-            dateLanded: 'error.seasonalFish.invalidate'
-        }});
+        expect(result).toStrictEqual({
+            error: 'invalid', errors: {
+                startDate: 'error.startDate.seasonalFish.invalidate',
+                dateLanded: 'error.seasonalFish.invalidate'
+            }
+        });
     });
 });
 
