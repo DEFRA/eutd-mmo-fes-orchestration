@@ -238,7 +238,7 @@ describe("validateLanding", () => {
         const errNoStack = { stack: undefined, valueOf: () => { throw errNoStack; } };
         const res = await validateAggregateExportWeight({ totalCombinedExportWeight: errNoStack, exportWeight: '0' } as any);
         expect(res).toStrictEqual([]);
-        expect(mockLoggerError).toHaveBeenCalledWith('[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][[object Object]]');
+        expect(mockLoggerError).toHaveBeenCalledWith('[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR]');
     });
 
     it("validateAggregateExportWeight logs stack when thrown error includes stack", async () => {

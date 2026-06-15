@@ -72,7 +72,7 @@ export const validateAggregateExportWeight = async (input: any, existingLandingW
           }
       return [];
     } catch (e) {
-      logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][${e?.stack ?? e}]`);
+      logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR]`);
       return [];
     }
   }
@@ -84,15 +84,21 @@ export const validateLanding = async (exportPayload: ProductLanded[]) => {
   const errors: any = {};
   try {
     await VesselValidator.checkVesselWithDate(exportPayload);
-  } catch (e: any) {
+  } catch (e) {
+    const error = e as Error & {
+      cause?: { stack?: string };
+      fields?: Array<'dateLanded' | 'startDate'>;
+      field?: 'dateLanded' | 'startDate';
+    };
+
     logger.error({
       requestId: 'validateLanding',
-      data: { error: e?.stack ?? e?.cause?.stack ?? e }
+      data: { error: error?.stack ?? error?.cause?.stack ?? error }
     }, '[INVALID-LANDING][INVALID-VESSEL-LICENSE]');
 
-    const fields: Array<'dateLanded' | 'startDate'> = Array.isArray(e?.fields)
-      ? e.fields
-      : [e?.field === 'startDate' ? 'startDate' : 'dateLanded'];
+    const fields: Array<'dateLanded' | 'startDate'> = Array.isArray(error?.fields)
+      ? error.fields
+      : [error?.field === 'startDate' ? 'startDate' : 'dateLanded'];
 
     fields.forEach((field) => {
       errors[field] = field === 'startDate'
