@@ -691,3 +691,91 @@ describe('invalidLandingDates', () => {
   });
 
 });
+describe('VesselLicenseValidationError constructor', () => {
+  it('should create error with default empty options', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const error = new VesselLicenseValidationError('Test error');
+    expect(error.message).toBe('Test error');
+    expect(error.name).toBe('VesselLicenseValidationError');
+    expect(error.field).toBeUndefined();
+    expect(error.fields).toBeUndefined();
+    expect((error as any).cause).toBeUndefined();
+  });
+
+  it('should create error with field option set to dateLanded', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const error = new VesselLicenseValidationError(
+      'Test error',
+      { field: 'dateLanded' }
+    );
+    expect(error.field).toBe('dateLanded');
+    expect(error.fields).toBeUndefined();
+    expect((error as any).cause).toBeUndefined();
+  });
+
+  it('should create error with field option set to startDate', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const error = new VesselLicenseValidationError(
+      'Test error',
+      { field: 'startDate' }
+    );
+    expect(error.field).toBe('startDate');
+    expect(error.fields).toBeUndefined();
+  });
+
+  it('should create error with fields array', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const error = new VesselLicenseValidationError(
+      'Test error',
+      { fields: ['dateLanded', 'startDate'] }
+    );
+    expect(error.fields).toEqual(['dateLanded', 'startDate']);
+    expect(error.field).toBeUndefined();
+  });
+
+  it('should create error with cause option', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const causeError = new Error('License expired');
+    const error = new VesselLicenseValidationError(
+      'Test error',
+      { cause: causeError }
+    );
+    expect((error as any).cause).toBe(causeError);
+    expect(error.field).toBeUndefined();
+    expect(error.fields).toBeUndefined();
+  });
+
+  it('should create error with all options: field, fields, and cause', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const causeError = new Error('License check failed');
+    const error = new VesselLicenseValidationError(
+      'Test error',
+      { field: 'dateLanded', fields: ['startDate'], cause: causeError }
+    );
+    expect(error.field).toBe('dateLanded');
+    expect(error.fields).toEqual(['startDate']);
+    expect((error as any).cause).toBe(causeError);
+    expect(error.name).toBe('VesselLicenseValidationError');
+  });
+
+  it('should create error with cause but undefined value', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const error = new VesselLicenseValidationError(
+      'Test error',
+      { cause: undefined }
+    );
+    expect((error as any).cause).toBeUndefined();
+  });
+
+  it('should create error with field and cause combined', () => {
+    const { VesselLicenseValidationError } = require('./vesselValidator.service');
+    const causeError = new Error('Vessel WIRON 5 has no valid license');
+    const error = new VesselLicenseValidationError(
+      'Invalid vessel license for dateLanded',
+      { field: 'dateLanded', cause: causeError }
+    );
+    expect(error.field).toBe('dateLanded');
+    expect((error as any).cause).toBe(causeError);
+    expect(error.message).toBe('Invalid vessel license for dateLanded');
+  });
+});

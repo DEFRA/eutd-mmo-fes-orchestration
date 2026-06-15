@@ -4,7 +4,7 @@ import * as Reference from './reference-data.service';
 
 type LandingDateField = 'dateLanded' | 'startDate';
 
-class VesselLicenseValidationError extends Error {
+export class VesselLicenseValidationError extends Error {
   public readonly field?: LandingDateField;
   public readonly fields?: LandingDateField[];
 

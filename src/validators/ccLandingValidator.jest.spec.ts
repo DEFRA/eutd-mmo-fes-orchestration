@@ -2,6 +2,7 @@ import { validateLanding, createExportPayloadForValidation, validateAggregateExp
 import VesselValidator from '../services/vesselValidator.service';
 import * as ProductValidator from './ccProductValidator';
 import * as ReferenceDataService from '../services/reference-data.service';
+import logger from '../logger';
 import { Landing, ProductLanded } from '../persistence/schema/frontEndModels/payload';
 
 describe("createExportPayloadForValidation", () => {
@@ -34,6 +35,7 @@ describe("validateLanding", () => {
     let mockCheckVesselWithDate: jest.SpyInstance;
     let mockValidateProducts: jest.SpyInstance;
     let mockIsValidGearType: jest.SpyInstance;
+        let mockLoggerError: jest.SpyInstance;
 
     beforeEach(() => {
       mockCheckVesselWithDate = jest.spyOn(VesselValidator, 'checkVesselWithDate');
@@ -42,11 +44,13 @@ describe("validateLanding", () => {
       mockValidateProducts.mockResolvedValue([]);
       mockIsValidGearType = jest.spyOn(ReferenceDataService, 'isValidGearType');
       mockIsValidGearType.mockResolvedValue(true);
+            mockLoggerError = jest.spyOn(logger, 'error').mockImplementation(() => undefined);
     });
 
     afterEach(() => {
       mockCheckVesselWithDate.mockRestore();
       mockValidateProducts.mockRestore();
+            mockLoggerError.mockRestore();
             jest.restoreAllMocks();
     });
 
@@ -95,6 +99,21 @@ describe("validateLanding", () => {
 
         const result = await validateLanding(exportPayload);
         expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+        expect(mockLoggerError).toHaveBeenCalledWith({
+            requestId: 'validateLanding',
+            data: { error: causeError.stack }
+        }, '[INVALID-LANDING][INVALID-VESSEL-LICENSE]');
+    });
+
+    it("should error with raw rejection value when vessel validation error has no stack or cause stack", async () => {
+        mockCheckVesselWithDate.mockRejectedValueOnce('raw rejection value');
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+        expect(mockLoggerError).toHaveBeenCalledWith({
+            requestId: 'validateLanding',
+            data: { error: 'raw rejection value' }
+        }, '[INVALID-LANDING][INVALID-VESSEL-LICENSE]');
     });
 
     it("should error if product validation fails", async () => {
@@ -205,10 +224,31 @@ describe("validateLanding", () => {
         expect(res).toStrictEqual([]);
     });
 
+    it("validateAggregateExportWeight returns empty array when totalCombinedExportWeight is present but exportWeight is missing", async () => {
+        const res = await validateAggregateExportWeight({ totalCombinedExportWeight: '10000000' } as any);
+        expect(res).toStrictEqual([]);
+    });
+
+    it("validateAggregateExportWeight returns empty array when exportWeight is present but totalCombinedExportWeight is missing", async () => {
+        const res = await validateAggregateExportWeight({ exportWeight: '200' } as any);
+        expect(res).toStrictEqual([]);
+    });
+
     it("validateAggregateExportWeight returns empty array when error thrown has no stack", async () => {
         const errNoStack = { stack: undefined, valueOf: () => { throw errNoStack; } };
         const res = await validateAggregateExportWeight({ totalCombinedExportWeight: errNoStack, exportWeight: '0' } as any);
         expect(res).toStrictEqual([]);
+        expect(mockLoggerError).toHaveBeenCalledWith('[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR][[object Object]]');
+    });
+
+    it("validateAggregateExportWeight logs stack when thrown error includes stack", async () => {
+        const res = await validateAggregateExportWeight({
+            totalCombinedExportWeight: { valueOf: () => { throw new Error('forced error'); } },
+            exportWeight: '0'
+        } as any);
+
+        expect(res).toStrictEqual([]);
+        expect(mockLoggerError).toHaveBeenCalledWith(expect.stringContaining('[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR]['));
     });
 
     it("should return gearType error from validateLanding and aggregate error from validateAggregateExportWeight separately", async () => {
