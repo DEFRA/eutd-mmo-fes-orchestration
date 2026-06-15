@@ -51,7 +51,7 @@ export default class VesselValidator {
     if (failedFields.length > 0) {
       throw new VesselLicenseValidationError('Invalid vessel license for landing dates', {
         fields: failedFields,
-        cause: firstFailure && firstFailure.status === 'rejected' ? firstFailure.reason : undefined
+        cause: firstFailure?.status === 'rejected' ? firstFailure.reason : undefined
       });
     }
   }
