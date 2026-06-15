@@ -2,9 +2,26 @@ import * as moment from 'moment';
 import { ProductLanded, LandingStatus, ValidationFailure } from '../persistence/schema/frontEndModels/payload';
 import * as Reference from './reference-data.service';
 
+type LandingDateField = 'dateLanded' | 'startDate';
+
+class VesselLicenseValidationError extends Error {
+  public readonly field?: LandingDateField;
+  public readonly fields?: LandingDateField[];
+
+  constructor(message: string, options: { field?: LandingDateField; fields?: LandingDateField[]; cause?: unknown } = {}) {
+    super(message);
+    this.name = 'VesselLicenseValidationError';
+    this.field = options.field;
+    this.fields = options.fields;
+    if (options.cause !== undefined) {
+      (this as Error & { cause?: unknown }).cause = options.cause;
+    }
+  }
+}
+
 export default class VesselValidator {
 
-  private static async validateVesselLicenseForDate(landing: LandingStatus, field: 'dateLanded' | 'startDate') {
+  private static async validateVesselLicenseForDate(landing: LandingStatus, field: LandingDateField) {
     const date = landing.model[field];
 
     if (!date || !moment(date).isValid()) {
@@ -14,27 +31,28 @@ export default class VesselValidator {
     try {
       await Reference.checkVesselLicense(landing.model.vessel, date);
     } catch (error) {
-      throw {
-        field,
-        cause: error
-      };
+      throw new VesselLicenseValidationError(`Invalid vessel license for ${field}`, { field, cause: error });
     }
   }
 
   private static async validateVesselLicenseForLanding(landing: LandingStatus) {
-    const failedFields: Array<'dateLanded' | 'startDate'> = [];
+    const candidateFields: LandingDateField[] = ['dateLanded', 'startDate'];
+    const validationResults = await Promise.allSettled(
+      candidateFields.map((field) => VesselValidator.validateVesselLicenseForDate(landing, field))
+    );
 
-    const candidateFields: Array<'dateLanded' | 'startDate'> = ['dateLanded', 'startDate'];
-    for (const field of candidateFields) {
-      try {
-        await VesselValidator.validateVesselLicenseForDate(landing, field);
-      } catch (_error) {
-        failedFields.push(field);
-      }
-    }
+    const failedFields = validationResults
+      .map((result, index) => ({ result, field: candidateFields[index] }))
+      .filter(({ result }) => result.status === 'rejected')
+      .map(({ field }) => field);
+
+    const firstFailure = validationResults.find((result) => result.status === 'rejected');
 
     if (failedFields.length > 0) {
-      throw { fields: failedFields };
+      throw new VesselLicenseValidationError('Invalid vessel license for landing dates', {
+        fields: failedFields,
+        cause: firstFailure && firstFailure.status === 'rejected' ? firstFailure.reason : undefined
+      });
     }
   }
 
