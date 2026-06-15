@@ -84,7 +84,7 @@ export const validateLanding = async (exportPayload: ProductLanded[]) => {
   const errors: any = {};
   try {
     await VesselValidator.checkVesselWithDate(exportPayload);
-  } catch (e: any) {
+  } catch (e: Error) {
     logger.error({
       requestId: 'validateLanding',
       data: { error: e?.stack ?? e?.cause?.stack ?? e }
