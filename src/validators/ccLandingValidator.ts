@@ -72,7 +72,7 @@ export const validateAggregateExportWeight = async (input: any, existingLandingW
           }
       return [];
     } catch (e) {
-      logger.error(`[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR]`);
+      logger.error('[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR]');
       return [];
     }
   }

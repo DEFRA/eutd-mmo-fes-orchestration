@@ -248,7 +248,7 @@ describe("validateLanding", () => {
         } as any);
 
         expect(res).toStrictEqual([]);
-        expect(mockLoggerError).toHaveBeenCalledWith(expect.stringContaining('[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR]['));
+        expect(mockLoggerError).toHaveBeenCalledWith('[VALIDATE-LANDING][AGGREGATE-WEIGHT-ERROR]');
     });
 
     it("should return gearType error from validateLanding and aggregate error from validateAggregateExportWeight separately", async () => {
