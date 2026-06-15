@@ -4,6 +4,40 @@ import * as Reference from './reference-data.service';
 
 export default class VesselValidator {
 
+  private static async validateVesselLicenseForDate(landing: LandingStatus, field: 'dateLanded' | 'startDate') {
+    const date = landing.model[field];
+
+    if (!date || !moment(date).isValid()) {
+      return;
+    }
+
+    try {
+      await Reference.checkVesselLicense(landing.model.vessel, date);
+    } catch (error) {
+      throw {
+        field,
+        cause: error
+      };
+    }
+  }
+
+  private static async validateVesselLicenseForLanding(landing: LandingStatus) {
+    const failedFields: Array<'dateLanded' | 'startDate'> = [];
+
+    const candidateFields: Array<'dateLanded' | 'startDate'> = ['dateLanded', 'startDate'];
+    for (const field of candidateFields) {
+      try {
+        await VesselValidator.validateVesselLicenseForDate(landing, field);
+      } catch (_error) {
+        failedFields.push(field);
+      }
+    }
+
+    if (failedFields.length > 0) {
+      throw { fields: failedFields };
+    }
+  }
+
   public static async checkVesselWithDate(exportedData: ProductLanded[]) {
 
     const validate = await Promise.all(exportedData.map(async function(item: ProductLanded) {
@@ -33,13 +67,7 @@ export default class VesselValidator {
 
         }
 
-        const check = await Reference.checkVesselLicense(landing.model.vessel, landing.model.dateLanded);
-
-        if (check.response?.status === 404) {
-
-          return false;
-
-      }
+        await VesselValidator.validateVesselLicenseForLanding(landing);
 
       return true;
 

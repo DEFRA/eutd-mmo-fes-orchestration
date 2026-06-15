@@ -62,6 +62,26 @@ describe("validateLanding", () => {
         expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
     });
 
+    it("should error on startDate if vessel validation fails for start date", async () => {
+        mockCheckVesselWithDate.mockRejectedValueOnce({ field: 'startDate', cause: new Error('Vessel WIRON 5 has no valid license') });
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { startDate: 'error.startDate.vesselPln.any.invalid' }});
+    });
+
+        it("should error on both date fields if vessel validation fails for both dates", async () => {
+                mockCheckVesselWithDate.mockRejectedValueOnce({ fields: ['dateLanded', 'startDate'] });
+
+                const result = await validateLanding(exportPayload);
+                expect(result).toStrictEqual({
+                    error: 'invalid',
+                    errors: {
+                        dateLanded: 'validation.vessel.license.invalid-date',
+                        startDate: 'error.startDate.vesselPln.any.invalid'
+                    }
+                });
+        });
+
     it("should error if product validation fails", async () => {
         mockValidateProducts.mockResolvedValueOnce([{
           result: ['dateLanded'],

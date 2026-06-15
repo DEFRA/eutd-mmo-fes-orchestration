@@ -84,12 +84,21 @@ export const validateLanding = async (exportPayload: ProductLanded[]) => {
   const errors: any = {};
   try {
     await VesselValidator.checkVesselWithDate(exportPayload);
-  } catch (e) {
+  } catch (e: any) {
     logger.error({
       requestId: 'validateLanding',
-      data: { error: e?.stack ?? e }
+      data: { error: e?.stack ?? e?.cause?.stack ?? e }
     }, '[INVALID-LANDING][INVALID-VESSEL-LICENSE]');
-    errors.dateLanded = 'validation.vessel.license.invalid-date';
+
+    const fields: Array<'dateLanded' | 'startDate'> = Array.isArray(e?.fields)
+      ? e.fields
+      : [e?.field === 'startDate' ? 'startDate' : 'dateLanded'];
+
+    fields.forEach((field) => {
+      errors[field] = field === 'startDate'
+        ? 'error.startDate.vesselPln.any.invalid'
+        : 'validation.vessel.license.invalid-date';
+    });
   }
   const seasonalFishValidationGuard = await validateProducts(exportPayload);
   const hasSeasonalFishError = seasonalFishValidationGuard.some(validation => (validation.result.length > 0 && validation.validator === 'seasonalFish'))
