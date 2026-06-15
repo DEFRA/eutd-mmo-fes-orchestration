@@ -39,6 +39,10 @@ function getMockObject(pln = "", vessel= "", date ="", vesselOverriddenByAdmin =
 const sinon = require('sinon');
 
 describe('checkVesselWithDate', () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it ("Should return false to show invalid if no vessel name is preset", async () => {
 
     expect(await Service.checkVesselWithDate(getMockObject("", "", ""))).toEqual([[false]]);
@@ -55,27 +59,24 @@ describe('checkVesselWithDate', () => {
   it ("Should return an error when a vessel doesn't have a valid license", async () => {
 
 
-    const stub = sinon.stub(ReferenceService, 'checkVesselLicense').resolves(
+    sinon.stub(ReferenceService, 'checkVesselLicense').rejects(
       { response : {
         status: 404
       }}
     );
 
-    expect(await Service.checkVesselWithDate(getMockObject("boaty", "bty", "05/05/3019"))).toEqual([[false]]);
-
-    stub.restore();
+    await expect(Service.checkVesselWithDate(getMockObject("boaty", "bty", "05/05/3019"))).rejects.toBeDefined();
 
 
   });
 
   it ("Should return true when a vessel has a valid license", async () => {
 
-    const stub = sinon.stub(ReferenceService, 'checkVesselLicense').resolves({
+    sinon.stub(ReferenceService, 'checkVesselLicense').resolves({
       hasValidLicense: true
     });
 
     expect(await Service.checkVesselWithDate(getMockObject("boaty", "bty", "05/05/2019"))).toEqual([[true]]);
-    stub.restore();
 
   });
 
@@ -89,8 +90,6 @@ describe('checkVesselWithDate', () => {
 
     expect(await Service.checkVesselWithDate(getMockObject("boaty", "bty", "05/05/2019", true))).toEqual([[true]]);
     expect(stub.called).toBeFalsy();
-
-    stub.restore();
 
   });
 })
