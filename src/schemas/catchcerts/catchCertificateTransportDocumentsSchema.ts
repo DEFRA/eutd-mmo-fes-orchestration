@@ -6,7 +6,13 @@ const catchCertificateTransportDocumentsSchema = Joi.object({
   vehicle: Joi.string().valid("truck", "plane", "train", "containerVessel").required(),
   documents: Joi.when('$query.draft', {
     is: true,
-    then: Joi.array(),
+    then: Joi.array()
+      .items(
+        Joi.object({
+          name: Joi.string().trim().allow('').max(50).custom(validateNoEmoji).optional(),
+          reference: Joi.string().trim().allow('').max(50).custom(validateNoEmoji).optional()
+        })
+      ),
     otherwise: Joi.array()
       .items(
         Joi.object({
