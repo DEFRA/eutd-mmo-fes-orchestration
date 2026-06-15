@@ -82,6 +82,21 @@ describe("validateLanding", () => {
                 });
         });
 
+    it("should error on dateLanded when vessel validation fails with dateLanded field", async () => {
+        mockCheckVesselWithDate.mockRejectedValueOnce({ field: 'dateLanded', cause: new Error('Vessel has no valid license') });
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+    });
+
+    it("should error with cause stack in error log when cause has stack property", async () => {
+        const causeError = new Error('Vessel license expired');
+        mockCheckVesselWithDate.mockRejectedValueOnce({ field: 'dateLanded', cause: causeError });
+
+        const result = await validateLanding(exportPayload);
+        expect(result).toStrictEqual({ error: 'invalid', errors: { dateLanded: 'validation.vessel.license.invalid-date' }});
+    });
+
     it("should error if product validation fails", async () => {
         mockValidateProducts.mockResolvedValueOnce([{
           result: ['dateLanded'],
