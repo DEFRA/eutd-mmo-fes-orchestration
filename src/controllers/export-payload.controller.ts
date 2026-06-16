@@ -22,7 +22,7 @@ import * as PayloadSchema from '../persistence/schema/frontEndModels/payload';
 import { fishingVessel } from '../persistence/schema/frontEndModels/transport';
 import { IExportCertificateResults } from '../persistence/schema/exportCertificateResults';
 import applicationConfig from '../applicationConfig';
-import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from '../persistence/schema/catchCert';
+import { DocumentStatuses, LandingsEntryOptions } from '../persistence/schema/catchCert';
 import { getRandomNumber } from '../helpers/utils/utils';
 import SummaryErrorsService from '../services/summaryErrors.service';
 import TransportService from '../services/transport.service';
@@ -157,11 +157,10 @@ export default class ExportPayloadController {
     }
   }
 
-  public static async preCheckCertificate(userPrincipal: string, documentNumber: string, exportPayload: PayloadSchema.ProductsLanded, contactId: string, providedDraft?: Partial<CatchCertificate>):
+  public static async preCheckCertificate(userPrincipal: string, documentNumber: string, exportPayload: PayloadSchema.ProductsLanded, contactId: string):
     Promise<{ response: any, url: string, code: number } | null> {
 
-    // P1/P2 optimization: reuse provided draft for status check
-    const documentStatus: string = providedDraft?.status ?? await ExportPayloadService.getCertificateStatus(userPrincipal, documentNumber, contactId);
+    const documentStatus: string = await ExportPayloadService.getCertificateStatus(userPrincipal, documentNumber, contactId);
     const isDocumentLocked: boolean = documentStatus == DocumentStatuses.Locked;
     logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][LOCKED][${isDocumentLocked}]`);
 
@@ -212,25 +211,15 @@ export default class ExportPayloadController {
     return null;
   }
 
-  public static async createExportCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string, providedDocument?: Partial<CatchCertificate>) {
+  public static async createExportCertificate(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
     try {
       logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][START]`);
-      
-      // P1/P2 optimization: use provided document from ownership validation if available
-      let draft = providedDocument;
-      
-      // Only invalidate cache if we don't have the document yet
-      if (!draft) {
-        await CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
-        draft = await CatchCertService.getDraft(userPrincipal, documentNumber, contactId);
-      }
-      
-      logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][USING-${providedDocument ? 'PROVIDED' : 'FETCHED'}-DOCUMENT]`);
+      await CatchCertService.invalidateDraftCache(userPrincipal, documentNumber, contactId);
 
-      const exportPayload: PayloadSchema.ProductsLanded = await ExportPayloadService.getFromDraft(draft, userPrincipal, documentNumber, contactId);
+      const exportPayload: PayloadSchema.ProductsLanded = await ExportPayloadService.get(userPrincipal, documentNumber, contactId);
       logger.debug(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][CONTROLLER][GOT-EXPORT-PAYLOAD]`);
 
-      const preCheckErrors = await this.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId, draft);
+      const preCheckErrors = await this.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId);
 
       if (preCheckErrors) {
         if (acceptsHtml(req.headers)) {
@@ -972,7 +961,7 @@ export default class ExportPayloadController {
     return ExportPayloadController.validate(req, h, true, userPrincipal, documentNumber, contactId);
   }
 
-  public static async getLandingsType(userPrincipal: string, documentNumber: string, contactId: string, providedDraft?: Partial<CatchCertificate>): Promise<{ landingsEntryOption: string, generatedByContent: boolean }> {
+  public static async getLandingsType(userPrincipal: string, documentNumber: string, contactId: string): Promise<{ landingsEntryOption: string, generatedByContent: boolean }> {
 
     // Short-lived cache to reduce DB load under concurrency
     try {
@@ -989,15 +978,7 @@ export default class ExportPayloadController {
       // Cache failures should not break the request; fall through to compute.
       logger.warn(`[LANDINGS-TYPE][CACHE][ERROR][${(e)?.message || e}]`);
     }
-    
-    // P1 optimization: if draft already has landingsEntryOption, use it directly
-    let landingsEntryOption: LandingsEntryOptions;
-    if (providedDraft?.exportData?.landingsEntryOption) {
-      landingsEntryOption = providedDraft.exportData.landingsEntryOption;
-    } else {
-      // Otherwise call service (which may use providedDraft to avoid additional read)
-      landingsEntryOption = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId, providedDraft);
-    }
+    const landingsEntryOption: LandingsEntryOptions = await CatchCertService.getLandingsEntryOption(userPrincipal, documentNumber, contactId);
 
     // helper to write cache and return result - reduces duplication
     const writeCacheAndReturn = async (result: { landingsEntryOption: any; generatedByContent: boolean }) => {

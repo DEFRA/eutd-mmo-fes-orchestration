@@ -620,6 +620,43 @@ describe("Transport endpoints", () => {
     expect(response.result).toEqual(transportWithDocuments);
   });
 
+  it('returns 200 when we PUT /v1/catch-certificate/transport-documents/0?draft=true with empty name and reference', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0?draft=true', {
+      id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }]
+    }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('returns 200 when we PUT /v1/catch-certificate/transport-documents/0?draft=true with name only', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0?draft=true', {
+      id: '0', vehicle: 'truck', documents: [{ name: 'name' }]
+    }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0?draft=true with name and reference over 50 characters', async () => {
+
+    const request = createRequestObj('/v1/catch-certificate/transport-documents/0?draft=true', {
+      id: '0', vehicle: 'truck', documents: [{
+        name: 'ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!',
+        reference: 'ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!ZebraJumpsOverLazyFoxesWhileCodingInTheRain123!'
+      }]
+    }, 'PUT');
+
+    const response = await server.inject(request);
+    expect(mockUpdateTransportDocuments).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.payload).toEqual(JSON.stringify({ "documents.0.name": "error.documents.0.name.string.max", "documents.0.reference": "error.documents.0.reference.string.max" }));
+  });
+
   it('returns 400 when we PUT /v1/catch-certificate/transport-documents/0 with documents with empty name and reference', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport-documents/0', { id: '0', vehicle: 'truck', documents: [{ name: '', reference: '' }] }, 'PUT');

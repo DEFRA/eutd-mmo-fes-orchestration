@@ -1859,4 +1859,119 @@ describe('document validator', () => {
 
   });
 
+  describe('resolveDraftCache (request-scoped cache ref)', () => {
+
+    const redisCache: IDraft = {
+      "GBR-2022-CC-0": {
+        products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 100 }]
+      }
+    };
+
+    it('reads from Redis on every call when no cacheRef is supplied', async () => {
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', 'COD', userPrincipal, contactId, processingStatementDocumentNumber);
+      await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', 'COD', userPrincipal, contactId, processingStatementDocumentNumber);
+
+      expect(mockGetDraftCache).toHaveBeenCalledTimes(2);
+    });
+
+    it('populates the cacheRef on first use (sets loaded flag and data)', async () => {
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const cacheRef: SUT.DraftCacheRef = { loaded: false };
+      await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', 'COD', userPrincipal, contactId, processingStatementDocumentNumber, cacheRef);
+
+      expect(mockGetDraftCache).toHaveBeenCalledTimes(1);
+      expect(cacheRef.loaded).toBe(true);
+      expect(cacheRef.data).toEqual(redisCache);
+    });
+
+    it('reads Redis only once when a cacheRef is shared across multiple calls', async () => {
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const cacheRef: SUT.DraftCacheRef = { loaded: false };
+      await SUT.validateCompletedDocument('GBR-2022-CC-0', userPrincipal, contactId, processingStatementDocumentNumber, cacheRef);
+      await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', 'COD', userPrincipal, contactId, processingStatementDocumentNumber, cacheRef);
+
+      expect(mockGetDraftCache).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the memoised data without re-reading Redis once loaded', async () => {
+      const cacheRef: SUT.DraftCacheRef = {
+        loaded: true,
+        data: { "GBR-2022-CC-0": { products: [{ species: "Atlantic cod (COD)", speciesCode: "COD", totalWeight: 100 }] } }
+      };
+      // If the loaded ref were ignored, this empty cache would be read and the result would be false.
+      mockGetDraftCache.mockResolvedValue({});
+
+      const result = await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', 'COD', userPrincipal, contactId, processingStatementDocumentNumber, cacheRef);
+
+      expect(result).toBe(true);
+      expect(mockGetDraftCache).not.toHaveBeenCalled();
+    });
+
+    it('treats a cacheRef with loaded:true and undefined data as an empty cache (no Redis read)', async () => {
+      const cacheRef: SUT.DraftCacheRef = { loaded: true };
+      mockGetDraftCache.mockResolvedValue(redisCache);
+
+      const result = await SUT.validateSpecies('GBR-2022-CC-0', 'Atlantic cod (COD)', 'COD', userPrincipal, contactId, processingStatementDocumentNumber, cacheRef);
+
+      expect(result).toBe(false);
+      expect(mockGetDraftCache).not.toHaveBeenCalled();
+    });
+
+    it('refreshes the shared cacheRef after a DB lookup so later calls reuse the freshly cached data without another Redis read', async () => {
+      const exportData: CatchCertSchema.ExportData = {
+        exporterDetails: {
+          exporterFullName: 'Carol',
+          exporterCompanyName: 'Mackerel Ltd',
+          addressOne: '5 Quay Rd',
+          postcode: 'ZZ9 9ZZ',
+          _dynamicsAddress: {},
+          _dynamicsUser: {}
+        },
+        products: [{
+          species: "Atlantic mackerel (MAC)",
+          speciesId: "GBR-2024-CC-REF-0",
+          speciesCode: "MAC",
+          commodityCode: "03025190",
+          commodityCodeDescription: "Fresh Atlantic mackerel",
+          scientificName: "Scomber scombrus",
+          state: { code: "FRE", name: "Fresh" },
+          presentation: { code: "WHL", name: "Whole" },
+          factor: 1,
+          caughtBy: [
+            { weight: 300, vessel: "MACKEREL", pln: "M1", homePort: "Peterhead", flag: "GBR", cfr: "GBR003", imoNumber: null, licenceNumber: "333", licenceValidTo: "2030-12-31T00:00:00", licenceHolder: "Mr C", id: "id-mac-1", date: "2024-02-10", startDate: "2024-02-09", faoArea: "FAO27", gearCategory: "Cat 3", gearType: "Type 3", highSeasArea: "No", numberOfSubmissions: 1, _status: CatchCertSchema.LandingValidationStatus.Pending }
+          ]
+        }],
+        conservation: { conservationReference: "UK Fisheries Policy" },
+        transportation: { vehicle: "truck", exportedFrom: "UK", exportedTo: { officialCountryName: "France", isoCodeAlpha2: "FR", isoCodeAlpha3: "FRA", isoNumericCode: "250" }, cmr: false },
+        transportations: [{ id: 0, vehicle: "truck" }],
+        exportedFrom: "UK",
+        exportedTo: { officialCountryName: "France", isoCodeAlpha2: "FR", isoCodeAlpha3: "FRA", isoNumericCode: "250" }
+      };
+
+      await new CatchCertSchema.CatchCertModel(sampleDocument('GBR-2024-CC-REF', 'COMPLETE', undefined, undefined, undefined, undefined, exportData)).save();
+
+      // Initial cache miss forces the DB lookup on the first call.
+      mockGetDraftCache.mockResolvedValue({});
+
+      const cacheRef: SUT.DraftCacheRef = { loaded: false };
+
+      const completed = await SUT.validateCompletedDocument('GBR-2024-CC-REF', userPrincipal, contactId, processingStatementDocumentNumber, cacheRef);
+      expect(completed).toBe(true);
+      expect(mockSaveDraftCache).toHaveBeenCalledTimes(1);
+      expect(cacheRef.data?.['GBR-2024-CC-REF']).toEqual({
+        products: [{ species: "Atlantic mackerel (MAC)", speciesCode: "MAC", commodityCode: "03025190", totalWeight: 300 }]
+      });
+
+      const speciesValid = await SUT.validateSpecies('GBR-2024-CC-REF', 'Atlantic mackerel (MAC)', 'MAC', userPrincipal, contactId, processingStatementDocumentNumber, cacheRef);
+      expect(speciesValid).toBe(true);
+      // Only the first call read Redis; the second reused the refreshed cacheRef.
+      expect(mockGetDraftCache).toHaveBeenCalledTimes(1);
+    });
+
+  });
+
 });

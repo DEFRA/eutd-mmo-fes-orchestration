@@ -13,7 +13,7 @@ import * as SessionManager from "../helpers/sessionManager";
 import * as Utils from "../helpers/utils/utils";
 import SUT from "./export-payload.controller";
 import logger from "../logger";
-import { DocumentStatuses, LandingsEntryOptions, CatchCertificate } from "../persistence/schema/catchCert";
+import { DocumentStatuses, LandingsEntryOptions } from "../persistence/schema/catchCert";
 import { fishingVessel, truck } from '../persistence/schema/frontEndModels/transport';
 import applicationConfig from "../applicationConfig";
 import SummaryErrorsService from "../services/summaryErrors.service";
@@ -127,29 +127,18 @@ describe("createExportCertificate", () => {
   let mockGetCertificateStatus;
   let mockSaveErrors;
   let mockInvalidateDraft;
-  let mockGetFromDraft;
-  let mockGetDraft;
-  let mockUpdateCertificateStatus;
 
   beforeEach(() => {
     mockResponse = jest.spyOn(h, "response");
     mockRedirect = jest.spyOn(h, "redirect");
     mockAcceptsHtml = jest.spyOn(AcceptsHTML, "default");
     mockGetExportPayload = jest.spyOn(ExportPayloadService, "get");
-    mockGetFromDraft = jest.spyOn(ExportPayloadService, "getFromDraft");
-    mockGetFromDraft.mockResolvedValue({ items: [] } as any);
-    mockGetDraft = jest.spyOn(CatchCertService, 'getDraft');
-    mockGetDraft.mockResolvedValue({ status: 'DRAFT', exportData: { products: [] } } as any);
     mockPreCheckCertificate = jest.spyOn(SUT, 'preCheckCertificate');
     mockPreCheckCertificate.mockResolvedValue(null);
     mockSubmitExportCertificate = jest.spyOn(SUT, "submitExportCertificate");
-    mockSubmitExportCertificate.mockResolvedValue({ uri: 'test-uri' } as any);
     mockIsSubmissionFailure = jest.spyOn(ExportPayloadService, 'isSubmissionFailure');
-    mockIsSubmissionFailure.mockReturnValue(false);
     mockGetCertificateStatus = jest.spyOn(ExportPayloadService, 'getCertificateStatus');
     mockGetCertificateStatus.mockResolvedValue(DocumentStatuses.Draft);
-    mockUpdateCertificateStatus = jest.spyOn(ExportPayloadService, 'updateCertificateStatus');
-    mockUpdateCertificateStatus.mockResolvedValue(null);
     mockLogDebug = jest.spyOn(logger, 'debug');
     mockLogError = jest.spyOn(logger, 'error');
     mockNumberOfLandings = jest.spyOn(FrontEndModels, 'getNumberOfUniqueLandings');
@@ -273,20 +262,20 @@ describe("createExportCertificate", () => {
 
     let mockSaveErrors;
     let mockMapValidationFailure;
+    let mockUpdateCertificateStatus;
     const numberOfLandings = 123;
 
     beforeEach(() => {
       mockSaveErrors = jest.spyOn(SummaryErrorsService, "saveErrors");
       mockSaveErrors.mockResolvedValue(null);
 
-      mockUpdateCertificateStatus.mockClear();
+      mockUpdateCertificateStatus = jest.spyOn(ExportPayloadService, 'updateCertificateStatus');
       mockUpdateCertificateStatus.mockResolvedValue(null);
 
       mockMapValidationFailure = jest.spyOn(FrontEndModels, 'toFrontEndValidationFailure');
       mockMapValidationFailure.mockReturnValue(mockFailureResult);
 
       mockGetExportPayload.mockResolvedValue(mockExportPayload);
-      mockGetFromDraft.mockResolvedValue(mockExportPayload);
       mockSubmitExportCertificate.mockResolvedValue(mockResult);
       mockIsSubmissionFailure.mockReturnValue(false);
       mockNumberOfLandings.mockReturnValue(numberOfLandings);
@@ -397,7 +386,6 @@ describe("createExportCertificate", () => {
       mockMapValidationFailure.mockReturnValue(mockFailureResult);
 
       mockGetExportPayload.mockResolvedValue(mockExportPayload);
-      mockGetFromDraft.mockResolvedValue(mockExportPayload);
       mockSubmitExportCertificate.mockResolvedValue(mockResult);
       mockIsSubmissionFailure.mockReturnValue(false);
       mockNumberOfLandings.mockReturnValue(numberOfLandings);
@@ -456,56 +444,8 @@ describe("createExportCertificate", () => {
 
   });
 
-  it('P2 optimization: should use provided document and NOT invalidate cache or fetch again', async () => {
-    const providedDocument = {
-      documentNumber: DOCUMENT_NUMBER,
-      status: 'DRAFT',
-      exportData: {
-        products: [],
-        landingsEntryOption: 'manualEntry'
-      }
-    } as CatchCertificate;
-
-    mockGetFromDraft.mockClear();
-    mockGetFromDraft.mockResolvedValue({ items: [] } as any);
-    mockInvalidateDraft.mockClear();
-    mockPreCheckCertificate.mockClear();
-    mockPreCheckCertificate.mockResolvedValue(null);
-
-    await SUT.createExportCertificate(req, h, USER_ID, DOCUMENT_NUMBER, contactId, providedDocument as any);
-
-    // Verify: invalidateDraftCache was NOT called (optimization working)
-    expect(mockInvalidateDraft).not.toHaveBeenCalled();
-    // Verify: getFromDraft was called with the provided document
-    expect(mockGetFromDraft).toHaveBeenCalledWith(providedDocument, USER_ID, DOCUMENT_NUMBER, contactId);
-    // Verify: preCheckCertificate received the provided document
-    expect(mockPreCheckCertificate).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, { items: [] }, contactId, providedDocument);
-  });
-
-  it('P2 optimization: should fall back to cache invalidation when no document provided', async () => {
-    mockGetDraft.mockClear();
-    mockGetDraft.mockResolvedValue({
-      documentNumber: DOCUMENT_NUMBER,
-      status: 'DRAFT',
-      exportData: { products: [] }
-    } as any);
-
-    mockGetFromDraft.mockClear();
-    mockGetFromDraft.mockResolvedValue({ items: [] } as any);
-    mockInvalidateDraft.mockClear();
-    mockPreCheckCertificate.mockClear();
-    mockPreCheckCertificate.mockResolvedValue(null);
-
-    await SUT.createExportCertificate(req, h, USER_ID, DOCUMENT_NUMBER, contactId);
-
-    // Verify: invalidateDraftCache WAS called (fallback working)
-    expect(mockInvalidateDraft).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
-    // Verify: getDraft was called to fetch the document
-    expect(mockGetDraft).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
-  });
-
   it('should invalidate the draft catch certificate cache', async () => {
-    mockGetFromDraft.mockResolvedValue({items: []});
+    mockGetExportPayload.mockResolvedValue({items: []});
     mockPreCheckCertificate.mockResolvedValue({
       response: { status: 'invalid catch certificate' },
       url: `create-catch-certificate/${DOCUMENT_NUMBER}/add-landings`,
@@ -682,54 +622,6 @@ describe('preCheckCertificate', () => {
     const result = await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId);
 
     expect(result).toBeNull();
-  });
-
-  it('P2 optimization: should use provided draft status and NOT call getCertificateStatus', async () => {
-    const providedDraft = {
-      status: 'DRAFT',
-      documentNumber,
-      exportData: {}
-    } as CatchCertificate;
-
-    mockGetCertificateStatus.mockClear();
-
-    const result = await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId, providedDraft as any);
-
-    // Verify: getCertificateStatus was NOT called (optimization working)
-    expect(mockGetCertificateStatus).not.toHaveBeenCalled();
-    // Verify: result is correct
-    expect(result).toBeNull();
-  });
-
-  it('P2 optimization: should detect LOCKED status from provided draft without DB call', async () => {
-    const lockedDraft = {
-      status: 'LOCKED',
-      documentNumber,
-      exportData: {}
-    } as CatchCertificate;
-
-    mockGetCertificateStatus.mockClear();
-
-    const result = await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId, lockedDraft as any);
-
-    // Verify: getCertificateStatus was NOT called
-    expect(mockGetCertificateStatus).not.toHaveBeenCalled();
-    // Verify: locked response returned
-    expect(result).toEqual({
-      response: { status: 'catch certificate is LOCKED' },
-      url: `create-catch-certificate/${documentNumber}/check-your-information`,
-      code: 200
-    });
-  });
-
-  it('P2 optimization: should fall back to getCertificateStatus when no draft provided', async () => {
-    mockGetCertificateStatus.mockClear();
-    mockGetCertificateStatus.mockResolvedValue('DRAFT');
-
-    await SUT.preCheckCertificate(userPrincipal, documentNumber, exportPayload, contactId);
-
-    // Verify: getCertificateStatus WAS called (fallback working)
-    expect(mockGetCertificateStatus).toHaveBeenCalledWith(userPrincipal, documentNumber, contactId);
   });
 
 });
@@ -3234,55 +3126,6 @@ describe('getLandingType', () => {
 
         const result = await SUT.getLandingsType(USER_ID, DOCUMENT_NUMBER, contactId);
         expect(result).toStrictEqual({ landingsEntryOption: LandingsEntryOptions.ManualEntry, generatedByContent: true });
-      });
-
-      it('P1 optimization: should use provided draft and NOT call getLandingsEntryOption', async () => {
-        const providedDraft = {
-          documentNumber: DOCUMENT_NUMBER,
-          exportData: {
-            landingsEntryOption: LandingsEntryOptions.DirectLanding
-          }
-        } as CatchCertificate;
-
-        // Mock session store to return null (no cache)
-        const mockGetSessionStore = jest.spyOn(require('../session_store/factory').SessionStoreFactory, 'getSessionStore');
-        mockGetSessionStore.mockResolvedValue({
-          readFor: jest.fn().mockResolvedValue(null),
-          writeFor: jest.fn().mockResolvedValue(undefined)
-        } as any);
-
-        mockGetLandingsEntryOption.mockClear();
-
-        const result = await SUT.getLandingsType(USER_ID, DOCUMENT_NUMBER, contactId, providedDraft as any);
-
-        // Verify: getLandingsEntryOption was NOT called (optimization working)
-        expect(mockGetLandingsEntryOption).not.toHaveBeenCalled();
-        // Verify: result uses provided draft data
-        expect(result).toStrictEqual({ 
-          landingsEntryOption: LandingsEntryOptions.DirectLanding, 
-          generatedByContent: false 
-        });
-
-        mockGetSessionStore.mockRestore();
-      });
-
-      it('P1 optimization: should fall back to DB call when no draft provided', async () => {
-        // Mock session store to return null (no cache)
-        const mockGetSessionStore = jest.spyOn(require('../session_store/factory').SessionStoreFactory, 'getSessionStore');
-        mockGetSessionStore.mockResolvedValue({
-          readFor: jest.fn().mockResolvedValue(null),
-          writeFor: jest.fn().mockResolvedValue(undefined)
-        } as any);
-
-        mockGetLandingsEntryOption.mockClear();
-        mockGetLandingsEntryOption.mockResolvedValue(LandingsEntryOptions.ManualEntry);
-
-        await SUT.getLandingsType(USER_ID, DOCUMENT_NUMBER, contactId);
-
-        // Verify: getLandingsEntryOption WAS called (fallback working)
-        expect(mockGetLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId, undefined);
-
-        mockGetSessionStore.mockRestore();
       });
 
     });

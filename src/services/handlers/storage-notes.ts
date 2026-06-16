@@ -76,7 +76,7 @@ export default {
 
     const addAnotherProduct = data.addAnotherProduct;
     if (!addAnotherProduct || addAnotherProduct === "" || addAnotherProduct === "notset") {
-      errors.addAnotherProduct = 'Select yes if you need to add another product';
+      errors.addAnotherProduct = 'addAnotherProductNullError';
       return { errors, next: currentUrl };
     }
 
@@ -133,8 +133,11 @@ export function clearStaleDepartureDerivedFields(product: any, index: number, er
 }
 
 export function checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch: any, index: number, errors: any) {
-  if (!ctch.netWeightProductDeparture && !ctch.netWeightFisheryProductDeparture) {
-    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightOrFisheryWeightProductDeparture';
+  if (!ctch.netWeightProductDeparture) {
+    errors[`catches-${index}-netWeightProductDeparture`] = 'sdNetWeightProductDepartureErrorNull';
+  }
+  if (!ctch.netWeightFisheryProductDeparture) {
+    errors[`catches-${index}-netWeightFisheryProductDeparture`] = 'sdNetWeightFisheryProductDepartureErrorNull';
   }
 }
 

@@ -2055,12 +2055,7 @@ describe("exporter-payload routes", () => {
     });
 
     it("should return 200 user is valid", async () => {
-      // P1/P2 optimization: validateDocumentOwnership now returns document object (not boolean)
-      mockValidateDocumentOwnership.mockResolvedValue({
-        documentNumber: "DOCUMENT123",
-        status: 'DRAFT',
-        exportData: { products: [] }
-      } as any);
+      mockValidateDocumentOwnership.mockResolvedValue(true);
       mockCreateExportCertificate.mockResolvedValue({ 
         documentNumber: "DOCUMENT123", 
         uri: "some-uri",

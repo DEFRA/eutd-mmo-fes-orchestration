@@ -9,6 +9,10 @@ import logger from '../logger';
 
 type DocumentType = CatchCertificate | ProcessingStatement | StorageDocument;
 
+// Fields required to validate ownership plus the fields consumed downstream when
+// the validated document is reused (avoids re-querying the same draft).
+const OWNERSHIP_PROJECTION = 'createdBy contactId status documentNumber userReference requestByAdmin exportData';
+
 export const validateDocumentOwnership = async (userId: string, documentId: string, statuses: DocumentStatuses[], contactId: string): Promise<DocumentType> => {
 
   if (!userId && !contactId) {
@@ -68,7 +72,11 @@ export const getOwnerFromMongo = async (documentNumber: string, statuses: Docume
 
     logger.debug(`[GET-OWNER-FROM-MONGO][DOCUMENT][${documentNumber}][QUERY][${JSON.stringify(query)}]`);
 
-    document = await model.findOne(query);
+    // Project only the fields required for the ownership check and for downstream
+    // reuse (loadRequiredData consumes exportData), and use lean() to skip Mongoose
+    // document hydration. This avoids returning the full hydrated document on a
+    // query that runs on every owned-document request.
+    document = await model.findOne(query, OWNERSHIP_PROJECTION, { lean: true });
 
     if (!document) {
       return null;

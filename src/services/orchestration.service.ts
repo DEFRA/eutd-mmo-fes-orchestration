@@ -42,7 +42,7 @@ import {
 import { toFrontEndStorageDocumentExportData } from "../persistence/schema/storageDoc";
 import { reportDocumentSubmitted, submitToCatchSystem } from "../services/reference-data.service";
 import { invalidateDraftCache, setCatchSubmissionInProgress } from '../persistence/services/catchCert'
-import { validateCompletedDocument, validateSpecies } from "../validators/documentValidator";
+import { validateCompletedDocument, validateSpecies, DraftCacheRef } from "../validators/documentValidator";
 import * as EuCountriesService from './eu-countries.service';
 
 export const catchCerts: string = "catchCertificate";
@@ -334,17 +334,16 @@ export default class OrchestrationService {
     }
   }
 
-  public static async generatePdf(req, h, userPrincipal, documentNumber) {
+  public static async generatePdf(req, h, userPrincipal, documentNumber, document?) {
     const nextUrl = req.query.n;
     const contactId = req.app.claims.contactId;
     const redisKey = req.params.redisKey;
     const clientip = req.payload.data;
-    const reportData = await loadRequiredData(
-      userPrincipal,
-      documentNumber,
-      redisKey,
-      contactId
-    );
+    // Reuse the document already loaded during ownership validation when available,
+    // otherwise fall back to loading it. Avoids a duplicate read of the same draft.
+    const reportData = document
+      ? await loadRequiredData(userPrincipal, documentNumber, redisKey, contactId, document)
+      : await loadRequiredData(userPrincipal, documentNumber, redisKey, contactId);
     let blockingStatus: boolean = false;
     const { data, exporter }: any = reportData;
     let exporterModel = {};
@@ -506,6 +505,7 @@ export default class OrchestrationService {
   }
 
   static readonly checkValidationStorageNotes = async (data, userPrincipal: string, contactId: string, documentNumber: string) => {
+    const draftCacheRef: DraftCacheRef = { loaded: false };
     const parseWeight = (value: string | number | null | undefined): number | undefined => {
       if (value === undefined || value === null || value === '') {
         return undefined;
@@ -551,14 +551,14 @@ export default class OrchestrationService {
         });
       }
 
-      if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber))) {
+      if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef))) {
         data.validationErrors.push({
           message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
           key: `catches-${ctch}-certificateNumber`,
           certificateNumber: documentCertificateNumber,
           product: species
         });
-      } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber)) {
+      } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef)) {
         data.validationErrors.push({
           message: 'sdAddUKEntryDocumentSpeciesDoesNotExistError',
           key: `catches-${ctch}-certificateNumber`,
@@ -570,11 +570,12 @@ export default class OrchestrationService {
   }
 
   static readonly checkValidationProcessingStatement = async (data, userPrincipal: string, contactId: string, documentNumber: string) => {
+    const draftCacheRef: DraftCacheRef = { loaded: false };
     for (const ctch in data.catches) {
       const documentCertificateNumber = data.catches[ctch].catchCertificateNumber;
       const species = data.catches[ctch].species;
       const speciesCode = data.catches[ctch].speciesCode;
-      if (data.catches[ctch].catchCertificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber) || !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber))) {
+      if (data.catches[ctch].catchCertificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef) || !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef))) {
         data.validationErrors.push({
           message: 'psAddCatchDetailsErrorUKCCInValid',
           key: `catches-${ctch}-catchCertificateNumber`
@@ -701,11 +702,12 @@ export const loadRequiredData = async (
   userPrincipal: string,
   documentNumber: string,
   redisKey: string,
-  contactId: string
+  contactId: string,
+  preloadedDraft?: any
 ) => {
   switch (redisKey) {
     case processingStatement: {
-      const draftData = await ProcessingStatementService.getDraft(
+      const draftData = preloadedDraft ?? await ProcessingStatementService.getDraft(
         userPrincipal,
         documentNumber,
         contactId
@@ -724,7 +726,7 @@ export const loadRequiredData = async (
       };
     }
     case storageNote: {
-      const draftData = await StorageDocumentService.getDraft(
+      const draftData = preloadedDraft ?? await StorageDocumentService.getDraft(
         userPrincipal,
         documentNumber,
         contactId
