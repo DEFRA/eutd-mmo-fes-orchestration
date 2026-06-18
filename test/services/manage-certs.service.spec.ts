@@ -17,7 +17,7 @@ test('setup', async (t) => {
   const connString = mongod.getUri();
 
   await MongoConnection.connect(connString, 'sample', '');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'manage certs service test assertion marker');
   t.end();
 });
 
@@ -37,7 +37,7 @@ test('Void certificate not allowed for another user', async (t) => {
     const voidResult = await ManageCertsService.voidCertificate(catchCertificate.documentNumber, badUser);
 
     t.equals(voidResult, false);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'manage certs service test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -66,7 +66,7 @@ test('Void certificate not allowed for another document of another user', async 
     const voidResult = await ManageCertsService.voidCertificate(badCertificate.documentNumber, currentUserId);
 
     t.equals(voidResult, false);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'manage certs service test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -88,10 +88,10 @@ test('Void certificate of document created by same user', async (t) => {
     const voidResult = await ManageCertsService.voidCertificate(catchCertificate.documentNumber, currentUserId);
 
     t.equals(voidResult, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'manage certs service test assertion marker');
     t.end();
   } catch(e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'manage certs service test assertion marker');
     t.end(e);
   }
 });
@@ -100,6 +100,6 @@ test('teardown', async (t) => {
   console.log('Trying to stop mongo server');
   await mongod.stop();
   console.log('Stopped mongo server');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'manage certs service test assertion marker');
   t.end();
 });

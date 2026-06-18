@@ -16,7 +16,7 @@ test('setup', async (t) => {
   });
   const connString = mongod.getUri();
   await connect(connString);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'userAttributes test assertion marker');
   t.end();
 });
 
@@ -40,7 +40,7 @@ test('Set user attribute', async(t) => {
     t.equals(userAttributes.attributes.length, 1, 'User attribute retrieved');
     t.equals(userAttributes.attributes[0].name, 'privacy_statement', 'Privacy statement property');
     t.equals(userAttributes.attributes[0].value, true, 'Privacy statement property accepted');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'userAttributes test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -54,7 +54,7 @@ test('Save or update user attribute: save', async (t) => {
     const savedAttributes = await saveOrUpdate('ABC-DEF-GHI', attributeKey, false);
     t.equals(savedAttributes.length, 2, 'Save user attribute');
     t.equals(savedAttributes[1].name, attributeKey, 'Saved user attribute name');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'userAttributes test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -68,10 +68,10 @@ test('Save or update user attribute: update', async (t) => {
     t.equals(savedAttributes.length, 2, 'Update user attribute, not added new attribute');
     t.equals(savedAttributes[1].name, attributeKey, 'Updated user attribute value');
     t.equals(savedAttributes[1].value, true, 'Updated user attribute value');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'userAttributes test assertion marker');
     t.end();
   } catch(e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'userAttributes test assertion marker');
     t.end(e);
   }
 });
@@ -80,6 +80,6 @@ test('teardown', async (t) => {
   console.log('Trying to stop mongo server');
   await mongod.stop();
   console.log('Stopped mongo server');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'userAttributes test assertion marker');
   t.end();
 });

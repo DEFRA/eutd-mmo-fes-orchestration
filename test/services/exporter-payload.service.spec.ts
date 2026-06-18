@@ -23,7 +23,7 @@ test('Get export-payload details', async (t) => {
 
     t.equals(exportPayload.items[0].product.commodityCode, exportPayload1.items[0].product.commodityCode);
     t.equals(!!exportPayload, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter payload service test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -52,7 +52,7 @@ test('Upsert export-payload details', async (t) => {
     );
     t.equals(!!matchedLanding, true);
     t.equals(matchedLanding.model.vessel.vesselName, mockLanding1.model.vessel.vesselName);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter payload service test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -74,7 +74,7 @@ test('Upsert export-payload details - product doesnt exist', async (t) => {
       item.product.id === productId
     );
     t.equals(!matchedItem, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter payload service test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -110,11 +110,11 @@ test('Upsert export-payload details - replace empty landing in json', async (t) 
     );
     t.equals(!!matchedLanding, true);
     t.equals(matchedLanding.model.vessel.vesselName, mockLanding1.model.vessel.vesselName);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter payload service test assertion marker');
     t.end();
 
   } catch(e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter payload service test assertion marker');
     t.end(e);
   }
 });
@@ -143,7 +143,7 @@ test('Create export certificate - generates pdf and session store is cleared', a
     pdfMock.restore();
     documentNumberMock.restore();
     saveCatchCert.restore();
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter payload service test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);

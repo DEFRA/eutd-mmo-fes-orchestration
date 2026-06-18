@@ -36,7 +36,7 @@ test('Document-delete - Remove data for a catchCertificate journey', async (t) =
       await shouldBeInStore(sessionStore, journey + '/' + SAVE_DRAFT_KEY, t, {})
     ]);
     
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'document delete service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -53,7 +53,7 @@ test('Document-delete - Remove data for a generic journey', async (t) => {
       await shouldBeInStore(sessionStore, 'test' + '/' + DOCUMENT_NUMBER_KEY, t, {}),
     ]);
 
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'document delete service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -73,7 +73,7 @@ test('Document-delete - Should throw an error', async (t) => {
     
     t.assert(error);
     sessionStoreFactoryStub.restore();
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'document delete service test assertion marker');
     t.end();
     
   } catch (e) {

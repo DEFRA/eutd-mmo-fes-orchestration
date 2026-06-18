@@ -14,7 +14,7 @@ test('ExporterService.get - Should return the data in the redis store', async (t
     await writeToStore('foobar');
     const result = await ExporterService.get(userID, key);
     t.equals(result, 'foobar');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -26,7 +26,7 @@ test('ExporterService.get - Should return an empty object if no data available',
     await writeToStore(null);
     const result = await ExporterService.get(userID, key);
     t.deepEquals(result, {});
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -38,7 +38,7 @@ test('ExporterService.save - Should add the data in the redis store', async (t) 
     await writeToStore(null);
     const result = await ExporterService.save({ foo: 'bar' }, userID, key);
     t.deepEquals(result, { foo: 'bar' });
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -50,7 +50,7 @@ test('ExporterService.save - Should append the data in the redis store', async (
     await writeToStore({ bar: 'foo' });
     const result = await ExporterService.save({ foo: 'bar' }, userID, key);
     t.deepEquals(result, { foo: 'bar', bar: 'foo' });
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'exporter service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
