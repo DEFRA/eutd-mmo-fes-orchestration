@@ -13,6 +13,6 @@ test('Should assert mandatory fields when empty', t => {
     { railwayBillNumber: 'error.railwayBillNumber.any.required', departurePlace: 'error.departurePlace.any.required' }
   );
 
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'errorExtractor test assertion marker');
   t.end();
 });

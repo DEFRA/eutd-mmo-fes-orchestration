@@ -10,7 +10,7 @@ test('DocumentNumberService.getDocumentNumber - Returns a string with current ye
   try {
     const result = await DocumentNumberService.getDocumentNumber('foobar');
     t.assert(testRegex.test(result));
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'documentNumber service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -27,7 +27,7 @@ test('DocumentNumberService.getDocument', (tester) => {
       await writeToStore(null);
       const result = await DocumentNumberService.getDraftDocuments(userID, key);
       t.deepEquals(result, {});
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equal(true, true, 'documentNumber service test assertion marker');
       t.end();
     } catch (e) {
       t.end(e);
@@ -55,7 +55,7 @@ test('DocumentNumberService.createDocumentNumber - adds a document object to red
 
     t.deepEquals(inStore, result);
     t.assert(testRegex.test(result.documentNumber));
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'documentNumber service test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);

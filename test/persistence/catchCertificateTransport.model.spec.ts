@@ -17,7 +17,7 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
 
   t.deepEqual(result.containerNumbers, ['CONT001', 'CONT002', 'CONT003']);
   t.equal(result.containerIdentificationNumber, 'CONT001 CONT002 CONT003');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -35,7 +35,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['CONT001']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -53,7 +53,7 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['CONT001', 'CONT002', 'CONT003']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -71,7 +71,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   const result = toFrontEndTransport(backEndTransport);
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -89,7 +89,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle null contain
   const result = toFrontEndTransport(backEndTransport);
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -108,7 +108,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -124,7 +124,7 @@ test('CatchCertificateTransport toFrontEndTransport - should not set containerNu
 
   t.equal(result.containerNumbers, undefined);
   t.equal(result.containerIdentificationNumber, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -140,7 +140,7 @@ test('CatchCertificateTransport toFrontEndTransport - should not include contain
   const result = toFrontEndTransport(backEndTransport);
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -157,7 +157,7 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
   t.equal(result.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -173,7 +173,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -189,7 +189,7 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -205,7 +205,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   const result = toFrontEndTransport(backEndTransport);
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -222,7 +222,7 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
   t.equal(result.containerIdentificationNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -238,7 +238,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -254,7 +254,7 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -270,7 +270,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   const result = toFrontEndTransport(backEndTransport);
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -286,7 +286,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle null contain
   const result = toFrontEndTransport(backEndTransport);
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -304,7 +304,7 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
   t.equal(result.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -321,7 +321,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -338,7 +338,7 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   const result = toFrontEndTransport(backEndTransport);
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -355,7 +355,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   const result = toFrontEndTransport(backEndTransport);
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -372,7 +372,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -389,7 +389,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -407,7 +407,7 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -426,7 +426,7 @@ test('CatchCertificateTransport toBackEndTransport - should preserve containerId
 
   t.equal(result.containerIdentificationNumber, 'CONT001 CONT002 CONT003');
   t.equal((result as any).containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });
 
@@ -443,6 +443,6 @@ test('CatchCertificateTransport toBackEndTransport - should handle truck transpo
 
   t.equal(result.containerIdentificationNumber, undefined);
   t.equal((result as any).containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchCertificateTransport model test assertion marker');
   t.end();
 });

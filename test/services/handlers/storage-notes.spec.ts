@@ -35,7 +35,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, {});
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -76,7 +76,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -117,7 +117,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -158,10 +158,10 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end(e);
   }
 });
@@ -200,10 +200,10 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end(e);
   }
 });
@@ -242,7 +242,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -283,7 +283,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -324,7 +324,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -370,7 +370,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -413,7 +413,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -456,7 +456,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -495,7 +495,7 @@ test('/create-non-manipulation-document/you-have-added-a-product with selected a
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -534,7 +534,7 @@ test('/create-non-manipulation-document/you-have-added-a-product with unselected
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -579,7 +579,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with all ma
 
     t.true(errors);
     t.deepEquals(errors, {});
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -626,7 +626,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with missin
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -674,7 +674,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with missin
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -722,7 +722,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with missin
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -771,7 +771,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with missin
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -818,7 +818,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with missin
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -868,7 +868,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with whites
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -905,7 +905,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with emoji 
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -942,7 +942,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with emoji 
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -979,7 +979,7 @@ test('/create-non-manipulation-document/add-storage-facility-details with emoji 
 
     t.true(errors);
     t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -1001,7 +1001,7 @@ test('validateEntry net weight arrival: fishery weight less than product weight 
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '30' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight < product weight');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -1013,7 +1013,7 @@ test('validateEntry net weight arrival: fishery weight equal to product weight -
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '50' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight = product weight');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -1025,7 +1025,7 @@ test('validateEntry net weight arrival: fishery weight exceeds product weight - 
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set when fishery weight > product weight');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -1038,7 +1038,7 @@ test('validateEntry net weight arrival: cross-check error applied at correct ind
     const { errors } = await validateEntry(product, 2, {});
     t.equal(errors['catches-2-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set on correct index');
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error on wrong index');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -1053,7 +1053,7 @@ test('validateEntry net weight arrival: cross-check not triggered when netWeight
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightProductArrival'], 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0', 'individual error set on product arrival weight');
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no fishery error when product has individual error — cross-check guarded by !errors[product]');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -1067,7 +1067,7 @@ test('validateEntry net weight arrival: fishery individual error preserved when 
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '-1' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0', 'individual fishery error preserved when fishery does not numerically exceed product and product is valid');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -1082,7 +1082,7 @@ test('validateEntry net weight arrival: fishery individual error preserved when 
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80.123' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal', 'individual fishery format error preserved; cross-check skipped because fishery already has its own error');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'storage notes test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);

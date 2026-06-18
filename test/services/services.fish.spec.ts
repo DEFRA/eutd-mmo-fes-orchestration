@@ -87,7 +87,7 @@ test('FishService.addFish - when invoked without an id, it creates a new record'
     t.equals(datum.species, completed.species);
     t.equals(datum.speciesCode, completed.speciesCode);
     t.equals(!!datum.id, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end();
   } catch(e) {
     t.end(e);
@@ -112,7 +112,7 @@ test('FishService.addFish - Should throw an error when invoked without data but 
 
     t.assert(error);
     t.equals(error.message, 'I am not sure what is going on!');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end();
 
   } catch (e) {
@@ -159,7 +159,7 @@ test('FishService.addFish - Should throw an error if trying to add details when 
   
   t.assert(error);
   t.equals(error.message, 'The species is in an inconsistent state for the second call');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'services fish test assertion marker');
   t.end();
   
 });
@@ -176,10 +176,10 @@ test('FishService.removeFish  - removes the fish by id', async (t) => {
 
     let savedSpecies = <MySpecies[]>await sessionStore.readAllFor(USER_ID, SPECIES_KEY);
     t.deepEqual(savedSpecies, [mockMultiple[0]]);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end();
   } catch(e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end(e);
   }
 });
@@ -202,7 +202,7 @@ test('FishService.removeFish  - throws an error if writeAllFor/readAllFor fails'
   t.assert(error);
   t.equals(error.message, 'Cannot writeAllFor or readAllFor to species file');
   sessionStoreMock.restore();
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'services fish test assertion marker');
   t.end();
 });
 
@@ -212,7 +212,7 @@ test('FishService.addedFish - Gets fish added for a user', async (t) => {
     
     const result = await Service.addedFish(completed.user_id);
     t.deepEquals(result, mockMultiple);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -234,7 +234,7 @@ test('FishService.addedFish - throws an error if readAllFor fails', async (t) =>
   t.assert(error);
   t.equals(error.message, 'Eh! does not work');
   sessionStoreMock.restore();
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'services fish test assertion marker');
   t.end();
 });
 
@@ -246,7 +246,7 @@ test('FishService.save - Should store species details for user', async (t) => {
     const data = await sessionStore.readAllFor(completed.user_id, SPECIES_KEY);
     t.deepEquals(result, completed);
     t.deepEquals(data, completed);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end();
   } catch (e) {
     t.end(e);
@@ -274,7 +274,7 @@ test('FishService::isDuplicate returns true if adding the same species', async (
     });
     
     t.equals(result, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end();
 
   } catch(e) {
@@ -303,7 +303,7 @@ test('FishService::isDuplicate returns false if not adding the same species', as
     });
     
     t.equals(result, false);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'services fish test assertion marker');
     t.end();
 
   } catch(e) {
@@ -317,6 +317,6 @@ test('FishService::isDuplicate returns false if presentation, state and user_id 
   });
   
   t.equal(result, false);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'services fish test assertion marker');
   t.end();
 });

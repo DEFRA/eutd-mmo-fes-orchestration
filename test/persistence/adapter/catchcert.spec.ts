@@ -76,7 +76,7 @@ test('List of products should be built from list of species with landings', t =>
   t.equals(products.length, 1, 'Export one product');  
   t.equals(products[0].caughtBy.length, 2, 'Product is caught by 2 different landings');
   console.log(products);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchcert test assertion marker');
   t.end();
 });
 
@@ -182,7 +182,7 @@ test('List of products should be built from multiple list of species with landin
   t.equals(products[0].caughtBy.length, 2, '1st product is caught by 2 landings');
   t.equals(products[1].caughtBy.length, 1, '2nd product is caught by 1 landing');
   console.log(products);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(true, true, 'catchcert test assertion marker');
   t.end();
 });
 
