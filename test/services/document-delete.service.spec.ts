@@ -65,6 +65,7 @@ test('Document-delete - Remove data for a processingStatement journey', async (t
     t.equals(clearErrorsStub.called, false, 'summary errors are not cleared for non-catch-certificate journey');
     t.equals(clearSessionDataStub.calledOnceWithExactly(USER_ID, DOCUMENT_NUMBER, CONTACT_ID), true, 'session data is cleared for processing statement journey');
     t.equals(invalidateDraftCacheStub.calledTwice, true, 'cache invalidation is still performed twice');
+    t.equals(invalidateDraftCacheStub.firstCall.calledWithExactly(USER_ID, DOCUMENT_NUMBER, CONTACT_ID), true, 'processing statement document cache key is invalidated');
     t.equals(invalidateDraftCacheStub.secondCall.calledWithExactly(USER_ID, `${PROCESSING_STATEMENT_KEY}/${DRAFT_HEADERS_KEY}`, CONTACT_ID), true, 'processing statement draft headers cache key is invalidated');
 
     t.end();
@@ -92,6 +93,8 @@ test('Document-delete - Remove data for a storageNotes journey', async (t) => {
 
     t.equals(deleteDraftStub.calledOnceWithExactly(USER_ID, DOCUMENT_NUMBER, CONTACT_ID), true, 'storage draft is deleted');
     t.equals(clearSessionDataStub.calledOnceWithExactly(USER_ID, DOCUMENT_NUMBER, CONTACT_ID), true, 'session data is cleared for storage journey');
+    t.equals(invalidateDraftCacheStub.calledTwice, true, 'storage cache invalidation is called twice');
+    t.equals(invalidateDraftCacheStub.firstCall.calledWithExactly(USER_ID, DOCUMENT_NUMBER, CONTACT_ID), true, 'storage document cache key is invalidated');
     t.equals(invalidateDraftCacheStub.secondCall.calledWithExactly(USER_ID, `${STORAGE_NOTES_KEY}/${DRAFT_HEADERS_KEY}`, CONTACT_ID), true, 'storage draft headers cache key is invalidated');
     t.end();
   } catch (e) {
@@ -114,6 +117,8 @@ test('Document-delete - Should throw an error for invalid journey', async (t) =>
     }
 
     t.assert(error, 'error should be thrown');
+    t.ok(error instanceof Error, 'thrown value should be an Error instance');
+    t.equals(typeof error.message, 'string', 'error message should be a string');
     t.equals(error.message, '[deleteDocument][INVALID-JOURNEY]', 'error message should describe invalid journey');
     t.end();
   } catch (e) {

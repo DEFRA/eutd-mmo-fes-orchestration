@@ -345,6 +345,7 @@ test('Should query catch cert data when year crosses over', async (t) => {
 
   } catch(e) {
     console.error(e);
+    t.fail('unexpected error in year crossover catch cert query test');
   }
 
   t.end();

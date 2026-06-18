@@ -98,6 +98,8 @@ test('ExporterService.save - Should merge draft and payload, persist and return 
     });
     t.equals(getDraftDataStub.calledOnceWithExactly(userID, `${CATCH_CERTIFICATE_KEY}/draftData`, contactId), true, 'catch cert draft data is fetched');
     t.equals(withUserSessionDataStoredStub.calledOnce, true, 'session wrapper is called once');
+    t.equals(withUserSessionDataStoredStub.firstCall.args[0], userID, 'session wrapper receives user id');
+    t.equals(withUserSessionDataStoredStub.firstCall.args[2], contactId, 'session wrapper receives contact id');
     t.equals(upsertExporterDetailsStub.calledOnce, true, 'upsert is called once');
     t.equals(upsertExporterDetailsStub.firstCall.args[0], userID, 'upsert receives user id');
     t.equals(upsertExporterDetailsStub.firstCall.args[1], documentNumber, 'upsert receives document number');
@@ -147,6 +149,8 @@ test('ExporterService.save - Should route to processing statement service for pr
     t.deepEquals(result, { existing: 'value', foo: 'bar', user_id: userID });
     t.equals(psGetDraftDataStub.calledOnceWithExactly(userID, `${PROCESSING_STATEMENT_KEY}/draftData`, contactId), true, 'processing statement draft data is fetched');
     t.equals(psUpsertExporterDetailsStub.calledOnce, true, 'processing statement upsert is called');
+    t.equals(psUpsertExporterDetailsStub.calledOnceWithExactly(userID, documentNumber, result, contactId), true, 'processing statement upsert is called with merged payload and expected arguments');
+    t.equals(withUserSessionDataStoredStub.calledOnce, true, 'session wrapper is called once for processing statement save');
     t.equals(catchGetDraftDataStub.called, false, 'catch cert service is not used for processing statement keys');
     t.end();
   } catch (e) {

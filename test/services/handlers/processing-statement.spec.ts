@@ -11,6 +11,7 @@ test('/create-processing-statement/add-consignment-details with all mandatory fi
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [{}],
@@ -25,9 +26,11 @@ test('/create-processing-statement/add-consignment-details with all mandatory fi
     });
 
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -37,6 +40,7 @@ test('/create-processing-statement/add-consignment-details with missing consignm
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [{}],
@@ -55,10 +59,12 @@ test('/create-processing-statement/add-consignment-details with missing consignm
       consignmentDescription: 'psConsignmentEnterConsignmentDescription'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -68,6 +74,7 @@ test('/create-processing-statement/add-consignment-details with whitespace consi
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [{}],
@@ -85,10 +92,12 @@ test('/create-processing-statement/add-consignment-details with whitespace consi
       consignmentDescription: 'psConsignmentEnterConsignmentDescription'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -99,6 +108,7 @@ test('/create-processing-statement/add-catch-weights with all weight fields vali
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -120,9 +130,11 @@ test('/create-processing-statement/add-catch-weights with all weight fields vali
     });
 
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -132,6 +144,7 @@ test('/create-processing-statement/add-catch-weights with missing totalWeightLan
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -155,10 +168,12 @@ test('/create-processing-statement/add-catch-weights with missing totalWeightLan
       'catches-0-totalWeightLanded': 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -168,6 +183,7 @@ test('/create-processing-statement/add-catch-weights with zero totalWeightLanded
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     // exportWeight values must also be 0 so they do not trigger the
     // "exceeds totalWeight" cross-field error alongside the zero-weight error
@@ -191,9 +207,11 @@ test('/create-processing-statement/add-catch-weights with zero totalWeightLanded
     });
 
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.ok(errors['catches-0-totalWeightLanded'], 'totalWeightLanded error is set');
     t.equals(errors['catches-0-totalWeightLanded'], 'psAddCatchWeightsErrorTotalWeightGreaterThanNull', 'totalWeightLanded zero error message is correct');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -203,6 +221,7 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightBe
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -226,10 +245,12 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightBe
       'catches-0-exportWeightBeforeProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -239,6 +260,7 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightAf
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -262,10 +284,12 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightAf
       'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -275,6 +299,7 @@ test('/create-processing-statement/add-catch-weights with negative exportWeightB
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -300,10 +325,12 @@ test('/create-processing-statement/add-catch-weights with negative exportWeightB
       'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorExportWeightGreaterThanNullAfterProcessing'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -313,6 +340,7 @@ test('/create-processing-statement/add-catch-weights with exportWeightAfterProce
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -337,10 +365,12 @@ test('/create-processing-statement/add-catch-weights with exportWeightAfterProce
       'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorExportWeightAfterProcessingExceedsBeforeProcessing'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -350,6 +380,7 @@ test('/create-processing-statement/add-catch-weights - uk type skips totalWeight
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -372,6 +403,7 @@ test('/create-processing-statement/add-catch-weights - uk type skips totalWeight
     t.equals(errors['catches-0-totalWeightLanded'], undefined, 'totalWeightLanded not validated for uk catch type');
     t.equals(Object.keys(errors).length, 0, 'no errors for uk catch with valid weights');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -382,6 +414,7 @@ test('/create-processing-statement/catch-added with missing addAnotherCatch vali
   try {
     const currentUrl = `/create-processing-statement/${DN}/catch-added`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [
@@ -411,10 +444,12 @@ test('/create-processing-statement/catch-added with missing addAnotherCatch vali
       addAnotherCatch: 'ccLandingTypeSelectOption'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -424,6 +459,7 @@ test('/create-processing-statement/catch-added with empty addAnotherCatch valida
   try {
     const currentUrl = `/create-processing-statement/${DN}/catch-added`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [{}],
@@ -443,10 +479,12 @@ test('/create-processing-statement/catch-added with empty addAnotherCatch valida
       addAnotherCatch: 'ccLandingTypeSelectOption'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -457,6 +495,7 @@ test('/create-processing-statement/add-processing-plant-details with all mandato
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -478,9 +517,11 @@ test('/create-processing-statement/add-processing-plant-details with all mandato
     });
 
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -490,6 +531,7 @@ test('/create-processing-statement/add-processing-plant-details with missing per
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -511,10 +553,12 @@ test('/create-processing-statement/add-processing-plant-details with missing per
       personResponsibleForConsignment: 'psAddProcessingPDErrorPersonResponsibleForConsignment'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -524,6 +568,7 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -546,10 +591,12 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
       personResponsibleForConsignment: 'psAddProcessingPDErrorPersonResponsibleForConsignment'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -559,6 +606,7 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -580,10 +628,12 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
       plantApprovalNumber: 'psAddProcessingPDErrorPlantApprovalNumber'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -593,6 +643,7 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -616,10 +667,12 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
       plantApprovalNumber: 'psAddProcessingPDErrorPlantApprovalNumber',
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -629,6 +682,7 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -650,10 +704,12 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
       plantName: 'psAddProcessingPlantAddressErrorNullPlantName'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -663,6 +719,7 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pl
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -685,10 +742,12 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pl
       plantName: 'emojiCharactersNotPermitted'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -698,6 +757,7 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pe
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       catches: [],
@@ -720,10 +780,12 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pe
       personResponsibleForConsignment: 'emojiCharactersNotPermitted'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -734,6 +796,7 @@ test('/create-processing-statement/add-processing-plant-address with all address
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       plantName: 'Triffid',
@@ -751,10 +814,12 @@ test('/create-processing-statement/add-processing-plant-address with all address
       plantAddressOne: 'psAddProcessingPlantAddressErrorAddress'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -764,6 +829,7 @@ test('/create-processing-statement/add-processing-plant-address with empty plant
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       plantName: 'Triffid',
@@ -785,10 +851,12 @@ test('/create-processing-statement/add-processing-plant-address with empty plant
       plantAddressOne: 'Enter the building and street (address line 1 of 2)'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -798,6 +866,7 @@ test('/create-processing-statement/add-processing-plant-address with missing pla
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       plantName: 'Triffid',
@@ -819,10 +888,12 @@ test('/create-processing-statement/add-processing-plant-address with missing pla
       plantTownCity: 'Enter the town or city'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -832,6 +903,7 @@ test('/create-processing-statement/add-processing-plant-address with whitespace 
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       plantName: 'Triffid',
@@ -853,10 +925,12 @@ test('/create-processing-statement/add-processing-plant-address with whitespace 
       plantPostcode: 'Enter the postcode'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -866,6 +940,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       plantName: 'Triffid Plant',
@@ -887,10 +962,12 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
       plantAddressOne: 'emojiCharactersNotPermitted'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -900,6 +977,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       plantName: 'Triffid Plant',
@@ -921,10 +999,12 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
       plantTownCity: 'emojiCharactersNotPermitted'
     };
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, expected);
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
@@ -934,6 +1014,7 @@ test('/create-processing-statement/add-processing-plant-address with valid addre
   try {
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
+    t.equals(typeof handler, 'function', 'route handler exists');
 
     const data = {
       plantName: 'Triffid Plant',
@@ -952,9 +1033,11 @@ test('/create-processing-statement/add-processing-plant-address with valid addre
     });
 
     t.true(errors);
+    t.equals(typeof errors, 'object', 'errors result is an object');
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
+    t.fail('unexpected error in processing-statement handler test');
     logger.error(e);
   }
   t.end();
