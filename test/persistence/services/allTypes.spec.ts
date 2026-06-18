@@ -326,6 +326,7 @@ test('Should query catch cert data when year crosses over', async (t) => {
 
     let data = mapToPersistableSchema(transient);
     data.createdAt = '2019-01-01T00:00:00Z';
+    t.equals(data.createdAt, '2019-01-01T00:00:00Z', 'createdAt is set to january for year crossover query');
     const model = new CatchCertModel(data);
     await model.save();
 
