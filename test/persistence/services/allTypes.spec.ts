@@ -179,7 +179,7 @@ test('Should persist catch cert data', async (t) => {
     t.equal(cert[0].documentUri, transient.documentUri, 'document URI is persisted');
 
   } catch(e) {
-    t.ok(false, );
+    t.ok(false, 'unexpected error in test case');
     console.error(e);
   }
   t.end();
@@ -346,7 +346,7 @@ test('Should query catch cert data when year crosses over', async (t) => {
 
   } catch(e) {
     console.error(e);
-    t.ok(false, );
+    t.ok(false, 'unexpected error in test case');
   }
 
   t.end();
@@ -400,7 +400,7 @@ test('Should persist processing statement data', async (t) => {
     t.equal(cert[0].documentUri, transient.documentUri, 'processing statement document URI is persisted');
 
   } catch (error) {
-    t.ok(false, );
+    t.ok(false, 'unexpected error in test case');
     console.error(error);
   }
   t.end();
@@ -455,7 +455,7 @@ test('Should persist storage doc data', async (t) => {
     t.equal(cert[0].documentUri, transient.documentUri, 'storage doc document URI is persisted');
 
   } catch (error) {
-    t.ok(false, );
+    t.ok(false, 'unexpected error in test case');
     console.error(error);
   }
   t.end();
@@ -510,7 +510,7 @@ test('Should not display void Storage Docs', async (t) => {
     t.isEqual(cert.length, 0, 'Will display zero storage docs');
 
   } catch (error) {
-    t.ok(false, );
+    t.ok(false, 'unexpected error in test case');
     console.error(error);
   }
   t.end();
