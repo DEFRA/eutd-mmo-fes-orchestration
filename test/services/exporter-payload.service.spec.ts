@@ -40,7 +40,7 @@ test('Get export-payload details', async (t) => {
     t.equals(getExportPayloadStub.calledOnceWithExactly(USER_ID, DOCUMENT_NUMBER, CONTACT_ID), true, 'export payload is requested with expected arguments');
     t.end();
   } catch(e) {
-    t.fail('unexpected error in Get export-payload details');
+    t.ok(false, );
     t.end(e);
   } finally {
     if (getCurrentSessionDataStub) getCurrentSessionDataStub.restore();
@@ -83,7 +83,7 @@ test('Upsert export-payload details', async (t) => {
     t.equals(upsertExportPayloadStub.calledOnceWithExactly(USER_ID, exportPayload, DOCUMENT_NUMBER, CONTACT_ID), true, 'updated payload is persisted once');
     t.end();
   } catch(e) {
-    t.fail('unexpected error in Upsert export-payload details');
+    t.ok(false, );
     t.end(e);
   } finally {
     if (getCurrentSessionDataStub) getCurrentSessionDataStub.restore();
@@ -121,7 +121,7 @@ test('Upsert export-payload details - product doesnt exist', async (t) => {
     t.equals(upsertExportPayloadStub.called, false, 'payload is not persisted when product does not exist');
     t.end();
   } catch(e) {
-    t.fail('unexpected error in Upsert export-payload details - product doesnt exist');
+    t.ok(false, );
     t.end(e);
   } finally {
     if (getCurrentSessionDataStub) getCurrentSessionDataStub.restore();
@@ -173,7 +173,7 @@ test('Upsert export-payload details - replace empty landing in json', async (t) 
     t.end();
 
   } catch(e) {
-    t.fail('unexpected error in Upsert export-payload details - replace empty landing in json');
+    t.ok(false, );
     t.end(e);
   } finally {
     if (getCurrentSessionDataStub) getCurrentSessionDataStub.restore();
@@ -192,7 +192,7 @@ test('isSubmissionFailure returns expected boolean values', async (t) => {
     t.equals(typeof ExportPayloadService.isSubmissionFailure({ report: [{}], isBlockingEnabled: true } as any), 'boolean', 'blocking submission check returns a boolean');
     t.end();
   } catch(e) {
-    t.fail('unexpected error in isSubmissionFailure returns expected boolean values');
+    t.ok(false, );
     t.end(e);
   }
 });

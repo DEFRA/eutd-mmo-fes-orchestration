@@ -40,6 +40,7 @@ test('Get export-payload details', async (t) => {
     t.equals(getExportPayloadStub.calledOnceWithExactly(USER_ID, DOCUMENT_NUMBER, CONTACT_ID), true, 'export payload is requested with expected arguments');
     t.end();
   } catch(e) {
+    t.ok(false, 'unexpected error in Get export-payload details');
     t.end(e);
   } finally {
     if (getCurrentSessionDataStub) getCurrentSessionDataStub.restore();
@@ -82,6 +83,7 @@ test('Upsert export-payload details', async (t) => {
     t.equals(upsertExportPayloadStub.calledOnceWithExactly(USER_ID, exportPayload, DOCUMENT_NUMBER, CONTACT_ID), true, 'updated payload is persisted once');
 
   } catch(e) {
+    t.ok(false, 'unexpected error in Upsert export-payload details');
     t.end(e);
     return;
   } finally {
@@ -121,6 +123,7 @@ test('Upsert export-payload details - product doesnt exist', async (t) => {
     t.equals(upsertExportPayloadStub.called, false, 'payload is not persisted when product does not exist');
 
   } catch(e) {
+    t.ok(false, 'unexpected error in Upsert export-payload details - product doesnt exist');
     t.end(e);
     return;
   } finally {
@@ -173,6 +176,7 @@ test('Upsert export-payload details - replace empty landing in json', async (t) 
     t.equals(upsertExportPayloadStub.calledOnce, true, 'payload is persisted when empty landing is replaced');
 
   } catch(e) {
+    t.ok(false, 'unexpected error in Upsert export-payload details - replace empty landing in json');
     t.end(e);
     return;
   } finally {
@@ -191,6 +195,7 @@ test('isSubmissionFailure returns expected boolean values', async (t) => {
     t.equals(ExportPayloadService.isSubmissionFailure({ report: [{}], isBlockingEnabled: false } as any), false, 'blocking disabled is not a submission failure');
     t.equals(ExportPayloadService.isSubmissionFailure({ report: [{}], isBlockingEnabled: true } as any), true, 'non-empty report with blocking enabled is a submission failure');
   } catch(e) {
+    t.ok(false, 'unexpected error in isSubmissionFailure returns expected boolean values');
     t.end(e);
     return;
   }

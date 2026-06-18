@@ -30,7 +30,7 @@ test('/create-processing-statement/add-consignment-details with all mandatory fi
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -64,7 +64,7 @@ test('/create-processing-statement/add-consignment-details with missing consignm
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -97,7 +97,7 @@ test('/create-processing-statement/add-consignment-details with whitespace consi
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -134,7 +134,7 @@ test('/create-processing-statement/add-catch-weights with all weight fields vali
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -173,7 +173,7 @@ test('/create-processing-statement/add-catch-weights with missing totalWeightLan
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -211,7 +211,7 @@ test('/create-processing-statement/add-catch-weights with zero totalWeightLanded
     t.ok(errors['catches-0-totalWeightLanded'], 'totalWeightLanded error is set');
     t.equals(errors['catches-0-totalWeightLanded'], 'psAddCatchWeightsErrorTotalWeightGreaterThanNull', 'totalWeightLanded zero error message is correct');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -250,7 +250,7 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightBe
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -289,7 +289,7 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightAf
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -330,7 +330,7 @@ test('/create-processing-statement/add-catch-weights with negative exportWeightB
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -370,7 +370,7 @@ test('/create-processing-statement/add-catch-weights with exportWeightAfterProce
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -403,7 +403,7 @@ test('/create-processing-statement/add-catch-weights - uk type skips totalWeight
     t.equals(errors['catches-0-totalWeightLanded'], undefined, 'totalWeightLanded not validated for uk catch type');
     t.equals(Object.keys(errors).length, 0, 'no errors for uk catch with valid weights');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -449,7 +449,7 @@ test('/create-processing-statement/catch-added with missing addAnotherCatch vali
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -484,7 +484,7 @@ test('/create-processing-statement/catch-added with empty addAnotherCatch valida
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -521,7 +521,7 @@ test('/create-processing-statement/add-processing-plant-details with all mandato
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -558,7 +558,7 @@ test('/create-processing-statement/add-processing-plant-details with missing per
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -596,7 +596,7 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -633,7 +633,7 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -672,7 +672,7 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -709,7 +709,7 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -747,7 +747,7 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pl
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -785,7 +785,7 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pe
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -819,7 +819,7 @@ test('/create-processing-statement/add-processing-plant-address with all address
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -856,7 +856,7 @@ test('/create-processing-statement/add-processing-plant-address with empty plant
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -893,7 +893,7 @@ test('/create-processing-statement/add-processing-plant-address with missing pla
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -930,7 +930,7 @@ test('/create-processing-statement/add-processing-plant-address with whitespace 
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -967,7 +967,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -1004,7 +1004,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
     t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
     t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();
@@ -1037,7 +1037,7 @@ test('/create-processing-statement/add-processing-plant-address with valid addre
     t.deepEquals(errors, {});
     t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
-    t.fail('unexpected error in processing-statement handler test');
+    t.ok(false, );
     logger.error(e);
   }
   t.end();

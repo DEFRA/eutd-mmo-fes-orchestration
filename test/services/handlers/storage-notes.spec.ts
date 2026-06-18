@@ -76,7 +76,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       assertNoErrors(t, errors);
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -103,7 +103,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       });
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -125,7 +125,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       });
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -147,7 +147,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       });
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -169,7 +169,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       });
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -191,7 +191,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       });
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -213,7 +213,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       });
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -235,7 +235,7 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
       });
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -262,7 +262,7 @@ test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product
       t.equals(next, '/create-non-manipulation-document/:documentNumber/add-storage-facility-details', 'no branch routes to storage facility details');
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -288,7 +288,7 @@ test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product
       t.equals(next, addedProductUrl, 'invalid branch stays on the same page');
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -320,7 +320,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
     assertNoErrors(t, errors);
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -346,7 +346,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityName': 'sdAddStorageFacilityDetailsErrorEnterTheFacilityName'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -373,7 +373,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityAddressOne': 'sdAddStorageFacilityDetailsErrorEnterTheAddress'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -400,7 +400,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityTownCity': 'sdAddStorageFacilityDetailsErrorEnterTheTown'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -428,7 +428,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityTownCity': 'sdAddStorageFacilityDetailsErrorEnterTheTown'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -450,7 +450,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-app
       'storageFacilities-facilityStorage': 'sdAddStorageFacilityProductStoredNullError'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -479,7 +479,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityTownCity': 'sdAddStorageFacilityDetailsErrorEnterTheTown'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -506,7 +506,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityName': 'emojiCharactersNotPermitted'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -533,7 +533,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityAddressOne': 'emojiCharactersNotPermitted'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -560,7 +560,7 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
       'storageFacilities-facilityTownCity': 'emojiCharactersNotPermitted'
     });
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -583,7 +583,7 @@ test('validateEntry net weight arrival: fishery weight less than product weight 
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight < product weight');
     t.equals(Object.keys(errors).length, 1, 'only certificateNumber error remains for this helper setup');
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -599,7 +599,7 @@ test('validateEntry net weight arrival: fishery weight equal to product weight -
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight = product weight');
     t.equals(Object.keys(errors).length, 1, 'only certificateNumber error remains for this helper setup');
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -615,7 +615,7 @@ test('validateEntry net weight arrival: fishery weight exceeds product weight - 
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set when fishery weight > product weight');
     t.ok(errors['catches-0-certificateNumber'], 'certificateNumber required error is also present');
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -631,7 +631,7 @@ test('validateEntry net weight arrival: cross-check error applied at correct ind
     t.equal(errors['catches-2-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set on correct index');
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error on wrong index');
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -647,7 +647,7 @@ test('validateEntry net weight arrival: cross-check not triggered when netWeight
     t.equal(errors['catches-0-netWeightProductArrival'], 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0', 'individual error set on product arrival weight');
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no fishery error when product has individual error');
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -662,7 +662,7 @@ test('validateEntry net weight arrival: fishery individual error preserved when 
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0', 'individual fishery error preserved');
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
@@ -678,7 +678,7 @@ test('validateEntry net weight arrival: fishery individual error preserved when 
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal', 'individual fishery format error preserved');
     t.ok(errors['catches-0-certificateNumber'], 'certificate number required error is also present');
   } catch (e) {
-    t.fail('unexpected error in storage-notes handler test');
+    t.ok(false, );
     logger.error(e);
     t.end(e);
     return;
