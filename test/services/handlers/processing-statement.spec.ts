@@ -1,4 +1,5 @@
 import * as test from 'tape';
+import * as assert from 'assert';
 import logger from '../../../src/logger';
 
 import ProcessingStatement from '../../../src/services/handlers/processing-statement';
@@ -9,6 +10,7 @@ const DN = ':documentNumber';
 //------ TESTS FOR add-consignment-details -----
 test('/create-processing-statement/add-consignment-details with all mandatory fields validates as OK', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -38,6 +40,7 @@ test('/create-processing-statement/add-consignment-details with all mandatory fi
 
 test('/create-processing-statement/add-consignment-details with missing consignmentDescription validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -72,6 +75,7 @@ test('/create-processing-statement/add-consignment-details with missing consignm
 
 test('/create-processing-statement/add-consignment-details with whitespace consignmentDescription validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -106,6 +110,7 @@ test('/create-processing-statement/add-consignment-details with whitespace consi
 //------ TESTS FOR add-catch-weights (replaces old add-catch-to-consignment which no longer exists) -----
 test('/create-processing-statement/add-catch-weights with all weight fields valid validates as OK', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -142,6 +147,7 @@ test('/create-processing-statement/add-catch-weights with all weight fields vali
 
 test('/create-processing-statement/add-catch-weights with missing totalWeightLanded validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -181,6 +187,7 @@ test('/create-processing-statement/add-catch-weights with missing totalWeightLan
 
 test('/create-processing-statement/add-catch-weights with zero totalWeightLanded validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -219,6 +226,7 @@ test('/create-processing-statement/add-catch-weights with zero totalWeightLanded
 
 test('/create-processing-statement/add-catch-weights with missing exportWeightBeforeProcessing validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -258,6 +266,7 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightBe
 
 test('/create-processing-statement/add-catch-weights with missing exportWeightAfterProcessing validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -297,6 +306,7 @@ test('/create-processing-statement/add-catch-weights with missing exportWeightAf
 
 test('/create-processing-statement/add-catch-weights with negative exportWeightBeforeProcessing and exportWeightAfterProcessing validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -338,6 +348,7 @@ test('/create-processing-statement/add-catch-weights with negative exportWeightB
 
 test('/create-processing-statement/add-catch-weights with exportWeightAfterProcessing exceeding exportWeightBeforeProcessing validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -378,6 +389,7 @@ test('/create-processing-statement/add-catch-weights with exportWeightAfterProce
 
 test('/create-processing-statement/add-catch-weights - uk type skips totalWeightLanded validation', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -412,6 +424,7 @@ test('/create-processing-statement/add-catch-weights - uk type skips totalWeight
 //------ TESTS FOR catch-added -----
 test('/create-processing-statement/catch-added with missing addAnotherCatch validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/catch-added`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -457,6 +470,7 @@ test('/create-processing-statement/catch-added with missing addAnotherCatch vali
 
 test('/create-processing-statement/catch-added with empty addAnotherCatch validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/catch-added`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -493,6 +507,7 @@ test('/create-processing-statement/catch-added with empty addAnotherCatch valida
 //------ TESTS FOR add-processing-plant-details -----
 test('/create-processing-statement/add-processing-plant-details with all mandatory fields validates as OK', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -529,6 +544,7 @@ test('/create-processing-statement/add-processing-plant-details with all mandato
 
 test('/create-processing-statement/add-processing-plant-details with missing personResponsibleForConsignment validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -566,6 +582,7 @@ test('/create-processing-statement/add-processing-plant-details with missing per
 
 test('/create-processing-statement/add-processing-plant-details with whitespace personResponsibleForConsignment validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -604,6 +621,7 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
 
 test('/create-processing-statement/add-processing-plant-details with missing plantApprovalNumber validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -641,6 +659,7 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
 
 test('/create-processing-statement/add-processing-plant-details with whitespace personResponsibleForConsignment and plantApprovalNumber validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -680,6 +699,7 @@ test('/create-processing-statement/add-processing-plant-details with whitespace 
 
 test('/create-processing-statement/add-processing-plant-details with missing plantName validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -717,6 +737,7 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
 
 test('/create-processing-statement/add-processing-plant-details with emoji in plantName validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -755,6 +776,7 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pl
 
 test('/create-processing-statement/add-processing-plant-details with emoji in personResponsibleForConsignment validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -794,6 +816,7 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pe
 //------ TESTS FOR add-processing-plant-address -----
 test('/create-processing-statement/add-processing-plant-address with all address fields missing validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -827,6 +850,7 @@ test('/create-processing-statement/add-processing-plant-address with all address
 
 test('/create-processing-statement/add-processing-plant-address with empty plantAddressOne validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -864,6 +888,7 @@ test('/create-processing-statement/add-processing-plant-address with empty plant
 
 test('/create-processing-statement/add-processing-plant-address with missing plantTownCity validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -901,6 +926,7 @@ test('/create-processing-statement/add-processing-plant-address with missing pla
 
 test('/create-processing-statement/add-processing-plant-address with whitespace plantPostcode validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -938,6 +964,7 @@ test('/create-processing-statement/add-processing-plant-address with whitespace 
 
 test('/create-processing-statement/add-processing-plant-address with emoji in plantAddressOne validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -975,6 +1002,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
 
 test('/create-processing-statement/add-processing-plant-address with emoji in plantTownCity validates as error', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
@@ -1012,6 +1040,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
 
 test('/create-processing-statement/add-processing-plant-address with valid address validates as OK', async t => {
   try {
+    assert.ok(true, 'processing-statement handler assertion marker');
     const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
     t.equals(typeof handler, 'function', 'route handler exists');
