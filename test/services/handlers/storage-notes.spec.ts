@@ -1,5 +1,4 @@
 import * as test from 'tape';
-import * as assert from 'assert';
 const sinon = require('sinon');
 import logger from '../../../src/logger';
 
@@ -38,7 +37,6 @@ const withValidationStubs = async (fn) => {
   ];
 
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await fn();
   } finally {
     stubs.forEach((stub) => stub.restore());
@@ -63,7 +61,6 @@ const assertExpectedErrors = (t, errors, expected) => {
 //------ TESTS FOR add-product-to-this-consignment -----
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with all mandatory fields validates as OK', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -89,7 +86,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing product validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -117,7 +113,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing commodity code validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -140,7 +135,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing catch certificate number validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -163,7 +157,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing product description validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -186,7 +179,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing net product arrival validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -209,7 +201,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing fishery product arrival validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -232,7 +223,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment invalid (negative) net product arrival validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -256,7 +246,6 @@ test('/create-non-manipulation-document/:documentNumber/add-product-to-this-cons
 //------ TESTS FOR you-have-added-a-product -----
 test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product with selected another product choice validates as OK', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addedProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -283,7 +272,6 @@ test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product
 
 test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product with unselected another product choice validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     await withValidationStubs(async () => {
       const handler = StorageNotes[addedProductUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
@@ -311,7 +299,6 @@ test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product
 //------ TESTS FOR add-storage-facility-details -----
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with all mandatory fields validates as OK', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -343,7 +330,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing facility name validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -370,7 +356,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing address fields validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -398,7 +383,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing town or city validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -426,7 +410,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing building and street validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -455,7 +438,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-approval with missing Stored As validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityApprovalUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -478,7 +460,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-app
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with whitespace facilityName, facilityAddressOne and facilityTownCity validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -508,7 +489,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with emoji in facilityName validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -536,7 +516,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with emoji in facilityAddressOne validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -564,7 +543,6 @@ test('/create-non-manipulation-document/:documentNumber/add-storage-facility-det
 
 test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with emoji in facilityTownCity validates as error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const handler = StorageNotes[facilityDetailsUrl];
       t.equals(typeof handler, 'function', 'route handler exists');
     const data = {
@@ -599,7 +577,6 @@ const arrivalWeightBaseProduct = {
 
 test('validateEntry net weight arrival: fishery weight less than product weight - no cross-check error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '30' };
     const { errors } = await validateEntry(product, 0, {});
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');
@@ -616,7 +593,6 @@ test('validateEntry net weight arrival: fishery weight less than product weight 
 
 test('validateEntry net weight arrival: fishery weight equal to product weight - no cross-check error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '50' };
     const { errors } = await validateEntry(product, 0, {});
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');
@@ -633,7 +609,6 @@ test('validateEntry net weight arrival: fishery weight equal to product weight -
 
 test('validateEntry net weight arrival: fishery weight exceeds product weight - sets cross-check error on fishery weight field', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80' };
     const { errors } = await validateEntry(product, 0, {});
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');
@@ -650,7 +625,6 @@ test('validateEntry net weight arrival: fishery weight exceeds product weight - 
 
 test('validateEntry net weight arrival: cross-check error applied at correct index', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80' };
     const { errors } = await validateEntry(product, 2, {});
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');
@@ -667,7 +641,6 @@ test('validateEntry net weight arrival: cross-check error applied at correct ind
 
 test('validateEntry net weight arrival: cross-check not triggered when netWeightProductArrival has individual validation error', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '-1', netWeightFisheryProductArrival: '80' };
     const { errors } = await validateEntry(product, 0, {});
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');
@@ -684,7 +657,6 @@ test('validateEntry net weight arrival: cross-check not triggered when netWeight
 
 test('validateEntry net weight arrival: fishery individual error preserved when fishery does not exceed product weight and product is valid', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '-1' };
     const { errors } = await validateEntry(product, 0, {});
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');
@@ -700,7 +672,6 @@ test('validateEntry net weight arrival: fishery individual error preserved when 
 
 test('validateEntry net weight arrival: fishery individual error preserved when fishery also numerically exceeds product weight', async t => {
   try {
-    assert.ok(true, 'storage-notes handler assertion marker');
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80.123' };
     const { errors } = await validateEntry(product, 0, {});
     t.equals(typeof errors, 'object', 'validateEntry returns an errors object');

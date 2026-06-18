@@ -1,5 +1,4 @@
 import * as test from 'tape';
-import * as assert from 'assert';
 const sinon = require('sinon');
 import ExporterService from '../../src/services/exporter.service';
 import { SessionStoreFactory } from '../../src/session_store/factory';
@@ -17,7 +16,6 @@ const key = 'redisKey';
 test('ExporterService.get - Should return the data in the redis store', async (t) => {
   let getSessionStoreStub;
   try {
-    assert.ok(true, 'exporter service assertion marker');
     const readAllForStub = sinon.stub().resolves('foobar');
     getSessionStoreStub = sinon.stub(SessionStoreFactory, 'getSessionStore').resolves({
       readAllFor: readAllForStub
@@ -41,7 +39,6 @@ test('ExporterService.get - Should return the data in the redis store', async (t
 test('ExporterService.get - Should return an empty object if no data available', async (t) => {
   let getSessionStoreStub;
   try {
-    assert.ok(true, 'exporter service assertion marker');
     const readAllForStub = sinon.stub().resolves(null);
     getSessionStoreStub = sinon.stub(SessionStoreFactory, 'getSessionStore').resolves({
       readAllFor: readAllForStub
@@ -68,7 +65,6 @@ test('ExporterService.save - Should merge draft and payload, persist and return 
   let withUserSessionDataStoredStub;
   let getCurrentSessionDataStub;
   try {
-    assert.ok(true, 'exporter service assertion marker');
     const payload = { foo: 'bar', currentUri: '/payload-current', nextUri: '/payload-next' };
     const draftData = { bar: 'foo', nextUri: '/draft-next' };
 
@@ -131,7 +127,6 @@ test('ExporterService.save - Should route to processing statement service for pr
   let withUserSessionDataStoredStub;
   let getCurrentSessionDataStub;
   try {
-    assert.ok(true, 'exporter service assertion marker');
     psGetDraftDataStub = sinon.stub(ProcessingStatementService, 'getDraftData').resolves({ existing: 'value' });
     psUpsertExporterDetailsStub = sinon.stub(ProcessingStatementService, 'upsertExporterDetails').resolves();
     catchGetDraftDataStub = sinon.stub(CatchCertService, 'getDraftData').resolves({});
@@ -175,7 +170,6 @@ test('ExporterService.save - Should route to storage document service for storag
   let withUserSessionDataStoredStub;
   let getCurrentSessionDataStub;
   try {
-    assert.ok(true, 'exporter service assertion marker');
     sdGetDraftDataStub = sinon.stub(StorageDocumentService, 'getDraftData').resolves({ alpha: 'omega' });
     sdUpsertExporterDetailsStub = sinon.stub(StorageDocumentService, 'upsertExporterDetails').resolves();
     withUserSessionDataStoredStub = sinon.stub(sessionManager, 'withUserSessionDataStored').callsFake(async (_user, _sessionData, _contact, nextAction) => {
