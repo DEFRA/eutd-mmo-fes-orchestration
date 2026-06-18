@@ -22,7 +22,7 @@ const commonSuccessTest = (desc, path, callFunc, expectEqual, ...args) => test(g
     const result = await callFunc(...args, mockAxios);
     t.assert(mockAxios.get.called);
     t.deepEquals(result, expectEqual);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(mockAxios.get.callCount, 1, 'axios.get called exactly once');
     t.end();
   } catch (e) {
     t.end(e);
@@ -35,7 +35,8 @@ const commonFailTest = (desc, path, callFunc, ...args) => test(getTestDescriptio
     const result = await callFunc(...args, mockAxios);
     t.assert(mockAxios.get.called);
     t.equals(result.message, 'error');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(mockAxios.get.callCount, 1, 'axios.get called exactly once on error');
+    t.ok(result instanceof Error, 'result is an Error instance');
     t.end();
   } catch (e) {
     t.end(e);

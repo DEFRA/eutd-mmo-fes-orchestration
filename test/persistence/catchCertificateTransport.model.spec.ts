@@ -14,10 +14,15 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.registrationNumber, backEndTransport.registrationNumber, 'registration number is preserved');
+  t.equal(result.nationalityOfVehicle, backEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved');
+  t.equal(result.cmr, String(backEndTransport.cmr), 'cmr flag is normalized to string');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['CONT001', 'CONT002', 'CONT003']);
   t.equal(result.containerIdentificationNumber, 'CONT001 CONT002 CONT003');
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -33,9 +38,14 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.registrationNumber, backEndTransport.registrationNumber, 'registration number is preserved');
+  t.equal(result.nationalityOfVehicle, backEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved');
+  t.equal(result.cmr, String(backEndTransport.cmr), 'cmr flag is normalized to string');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['CONT001']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -51,9 +61,14 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.registrationNumber, backEndTransport.registrationNumber, 'registration number is preserved');
+  t.equal(result.nationalityOfVehicle, backEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved');
+  t.equal(result.cmr, String(backEndTransport.cmr), 'cmr flag is normalized to string');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['CONT001', 'CONT002', 'CONT003']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -69,9 +84,14 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.registrationNumber, backEndTransport.registrationNumber, 'registration number is preserved');
+  t.equal(result.nationalityOfVehicle, backEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved');
+  t.equal(result.cmr, String(backEndTransport.cmr), 'cmr flag is normalized to string');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
-  t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.deepEqual(result.containerNumbers, []);
   t.end();
 });
 
@@ -87,9 +107,14 @@ test('CatchCertificateTransport toFrontEndTransport - should handle null contain
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.registrationNumber, backEndTransport.registrationNumber, 'registration number is preserved');
+  t.equal(result.nationalityOfVehicle, backEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved');
+  t.equal(result.cmr, String(backEndTransport.cmr), 'cmr flag is normalized to string');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -105,10 +130,15 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.registrationNumber, backEndTransport.registrationNumber, 'registration number is preserved');
+  t.equal(result.nationalityOfVehicle, backEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved');
+  t.equal(result.cmr, String(backEndTransport.cmr), 'cmr flag is normalized to string');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -121,10 +151,15 @@ test('CatchCertificateTransport toFrontEndTransport - should not set containerNu
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.registrationNumber, backEndTransport.registrationNumber, 'registration number is preserved');
+  t.equal(result.nationalityOfVehicle, backEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved');
+  t.equal(result.cmr, String(backEndTransport.cmr), 'cmr flag is normalized to string');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.equal(result.containerNumbers, undefined);
   t.equal(result.containerIdentificationNumber, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -138,9 +173,12 @@ test('CatchCertificateTransport toFrontEndTransport - should not include contain
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.flightNumber, backEndTransport.flightNumber, 'flight number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
-  t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.deepEqual(result.containerNumbers, ['CONT123']);
   t.end();
 });
 
@@ -154,10 +192,13 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.flightNumber, backEndTransport.flightNumber, 'flight number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
   t.equal(result.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -171,9 +212,12 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.flightNumber, backEndTransport.flightNumber, 'flight number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -187,9 +231,12 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.flightNumber, backEndTransport.flightNumber, 'flight number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -203,9 +250,12 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.flightNumber, backEndTransport.flightNumber, 'flight number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
-  t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.deepEqual(result.containerNumbers, []);
   t.end();
 });
 
@@ -219,10 +269,12 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.railwayBillNumber, backEndTransport.railwayBillNumber, 'railway bill number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
   t.equal(result.containerIdentificationNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -236,9 +288,12 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.railwayBillNumber, backEndTransport.railwayBillNumber, 'railway bill number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -252,9 +307,11 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.railwayBillNumber, backEndTransport.railwayBillNumber, 'railway bill number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -268,9 +325,12 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.railwayBillNumber, backEndTransport.railwayBillNumber, 'railway bill number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
-  t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.deepEqual(result.containerNumbers, []);
   t.end();
 });
 
@@ -284,9 +344,11 @@ test('CatchCertificateTransport toFrontEndTransport - should handle null contain
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.railwayBillNumber, backEndTransport.railwayBillNumber, 'railway bill number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -301,10 +363,14 @@ test('CatchCertificateTransport toFrontEndTransport - should transform container
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.vesselName, backEndTransport.vesselName, 'vessel name is preserved');
+  t.equal(result.flagState, backEndTransport.flagState, 'flag state is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
   t.equal(result.containerNumber, 'ABCU1234567 ABCJ2345678 ABCZ3456789');
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -319,9 +385,13 @@ test('CatchCertificateTransport toFrontEndTransport - should handle single conta
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.vesselName, backEndTransport.vesselName, 'vessel name is preserved');
+  t.equal(result.flagState, backEndTransport.flagState, 'flag state is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -336,9 +406,13 @@ test('CatchCertificateTransport toFrontEndTransport - should filter out empty st
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.vesselName, backEndTransport.vesselName, 'vessel name is preserved');
+  t.equal(result.flagState, backEndTransport.flagState, 'flag state is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['ABCU1234567', 'ABCJ2345678', 'ABCZ3456789']);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -353,9 +427,13 @@ test('CatchCertificateTransport toFrontEndTransport - should handle empty contai
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.vesselName, backEndTransport.vesselName, 'vessel name is preserved');
+  t.equal(result.flagState, backEndTransport.flagState, 'flag state is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
-  t.equal(result.containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.deepEqual(result.containerNumbers, []);
   t.end();
 });
 
@@ -369,10 +447,12 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.flightNumber, backEndTransport.flightNumber, 'flight number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -386,10 +466,13 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.railwayBillNumber, backEndTransport.railwayBillNumber, 'railway bill number is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -404,10 +487,15 @@ test('CatchCertificateTransport toFrontEndTransport - should handle maximum 10 c
   };
 
   const result = toFrontEndTransport(backEndTransport);
+  t.equal(result.departurePlace, backEndTransport.departurePlace, 'departure place is preserved');
+  t.equal(result.containerNumber, backEndTransport.containerNumber, 'container number is preserved');
+  t.equal(result.vesselName, backEndTransport.vesselName, 'vessel name is preserved');
+  t.equal(result.flagState, backEndTransport.flagState, 'flag state is preserved');
+  t.equal(result.vehicle, backEndTransport.vehicle, 'vehicle is preserved');
+  t.equal(result.id, String(backEndTransport.id), 'id is normalized to string');
 
   t.deepEqual(result.containerNumbers, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
   t.equal(result.containerNumbers?.length, 10);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -423,10 +511,13 @@ test('CatchCertificateTransport toBackEndTransport - should preserve containerId
   };
 
   const result = toBackEndTransport(frontEndTransport);
+  t.equal(result.departurePlace, frontEndTransport.departurePlace, 'departure place is preserved in backend model');
+  t.equal(result.registrationNumber, frontEndTransport.registrationNumber, 'registration number is preserved in backend model');
+  t.equal(result.nationalityOfVehicle, frontEndTransport.nationalityOfVehicle, 'vehicle nationality is preserved in backend model');
+  t.equal(result.vehicle, frontEndTransport.vehicle, 'vehicle is preserved in backend model');
 
   t.equal(result.containerIdentificationNumber, 'CONT001 CONT002 CONT003');
   t.equal((result as any).containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -440,9 +531,10 @@ test('CatchCertificateTransport toBackEndTransport - should handle truck transpo
   };
 
   const result = toBackEndTransport(frontEndTransport);
+  t.equal(result.cmr, true, 'cmr string is normalized to boolean true in backend model');
+  t.equal(result.vehicle, frontEndTransport.vehicle, 'vehicle is preserved in backend model');
 
   t.equal(result.containerIdentificationNumber, undefined);
   t.equal((result as any).containerNumbers, undefined);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });

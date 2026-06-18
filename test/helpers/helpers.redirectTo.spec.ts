@@ -1,5 +1,6 @@
 import * as test from 'tape';
 import * as Hapi from 'hapi';
+import * as assert from 'node:assert/strict';
 import { serverTest } from '../testHelpers';
 import { mock } from 'ts-mockito';
 
@@ -18,8 +19,8 @@ test('when redirect attribute is set in payload redirectTo should return redirec
 
   //
   let redirectUri = redirectTo(mockReq);
+  assert.strictEqual(redirectUri, '/add-landings');
   t.equal(redirectUri, '/add-landings');
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -34,8 +35,8 @@ test('when redirect attribute is NOT set in payload but header is set to accept 
 
   //
   let redirectUri = redirectTo(mockReq);
+  assert.strictEqual(redirectUri, null);
   t.equal(redirectUri, null);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
@@ -46,7 +47,7 @@ test('when redirect attribute is NOT set in payload and header is NOT set to acc
 
   //
   let redirectUri = redirectTo(mockReq);
+  assert.strictEqual(redirectUri, null);
   t.equal(redirectUri, null);
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });

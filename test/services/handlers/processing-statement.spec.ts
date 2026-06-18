@@ -2,12 +2,14 @@ import * as test from 'tape';
 import logger from '../../../src/logger';
 
 import ProcessingStatement from '../../../src/services/handlers/processing-statement';
-import moment = require('moment');
 
-//------ TESTS FOR /create-processing-statement/add-consignment-details -----
+// Handler route keys all use the :documentNumber pattern
+const DN = ':documentNumber';
+
+//------ TESTS FOR add-consignment-details -----
 test('/create-processing-statement/add-consignment-details with all mandatory fields validates as OK', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-consignment-details';
+    const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
@@ -15,7 +17,7 @@ test('/create-processing-statement/add-consignment-details with all mandatory fi
       consignmentDescription: 'A description'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -24,16 +26,16 @@ test('/create-processing-statement/add-consignment-details with all mandatory fi
 
     t.true(errors);
     t.deepEquals(errors, {});
+    t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
 test('/create-processing-statement/add-consignment-details with missing consignmentDescription validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-consignment-details';
+    const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
@@ -42,7 +44,7 @@ test('/create-processing-statement/add-consignment-details with missing consignm
       healthCertificateDate: '31/03/2018'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -54,16 +56,17 @@ test('/create-processing-statement/add-consignment-details with missing consignm
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
 test('/create-processing-statement/add-consignment-details with whitespace consignmentDescription validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-consignment-details';
+    const currentUrl = `/create-processing-statement/${DN}/add-consignment-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
@@ -71,7 +74,7 @@ test('/create-processing-statement/add-consignment-details with whitespace consi
       consignmentDescription: ' ',
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -83,428 +86,301 @@ test('/create-processing-statement/add-consignment-details with whitespace consi
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-//------ TESTS FOR /create-processing-statement/add-catch-to-consignment/:catchIndex -----
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with all mandatory fields validates as OK', async t => {
+//------ TESTS FOR add-catch-weights (replaces old add-catch-to-consignment which no longer exists) -----
+test('/create-processing-statement/add-catch-weights with all weight fields valid validates as OK', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [
         {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
+          catchCertificateType: 'non_uk',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110'
         }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
+      ]
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
-      params: 0,
+      params: { catchIndex: 0 },
       errors: {}
     });
 
     t.true(errors);
     t.deepEquals(errors, {});
+    t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-test('/create-processing-statement/add-processing-plant-address with missing plantPostcode validates as error', async t => {
+test('/create-processing-statement/add-catch-weights with missing totalWeightLanded validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-processing-plant-address';
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [
         {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
+          catchCertificateType: 'non_uk',
           exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110'
         }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantName: 'Triffid',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: ' '
+      ]
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
-      params: 0,
+      params: { catchIndex: 0 },
       errors: {}
     });
 
     const expected = {
-      plantPostcode: 'Enter the postcode'
+      'catches-0-totalWeightLanded': 'psAddCatchWeightsErrorEnterTotalWeightLandedInKG'
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with missing species validates as error', async t => {
+test('/create-processing-statement/add-catch-weights with zero totalWeightLanded validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
 
+    // exportWeight values must also be 0 so they do not trigger the
+    // "exceeds totalWeight" cross-field error alongside the zero-weight error
     const data = {
       catches: [
         {
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
+          catchCertificateType: 'non_uk',
+          totalWeightLanded: '0',
+          exportWeightBeforeProcessing: '0',
+          exportWeightAfterProcessing: '0'
         }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
+      ]
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
-      params: 0,
+      params: { catchIndex: 0 },
       errors: {}
     });
 
-    const expected = {'catches-0-species': 'Enter the FAO code or species name'};
     t.true(errors);
-    t.deepEquals(errors, expected);
+    t.ok(errors['catches-0-totalWeightLanded'], 'totalWeightLanded error is set');
+    t.equals(errors['catches-0-totalWeightLanded'], 'psAddCatchWeightsErrorTotalWeightGreaterThanNull', 'totalWeightLanded zero error message is correct');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with missing catchCertificateNumber validates as error', async t => {
+test('/create-processing-statement/add-catch-weights with missing exportWeightBeforeProcessing validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [
         {
-          species: 'Atlantic Cod',
+          catchCertificateType: 'non_uk',
           totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
           exportWeightAfterProcessing: '1110'
         }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
+      ]
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
-      params: 0,
+      params: { catchIndex: 0 },
       errors: {}
     });
 
     const expected = {
-      'catches-0-catchCertificateNumber': 'Enter the catch certificate number'
+      'catches-0-exportWeightBeforeProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGBeforeProcessing'
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with missing totalWeightLanded validates as error', async t => {
+test('/create-processing-statement/add-catch-weights with missing exportWeightAfterProcessing validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [
         {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
-    };
-
-    let {errors} = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
-
-    const expected = {
-      'catches-0-totalWeightLanded': 'Enter the total weight landed in kg'
-    };
-    t.true(errors);
-    t.deepEquals(errors, expected);
-  } catch (e) {
-    logger.error(e);
-  }
-  t.equal(true, true, 'Sonar S2699 assertion');
-  t.end();
-});
-
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with missing exportWeightBeforeProcessing validates as error', async t => {
-  try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
-    const handler = ProcessingStatement[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
-    };
-
-    let {errors} = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
-
-    const expected = {
-      'catches-0-exportWeightBeforeProcessing':
-        'Enter the export weight in kg (before processing)'
-    };
-    t.true(errors);
-    t.deepEquals(errors, expected);
-  } catch (e) {
-    logger.error(e);
-  }
-  t.equal(true, true, 'Sonar S2699 assertion');
-  t.end();
-});
-
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with missing exportWeightAfterProcessing validates as error', async t => {
-  try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
-    const handler = ProcessingStatement[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
+          catchCertificateType: 'non_uk',
           totalWeightLanded: '1112',
           exportWeightBeforeProcessing: '1111'
         }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
+      ]
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
-      params: 0,
+      params: { catchIndex: 0 },
       errors: {}
     });
 
     const expected = {
-      'catches-0-exportWeightAfterProcessing':
-        'Enter the export weight in kg (after processing)'
+      'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorEnterExportWeightInKGAfterProcessing'
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with whitespace species and catchCertificateNumber validates as error', async t => {
+test('/create-processing-statement/add-catch-weights with negative exportWeightBeforeProcessing and exportWeightAfterProcessing validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [
         {
-          species: ' ',
-          catchCertificateNumber: ' ',
+          catchCertificateType: 'non_uk',
           totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
-    };
-
-    let {errors} = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
-
-    const expected = {
-      'catches-0-species': 'Enter the FAO code or species name',
-      'catches-0-catchCertificateNumber': 'Enter the catch certificate number'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-  } catch (e) {
-    logger.error(e);
-  }
-  t.equal(true, true, 'Sonar S2699 assertion');
-  t.end();
-});
-
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with invalid (negative) numbers in totalWeightLanded, exportWeightBeforeProcessing and exportWeightAfterProcessing validates as error', async t => {
-  try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
-    const handler = ProcessingStatement[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '-1112',
           exportWeightBeforeProcessing: '-1111',
           exportWeightAfterProcessing: '-1110'
         }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
+      ]
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
-      params: 0,
+      params: { catchIndex: 0 },
       errors: {}
     });
 
     const expected = {
-      'catches-0-totalWeightLanded':
-        'Enter the total landed weight as a whole number, like 500',
-      'catches-0-exportWeightBeforeProcessing':
-        'Enter the export weight (before processing) as a whole number, like 500',
-      'catches-0-exportWeightAfterProcessing':
-        'Enter the export weight (after processing) as a whole number, like 500'
+      'catches-0-exportWeightBeforeProcessing': 'psAddCatchWeightsErrorExportWeightGreaterThanNullBeforeProcessing',
+      'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorExportWeightGreaterThanNullAfterProcessing'
     };
-
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-test('/create-processing-statement/add-catch-to-consignment/:catchIndex with zero totalWeightLanded validates as error', async t => {
+test('/create-processing-statement/add-catch-weights with exportWeightAfterProcessing exceeding exportWeightBeforeProcessing validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-catch-to-consignment';
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [
         {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '0',
-          exportWeightBeforeProcessing: '1',
-          exportWeightAfterProcessing: '1'
+          catchCertificateType: 'non_uk',
+          totalWeightLanded: '2000',
+          exportWeightBeforeProcessing: '500',
+          exportWeightAfterProcessing: '1000'
         }
-      ],
-      consignmentDescription: 'A description',
-      healthCertificateNumber: 'HN-111111',
-      healthCertificateDate: '31/03/2018'
+      ]
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
-      params: 0,
+      params: { catchIndex: 0 },
       errors: {}
     });
 
     const expected = {
-      'catches-0-totalWeightLanded': 'psAddCatchWeightsErrorTotalWeightGreaterThanNull'
+      'catches-0-exportWeightAfterProcessing': 'psAddCatchWeightsErrorExportWeightAfterProcessingExceedsBeforeProcessing'
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
+test('/create-processing-statement/add-catch-weights - uk type skips totalWeightLanded validation', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-catch-weights/:catchIndex`;
+    const handler = ProcessingStatement[currentUrl];
 
-//------ TESTS FOR /create-processing-statement/catch-added -----
+    const data = {
+      catches: [
+        {
+          catchCertificateType: 'uk',
+          exportWeightBeforeProcessing: '500',
+          exportWeightAfterProcessing: '400'
+        }
+      ]
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: { catchIndex: 0 },
+      errors: {}
+    });
+
+    t.equals(errors['catches-0-totalWeightLanded'], undefined, 'totalWeightLanded not validated for uk catch type');
+    t.equals(Object.keys(errors).length, 0, 'no errors for uk catch with valid weights');
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+//------ TESTS FOR catch-added -----
 test('/create-processing-statement/catch-added with missing addAnotherCatch validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/catch-added';
+    const currentUrl = `/create-processing-statement/${DN}/catch-added`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
@@ -523,7 +399,7 @@ test('/create-processing-statement/catch-added with missing addAnotherCatch vali
       addAnotherCatch: 'notset'
     };
 
-    let {errors} = await handler({
+    let { errors } = await handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -532,50 +408,68 @@ test('/create-processing-statement/catch-added with missing addAnotherCatch vali
     });
 
     const expected = {
-      addAnotherCatch: 'psCatchAddedErrorAddAnotherCatch'
+      addAnotherCatch: 'ccLandingTypeSelectOption'
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-
-//------ TESTS FOR /create-processing-statement/add-processing-plant-details -----
-test('/create-processing-statement/add-processing-plant-details with all mandatory fields validates as OK', async t => {
+test('/create-processing-statement/catch-added with empty addAnotherCatch validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-details';
+    const currentUrl = `/create-processing-statement/${DN}/catch-added`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
+      catches: [{}],
+      consignmentDescription: 'Consignment 1',
+      addAnotherCatch: ''
+    };
+
+    let { errors } = await handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      addAnotherCatch: 'ccLandingTypeSelectOption'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+//------ TESTS FOR add-processing-plant-details -----
+test('/create-processing-statement/add-processing-plant-details with all mandatory fields validates as OK', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [],
       consignmentDescription: 'Consignment 1',
       healthCertificateNumber: 'HC-111111',
       healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
       dateOfAcceptance: '03/03/2019',
       personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
+      plantApprovalNumber: 'Approval123',
       plantName: 'Triffid',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA'
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -585,43 +479,27 @@ test('/create-processing-statement/add-processing-plant-details with all mandato
 
     t.true(errors);
     t.deepEquals(errors, {});
+    t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
 test('/create-processing-statement/add-processing-plant-details with missing personResponsibleForConsignment validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-details';
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
+      catches: [],
       consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
       dateOfAcceptance: '03/03/2019',
-      plantApprovalNumber: 'Marvin',
+      plantApprovalNumber: 'Approval123',
       plantName: 'Triffid',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA'
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -630,48 +508,67 @@ test('/create-processing-statement/add-processing-plant-details with missing per
     });
 
     const expected = {
-      personResponsibleForConsignment:
-        'psAddProcessingPlantDetailsErrorNullReponsiblePerson'
+      personResponsibleForConsignment: 'psAddProcessingPDErrorPersonResponsibleForConsignment'
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-details with whitespace personResponsibleForConsignment validates as error', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [],
+      consignmentDescription: 'Consignment 1',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: ' ',
+      plantApprovalNumber: 'Approval123',
+      plantName: 'Triffid',
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      personResponsibleForConsignment: 'psAddProcessingPDErrorPersonResponsibleForConsignment'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+  } catch (e) {
+    logger.error(e);
+  }
   t.end();
 });
 
 test('/create-processing-statement/add-processing-plant-details with missing plantApprovalNumber validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-details';
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
+      catches: [],
       consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
       dateOfAcceptance: '03/03/2019',
       personResponsibleForConsignment: 'Hank',
       plantName: 'Triffid',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA'
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -680,47 +577,68 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
     });
 
     const expected = {
-      plantApprovalNumber: 'psAddProcessingPlantDetailsErrorNullPlantApprovalNumber'
+      plantApprovalNumber: 'psAddProcessingPDErrorPlantApprovalNumber'
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-details with whitespace personResponsibleForConsignment and plantApprovalNumber validates as error', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      catches: [],
+      consignmentDescription: 'Consignment 1',
+      dateOfAcceptance: '03/03/2019',
+      personResponsibleForConsignment: ' ',
+      plantApprovalNumber: ' ',
+      plantName: 'Triffid',
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      personResponsibleForConsignment: 'psAddProcessingPDErrorPersonResponsibleForConsignment',
+      plantApprovalNumber: 'psAddProcessingPDErrorPlantApprovalNumber',
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+  } catch (e) {
+    logger.error(e);
+  }
   t.end();
 });
 
 test('/create-processing-statement/add-processing-plant-details with missing plantName validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-address';
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
+      catches: [],
       consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
       dateOfAcceptance: '03/03/2019',
       personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA'
+      plantApprovalNumber: 'Approval123',
     };
 
-    let {errors} = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -733,223 +651,29 @@ test('/create-processing-statement/add-processing-plant-details with missing pla
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
-test('/create-processing-statement/add-processing-plant-details with missing plantAddressOne validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-address';
-    const handler = ProcessingStatement[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantName: 'Triffid'
-    };
-
-    let {errors} = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
-
-    const expected = {
-      plantAddressOne: 'Enter the address'
-    };
-    t.true(errors);
-    t.deepEquals(errors, expected);
-  } catch (e) {
-    logger.error(e);
-  }
-  t.equal(true, true, 'Sonar S2699 assertion');
-  t.end();
-});
-
-test('/create-processing-statement/add-processing-plant-details with missing plantAddressOne validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-address';
-    const handler = ProcessingStatement[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantName: 'Triffid',
-      plantAddressOne: '',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: 'Seaham',
-      plantPostcode: 'SE11EA'
-    };
-
-    let {errors} = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
-
-    const expected = {
-      plantAddressOne: 'Enter the building and street (address line 1 of 2)'
-    };
-    t.true(errors);
-    t.deepEquals(errors, expected);
-  } catch (e) {
-    logger.error(e);
-  }
-  t.equal(true, true, 'Sonar S2699 assertion');
-  t.end();
-});
-
-test('/create-processing-statement/add-processing-plant-details with missing plantTownCity validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-address';
-    const handler = ProcessingStatement[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
-      plantName: 'Triffid',
-      plantAddressOne: 'Fish Quay',
-      plantAddressTwo: 'Fishy Way',
-      plantTownCity: '',
-      plantPostcode: 'SE11EA'
-    };
-
-    let {errors} = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
-
-    const expected = {
-      plantTownCity: 'Enter the town or city'
-    };
-    t.true(errors);
-    t.deepEquals(errors, expected);
-  } catch (e) {
-    logger.error(e);
-  }
-  t.equal(true, true, 'Sonar S2699 assertion');
-  t.end();
-});
-
-test('/create-processing-statement/add-processing-plant-details with whitespace personResponsibleForConsignment, plantApprovalNumber validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-processing-statement/add-processing-plant-details';
-    const handler = ProcessingStatement[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          species: 'Atlantic Cod',
-          catchCertificateNumber: 'CT-111111',
-          totalWeightLanded: '1112',
-          exportWeightBeforeProcessing: '1111',
-          exportWeightAfterProcessing: '1110'
-        }
-      ],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: ' ',
-      plantApprovalNumber: ' ',
-    };
-
-    let {errors} = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
-
-    const expected = {
-      personResponsibleForConsignment:
-        'psAddProcessingPlantDetailsErrorNullReponsiblePerson',
-      plantApprovalNumber: 'psAddProcessingPlantDetailsErrorNullPlantApprovalNumber',
-    };
-    t.true(errors);
-    t.deepEquals(errors, expected);
-  } catch (e) {
-    logger.error(e);
-  }
-  t.equal(true, true, 'Sonar S2699 assertion');
-  t.end();
-});
 test('/create-processing-statement/add-processing-plant-details with emoji in plantName validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-processing-plant-details';
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [],
       consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
       dateOfAcceptance: '03/03/2019',
       personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
+      plantApprovalNumber: 'Approval123',
       plantName: '🐟 Triffid Plant',
     };
 
-    let { errors } = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -962,31 +686,29 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pl
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
 test('/create-processing-statement/add-processing-plant-details with emoji in personResponsibleForConsignment validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-processing-plant-details';
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-details`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
       catches: [],
       consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
       dateOfAcceptance: '03/03/2019',
       personResponsibleForConsignment: 'Hank 😀',
-      plantApprovalNumber: 'Marvin',
+      plantApprovalNumber: 'Approval123',
       plantName: 'Triffid Plant',
     };
 
-    let { errors } = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -999,27 +721,153 @@ test('/create-processing-statement/add-processing-plant-details with emoji in pe
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.end();
+});
+
+//------ TESTS FOR add-processing-plant-address -----
+test('/create-processing-statement/add-processing-plant-address with all address fields missing validates as error', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      plantName: 'Triffid',
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantAddressOne: 'psAddProcessingPlantAddressErrorAddress'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-address with empty plantAddressOne validates as error', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      plantName: 'Triffid',
+      plantAddressOne: '',
+      plantAddressTwo: 'Fishy Way',
+      plantTownCity: 'Seaham',
+      plantPostcode: 'SE11EA'
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantAddressOne: 'Enter the building and street (address line 1 of 2)'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-address with missing plantTownCity validates as error', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      plantName: 'Triffid',
+      plantAddressOne: 'Fish Quay',
+      plantAddressTwo: 'Fishy Way',
+      plantTownCity: '',
+      plantPostcode: 'SE11EA'
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantTownCity: 'Enter the town or city'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+  } catch (e) {
+    logger.error(e);
+  }
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-address with whitespace plantPostcode validates as error', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      plantName: 'Triffid',
+      plantAddressOne: 'Fish Quay',
+      plantAddressTwo: 'Fishy Way',
+      plantTownCity: 'Seaham',
+      plantPostcode: ' '
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    const expected = {
+      plantPostcode: 'Enter the postcode'
+    };
+    t.true(errors);
+    t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+  } catch (e) {
+    logger.error(e);
+  }
   t.end();
 });
 
 test('/create-processing-statement/add-processing-plant-address with emoji in plantAddressOne validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-processing-plant-address';
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
-      catches: [],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
       plantName: 'Triffid Plant',
       plantAddressOne: '🏠 Fish Quay',
       plantAddressTwo: 'Fishy Way',
@@ -1027,7 +875,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
       plantPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -1040,27 +888,20 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
   t.end();
 });
 
 test('/create-processing-statement/add-processing-plant-address with emoji in plantTownCity validates as error', async t => {
   try {
-    const currentUrl = '/create-processing-statement/add-processing-plant-address';
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
     const handler = ProcessingStatement[currentUrl];
 
     const data = {
-      catches: [],
-      consignmentDescription: 'Consignment 1',
-      healthCertificateNumber: 'HC-111111',
-      healthCertificateDate: '31/03/2018',
-      addAnotherCatch: 'notset',
-      dateOfAcceptance: '03/03/2019',
-      personResponsibleForConsignment: 'Hank',
-      plantApprovalNumber: 'Marvin',
       plantName: 'Triffid Plant',
       plantAddressOne: 'Fish Quay',
       plantAddressTwo: 'Fishy Way',
@@ -1068,7 +909,7 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
       plantPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
+    let { errors } = handler({
       data: data,
       nextUrl: '',
       currentUrl: currentUrl,
@@ -1081,9 +922,40 @@ test('/create-processing-statement/add-processing-plant-address with emoji in pl
     };
     t.true(errors);
     t.deepEquals(errors, expected);
+    t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+    t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
   } catch (e) {
     logger.error(e);
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.end();
+});
+
+test('/create-processing-statement/add-processing-plant-address with valid address validates as OK', async t => {
+  try {
+    const currentUrl = `/create-processing-statement/${DN}/add-processing-plant-address`;
+    const handler = ProcessingStatement[currentUrl];
+
+    const data = {
+      plantName: 'Triffid Plant',
+      plantAddressOne: 'Fish Quay',
+      plantAddressTwo: 'Fishy Way',
+      plantTownCity: 'Seaham',
+      plantPostcode: 'SE11EA'
+    };
+
+    let { errors } = handler({
+      data: data,
+      nextUrl: '',
+      currentUrl: currentUrl,
+      params: 0,
+      errors: {}
+    });
+
+    t.true(errors);
+    t.deepEquals(errors, {});
+    t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
+  } catch (e) {
+    logger.error(e);
+  }
   t.end();
 });

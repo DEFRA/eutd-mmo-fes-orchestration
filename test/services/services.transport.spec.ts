@@ -25,7 +25,8 @@ test('Add transport', async (t) => {
     t.equals(catchCertificate.transport['vehicle'], transport['vehicle']);
     t.equals(catchCertificate.transport['user_id'], transport['user_id']);
     t.equals(!!catchCertificate, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof catchCertificate.transport, 'object', 'transport is an object');
+    t.equals(catchCertificate.transport['journey'], transport['journey'], 'journey matches input');
     t.end();
   } catch (e) {
     logger.error(e);
@@ -62,7 +63,8 @@ test('Add transport Details', async (t) => {
     t.equals(catchCertificate.transport['vehicle'], 'train');
 
     t.equals(!!catchCertificate, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof catchCertificate.transport, 'object', 'transport is an object');
+    t.ok(catchCertificate.transport['railwayBillNumber'], 'railwayBillNumber is truthy');
     t.end();
   } catch (e) {
     logger.error(e);
@@ -98,7 +100,8 @@ test('Get transport Details', async (t) => {
     t.equals(savedTransport['departurePlace'], transport['departurePlace']);
     t.equals(savedTransport['vehicle'], 'train');
     t.equals(!!savedTransport, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof savedTransport, 'object', 'savedTransport is an object');
+    t.ok(Object.keys(savedTransport).length > 0, 'savedTransport has properties');
     t.end();
 
   } catch (e) {

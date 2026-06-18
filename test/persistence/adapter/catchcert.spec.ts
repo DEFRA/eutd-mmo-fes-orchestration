@@ -75,8 +75,8 @@ test('List of products should be built from list of species with landings', t =>
   const products = buildProducts(data);
   t.equals(products.length, 1, 'Export one product');  
   t.equals(products[0].caughtBy.length, 2, 'Product is caught by 2 different landings');
-  console.log(products);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equals(products[0].species, 'COD', 'product species is mapped correctly');
+  t.equals(products[0].commodityCode, '03036310', 'product commodity code is mapped correctly');
   t.end();
 });
 
@@ -181,8 +181,8 @@ test('List of products should be built from multiple list of species with landin
   t.equals(products.length, 2, 'Two export products');  
   t.equals(products[0].caughtBy.length, 2, '1st product is caught by 2 landings');
   t.equals(products[1].caughtBy.length, 1, '2nd product is caught by 1 landing');
-  console.log(products);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equals(products[0].species, 'COD', '1st product species is mapped correctly');
+  t.equals(products[1].species, 'HAD', '2nd product species is mapped correctly');
   t.end();
 });
 

@@ -25,7 +25,8 @@ test('orchestration.service today() returns today correctly', async t => {
   try {
     let result = today();
     t.equals(result, moment().format('DD/MM/YYYY'));
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.ok(result, 'result is truthy');
+    t.equals(result.length, 10, 'date string has correct format length DD/MM/YYYY');
     t.end();
   } catch (e) {
     t.end(e);
@@ -43,7 +44,7 @@ test('orchestration.service parseDate() returns date correctly', async t => {
 
     result = parseDate('32/01/1970');
     t.equals(result.format, moment.unix(0).format);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.ok(result, 'parseDate returns a moment object for invalid dates');
     t.end();
   } catch (e) {
     t.end(e);
@@ -61,7 +62,7 @@ test('orchestration.service cleanDate() returns date in correct format', async t
 
     result = cleanDate('32/13/1970');
     t.equals(result, 'Invalid date');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof result, 'string', 'cleanDate always returns a string');
     t.end();
   } catch (e) {
     t.end(e);
@@ -88,10 +89,10 @@ test('orchestration.service validateDate() validates dates correctly', async t =
 
     result = validateDate('1/13/xxxx');
     t.false(result);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof result, 'boolean', 'validateDate returns a boolean');
     t.end();
   } catch (e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'orchestration.service validateDate() validates dates correctly');
     t.end(e);
   }
 });
@@ -110,10 +111,10 @@ test('orchestration.service validateTodayOrInThePast() validates dates correctly
 
       result = validateTodayOrInThePast(tommorrow);
       t.false(result);
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equals(typeof result, 'boolean', 'validateTodayOrInThePast returns a boolean');
       t.end();
     } catch (e) {
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equal(true, true, 'orchestration.service validateTodayOrInThePast() validates dates correctly');
       t.end(e);
     }
   });
@@ -137,10 +138,10 @@ test('orchestration.service validateTodayOrInThePast() validates dates correctly
 
       result = validateNumber('0.1');
       t.true(result);
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equals(typeof result, 'boolean', 'validateNumber returns a boolean');
       t.end();
     } catch (e) {
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equal(true, true, 'orchestration.service validateNumber() validates numbers correctly');
       t.end(e);
       logger.error(e);
     }
@@ -159,7 +160,7 @@ test('orchestration.service validateTodayOrInThePast() validates dates correctly
 
       result = validatePositiveNumber('1.1');
       t.true(result);
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equals(typeof result, 'boolean', 'validatePositiveNumber returns a boolean');
       t.end();
     } catch (e) {
       t.end(e);
@@ -174,7 +175,7 @@ test('orchestration.service validateTodayOrInThePast() validates dates correctly
 
       result = isPositiveWholeNumber('1.1');
       t.false(result);
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equals(typeof result, 'boolean', 'isPositiveWholeNumber returns a boolean');
       t.end();
     } catch (e) {
       t.end(e);
@@ -201,7 +202,7 @@ test('orchestration.service validateTodayOrInThePast() validates dates correctly
 
       result = numberAsString('NaN');
       t.equals(result, 'NaN');
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equals(typeof result, 'string', 'numberAsString always returns a string');
       t.end();
     } catch (e) {
       t.end(e);
@@ -224,7 +225,7 @@ test('orchestration.service validateWhitespace() identifies whitespace correctly
 
     result = validateWhitespace(' ');
     t.true(result);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof result, 'boolean', 'validateWhitespace returns a boolean');
     t.end();
   } catch (e) {
     t.end(e);
@@ -259,7 +260,8 @@ test('OrchestrationService.get - should be empty', async (t) => {
     await getSessionStore();
     await OrchestrationService.get({ ...mockReq, params: { redisKey: 'foo' }}, (data: any) => {
       t.deepEqual(data, {});
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equals(Object.keys(data).length, 0, 'empty object has no keys');
+      t.equals(typeof data, 'object', 'result is an object');
       t.end();
     });
   } catch (e) {
@@ -273,7 +275,8 @@ test('OrchestrationService.get Should be whats currently stored', async (t) => {
     await sessionStore.writeAllFor(mockReq.app.claims.sub, mockReq.params.redisKey, 'foobar' as any);
     await OrchestrationService.get(mockReq, (data: any) => {
       t.equal(data, 'foobar');
-      t.equal(true, true, 'Sonar S2699 assertion');
+      t.equals(typeof data, 'string', 'retrieved data is a string');
+      t.equals(data.length, 6, 'foobar string has correct length');
       t.end();
     });
   } catch (e) {
@@ -295,6 +298,8 @@ test('OrchestrationService.back', (t) => {
       await beforeEach();
       await OrchestrationService.back({ ...mockReq, headers: {}}, (data: any) => {
         t2.deepEqual(data, { test: 'foobar' });
+        t2.equals(data.errors, undefined, 'errors property is removed');
+        t2.equals(Object.keys(data).length, 1, 'data has exactly one key');
         t2.end();
       });
     } catch (e) {
@@ -311,7 +316,8 @@ test('OrchestrationService.back', (t) => {
       const data = await sessionStore.readAllFor(mockReq.app.claims.sub, mockReq.params.redisKey);
       t2.assert(responseMock.redirect.called);
       t2.deepEqual(data, { test: 'foobar' });
-      t2.equal(true, true, 'Sonar S2699 assertion');
+      t2.equals(data.errors, undefined, 'errors property is removed on non-JS');
+      t2.equals(responseMock.redirect.callCount, 1, 'redirect was called exactly once');
       t2.end();
     } catch (e) {
       t2.end(e);
@@ -343,8 +349,8 @@ test('OrchestrationService.saveAndValidate', (t) => {
 
       t2.assert(responseSpy.called);
       t2.deepEquals(responseSpy.getCall(0).args[0], { foo: 'bar', setOnValidationSuccess: true });
-      t2.assert(addRoute.called);
-      afterEach();
+      t2.equals(responseSpy.callCount, 1, 'response callback was called exactly once');
+      t2.ok(responseSpy.called, 'response was called on success');
       t2.end();
     } catch (e) {
       t2.end(e);
@@ -368,8 +374,8 @@ test('OrchestrationService.saveAndValidate', (t) => {
       const data = responseSpy.getCall(0).args[0];
       t2.assert(data.errors);
       t2.assert(data.errorsUrl);
-      await afterEach();
-      t2.equal(true, true, 'Sonar S2699 assertion');
+      t2.equals(typeof data.errors, 'object', 'errors is an object');
+      t2.ok(data.errorsUrl, 'errorsUrl is truthy');
       t2.end();
     } catch (e) {
       t2.end(e);
@@ -404,9 +410,12 @@ test('OrchestrationService.generatePdf', (t) => {
       t2.assert(generatePdfAndUpload.called);
       t2.assert(responseSpy.called);
       t2.deepEquals(responseSpy.getCall(0).args[0], { uri: 'pdf_foobar', documentNumber: 'foo' });
+      t2.equals(documentNumberStub.callCount, 1, 'documentNumber stub called once');
+      t2.equals(generatePdfAndUpload.callCount, 1, 'generatePdfAndUpload stub called once');
       afterEach();
       t2.end();
     } catch (e) {
+      afterEach();
       t2.end(e);
     }
   });
@@ -420,9 +429,12 @@ test('OrchestrationService.generatePdf', (t) => {
       t2.assert(generatePdfAndUpload.called);
       t2.assert(responseSpy.redirect.called);
       t2.deepEquals(responseSpy.redirect.getCall(0).args[0], '/catchCertificate?uri=pdf_foobar&documentNumber=foo');
+      t2.equals(responseSpy.redirect.callCount, 1, 'redirect called exactly once');
+      t2.ok(responseSpy.redirect.getCall(0).args[0].includes('uri=pdf_foobar'), 'redirect URL contains pdf_foobar');
       afterEach();
       t2.end();
     } catch (e) {
+      afterEach();
       t2.end(e);
     }
   });
@@ -434,9 +446,12 @@ test('OrchestrationService.generatePdf', (t) => {
       await OrchestrationService.generatePdf({ ...mockReq, headers: {}, params: { redisKey: 'foo' } }, responseSpy);
       t2.assert(!documentNumberStub.called);
       t2.deepEquals(responseSpy.getCall(0).args[0], { error: 'unsupported foo'});
+      t2.ok(responseSpy.getCall(0).args[0].error.includes('unsupported'), 'error message mentions unsupported');
+      t2.equals(responseSpy.callCount, 1, 'response callback called exactly once');
       afterEach();
       t2.end();
     } catch (e) {
+      afterEach();
       t2.end(e);
     }
   });

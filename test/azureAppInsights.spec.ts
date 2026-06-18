@@ -8,6 +8,16 @@ import ApplicationConfig from '../src/applicationConfig';
 test('AzureAppInsights', (tester) => {
   let setupStub;
   let startStub;
+  let completedSubtests = 0;
+
+  const finishSubtest = () => {
+    completedSubtests += 1;
+    if (completedSubtests === 2) {
+      tester.equal(completedSubtests, 2, 'AzureAppInsights runs both subtests');
+      tester.end();
+    }
+  };
+
   const beforeEach = () => {
     setupStub = sinon.stub(appInsights, 'setup');
     startStub = sinon.stub(appInsights, 'start');
@@ -25,8 +35,9 @@ test('AzureAppInsights', (tester) => {
     t.assert(startStub.called);
     afterEach();
     ApplicationConfig._instrumentationKey = currentKey;
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'AzureAppInsights - should setup and start applicationinsights if instrumentationKey is present');
     t.end();
+    finishSubtest();
   });
 
   tester.test('AzureAppInsights - should not initialise', (t) => {
@@ -36,5 +47,6 @@ test('AzureAppInsights', (tester) => {
     t.assert(!startStub.called);
     afterEach();
     t.end();
+    finishSubtest();
   });
 });

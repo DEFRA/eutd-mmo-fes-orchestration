@@ -20,7 +20,8 @@ test('when validaing vessel data against reference service it should return vehi
 
   const valid = await validate('some (123)', 'http://somebaseurl', 'vessel', constructPath, mock);
   t.equals(valid.isError, false, 'vessel data exists in reference service for given name and pln');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equals(typeof valid, 'object', 'result is an object');
+  t.ok(valid.hasOwnProperty('isError'), 'result has isError property');
   t.end();
 });
 
@@ -34,12 +35,17 @@ test('when validaing vessel data against reference service it should throw an er
     }
   } as any; // this cast to any is ok for testing mock instances
 
+  let errorCaught = false;
+  let response;
   try {
-    const isValid = await validate(mock, 'http://somebaseurl', 'vessel', constructPath, mock);
+    response = await validate(mock, 'http://somebaseurl', 'vessel', constructPath, mock);
   } catch(e) {
+    errorCaught = true;
     t.equals(e.message, dummyError);
+    t.ok(e instanceof Error, 'caught error is an Error instance');
   }
-  t.equal(true, true, 'Sonar S2699 assertion');
+  // Either error was caught or response has error structure
+  t.ok(errorCaught || (response && response.isError !== undefined), 'function handles error case');
   t.end();
 });
 

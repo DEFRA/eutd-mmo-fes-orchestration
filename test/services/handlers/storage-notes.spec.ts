@@ -1,995 +1,512 @@
 import * as test from 'tape';
+const sinon = require('sinon');
 import logger from '../../../src/logger';
 
 import StorageNotes, { validateEntry } from '../../../src/services/handlers/storage-notes';
+import * as fishValidator from '../../../src/validators/fish.validator';
+import * as commodityValidator from '../../../src/validators/pssdCommodityCode.validator';
+import * as documentValidator from '../../../src/validators/documentValidator';
+import * as countriesValidator from '../../../src/validators/countries.validator';
 
-//------ TESTS FOR /create-non-manipulation-document/add-product-to-this-consignment -----
+const addProductUrl = '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
+const addedProductUrl = '/create-non-manipulation-document/:documentNumber/you-have-added-a-product';
+const facilityDetailsUrl = '/create-non-manipulation-document/:documentNumber/add-storage-facility-details';
+const facilityApprovalUrl = '/create-non-manipulation-document/:documentNumber/add-storage-facility-approval';
+
+const baseCatch = {
+  certificateType: 'non_uk',
+  certificateNumber: 'CC-11111',
+  issuingCountry: 'Spain',
+  product: 'Atlantic cod',
+  speciesCode: 'COD',
+  scientificName: 'Gadus morhua',
+  commodityCode: '03036310',
+  productDescription: 'Frozen cod fillets',
+  weightOnCC: '2222',
+  netWeightProductArrival: '1111',
+  netWeightFisheryProductArrival: '1100'
+};
+
+const withValidationStubs = async (fn) => {
+  const stubs = [
+    sinon.stub(fishValidator, 'validateSpeciesName').resolves({ isError: false }),
+    sinon.stub(commodityValidator, 'validateCommodityCode').resolves({ isError: false }),
+    sinon.stub(documentValidator, 'validateCompletedDocument').resolves(true),
+    sinon.stub(documentValidator, 'validateSpecies').resolves(true),
+    sinon.stub(countriesValidator, 'validateCountriesName').resolves({ isError: false })
+  ];
+
+  try {
+    await fn();
+  } finally {
+    stubs.forEach((stub) => stub.restore());
+  }
+};
+
+const assertNoErrors = (t, errors) => {
+  t.true(errors);
+  t.deepEquals(errors, {});
+  t.equals(Object.keys(errors).length, 0, 'no validation errors are returned');
+};
+
+const assertExpectedErrors = (t, errors, expected) => {
+  t.true(errors);
+  t.deepEquals(errors, expected);
+  t.equals(Object.keys(errors).length, Object.keys(expected).length, 'error count matches expected');
+  t.deepEquals(Object.keys(errors).sort(), Object.keys(expected).sort(), 'error keys match expected');
+};
+
+//------ TESTS FOR add-product-to-this-consignment -----
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with all mandatory fields validates as OK', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({
+        data,
+        nextUrl: '',
+        currentUrl: addProductUrl,
+        errors: {}
+      });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertNoErrors(t, errors);
     });
-
-    t.true(errors);
-    t.deepEquals(errors, {});
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing product validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch, product: undefined, scientificName: undefined, speciesCode: undefined }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({
+        data,
+        nextUrl: '',
+        currentUrl: addProductUrl,
+        errors: {}
+      });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, {
+        'catches-0-product': 'sdAddProductToConsignmentProductNameErrorNull'
+      });
     });
-
-    const expected = {
-      'catches-0-product': 'Enter the FAO code or product name'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing commodity code validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch, commodityCode: undefined }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({ data, nextUrl: '', currentUrl: addProductUrl, errors: {} });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, {
+        'catches-0-commodityCode': 'sdAddProductToConsignmentCommodityCodeErrorNull'
+      });
     });
-
-    const expected = {
-      'catches-0-commodityCode': 'Enter the commodity code'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing catch certificate number validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch, certificateNumber: undefined }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({ data, nextUrl: '', currentUrl: addProductUrl, errors: {} });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, {
+        'catches-0-certificateNumber': 'sdAddProductToConsignmentCertificateNumberErrorNull'
+      });
     });
-
-    const expected = {
-      'catches-0-certificateNumber': 'Enter the document number'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
-  } catch (e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end(e);
-  }
-});
-
-test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing export weight validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
-
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
-    });
-
-    const expected = {
-      'catches-0-productWeight': 'Enter the export weight in kg'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
-  } catch (e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end(e);
-  }
-});
-
-test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing date product entered the UK validates as error', async t => {
-  try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
-
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
-    });
-
-    const expected = {
-      'catches-0-dateOfUnloading': 'Enter the date product entered the UK'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing place product entered the UK validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing product description validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch, productDescription: undefined }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({ data, nextUrl: '', currentUrl: addProductUrl, errors: {} });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, {
+        'catches-0-productDescription': 'sdAddProductToConsignmentProductDescriptionErrorNull'
+      });
     });
-
-    const expected = {
-      'catches-0-placeOfUnloading': 'Enter the place product entered the UK'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing transport details validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing net product arrival validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch, netWeightProductArrival: undefined }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({ data, nextUrl: '', currentUrl: addProductUrl, errors: {} });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, {
+        'catches-0-netWeightProductArrival': 'sdAddProductToConsignmentNetWeightOfProductErrorNull'
+      });
     });
-
-    const expected = {
-      'catches-0-transportUnloadedFrom': 'Enter the transport details'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with whitespace product, commodityCode, certificateNumber, placeOfUnloading and transportUnloadedFrom validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment with missing fishery product arrival validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch, netWeightFisheryProductArrival: undefined }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: ' ',
-          commodityCode: ' ',
-          certificateNumber: ' ',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: ' ',
-          transportUnloadedFrom: ' '
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({ data, nextUrl: '', currentUrl: addProductUrl, errors: {} });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, {
+        'catches-0-netWeightFisheryProductArrival': 'sdAddProductToConsignmentNetWeightOfFisheryProductErrorNull'
+      });
     });
-
-    const expected = {
-      'catches-0-product': 'Enter the FAO code or product name',
-      'catches-0-commodityCode': 'Enter the commodity code',
-      'catches-0-certificateNumber': 'Enter the document number',
-      'catches-0-placeOfUnloading': 'Enter the place product entered the UK',
-      'catches-0-transportUnloadedFrom': 'Enter the transport details'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment invalid (negative) numbers in productWeight validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment invalid (negative) net product arrival validates as error', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addProductUrl];
+      const data = { catches: [{ ...baseCatch, netWeightProductArrival: '-1' }] };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '-1',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors } = await handler({ data, nextUrl: '', currentUrl: addProductUrl, errors: {} });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, {
+        'catches-0-netWeightProductArrival': 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0'
+      });
     });
-
-    const expected = {
-      'catches-0-productWeight':
-        'Enter the export weight as a whole number larger than 0, like 500'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment invalid (floating point) numbers in productWeight validates as error', async t => {
+//------ TESTS FOR you-have-added-a-product -----
+test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product with selected another product choice validates as OK', async t => {
   try {
-    const currentUrl =
-      '/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addedProductUrl];
+      const data = { catches: [{ ...baseCatch }], addAnotherProduct: 'No' };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '11.11',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
+      const { errors, next } = await handler({
+        data,
+        nextUrl: '',
+        currentUrl: addedProductUrl,
+        errors: {}
+      });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertNoErrors(t, errors);
+      t.equals(next, '/create-non-manipulation-document/:documentNumber/add-storage-facility-details', 'no branch routes to storage facility details');
     });
-
-    const expected = {
-      'catches-0-productWeight':
-        'Enter the export weight as a whole number, like 500'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-//------ TESTS FOR /create-non-manipulation-document/you-have-added-a-product -----
-test('/create-non-manipulation-document/you-have-added-a-product with selected another product choice details validates as OK', async t => {
+test('/create-non-manipulation-document/:documentNumber/you-have-added-a-product with unselected another product choice validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/you-have-added-a-product';
-    const handler = StorageNotes[currentUrl];
+    await withValidationStubs(async () => {
+      const handler = StorageNotes[addedProductUrl];
+      const data = { catches: [{ ...baseCatch }], addAnotherProduct: 'notset' };
 
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover'
-        }
-      ],
-      addAnotherProduct: 'No'
-    };
+      const { errors, next } = await handler({
+        data,
+        nextUrl: '',
+        currentUrl: addedProductUrl,
+        errors: {}
+      });
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
+      assertExpectedErrors(t, errors, { addAnotherProduct: 'addAnotherProductNullError' });
+      t.equals(next, addedProductUrl, 'invalid branch stays on the same page');
     });
-
-    const expected = {};
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/you-have-added-a-product with unselected another product choice details validates as error', async t => {
+//------ TESTS FOR add-storage-facility-details -----
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with all mandatory fields validates as OK', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/you-have-added-a-product';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [
-        {
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover'
-        }
-      ],
-      addAnotherProduct: 'notset'
-    };
-
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      errors: {}
-    });
-
-    const expected = {
-      addAnotherProduct: 'addAnotherProductNullError'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
-  } catch (e) {
-    t.end(e);
-  }
-});
-
-//------ TESTS FOR /create-non-manipulation-document/add-storage-facility-details -----
-test('/create-non-manipulation-document/add-storage-facility-details with all mandatory fields validates as OK', async t => {
-  try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
-    const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
+      facilityArrivalDate: '29/01/2019',
       facilityName: 'Hank Marvin',
       facilityAddressOne: 'Fish Quay',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: 'Seaham',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
+    const { errors } = await handler({
+      data,
       nextUrl: '',
-      currentUrl: currentUrl,
+      currentUrl: facilityDetailsUrl,
       params: 0,
       errors: {}
     });
 
-    t.true(errors);
-    t.deepEquals(errors, {});
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    assertNoErrors(t, errors);
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with missing facility name fields validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing facility name validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
+      facilityArrivalDate: '29/01/2019',
       facilityAddressOne: 'Fish Quay',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: 'Seaham',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
+
+    assertExpectedErrors(t, errors, {
+      'storageFacilities-facilityName': 'sdAddStorageFacilityDetailsErrorEnterTheFacilityName'
     });
-
-    const expected = {
-      'storageFacilities-facilityName': 'Enter the facility name'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with missing address fields validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing address fields validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
+      facilityArrivalDate: '29/01/2019',
       facilityName: 'Hank Marvin',
       facilityAddressOne: '',
       facilityAddressTwo: '',
       facilityTownCity: '',
-      facilityPostcode: '',
-      facilttyStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: ''
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
+
+    assertExpectedErrors(t, errors, {
+      'storageFacilities-facilityAddressOne': 'sdAddStorageFacilityDetailsErrorEnterTheAddress'
     });
-
-    const expected = {
-      'storageFacilities-facilityAddressOne': 'Enter the address'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with missing town or city field validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing town or city validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
+      facilityArrivalDate: '29/01/2019',
       facilityName: 'Hank Marvin',
       facilityAddressOne: 'Fish Quay',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: '',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
+
+    assertExpectedErrors(t, errors, {
+      'storageFacilities-facilityTownCity': 'sdAddStorageFacilityDetailsErrorEnterTheTown'
     });
-
-    const expected = {
-      'storageFacilities-facilityTownCity': 'Enter the town or city'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with missing building and street field validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with missing building and street validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
+      facilityArrivalDate: '29/01/2019',
       facilityName: 'Hank Marvin',
       facilityAddressOne: '',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: '',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
+
+    assertExpectedErrors(t, errors, {
+      'storageFacilities-facilityAddressOne': 'sdAddStorageFacilityDetailsErrorEnterTheBuilding',
+      'storageFacilities-facilityTownCity': 'sdAddStorageFacilityDetailsErrorEnterTheTown'
     });
-
-    const expected = {
-      'storageFacilities-facilityAddressOne': 'Enter the building and street (address line 1 of 2)',
-      'storageFacilities-facilityTownCity': 'Enter the town or city'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with missing Stored As fields validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-approval with missing Stored As validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityApprovalUrl];
     const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
-      facilityName: 'Hank Marvin',
-      facilityAddressOne: 'Fish Quay',
-      facilityAddressTwo: 'Fishy Way',
-      facilityTownCity: 'Seaham',
-      facilityPostcode: 'SE11EA',
-      addAnotherProduct: 'notset'
+      facilityApprovalNumber: 'AB-123'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityApprovalUrl, params: 0, errors: {} });
+
+    assertExpectedErrors(t, errors, {
+      'storageFacilities-facilityStorage': 'sdAddStorageFacilityProductStoredNullError'
     });
-
-    const expected = {
-      'storageFacilities-facilityStorage': 'Select how the products are stored'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with whitespace facilityName, facilityAddressOne and facilityTownCity validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with whitespace facilityName, facilityAddressOne and facilityTownCity validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [
-        {
-          weightOnCC: '2222',
-          product: 'Atlantix',
-          commodityCode: '34234324',
-          certificateNumber: 'CC-11111',
-          productWeight: '1111',
-          dateOfUnloading: '29/01/2019',
-          placeOfUnloading: 'Dover',
-          transportUnloadedFrom: 'TRANS-IN-001'
-        }
-      ],
+      facilityArrivalDate: '29/01/2019',
       facilityName: ' ',
       facilityAddressOne: ' ',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: ' ',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
+
+    assertExpectedErrors(t, errors, {
+      'storageFacilities-facilityName': 'sdAddStorageFacilityDetailsErrorEnterTheFacilityName',
+      'storageFacilities-facilityAddressOne': 'sdAddStorageFacilityDetailsErrorEnterTheBuilding',
+      'storageFacilities-facilityTownCity': 'sdAddStorageFacilityDetailsErrorEnterTheTown'
     });
-
-    const expected = {
-      'storageFacilities-facilityName': 'Enter the facility name',
-      'storageFacilities-facilityAddressOne': 'Enter the building and street (address line 1 of 2)',
-      'storageFacilities-facilityTownCity': 'Enter the town or city'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with emoji in facilityName validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with emoji in facilityName validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [],
+      facilityArrivalDate: '29/01/2019',
       facilityName: 'Hank 😀 Marvin',
       facilityAddressOne: 'Fish Quay',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: 'Seaham',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
 
-    const expected = {
+    assertExpectedErrors(t, errors, {
       'storageFacilities-facilityName': 'emojiCharactersNotPermitted'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    });
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with emoji in facilityAddressOne validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with emoji in facilityAddressOne validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [],
+      facilityArrivalDate: '29/01/2019',
       facilityName: 'Hank Marvin',
       facilityAddressOne: '🏠 Fish Quay',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: 'Seaham',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
 
-    const expected = {
+    assertExpectedErrors(t, errors, {
       'storageFacilities-facilityAddressOne': 'emojiCharactersNotPermitted'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    });
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
-test('/create-non-manipulation-document/add-storage-facility-details with emoji in facilityTownCity validates as error', async t => {
+test('/create-non-manipulation-document/:documentNumber/add-storage-facility-details with emoji in facilityTownCity validates as error', async t => {
   try {
-    const currentUrl = '/create-non-manipulation-document/add-storage-facility-details';
-    const handler = StorageNotes[currentUrl];
-
+    const handler = StorageNotes[facilityDetailsUrl];
     const data = {
-      catches: [],
+      facilityArrivalDate: '29/01/2019',
       facilityName: 'Hank Marvin',
       facilityAddressOne: 'Fish Quay',
       facilityAddressTwo: 'Fishy Way',
       facilityTownCity: '🌊 Seaham',
-      facilityPostcode: 'SE11EA',
-      facilityStorage: 'Chilled',
-      addAnotherProduct: 'notset'
+      facilityPostcode: 'SE11EA'
     };
 
-    let { errors } = await handler({
-      data: data,
-      nextUrl: '',
-      currentUrl: currentUrl,
-      params: 0,
-      errors: {}
-    });
+    const { errors } = await handler({ data, nextUrl: '', currentUrl: facilityDetailsUrl, params: 0, errors: {} });
 
-    const expected = {
+    assertExpectedErrors(t, errors, {
       'storageFacilities-facilityTownCity': 'emojiCharactersNotPermitted'
-    };
-
-    t.true(errors);
-    t.deepEquals(errors, expected);
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    });
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 //------ TESTS FOR net weight arrival cross-field validation -----
-// Base product: certificateType 'uk' (no external country validation call),
-// no certificateNumber (early return without external call),
-// all individual weight fields valid — focuses tests on the cross-check only.
 const arrivalWeightBaseProduct = {
   certificateType: 'uk',
   productDescription: 'TestProduct',
@@ -1001,11 +518,12 @@ test('validateEntry net weight arrival: fishery weight less than product weight 
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '30' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight < product weight');
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    t.equals(Object.keys(errors).length, 1, 'only certificateNumber error remains for this helper setup');
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('validateEntry net weight arrival: fishery weight equal to product weight - no cross-check error', async t => {
@@ -1013,11 +531,12 @@ test('validateEntry net weight arrival: fishery weight equal to product weight -
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '50' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error when fishery weight = product weight');
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    t.equals(Object.keys(errors).length, 1, 'only certificateNumber error remains for this helper setup');
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('validateEntry net weight arrival: fishery weight exceeds product weight - sets cross-check error on fishery weight field', async t => {
@@ -1025,11 +544,12 @@ test('validateEntry net weight arrival: fishery weight exceeds product weight - 
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set when fishery weight > product weight');
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    t.ok(errors['catches-0-certificateNumber'], 'certificateNumber required error is also present');
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('validateEntry net weight arrival: cross-check error applied at correct index', async t => {
@@ -1038,53 +558,47 @@ test('validateEntry net weight arrival: cross-check error applied at correct ind
     const { errors } = await validateEntry(product, 2, {});
     t.equal(errors['catches-2-netWeightFisheryProductArrival'], 'sdNetWeightFisheryProductArrivalExceedsProductArrival', 'cross-check error set on correct index');
     t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no cross-check error on wrong index');
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('validateEntry net weight arrival: cross-check not triggered when netWeightProductArrival has individual validation error', async t => {
   try {
-    // product arrival (-1) has an individual error; the cross-check inside checkNetFisheryWeightArrival
-    // guards on !errors[netWeightProductArrival], so fishery gets no error when product is invalid
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '-1', netWeightFisheryProductArrival: '80' };
     const { errors } = await validateEntry(product, 0, {});
     t.equal(errors['catches-0-netWeightProductArrival'], 'sdNetWeightProductArrivalErrorMax2DecimalLargerThan0', 'individual error set on product arrival weight');
-    t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no fishery error when product has individual error — cross-check guarded by !errors[product]');
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], undefined, 'no fishery error when product has individual error');
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('validateEntry net weight arrival: fishery individual error preserved when fishery does not exceed product weight and product is valid', async t => {
   try {
-    // fishery (-1) has its own individual error; product (50) is valid and -1 does not numerically
-    // exceed 50, so the cross-check does not fire and the fishery individual error is preserved
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '-1' };
     const { errors } = await validateEntry(product, 0, {});
-    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0', 'individual fishery error preserved when fishery does not numerically exceed product and product is valid');
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalErrorMax2DecimalLargerThan0', 'individual fishery error preserved');
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });
 
 test('validateEntry net weight arrival: fishery individual error preserved when fishery also numerically exceeds product weight', async t => {
   try {
-    // fishery (80.123) has an individual format error and also numerically exceeds product (50).
-    // Because fishery already has its own individual error, the cross-check is skipped so the
-    // format error is preserved — all field errors are shown rather than being overwritten.
     const product = { ...arrivalWeightBaseProduct, netWeightProductArrival: '50', netWeightFisheryProductArrival: '80.123' };
     const { errors } = await validateEntry(product, 0, {});
-    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal', 'individual fishery format error preserved; cross-check skipped because fishery already has its own error');
-    t.equal(true, true, 'Sonar S2699 assertion');
-    t.end();
+    t.equal(errors['catches-0-netWeightFisheryProductArrival'], 'sdNetWeightProductFisheryArrivalPositiveMax2Decimal', 'individual fishery format error preserved');
+    t.ok(errors['catches-0-certificateNumber'], 'certificate number required error is also present');
   } catch (e) {
     t.end(e);
+    return;
   }
+  t.end();
 });

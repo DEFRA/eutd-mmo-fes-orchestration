@@ -87,7 +87,8 @@ test('FishService.addFish - when invoked without an id, it creates a new record'
     t.equals(datum.species, completed.species);
     t.equals(datum.speciesCode, completed.speciesCode);
     t.equals(!!datum.id, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.ok(typeof datum.id === 'string', 'generated id is a string');
+    t.ok(datum.id.length > 0, 'generated id is non-empty');
     t.end();
   } catch(e) {
     t.end(e);
@@ -112,7 +113,7 @@ test('FishService.addFish - Should throw an error when invoked without data but 
 
     t.assert(error);
     t.equals(error.message, 'I am not sure what is going on!');
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.ok(error instanceof Error, 'error is an Error instance');
     t.end();
 
   } catch (e) {
@@ -159,7 +160,7 @@ test('FishService.addFish - Should throw an error if trying to add details when 
   
   t.assert(error);
   t.equals(error.message, 'The species is in an inconsistent state for the second call');
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.ok(error instanceof Error, 'error is an Error instance');
   t.end();
   
 });
@@ -176,10 +177,11 @@ test('FishService.removeFish  - removes the fish by id', async (t) => {
 
     let savedSpecies = <MySpecies[]>await sessionStore.readAllFor(USER_ID, SPECIES_KEY);
     t.deepEqual(savedSpecies, [mockMultiple[0]]);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(savedSpecies.length, 1, 'species array has exactly one item after removal');
+    t.equals(savedSpecies[0].id, mockMultiple[0].id, 'remaining species has correct id');
     t.end();
   } catch(e) {
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equal(true, true, 'FishService.removeFish  - removes the fish by id');
     t.end(e);
   }
 });
@@ -202,7 +204,7 @@ test('FishService.removeFish  - throws an error if writeAllFor/readAllFor fails'
   t.assert(error);
   t.equals(error.message, 'Cannot writeAllFor or readAllFor to species file');
   sessionStoreMock.restore();
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.ok(error instanceof Error, 'error is an Error instance');
   t.end();
 });
 
@@ -212,7 +214,8 @@ test('FishService.addedFish - Gets fish added for a user', async (t) => {
     
     const result = await Service.addedFish(completed.user_id);
     t.deepEquals(result, mockMultiple);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.ok(Array.isArray(result), 'result is an array');
+    t.equals(result.length, 2, 'result has exactly 2 items');
     t.end();
   } catch (e) {
     t.end(e);
@@ -234,7 +237,7 @@ test('FishService.addedFish - throws an error if readAllFor fails', async (t) =>
   t.assert(error);
   t.equals(error.message, 'Eh! does not work');
   sessionStoreMock.restore();
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.ok(error instanceof Error, 'error is an Error instance');
   t.end();
 });
 
@@ -246,7 +249,8 @@ test('FishService.save - Should store species details for user', async (t) => {
     const data = await sessionStore.readAllFor(completed.user_id, SPECIES_KEY);
     t.deepEquals(result, completed);
     t.deepEquals(data, completed);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof result, 'object', 'result is an object');
+    t.equals(result.user_id, completed.user_id, 'result user_id matches input');
     t.end();
   } catch (e) {
     t.end(e);
@@ -274,7 +278,8 @@ test('FishService::isDuplicate returns true if adding the same species', async (
     });
     
     t.equals(result, true);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof result, 'boolean', 'result is a boolean');
+    t.ok(result === true, 'result is strictly true');
     t.end();
 
   } catch(e) {
@@ -303,7 +308,8 @@ test('FishService::isDuplicate returns false if not adding the same species', as
     });
     
     t.equals(result, false);
-    t.equal(true, true, 'Sonar S2699 assertion');
+    t.equals(typeof result, 'boolean', 'result is a boolean');
+    t.ok(result === false, 'result is strictly false');
     t.end();
 
   } catch(e) {
@@ -317,6 +323,7 @@ test('FishService::isDuplicate returns false if presentation, state and user_id 
   });
   
   t.equal(result, false);
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equals(typeof result, 'boolean', 'result is a boolean');
+  t.ok(result === false, 'result is strictly false');
   t.end();
 });

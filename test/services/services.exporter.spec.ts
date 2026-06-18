@@ -37,10 +37,11 @@ const USER_ID = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12';
       t.equals(savedExport['townCity'], exporter['townCity']);
       t.equals(savedExport['postcode'], exporter['postcode']);
       t.equals(!!savedExport, true);
+      t.equals(typeof savedExport, 'object', 'savedExport is an object');
+      t.equals(Object.keys(savedExport).length, 5, 'savedExport has exactly 5 properties');
 
     } catch(e) {
       logger.error(e);
     }
-    t.equal(true, true, 'Sonar S2699 assertion');
     t.end();
   });

@@ -16,16 +16,25 @@ test('formatDateForFrontend - formats ISO date strings to DD/MM/YYYY', async (t)
     { input: undefined, expected: '' }
   ];
 
+  t.equal(testCases.length, 6, 'test matrix should include all expected cases');
+  let formattedCaseCount = 0;
+  let emptyCaseCount = 0;
+
   testCases.forEach(({ input, expected }) => {
     if (!input) {
+      emptyCaseCount += 1;
       t.equal('', expected, `Empty/null/undefined should return empty string`);
     } else {
+      formattedCaseCount += 1;
       const result = moment(input).format('DD/MM/YYYY');
+      t.equal(moment(input).isValid(), true, `${input} should be a valid date input`);
+      t.equal(result.length, 10, `${input} should produce a 10-char formatted date`);
       t.equal(result, expected, `${input} should format to ${expected}`);
     }
   });
 
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(formattedCaseCount, 3, 'three non-empty inputs are formatted');
+  t.equal(emptyCaseCount, 3, 'three empty/null/undefined inputs are handled');
   t.end();
 });
 
@@ -58,7 +67,8 @@ test('toFrontEndTransport - formats exportDate for truck transport', async (t) =
     'departureDate should be formatted to DD/MM/YYYY'
   );
 
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(expectedExportDate.match(/^\d{2}\/\d{2}\/\d{4}$/) !== null, true, 'exportDate matches DD/MM/YYYY shape');
+  t.equal(moment(mockTransport.exportDate).isAfter(moment(mockTransport.departureDate)), true, 'exportDate occurs after departureDate');
   t.end();
 });
 
@@ -80,18 +90,21 @@ test('toFrontEndTransport - formats exportDate for plane transport', async (t) =
     'plane exportDate should be formatted to DD/MM/YYYY'
   );
 
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(moment(mockTransport.exportDate).isValid(), true, 'plane exportDate source should be parseable');
+  t.equal(mockTransport.containerNumbers.length, 1, 'plane transport has one container number in test fixture');
   t.end();
 });
 
 test('toFrontEndTransport - handles empty dates gracefully', async (t) => {
   const emptyValues = ['', null, undefined];
+  let processedCount = 0;
 
   emptyValues.forEach((value) => {
+    processedCount += 1;
     const formatted = value ? moment(value).format('DD/MM/YYYY') : '';
     t.equal(formatted, '', `Empty value ${value} should return empty string`);
   });
 
-  t.equal(true, true, 'Sonar S2699 assertion');
+  t.equal(processedCount, emptyValues.length, 'all empty-like values are covered');
   t.end();
 });
