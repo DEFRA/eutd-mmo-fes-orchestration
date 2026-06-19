@@ -21,7 +21,7 @@ export interface IStorage<T extends IStoreable> extends
  * Interface for single user session
  */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// eslint-disable-next-line @typescript-eslint/no-unused-vars 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface IUserStorage<T extends IStoreable> {
   readFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string): Promise<T>
   readAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string): Promise<T[]>
@@ -41,7 +41,7 @@ export interface IDocumentStorageForUser {
 /**
  * Interface for multiple user sessions
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface IAllUsersStorage<T extends IStoreable> {
   readAll<T extends IStoreable>(key: string): Promise<T[]>
   read<T extends IStoreable>(key: string): Promise<T>
@@ -50,6 +50,6 @@ export interface IAllUsersStorage<T extends IStoreable> {
 
 
 export interface IStorageInitializer {
-  initialize(options?: object): void
+  initialize(options?: object): Promise<void>
   cleanUp(): void
 }

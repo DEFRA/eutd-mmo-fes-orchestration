@@ -66,7 +66,7 @@
     "flat": "5.0.2",
     "form-data": "^4.0.0",
     "hapi-auth-jwt2": "^10.7.0",
-    "ioredis": "^5.10.1",
+    "redis": "^4.7.0",
     "joi": "^17.13.3",
     "json-query": "2.2.2",
     "jsonfile": "6.1.0",

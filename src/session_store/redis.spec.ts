@@ -1,22 +1,24 @@
-import { RedisStorage, getRedisOptions } from "./redis";
+import { RedisStorage } from "./redis";
 import { IStoreable } from "./storeable";
-import Redis from 'ioredis';
+import { createClient } from 'redis';
 import { CATCH_CERTIFICATE_KEY } from './constants';
 
-jest.mock('ioredis', () => ({
-  default: jest.fn(() => ({
+jest.mock('redis', () => ({
+  createClient: jest.fn(() => ({
     del: jest.fn(),
     get: jest.fn(),
     set: jest.fn(),
-    sadd: jest.fn(),
-    disconnect: jest.fn(),
-    smembers: jest.fn(),
+    sAdd: jest.fn(),
+    quit: jest.fn(),
+    sMembers: jest.fn(),
+    connect: jest.fn().mockResolvedValue(undefined),
+    isOpen: true,
   }))
 }));
 
 describe("RedisStorage", () => {
 
-  const mockRedis = new Redis(getRedisOptions()) as jest.Mocked<Redis>;
+  const mockRedis = createClient() as unknown as jest.Mocked<ReturnType<typeof createClient>>;
   let storage: RedisStorage<IStoreable>;
 
   const CONTACT_ID = 'contactBob';
@@ -34,7 +36,7 @@ describe("RedisStorage", () => {
   describe('initialize', () => {
     it('should create a new Redis connection if one does not exist', async () => {
       await new RedisStorage().initialize({ blah: true });
-      expect(Redis).toHaveBeenCalledWith({ blah: true });
+      expect(createClient).toHaveBeenCalled();
     });
 
     it('should warn when attempting to start connection again if connection exists', async () => {
@@ -51,7 +53,7 @@ describe("RedisStorage", () => {
   describe('cleanup', () => {
     it('should close the Redis connection', () => {
       storage.cleanUp();
-      expect(mockRedis.disconnect).toHaveBeenCalled();
+      expect(mockRedis.quit).toHaveBeenCalled();
     });
   });
 
@@ -151,7 +153,7 @@ describe("RedisStorage", () => {
 
       await storage.writeAllFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data, 120);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), 'EX', 120);
+      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), { EX: 120 });
     });
   });
 
@@ -160,8 +162,8 @@ describe("RedisStorage", () => {
       const constants = require('./constants');
       await storage.tagByDocumentNumber('BOB', CONTACT_ID, 'doc-123', constants.CATCH_CERTIFICATE_KEY);
 
-      expect(mockRedis.sadd).toHaveBeenCalled();
-      const call = (mockRedis.sadd as jest.Mock).mock.calls[0];
+      expect(mockRedis.sAdd).toHaveBeenCalled();
+      const call = (mockRedis.sAdd as jest.Mock).mock.calls[0];
       expect(call[0]).toBe('doc-123');
     });
   });
@@ -184,7 +186,7 @@ describe("RedisStorage", () => {
 
       await storage.writeFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data, 10);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), 'EX', 10);
+      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), { EX: 10 });
     });
 
     it('should write data to Redis with EX when ttlSeconds provided and contactId missing', async () => {
@@ -192,33 +194,33 @@ describe("RedisStorage", () => {
 
       await storage.writeFor('BOB', '', 'GBR-2020-CC-0E42C2DA5', data, 20);
 
-      expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data), 'EX', 20);
+      expect(mockRedis.set).toHaveBeenCalledWith('BOB:GBR-2020-CC-0E42C2DA5', JSON.stringify(data), { EX: 20 });
     });
   });
 
   describe('tagByDocumentNumber - 1', () => {
     it('should call sadd with expected keys for catch certificate journey', () => {
-      // ensure mock has sadd
-      (mockRedis as any).sadd = jest.fn();
+      // ensure mock has sAdd
+      (mockRedis as any).sAdd = jest.fn();
 
       storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', CATCH_CERTIFICATE_KEY);
 
-      expect((mockRedis as any).sadd).toHaveBeenCalledWith('DOC-999',
+      expect((mockRedis as any).sAdd).toHaveBeenCalledWith('DOC-999', [
         `${CONTACT_ID}:catchCertificate`,
         `${CONTACT_ID}:species`,
         `${CONTACT_ID}:catches`,
         `${CONTACT_ID}:catchCertificate/exporter`,
         `${CONTACT_ID}:conservation`,
         `${CONTACT_ID}:catchCertificate/export-payload`
-      );
+      ]);
     });
 
     it('should call sadd with no keys for unknown journey', () => {
-      (mockRedis as any).sadd = jest.fn();
+      (mockRedis as any).sAdd = jest.fn();
 
       storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', 'unknownJourney');
 
-      expect((mockRedis as any).sadd).toHaveBeenCalledWith('DOC-999');
+      expect((mockRedis as any).sAdd).toHaveBeenCalledWith('DOC-999', []);
     });
   });
 
@@ -259,7 +261,7 @@ describe("RedisStorage", () => {
 
   describe('keysForTag', () => {
     it('retrieves keys from Redis', async () => {
-      mockRedis.smembers.mockResolvedValue(['12345', 'abcde'])
+      mockRedis.sMembers.mockResolvedValue(['12345', 'abcde'])
       const keys = await storage.getKeysForTag('abcde');
 
       expect(keys).toEqual(['12345','abcde']);
@@ -269,7 +271,7 @@ describe("RedisStorage", () => {
   describe('getDocument', () => {
 
     it('should return document from Redis when key exists', async () => {
-      mockRedis.smembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
+      mockRedis.sMembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
       mockRedis.get.mockResolvedValueOnce('{"id":"12345"}')
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
 
@@ -283,14 +285,14 @@ describe("RedisStorage", () => {
     });
 
     it('should return null from Redis when key does not exist', async () => {
-      mockRedis.smembers.mockResolvedValueOnce([]);
+      mockRedis.sMembers.mockResolvedValueOnce([]);
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
 
       expect(doc).toBeNull();
     });
 
     it('should handle keys that do not contain the delimiter', async () => {
-      mockRedis.smembers.mockResolvedValueOnce(["BOBINVALIDKEY"]);
+      mockRedis.sMembers.mockResolvedValueOnce(["BOBINVALIDKEY"]);
       mockRedis.get.mockResolvedValueOnce('{"id":"12345"}');
 
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
@@ -301,7 +303,7 @@ describe("RedisStorage", () => {
     });
 
     it('should set userPrincipal even when stored json is falsy', async () => {
-      mockRedis.smembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
+      mockRedis.sMembers.mockResolvedValueOnce(["BOB:GBR-2020-CC-0E42C2DA5"]);
       mockRedis.get.mockResolvedValueOnce(null as any);
       const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
 
@@ -329,7 +331,7 @@ describe("RedisStorage", () => {
 
       await storage.writeFor('BOB', CONTACT_ID, 'GBR-2020-CC-0E42C2DA5', data, 60);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), 'EX', 60);
+      expect(mockRedis.set).toHaveBeenCalledWith(`${CONTACT_ID}:GBR-2020-CC-0E42C2DA5`, JSON.stringify(data), { EX: 60 });
     });
   });
 
