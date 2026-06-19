@@ -52,8 +52,8 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   public closeConnection(): void {
-    if (this.connection && this.connection.isOpen) {
-      void this.connection.quit();
+    if (this.connection?.isOpen) {
+      this.connection.quit();
     }
   }
 
