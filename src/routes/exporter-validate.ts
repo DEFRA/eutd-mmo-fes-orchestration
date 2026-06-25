@@ -111,43 +111,27 @@ export default class ExporterValidateRoutes {
       return value;
     }
 
-    private validateAddressFirstPart(value: any, validationErrors: any[]): void {
-      if (value && !value.buildingNumber) {
-        validationErrors.push({
-          message: '"buildingNumber" is required',
-          path: ['buildingNumber'],
-          type: 'any.required',
-          context: { key: 'buildingNumber', label: 'buildingNumber' }
-        });
-      }
+  private validateAddressFirstPart(value: any, validationErrors: any[]): void {
+    if (!value) return;
 
-      if (value && !value.buildingName) {
-        validationErrors.push({
-          message: '"buildingName" is required',
-          path: ['buildingName'],
-          type: 'any.required',
-          context: { key: 'buildingName', label: 'addressSecondPart' }
-        });
-      }
+    const fields = [
+      { key: 'buildingNumber', label: 'buildingNumber' },
+      { key: 'buildingName', label: 'addressSecondPart' }, // keep your custom label
+      { key: 'subBuildingName', label: 'subBuildingName' },
+      { key: 'streetName', label: 'streetName' }
+    ];
 
-      if (value && !value.subBuildingName) {
+    fields.forEach(({ key, label }) => {
+      if (!value[key]) {
         validationErrors.push({
-          message: '"subBuildingName" is required',
-          path: ['subBuildingName'],
+          message: `"${key}" is required`,
+          path: [key],
           type: 'any.required',
-          context: { key: 'subBuildingName', label: 'subBuildingName' }
+          context: { key, label }
         });
       }
-
-      if(value && !value.streetName) {
-        validationErrors.push({
-          message: '"streetName" is required',
-          path: ['streetName'],
-          type: 'any.required',
-          context: { key: 'streetName', label: 'streetName' }
-        });
-      }
-    }
+    });
+  }
 
     private async validateCountryWithReference(value: any): Promise<void> {
       const refUrl = ApplicationConfig.getReferenceServiceUrl();
