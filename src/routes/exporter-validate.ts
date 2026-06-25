@@ -112,12 +112,39 @@ export default class ExporterValidateRoutes {
     }
 
     private validateAddressFirstPart(value: any, validationErrors: any[]): void {
-      if (value && !value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
+      if (value && !value.buildingNumber) {
         validationErrors.push({
-          message: '"addressFirstPart" is required',
-          path: ['addressFirstPart'],
+          message: '"buildingNumber" is required',
+          path: ['buildingNumber'],
           type: 'any.required',
-          context: { key: 'addressFirstPart', label: 'addressFirstPart' }
+          context: { key: 'buildingNumber', label: 'buildingNumber' }
+        });
+      }
+
+      if (value && !value.buildingName) {
+        validationErrors.push({
+          message: '"buildingName" is required',
+          path: ['buildingName'],
+          type: 'any.required',
+          context: { key: 'buildingName', label: 'addressSecondPart' }
+        });
+      }
+
+      if (value && !value.subBuildingName) {
+        validationErrors.push({
+          message: '"subBuildingName" is required',
+          path: ['subBuildingName'],
+          type: 'any.required',
+          context: { key: 'subBuildingName', label: 'subBuildingName' }
+        });
+      }
+
+      if(value && !value.streetName) {
+        validationErrors.push({
+          message: '"streetName" is required',
+          path: ['streetName'],
+          type: 'any.required',
+          context: { key: 'streetName', label: 'streetName' }
         });
       }
     }
