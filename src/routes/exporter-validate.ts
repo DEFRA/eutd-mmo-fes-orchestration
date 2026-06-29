@@ -111,16 +111,27 @@ export default class ExporterValidateRoutes {
       return value;
     }
 
-    private validateAddressFirstPart(value: any, validationErrors: any[]): void {
-      if (value && !value.subBuildingName && !value.buildingNumber && !value.buildingName && !value.streetName) {
+  private validateAddressFirstPart(value: any, validationErrors: any[]): void {
+    if (!value) return;
+
+    const fields = [
+      { key: 'buildingNumber', label: 'buildingNumber' },
+      { key: 'buildingName', label: 'addressSecondPart' }, // keep your custom label
+      { key: 'subBuildingName', label: 'subBuildingName' },
+      { key: 'streetName', label: 'streetName' }
+    ];
+
+    fields.forEach(({ key, label }) => {
+      if (!value[key]) {
         validationErrors.push({
-          message: '"addressFirstPart" is required',
-          path: ['addressFirstPart'],
+          message: `"${key}" is required`,
+          path: [key],
           type: 'any.required',
-          context: { key: 'addressFirstPart', label: 'addressFirstPart' }
+          context: { key, label }
         });
       }
-    }
+    });
+  }
 
     private async validateCountryWithReference(value: any): Promise<void> {
       const refUrl = ApplicationConfig.getReferenceServiceUrl();
