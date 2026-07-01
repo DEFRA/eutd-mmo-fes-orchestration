@@ -1045,7 +1045,7 @@ export default class ExportPayloadController {
     await TransportService.removeTransport(userPrincipal, documentNumber, contactId);
 
     if (hasProductItems && exportLocation?.exportedFrom) {
-      await ExportLocationService.addExportLocation(userPrincipal, exportLocation, documentNumber, contactId);
+      await ExportLocationService.addExportLocation(userPrincipal, exportLocation, documentNumber, contactId, false);
     }
 
     await this.addLandingsEntryOption(userPrincipal, documentNumber, landingsEntryOption, contactId);
