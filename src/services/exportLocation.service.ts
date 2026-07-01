@@ -39,10 +39,14 @@ export default class ExportLocationService {
     }
   }
 
-  public static async addExportLocation(userPrincipal: string, payload: any, documentNumber: string, contactId: string) {
+  public static async addExportLocation(userPrincipal: string, payload: any, documentNumber: string, contactId: string, savingAsDraft: boolean) {
     try {
-      if (!['United Kingdom', 'Guernsey', 'Isle Of Man', 'Jersey'].includes(payload.exportedFrom) &&
-        DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber) === ServiceNames.CC) {
+      const shouldThrow = () =>
+        !['United Kingdom', 'Guernsey', 'Isle Of Man', 'Jersey'].includes(payload.exportedFrom) &&
+        DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber) === ServiceNames.CC &&
+        !savingAsDraft;
+
+      if (shouldThrow()) {
         throw new Error(`[ERROR][${documentNumber}] Invalid departure country`);
       }
 
