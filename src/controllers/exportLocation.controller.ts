@@ -10,7 +10,7 @@ export default class ExportLocationController {
 
   public static async addExportLocation(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload = {...(req.payload as any) };
-    const result = await Services.addExportLocation(userPrincipal, payload, documentNumber, contactId);
+    const result = await Services.addExportLocation(userPrincipal, payload, documentNumber, contactId, savingAsDraft);
 
     if (acceptsHtml(req.headers)) {
       if (savingAsDraft) {
