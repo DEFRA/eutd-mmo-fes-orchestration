@@ -61,7 +61,8 @@ describe("ExportLocationController", () => {
         USER_ID,
         mockReq.payload,
         DOCUMENT_NUMBER,
-        CONTACT_ID
+        CONTACT_ID,
+        false
       );
       expect(mockRedirect).toHaveBeenCalledWith(mockReq.payload.nextUri);
     });
@@ -121,7 +122,7 @@ describe("ExportLocationController", () => {
         DOCUMENT_NUMBER,
         CONTACT_ID
       );
-      
+
       // Verify the saveAsDraft flag (3rd parameter) is true
       expect(mockAddExportLocation).toHaveBeenCalledWith(
         mockReq,
