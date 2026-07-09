@@ -2377,6 +2377,20 @@ describe('handler for /create-processing-statement/:documentNumber/add-health-ce
     expect(errors.healthCertificateDate).toBe('psAddHealthCertificateErrorRealDateHealthCertificateDate');
   });
 
+  it('should return error when healthCertificateDate has year 0000', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-health-certificate';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      healthCertificateNumber: '11/1/111111',
+      healthCertificateDate: '01/01/0000',
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors.healthCertificateDate).toBe('psAddHealthCertificateErrorRealDateHealthCertificateDate');
+  });
+
   it('should return error when healthCertificateDate exceeds maximum future date', async () => {
     const currentUrl = '/create-processing-statement/:documentNumber/add-health-certificate';
     const handler = SUT[currentUrl];

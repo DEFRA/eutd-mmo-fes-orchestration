@@ -778,11 +778,13 @@ export function cleanDate(toClean) {
 }
 
 export function validateDate(date) {
-  return moment(
+  const parsedDate = moment(
     date,
     ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"],
     true
-  ).isValid();
+  );
+
+  return parsedDate.isValid() && parsedDate.year() > 0;
 }
 
 export function validateTodayOrInThePast(date) {
