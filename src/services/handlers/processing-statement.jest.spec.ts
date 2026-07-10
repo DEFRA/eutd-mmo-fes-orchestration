@@ -3072,6 +3072,54 @@ describe('validateCatchDetails', () => {
 
     expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBeUndefined();
   });
+
+  it('should return speciesCommodityCode invalid characters error when special characters are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '@@@@🤖🤖',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorValidSpeciesCommodityCode');
+  });
+
+  it('should return speciesCommodityCode invalid characters error when letters are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: 'ABCDEF',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorValidSpeciesCommodityCode');
+  });
+
+  it('should return speciesCommodityCode invalid characters error when alphanumeric value is entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '0302ABC',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorValidSpeciesCommodityCode');
+  });
 });
 
 describe('calling handler for /create-processing-statement/:documentNumber/progress (FI0-10647)', () => {
