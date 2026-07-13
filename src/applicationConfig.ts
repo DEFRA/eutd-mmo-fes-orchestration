@@ -116,10 +116,19 @@ class ApplicationConfig {
       const parsed = new URL(host);
       parsed.username = this._refServiceBasicAuthUser || '';
       parsed.password = this._refServiceBasicAuthPassword || '';
-      return parsed.toString().replace(/\/+$/, '');
+      return this.trimTrailingSlashes(parsed.toString());
     } catch {
-      return host.replace(/\/+$/, '');
+      return this.trimTrailingSlashes(host);
     }
+  }
+
+  private trimTrailingSlashes(value: string): string {
+    let trimmed = value;
+    while (trimmed.length > 0 && trimmed.endsWith('/')) {
+      trimmed = trimmed.slice(0, -1);
+    }
+
+    return trimmed;
   }
 
   getEventHubNamespace(): string {
