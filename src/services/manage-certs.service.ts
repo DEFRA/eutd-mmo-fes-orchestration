@@ -77,7 +77,7 @@ export default class ManageCertsService {
     const urlMinusQueryPath = documentUri.split("?")[0];
     const urlParts = urlMinusQueryPath.split("/");
 
-    return urlParts[urlParts.length - 1];
+    return urlParts.at(-1);
   }
 
 }

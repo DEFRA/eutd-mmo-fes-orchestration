@@ -10,8 +10,8 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
     this.store = {};
   }
 
-  async initialize() {
-     logger.info('Memory storage is initialized as session store');
+  initialize() {
+    logger.info('Memory storage is initialized as session store');
   }
 
   async readAll<T extends IStoreable>(key: string): Promise<T[]> {

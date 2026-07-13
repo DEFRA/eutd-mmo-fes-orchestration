@@ -63,8 +63,8 @@ export async function validateTruckNationality(
   try {
     const refUrl = ApplicationConfig.getReferenceServiceUrl();
     const { data: countries } = await axios.get(`${refUrl}/v1/countries`);
-    const matchedCountry = countries.find((c: any) => 
-      c.officialCountryName === nationalityOfVehicle
+    const matchedCountry = countries.some(
+      (c: any) => c.officialCountryName === nationalityOfVehicle
     );
     
     if (!matchedCountry) {

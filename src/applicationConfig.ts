@@ -1,4 +1,3 @@
-import * as urlParser from 'url-parse';
 import * as dotenv from 'dotenv';
 import logger from "./logger";
 
@@ -108,10 +107,19 @@ class ApplicationConfig {
   }
 
   getReferenceServiceUrl(): string {
-    const parsed = urlParser(this._referenceServiceHost);
-    parsed.set('username', this._refServiceBasicAuthUser);
-    parsed.set('password', this._refServiceBasicAuthPassword);
-    return parsed.toString().replace(/(\/)+$/, '');
+    const host = this._referenceServiceHost || '';
+    if (!host) {
+      return '';
+    }
+
+    try {
+      const parsed = new URL(host);
+      parsed.username = this._refServiceBasicAuthUser || '';
+      parsed.password = this._refServiceBasicAuthPassword || '';
+      return parsed.toString().replace(/\/+$/, '');
+    } catch {
+      return host.replace(/\/+$/, '');
+    }
   }
 
   getEventHubNamespace(): string {
