@@ -4,7 +4,7 @@ export interface ParsedItem {
 }
 
 export const breakDownNameAndCode = (nameWithCode: string): ParsedItem | null => {
-  const regex = /(.*) \((.*)\)/g;
+  const regex = /^(.+?) \(([^()]*)\)$/;
   const matches = regex.exec(nameWithCode);
   if (matches?.length >= 3) {
     return {

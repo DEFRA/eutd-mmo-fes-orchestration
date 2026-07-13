@@ -3313,7 +3313,7 @@ describe("confirmLandingsType", () => {
     expect(mockGetExportLocation).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockCatchCertificateTransportServiceRemove).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, contactId);
-    expect(mockAddExportLocation).toHaveBeenCalledWith(USER_ID, exportLocation, DOCUMENT_NUMBER, contactId);
+    expect(mockAddExportLocation).toHaveBeenCalledWith(USER_ID, exportLocation, DOCUMENT_NUMBER, contactId, false);
     expect(mockLogger).toHaveBeenCalledWith('[CONFIRM-LANDINGS-TYPE][REMOVING-LANDINGS-FOR][product-id][SUCCESS]');
     expect(mockExportPayloadServiceSave).toHaveBeenCalledWith({ items: expected }, USER_ID, DOCUMENT_NUMBER, contactId);
     expect(mockAddLandingsEntryOption).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, LandingsEntryOptions.ManualEntry, contactId);

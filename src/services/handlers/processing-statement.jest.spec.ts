@@ -2377,6 +2377,20 @@ describe('handler for /create-processing-statement/:documentNumber/add-health-ce
     expect(errors.healthCertificateDate).toBe('psAddHealthCertificateErrorRealDateHealthCertificateDate');
   });
 
+  it('should return error when healthCertificateDate has year 0000', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-health-certificate';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      healthCertificateNumber: '11/1/111111',
+      healthCertificateDate: '01/01/0000',
+    };
+
+    const { errors } = await handler({ data, errors: {} });
+
+    expect(errors.healthCertificateDate).toBe('psAddHealthCertificateErrorRealDateHealthCertificateDate');
+  });
+
   it('should return error when healthCertificateDate exceeds maximum future date', async () => {
     const currentUrl = '/create-processing-statement/:documentNumber/add-health-certificate';
     const handler = SUT[currentUrl];
@@ -3057,6 +3071,54 @@ describe('validateCatchDetails', () => {
     const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
 
     expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBeUndefined();
+  });
+
+  it('should return speciesCommodityCode invalid characters error when special characters are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '@@@@🤖🤖',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorValidSpeciesCommodityCode');
+  });
+
+  it('should return speciesCommodityCode invalid characters error when letters are entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: 'ABCDEF',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorValidSpeciesCommodityCode');
+  });
+
+  it('should return speciesCommodityCode invalid characters error when alphanumeric value is entered', async () => {
+    const ctch: any = {
+      species: 'Atlantic Cod',
+      speciesCode: 'COD',
+      scientificName: 'Gadus morhua',
+      catchCertificateNumber: 'CT-111111',
+      speciesCommodityCode: '0302ABC',
+    };
+
+    mockValidateSpeciesName.mockResolvedValue({ isError: false });
+
+    const result = await ProcessingStatementService.validateCatchDetails(ctch, index, {}, documentNumber, userPrincipal, contactId);
+
+    expect(result.errors[`catches-${index}-speciesCommodityCode`]).toBe('psAddCatchDetailsErrorValidSpeciesCommodityCode');
   });
 });
 

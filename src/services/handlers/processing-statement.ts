@@ -280,6 +280,8 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
 function validateCatchCertificateCommodityCode(ctch: any, index: number, errors: any) {
   if (!ctch.speciesCommodityCode || validateWhitespace(ctch.speciesCommodityCode)) {
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorEnterSpeciesCommodityCode';
+  } else if (!/^\d+$/.test(ctch.speciesCommodityCode.trim().replaceAll(/\s/g, ''))) {
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorValidSpeciesCommodityCode';
   } else if (ctch.speciesCommodityCode.trim().replaceAll(/\s/g, '').length < MIN_COMMODITY_CODE_LENGTH) {
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMinLength';
   } else if (ctch.speciesCommodityCode.trim().replaceAll(/\s/g, '').length > MAX_COMMODITY_CODE_LENGTH) {

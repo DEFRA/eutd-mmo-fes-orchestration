@@ -206,9 +206,7 @@ export default class FishController {
 
     if (exportPayload?.items) {
       const unmatchedExportPayloadItems = exportPayload.items.filter((item: any) => {
-        const found = species.find((s: any) => {
-          return s.id === item.product.id;
-        });
+        const found = species.some((s: any) => s.id === item.product.id);
         // filter out any elements that were found
         return !found;
       });

@@ -35,6 +35,7 @@ import {
   toBackEndProcessingStatementExportData
 } from "../persistence/schema/frontEndModels/processingStatement";
 import { clearSessionDataForCurrentJourney } from "../helpers/sessionManager";
+import * as https from 'node:https';
 import {
   sdDataToSave,
   StorageDocument,
@@ -48,12 +49,11 @@ import * as EuCountriesService from './eu-countries.service';
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
 export const processingStatement: string = "processingStatement";
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 
 const { unflatten } = require("flat");
 const flatten = require("flat");
 const _ = require("lodash");
-const https = require('https');
 
 export default class OrchestrationService {
   public static async get(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
@@ -156,7 +156,7 @@ export default class OrchestrationService {
     );
     const sessionData: any = await OrchestrationService.getSessionData(redisKey, userPrincipal, documentNumber, contactId, sessionStore);
 
-    const originalSessionData = _.cloneDeep(sessionData);
+    const originalSessionData = structuredClone(sessionData);
 
     let data = payload as any;
     if (acceptsHtml(req.headers)) {
@@ -778,11 +778,13 @@ export function cleanDate(toClean) {
 }
 
 export function validateDate(date) {
-  return moment(
+  const parsedDate = moment(
     date,
     ["DD/MM/YYYY", "DD/M/YYYY", "D/MM/YYYY", "D/M/YYYY"],
     true
-  ).isValid();
+  );
+
+  return parsedDate.isValid() && parsedDate.year() > 0;
 }
 
 export function validateTodayOrInThePast(date) {

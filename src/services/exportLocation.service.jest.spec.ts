@@ -46,7 +46,7 @@ describe("Export location service", () => {
     mockSaveExportLocationDataCC.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
 
-    await ExportLocationService.addExportLocation("User 1", payload, 'GBR-344-4234234-2344', contactId);
+    await ExportLocationService.addExportLocation("User 1", payload, 'GBR-344-4234234-2344', contactId, false);
 
     expect(mockGetExportLocationDataCC).toHaveBeenCalledWith('User 1', 'GBR-344-4234234-2344', contactId);
     expect(mockSaveExportLocationDataCC).toHaveBeenCalledWith("User 1", {"exportedFrom": "United Kingdom"}, 'GBR-344-4234234-2344', contactId);
@@ -57,7 +57,40 @@ describe("Export location service", () => {
     mockSaveExportLocationDataCC.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
 
-    await expect(() => ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId)).rejects.toThrow();
+    await expect(() => ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId, false)).rejects.toThrow();
+  });
+
+  it("Will not throw for CC export location when saving as draft with an invalid exportedFrom", async () => {
+    mockGetExportLocationDataCC.mockResolvedValue({});
+    mockSaveExportLocationDataCC.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
+
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId, true);
+
+    expect(mockSaveExportLocationDataCC).toHaveBeenCalled();
+    expect(result).toEqual({ "exportedFrom": "Invalid", "exportedTo": undefined });
+  });
+
+  it("Will not throw for CC export location when saving as draft without exportedFrom field", async () => {
+    mockGetExportLocationDataCC.mockResolvedValue({});
+    mockSaveExportLocationDataCC.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
+
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedTo": "France" }, 'GBR-344-4234234-2344', contactId, true);
+
+    expect(mockSaveExportLocationDataCC).toHaveBeenCalled();
+    expect(result).toEqual({ "exportedFrom": undefined, "exportedTo": "France" });
+  });
+
+  it("Will not throw for CC export location when saving as draft with empty exportedFrom", async () => {
+    mockGetExportLocationDataCC.mockResolvedValue({});
+    mockSaveExportLocationDataCC.mockResolvedValue({});
+    mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.CC);
+
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "" }, 'GBR-344-4234234-2344', contactId, true);
+
+    expect(mockSaveExportLocationDataCC).toHaveBeenCalled();
+    expect(result).toEqual({ "exportedFrom": "", "exportedTo": undefined });
   });
 
   it("Will retrieve the CC export location from mongo", async () => {
@@ -83,7 +116,7 @@ describe("Export location service", () => {
     mockSaveExportLocationDataPS.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
 
-    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId);
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId, false);
 
     expect(result).toEqual({"exportedFrom": "Invalid", "exportedTo": undefined});
   });
@@ -93,7 +126,7 @@ describe("Export location service", () => {
     mockSaveExportLocationDataPS.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
 
-    const result = await ExportLocationService.addExportLocation("User 1", { "exportedTo": "France" }, 'GBR-2022-PS-123456', contactId);
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedTo": "France" }, 'GBR-2022-PS-123456', contactId, false);
 
     expect(result).toEqual({"exportedFrom": undefined, "exportedTo": "France"});
   });
@@ -103,7 +136,7 @@ describe("Export location service", () => {
     mockSaveExportLocationDataPS.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.PS);
 
-    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "" }, 'GBR-2022-PS-123456', contactId);
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "" }, 'GBR-2022-PS-123456', contactId, false);
 
     expect(result).toEqual({"exportedFrom": "", "exportedTo": undefined});
   });
@@ -113,7 +146,7 @@ describe("Export location service", () => {
     mockSaveExportLocationDataSD.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
 
-    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId);
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "Invalid" }, 'GBR-344-4234234-2344', contactId, false);
 
     expect(result).toEqual({"exportedFrom": "Invalid", "exportedTo": undefined});
   });
@@ -123,7 +156,7 @@ describe("Export location service", () => {
     mockSaveExportLocationDataSD.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
 
-    const result = await ExportLocationService.addExportLocation("User 1", { "exportedTo": "Germany" }, 'GBR-2022-SD-123456', contactId);
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedTo": "Germany" }, 'GBR-2022-SD-123456', contactId, false);
 
     expect(result).toEqual({"exportedFrom": undefined, "exportedTo": "Germany"});
   });
@@ -133,7 +166,7 @@ describe("Export location service", () => {
     mockSaveExportLocationDataSD.mockResolvedValue({});
     mockGetServiceNameFromDocumentNumber.mockReturnValue(ServiceNames.SD);
 
-    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "" }, 'GBR-2022-SD-123456', contactId);
+    const result = await ExportLocationService.addExportLocation("User 1", { "exportedFrom": "" }, 'GBR-2022-SD-123456', contactId, false);
 
     expect(result).toEqual({"exportedFrom": "", "exportedTo": undefined});
   });
