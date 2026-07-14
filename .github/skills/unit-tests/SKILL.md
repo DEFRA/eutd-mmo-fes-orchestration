@@ -1,6 +1,10 @@
 ---
 name: unit-tests
 description: 'Expert unit test engineer for MMO FES Orchestration. Use when: writing unit tests, updating tests for code changes, fixing failing tests, improving code coverage, fixing SonarQube issues.'
+license: OGL-UK-3.0
+metadata:
+  author: mmo-fes
+  version: "1.0"
 ---
 
 # Orchestration — Unit Tests Skill
