@@ -1,6 +1,10 @@
 ---
 name: develop
 description: 'Expert Hapi.js/TypeScript middleware developer for MMO FES Orchestration. Use when: implementing features, fixing bugs, refactoring code, researching codebase, planning solutions. Covers dual-auth, dual-storage, ownership validation, GOV.UK Notify, PDF generation.'
+license: OGL-UK-3.0
+metadata:
+  author: mmo-fes
+  version: "1.0"
 ---
 
 # Orchestration — Developer Skill
