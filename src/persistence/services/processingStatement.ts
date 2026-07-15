@@ -302,6 +302,7 @@ export const cloneProcessingStatement = async (documentNumber: string, userPrinc
   }
 
   const copy = clonePS(original, newDocumentNumber, requestByAdmin, voidOriginal);
+  void invalidateDraftCache(userPrincipal, `${PROCESSING_STATEMENT_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 
   await new ProcessingStatementModel(copy).save();
 
