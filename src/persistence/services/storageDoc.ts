@@ -358,6 +358,7 @@ export const cloneStorageDocument = async (documentNumber: string, userPrincipal
   }
 
   const copy = cloneSD(original, newDocumentNumber, requestByAdmin, voidOriginal);
+  void invalidateDraftCache(userPrincipal, `${STORAGE_NOTES_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
   await new StorageDocumentModel(copy).save();
 
   return newDocumentNumber;

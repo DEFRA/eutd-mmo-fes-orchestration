@@ -11,6 +11,7 @@ import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
 import * as ReferenceDataService from '../../services/reference-data.service';
 import * as DraftCreationValidator from '../../validators/draftCreationValidator';
+import * as CatchCertService from './catchCert';
 import ApplicationConfig from '../../applicationConfig';
 
 describe('processingStatement', () => {
@@ -1416,6 +1417,8 @@ describe('processingStatement', () => {
     });
 
     it('will return the document number of the newly created copy', async () => {
+      const invalidateDraftCacheSpy = jest.spyOn(CatchCertService, 'invalidateDraftCache').mockResolvedValue();
+
       const result = await ProcessingStatementService.cloneProcessingStatement(
         originalDocNumber,
         'Bob',
@@ -1425,6 +1428,8 @@ describe('processingStatement', () => {
       );
 
       expect(result).toBe(cloneDocNumber);
+      expect(invalidateDraftCacheSpy).toHaveBeenCalledWith('Bob', 'processingStatement/draftHeadersForUser', testContact);
+      invalidateDraftCacheSpy.mockRestore();
     });
 
     it('will clone an existing ps', async () => {
