@@ -12,6 +12,7 @@ import {
 import { ProcessingStatementDraft } from '../schema/frontEndModels/processingStatement';
 import { ExportLocation } from "../schema/frontEndModels/export-location";
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
+import { userCanCreateDraft } from '../../validators/draftCreationValidator';
 import { constructOwnerQuery, getDraftCache, saveDraftCache, invalidateDraftCache } from './catchCert';
 import { DocumentStatuses } from '../schema/catchCert';
 import { PROCESSING_STATEMENT_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
@@ -301,6 +302,7 @@ export const cloneProcessingStatement = async (documentNumber: string, userPrinc
   }
 
   const copy = clonePS(original, newDocumentNumber, requestByAdmin, voidOriginal);
+  void invalidateDraftCache(userPrincipal, `${PROCESSING_STATEMENT_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 
   await new ProcessingStatementModel(copy).save();
 
@@ -322,10 +324,16 @@ export const checkDocument = async (
   documentNumber: string,
   userPrincipal: string,
   contactId: string
-): Promise<{ _id: any } | null> => {
+): Promise<boolean> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  return await ProcessingStatementModel.exists({
+  const documentExists = await ProcessingStatementModel.exists({
     documentNumber: documentNumber,
     $or: ownerQuery,
   });
+
+  if (!documentExists) {
+    return false;
+  }
+
+  return await userCanCreateDraft(userPrincipal, 'processingStatement', contactId);
 };
