@@ -17,6 +17,7 @@ import { StorageDocumentDraft } from '../../persistence/schema/frontEndModels/st
 import { ExportLocation } from "../schema/frontEndModels/export-location";
 import { DocumentStatuses } from '../schema/catchCert';
 import { constructOwnerQuery, getDraftCache, saveDraftCache, invalidateDraftCache } from './catchCert';
+import { userCanCreateDraft } from '../../validators/draftCreationValidator';
 import { validateDocumentOwner } from '../../validators/documentOwnershipValidator';
 import { validateContainerNumbers } from '../../helpers/transportValidation';
 import { STORAGE_NOTES_KEY, DRAFT_HEADERS_KEY } from '../../session_store/constants';
@@ -377,10 +378,16 @@ export const checkDocument = async (
   documentNumber: string,
   userPrincipal: string,
   contactId: string
-): Promise<{ _id: any } | null> => {
+): Promise<boolean> => {
   const ownerQuery = constructOwnerQuery(userPrincipal, contactId);
-  return await StorageDocumentModel.exists({
+  const documentExists = await StorageDocumentModel.exists({
     documentNumber: documentNumber,
     $or: ownerQuery,
   });
+
+  if (!documentExists) {
+    return false;
+  }
+
+  return await userCanCreateDraft(userPrincipal, 'storageNotes', contactId);
 };

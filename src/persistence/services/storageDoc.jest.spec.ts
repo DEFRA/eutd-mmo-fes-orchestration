@@ -8,6 +8,7 @@ import { StorageDocumentModel } from "../schema/storageDoc";
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
 import * as ReferenceDataService from '../../services/reference-data.service';
+import * as DraftCreationValidator from '../../validators/draftCreationValidator';
 import ApplicationConfig from '../../applicationConfig';
 
 let mongoServer: MongoMemoryServer;
@@ -585,16 +586,29 @@ describe('voidStorageDocument', () => {
 describe('checkDocument', () => {
   it('will return a document if a match exists', async () => {
     await createDocument('Bob', 'COMPLETE', 'doc1');
+    const mockUserCanCreateDraft = jest.spyOn(DraftCreationValidator, 'userCanCreateDraft').mockResolvedValue(true);
 
     const result = await StorageDocumentService.checkDocument('doc1', 'Bob', defaultContact);
 
     expect(result).toBeTruthy();
+    mockUserCanCreateDraft.mockRestore();
   });
 
   it('will return null if no document can be found', async () => {
     const result = await StorageDocumentService.checkDocument('doc1', 'Bob', defaultContact);
 
     expect(result).toBeFalsy();
+  });
+
+  it('will return false when draft threshold is reached', async () => {
+    await createDocument('Bob', 'COMPLETE', 'doc1');
+    const mockUserCanCreateDraft = jest.spyOn(DraftCreationValidator, 'userCanCreateDraft').mockResolvedValue(false);
+
+    const result = await StorageDocumentService.checkDocument('doc1', 'Bob', defaultContact);
+
+    expect(result).toBe(false);
+    expect(mockUserCanCreateDraft).toHaveBeenCalledWith('Bob', 'storageNotes', defaultContact);
+    mockUserCanCreateDraft.mockRestore();
   });
 });
 

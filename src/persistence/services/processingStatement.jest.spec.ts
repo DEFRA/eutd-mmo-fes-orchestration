@@ -10,6 +10,7 @@ import * as FrontEndExporterSchema from '../schema/frontEndModels/exporterDetail
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
 import * as ReferenceDataService from '../../services/reference-data.service';
+import * as DraftCreationValidator from '../../validators/draftCreationValidator';
 import ApplicationConfig from '../../applicationConfig';
 
 describe('processingStatement', () => {
@@ -1551,6 +1552,7 @@ describe('processingStatement', () => {
   describe('checkDocument', () => {
     it('will return a document if a match exists', async () => {
       await createDocument(null, 'COMPLETE', testUser, 'doc1');
+      const mockUserCanCreateDraft = jest.spyOn(DraftCreationValidator, 'userCanCreateDraft').mockResolvedValue(true);
 
       const result = await ProcessingStatementService.checkDocument(
         'doc1',
@@ -1559,6 +1561,7 @@ describe('processingStatement', () => {
       );
 
       expect(result).toBeTruthy();
+      mockUserCanCreateDraft.mockRestore();
     });
 
     it('will return null if no document can be found', async () => {
@@ -1569,6 +1572,21 @@ describe('processingStatement', () => {
       );
 
       expect(result).toBeFalsy();
+    });
+
+    it('will return false when draft threshold is reached', async () => {
+      await createDocument(null, 'COMPLETE', testUser, 'doc1');
+      const mockUserCanCreateDraft = jest.spyOn(DraftCreationValidator, 'userCanCreateDraft').mockResolvedValue(false);
+
+      const result = await ProcessingStatementService.checkDocument(
+        'doc1',
+        testUser,
+        testContact
+      );
+
+      expect(result).toBe(false);
+      expect(mockUserCanCreateDraft).toHaveBeenCalledWith(testUser, 'processingStatement', testContact);
+      mockUserCanCreateDraft.mockRestore();
     });
   });
 
