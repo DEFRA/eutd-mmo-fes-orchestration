@@ -255,7 +255,7 @@ export default class ExportPayloadRoutes {
                   .required(),
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
-                  const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
+                  const dateLanded = moment(helpers.state.ancestors[0].dateLanded, moment.ISO_8601, true);
                   if (!startDate.isValid()) {
                     return helpers.error('date.base');
                   }
