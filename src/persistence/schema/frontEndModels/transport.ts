@@ -14,7 +14,7 @@ const formatDateForFrontend = (date: any): string => {
   if (typeof date === 'string' && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date)) {
     return date; // Already in DD/MM/YYYY format
   }
-  const m = moment(date);
+  const m = moment.utc(date, moment.ISO_8601, true);
   return m.isValid() ? m.format('DD/MM/YYYY') : date;
 };
 
