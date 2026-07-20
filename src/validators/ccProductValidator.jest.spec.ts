@@ -600,6 +600,12 @@ describe('seasonalFish', () => {
     expect(validations).toEqual(expected);
   });
 
+  it('should return an empty validation list when products input is undefined', async () => {
+    const validations = await ProductValidator.validateProducts(undefined);
+
+    expect(validations).toEqual([]);
+  });
+
 })
 
 describe('productsAreValid', () => {
