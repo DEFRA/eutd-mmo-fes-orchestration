@@ -1,4 +1,3 @@
-import { flatten } from 'lodash';
 import * as moment from 'moment';
 import { ProductLanded } from '../persistence/schema/frontEndModels/payload';
 
@@ -18,8 +17,8 @@ type ProductItem = {
 }
 
 export const unwind = (products): ProductItem[] =>
-  flatten(
-    products.map(product => product.landings.map(landing => ({
+  (products ?? [])
+    .flatMap((product: any) => product.landings.map((landing: any) => ({
       id: product.product.id,
       landingId: landing.model.id,
       pln: landing.model.vessel.pln,
@@ -30,7 +29,7 @@ export const unwind = (products): ProductItem[] =>
         label: product.product.species.label
       },
       weight: landing.model.exportWeight
-    }))))
+    })))
 
 const seasonalFishValidator = (blackPeriods: SeasonalFishPeriod[]) =>
   (item: ProductItem) => {
@@ -63,13 +62,14 @@ export const validateProducts = async (products) => {
     validator: seasonalFishValidator(await getSeasonalFish())
   }]
 
-  return flatten(unwind(products).map(
-    item => validators.map(
-      validator => ({
-        ...item,
-        validator: validator.name,
-        result: validator.validator(item)
-      }))))
+  return unwind(products)
+    .flatMap(
+      item => validators.map(
+        validator => ({
+          ...item,
+          validator: validator.name,
+          result: validator.validator(item)
+        })))
 }
 
 export const productsAreValid = async (products: ProductLanded[]) =>
