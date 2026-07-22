@@ -290,6 +290,94 @@ describe('exporter validate routes', () => {
       expect(response.result).toEqual(['error.buildingNumber.any.required', 'error.buildingName.any.required', 'error.subBuildingName.any.required', 'error.streetName.any.required']);
     });
 
+    it('should return 200 when only buildingNumber is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "12",
+          subBuildingName: "",
+          buildingName: "",
+          streetName: "",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('should return 200 when only buildingName is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "",
+          subBuildingName: "",
+          buildingName: "LANCASTER HOUSE",
+          streetName: "",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('should return 200 when only subBuildingName is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "",
+          subBuildingName: "MMO",
+          buildingName: "",
+          streetName: "",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('should return 200 when only streetName is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "",
+          subBuildingName: "",
+          buildingName: "",
+          streetName: "HAMPSHIRE COURT",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    });
+
     it('should return 400 if documentNumber is not given in payload', async () => {
       const response = await server.inject({
         method: 'POST',
