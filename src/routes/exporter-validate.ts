@@ -118,10 +118,7 @@ export default class ExporterValidateRoutes {
 
     if (!hasAddressFirstPart) {
       const missingFields = [
-        { key: 'buildingNumber', label: 'Building Number' },
-        { key: 'buildingName', label: 'Building Name' },
-        { key: 'subBuildingName', label: 'Sub-building Name' },
-        { key: 'streetName', label: 'Street Name' }
+        { key: 'addressFirstPart', label: 'Building Number' }
       ];
 
       missingFields.forEach(({ key, label }) => {
