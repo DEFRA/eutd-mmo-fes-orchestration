@@ -116,7 +116,7 @@ const CatchesSchema = new Schema({
   productDescription            : { type: String },
   productCommodityCode          : { type: String },
   speciesCommodityCode          : { type: String },
-}, { _id : true });
+}, { _id : false });
 
 const ProductsSchema = new Schema({
   id           : { type: String },
