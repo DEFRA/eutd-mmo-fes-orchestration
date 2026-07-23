@@ -287,7 +287,7 @@ describe('exporter validate routes', () => {
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      expect(response.result).toEqual(['error.buildingNumber.any.required', 'error.buildingName.any.required', 'error.subBuildingName.any.required', 'error.streetName.any.required']);
+      expect(response.result).toEqual(['error.addressFirstPart.any.required']);
     });
 
     it('should return 200 when only buildingNumber is provided', async () => {
@@ -814,13 +814,10 @@ describe('exporter validate routes', () => {
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
+      expect(response.result).toContain('error.addressFirstPart.any.required');
       expect(response.result).toContain('error.townCity.string.empty');
       expect(response.result).toContain('error.postcode.string.empty');
       expect(response.result).toContain('error.country.string.empty');
-      expect(response.result).toContain('error.buildingNumber.any.required');
-      expect(response.result).toContain('error.buildingName.any.required');
-      expect(response.result).toContain('error.subBuildingName.any.required');
-      expect(response.result).toContain('error.streetName.any.required');
     });
   });
 });
