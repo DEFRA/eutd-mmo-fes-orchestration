@@ -126,10 +126,13 @@ export const toBackEndNewCcExporterDetails = (
       }
     : null;
 
-const isOldExporterDetails = (exporterDetails: ExporterDetails) =>
-  !isEmpty(exporterDetails) && !isEmpty(exporterDetails.addressOne) &&
-  ['buildingNumber', 'subBuildingName', 'buildingName', 'streetName', 'county', 'country'].every((key: string) =>
-    !Object.hasOwn(exporterDetails, key));
+const isOldExporterDetails = (exporterDetails: ExporterDetails) => {
+  const normalized = (exporterDetails as any)?.toObject?.() ?? exporterDetails;
+
+  return !isEmpty(normalized) && !isEmpty(normalized.addressOne) &&
+    ['buildingNumber', 'subBuildingName', 'buildingName', 'streetName', 'county', 'country']
+      .every((key: string) => normalized?.[key] === undefined);
+};
 
 const addressOne = (dynamicsAddress: any): string | undefined => {
   const addressLineOne: string[] = [];
@@ -166,22 +169,22 @@ const addressOne = (dynamicsAddress: any): string | undefined => {
 }
 
 export const toBackEndNewPsAndSdExporterDetails = (exporterDetails: ExporterDetails) : ExporterDetails  => {
-
-  return isOldExporterDetails(exporterDetails) ? {
-    ...exporterDetails,
-    addressOne: addressOne(exporterDetails._dynamicsAddress),
+  const normalized = ((exporterDetails as any)?.toObject?.() ?? exporterDetails) as ExporterDetails;
+  return isOldExporterDetails(normalized) ? {
+    ...normalized,
+    addressOne: addressOne(normalized._dynamicsAddress),
     addressTwo: undefined,
-    buildingNumber: getBuildingNumber(exporterDetails),
-    subBuildingName: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_subbuildingname : null,
-    buildingName: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_buildingname : null,
-    streetName: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_street : null,
-    townCity: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_towntext : null,
-    county: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_county : null,
-    postcode: exporterDetails._dynamicsAddress ? exporterDetails._dynamicsAddress.defra_postcode : null,
-    country: getConutry(exporterDetails),
+    buildingNumber: getBuildingNumber(normalized),
+    subBuildingName: normalized._dynamicsAddress ? normalized._dynamicsAddress.defra_subbuildingname : null,
+    buildingName: normalized._dynamicsAddress ? normalized._dynamicsAddress.defra_buildingname : null,
+    streetName: normalized._dynamicsAddress ? normalized._dynamicsAddress.defra_street : null,
+    townCity: normalized._dynamicsAddress ? normalized._dynamicsAddress.defra_towntext : null,
+    county: normalized._dynamicsAddress ? normalized._dynamicsAddress.defra_county : null,
+    postcode: normalized._dynamicsAddress ? normalized._dynamicsAddress.defra_postcode : null,
+    country: getConutry(normalized),
     _updated: true
   } : {
-    ...exporterDetails
+    ...normalized
   }
 }
 

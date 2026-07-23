@@ -1229,3 +1229,81 @@ describe("when mapping from a front end SD exporterDetails to a backend SD expor
     expect(result).toBeUndefined();
   })
 });
+
+describe("regression for exporter old-format detection", () => {
+  it("does not treat mongoose-like exporter details with decomposed fields as old format", () => {
+    const plainExporter: ExporterDetails = {
+      contactId: "4704bf69-18f9-ec11-bb3d-000d3a2f806d",
+      addressOne: "2224, Toer C234, BRITISH FORCES, Test",
+      buildingNumber: "2224",
+      subBuildingName: "BRITISH FORCES",
+      buildingName: "Toer C234",
+      streetName: "Test",
+      county: "",
+      country: "Afghanistan",
+      postcode: "BF1 2AT",
+      townCity: "test",
+      exporterCompanyName: "Aakash Sharma",
+      _dynamicsAddress: {
+        defra_buildingname: "LANCASTER HOUSE",
+        defra_subbuildingname: "NATURAL ENGLAND",
+        defra_premises: null,
+        defra_street: "HAMPSHIRE COURT",
+        defra_locality: "NEWCASTLE BUSINESS PARK",
+        defra_towntext: "NEWCASTLE UPON TYNE",
+        defra_county: null,
+        defra_postcode: "NE4 7YH",
+        _defra_country_value_OData_Community_Display_V1_FormattedValue: "United Kingdom of Great Britain and Northern Ireland",
+      },
+      _dynamicsUser: { firstName: "Automation", lastName: "Tester" },
+    };
+
+    const mongooseLikeExporter = {
+      toObject: () => plainExporter,
+      ...plainExporter,
+    } as unknown as ExporterDetails;
+
+    const result = FrontEndExporter.toBackEndNewPsAndSdExporterDetails(mongooseLikeExporter);
+
+    expect(result.addressOne).toBe("2224, Toer C234, BRITISH FORCES, Test");
+    expect(result.buildingNumber).toBe("2224");
+    expect(result.buildingName).toBe("Toer C234");
+    expect(result.streetName).toBe("Test");
+    expect(result.postcode).toBe("BF1 2AT");
+    expect(result.country).toBe("Afghanistan");
+    expect(result._updated).toBeUndefined();
+  });
+
+  it("still transforms legacy exporter details when decomposed fields are missing", () => {
+    const legacyExporter = {
+      contactId: "some contact id",
+      exporterCompanyName: "Private",
+      addressOne: "45 Leopold Street",
+      townCity: "Town",
+      postcode: "DE1 2HF",
+      _dynamicsAddress: {
+        defra_premises: "defra premises",
+        defra_subbuildingname: "defra sub building name",
+        defra_buildingname: "defra building name",
+        defra_street: "defra street",
+        defra_locality: "defra locality",
+        defra_dependentlocality: "defra dependent locality",
+        defra_towntext: "defra town",
+        defra_county: "defra county",
+        defra_postcode: "defra postcode",
+        _defra_country_value_OData_Community_Display_V1_FormattedValue: "defra country value",
+      },
+      _dynamicsUser: { firstName: "A", lastName: "B" },
+    } as unknown as ExporterDetails;
+
+    const result = FrontEndExporter.toBackEndNewPsAndSdExporterDetails(legacyExporter);
+
+    expect(result.addressOne).toBe("defra premises, defra sub building name, defra building name, defra street, defra locality, defra dependent locality");
+    expect(result.buildingNumber).toBe("defra premises");
+    expect(result.buildingName).toBe("defra building name");
+    expect(result.streetName).toBe("defra street");
+    expect(result.postcode).toBe("defra postcode");
+    expect(result.country).toBe("defra country value");
+    expect(result._updated).toBe(true);
+  });
+});
