@@ -119,10 +119,10 @@ const CatchesSchema = new Schema({
 }, { _id : true });
 
 const ProductsSchema = new Schema({
-  id                  : { type: String },
-  commodityCode       : { type: String },
-  description         : { type: String }
-});
+  id           : { type: String },
+  commodityCode: { type: String },
+  description  : { type: String }
+}, { _id: false });
 
 const ExportDataSchema = new Schema({
   catches                           : { type: [CatchesSchema] },
