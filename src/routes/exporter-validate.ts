@@ -114,23 +114,22 @@ export default class ExporterValidateRoutes {
   private validateAddressFirstPart(value: any, validationErrors: any[]): void {
     if (!value) return;
 
-    const fields = [
-      { key: 'buildingNumber', label: 'buildingNumber' },
-      { key: 'buildingName', label: 'addressSecondPart' }, // keep your custom label
-      { key: 'subBuildingName', label: 'subBuildingName' },
-      { key: 'streetName', label: 'streetName' }
-    ];
+    const hasAddressFirstPart = value.buildingNumber || value.buildingName || value.subBuildingName || value.streetName;
 
-    fields.forEach(({ key, label }) => {
-      if (!value[key]) {
+    if (!hasAddressFirstPart) {
+      const missingFields = [
+        { key: 'addressFirstPart', label: 'Building Number' }
+      ];
+
+      missingFields.forEach(({ key, label }) => {
         validationErrors.push({
-          message: `"${key}" is required`,
+          message: `"${label}" is required`,
           path: [key],
           type: 'any.required',
           context: { key, label }
         });
-      }
-    });
+      });
+    }
   }
 
     private async validateCountryWithReference(value: any): Promise<void> {

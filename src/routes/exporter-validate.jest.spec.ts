@@ -287,7 +287,95 @@ describe('exporter validate routes', () => {
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      expect(response.result).toEqual(['error.buildingNumber.any.required', 'error.buildingName.any.required', 'error.subBuildingName.any.required', 'error.streetName.any.required']);
+      expect(response.result).toEqual(['error.addressFirstPart.any.required']);
+    });
+
+    it('should return 200 when only buildingNumber is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "12",
+          subBuildingName: "",
+          buildingName: "",
+          streetName: "",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('should return 200 when only buildingName is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "",
+          subBuildingName: "",
+          buildingName: "LANCASTER HOUSE",
+          streetName: "",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('should return 200 when only subBuildingName is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "",
+          subBuildingName: "MMO",
+          buildingName: "",
+          streetName: "",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('should return 200 when only streetName is provided', async () => {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/exporter-validate",
+        headers: { documentnumber: documentNumber },
+        app: { claims: { sub: 'Bob' } },
+        payload: {
+          buildingNumber: "",
+          subBuildingName: "",
+          buildingName: "",
+          streetName: "HAMPSHIRE COURT",
+          townCity: "NEWCASTLE UPON TYNE",
+          county: "TYNESIDE",
+          postcode: "NE4 7YH",
+          country: "England"
+        },
+      });
+
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
     });
 
     it('should return 400 if documentNumber is not given in payload', async () => {
@@ -726,13 +814,10 @@ describe('exporter validate routes', () => {
 
       expect(mockAddExporterDetails).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
+      expect(response.result).toContain('error.addressFirstPart.any.required');
       expect(response.result).toContain('error.townCity.string.empty');
       expect(response.result).toContain('error.postcode.string.empty');
       expect(response.result).toContain('error.country.string.empty');
-      expect(response.result).toContain('error.buildingNumber.any.required');
-      expect(response.result).toContain('error.buildingName.any.required');
-      expect(response.result).toContain('error.subBuildingName.any.required');
-      expect(response.result).toContain('error.streetName.any.required');
     });
   });
 });
