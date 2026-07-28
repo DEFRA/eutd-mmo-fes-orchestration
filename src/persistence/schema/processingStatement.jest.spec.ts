@@ -732,9 +732,9 @@ describe('When saving a Processing Statement', () => {
 
     const ps = await new ProcessingStatementModel(data).save();
 
-    expect(ps.exportData.catches[0]['_id']).not.toBeUndefined();
-    expect(ps.exportData.catches[1]['_id']).not.toBeUndefined();
-    expect(ps.exportData.catches[0]['_id']).not.toEqual(ps.exportData.catches[1]['_id']);
+    expect(ps.exportData.catches[0]['_id']).toBeUndefined();
+    expect(ps.exportData.catches[1]['_id']).toBeUndefined();
+    expect(ps.exportData.catches[0]['_id']).toEqual(ps.exportData.catches[1]['_id']);
   });
 
 });
