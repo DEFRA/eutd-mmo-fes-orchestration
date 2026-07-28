@@ -1,6 +1,7 @@
 import {IProduct, UserAttributesModel} from '../schema/userAttributes';
 import * as Favourites from './favourites';
 import * as UserAttributes from './userAttributes';
+import * as crypto from 'node:crypto';
 
 import * as mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -360,20 +361,20 @@ describe('helper functions', ()=> {
   ];
 
   describe('generateFavouriteId', ()=> {
-    let mockRandom;
+    let mockRandomInt;
 
     beforeAll(() => {
-      mockRandom = jest.spyOn(Math, 'random');
+      mockRandomInt = jest.spyOn(crypto, 'randomInt');
     });
 
     afterAll(() => {
-      mockRandom.mockRestore();
+      mockRandomInt.mockRestore();
     });
 
     it('should generated a id that is no present already in the product array', () => {
-      mockRandom.mockReturnValueOnce(0);
-      mockRandom.mockReturnValueOnce(0);
-      mockRandom.mockReturnValueOnce(0.99999999999);
+      mockRandomInt.mockReturnValueOnce(1);
+      mockRandomInt.mockReturnValueOnce(1);
+      mockRandomInt.mockReturnValueOnce(999);
 
       const newId = Favourites.generateFavouriteId(['PRD001']);
 
@@ -381,7 +382,7 @@ describe('helper functions', ()=> {
     });
 
     it('should generate a minimum id of PRD001', () => {
-      mockRandom.mockReturnValueOnce(0);
+      mockRandomInt.mockReturnValueOnce(1);
 
       const newId = Favourites.generateFavouriteId([]);
 
@@ -389,7 +390,7 @@ describe('helper functions', ()=> {
     });
 
     it('should generate a maximum id of PRD999', () => {
-      mockRandom.mockReturnValue(0.99999999999);
+      mockRandomInt.mockReturnValueOnce(999);
 
       const newId = Favourites.generateFavouriteId([]);
 
