@@ -2997,7 +2997,7 @@ describe('getCertificateHash', () => {
   const userPrincipal = "a User Id";
   const documentNumber = "a document number";
   const mockCertificateData = { some: "data" };
-  const mockValidHash = crypto.createHash('sha1')
+  const mockValidHash = crypto.createHash('sha256')
     .update(JSON.stringify(mockCertificateData))
     .digest('base64') as string;
   let mockGetCertificate: jest.SpyInstance;
