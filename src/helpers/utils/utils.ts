@@ -1,6 +1,8 @@
+import { randomInt } from 'node:crypto';
+
 // 10 digits
 export const getRandomNumber = (): number => {
-  return Math.floor(Math.random() * 9000000000) + 1000000000;
+  return randomInt(1000000000, 10000000000);
 };
 
 export const getFAOAreaList = () : string[] => {
