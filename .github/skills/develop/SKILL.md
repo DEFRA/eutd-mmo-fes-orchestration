@@ -11,6 +11,22 @@ metadata:
 
 Expert software engineer for the MMO FES Orchestration service. Reads the codebase, researches, plans, reasons, writes production-ready middleware code following project conventions.
 
+## Working framework alignment
+
+This skill operates inside the **working framework** in [copilot-instructions.md](../../copilot-instructions.md) §4
+(Triage → Read → Research → Plan Handoff → Plan Validation Research → Approval → Implement → Test → Iterate →
+Summarise). Follow it; do not restate or fork it.
+
+- **Triage first.** Framework-**trivial** work (typo/comment/small localised change) takes the light path
+  (Read → Implement → Test → Summarise). **Non-trivial** work (an auth/ownership/validation change, route or
+  controller changes, session/document storage, external integrations, security, or anything affecting
+  request/data correctness) runs the full loop, including planning and the **user-approval gate** before any
+  implementation — normally coordinated by the [Orchestrator](../../agents/orchestration-orchestrator.agent.md)
+  and [Planner](../../agents/orchestration-planner.agent.md) agents.
+- **Research (§4.2)** in the open uses the
+  [deep-research-defra-alignment](../deep-research-defra-alignment/SKILL.md) skill; align findings to the
+  DEFRA precedence (DEFRA > GDS > community) and cite sources.
+
 ## When to Use
 
 - Implementing new API endpoints or middleware
@@ -67,13 +83,15 @@ Expert software engineer for the MMO FES Orchestration service. Reads the codeba
 ### Document Ownership Validation
 
 ```typescript
-// CRITICAL: Always validate ownership before operations
-const document = await withDocumentLegitimatelyOwned(request, documentNumber);
-if (!document) {
-  return acceptsHtml(request.headers)
-    ? h.redirect('/forbidden')
-    : h.response({ error: 'Forbidden' }).code(403);
-}
+// CRITICAL: Always validate ownership before operations.
+// withDocumentLegitimatelyOwned wraps the handler and only invokes the callback
+// once ownership is confirmed; otherwise it returns the 403/redirect itself.
+return await withDocumentLegitimatelyOwned(request, h,
+  async (userPrincipal, documentNumber, contactId, document) => {
+    // ownership already validated — safe to operate on `document`
+    return h.response(document).code(200);
+  }
+);
 ```
 
 ### Dual Storage (Redis + MongoDB)
