@@ -477,7 +477,8 @@ export default class ExportPayloadService {
   }
 
   public static async getCertificateHash(userPrincipal: string, documentNumber: string, contactId: string): Promise<string> {
-    return crypto.createHash('sha1')
+    // Hotspot fix / (Sonar loud issue on sha1: issue name - Make sure this weak hash algorithm is not used in a sensitive context here .)
+    return crypto.createHash('sha256')
       .update(JSON.stringify(await ExportPayloadService.get(userPrincipal, documentNumber, contactId)))
       .digest('base64');
   }
