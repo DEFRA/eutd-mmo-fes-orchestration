@@ -21,6 +21,7 @@ import * as moment from 'moment';
 import { MAX_COMMODITY_CODE_LENGTH, MIN_COMMODITY_CODE_LENGTH } from '../../src/services/constants';
 import * as pdfService from 'mmo-ecc-pdf-svc';
 import * as EuCountriesService from './eu-countries.service';
+import { ObjectId } from 'mongodb';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -3027,6 +3028,44 @@ describe('saveAndValidate additional paths', () => {
     mockGetDraft.mockRestore();
     mockUpsertDraft.mockRestore();
     mockAddTotalWeight.mockRestore();
+  });
+
+  it('should preserve the exportData _id as a valid ObjectId on originalSessionData when validation errors occur', async () => {
+    // Regression test: originalSessionData is built with _.cloneDeep(sessionData).
+    // Using structuredClone() instead corrupts a Mongo ObjectId _id into a plain
+    // object, which later causes a Mongoose CastError when it's saved back on the
+    // errors fallback path (dataToSave = originalSessionData.exportData).
+    const originalId = new ObjectId();
+    const mockGetDraft = jest.spyOn(ProcessingStatementService, 'getDraft').mockResolvedValue({
+      exportData: {
+        _id: originalId,
+        consignmentDescription: '',
+        catches: [],
+      },
+    } as any);
+    const mockUpsertDraft = jest.spyOn(ProcessingStatementService, 'upsertDraftData').mockResolvedValue(null);
+
+    const req: any = {
+      app: { claims: { sub: testUser } },
+      params: { redisKey: processingStatement },
+      payload: { consignmentDescription: '' },
+      query: {
+        n: '/next',
+        c: '/create-processing-statement/DOC-123/add-consignment-details',
+      },
+      headers: { accept: false },
+    };
+
+    const result: any = await OrchestrationService.saveAndValidate(req, h, testUser, 'DOC-123', 'contact1');
+
+    // Validation should have failed (empty consignmentDescription), so the errors
+    // fallback branch returns originalSessionData rather than the mutated data.
+    expect(result.errors).toBeDefined();
+    expect(result.exportData._id).toBeInstanceOf(ObjectId);
+    expect(result.exportData._id.toString()).toEqual(originalId.toString());
+
+    mockGetDraft.mockRestore();
+    mockUpsertDraft.mockRestore();
   });
 });
 
