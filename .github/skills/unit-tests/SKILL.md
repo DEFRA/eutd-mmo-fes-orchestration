@@ -20,10 +20,11 @@ Expert in writing and maintaining unit tests for the MMO FES Orchestration servi
 
 ## Coverage Requirements
 
-- **Branches**: 90%
-- **Functions**: 90%
-- **Lines**: 90%
-- **Statements**: 90%
+Meet the tiered Defra targets (never drop below the project or SonarCloud baseline):
+
+- **≥90% global** — Statements, Branches, Functions, Lines (the Jest threshold gate)
+- **≥95%** — core business logic (dual-auth, document-ownership validation, dual storage, controllers)
+- **100%** — error-handling and security-critical paths
 - Run tests: `npm test`
 - Run CI tests: `npm run test:ci`
 
