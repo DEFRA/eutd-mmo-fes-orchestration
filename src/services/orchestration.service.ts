@@ -45,6 +45,7 @@ import { reportDocumentSubmitted, submitToCatchSystem } from "../services/refere
 import { invalidateDraftCache, setCatchSubmissionInProgress } from '../persistence/services/catchCert'
 import { validateCompletedDocument, validateSpecies, DraftCacheRef } from "../validators/documentValidator";
 import * as EuCountriesService from './eu-countries.service';
+import { safeClone } from "../helpers/utils/safeClone";
 
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
@@ -156,7 +157,7 @@ export default class OrchestrationService {
     );
     const sessionData: any = await OrchestrationService.getSessionData(redisKey, userPrincipal, documentNumber, contactId, sessionStore);
 
-    const originalSessionData = structuredClone(sessionData);
+    const originalSessionData = safeClone(sessionData);
 
     let data = payload as any;
     if (acceptsHtml(req.headers)) {

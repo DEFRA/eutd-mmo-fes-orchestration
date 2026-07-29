@@ -116,13 +116,13 @@ const CatchesSchema = new Schema({
   productDescription            : { type: String },
   productCommodityCode          : { type: String },
   speciesCommodityCode          : { type: String },
-}, { _id : false });
+}, { _id : true });
 
 const ProductsSchema = new Schema({
   id           : { type: String },
   commodityCode: { type: String },
   description  : { type: String }
-}, { _id: false });
+});
 
 const ExportDataSchema = new Schema({
   catches                           : { type: [CatchesSchema] },
