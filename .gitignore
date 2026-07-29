@@ -7,5 +7,5 @@ dist
 test-results.xml
 .nyc_output/
 coverage/
-.vscode/
+.vscode/mcp.json
 .env
