@@ -5,6 +5,14 @@ describe("utils", () => {
     const mockGetRandomNumber = jest.spyOn(utils, 'getRandomNumber');
     mockGetRandomNumber.mockReturnValue(1234567890);
     expect(utils.getRandomNumber()).toEqual(1234567890);
+    mockGetRandomNumber.mockRestore();
+  });
+
+  it('returns a real 10 digit number when unmocked', () => {
+    const result = utils.getRandomNumber();
+    expect(typeof result).toBe('number');
+    expect(result).toBeGreaterThanOrEqual(1000000000);
+    expect(result).toBeLessThan(10000000000);
   });
 
   it('should return an array of FAO Area codes with exactly 19 items', () => {
@@ -68,6 +76,21 @@ describe("utils", () => {
     });
     it('returns false for null', () => {
       expect(utils.hasValue(null)).toBe(false);
+    });
+  });
+
+  describe('nonJSInputHistory', () => {
+    it('pushes only non-empty tracked fields onto transportDetails with a temp-prefixed field name', () => {
+      const fieldParam = { vehicle: 'plane', flightNumber: 'BA1', untracked: 'ignored', empty: '' };
+      const dataObject: any = { transportDetails: [] };
+      const arrayOfInputFields = ['vehicle', 'flightNumber', 'empty'];
+
+      const result = utils.nonJSInputHistory(fieldParam, dataObject, arrayOfInputFields);
+
+      expect(result.transportDetails).toEqual([
+        { field: 'tempVehicle', value: 'plane' },
+        { field: 'tempFlightNumber', value: 'BA1' },
+      ]);
     });
   });
 });

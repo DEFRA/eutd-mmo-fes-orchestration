@@ -121,7 +121,7 @@ const CatchSchema = new Schema({
   netWeightFisheryProductArrival    : { type: String },
   netWeightProductDeparture         : { type: String, required: false },
   netWeightFisheryProductDeparture  : { type: String, required: false },
-}, { _id : false } );
+}, { _id : true } );
 
 const StorageFacilitySchema = new Schema({
   facilityName              : { type: String },

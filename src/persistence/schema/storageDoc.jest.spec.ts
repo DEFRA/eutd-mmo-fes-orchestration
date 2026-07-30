@@ -490,9 +490,9 @@ describe('When saving a storage document', () => {
 
     const sd = await new BackEndStorageDocument.StorageDocumentModel(data).save();
 
-    expect(sd.exportData.catches[0]['_id']).toBeUndefined();
-    expect(sd.exportData.catches[1]['_id']).toBeUndefined();
-    expect(sd.exportData.catches[0]['_id']).toEqual(sd.exportData.catches[1]['_id']);
+    expect(sd.exportData.catches[0]['_id']).not.toBeUndefined();
+    expect(sd.exportData.catches[1]['_id']).not.toBeUndefined();
+    expect(sd.exportData.catches[0]['_id']).not.toEqual(sd.exportData.catches[1]['_id']);
   });
 
 });
