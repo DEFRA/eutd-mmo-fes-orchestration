@@ -13,11 +13,6 @@
     "muhammara@6.0.5": true,
     "mongodb-memory-server@9.5.0": true
   },
-  "allowScripts": {
-    "applicationinsights-native-metrics@0.0.10": true,
-    "dtrace-provider@0.8.8": true,
-    "muhammara@6.0.4": true
-  },
   "overrides": {
     "tar": "7.5.22",
     "muhammara": {
@@ -163,6 +158,8 @@
     "test:pre-commit": "cross-env NODE_ENV=test jest",
     "test": "cross-env NODE_ENV=test jest --coverage",
     "test:ci": "cross-env JEST_JUNIT_OUTPUT_DIR=test-results JEST_JUNIT_OUTPUT_NAME=junit.xml NODE_ENV=test jest --runInBand --watchAll=false --reporters=default --reporters=jest-junit --coverage --ci",
+    "test:db:up": "docker compose -f docker-compose.test.yml up -d mongo",
+    "test:db:down": "docker compose -f docker-compose.test.yml down --volumes",
     "prepare": "husky || true"
   }
 }
