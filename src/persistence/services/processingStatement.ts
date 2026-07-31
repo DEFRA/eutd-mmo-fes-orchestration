@@ -1,5 +1,5 @@
 import { IProcessingStatementModel, ProcessingStatementModel, ProcessingStatement, cloneProcessingStatement as clonePS } from '../schema/processingStatement';
-import { Condition, StrictUpdateFilter } from 'mongodb';
+import type { StrictUpdateFilter } from 'mongodb';
 import DocumentNumberService from "../../services/documentNumber.service";
 import ManageCertsService from '../../services/manage-certs.service';
 import ServiceNames from "../../validators/interfaces/service.name.enum";
@@ -115,7 +115,7 @@ export const getAllProcessingStatementsForUserByYearAndMonth = async (monthAndYe
     createdAt: {
       "$gte": new Date(yearInt, monthInt - 1, 1),
       "$lt": new Date(yearInt, monthInt, 1)
-    } as Condition<any>
+    } as any
   }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
 
   return data;

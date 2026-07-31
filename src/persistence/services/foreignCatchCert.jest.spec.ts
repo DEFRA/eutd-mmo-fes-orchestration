@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from  'uuid';
 
-import * as mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import { sortBy } from 'lodash';
 
 import * as Service from './foreignCatchCert';
@@ -9,17 +8,12 @@ import { IForeignCatchCert } from '../schema/foreignCatchCert';
 import { StorageDocumentModel } from '../schema/storageDoc';
 import { ProcessingStatementModel } from '../schema/processingStatement';
 
-let mongoServer: MongoMemoryServer;
-
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri).catch(err => {console.log(err)});
+  await connectTestMongo();
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
+  await disconnectTestMongo();
 });
 
 const createDocument = (documentNumber, catches) =>

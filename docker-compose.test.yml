@@ -1,0 +1,30 @@
+services:
+  mongo:
+    image: mongo:7
+    tmpfs:
+      - /data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - test-net
+
+  test:
+    build:
+      context: .
+      target: test
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      DB_CONNECTION_URI: mongodb://mongo:27017
+    command: npm run test:ci
+    networks:
+      - test-net
+
+networks:
+  test-net:
+    driver: bridge

@@ -1,7 +1,7 @@
 import * as moment from 'moment';
 import { isEmpty } from 'lodash';
 
-import { Condition, StrictUpdateFilter } from 'mongodb';
+import type { StrictUpdateFilter } from 'mongodb';
 import { CatchCertificate, CatchCertModel, CatchCertificateModel, toFrontEndSpecies, toFrontEndConservation, DocumentStatuses, cloneCatchCertificate as cloneCC, LandingsEntryOptions, Product, EuCatchStatus } from '../schema/catchCert';
 import { BaseModel } from '../schema/base';
 import logger from '../../logger';
@@ -107,7 +107,7 @@ export const getAllCatchCertsForUserByYearAndMonth = async (yearAndMonth: string
     createdAt: {
       '$gte': new Date(yearInt, monthInt - 1, 1),
       '$lt': new Date(yearInt, monthInt, 1)
-    } as Condition<any>
+    } as any
   }).sort({ createdAt: 'desc' }).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
 
   return data;
