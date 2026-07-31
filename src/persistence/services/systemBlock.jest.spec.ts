@@ -1,19 +1,13 @@
-import * as mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import { getBlockingStatus, getBlockingStatuses } from './systemBlock';
 import { BlockingStatusModel,ValidationRules } from '../schema/systemBlock'
 
-let mongoServer: MongoMemoryServer;
-
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri).catch(err => {console.log(err)});
+  await connectTestMongo();
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
+  await disconnectTestMongo();
 });
 
 describe("find out if the blocking is on", () => {

@@ -33,9 +33,18 @@ export class MongoConnection {
     }
   }
 
+  /** Returns the raw Db, throwing if the connection has not been established yet. */
+  private static getDb() {
+    const db = MongoConnection.mongo?.connection?.db;
+    if (!db) {
+      throw new Error('Mongo connection not established');
+    }
+    return db;
+  }
+
   public static async findOne(collection: string, query: object): Promise<object | Error> {
     try {
-      return await MongoConnection.mongo.connection.db.collection(collection).findOne(query);
+      return await MongoConnection.getDb().collection(collection).findOne(query);
     } catch(e) {
       logger.error(e);
     }
@@ -43,7 +52,7 @@ export class MongoConnection {
 
   public static async insert(collection: string, newDoc: object): Promise<object | Error> {
     try {
-      return await MongoConnection.mongo.connection.db.collection(collection).insertOne(newDoc);
+      return await MongoConnection.getDb().collection(collection).insertOne(newDoc);
     } catch(e) {
       logger.error(e);
     }
@@ -51,7 +60,7 @@ export class MongoConnection {
 
   public static async deleteOne(collection: string, query: object): Promise<object | Error> {
     try {
-      return await MongoConnection.mongo.connection.db.collection(collection).deleteOne(query);
+      return await MongoConnection.getDb().collection(collection).deleteOne(query);
     } catch(e) {
       logger.error(e);
     }
@@ -63,7 +72,7 @@ export class MongoConnection {
 
   private static async updateStatus(collection: string, status: string, query: object): Promise<object | Error> {
       try {
-        const updatedDocu = MongoConnection.mongo.connection.db.collection(collection);
+        const updatedDocu = MongoConnection.getDb().collection(collection);
 
         return updatedDocu.updateOne(query, {$set : {"status":status}});
       } catch(e) {

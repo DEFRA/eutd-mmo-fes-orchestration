@@ -46,7 +46,7 @@ export const validateCompletedDocument = async (documentNumber: string, userPrin
   if (!isEmpty(draftCache?.[documentNumber])) return true;
 
   const isProcessingStatement: boolean = DocumentNumberService.getServiceNameFromDocumentNumber(foreignDocumentNumber) === ServiceNames.PS;
-  const completedDocument: CatchCertSchema.CatchCertificateModel | ProcessingStatementSchema.IProcessingStatementModel | StorageDocSchema.StorageDocumentModel = isProcessingStatement ? await CatchCertSchema.CatchCertModel.findOne({
+  const completedDocument: CatchCertSchema.CatchCertificateModel | ProcessingStatementSchema.IProcessingStatementModel | StorageDocSchema.StorageDocumentModel = (isProcessingStatement ? await CatchCertSchema.CatchCertModel.findOne({
     status: {
       $in: [
         CatchCertSchema.DocumentStatuses.Complete,
@@ -60,7 +60,7 @@ export const validateCompletedDocument = async (documentNumber: string, userPrin
       ],
     },
     documentNumber: documentNumber,
-  }).lean();
+  }).lean()) as any;
 
   if (!completedDocument) return false;
 
