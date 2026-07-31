@@ -186,6 +186,12 @@ module.exports = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
+  // Increase hook/test timeout for real MongoDB connections under parallel load
+  testTimeout: 30000,
+
+  // Cap parallel workers to reduce simultaneous MongoDB connection burst
+  maxWorkers: 4,
+
   "roots": [
     "<rootDir>/src"
   ],

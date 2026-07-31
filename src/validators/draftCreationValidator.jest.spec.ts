@@ -1,19 +1,15 @@
 import { userCanCreateDraft } from './draftCreationValidator';
 import ApplicationConfig from "../applicationConfig";
-import {MongoMemoryServer} from "mongodb-memory-server";
-import * as mongoose from "mongoose";
+import { connectTestMongo, disconnectTestMongo } from '../../test/helpers/mongoTestConnection';
 import {CatchCertModel} from "../persistence/schema/catchCert";
 import {ProcessingStatementModel} from "../persistence/schema/processingStatement";
 import {StorageDocumentModel} from "../persistence/schema/storageDoc";
 
 describe('A draft creation validator', () => {
-  let mongoServer: MongoMemoryServer;
   const contactId = 'contactBob';
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri).catch(err => {console.log(err)});
+    await connectTestMongo();
   });
 
   afterEach(async () => {
@@ -23,8 +19,7 @@ describe('A draft creation validator', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await disconnectTestMongo();
   });
 
   const sampleDocument = (documentNumber, status, user) => ({

@@ -14,10 +14,10 @@
     "mongodb-memory-server@9.5.0": true
   },
   "overrides": {
-    "mongodb-memory-server": {
-      "tmp": "^0.2.1"
-    },
     "tar": "7.5.22",
+    "muhammara": {
+      "tar": "7.5.22"
+    },
     "diff": "8.0.3",
     "js-yaml": "4.3.1",
     "nyc": {
@@ -89,8 +89,8 @@
     "lodash": "^4.18.1",
     "mmo-ecc-pdf-svc": "2.4.27",
     "moment": "^2.30.1",
-    "mongodb": "^6.6.2",
-    "mongoose": "^7.8.9",
+    "mongodb": "^7.5.0",
+    "mongoose": "^9.8.0",
     "muhammara": "^6.0.4",
     "notifications-node-client": "^8.3.2",
     "path-to-regexp": "^6.3.0",
@@ -107,7 +107,6 @@
     "@types/jsonfile": "6.1.4",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/lodash": "^4.17.24",
-    "@types/mongodb": "^4.0.7",
     "@types/nock": "11.1.0",
     "@types/node": "^24.13.1",
     "@types/qs": "^6.15.0",
@@ -125,7 +124,6 @@
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
     "lint-staged": "^15.2.7",
-    "mongodb-memory-server": "^9.5.0",
     "nock": "13.5.4",
     "nodemon": "^3.1.4",
     "npm-run-all2": "^8.0.4",
@@ -160,6 +158,8 @@
     "test:pre-commit": "cross-env NODE_ENV=test jest",
     "test": "cross-env NODE_ENV=test jest --coverage",
     "test:ci": "cross-env JEST_JUNIT_OUTPUT_DIR=test-results JEST_JUNIT_OUTPUT_NAME=junit.xml NODE_ENV=test jest --runInBand --watchAll=false --reporters=default --reporters=jest-junit --coverage --ci",
+    "test:db:up": "docker compose -f docker-compose.test.yml up -d mongo",
+    "test:db:down": "docker compose -f docker-compose.test.yml down --volumes",
     "prepare": "husky || true"
   }
 }

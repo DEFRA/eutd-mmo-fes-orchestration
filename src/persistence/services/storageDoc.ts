@@ -1,7 +1,7 @@
 import { TransientData, mapToPersistableSchema } from '../adapters/storageDoc';
 import { StorageDocumentModel, StorageDocument, cloneStorageDocument as cloneSD } from '../schema/storageDoc';
 import { STATUS_COMPLETE } from '../../services/constants';
-import { Condition, StrictUpdateFilter } from 'mongodb';
+import type { StrictUpdateFilter } from 'mongodb';
 import logger from '../../logger';
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
@@ -120,7 +120,7 @@ export const getAllStorageDocsForUserByYearAndMonth = async (monthAndYear: strin
     createdAt: {
       "$gte": new Date(yearInt, monthInt - 1, 1),
       "$lt": new Date(yearInt, monthInt, 1)
-    } as Condition<any>
+    } as any
   }).sort({createdAt: 'desc'}).select(['documentNumber', 'createdAt', 'documentUri', 'status', 'userReference', 'catchSubmission']).lean();
 
   return data;

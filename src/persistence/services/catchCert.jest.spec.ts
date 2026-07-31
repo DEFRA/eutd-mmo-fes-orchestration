@@ -1,5 +1,4 @@
-import * as mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import * as CatchCertService from './catchCert';
 import * as ReferenceData from '../../../src/services/reference-data.service'
 import { CatchCertModel, CatchCertificate, ExportData, DocumentStatuses } from '../schema/catchCert';
@@ -87,14 +86,11 @@ describe("catchCert - invalidateDraftCache", () => {
 });
 
 describe('catchCert - db related', () => {
-  let mongoServer: MongoMemoryServer;
   let mockWriteAllFor;
   let mockSessionStore;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    mongoose.connect(mongoUri).catch(err => { console.log(err) });
+    await connectTestMongo();
 
     mockSessionStore = new MockSessionStorage();
     mockWriteAllFor = jest.fn();
@@ -115,8 +111,7 @@ describe('catchCert - db related', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await disconnectTestMongo();
     jest.resetAllMocks();
   });
 

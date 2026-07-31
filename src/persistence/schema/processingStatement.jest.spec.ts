@@ -1,5 +1,4 @@
-import * as mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import {
   ProcessingStatementModel,
   ProcessingStatement,
@@ -696,22 +695,16 @@ describe('When adding total weight landed to catches', () => {
 
 describe('When saving a Processing Statement', () => {
 
-  let mongoServer: MongoMemoryServer;
-
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri).catch(err => {console.log(err)});
-
-  } );
+    await connectTestMongo();
+  });
 
   afterEach(async () => {
     await ProcessingStatementModel.deleteMany({});
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await disconnectTestMongo();
   });
 
   it('should generate a unique _id for each catch', async () => {

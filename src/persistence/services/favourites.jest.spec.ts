@@ -3,20 +3,15 @@ import * as Favourites from './favourites';
 import * as UserAttributes from './userAttributes';
 import * as crypto from 'node:crypto';
 
-import * as mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import applicationConfig from '../../applicationConfig';
 
 describe('Favourites', () => {
 
   const USER_ID = "ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12";
 
-  let mongoServer: MongoMemoryServer;
-
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri).catch(err => {console.log(err)});
+    await connectTestMongo();
   });
 
   afterEach(async() => {
@@ -24,8 +19,7 @@ describe('Favourites', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await disconnectTestMongo();
   });
 
   const mockUserFavouritesEntry = {

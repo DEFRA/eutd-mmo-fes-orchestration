@@ -1,5 +1,4 @@
-import * as mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import * as ProcessingStatementService from './processingStatement';
 import {
   ExportData,
@@ -15,12 +14,9 @@ import * as CatchCertService from './catchCert';
 import ApplicationConfig from '../../applicationConfig';
 
 describe('processingStatement', () => {
-  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri).catch(err => {console.log(err)});
+    await connectTestMongo();
   });
 
   afterEach(async () => {
@@ -28,8 +24,7 @@ describe('processingStatement', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await disconnectTestMongo();
   });
 
   const testUser = 'Bob';
