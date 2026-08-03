@@ -234,10 +234,10 @@ export async function validateSpeciesWithinCatchDetails(ctch: any, index: number
     const speciesMatchError = await validateSpeciesWithSuggestions(ctch.species, refUrl);
     if (speciesMatchError.isError) {
       if (speciesMatchError.error.message === "Incorect FAO code or Species name") {
-        errors[`catches-species-incorrect`] = 'psAddCatchDetailsErrorIncorrectFaoOrSpecies';
+        errors[`catches-${index}-product`] = 'psAddCatchDetailsErrorIncorrectFaoOrSpecies';
       } else if (speciesMatchError.error.message === "Results match fewer than 5") {
         const speciesError = speciesMatchError as SpeciesSuggestionError
-        errors[`catches-species-suggest`] = {
+        errors[`catches-${index}-product`] = {
           translation: 'psAddCatchDetailsErrorSpeciesSuggestion',
           possibleMatches: speciesError.resultList
         };

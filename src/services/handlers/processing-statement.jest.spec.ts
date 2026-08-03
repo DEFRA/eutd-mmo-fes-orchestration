@@ -1383,7 +1383,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-incorrect": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-0-product": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -1421,7 +1421,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-suggest": {
+    const expectedErrors = { "catches-0-product": {
       translation: 'psAddCatchDetailsErrorSpeciesSuggestion',
       possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
     } };
@@ -1608,7 +1608,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-incorrect": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-1-product": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -1691,7 +1691,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-suggest": {
+    const expectedErrors = { "catches-1-product": {
       translation: 'psAddCatchDetailsErrorSpeciesSuggestion',
       possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
     } };
