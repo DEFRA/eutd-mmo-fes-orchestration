@@ -1446,7 +1446,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
     });
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal", "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal", "catches-0-product": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -1495,7 +1495,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
     const expectedErrors = {
       "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal",
-      "catches-species-suggest": {
+      "catches-0-product": {
         translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
         possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
       }
@@ -2162,7 +2162,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
     });
 
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-0-certificateNumber": "sdAddProductToConsignmentCertificateNumberErrorNull", "catches-species-incorrect": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-0-certificateNumber": "sdAddProductToConsignmentCertificateNumberErrorNull", "catches-0-product": "sdAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -2215,7 +2215,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
     const expectedErrors = {
       "catches-0-weightOnCC": "sdAddProductToConsignmentWeightOnCCErrorPositiveMax2Decimal",
-      "catches-species-suggest": {
+      "catches-0-product": {
         translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
         possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
       },
@@ -3057,7 +3057,7 @@ describe("Facility Arrival Date: transport and exportDate edge cases", () => {
   it("should set error if transport exportDate exists and is same or one day before arrival date", () => {
     const data = {
       facilityArrivalDate: "10/10/2025",
-      transport: { exportDate: "10/10/2025" }, 
+      transport: { exportDate: "10/10/2025" },
       facilityName: "name",
       facilityAddressOne: "address",
       facilityTownCity: "city",
@@ -3074,7 +3074,7 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
   it("should NOT set error for today's date", () => {
     const today = new Date();
     const todayFormatted = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-    
+
     const data = {
       facilityArrivalDate: todayFormatted,
       facilityName: "name",
@@ -3090,7 +3090,7 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowFormatted = `${String(tomorrow.getDate()).padStart(2, '0')}/${String(tomorrow.getMonth() + 1).padStart(2, '0')}/${tomorrow.getFullYear()}`;
-    
+
     const data = {
       facilityArrivalDate: tomorrowFormatted,
       facilityName: "name",
@@ -3106,7 +3106,7 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
     const twoDaysLater = new Date();
     twoDaysLater.setDate(twoDaysLater.getDate() + 2);
     const twoDaysLaterFormatted = `${String(twoDaysLater.getDate()).padStart(2, '0')}/${String(twoDaysLater.getMonth() + 1).padStart(2, '0')}/${twoDaysLater.getFullYear()}`;
-    
+
     const data = {
       facilityArrivalDate: twoDaysLaterFormatted,
       facilityName: "name",
@@ -3122,7 +3122,7 @@ describe("Facility Arrival Date: Maximum 1 day in future validation", () => {
     const sevenDaysLater = new Date();
     sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
     const sevenDaysLaterFormatted = `${String(sevenDaysLater.getDate()).padStart(2, '0')}/${String(sevenDaysLater.getMonth() + 1).padStart(2, '0')}/${sevenDaysLater.getFullYear()}`;
-    
+
     const data = {
       facilityArrivalDate: sevenDaysLaterFormatted,
       facilityName: "name",
