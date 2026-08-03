@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+import { randomInt } from 'node:crypto';
 import { SessionStoreFactory } from '../session_store/factory';
 import { getRedisOptions } from '../session_store/redis';
 import { STATUS_DRAFT } from '../services/constants';
@@ -178,7 +179,7 @@ export default class DocumentNumberService {
 function randomId() {
   // taken from https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
   return 'xxxxxxxxx'.replaceAll(/[xy]/g, (c) => {
-    const r = Math.trunc(Math.random() * 16), v = c == 'x' ? r : (r & 0x3 | 0x8); // tslint:disable-line
+    const r = randomInt(0, 16), v = c == 'x' ? r : (r & 0x3 | 0x8); // tslint:disable-line
     return v.toString(16).toUpperCase();
   });
 }

@@ -1,6 +1,7 @@
 import applicationConfig from "../../applicationConfig";
 import { IFavourites, IProduct, IUserAttributes } from "../schema/userAttributes";
 import { find, save } from "./userAttributes";
+import { randomInt } from 'node:crypto';
 
 export const readFavourites  = async (userPrincipal: string): Promise<IFavourites | null > => {
   const userAttributes =  await find(userPrincipal,["favourites"]);
@@ -50,7 +51,7 @@ export const generateFavouriteId = (existingIds: string[]) => {
   let id;
 
   do {
-    id = 'PRD' + `${Math.floor(Math.random() * 999) + 1}`.padStart(3, '0');
+    id = 'PRD' + `${randomInt(1, 1000)}`.padStart(3, '0');
   }
   while (existingIds.includes(id));
 
