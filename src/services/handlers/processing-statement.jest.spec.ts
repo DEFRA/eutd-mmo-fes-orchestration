@@ -306,6 +306,35 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-c
     expect(mockValidateCommodityCode).toHaveBeenCalled();
   });
 
+  it('with commodity code as special chars validates as error', async () => {
+    mockValidateCommodityCode.mockResolvedValue({ isError: true, error: new Error('Cannot get PS/SD commodity code from reference service') });
+
+    const currentUrl = '/create-processing-statement/:documentNumber/add-consignment-details/:productIndex';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      catches: [{}],
+      products: [{
+        description: 'some product description',
+        commodityCode: '!@#$%^&*()'
+      }]
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {},
+      params: { productIndex: 0 }
+    });
+
+    const expected = {
+      commodityCode: 'psAddProductCommodityCodeError'
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+    expect(mockValidateCommodityCode).toHaveBeenCalled();
+  });
+
   it('with whitespace description validates as error', async () => {
     const currentUrl = '/create-processing-statement/:documentNumber/add-consignment-details/:productIndex';
     const handler = SUT[currentUrl];
