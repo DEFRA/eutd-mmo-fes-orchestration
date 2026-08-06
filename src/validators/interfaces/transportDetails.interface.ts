@@ -11,8 +11,7 @@ interface TransportDetails extends IStoreable {
     registrationNumber? : string,
     containerIdentificationNumber? : string,
     flagState? : string,
-    vesselName? : string,
-    cmr? : string
+    vesselName? : string
 }
 
 export default TransportDetails;

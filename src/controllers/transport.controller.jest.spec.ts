@@ -24,7 +24,6 @@ describe("TransportController", () => {
       presentationLabel: "Whole",
       stateLabel: "Fresh",
       vehicle: "directLanding",
-      cmr: "true"
     },
     headers: { accept: "text/html" },
   };
@@ -82,12 +81,12 @@ describe("TransportController", () => {
 
   describe("nextVehicleUri() should return a valid nextUri", () => {
     it("case truck", () => {
-      const truckCmrUri = "truck-cmr-uri";
+      const truckDetailsUri = "truck-details-uri";
       const result = TransportController.nextVehicleUri({
         vehicle: "truck",
-        truckCmrUri,
+        truckDetailsUri,
       });
-      expect(result).toEqual(truckCmrUri);
+      expect(result).toEqual(truckDetailsUri);
     });
 
     it("case plane", () => {
@@ -124,25 +123,6 @@ describe("TransportController", () => {
         summaryUri,
       });
       expect(result).toEqual(summaryUri);
-    });
-  });
-
-  describe("nextTruckUri()", () => {
-    const payload = {
-      summaryUri: "summary-uri",
-      cmr: "true",
-      truckDetailsUri: "truck-details-uri",
-    };
-
-    it("returns summaryUri when cmr is 'true'", () => {
-      const result = TransportController.nextTruckUri(payload);
-      expect(result).toEqual(payload.summaryUri);
-    });
-
-    it("returns truckDetailsUri when cmr is not 'true'", () => {
-      payload.cmr = "false";
-      const result = TransportController.nextTruckUri(payload);
-      expect(result).toEqual(payload.truckDetailsUri);
     });
   });
 
@@ -413,7 +393,7 @@ describe("TransportController", () => {
 
     it("should not validate when storage document has no facilityArrivalDate", async () => {
       mockGet.mockResolvedValueOnce({ ...storageDocument, facilityArrivalDate: undefined });
-      
+
       const req = {
         ...mockReq,
         payload: {
@@ -617,7 +597,7 @@ describe("TransportController", () => {
 
     it("should not validate when storage document is null", async () => {
       mockGet.mockResolvedValueOnce(null);
-      
+
       const req = {
         ...mockReq,
         payload: {
@@ -755,7 +735,7 @@ describe("TransportController", () => {
 
     it("should not validate exportDate when storage document has no facilityArrivalDate", async () => {
       mockGet.mockResolvedValueOnce({ ...storageDocument, facilityArrivalDate: undefined });
-      
+
       const req = {
         ...mockReq,
         payload: {
@@ -778,7 +758,7 @@ describe("TransportController", () => {
 
     it("should not validate exportDate when storage document is null", async () => {
       mockGet.mockResolvedValueOnce(null);
-      
+
       const req = {
         ...mockReq,
         payload: {
@@ -844,49 +824,6 @@ describe("TransportController", () => {
     });
   });
 
-  describe("addTruckCMR()", () => {
-    it("should redirect to dashboardUri when savingAsDraft is true", async () => {
-      await TransportController.addTruckCMR(
-        mockReq,
-        h,
-        true,
-        USER_ID,
-        DOCUMENT_NUMBER,
-        contactId
-      );
-
-      expect(mockRedirect).toHaveBeenCalledWith(mockReq.payload.dashboardUri);
-    });
-
-    it("should redirect to nextUri when savingAsDraft is false", async () => {
-      await TransportController.addTruckCMR(
-        mockReq,
-        h,
-        false,
-        USER_ID,
-        DOCUMENT_NUMBER,
-        contactId
-      );
-
-      expect(mockRedirect).toHaveBeenCalledWith(mockReq.payload.summaryUri);
-    });
-
-    it("should return a result object when accept header is not text/html", async () => {
-      mockReq.headers.accept = "application/pdf";
-      const result = await TransportController.addTruckCMR(
-        mockReq,
-        h,
-        true,
-        USER_ID,
-        DOCUMENT_NUMBER,
-        contactId
-      );
-
-      expect(result).toEqual(data);
-      mockReq.headers.accept = "text/html";
-    });
-  });
-
   describe("getTransportDetails()", () => {
     it("should return a valid result object", async () => {
       const result = await TransportController.getTransportDetails(mockReq, USER_ID, DOCUMENT_NUMBER, contactId);
@@ -897,13 +834,6 @@ describe("TransportController", () => {
   it("addTransportSaveAsDraft() should return a valid return object", async () => {
     mockReq.headers.accept = "application/pdf";
     const result = await TransportController.addTransportSaveAsDraft(mockReq, h, USER_ID, DOCUMENT_NUMBER, contactId);
-    expect(result).toEqual(data);
-    mockReq.headers.accept = "text/html";
-  });
-
-  it("addTruckCMRSaveAsDraft() should return a valid return object", async () => {
-    mockReq.headers.accept = "application/pdf";
-    const result = await TransportController.addTruckCMRSaveAsDraft(mockReq, h, USER_ID, DOCUMENT_NUMBER, contactId);
     expect(result).toEqual(data);
     mockReq.headers.accept = "text/html";
   });

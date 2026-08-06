@@ -8,7 +8,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
   it("if vehicle is truck then it should contain all relevant properties for truck", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: "false",
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
@@ -27,7 +26,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: false,
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
@@ -48,7 +46,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
   it("if vehicle is truck then it should contain all relevant properties for truck with exported to", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: "false",
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here",
@@ -62,7 +59,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: false,
       nationalityOfVehicle: "UK",
       registrationNumber: "REG Number",
       departurePlace: "here"
@@ -553,68 +549,9 @@ describe("When mapping from a front end transport to a backend transport", () =>
     });
   });
 
-  it("if CMR is anything other than 'true' it should be false", () => {
-    const input: FrontEndTransport.Transport = {
-      vehicle: FrontEndTransport.truck,
-      cmr: 'yes',
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    };
-
-    const result = FrontEndTransport.toBackEndTransport(input);
-
-    expect(result).toStrictEqual({
-      vehicle: input.vehicle,
-      cmr: false,
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    });
-  });
-
-  it("if CMR is true, we should remove the nationalityOfVehicle, registrationNumber, and departurePlace properties", () => {
-    const transport: FrontEndTransport.Transport = {
-      vehicle: FrontEndTransport.truck,
-      cmr: "true",
-      nationalityOfVehicle: "UK",
-      registrationNumber: "REG Number",
-      departurePlace: "here",
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    };
-
-
-    const expectedResult: BackEndModels.Transport = {
-      vehicle: FrontEndTransport.truck,
-      cmr: true,
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    };
-
-    const result = FrontEndTransport.toBackEndTransport(transport);
-
-    expect(result).toStrictEqual(expectedResult);
-  });
-
   it("if vehicle is truck with containerIdentificationNumber then it should be included in backend transport", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: "false",
       nationalityOfVehicle: "UK",
       registrationNumber: "REG123",
       containerIdentificationNumber: "ABCD1234567",
@@ -629,7 +566,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: false,
       nationalityOfVehicle: "UK",
       registrationNumber: "REG123",
       containerIdentificationNumber: "ABCD1234567",
@@ -650,7 +586,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
   it("if vehicle is truck without containerIdentificationNumber then it should not be in backend transport", () => {
     const transport: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: "false",
       nationalityOfVehicle: "UK",
       registrationNumber: "REG123",
       departurePlace: "Dover",
@@ -664,7 +599,6 @@ describe("When mapping from a front end transport to a backend transport", () =>
 
     const expectedResult: BackEndModels.Transport = {
       vehicle: FrontEndTransport.truck,
-      cmr: false,
       nationalityOfVehicle: "UK",
       registrationNumber: "REG123",
       departurePlace: "Dover",
@@ -1086,16 +1020,6 @@ describe('checkTransportDataFrontEnd', () => {
         isoNumericCode: "SP"
       }
     };
-    const fullValidObjectWithCmr: FrontEndTransport.Transport = {
-      vehicle: FrontEndTransport.truck,
-      cmr: "true",
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    };
     const baseValidObject: FrontEndTransport.Transport = {
       vehicle: FrontEndTransport.truck,
       exportedTo: {
@@ -1105,60 +1029,10 @@ describe('checkTransportDataFrontEnd', () => {
         isoNumericCode: "SP"
       }
     };
-    const baseValidCmrObject: FrontEndTransport.Transport = {
-      vehicle: FrontEndTransport.truck,
-      cmr: "false",
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    };
 
     shouldReturnFullObject(fullValidObjectNoCmr);
-    shouldReturnFullObject(fullValidObjectWithCmr);
     shouldReturnBaseValidObject(baseValidObject, {
       vehicle: FrontEndTransport.truck,
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    });
-    shouldReturnBaseValidObject(baseValidCmrObject, {
-      vehicle: FrontEndTransport.truck,
-      cmr: "false",
-      registrationNumber: "WE78ERF",
-      departurePlace: "London",
-      exportDate: "some date",
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    });
-    shouldReturnBaseValidObject(baseValidCmrObject, {
-      vehicle: FrontEndTransport.truck,
-      cmr: "false",
-      nationalityOfVehicle: "British",
-      departurePlace: "London",
-      exportDate: "some date",
-      exportedTo: {
-        officialCountryName: "SPAIN",
-        isoCodeAlpha2: "A1",
-        isoCodeAlpha3: "A3",
-        isoNumericCode: "SP"
-      }
-    });
-    shouldReturnBaseValidObject(baseValidCmrObject, {
-      vehicle: FrontEndTransport.truck,
-      cmr: "false",
-      nationalityOfVehicle: "British",
-      registrationNumber: "WE78ERF",
-      exportDate: "some date",
       exportedTo: {
         officialCountryName: "SPAIN",
         isoCodeAlpha2: "A1",
@@ -1468,7 +1342,6 @@ describe("When mapping transport with pointOfDestination field", () => {
 
       const expectedResult: BackEndModels.Transport = {
         vehicle: FrontEndTransport.truck,
-        cmr: false,
         nationalityOfVehicle: "UK",
         registrationNumber: "REG123",
         departurePlace: "London",
