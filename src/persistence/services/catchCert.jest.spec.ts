@@ -1426,7 +1426,6 @@ describe('catchCert - db related', () => {
       const expected = {
         departurePlace: 'here',
         nationalityOfVehicle: 'UK',
-        cmr: false,
         registrationNumber: 'REG Number',
         vehicle: 'truck',
         exportedTo: {

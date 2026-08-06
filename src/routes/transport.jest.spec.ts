@@ -64,8 +64,6 @@ describe("transport routes", () => {
         let mockGetTransportDetails: jest.SpyInstance;
         let mockSelectTransport: jest.SpyInstance;
         let mockSelectTransportSaveAsDraft: jest.SpyInstance;
-        let mockAddTruckCMR: jest.SpyInstance;
-        let mockAddTruckCMRSaveAsDraft: jest.SpyInstance;
 
         beforeEach(() => {
             mockWithDocumentLegitimatelyOwned = jest.spyOn(DocumentOwnershipValidator, 'validateDocumentOwnership');
@@ -85,12 +83,6 @@ describe("transport routes", () => {
 
             mockGetTransportDetails = jest.spyOn(Controller, 'getTransportDetails');
             mockGetTransportDetails.mockResolvedValue({ some : 'data' });
-
-            mockAddTruckCMR = jest.spyOn(Controller, 'addTruckCMR');
-            mockAddTruckCMR.mockResolvedValue({ some : 'data' });
-
-            mockAddTruckCMRSaveAsDraft = jest.spyOn(Controller, 'addTruckCMRSaveAsDraft');
-            mockAddTruckCMRSaveAsDraft.mockResolvedValue({ some : 'data' });
 
         })
 
@@ -418,113 +410,6 @@ describe("transport routes", () => {
 
             const response = await server.inject(request);
             expect(mockSelectTransportSaveAsDraft).not.toHaveBeenCalled();
-            expect(response.statusCode).toBe(302);
-        });
-
-        // /v1/transport/truck/cmr (with saveAsDraft) cases
-
-        it(`returns 200 and doesnt fail when we POST /v1/transport/truck/cmr`, async () => {
-
-            const request = createRequestObj('/v1/transport/truck/cmr', {
-                cmr: "xs"
-            })
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMR).toHaveBeenCalled();
-            expect(response.statusCode).toBe(200);
-            expect(response.result).toEqual({some:'data'});
-        });
-
-        it(`returns 500 and FAILS when we POST /v1/transport/truck/cmr`, async () => {
-
-            mockAddTruckCMR.mockRejectedValue(new Error('an error'))
-
-            const request = createRequestObj('/v1/transport/truck/cmr', {
-                cmr: "train"
-            })
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMR).toHaveBeenCalled();
-            expect(response.statusCode).toBe(500);
-            expect(response.result).toEqual(null);
-        });
-
-        it(`returns 400 and FAILS when we POST /v1/transport/truck/cmr without a cmr`, async () => {
-
-            const request = createRequestObj('/v1/transport/truck/cmr', {})
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMR).not.toHaveBeenCalled();
-            expect(response.statusCode).toBe(400);
-            const error = { cmr: 'error.cmr.any.required' }
-            expect(response.payload).toStrictEqual(JSON.stringify(error));
-        });
-
-        it(`returns 302 and FAILS when we POST /v1/transport/truck/cmr without a cmr`, async () => {
-
-            const request = createRequestObj('/v1/transport/truck/cmr', {
-                dashboardUri: '/uri',
-                currentUri: '/uri',
-            }, 'POST', true)
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMR).not.toHaveBeenCalled();
-            expect(response.statusCode).toBe(302);
-        });
-
-        it(`returns 200 and doesnt fail when we POST /v1/transport/truck/cmr/saveAsDraft`, async () => {
-
-            const request = createRequestObj('/v1/transport/truck/cmr/saveAsDraft', {
-                cmr: "x",
-                dashboardUri: '/uri',
-                currentUri: '/uri',
-            })
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMRSaveAsDraft).toHaveBeenCalled();
-            expect(response.statusCode).toBe(200);
-            expect(response.result).toEqual({some:'data'});
-        });
-
-        it(`returns 500 and FAILS when we POST /v1/transport/truck/cmr/saveAsDraft`, async () => {
-
-            mockAddTruckCMRSaveAsDraft.mockRejectedValue(new Error('an error'))
-
-            const request = createRequestObj('/v1/transport/truck/cmr/saveAsDraft', {
-                cmr: "x",
-                dashboardUri: '/uri',
-                currentUri: '/uri',
-            })
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMRSaveAsDraft).toHaveBeenCalled();
-            expect(response.statusCode).toBe(500);
-            expect(response.result).toEqual(null);
-        });
-
-        it(`returns 400 and FAILS when we POST /v1/transport/truck/cmr/saveAsDraft without a cmr`, async () => {
-
-            const request = createRequestObj('/v1/transport/truck/cmr/saveAsDraft', {
-                dashboardUri: '/uri',
-                currentUri: '/uri',
-            })
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMRSaveAsDraft).not.toHaveBeenCalled();
-            expect(response.statusCode).toBe(400);
-            const error = { cmr: 'error.cmr.any.required' }
-            expect(response.payload).toStrictEqual(JSON.stringify(error));
-        });
-
-        it('returns 302 and FAILS when we POST /v1/transport/truck/cmr/saveAsDraft without a cmr', async () => {
-
-            const request = createRequestObj('/v1/transport/truck/cmr/saveAsDraft', {
-                dashboardUri: '/uri',
-                currentUri: '/uri',
-            }, 'POST', true)
-
-            const response = await server.inject(request);
-            expect(mockAddTruckCMRSaveAsDraft).not.toHaveBeenCalled();
             expect(response.statusCode).toBe(302);
         });
 

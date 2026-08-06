@@ -480,81 +480,6 @@ describe("Transport endpoints", () => {
     });
   });
 
-  describe('/v1/catch-certificate/transport/:id/cmr', () => {
-    it('returns 200 when we PUT /v1/catch-certificate/transport/0/cmr as true for truck transport', async () => {
-
-      const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
-        id: '0',
-        vehicle: 'truck',
-        cmr: 'true',
-      }, 'PUT');
-
-      const response = await server.inject(request);
-      expect(mockUpdateTransport).toHaveBeenCalled();
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toEqual(transport);
-    });
-
-    it('returns 200 when we PUT /v1/catch-certificate/transport/0/cmr as false for truck transport', async () => {
-
-      const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
-        id: '0',
-        vehicle: 'truck',
-        cmr: 'false',
-      }, 'PUT');
-
-      const response = await server.inject(request);
-      expect(mockUpdateTransport).toHaveBeenCalled();
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toEqual(transport);
-    });
-
-    it('returns 400 when we PUT /v1/catch-certificate/transport/0/cmr with no cmr value provided', async () => {
-      const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
-        id: '0',
-        vehicle: "truck",
-      }, 'PUT');
-
-      const response = await server.inject(request);
-      expect(mockUpdateTransport).not.toHaveBeenCalled();
-      expect(response).toMatchObject({ statusCode: 400, result: { cmr: "error.cmr.any.required" } });
-    
-    });
-
-    it('returns 400 when we PUT /v1/catch-certificate/transport/0/cmr as invalid boolean string', async () => {
-      const requests = ["tru", "yes", "no", "1", "0", "blah"].map(cmr => {
-        const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
-          id: '0',
-          vehicle: "truck",
-          cmr,
-        }, 'PUT');
-
-        return server.inject(request);
-      });
-      const responses = await Promise.all(requests);
-      expect(mockUpdateTransport).not.toHaveBeenCalled();
-      responses.forEach(r => expect(r).toMatchObject({ statusCode: 400, result: { cmr: "error.cmr.any.only" } }))
-    
-    });
-
-    it('returns 400 when we PUT /v1/catch-certificate/transport/0/cmr with non-truck transport', async () => {
-
-      const requests = ["plane", "train", "containerVessel"].map(vehicle => {
-        const request = createRequestObj('/v1/catch-certificate/transport/0/cmr', {
-          id: '0',
-          vehicle,
-          cmr: 'true',
-        }, 'PUT');
-
-        return server.inject(request);
-      });
-      const responses = await Promise.all(requests);
-      expect(mockUpdateTransport).not.toHaveBeenCalled();
-      responses.forEach(r => expect(r).toMatchObject({ statusCode: 400, result: { vehicle: "error.vehicle.any.only" } }))
-    
-    });
-  });
-
   it('returns 400 and FAILS when we PUT /v1/catch-certificate/transport/0 with an invalid a vehicle', async () => {
 
     const request = createRequestObj('/v1/catch-certificate/transport/0', {
@@ -1110,7 +1035,7 @@ describe("Transport endpoints", () => {
       const request = createRequestObj(
         '/v1/catch-certificate/transport-details/0',
         {
-          id: '0', 
+          id: '0',
           vehicle: 'truck',
           nationalityOfVehicle: 'UK',
           registrationNumber: 'UI90UXB',
@@ -1119,28 +1044,28 @@ describe("Transport endpoints", () => {
         },
         'PUT'
       );
-    
+
       const response = await server.inject(request);
       expect(mockUpdateTransport).toHaveBeenCalled();
       expect(response.statusCode).toBe(200);
       expect(response.result).toEqual(transport);
     });
-    
+
     it('returns 200 when freight bill number is not provided', async () => {
       const request = createRequestObj(
         '/v1/catch-certificate/transport-details/0',
         {
           id: '0',
-          vehicle: 'truck', 
+          vehicle: 'truck',
           nationalityOfVehicle: 'UK',
           registrationNumber: 'UI90UXB',
           departurePlace: 'Hull'
         },
         'PUT'
       );
-    
+
       const response = await server.inject(request);
-      expect(mockUpdateTransport).toHaveBeenCalled(); 
+      expect(mockUpdateTransport).toHaveBeenCalled();
       expect(response.statusCode).toBe(200);
       expect(response.result).toEqual(transport);
     });
@@ -1259,9 +1184,9 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { 
+      const error = {
         containerNumbers: "commonAddTransportationDetailsPlaneContainerNumberLabelError",
-        flightNumber: "error.flightNumber.string.max" 
+        flightNumber: "error.flightNumber.string.max"
       };
       expect(response.result).toEqual(error);
     });
@@ -1328,9 +1253,9 @@ describe("Transport endpoints", () => {
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);
-      const error = { 
+      const error = {
         containerNumbers: "ccContainerVesselContainerNumberLabelError",
-        vesselName: "error.vesselName.string.pattern.base" 
+        vesselName: "error.vesselName.string.pattern.base"
       };
       expect(response.result).toEqual(error);
     });
@@ -1395,7 +1320,7 @@ describe("Transport endpoints", () => {
         },
         'PUT'
       );
-    
+
       const response = await server.inject(request);
       expect(mockUpdateTransport).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(400);

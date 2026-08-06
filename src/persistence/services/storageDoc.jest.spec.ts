@@ -986,7 +986,6 @@ describe('upsertTransportDetails', () => {
       {
         '$set': {
           'exportData.transportation': {
-            "cmr": true,
             "vehicle": "truck"
           }
         }
@@ -1004,7 +1003,6 @@ describe('upsertTransportDetails', () => {
       {
         '$set': {
           'exportData.arrivalTransportation': {
-            "cmr": true,
             "vehicle": "truck"
           }
         }
