@@ -17,7 +17,6 @@ const truckSaveAsDraftSchema = Joi.object({
     }).optional()
   }),
   pointOfDestination: Joi.string().trim().allow('').allow(null).optional().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' /]+$/)),
-  cmr: Joi.string().optional(),
   nationalityOfVehicle: Joi.when('arrival', {
     is: true,
     then: Joi.string().trim().allow('').optional().custom(validateNoEmoji),

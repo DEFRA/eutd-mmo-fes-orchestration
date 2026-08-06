@@ -5,11 +5,9 @@ import acceptsHtml from "../helpers/acceptsHtml";
 import transportSelectionSchema from '../schemas/catchcerts/transportSelectionSchema';
 import trainSchema from '../schemas/catchcerts/trainSchema';
 import truckSchema from '../schemas/catchcerts/truckSchema';
-import truckCmrSchema from '../schemas/catchcerts/truckCmrSchema';
 import planeSchema from '../schemas/catchcerts/planeSchema';
 import containerVesselSchema from '../schemas/catchcerts/containerVesselSchema';
 import transportSelectionSaveAsDraftSchema from '../schemas/catchcerts/transportSelectionSaveAsDraftSchema';
-import truckCmrSaveAsDraftSchema from '../schemas/catchcerts/truckCmrSaveAsDraftSchema';
 import errorExtractor, { buildNonJsErrorObject } from '../helpers/errorExtractor';
 import { withDocumentLegitimatelyOwned } from "../helpers/withDocumentLegitimatelyOwned";
 import logger from "../logger";
@@ -61,39 +59,6 @@ export default class TransportRoutes {
                 return h.response(errorObject).code(400).takeover();
               },
               payload: transportSelectionSchema
-            }
-          }
-        },
-        {
-          method: 'POST',
-          path: '/v1/transport/truck/cmr',
-          options: {
-            auth: defineAuthStrategies(),
-            security: true,
-            cors: true,
-            handler: async (request, h) => {
-              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-                return await Controller.addTruckCMR(request, h, false, userPrincipal, documentNumber, contactId);
-              }).catch(error => {
-                logger.error(`[ADD-TRUCK-CMR][ERROR][${error.stack || error}`);
-                return h.response().code(500);
-              });
-            },
-            description: 'Add truck CMR details',
-            tags: ['api', 'transport'],
-            validate: {
-              options: {
-                abortEarly: false
-              },
-              failAction: function (req, h, error) {
-                const errorObject = errorExtractor(error);
-
-                if (acceptsHtml(req.headers)) {
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
-                }
-                return h.response(errorObject).code(400).takeover();
-              },
-              payload: truckCmrSchema
             }
           }
         },
@@ -383,38 +348,6 @@ export default class TransportRoutes {
                 return h.response(errorObject).code(400).takeover();
               },
               payload: transportSelectionSaveAsDraftSchema
-            }
-          }
-        },
-        {
-          method: 'POST',
-          path: '/v1/transport/truck/cmr/saveAsDraft',
-          options: {
-            auth: defineAuthStrategies(),
-            security: true,
-            cors: true,
-            handler: async (request, h) => {
-              return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-                return await Controller.addTruckCMRSaveAsDraft(request, h, userPrincipal, documentNumber, contactId);
-              }).catch(error => {
-                logger.error(`[TRANSPORT-TRUCK-CMR-DRAFT][ERROR][${error.stack || error}`);
-                return h.response().code(500);
-              });
-            },
-            description: 'Add truck CMR details and save as draft',
-            tags: ['api', 'transport cmr', 'save as draft'],
-            validate: {
-              options: {
-                abortEarly: false
-              },
-              failAction: function (req, h, error) {
-                const errorObject = errorExtractor(error);
-                if (acceptsHtml(req.headers)) {
-                  return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
-                }
-                return h.response(errorObject).code(400).takeover();
-              },
-              payload: truckCmrSaveAsDraftSchema
             }
           }
         },

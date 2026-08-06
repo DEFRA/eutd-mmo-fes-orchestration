@@ -21,7 +21,6 @@ const truckSchema = Joi.object({
     then: Joi.string().trim().allow('').allow(null).optional().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' /]+$/)),
     otherwise: Joi.string().empty('').trim().required().max(100).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\-' /]+$/))
   }),
-  cmr: Joi.string().optional(),
   nationalityOfVehicle: Joi.string().trim().required().custom(validateNoEmoji),
   registrationNumber: Joi.string().trim().required().max(50).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9\- ]+$/)),
   freightBillNumber: Joi.string().allow('').allow(null).trim().max(60).custom(createEmojiAwarePatternValidator(/^[a-zA-Z0-9-./]*$/)).optional(),

@@ -13,6 +13,7 @@ export interface CatchCertificateTransportDocument {
 export interface CatchCertificateTransport {
   id: string;
   vehicle: string;
+  // retained for backward compat — reads cmr from pre-removal documents
   cmr?: string;
   nationalityOfVehicle?: string;
   registrationNumber?: string;
@@ -54,22 +55,16 @@ export const toBackEndTransport = (transport: CatchCertificateTransport): BackEn
   return backEndTransport;
 };
 
-const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEndModels.CatchCertificateTruck => {
-  const cmrIsSet = typeof transport.cmr === 'string';
-  const hasCmr = transport.cmr === 'true';
-  const result = {
-    id: Number.parseInt(transport.id),
-    vehicle: transport.vehicle,
-    cmr: cmrIsSet ? hasCmr : undefined,
-    nationalityOfVehicle: cmrIsSet && hasCmr ? undefined : transport.nationalityOfVehicle,
-    registrationNumber: cmrIsSet && hasCmr ? undefined : transport.registrationNumber,
-    departurePlace: cmrIsSet && hasCmr ? undefined : transport.departurePlace,
-    freightBillNumber: cmrIsSet && hasCmr ? undefined : transport.freightBillNumber,
-    containerIdentificationNumber: cmrIsSet && hasCmr ? undefined : transport.containerIdentificationNumber,
-    transportDocuments: cmrIsSet && hasCmr ? undefined : transport.documents,
-  };
-  return result;
-};
+const getTruckBackEndTransport = (transport: CatchCertificateTransport): BackEndModels.CatchCertificateTruck => ({
+  id: Number.parseInt(transport.id),
+  vehicle: transport.vehicle,
+  nationalityOfVehicle: transport.nationalityOfVehicle,
+  registrationNumber: transport.registrationNumber,
+  departurePlace: transport.departurePlace,
+  freightBillNumber: transport.freightBillNumber,
+  containerIdentificationNumber: transport.containerIdentificationNumber,
+  transportDocuments: transport.documents,
+});
 
 const getPlaneBackEndTransport = (transport: CatchCertificateTransport) => ({
   id: Number.parseInt(transport.id),
@@ -116,13 +111,13 @@ export const toFrontEndTransport = (transport: BackEndModels.CatchCertificateTra
         id: transport.id.toString(),
         vehicle: model.vehicle,
         cmr: valueOrDefault(model.cmr?.toString(), hasValue(model.cmr)),
-        nationalityOfVehicle: valueOrDefault(model.nationalityOfVehicle, !model.cmr),
-        registrationNumber: valueOrDefault(model.registrationNumber, !model.cmr),
-        departurePlace: valueOrDefault(model.departurePlace, !model.cmr),
-        freightBillNumber: valueOrDefault(model.freightBillNumber, !model.cmr),
-        containerIdentificationNumber: valueOrDefault(model.containerIdentificationNumber, !model.cmr),
-        containerNumbers: valueOrDefault(containerNumbers, !model.cmr),
-        documents: valueOrDefault(model.transportDocuments, !model.cmr)
+        nationalityOfVehicle: model.nationalityOfVehicle,
+        registrationNumber: model.registrationNumber,
+        departurePlace: model.departurePlace,
+        freightBillNumber: model.freightBillNumber,
+        containerIdentificationNumber: model.containerIdentificationNumber,
+        containerNumbers: containerNumbers,
+        documents: model.transportDocuments
       };
       break;
     }
