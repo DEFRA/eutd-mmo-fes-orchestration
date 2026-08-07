@@ -19,7 +19,24 @@ export const querySpecies = (query: string, options: Species[]) => {
 
   const optionName = (option: Species) => `${option.faoName} (${option.faoCode})`;
 
-  const queryStr = query.toLowerCase();
+  const queryStr = query.trim().toLowerCase();
+
+  // Prefer exact matches first so FAO code inputs like "COD" don't fan out
+  // into large fuzzy result sets that hide the intended suggestion path.
+  const exactMatches = options
+    .filter((option: Species) => {
+      const faoCode = option.faoCode?.trim().toLowerCase() ?? "";
+      const faoName = option.faoName?.trim().toLowerCase() ?? "";
+      const fullLabel = optionName(option).trim().toLowerCase();
+
+      return queryStr === faoCode || queryStr === faoName || queryStr === fullLabel;
+    })
+    .map((option: Species) => optionName(option));
+
+  if (exactMatches.length > 0) {
+    return exactMatches;
+  }
+
   return options
     .filter((option: Species) => optionName(option).toLowerCase().includes(queryStr))
     .map((option: Species) => calculateRank(option, queryStr))
