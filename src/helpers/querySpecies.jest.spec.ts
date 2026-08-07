@@ -80,4 +80,9 @@ describe('querySpecies()', () => {
     const result = calculateRank(speciesArray[0], "steak");
     expect(result.rank).toBe(100);
   });
+
+  it('should return only exact FAO code match when query is an exact code', () => {
+    const result = querySpecies("COD", speciesArray);
+    expect(result).toEqual(["Atlantic cod (cod)"]);
+  });
 });
