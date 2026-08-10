@@ -36,6 +36,62 @@ Use the following targets,
 - `npm start` will start without auth
 - `npm run start-with-auth` will start with auth
 
+## Running with Docker Compose
+
+Requires Docker, and `NPM_TOKEN` exported in your shell — the `test`/`development` image targets run `npm ci` against the private `mmo-shared-reference-data` Azure Artifacts feed (see `.npmrc`).
+
+### Set up `NPM_TOKEN`
+
+1. Create a Personal Access Token in Azure DevOps (`https://dev.azure.com/defragovuk` → User settings → Personal access tokens) with **Packaging → Read** scope.
+2. Export it in the shell you'll run `docker compose` / `npm ci` from — it is only used locally, never committed:
+
+   ```bash
+   export NPM_TOKEN=<your-pat>
+   ```
+
+   To persist it across terminal sessions, add the line above to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) instead of exporting it each time.
+3. Verify it's set before running any of the commands below:
+
+   ```bash
+   [ -n "$NPM_TOKEN" ] && echo "NPM_TOKEN is set" || echo "NPM_TOKEN is NOT set"
+   ```
+
+Never commit a PAT, print it in logs, or share it — see the warning already in `.npmrc`.
+
+### 1. Shared infra (run first, from any app)
+
+`docker-compose.deps.yml` provisions mongo + redis on the common `fes-shared-net` network, shared across all FES apps. Start it once and leave it running:
+
+```bash
+docker compose -f docker-compose.deps.yml up -d --wait
+```
+
+Mongo is on `127.0.0.1:27017` and Redis on `127.0.0.1:6379` for host tools (e.g. `npm start`, a Mongo GUI). Data persists in named volumes across restarts; `docker compose -f docker-compose.deps.yml down -v` wipes them.
+
+### 2. Run the app
+
+Preferred — containerised, with hot-reload (joins `fes-shared-net`, base `docker-compose.yml` + dev overlay `docker-compose.override.yml` are merged automatically):
+
+```bash
+docker compose up --build
+```
+
+Backup — on the host (needs the shared infra from step 1 and a `.env` copied from `.envSample`):
+
+```bash
+npm start
+```
+
+### 3. Unit tests
+
+Runs against an isolated, ephemeral mongo (own `test-net`, no shared infra, no host port) — the same command is used locally and in CI:
+
+```bash
+docker compose -f docker-compose.test.yml run --rm --build test
+```
+
+`--build` forces a rebuild so the image always reflects your latest code — `docker compose run` reuses an existing image otherwise and can silently test stale code. This is also what runs in the `pre-push` git hook, blocking the push if tests fail.
+
 ### Troubleshooting
 
 #### Error "no such file or directory: ./node_modules/pre-commit/hook" when commiting a change
