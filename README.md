@@ -38,22 +38,22 @@ Use the following targets,
 
 ## Running with Docker Compose
 
-Requires Docker, and `NPM_TOKEN` declared in a `.env` file at the project root — the `test`/`development` image targets run `npm ci` against the private `mmo-shared-reference-data` Azure Artifacts feed (see `.npmrc`).
+Requires Docker, and `NPM_TOKEN` exported in your shell — the `test`/`development` image targets run `npm ci` against the private `mmo-shared-reference-data` Azure Artifacts feed (see `.npmrc`).
 
 ### Set up `NPM_TOKEN`
 
 1. Create a Personal Access Token in Azure DevOps (`https://dev.azure.com/defragovuk` → User settings → Personal access tokens) with **Packaging → Read** scope.
-2. Copy `.envSample` to `.env` if you haven't already, then add the token as a line in `.env` (project root, already gitignored, so it's only used locally and never committed):
+2. Export it in the shell you'll run `docker compose` / `npm ci` from — it is only used locally, never committed:
 
    ```bash
-   NPM_TOKEN="<your-pat>"
+   export NPM_TOKEN=<your-pat>
    ```
 
-   Docker Compose automatically reads `.env` in the project root and substitutes `${NPM_TOKEN}` into the build `args` in `docker-compose.yml`/`docker-compose.test.yml` — no shell export needed. This also means every `docker compose` command must be run from the project root so `.env` is picked up.
+   To persist it across terminal sessions, add the line above to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) instead of exporting it each time.
 3. Verify it's set before running any of the commands below:
 
    ```bash
-   grep -q '^NPM_TOKEN=.\+' .env && echo "NPM_TOKEN is set" || echo "NPM_TOKEN is NOT set"
+   [ -n "$NPM_TOKEN" ] && echo "NPM_TOKEN is set" || echo "NPM_TOKEN is NOT set"
    ```
 
 Never commit a PAT, print it in logs, or share it — see the warning already in `.npmrc`.
