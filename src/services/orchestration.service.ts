@@ -58,7 +58,7 @@ const _ = require("lodash");
 
 export default class OrchestrationService {
   public static async get(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
-    const redisKey = req.params.redisKey;
+    const redisKey = req.params.redisKey as string;
 
     const response = await OrchestrationService.getFromMongo(
       userPrincipal,
@@ -151,7 +151,7 @@ export default class OrchestrationService {
     }
 
     const setOnValidationSuccess = req.query.setOnValidationSuccess;
-    const redisKey = req.params.redisKey;
+    const redisKey = req.params.redisKey as string;
     const sessionStore = await SessionStoreFactory.getSessionStore(
       getRedisOptions()
     );

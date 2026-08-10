@@ -46,7 +46,7 @@ export default class FavouritesController {
   }
 
   public static async deleteFavouritesProduct(req: Hapi.Request, _h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>) {
-    return await deleteFavouritesProduct((req.app as HapiRequestApplicationStateExtended).claims.sub, req.params.productId);
+    return await deleteFavouritesProduct((req.app as HapiRequestApplicationStateExtended).claims.sub, req.params.productId as string);
   }
 
   public static async removeInvalidFavouriteProduct(userPrincipal: string, productId: string): Promise<void> {
