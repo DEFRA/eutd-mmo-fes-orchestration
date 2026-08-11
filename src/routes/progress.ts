@@ -114,7 +114,7 @@ export default class ProgressRoutes {
         cors: true,
         handler: async (request, h) => {
           return withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-            return this.getProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey);
+            return this.getProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey as string);
           }).catch((e) => {
             logger.error(`[GET-PROGRESS][ERROR][${e.stack || e}]`);
             return h.response().code(500);
@@ -135,7 +135,7 @@ export default class ProgressRoutes {
         cors: true,
         handler: async (request, h) => {
           return withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-            return this.getCompleteProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey, h);
+            return this.getCompleteProgressForJourney(userPrincipal, documentNumber, contactId, request.params.journey as string, h);
           }, [DocumentStatuses.Draft, DocumentStatuses.Locked])
           .catch((e) => {
             logger.error(`[GET-COMPLETE-PROGRESS][ERROR][${e.stack || e}]`);

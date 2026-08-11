@@ -16,7 +16,7 @@ import logger from '../logger';
 export default class ExporterController {
 
   public static async getExporterDetails(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
-    const journey = req.params.journey;
+    const journey = req.params.journey as string;
     let result: any;
 
     switch (journey) {

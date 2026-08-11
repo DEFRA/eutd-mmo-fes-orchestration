@@ -364,7 +364,7 @@ export default class ExportPayloadController {
       const landing = product.landings.find(_landing => _landing.model.id === req.params.landingId);
 
       if (landing) {
-        ExportPayloadController.editExportPayloadCheckLanding(landing, product, req.params.landingId);
+        ExportPayloadController.editExportPayloadCheckLanding(landing, product, req.params.landingId as string);
         result = await ExportPayloadService.save(exportPayload, userPrincipal, documentNumber, contactId);
       } else {
         // add another landing
@@ -372,7 +372,7 @@ export default class ExportPayloadController {
           addMode: true,
           editMode: false,
           model: {
-            id: req.params.landingId
+            id: req.params.landingId as string
           }
         };
         product.landings.push(anotherLanding);
@@ -485,7 +485,7 @@ export default class ExportPayloadController {
       }
     };
 
-    await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
+    await ExportPayloadService.upsertLanding(req.params.productId as string, newLanding, userPrincipal, documentNumber, contactId);
     return h.redirect(payload.currentUri);
   }
 
@@ -791,7 +791,7 @@ export default class ExportPayloadController {
       }
     };
 
-    const productItem = await ExportPayloadService.getItemByProductId(userPrincipal, req.params.productId, documentNumber, contactId);
+    const productItem = await ExportPayloadService.getItemByProductId(userPrincipal, req.params.productId as string, documentNumber, contactId);
 
     const exportPayload = LandingValidator.createExportPayloadForValidation(productItem, newLanding.model);
 
@@ -803,7 +803,7 @@ export default class ExportPayloadController {
       newLanding.errors = validation.errors;
     }
 
-    await ExportPayloadService.upsertLanding(req.params.productId, newLanding, userPrincipal, documentNumber, contactId);
+    await ExportPayloadService.upsertLanding(req.params.productId as string, newLanding, userPrincipal, documentNumber, contactId);
     return h.redirect(payload.currentUri);
   }
 
