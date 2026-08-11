@@ -211,7 +211,7 @@ export default class ExportPayloadRoutes {
             cors: true,
             handler: async (request, h) => {
               return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-                return await Controller.upsertExportPayloadProductLanding(request, h, userPrincipal, documentNumber, request.params.productId, contactId);
+                return await Controller.upsertExportPayloadProductLanding(request, h, userPrincipal, documentNumber, request.params.productId as string, contactId);
               }).catch(error => {
                 logger.error(`[UPSERTING-LANDING][ERROR][${error.stack || error}`);
                 return h.response().code(500);
