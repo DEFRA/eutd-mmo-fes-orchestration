@@ -7,6 +7,11 @@
     "node": "~24.13.1",
     "npm": "~11.8.0"
   },
+  "allowScripts": {
+    "applicationinsights-native-metrics@0.0.10": true,
+    "dtrace-provider@0.8.8": true,
+    "muhammara@6.0.4": true
+  },
   "overrides": {
     "mongodb-memory-server": {
       "tmp": "^0.2.1"
