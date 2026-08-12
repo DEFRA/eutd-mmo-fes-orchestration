@@ -110,8 +110,7 @@ export default {
   "/create-processing-statement/:documentNumber/add-catch-details/:productId/:catchIndex": async ({ data, errors, params, documentNumber, userPrincipal, contactId }) => {
     const index = params.catchIndex;
     const ctch = data.catches[index];
-    const { errors: catchTypeErrors } = validateCatchType(ctch, index, errors);
-    const catchDetails = await validateCatchDetails(ctch, index, catchTypeErrors, documentNumber, userPrincipal, contactId);
+    const catchDetails = await validateCatchDetails(ctch, index, errors, documentNumber, userPrincipal, contactId);
 
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
@@ -270,6 +269,7 @@ export async function validateCatchDetails(ctch: any, index: number, errors: any
   if (!errors[`catches-${index}-species`]) {
     await validateSpeciesAgainstReferenceData(ctch, index, errors);
   }
+  validateCatchType(ctch, index, errors);
   await validateIssuingCountryForNonUKCatch(ctch, index, errors);
   await validateCatchCertificateNumber(ctch, index, errors, documentNumber, userPrincipal, contactId);
   validateCatchCertificateCommodityCode(ctch, index, errors);
@@ -286,6 +286,8 @@ function validateCatchCertificateCommodityCode(ctch: any, index: number, errors:
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMinLength';
   } else if (ctch.speciesCommodityCode.trim().replaceAll(/\s/g, '').length > MAX_COMMODITY_CODE_LENGTH) {
     errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorSpeciesCommodityCodeMaxLength';
+  } else if (!/^\d+$/.test(ctch.speciesCommodityCode.trim().replaceAll(/\s/g, ''))) {
+    errors[`catches-${index}-speciesCommodityCode`] = 'psAddCatchDetailsErrorValidSpeciesCommodityCode';
   }
 }
 
