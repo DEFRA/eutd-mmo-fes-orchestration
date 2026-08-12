@@ -4,7 +4,7 @@ import * as CatchCertService from '../persistence/services/catchCert';
 import { getRedisOptions } from '../session_store/redis';
 import { SPECIES_KEY } from '../session_store/constants';
 import { SessionStoreFactory } from '../session_store/factory';
-import { reject, findIndex } from 'lodash';
+import { reject } from 'lodash';
 import logger from '../logger';
 
 export default class FishService {
@@ -35,10 +35,7 @@ export default class FishService {
   public static async editFish(payload: any, documentNumber: string, contactId: string) {
     const userPrincipal = payload.user_id;
     const data: FrontEndSpecies.Product[] = await CatchCertService.getSpecies(userPrincipal, documentNumber, contactId) || [];
-    const speciesToUpdate =
-      data[
-        findIndex(data, (s: FrontEndSpecies.Product) => s.id === payload.id)
-      ];
+    const speciesToUpdate = data[data.findIndex((s: FrontEndSpecies.Product) => s.id === payload.id)];
 
     if (speciesToUpdate) {
       speciesToUpdate.state = payload.state;

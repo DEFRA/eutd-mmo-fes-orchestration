@@ -310,15 +310,15 @@ export function validateDocumentType(ctch: any, index: number, errors: any) {
   return { errors };
 }
 
-async function validateNonJsSpeciesName(product: any, errors: any) {
+async function validateNonJsSpeciesName(product: any, errors: any, index: number) {
   const refUrl = ApplicationConfig.getReferenceServiceUrl();
   const speciesMatchError = await validateSpeciesWithSuggestions(product.product, refUrl);
   if (speciesMatchError.isError) {
     if (speciesMatchError.error.message === "Incorect FAO code or Species name") {
-      errors[`catches-species-incorrect`] = 'sdAddCatchDetailsErrorIncorrectFaoOrSpecies';
+      errors[`catches-${index}-product`] = 'sdAddCatchDetailsErrorIncorrectFaoOrSpecies';
     } else if (speciesMatchError.error.message === "Results match fewer than 5") {
       const speciesError = speciesMatchError as SpeciesSuggestionError
-      errors[`catches-species-suggest`] = {
+      errors[`catches-${index}-product`] = {
         translation: 'sdAddCatchDetailsErrorSpeciesSuggestion',
         possibleMatches: speciesError.resultList
       };
@@ -338,7 +338,7 @@ export async function validateProduct(product: any, index: number, errors, isNon
   }
 
   if (isNonJs && isProductDefined(product)) {
-    errors = await validateNonJsSpeciesName(product, errors);
+    errors = await validateNonJsSpeciesName(product, errors, index);
   } else if (!await isSpeciesNameValid(product.product, product.scientificName)) {
     errors[`catches-${index}-product`] = 'sdAddProductToConsignmentSpeciesNameErrorInValid';
 

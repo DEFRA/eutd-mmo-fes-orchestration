@@ -211,7 +211,7 @@ export default class ExportPayloadRoutes {
             cors: true,
             handler: async (request, h) => {
               return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-                return await Controller.upsertExportPayloadProductLanding(request, h, userPrincipal, documentNumber, request.params.productId, contactId);
+                return await Controller.upsertExportPayloadProductLanding(request, h, userPrincipal, documentNumber, request.params.productId as string, contactId);
               }).catch(error => {
                 logger.error(`[UPSERTING-LANDING][ERROR][${error.stack || error}`);
                 return h.response().code(500);
@@ -255,7 +255,7 @@ export default class ExportPayloadRoutes {
                   .required(),
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
-                  const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
+                  const dateLanded = moment(helpers.state.ancestors[0].dateLanded, moment.ISO_8601, true);
                   if (!startDate.isValid()) {
                     return helpers.error('date.base');
                   }

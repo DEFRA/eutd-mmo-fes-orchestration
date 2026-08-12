@@ -218,61 +218,27 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
   });
 
   describe('Invalid Date Formats Still Rejected', () => {
-    it('should reject invalid date format (123/03/2025)', async () => {
-      const data = {
-        ...baseData,
+    it.each([
+      {
+        title: 'should reject invalid date format (123/03/2025)',
         facilityArrivalDate: "123/03/2025",
-      };
-
-      const { errors } = handler({
-        data: data,
-        _currentUrl: currentUrl,
-        _nextUrl: "",
-        errors: {},
-        _params: {},
-      });
-
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateValidationError");
-    });
-
-    it('should reject invalid date format (invalid text)', async () => {
-      const data = {
-        ...baseData,
+      },
+      {
+        title: 'should reject invalid date format (invalid text)',
         facilityArrivalDate: "not-a-date",
-      };
-
-      const { errors } = handler({
-        data: data,
-        _currentUrl: currentUrl,
-        _nextUrl: "",
-        errors: {},
-        _params: {},
-      });
-
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateValidationError");
-    });
-
-    it('should reject missing date', async () => {
-      const data = {
-        ...baseData,
+      },
+      {
+        title: 'should reject missing date',
         facilityArrivalDate: "",
-      };
-
-      const { errors } = handler({
-        data: data,
-        _currentUrl: currentUrl,
-        _nextUrl: "",
-        errors: {},
-        _params: {},
-      });
-
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateValidationError");
-    });
-
-    it('should reject undefined date', async () => {
+      },
+      {
+        title: 'should reject undefined date',
+        facilityArrivalDate: undefined,
+      },
+    ])('$title', async ({ facilityArrivalDate }) => {
       const data = {
         ...baseData,
-        facilityArrivalDate: undefined,
+        facilityArrivalDate,
       };
 
       const { errors } = handler({
@@ -350,44 +316,23 @@ describe('DEFECT-469: Facility Arrival Date Validation - Future Date Limit', () 
       expect(errors["storageFacilities-facilityArrivalDate"]).toBeUndefined();
     });
 
-    it('should reject February 31st (non-existent date)', async () => {
-      const data = {
-        ...baseData,
+    it.each([
+      {
+        title: 'should reject February 31st (non-existent date)',
         facilityArrivalDate: "31/02/2025", // Invalid: 31st February doesn't exist
-      };
-
-      const { errors } = handler({
-        data: data,
-        _currentUrl: currentUrl,
-        _nextUrl: "",
-        errors: {},
-        _params: {},
-      });
-
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateValidationError");
-    });
-
-    it('should reject day 32 (non-existent)', async () => {
-      const data = {
-        ...baseData,
+      },
+      {
+        title: 'should reject day 32 (non-existent)',
         facilityArrivalDate: "32/01/2025", // Invalid: 32nd January doesn't exist
-      };
-
-      const { errors } = handler({
-        data: data,
-        _currentUrl: currentUrl,
-        _nextUrl: "",
-        errors: {},
-        _params: {},
-      });
-
-      expect(errors["storageFacilities-facilityArrivalDate"]).toBe("sdArrivalDateValidationError");
-    });
-
-    it('should reject month 13 (non-existent)', async () => {
+      },
+      {
+        title: 'should reject month 13 (non-existent)',
+        facilityArrivalDate: "01/13/2025", // Invalid: 13th month doesn't exist
+      },
+    ])('$title', async ({ facilityArrivalDate }) => {
       const data = {
         ...baseData,
-        facilityArrivalDate: "01/13/2025", // Invalid: 13th month doesn't exist
+        facilityArrivalDate,
       };
 
       const { errors } = handler({

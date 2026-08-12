@@ -33,7 +33,7 @@ export default class DocumentController {
     const fesApi: boolean = app.claims.fesApi;
     const requestByAdmin: boolean = isRequestByAdmin(roles);
 
-    const documentType: string = req.params.documentType;
+    const documentType: string = req.params.documentType as string;
     logger.info(`[ORCHESTRATOR][REQUEST-BY-EACC-ADMIN][${requestByAdmin}]`);
     return await userCanCreateDraft(userId, documentType, contactId).then(async canCreateDraft => {
       if (canCreateDraft) {
@@ -69,7 +69,7 @@ export default class DocumentController {
     const app = req.app as HapiRequestApplicationStateExtended;
     const userPrincipal = app.claims.sub;
     const contactId = app.claims.contactId;
-    const { documentNumber } = req.params;
+    const documentNumber = req.params.documentNumber as string;
     const document = await DocumentNumberService.getDocument(documentNumber, userPrincipal, contactId);
 
     return document ? h.response(document) : h.response().code(404);
@@ -136,7 +136,7 @@ export default class DocumentController {
   ): Promise<any> {
     const userPrincipal = <string>(req as any).app.claims.sub;
     const contactId = <string>(req as any).app.claims.contactId;
-    const documentType = req.params.documentType;
+    const documentType = req.params.documentType as string;
     const pageNumber = (req.query.pageNumber as string) ?? '1';
     const pageLimit = (req.query.pageLimit as string) ?? '50';
 

@@ -70,34 +70,29 @@ describe('directLandingsSchema - dateLanded validation', () => {
 		expect(dateErr.type).toBe('directLanding.date.base');
 	});
 
-	it('passes validation with dateLanded having an empty part (e.g., 2026--15)', () => {
-		const payload = { ...basePayload, dateLanded: '2026--15' };
-		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
-		// The schema only checks if ALL parts are empty, so '2026--15' passes the parts check
-		// but will fail on moment validation
-		expect(error).toBeDefined();
-		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
-		expect(dateErr).toBeDefined();
-		expect(dateErr.type).toBe('directLanding.date.invalid');
-	});
-
-	it('returns an error when dateLanded has wrong number of parts (e.g., 2026-02)', () => {
-		const payload = { ...basePayload, dateLanded: '2026-02' };
-		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
-		expect(error).toBeDefined();
-		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
-		expect(dateErr).toBeDefined();
-		// parts[2] is undefined so padStart throws; Joi wraps unhandled custom errors as any.custom
-		expect(dateErr.type).toBe('any.custom');
-	});
-
-	it('returns directLanding.date.invalid error when dateLanded is invalid date', () => {
-		const payload = { ...basePayload, dateLanded: '2026-02-31' };
+	it.each([
+		{
+			title: 'returns directLanding.date.invalid when dateLanded has an empty part (e.g., 2026--15)',
+			dateLanded: '2026--15',
+			expectedType: 'directLanding.date.invalid'
+		},
+		{
+			title: 'returns any.custom when dateLanded has wrong number of parts (e.g., 2026-02)',
+			dateLanded: '2026-02',
+			expectedType: 'any.custom'
+		},
+		{
+			title: 'returns directLanding.date.invalid when dateLanded is invalid date',
+			dateLanded: '2026-02-31',
+			expectedType: 'directLanding.date.invalid'
+		}
+	])('$title', ({ dateLanded, expectedType }) => {
+		const payload = { ...basePayload, dateLanded };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeDefined();
 		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
 		expect(dateErr).toBeDefined();
-		expect(dateErr.type).toBe('directLanding.date.invalid');
+		expect(dateErr.type).toBe(expectedType);
 	});
 
 	it('returns date.max error when dateLanded exceeds future limit', () => {

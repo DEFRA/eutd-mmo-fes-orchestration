@@ -491,10 +491,11 @@ describe('check species name with suggestions', () => {
     expect(result).toEqual(expected);
   });
 
-  it('should return an error if the species name result is more than 5', async () => {
-    const expected: BusinessError = {
+  it('should return a single suggestion for exact FAO code input', async () => {
+    const expected: SpeciesSuggestionError = {
       isError: true,
-      error: new Error('Incorect FAO code or Species name') as CannotReachError
+      error: new Error('Results match fewer than 5') as CannotReachError,
+      resultList: ["Atlantic cod (COD)"]
     };
     mockGetEntityFromServer.mockResolvedValue([
       {
@@ -577,7 +578,7 @@ describe('check species name with suggestions', () => {
       }
     ]);
 
-    const result = await SUT.checkSpeciesNameWithSuggestions("cod", baseURL, propertyName);
+    const result = await SUT.checkSpeciesNameWithSuggestions("co", baseURL, propertyName);
 
     expect(mockGetEntityFromServer).toHaveBeenCalled();
     expect(result).toEqual(expected);

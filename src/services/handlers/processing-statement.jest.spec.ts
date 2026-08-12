@@ -306,6 +306,35 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-c
     expect(mockValidateCommodityCode).toHaveBeenCalled();
   });
 
+  it('with commodity code as special chars validates as error', async () => {
+    mockValidateCommodityCode.mockResolvedValue({ isError: true, error: new Error('Cannot get PS/SD commodity code from reference service') });
+
+    const currentUrl = '/create-processing-statement/:documentNumber/add-consignment-details/:productIndex';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      catches: [{}],
+      products: [{
+        description: 'some product description',
+        commodityCode: '!@#$%^&*()'
+      }]
+    };
+
+    const { errors } = await handler({
+      data: data,
+      errors: {},
+      params: { productIndex: 0 }
+    });
+
+    const expected = {
+      commodityCode: 'psAddProductCommodityCodeError'
+    };
+
+    expect(errors).toBeTruthy();
+    expect(errors).toEqual(expected);
+    expect(mockValidateCommodityCode).toHaveBeenCalled();
+  });
+
   it('with whitespace description validates as error', async () => {
     const currentUrl = '/create-processing-statement/:documentNumber/add-consignment-details/:productIndex';
     const handler = SUT[currentUrl];
@@ -1383,7 +1412,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-incorrect": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-0-product": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -1421,7 +1450,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-suggest": {
+    const expectedErrors = { "catches-0-product": {
       translation: 'psAddCatchDetailsErrorSpeciesSuggestion',
       possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
     } };
@@ -1608,7 +1637,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-incorrect": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
+    const expectedErrors = { "catches-1-product": "psAddCatchDetailsErrorIncorrectFaoOrSpecies" };
     expect(errors).toEqual(expectedErrors);
   });
 
@@ -1691,7 +1720,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-catch-typ
 
     expect(mockValidateSpeciesName).not.toHaveBeenCalled();
     expect(mockValidateSpeciesWithSuggestions).toHaveBeenCalled();
-    const expectedErrors = { "catches-species-suggest": {
+    const expectedErrors = { "catches-1-product": {
       translation: 'psAddCatchDetailsErrorSpeciesSuggestion',
       possibleMatches: ['Yellowback seabream (DTT)', 'Atlantic cod (COD)']
     } };

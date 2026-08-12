@@ -1,4 +1,5 @@
 import * as jsonfile from 'jsonfile';
+import { randomInt } from 'node:crypto';
 
 const filePath = './mock_data/commodity_code/commodity_code.json';
 
@@ -12,7 +13,7 @@ export default class CatchService {
           return reject(new Error('Cannot readAll commodity codes'));
         }
         for (let i = 0; i < howMany; i++) {
-          result.push(data[Math.floor(Math.random() * data.length)]);
+          result.push(data[randomInt(0, data.length)]);
         }
         return resolve(Array.from(new Set(result)));
       });
