@@ -13,11 +13,11 @@ export class SessionStoreFactory {
       if (process.env.NODE_ENV==='test') {
         // NB: This is used only for test
         SessionStoreFactory.sessionStore = new MemoryStorage();
-        SessionStoreFactory.sessionStore.initialize();
+        await SessionStoreFactory.sessionStore.initialize();
 
       } else {
         SessionStoreFactory.sessionStore = new RedisStorage();
-        SessionStoreFactory.sessionStore.initialize(options);
+        await SessionStoreFactory.sessionStore.initialize(options);
       }
     }
 

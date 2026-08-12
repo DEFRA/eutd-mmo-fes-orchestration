@@ -50,6 +50,6 @@ export interface IAllUsersStorage<T extends IStoreable> {
 
 
 export interface IStorageInitializer {
-  initialize(options?: object): void
+  initialize(options?: object): Promise<void>
   cleanUp(): void
 }
