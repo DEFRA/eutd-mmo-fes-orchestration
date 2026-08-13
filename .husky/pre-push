@@ -17,5 +17,9 @@ if [ -z "${NPM_TOKEN:-}" ]; then
   exit 1
 fi
 
+# Pre-create the bind-mount output dirs as the current user, otherwise the Docker
+# daemon creates them as root and the container's node user cannot write reports.
+mkdir -p "$ROOT/coverage" "$ROOT/test-results"
+
 docker compose -f docker-compose.test.yml run --rm --build --remove-orphans test
 exit $?
