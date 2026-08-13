@@ -1,2 +1,21 @@
+#!/usr/bin/env sh
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+# VS Code / Git GUIs run hooks in a non-interactive process that does NOT inherit
+# your shell's exported variables. Fall back to NPM_TOKEN from the git-ignored
+# .env file so the Docker build can auth to the private Azure Artifacts feed.
+if [ -z "${NPM_TOKEN:-}" ] && [ -f "$ROOT/.env" ]; then
+  NPM_TOKEN="$(grep -E '^NPM_TOKEN=' "$ROOT/.env" | tail -n1 | cut -d '=' -f2-)"
+  export NPM_TOKEN
+fi
+
+if [ -z "${NPM_TOKEN:-}" ]; then
+  echo "pre-push: NPM_TOKEN is not set."
+  echo "  Add 'NPM_TOKEN=<azure-devops-pat>' to $ROOT/.env (git-ignored), or export it."
+  echo "  See README 'Set up NPM_TOKEN'."
+  exit 1
+fi
+
 docker compose -f docker-compose.test.yml run --rm --build test
 exit $?
