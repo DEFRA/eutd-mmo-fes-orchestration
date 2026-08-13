@@ -17,5 +17,5 @@ if [ -z "${NPM_TOKEN:-}" ]; then
   exit 1
 fi
 
-docker compose -f docker-compose.test.yml run --rm --build test
+docker compose -f docker-compose.test.yml run --rm --build --remove-orphans test
 exit $?
