@@ -5,7 +5,7 @@
   "private": true,
   "engines": {
     "node": "~24.13.1",
-    "npm": "~11.8.0"
+    "npm": "~12.0.2"
   },
   "allowScripts": {
     "applicationinsights-native-metrics@0.0.10": true,
