@@ -4,13 +4,14 @@
   "version": "1.10.0",
   "private": true,
   "engines": {
-    "node": "~24.13.1",
-    "npm": "~12.0.2"
+    "node": "24.19.0",
+    "npm": "12.0.2"
   },
   "allowScripts": {
     "applicationinsights-native-metrics@0.0.10": true,
     "dtrace-provider@0.8.8": true,
-    "muhammara@6.0.5": true
+    "muhammara@6.0.5": true,
+    "mongodb-memory-server@9.5.0": true
   },
   "overrides": {
     "mongodb-memory-server": {
@@ -78,7 +79,7 @@
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "3.1.0",
     "lodash": "^4.18.1",
-    "mmo-ecc-pdf-svc": "2.4.26",
+    "mmo-ecc-pdf-svc": "2.4.27",
     "moment": "^2.30.1",
     "mongodb": "^6.6.2",
     "mongoose": "^7.8.9",
