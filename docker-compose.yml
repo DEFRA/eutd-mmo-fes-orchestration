@@ -6,6 +6,8 @@ services:
     build:
       context: .
       target: development
+      args:
+        NPM_TOKEN: ${NPM_TOKEN:-}
     ports:
       - "5500:5500"
     environment:
