@@ -8,10 +8,10 @@
     "npm": "12.0.2"
   },
   "allowScripts": {
-    "applicationinsights-native-metrics@0.0.10": true,
-    "dtrace-provider@0.8.8": true,
-    "muhammara@6.0.5": true,
-    "mongodb-memory-server@9.5.0": true
+    "mongodb-memory-server": true,
+    "applicationinsights-native-metrics": true,
+    "dtrace-provider": true,
+    "muhammara": true
   },
   "overrides": {
     "tar": "7.5.22",
