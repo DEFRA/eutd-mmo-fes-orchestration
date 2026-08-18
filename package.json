@@ -18,9 +18,6 @@
       "tmp": "^0.2.1"
     },
     "tar": "7.5.22",
-    "muhammara": {
-      "tar": "7.5.22"
-    },
     "diff": "8.0.3",
     "js-yaml": "4.3.1",
     "nyc": {
@@ -163,7 +160,6 @@
     "test:pre-commit": "cross-env NODE_ENV=test jest",
     "test": "cross-env NODE_ENV=test jest --coverage",
     "test:ci": "cross-env JEST_JUNIT_OUTPUT_DIR=test-results JEST_JUNIT_OUTPUT_NAME=junit.xml NODE_ENV=test jest --runInBand --watchAll=false --reporters=default --reporters=jest-junit --coverage --ci",
-    "prepare": "husky || true",
-    "postinstall": "node scripts/replace-bundled-tar.js"
+    "prepare": "husky || true"
   }
 }
