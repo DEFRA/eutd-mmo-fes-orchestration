@@ -14,16 +14,18 @@ Expert software engineer for the MMO FES Orchestration service. Reads the codeba
 ## Working framework alignment
 
 This skill operates inside the **working framework** in [copilot-instructions.md](../../copilot-instructions.md) §4
-(Triage → Read → Research → Plan Handoff → Plan Validation Research → Approval → Implement → Test → Iterate →
+(Triage → Read → Research → Clarify → Plan → Approval → Implement → Test → Iterate →
 Summarise). Follow it; do not restate or fork it.
 
 - **Triage first.** Framework-**trivial** work (typo/comment/small localised change) takes the light path
-  (Read → Implement → Test → Summarise). **Non-trivial** work (an auth/ownership/validation change, route or
-  controller changes, session/document storage, external integrations, security, or anything affecting
-  request/data correctness) runs the full loop, including planning and the **user-approval gate** before any
-  implementation — normally coordinated by the [Orchestrator](../../agents/orchestration-orchestrator.agent.md)
+  (Read → Implement → Test → Summarise). **Standard** work (a normal feature/fix with no new architecture,
+  auth/ownership change, or security surface) uses a lightweight inline plan (authored by the Developer, no
+  heavyweight Planner) plus the user-approval gate. **Complex** work (an auth/ownership/validation
+  architecture change, session/document storage architecture change, a new external integration, a security
+  surface) runs the full loop, including planning and the **user-approval gate** before any implementation —
+  normally coordinated by the [Orchestrator](../../agents/orchestration-orchestrator.agent.md)
   and [Planner](../../agents/orchestration-planner.agent.md) agents.
-- **Research (§4.2)** in the open uses the
+- **Research (§4.2), single pass** in the open uses the
   [deep-research-defra-alignment](../deep-research-defra-alignment/SKILL.md) skill; align findings to the
   DEFRA precedence (DEFRA > GDS > community) and cite sources.
 
