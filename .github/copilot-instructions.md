@@ -155,38 +155,42 @@ When guidance conflicts, follow this order:
 
 > **DEFRA takes precedence over GDS. GDS takes precedence over community guidance.** Any deviation from a DEFRA standard MUST be raised as a formal exception through DEFRA's architectural governance (Delivery Architecture team: `delivery.architecture@defra.gov.uk`).
 
-## The working framework (Triage → Read → Research → Plan Handoff → Plan Validation Research → Approval → Implement → Test → Iterate → Summarise)
+## The working framework (Triage → Read → Research → Clarify → Plan → Approval → Implement → Test → Iterate → Summarise)
 
-This section is the **single source of truth** for the working loop. The custom agents ([Orchestrator](.github/agents/orchestration-orchestrator.agent.md), [Planner](.github/agents/orchestration-planner.agent.md), [Developer](.github/agents/orchestration-developer.agent.md) and [Reviewer](.github/agents/orchestration-reviewer.agent.md)) reference it and **must not restate or fork it**.
+This section is the **single source of truth** for the working loop. The custom agents ([Orchestrator](.github/agents/orchestration-orchestrator.agent.md), [Planner](.github/agents/orchestration-planner.agent.md), [Developer](.github/agents/orchestration-developer.agent.md) and [Reviewer](.github/agents/orchestration-reviewer.agent.md)) reference it and **must not restate or fork it**. The guiding principle is **match effort to risk**: do the least work that still delivers the change safely and to standard.
 
-**Triage first — pick the right path by size and risk:**
+**Triage first — pick one of three gears by size and risk:**
 
-- **Trivial / low-risk** (typo, comment/doc tweak, a small localised change with no impact on architecture, dual-strategy auth, document-ownership validation, session/document storage, Joi validation, external integrations, security or data correctness): skip the planner and heavy research. Do a light **Read → Implement → Test → Summarise**, and research only the specific point that is genuinely uncertain.
-- **Non-trivial** (new feature, an auth/ownership/validation change, route or controller changes, session (Redis) or document (MongoDB/Mongoose) storage, external integrations (Reference/Consolidation services, GOV.UK Notify, Azure Blob, Event Hubs), security, or anything affecting request/data correctness or risky): run the full loop below.
+- **Trivial** (typo, comment/doc tweak, a small localised change with no impact on architecture, dual-strategy auth, document-ownership validation, session/document storage, Joi validation, external integrations, security or data correctness): skip the planner, research and review. Do a light **Read → Implement → Test → Summarise**, and research only the one point that is genuinely uncertain.
+- **Standard** (a normal feature/fix with **no** new architecture, auth/ownership change, or security surface): use a **lightweight inline plan** (a short Objective · Plan · Files · Validation · Risks note from the Developer agent — no heavyweight Planner), get approval, then implement and test. Run a **single** risk-scoped research pass **only if** something is genuinely uncertain.
+- **Complex** (an auth/ownership/validation architecture change, session (Redis) or document (MongoDB/Mongoose) storage architecture change, a new external integration (Reference/Consolidation services, GOV.UK Notify, Azure Blob, Event Hubs), a security surface, or multi-item delivery): run the full loop with the Planner agent below.
 
-Non-trivial loop:
+**Manual override.** The user can force a gear — e.g. "treat this as trivial", "just a lightweight/standard plan", "force the full plan", "skip the planner" — and that instruction wins over the automatic classification. Always honour a request for **more** rigour. When the user asks for **less** rigour than the risk warrants, comply but **briefly flag the risk first**, and never drop the approval gate or security for a change that genuinely touches architecture, auth/ownership, external integrations, security or data correctness.
+
+The loop (Standard and Complex; Trivial uses the light path above):
 
 1. **Read** — Read the relevant files/config in the repo for context before acting. Never assume; verify.
-2. **Research** — Do thorough, risk-scoped research in the open and validate findings against DEFRA/GDS and framework/library guidance so advice reflects current APIs and policy. Cite sources.
+2. **Research (single pass, risk-scoped)** — When something is genuinely uncertain — an unfamiliar or version-sensitive API, security, or DEFRA/GDS policy — do **one** thorough, risk-scoped research pass in the open and validate findings against DEFRA/GDS and framework/library guidance so advice reflects current APIs and policy. Cite sources. **Do not run a second, separate validation research round** — the plan is checked against these same cited sources. Well-trodden or cosmetic steps need little or no research.
 3. **Clarify** — Ask the user targeted questions whenever requirements are ambiguous or missing. Surface requirement gaps explicitly with suggested fixes. Do not guess at intent.
-4. **Plan handoff** — Delegate planning to the [Planner - Orchestration Service](.github/agents/orchestration-planner.agent.md) agent when one exists. The planning agent returns the complete implementation plan.
-5. **Plan validation research** — Perform thorough research in the open to validate the plan against DEFRA/GDS and framework guidance, **focusing on the steps the planner flagged as risky or version-sensitive** (unfamiliar APIs, security, policy). Send targeted revisions back to the planner.
-6. **Approval** — Present the complete validated plan to the user and obtain explicit approval before implementation. If changes are requested, update the plan, re-validate, and re-approve. **Cap the plan → validate → approve → implement replanning cycle at 3 iterations**; if it is still unresolved, stop and surface the blocker to the user.
-7. **Implement** — Deliver one task at a time (or parallel independent tasks) from the approved plan. Stay focused on the requested outcome; do not scope-creep or refactor unrelated code. When a change introduces or alters architecture, capture the decision as an ADR and update the relevant docs and ADRs **where the repo already keeps them** (e.g. `docs/`).
-8. **Test / Validate** — Build (`npm run build`), run the test suite (`npm test`, or `npm run test:ci` in CI — test files use the `.jest.spec.ts` suffix), lint (`npm run lint`), check errors, and confirm each task works before moving on.
-9. **Iterate** — Refine until the user is satisfied with each task.
-10. **Summarise** — End with a detailed **executive summary** of what changed, why, how it was validated, and any follow-ups or risks.
+4. **Plan** — For **Complex** work, delegate planning to the [Planner - Orchestration Service](.github/agents/orchestration-planner.agent.md) agent, which returns a complete plan with its research already cited. For **Standard** work, produce the lightweight inline plan directly — no separate planning agent. Either way, **check** the plan's risky/version-sensitive steps are covered and cited; only send a targeted revision back if a genuine gap is found (do not re-research what is already cited).
+5. **Approval** — Present the plan to the user and obtain explicit approval before implementation. If changes are requested, update the plan and re-present. **Cap the plan → approve → implement cycle at 3 iterations**; if it is still unresolved, stop and surface the blocker to the user.
+6. **Implement** — Deliver one task at a time (or parallel independent tasks) from the approved plan. Stay focused on the requested outcome; do not scope-creep or refactor unrelated code. When a change introduces or alters architecture, capture the decision as an ADR and update the relevant docs and ADRs **where the repo already keeps them** (e.g. `docs/`).
+7. **Test / Validate** — Build (`npm run build`), run the test suite (`npm test`, or `npm run test:ci` in CI — test files use the `.jest.spec.ts` suffix), lint (`npm run lint`), check errors, and confirm each task works before moving on.
+8. **Iterate** — Refine until the user is satisfied with each task.
+9. **Summarise** — End with a detailed **executive summary** of what changed, why, how it was validated, and any follow-ups or risks.
+
+**Code review is optional and on-request.** A full code review is **not** part of the default loop. Run it only when the user asks for one. At the end of implementation, if no review has been run, **offer** one (a single Yes/No question); invoke the reviewer only on an explicit Yes.
 
 ## Workflow agents
 
-Non-trivial work is coordinated through four custom agents that all run the framework above:
+Standard and Complex work is coordinated through four custom agents that all run the framework above:
 
 | Agent | Role |
 |-------|------|
-| [Orchestrator - Orchestration Service](.github/agents/orchestration-orchestrator.agent.md) | Plans, delegates, verifies and reports; owns the Yes/No user-approval gate. Does **not** implement. |
-| [Planner - Orchestration Service](.github/agents/orchestration-planner.agent.md) | Internal planning subagent; produces the approval-ready plan and the research behind it. |
-| [Developer - Orchestration Service](.github/agents/orchestration-developer.agent.md) | Implements an already-approved plan end-to-end with tests. |
-| [Reviewer - Orchestration Service](.github/agents/orchestration-reviewer.agent.md) | Read-only review against DEFRA standards; reports findings by severity. |
+| [Orchestrator - Orchestration Service](.github/agents/orchestration-orchestrator.agent.md) | Plans, delegates, verifies and reports; owns the Yes/No user-approval gate and the end-of-work review offer. Does **not** implement. |
+| [Planner - Orchestration Service](.github/agents/orchestration-planner.agent.md) | Internal planning subagent; produces the approval-ready plan and the single research pass behind it. Invoked for **Complex** work. |
+| [Developer - Orchestration Service](.github/agents/orchestration-developer.agent.md) | Implements an already-approved plan end-to-end with tests; authors the lightweight inline plan for **Standard** work. |
+| [Reviewer - Orchestration Service](.github/agents/orchestration-reviewer.agent.md) | Read-only review against DEFRA standards; reports findings by severity. **Optional, on-request only** — not run by default. |
 
 Research (§4.2) and plan-validation research (§4.5) use the [deep-research-defra-alignment](.github/skills/deep-research-defra-alignment/SKILL.md) skill. The [Speckit](.github/agents) agents (`speckit.*`) are a separate spec-driven toolset and are **not** part of this workflow.
 
