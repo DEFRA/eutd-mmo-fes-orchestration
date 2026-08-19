@@ -4,7 +4,7 @@ bundle.js
 dev.js
 .idea
 dist
-test-results
+test-results/
 .nyc_output/
 coverage/
 .vscode/

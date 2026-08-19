@@ -11,7 +11,8 @@
     "mongodb-memory-server": true,
     "applicationinsights-native-metrics": true,
     "dtrace-provider": true,
-    "muhammara": true
+    "muhammara": true,
+    "protobufjs": true
   },
   "overrides": {
     "tar": "7.5.22",
