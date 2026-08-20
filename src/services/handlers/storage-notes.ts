@@ -21,7 +21,7 @@ import { validateCountriesName } from "../../validators/countries.validator";
 import { MAX_DOCUMENT_NUMBER_LENGTH, MAX_PRODUCT_DESCRIPTION } from "../constants";
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
 import { BusinessError, SpeciesSuggestionError } from "../../validators/validationErrors";
-import { ICountry } from "../../persistence/schema/common";
+import { ICountry, Journey } from '../../persistence/schema/common';
 import { isEmpty } from "lodash";
 
 export const initialState = {
@@ -361,8 +361,11 @@ export async function validateProduct(product: any, index: number, errors, isNon
 }
 
 export async function validateEntry(product: any, index: number, errors, documentNumber: string = "", userPrincipal: string = "", contactId: string = "") {
+  validateEntryDocumentType(product, index, errors);
   validateCertificateType(product, index, errors);
-  await validateCertificateNumber(product, index, errors, documentNumber, userPrincipal, contactId);
+  if (product.entryDocumentType) {
+    await validateCertificateNumber(product, index, errors, documentNumber, userPrincipal, contactId);
+  }
   await validateIssuingCountryForNonUK(product, index, errors);
   checkSupportingDocuments(product, errors, index);
   checkProductDescription(product, errors, index);
@@ -370,6 +373,13 @@ export async function validateEntry(product: any, index: number, errors, documen
   checkNetWeightArrival(product, errors, index);
   checkNetFisheryWeightArrival(product, errors, index);
   return { errors };
+}
+
+function validateEntryDocumentType(product: any, index: number, errors: any): void {
+  const validTypes: Journey[] = ['catchCertificate', 'storageNotes', 'processingStatement'];
+  if (!product.entryDocumentType || !validTypes.includes(product.entryDocumentType)) {
+    errors[`catches-${index}-entryDocumentType`] = 'sdAddCatchDetailsErrorSelectEntryDocumentType';
+  }
 }
 
 function validateCertificateType(product: any, index: number, errors: any) {
