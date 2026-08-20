@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import * as BackEndSD from '../storageDoc';
 import * as Transport from './transport';
 import * as ExporterDetails from './exporterDetails';
-import { ICountry, ProgressStatus } from '../common';
+import { ICountry, ProgressStatus, Journey } from '../common';
 import { toFrontEndPsAndSdExporterDetails } from "./exporterDetails";
 import { BaseProgress } from './payload';
 
@@ -54,6 +54,7 @@ export interface Catch {
   netWeightFisheryProductArrival?: string;
   netWeightProductDeparture?: string;
   netWeightFisheryProductDeparture?: string;
+  entryDocumentType?: Journey;
 }
 
 export interface StorageDocumentProgress extends BaseProgress {
@@ -110,6 +111,7 @@ export const toBackEndCatchSD = (catchDetails: Catch[]): BackEndSD.Catch[] => {
         netWeightFisheryProductArrival: cat.netWeightFisheryProductArrival,
         netWeightProductDeparture: cat.netWeightProductDeparture,
         netWeightFisheryProductDeparture: cat.netWeightFisheryProductDeparture,
+        entryDocumentType: cat.entryDocumentType,
       }
     })
     : [];

@@ -35,6 +35,7 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
       scientificName: "some scientific name",
       certificateType: "uk",
       issuingCountry: undefined,
+      entryDocumentType: undefined,
       supportingDocuments: undefined,
       productDescription: undefined,
       netWeightFisheryProductArrival: undefined,
@@ -60,6 +61,7 @@ describe('when mapping frontend catch to backend catch for statementDocument', (
     const expected: BackEndSD.Catch[] = [{
       certificateType: undefined,
       certificateNumber: undefined,
+      entryDocumentType: undefined,
       issuingCountry: undefined,
       supportingDocuments: undefined,
       product: "COD",
