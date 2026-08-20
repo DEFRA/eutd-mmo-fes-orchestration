@@ -504,7 +504,8 @@ describe('When cloning a storage document', () => {
     dateOfUnloading: "26/05/2021",
     transportUnloadedFrom: "12",
     id: "12-1622029341",
-    scientificName: "Cancer edwardsii"
+    scientificName: "Cancer edwardsii",
+    entryDocumentType: 'catchCertificate'
   };
 
   const originalCatch2: Catch = {
@@ -695,6 +696,7 @@ describe('When cloning a storage document', () => {
       expect(clone.placeOfUnloading).toBe(originalCatch.placeOfUnloading);
       expect(clone.transportUnloadedFrom).toBe(originalCatch.transportUnloadedFrom);
       expect(clone.scientificName).toBe(originalCatch.scientificName);
+      expect(clone.entryDocumentType).toBe(originalCatch.entryDocumentType);
     });
   });
 });

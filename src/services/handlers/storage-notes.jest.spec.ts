@@ -48,6 +48,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
           issuingCountry: {
@@ -95,6 +96,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
       transportUnloadedFrom: "TRANS-IN-001",
       scientificName: 'Salvelinus alpinus',
       certificateType: 'non_uk',
+      entryDocumentType: 'catchCertificate',
       netWeightProductArrival: "500", // user just changed this from 999 → 500
       netWeightFisheryProductArrival: "500",
       issuingCountry: {
@@ -146,6 +148,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
       transportUnloadedFrom: "TRANS-IN-001",
       scientificName: 'Salvelinus alpinus',
       certificateType: 'non_uk',
+      entryDocumentType: 'catchCertificate',
       // arrival weights missing — validation will fail
       issuingCountry: {
         officialCountryName: 'SPAIN',
@@ -197,6 +200,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
       transportUnloadedFrom: "TRANS-IN-001",
       scientificName: 'Salvelinus alpinus',
       certificateType: 'non_uk',
+      entryDocumentType: 'catchCertificate',
       netWeightProductArrival: "500", // arrival >= departure, so no clearing needed
       netWeightFisheryProductArrival: "500",
       issuingCountry: {
@@ -249,6 +253,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
       transportUnloadedFrom: "TRANS-IN-001",
       scientificName: 'Salvelinus alpinus',
       certificateType: 'non_uk',
+      entryDocumentType: 'catchCertificate',
       netWeightProductArrival: "500",
       netWeightFisheryProductArrival: "500", // fishery departure 999 > 500
       issuingCountry: {
@@ -305,6 +310,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -350,6 +356,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
           issuingCountry: 'InvalidCountryName',  // String format to simulate browser input
@@ -396,6 +403,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
           issuingCountry: { officialCountryName: '' },  // Empty country name
@@ -442,6 +450,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
           // issuingCountry: undefined (not set)
@@ -486,6 +495,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           scientificName: 'Salvelinus alpinus',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
+          entryDocumentType: 'catchCertificate',
         },
       ],
       storageFacilities: [{}],
@@ -529,6 +539,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'invalid_type',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -571,6 +582,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -611,6 +623,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -651,6 +664,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -693,6 +707,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightFisheryProductArrival: "1",
         },
       ],
@@ -734,6 +749,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
         },
       ],
@@ -775,6 +791,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "10.123",
           netWeightFisheryProductArrival: "1",
         },
@@ -817,6 +834,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "10.123",
         },
@@ -858,6 +876,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -908,6 +927,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
         },
       ],
       storageFacilities: [{}],
@@ -949,6 +969,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -993,6 +1014,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1035,6 +1057,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           certificateNumber: 'CERTIFICATENUMBERCERTIFICATENUMBERCERTIFICATENUMBERCERTIFICATENUMBER',
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1079,6 +1102,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           certificateNumber: 'DOCUMENTNUMBER; R*1',
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1122,6 +1146,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1163,6 +1188,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           dateOfUnloading: "29/01/2019",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1205,6 +1231,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           placeOfUnloading: "!Dover",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1246,6 +1273,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           dateOfUnloading: "29/01/2019",
           placeOfUnloading: "Dover",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1288,6 +1316,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: " ",
           transportUnloadedFrom: " ",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1335,6 +1364,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1378,6 +1408,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1421,6 +1452,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         }
@@ -1467,6 +1499,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1522,6 +1555,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           supportingDocuments: ["@@$@$"],
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1567,6 +1601,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           supportingDocuments: ["supportingDocumentsupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocuments"],
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1611,6 +1646,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           productDescription: "@@$@$",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1655,6 +1691,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           productDescription: "supportingDocumentsupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocumentssupportingDocuments",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1699,6 +1736,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           // productDescription intentionally missing
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1745,6 +1783,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           netWeightProductArrival: "0",
           netWeightFisheryProductArrival: "0",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
         },
       ]
     };
@@ -1788,6 +1827,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           netWeightProductArrival: -1,
           netWeightFisheryProductArrival: -1,
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
         },
       ]
     };
@@ -1831,6 +1871,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           netWeightProductArrival: "99999999999.991",
           netWeightFisheryProductArrival: "99999999999.991",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
         },
       ]
     };
@@ -1874,6 +1915,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           netWeightProductArrival: 100000000000,
           netWeightFisheryProductArrival: 100000000000,
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
         },
       ]
     };
@@ -1915,6 +1957,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -1963,6 +2006,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -2013,6 +2057,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           scientificName: 'Salvelinus alpinus',
           speciesCode: 'ACH',
           certificateType: 'uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -2037,6 +2082,215 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
 
     expect(errors).toBeTruthy();
     expect(errors).toEqual(expected);
+  });
+
+  it("returns error sdAddCatchDetailsErrorSelectEntryDocumentType when entryDocumentType is missing", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
+          commodityCode: "34234324",
+          scientificName: 'Salvelinus alpinus',
+          certificateType: 'non_uk',
+          netWeightProductArrival: "1",
+          netWeightFisheryProductArrival: "1",
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+        },
+      ],
+      storageFacilities: [{}],
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id',
+    });
+
+    expect(errors['catches-0-entryDocumentType']).toBe('sdAddCatchDetailsErrorSelectEntryDocumentType');
+  });
+
+  it("returns error sdAddCatchDetailsErrorSelectEntryDocumentType when entryDocumentType is an invalid value", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
+          commodityCode: "34234324",
+          scientificName: 'Salvelinus alpinus',
+          certificateType: 'non_uk',
+          netWeightProductArrival: "1",
+          netWeightFisheryProductArrival: "1",
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          entryDocumentType: 'invalidValue',
+        },
+      ],
+      storageFacilities: [{}],
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id',
+    });
+
+    expect(errors['catches-0-entryDocumentType']).toBe('sdAddCatchDetailsErrorSelectEntryDocumentType');
+  });
+
+  it("does not validate certificateNumber when entryDocumentType is missing", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
+          commodityCode: "34234324",
+          scientificName: 'Salvelinus alpinus',
+          certificateType: 'non_uk',
+          netWeightProductArrival: "1",
+          netWeightFisheryProductArrival: "1",
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+        },
+      ],
+      storageFacilities: [{}],
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id',
+    });
+
+    expect(errors['catches-0-entryDocumentType']).toBe('sdAddCatchDetailsErrorSelectEntryDocumentType');
+    expect(errors['catches-0-certificateNumber']).toBeUndefined();
+  });
+
+  it("validates certificateNumber when entryDocumentType is provided", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+
+    const data = {
+      catches: [
+        {
+          weightOnCC: "2222",
+          product: "Arctic char (ACH)",
+          productDescription: 'Some product description',
+          commodityCode: "34234324",
+          scientificName: 'Salvelinus alpinus',
+          certificateType: 'non_uk',
+          netWeightProductArrival: "1",
+          netWeightFisheryProductArrival: "1",
+          issuingCountry: {
+            officialCountryName: 'SPAIN',
+            isoCodeAlpha2: 'ES',
+            isoCodeAlpha3: 'ESP',
+            isoNumericCode: '724',
+          },
+          entryDocumentType: 'catchCertificate',
+        },
+      ],
+      storageFacilities: [{}],
+    };
+
+    const { errors } = await handler({
+      data,
+      _nextUrl: "",
+      _currentUrl: currentUrl,
+      errors: {},
+      documentNumber: 'SD',
+      userPrincipal: 'bob',
+      contactId: 'bob-contact-Id',
+    });
+
+    expect(errors['catches-0-entryDocumentType']).toBeUndefined();
+    expect(errors['catches-0-certificateNumber']).toBeDefined();
+  });
+
+  it("accepts all three valid entryDocumentType values without entryDocumentType error", async () => {
+    const currentUrl =
+      "/create-non-manipulation-document/:documentNumber/add-product-to-this-consignment";
+    const handler = StorageNotes[currentUrl];
+    const validTypes = ['catchCertificate', 'storageNotes', 'processingStatement'];
+
+    for (const entryDocumentType of validTypes) {
+      const data = {
+        catches: [
+          {
+            weightOnCC: "2222",
+            product: "Arctic char (ACH)",
+            productDescription: 'Some product description',
+            commodityCode: "34234324",
+            certificateNumber: "CC-11111",
+            scientificName: 'Salvelinus alpinus',
+            certificateType: 'non_uk',
+            netWeightProductArrival: "1",
+            netWeightFisheryProductArrival: "1",
+            issuingCountry: {
+              officialCountryName: 'SPAIN',
+              isoCodeAlpha2: 'ES',
+              isoCodeAlpha3: 'ESP',
+              isoNumericCode: '724',
+            },
+            entryDocumentType,
+          },
+        ],
+        storageFacilities: [{}],
+      };
+
+      const { errors } = await handler({
+        data,
+        _nextUrl: "",
+        _currentUrl: currentUrl,
+        errors: {},
+        documentNumber: 'SD',
+        userPrincipal: 'bob',
+        contactId: 'bob-contact-Id',
+      });
+
+      expect(errors['catches-0-entryDocumentType']).toBeUndefined();
+    }
   });
 });
 
@@ -2087,6 +2341,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
           issuingCountry: {
@@ -2134,6 +2389,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           transportUnloadedFrom: "TRANS-IN-001",
           scientificName: 'Salvelinus alpinus',
           certificateType: 'uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },
@@ -2184,6 +2440,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-product-to-this-
           placeOfUnloading: "Dover",
           transportUnloadedFrom: "TRANS-IN-001",
           certificateType: 'non_uk',
+          entryDocumentType: 'catchCertificate',
           netWeightProductArrival: "1",
           netWeightFisheryProductArrival: "1",
         },

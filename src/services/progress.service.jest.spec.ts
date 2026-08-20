@@ -4875,6 +4875,7 @@ describe('getStorageDocumentProgress', () => {
             netWeightFisheryProductArrival: '1',
             netWeightProductDeparture: '1',
             netWeightFisheryProductDeparture: '1',
+            entryDocumentType: 'catchCertificate',
           },
         ],
       },
@@ -4939,6 +4940,7 @@ describe('getStorageDocumentProgress', () => {
             netWeightProductArrival: '1',
             netWeightFisheryProductArrival: '1',
             // No netWeightProductDeparture / netWeightFisheryProductDeparture
+            entryDocumentType: 'catchCertificate',
           },
         ],
       },
@@ -4981,6 +4983,7 @@ describe('getStorageDocumentProgress', () => {
             netWeightFisheryProductArrival: '1',
             netWeightProductDeparture: '700',
             netWeightFisheryProductDeparture: '700',
+            entryDocumentType: 'catchCertificate',
           },
         ],
       },
@@ -5022,6 +5025,7 @@ describe('getStorageDocumentProgress', () => {
             netWeightFisheryProductArrival: '30',
             netWeightProductDeparture: '50',
             netWeightFisheryProductDeparture: '40',
+            entryDocumentType: 'catchCertificate',
           },
         ],
       },
@@ -5228,6 +5232,7 @@ describe('getStorageDocumentProgress', () => {
             weightOnCC: "100",
             scientificName: "Haliotis rufescens",
             certificateType: "non_uk",
+            entryDocumentType: "catchCertificate",
             issuingCountry: {
               officialCountryName: 'SPAIN',
               isoCodeAlpha2: 'ES',
@@ -5356,6 +5361,7 @@ describe('getStorageDocumentProgress', () => {
             productDescription: 'Some product description',
             commodityCode: '45345454354',
             certificateNumber: 'DSFDSF',
+            entryDocumentType: 'catchCertificate',
             certificateType: 'non_uk',
             issuingCountry: {
               officialCountryName: 'SPAIN',
