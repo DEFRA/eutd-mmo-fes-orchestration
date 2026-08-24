@@ -22,9 +22,7 @@ export const getEntityFromServer = async (
         baseURL: baseUrl,
       });
     }
-    logger.info(`[GET][${path}][getEntityFromServer]`);
     const response = await httpClient.get(path);
-    logger.info(`[GET][RESPONSE][PAYLOAD][${JSON.stringify(response.data)}]`);
     if (Object.hasOwn(response, 'data')) {
       return response.data;
     }
