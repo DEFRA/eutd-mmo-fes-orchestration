@@ -98,7 +98,6 @@ export const validateSpecies = async (
     };
   }
   const commodityCodes: ICommodityCodeExtended[] = await getEntityFromServer(baseURL, path, client);
-  logger.debug(`[COMPARING ][${JSON.stringify(commodityCodes)}][${JSON.stringify(species)}]`)
     if (commodityCodes.some(
     (commodity: ICommodityCodeExtended) =>
       commodity.code === species.commodity_code
