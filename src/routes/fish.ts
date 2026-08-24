@@ -4,8 +4,9 @@ import * as Joi from 'joi';
 import Controller from '../controllers/fish.controller';
 import FavouritesController from '../controllers/favourites.controller';
 import acceptsHtml from '../helpers/acceptsHtml';
-import { validateSpeciesWithReferenceData } from '../validators/fish.validator';
+import { validateSpeciesWithReferenceData, validateSpeciesName } from '../validators/fish.validator';
 import errorExtractor, { buildRedirectUrlWithErrorStringInQueryParam } from '../helpers/errorExtractor';
+import { mergeSchemaAndValidationErrors, BusinessError } from '../validators/validationErrors';
 import ApplicationConfig from '../applicationConfig';
 import { withDocumentLegitimatelyOwned } from "../helpers/withDocumentLegitimatelyOwned";
 import logger from "../logger";
@@ -49,7 +50,6 @@ export default class FishRoutes {
             tags: ['api', 'fish', 'manual'],
             validate: {
               failAction: async function (req, h, error) {
-                logger.error(`[ADDING-SPECIES][FAILED-ACTION][/v1/fish/add]`);
                 let errorDetailsObj = errorExtractor(error);
 
                 if ((req.payload as any).isFavourite && Object.hasOwn(errorDetailsObj, 'species') && errorDetailsObj['species'] === 'error.species.any.invalid') {
@@ -103,22 +103,31 @@ export default class FishRoutes {
                   const e = new Error('I am not sure what\'s going on') as any;
                   return e;
                 }
-                const errors = schema.validate(value, {
-                  abortEarly: false,
-                  allowUnknown: true
-                });
-
-                if (errors.error) {
-                  throw errors.error;
-                }
-
-                logger.info(`[ADDING-SPECIES][PAYLOAD][validate whether species is valid only when adding species][${JSON.stringify(value)}]`);
+                const joiResult = schema.validate(value, { abortEarly: false, allowUnknown: true });
+                const speciesPassedJoi = !joiResult.error?.details.some((d: any) => d.path[0] === 'species');
+                // composite check requires valid state/presentation/commodity_code; use name-only check when they haven't passed yet
+                const otherFieldsPassedJoi = !joiResult.error?.details.some((d: any) => d.path[0] !== 'species');
                 const refUrl = ApplicationConfig.getReferenceServiceUrl();
-                const anyError = await validateSpeciesWithReferenceData(value, refUrl);
-                if (anyError.isError) {
-                  throw anyError.error;
+
+                let speciesRefError: BusinessError;
+                if (!speciesPassedJoi) {
+                  speciesRefError = { isError: false, error: null };
+                } else if (!otherFieldsPassedJoi) {
+                  speciesRefError = await validateSpeciesName(value.species, value.scientificName ?? '', refUrl);
+                } else {
+                  speciesRefError = await validateSpeciesWithReferenceData(value, refUrl);
                 }
 
+                const combined = mergeSchemaAndValidationErrors(
+                  joiResult.error ?? null,
+                  speciesRefError.isError ? [speciesRefError.error] : []
+                );
+                if (combined) {
+                  // species first so it leads the error response object
+                  const speciesIdx = combined.details.findIndex((d: any) => d.path[0] === 'species');
+                  if (speciesIdx > 0) combined.details.unshift(combined.details.splice(speciesIdx, 1)[0]);
+                  throw combined;
+                }
                 return value;
               }
 
@@ -177,21 +186,31 @@ export default class FishRoutes {
                   const e = new Error('I am not sure what\'s going on') as any;
                   return e;
                 }
-                const errors = schema.validate(value, {
-                  abortEarly: false,
-                  allowUnknown: true
-                });
-
-                if (errors.error) {
-                  throw errors.error;
-                }
-
+                const joiResult = schema.validate(value, { abortEarly: false, allowUnknown: true });
+                const speciesPassedJoi = !joiResult.error?.details.some((d: any) => d.path[0] === 'species');
+                // composite check requires valid state/presentation/commodity_code; use name-only check when they haven't passed yet
+                const otherFieldsPassedJoi = !joiResult.error?.details.some((d: any) => d.path[0] !== 'species');
                 const refUrl = ApplicationConfig.getReferenceServiceUrl();
-                const anyError = await validateSpeciesWithReferenceData(value as Product, refUrl);
-                if (anyError.isError) {
-                  throw anyError.error;
+
+                let speciesRefError: BusinessError;
+                if (!speciesPassedJoi) {
+                  speciesRefError = { isError: false, error: null };
+                } else if (!otherFieldsPassedJoi) {
+                  speciesRefError = await validateSpeciesName((value as any).species, (value as any).scientificName ?? '', refUrl);
+                } else {
+                  speciesRefError = await validateSpeciesWithReferenceData(value as Product, refUrl);
                 }
 
+                const combined = mergeSchemaAndValidationErrors(
+                  joiResult.error ?? null,
+                  speciesRefError.isError ? [speciesRefError.error] : []
+                );
+                if (combined) {
+                  // species first so it leads the error response object
+                  const speciesIdx = combined.details.findIndex((d: any) => d.path[0] === 'species');
+                  if (speciesIdx > 0) combined.details.unshift(combined.details.splice(speciesIdx, 1)[0]);
+                  throw combined;
+                }
                 return value;
               }
             }
