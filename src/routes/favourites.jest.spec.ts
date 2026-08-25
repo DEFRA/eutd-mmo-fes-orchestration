@@ -11,6 +11,7 @@ describe("favourites routes", () => {
   const server = Hapi.server();
 
   let mockAddFavourites;
+  let mockValidateSpeciesWithReferenceData;
   let mockValidateSpeciesName;
 
   beforeAll(async () => {
@@ -20,7 +21,8 @@ describe("favourites routes", () => {
     await server.start();
 
     mockAddFavourites = jest.spyOn(FavouritesController, "addFavourites");
-    mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesWithReferenceData');
+    mockValidateSpeciesWithReferenceData = jest.spyOn(FishValidator, 'validateSpeciesWithReferenceData');
+    mockValidateSpeciesName = jest.spyOn(FishValidator, 'validateSpeciesName');
 
   });
 
@@ -29,7 +31,9 @@ describe("favourites routes", () => {
   });
 
   beforeEach(() => {
-    mockValidateSpeciesName.mockResolvedValue({});
+    jest.clearAllMocks();
+    mockValidateSpeciesWithReferenceData.mockResolvedValue({ isError: false, error: null });
+    mockValidateSpeciesName.mockResolvedValue({ isError: false, error: null });
     mockAddFavourites.mockResolvedValue([{ some: 'data' }]);
   });
 
@@ -96,6 +100,8 @@ describe("favourites routes", () => {
           species: "error.species.any.required",
           state: "error.state.any.required",
         });
+        expect(mockValidateSpeciesName).not.toHaveBeenCalled();
+        expect(mockValidateSpeciesWithReferenceData).not.toHaveBeenCalled();
       });
     });
 
@@ -122,6 +128,75 @@ describe("favourites routes", () => {
         expect(JSON.parse(response.payload)).toEqual({
           commodity_code_description: "error.commodity_code_description.string.emoji",
         });
+      });
+    });
+
+    describe('with valid species but empty state/presentation/commodity_code', () => {
+      it('should not return a species error (regression guard)', async () => {
+        mockValidateSpeciesName.mockResolvedValue({ isError: false, error: null });
+        const response = await server.inject({
+          ...request,
+          payload: { species: 'Atlantic cod (COD)', speciesCode: 'COD', scientificName: 'Gadus morhua',
+                     state: '', stateLabel: '', presentation: '', presentationLabel: '', commodity_code: '' }
+        });
+        expect(response.statusCode).toBe(400);
+        const body = JSON.parse(response.payload);
+        expect(body).not.toHaveProperty('species');
+        expect(body).toHaveProperty('state');
+        expect(body).toHaveProperty('presentation');
+        expect(body).toHaveProperty('commodity_code');
+        expect(mockValidateSpeciesName).toHaveBeenCalledTimes(1);
+        expect(mockValidateSpeciesWithReferenceData).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('with invalid species and empty other fields', () => {
+      it('should return species error as the first key', async () => {
+        const speciesErr: any = new Error('invalid');
+        speciesErr.details = [{ path: ['species'], type: 'any.invalid', context: { key: 'species' }, message: 'error.species.any.invalid' }];
+        mockValidateSpeciesName.mockResolvedValue({ isError: true, error: speciesErr });
+        const response = await server.inject({
+          ...request,
+          payload: { species: 'aaaaaaaaa', speciesCode: '', scientificName: '', state: '', presentation: '', commodity_code: '' }
+        });
+        expect(response.statusCode).toBe(400);
+        const body = JSON.parse(response.payload) as Record<string, string>;
+        expect(Object.keys(body)[0]).toBe('species');
+        expect(body).toHaveProperty('state');
+        expect(body).toHaveProperty('presentation');
+        expect(body).toHaveProperty('commodity_code');
+        expect(mockValidateSpeciesName).toHaveBeenCalledTimes(1);
+        expect(mockValidateSpeciesWithReferenceData).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('with all fields valid', () => {
+      it('should call validateSpeciesWithReferenceData and not validateSpeciesName', async () => {
+        const response = await server.inject({
+          ...request,
+          payload: { species: 'Atlantic COD', speciesCode: 'COD', scientificName: 'THE COD',
+                     state: 'FRE', stateLabel: 'Fresh', presentation: 'HED', presentationLabel: 'Headed',
+                     commodity_code: '21294949045', commodity_code_description: 'many letters here' }
+        });
+        expect(response.statusCode).toBe(200);
+        expect(mockValidateSpeciesWithReferenceData).toHaveBeenCalledTimes(1);
+        expect(mockValidateSpeciesName).not.toHaveBeenCalled();
+      });
+
+      it('should return species error when reference data validator fails', async () => {
+        const speciesErr: any = new Error('invalid');
+        speciesErr.details = [{ path: ['species'], type: 'any.invalid', context: { key: 'species' }, message: 'error.species.any.invalid' }];
+        mockValidateSpeciesWithReferenceData.mockResolvedValue({ isError: true, error: speciesErr });
+        const response = await server.inject({
+          ...request,
+          payload: { species: 'Atlantic COD', speciesCode: 'COD', scientificName: 'THE COD',
+                     state: 'FRE', stateLabel: 'Fresh', presentation: 'HED', presentationLabel: 'Headed',
+                     commodity_code: '21294949045', commodity_code_description: '' }
+        });
+        expect(response.statusCode).toBe(400);
+        expect(JSON.parse(response.payload)).toHaveProperty('species');
+        expect(mockValidateSpeciesWithReferenceData).toHaveBeenCalledTimes(1);
+        expect(mockValidateSpeciesName).not.toHaveBeenCalled();
       });
     });
   });
