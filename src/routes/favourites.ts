@@ -6,7 +6,8 @@ import { validateNoEmoji } from '../validators/emojiValidator';
 import FavouritesController from '../controllers/favourites.controller';
 import logger from '../logger';
 import ApplicationConfig from "../applicationConfig";
-import {validateSpeciesWithReferenceData} from "../validators/fish.validator";
+import { validateSpeciesWithReferenceData, validateSpeciesName } from '../validators/fish.validator';
+import { mergeSchemaAndValidationErrors, BusinessError } from '../validators/validationErrors';
 import { Product } from "../persistence/schema/frontEndModels/species";
 
 export default class FavouritesRoutes {
@@ -46,22 +47,32 @@ export default class FavouritesRoutes {
                   commodity_code_description: Joi.string().trim().allow('').custom(validateNoEmoji),
               });
 
-              const errors = schema.validate(value, {
-                abortEarly: false,
-                allowUnknown: true
-              });
-
-              if (errors.error) {
-                throw errors.error;
-              }
-
-              // validate  species when favourites
-              logger.info(`[ADDING-FAVOURITES][PAYLOAD][validate species][${JSON.stringify(value)}]`);
+              const joiResult = schema.validate(value, { abortEarly: false, allowUnknown: true });
+              const speciesPassedJoi = !joiResult.error?.details.some((d: any) => d.path[0] === 'species');
+              // composite check requires valid state/presentation/commodity_code; use name-only check when they haven't passed yet
+              const otherFieldsPassedJoi = !joiResult.error?.details.some((d: any) => d.path[0] !== 'species');
               const refUrl = ApplicationConfig.getReferenceServiceUrl();
-              const anyError =  await validateSpeciesWithReferenceData(value as Product, refUrl);
-              if (anyError.isError) {
-                throw anyError.error;
+
+              let speciesRefError: BusinessError;
+              if (!speciesPassedJoi) {
+                speciesRefError = { isError: false, error: null };
+              } else if (!otherFieldsPassedJoi) {
+                speciesRefError = await validateSpeciesName((value as any).species, (value as any).scientificName ?? '', refUrl);
+              } else {
+                speciesRefError = await validateSpeciesWithReferenceData(value as Product, refUrl);
               }
+
+              const combined = mergeSchemaAndValidationErrors(
+                joiResult.error ?? null,
+                speciesRefError.isError ? [speciesRefError.error] : []
+              );
+              if (combined) {
+                // species first so it leads the error response object
+                const speciesIdx = combined.details.findIndex((d: any) => d.path[0] === 'species');
+                if (speciesIdx > 0) combined.details.unshift(combined.details.splice(speciesIdx, 1)[0]);
+                throw combined;
+              }
+              return value;
             }
           },
         },
