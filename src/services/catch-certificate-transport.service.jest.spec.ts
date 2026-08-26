@@ -125,11 +125,13 @@ describe('CatchCertificateTransportService - addTransport', () => {
     expect(mockUpsertDraftData).toHaveBeenCalledWith('Bob', 'GBR-2025-CC-0123456789', { '$push': { 'exportData.transportations': expected } }, 'contactId')
   });
 
-  it('should omit vehicle details for truck transportation when upserting truck with CMR flag set to true', async () => {
+  it('should not include cmr in backend payload for truck transportation', async () => {
     const expected: BackEndCatchCertificateTransport = {
       id: 0,
       vehicle: 'truck',
-      cmr: true,
+      nationalityOfVehicle: 'UK',
+      registrationNumber: 'BA078',
+      departurePlace: 'Hull',
     };
 
     const payload = { ...transport, cmr: 'true' };
@@ -316,7 +318,8 @@ describe('CatchCertificateTransport - getTransportDetails', () => {
     const expectedResult: CatchCertificateTransport = {
       id: "0",
       vehicle: "truck",
-      cmr: "true"
+      cmr: "true",
+      documents: []
     }
 
     const result = await SUT.getTransportationDetails(USER_ID, DOCUMENT_NUMBER, contactId);
@@ -581,7 +584,13 @@ describe('CatchCertificateTransportService - updateTransport', () => {
     const expected: BackEndCatchCertificateTransport = {
       id: 0,
       vehicle: "truck",
-      cmr: true,
+      transportDocuments: [{
+        name: 'truck doc 1',
+        reference: 'TRK00001'
+      }, {
+        name: 'truck doc 2',
+        reference: 'TRK0002'
+      }]
     }
 
     const transport: CatchCertificateTransport = {
@@ -678,7 +687,6 @@ describe('CatchCertificateTransportService - updateTransport', () => {
     const expected: BackEndCatchCertificateTransport = {
       id: 0,
       vehicle: "truck",
-      cmr: false,
       transportDocuments: [{
         name: 'truck doc 1',
         reference: 'TRK00001'

@@ -124,6 +124,8 @@ export enum ProgressStatus {
   OPTIONAL = 'OPTIONAL'
 }
 
+export type Journey = 'catchCertificate' | 'storageNotes' | 'processingStatement';
+
 export interface ICommodityCode {
   code: string;
   description: string;

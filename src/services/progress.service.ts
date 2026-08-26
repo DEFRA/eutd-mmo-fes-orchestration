@@ -277,7 +277,9 @@ export default class ProgressService {
       return ProgressStatus.INCOMPLETE;
     }
 
-    const { error } = schema.validate({ ...transportation, journey, exportDateTo: journey === "storageNotes" && moment().startOf("day").add(1, "day").toISOString(), arrival });
+    const payload = { ...transportation, journey, exportDateTo: journey === "storageNotes" && moment().startOf("day").add(1, "day").toISOString(), arrival };
+    delete payload.cmr;
+    const { error } = schema.validate(payload);
     if (error) {
       return ProgressStatus.INCOMPLETE;
     }

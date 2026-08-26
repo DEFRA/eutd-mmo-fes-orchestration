@@ -1,0 +1,30 @@
+# App only. Run `docker compose -f docker-compose.deps.yml up -d --wait` first — this joins the external fes-shared-net it creates.
+# Cross-project depends_on is not supported; the app's mongoose connection-retry handles startup ordering.
+
+services:
+  orchestration:
+    build:
+      context: .
+      target: development
+      args:
+        NPM_TOKEN: ${NPM_TOKEN:-}
+    ports:
+      - "5500:5500"
+    environment:
+      DB_CONNECTION_URI: mongodb://mongo:27017
+      DISABLE_AUTH: "true"
+      AZURE_STORAGE_PROXY_URL: http://127.0.0.1:3001
+      REDIS_HOST_NAME: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ""
+      REDIS_TLS_ENABLED: "false"
+    env_file:
+      - path: .env
+        required: false
+    networks:
+      - fes-shared
+
+networks:
+  fes-shared:
+    external: true
+    name: fes-shared-net

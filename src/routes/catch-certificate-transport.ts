@@ -6,7 +6,7 @@ import logger from '../logger';
 import errorExtractor from '../helpers/errorExtractor';
 import Controller from '../controllers/catch-certificate-transport.controller';
 import { CatchCertificateTransport } from '../persistence/schema/frontEndModels/catchCertificateTransport';
-import catchCertificateTransportSchema, { catchCertificateTransportCmrSchema } from '../schemas/catchcerts/catchCertificateTransportSelectionSchema';
+import catchCertificateTransportSchema from '../schemas/catchcerts/catchCertificateTransportSelectionSchema';
 import catchCertificateTransportDetailsSchema from '../schemas/catchcerts/catchCertificateTransportDetailsSchema';
 import catchCertificateTransportDocumentsSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSchema';
 import catchCertificateTransportDocumentsSaveAndContinueSchema from '../schemas/catchcerts/catchCertificateTransportDocumentsSaveAndContinueSchema';
@@ -92,36 +92,6 @@ export default class CatchCertificateTransportRoutes {
         }
       },
       {
-        method: 'PUT',
-        path: '/v1/catch-certificate/transport/{transportId}/cmr',
-        options: {
-          auth: defineAuthStrategies(),
-          security: true,
-          cors: true,
-          handler: async (request, h) => {
-            return await withDocumentLegitimatelyOwned(request, h, async (userPrincipal, documentNumber, contactId) => {
-              return await Controller.updateTransport(request, userPrincipal, documentNumber, contactId);
-            }).catch(error => {
-              logger.error(`[UPDATE-TRANSPORT-CMR][ERROR][${error.stack || error}`);
-              return h.response().code(500);
-            })
-          },
-          description: 'Update transport CMR value',
-          tags: ['api', 'transport'],
-          validate: {
-            options: {
-              abortEarly: false
-            },
-            failAction: function (_, h, error) {
-              const errorObject = errorExtractor(error);
-
-              return h.response(errorObject).code(400).takeover();
-            },
-            payload: catchCertificateTransportCmrSchema,
-          }
-        }
-      },
-      {
         method: 'DELETE',
         path: '/v1/catch-certificate/transport/{transportId}',
         options: {
@@ -164,7 +134,7 @@ export default class CatchCertificateTransportRoutes {
             },
             failAction: async function (req, h, error) {
               const errorObject: any = errorExtractor(error);
-              
+
               return h.response(errorObject).code(400).takeover();
             },
             query: Joi.object({
@@ -173,9 +143,9 @@ export default class CatchCertificateTransportRoutes {
             payload: async function (value: any, options: any) {
               // Get draft mode from query parameter
               const isDraft = options?.context?.query?.draft === true || options?.context?.query?.draft === 'true';
-              
-              const { error } = catchCertificateTransportDetailsSchema.validate(value, { 
-                abortEarly: false, 
+
+              const { error } = catchCertificateTransportDetailsSchema.validate(value, {
+                abortEarly: false,
                 allowUnknown: true,
                 context: { query: options?.context?.query || {} }
               });
@@ -186,7 +156,7 @@ export default class CatchCertificateTransportRoutes {
                 value.nationalityOfVehicle,
                 isDraft
               );
-              
+
               // Merge and throw all errors (schema + country validation)
               const combinedError = mergeSchemaAndValidationErrors(error, countryValidationErrors);
               if (combinedError) {

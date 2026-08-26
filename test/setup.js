@@ -1,2 +1,6 @@
+/* global process, jest */
+
 process.env.eventHubConnectionString='Endpoint=sb://sndmmosocens001.servicebus.windows.net/;SharedAccessKeyName=QRADAR_APP;SharedAccessKey=Kowc1RMzOG4L3U/AcFswmxIvS1susT6LD9WqUT8kCwA=;EntityPath=insights-application-logs';
 process.env.MAXIMUM_FAVOURITES_PER_USER='50';
+
+jest.mock('muhammara', () => ({}));

@@ -1,10 +1,9 @@
-import * as mongoose from 'mongoose';
 import * as CatchCertService from '../persistence/services/catchCert';
 import * as CatchCertSchema from '../persistence/schema/catchCert';
 import * as ProcessingStatementSchema from '../persistence/schema/processingStatement';
 import * as StorageDocSchema from '../persistence/schema/storageDoc';
 import * as SUT from './documentValidator'
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../test/helpers/mongoTestConnection';
 import { MockSessionStorage } from '../../test/session_store/mock';
 import { SessionStoreFactory } from '../session_store/factory';
 import { BaseModel } from '../persistence/schema/base';
@@ -17,7 +16,6 @@ describe('document validator', () => {
   const processingStatementDocumentNumber = 'GBR-2023-PS-ABCD01234';
   const storageDocumentNumber = 'GBR-2023-SD-ABCD01234';
 
-  let mongoServer;
   let mockWriteAllFor;
   let mockSessionStore;
 
@@ -36,9 +34,7 @@ describe('document validator', () => {
   let mockSaveDraftCache;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    mongoose.connect(mongoUri).catch(err => {console.log(err)});
+    await connectTestMongo();
 
     mockSessionStore = new MockSessionStorage();
     mockWriteAllFor = jest.fn();
@@ -66,8 +62,7 @@ describe('document validator', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await disconnectTestMongo();
     jest.resetAllMocks();
   });
 

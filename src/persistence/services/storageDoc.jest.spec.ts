@@ -1,9 +1,8 @@
-import * as mongoose from 'mongoose';
 import * as StorageDocumentService from "./storageDoc";
 import * as FrontEndExporterSchema from "../schema/frontEndModels/exporterDetails";
 import * as FrontEndTransportSchema from '../schema/frontEndModels/transport';
 import { StorageDocument, ExportData } from "../schema/storageDoc";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import { StorageDocumentModel } from "../schema/storageDoc";
 import DocumentNumberService from '../../services/documentNumber.service';
 import ManageCertsService from '../../services/manage-certs.service';
@@ -12,15 +11,12 @@ import * as DraftCreationValidator from '../../validators/draftCreationValidator
 import * as CatchCertService from './catchCert';
 import ApplicationConfig from '../../applicationConfig';
 
-let mongoServer: MongoMemoryServer;
 const defaultUserReference = 'User Reference';
 const defaultUser = 'Bob';
 const defaultContact = 'contactBob';
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri).catch(err => { console.log(err) });
+  await connectTestMongo();
 });
 
 afterEach(async () => {
@@ -28,8 +24,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
+  await disconnectTestMongo();
 });
 
 describe('getDocument', () => {
@@ -986,7 +981,6 @@ describe('upsertTransportDetails', () => {
       {
         '$set': {
           'exportData.transportation': {
-            "cmr": true,
             "vehicle": "truck"
           }
         }
@@ -1004,7 +998,6 @@ describe('upsertTransportDetails', () => {
       {
         '$set': {
           'exportData.arrivalTransportation': {
-            "cmr": true,
             "vehicle": "truck"
           }
         }

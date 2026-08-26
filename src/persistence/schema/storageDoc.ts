@@ -12,7 +12,8 @@ import {
   toFrontEndDocumentNumber,
   Country,
   ICountry,
-  toExportedTo
+  toExportedTo,
+  Journey
 } from './common';
 import { toFrontEndTransport } from './frontEndModels/transport';
 import * as FrontEndStorageDocument from './frontEndModels/storageDocument';
@@ -41,6 +42,7 @@ export interface Catch {
  netWeightFisheryProductArrival?    : string,
  netWeightProductDeparture?         : string,
  netWeightFisheryProductDeparture?  : string,
+ entryDocumentType?                 : Journey,
 }
 
 export interface StorageFacility {
@@ -114,6 +116,7 @@ const CatchSchema = new Schema({
   scientificName                    : { type: String, required: false},
   speciesCode                       : { type: String, required: false },
   certificateType                   : { type: String, required: false, enum: Object.values(CertificateType) },
+  entryDocumentType                 : { type: String, required: false, enum: ['catchCertificate', 'storageNotes', 'processingStatement'] },
   issuingCountry                    : { type: Country, required: false },
   supportingDocuments               : { type: [String], required: false },
   productDescription                : { type: String, required: false },
@@ -291,6 +294,7 @@ export const cloneCatches = (original: Catch): Catch => {
     netWeightFisheryProductArrival,
     netWeightProductDeparture,
     netWeightFisheryProductDeparture,
+    entryDocumentType,
   } = original;
 
   const result = {
@@ -312,6 +316,7 @@ export const cloneCatches = (original: Catch): Catch => {
     netWeightFisheryProductArrival,
     netWeightProductDeparture,
     netWeightFisheryProductDeparture,
+    entryDocumentType,
   }
 
   Object.keys(result).forEach(key => result[key] === undefined && delete result[key]);

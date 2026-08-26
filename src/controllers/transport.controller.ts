@@ -9,12 +9,12 @@ import { HapiRequestApplicationStateExtended } from '../types';
 export default class TransportController {
 
   static nextVehicleUri(payload) {
-    const { truckCmrUri, planeDetailsUri, trainDetailsUri, containerVesselDetailsUri, summaryUri, vehicle } = payload;
+    const { truckDetailsUri, planeDetailsUri, trainDetailsUri, containerVesselDetailsUri, summaryUri, vehicle } = payload;
 
     let nextUri = '';
     switch (vehicle) {
       case 'truck':
-        nextUri = truckCmrUri;
+        nextUri = truckDetailsUri;
         break;
       case 'plane':
         nextUri = planeDetailsUri;
@@ -31,12 +31,6 @@ export default class TransportController {
     }
 
     return nextUri;
-  }
-
-  static nextTruckUri(payload) {
-    const { summaryUri, truckDetailsUri } = payload;
-
-    return payload.cmr === 'true' ? summaryUri : truckDetailsUri;
   }
 
   private static async validateExportDate(payload: any, userPrincipal: string, documentNumber: string, contactId: string, h: Hapi.ResponseToolkit) {
@@ -140,23 +134,6 @@ export default class TransportController {
     return data;
   }
 
-  public static async addTruckCMR(req: Hapi.Request, h, savingAsDraft: boolean, userPrincipal: string, documentNumber: string, contactId: string) {
-    logger.info({ userPrincipal: (req.app as HapiRequestApplicationStateExtended).claims.sub }, 'addTruckCMR()');
-    const payload: any = { ...(req.payload as any) };
-    payload.user_id = userPrincipal;
-
-    const data = await Services.addTransport(payload, documentNumber, contactId) as any;
-
-    if (acceptsHtml(req.headers)) {
-      if (savingAsDraft) {
-        return h.redirect(payload.dashboardUri);
-      }
-      const uri = TransportController.nextTruckUri(payload);
-      return h.redirect(uri);
-    }
-    return data;
-  }
-
   public static async getTransportDetails(req: Hapi.Request, userPrincipal: string, documentNumber: string, contactId: string) {
     const payload: any = { ...(req.payload as any) };
     payload.user_id = userPrincipal;
@@ -169,11 +146,6 @@ export default class TransportController {
   public static async addTransportSaveAsDraft(req: Hapi.Request, h, userPrincipal: string, documentNumber: string, contactId: string) {
     logger.info({ userPrincipal: userPrincipal }, 'Received a request to add transport and save as draft');
     return TransportController.addTransport(req, h, true, userPrincipal, documentNumber, contactId);
-  }
-
-  public static async addTruckCMRSaveAsDraft(req: Hapi.Request, h, userPrincipal: string, documentNumber: string, contactId: string) {
-    logger.info({ userPrincipal: userPrincipal }, 'Received a request to add transport CMR and save as draft');
-    return TransportController.addTruckCMR(req, h, true, userPrincipal, documentNumber, contactId);
   }
 
   public static async addTransportDetailsSaveAsDraft(req: Hapi.Request, h, userPrincipal: string, documentNumber: string, contactId: string) {

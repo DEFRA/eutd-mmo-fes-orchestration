@@ -20,6 +20,7 @@ const formatDateForFrontend = (date: any): string => {
 
 export interface Transport {
   vehicle: string;
+  // retained for backward compat — reads cmr from pre-removal documents
   cmr?: string;
   nationalityOfVehicle?: string;
   registrationNumber?: string;
@@ -54,9 +55,7 @@ export const toBackEndTransport = (transport: Transport): BackEndModels.Transpor
 
   switch (transport.vehicle) {
     case truck: {
-      const hasCmr = (transport.cmr !== null && transport.cmr !== undefined);
-      const cmr = (transport.cmr === 'true');
-      backEndTransport = getTruckBackEndTransport(transport, hasCmr, cmr);
+      backEndTransport = getTruckBackEndTransport(transport);
       break;
     }
     case plane:
@@ -79,14 +78,13 @@ export const toBackEndTransport = (transport: Transport): BackEndModels.Transpor
   return backEndTransport;
 };
 
-const getTruckBackEndTransport = (transport: Transport, hasCmr: boolean, cmr: boolean) => ({
+const getTruckBackEndTransport = (transport: Transport) => ({
   vehicle: transport.vehicle,
-  cmr: hasCmr ? cmr : undefined,
-  nationalityOfVehicle: cmr ? undefined : transport.nationalityOfVehicle,
-  registrationNumber: cmr ? undefined : transport.registrationNumber,
+  nationalityOfVehicle: transport.nationalityOfVehicle,
+  registrationNumber: transport.registrationNumber,
   containerIdentificationNumber: transport.containerIdentificationNumber,
   freightBillNumber: transport.freightBillNumber,
-  departurePlace: cmr ? undefined : transport.departurePlace,
+  departurePlace: transport.departurePlace,
   pointOfDestination: transport.pointOfDestination,
   departureCountry: transport.departureCountry,
   departurePort: transport.departurePort,
@@ -322,37 +320,13 @@ export const checkTransportDataFrontEnd = (transport: Transport): Transport => {
   return data;
 };
 
-const checkTruckDataFrontEnd = (transport: Transport) => {
-  let data;
-  if (transport.cmr) {
-    if (transport.cmr === "false") {
-      data = (
-        transport.nationalityOfVehicle
-        && transport.registrationNumber
-        && transport.departurePlace
-      ) ? transport : {
-        vehicle: transport.vehicle,
-        cmr: transport.cmr,
-        exportedTo: transport.exportedTo
-      }
-    } else {
-        data = {
-          vehicle: transport.vehicle,
-          cmr: transport.cmr,
-          exportedTo: transport.exportedTo
-        }
-    }
-  } else {
-      data = (
-        transport.nationalityOfVehicle
-        && transport.registrationNumber
-        && transport.departurePlace
-      ) ? transport : {
-        vehicle: transport.vehicle,
-        exportedTo: transport.exportedTo
-      }
-  }
-  return data;
+const checkTruckDataFrontEnd = (transport: Transport) => (
+  transport.nationalityOfVehicle
+  && transport.registrationNumber
+  && transport.departurePlace
+) ? transport : {
+  vehicle: transport.vehicle,
+  exportedTo: transport.exportedTo
 }
 
 const checkPlaneDataFrontEnd = (transport: Transport) => (

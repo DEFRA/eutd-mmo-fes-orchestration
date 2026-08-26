@@ -1,5 +1,4 @@
-import * as mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { connectTestMongo, disconnectTestMongo } from '../../../test/helpers/mongoTestConnection';
 import * as BackEndStorageDocument from './storageDoc';
 import { DocumentNumber } from './frontEndModels/documentNumber';
 import { Catch } from './frontEndModels/storageDocument';
@@ -455,12 +454,8 @@ describe('toFrontEndStorageDocumentExportData mapping back end to front end', ()
 
 describe('When saving a storage document', () => {
 
-  let mongoServer: MongoMemoryServer;
-
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri).catch(err => { console.log(err) });
+    await connectTestMongo();
   });
 
   afterEach(async () => {
@@ -468,8 +463,7 @@ describe('When saving a storage document', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await disconnectTestMongo();
   });
 
   it('should generate a unique _id for each catch', async () => {
@@ -510,7 +504,8 @@ describe('When cloning a storage document', () => {
     dateOfUnloading: "26/05/2021",
     transportUnloadedFrom: "12",
     id: "12-1622029341",
-    scientificName: "Cancer edwardsii"
+    scientificName: "Cancer edwardsii",
+    entryDocumentType: 'catchCertificate'
   };
 
   const originalCatch2: Catch = {
@@ -701,6 +696,7 @@ describe('When cloning a storage document', () => {
       expect(clone.placeOfUnloading).toBe(originalCatch.placeOfUnloading);
       expect(clone.transportUnloadedFrom).toBe(originalCatch.transportUnloadedFrom);
       expect(clone.scientificName).toBe(originalCatch.scientificName);
+      expect(clone.entryDocumentType).toBe(originalCatch.entryDocumentType);
     });
   });
 });
