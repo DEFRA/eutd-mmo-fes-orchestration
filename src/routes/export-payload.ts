@@ -23,6 +23,7 @@ import { mergeSchemaAndValidationErrors } from '../validators/validationErrors';
 import { validateAggregateExportWeight } from '../validators/ccLandingValidator';
 
 const extendedJoi = Joi.extend(require('@joi/date'));
+const minimumLandingDate = moment('2000-01-01', 'YYYY-MM-DD', true);
 
 export default class ExportPayloadRoutes {
 
@@ -245,6 +246,8 @@ export default class ExportPayloadRoutes {
                     const isoDate = `${year}-${month}-${day}`;
                     if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
                       return helpers.error('date.base');
+                    } else if (moment(isoDate, "YYYY-MM-DD", true).isBefore(minimumLandingDate, 'day')) {
+                      return helpers.error('date.base');
                     }
                     const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
                     if (moment(value).isAfter(maxDate, 'day')) {
@@ -257,6 +260,8 @@ export default class ExportPayloadRoutes {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
                   const dateLanded = moment(helpers.state.ancestors[0].dateLanded, moment.ISO_8601, true);
                   if (!startDate.isValid()) {
+                    return helpers.error('date.base');
+                  } else if (startDate.isBefore(minimumLandingDate, 'day')) {
                     return helpers.error('date.base');
                   }
                   if (dateLanded.isBefore(startDate, 'day')) {

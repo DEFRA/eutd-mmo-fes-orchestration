@@ -11,6 +11,8 @@ import { LandingsEntryOptions } from "../persistence/schema/catchCert";
 import * as CountriesValidator from "../validators/countries.validator";
 import VesselValidator from "../services/vesselValidator.service";
 import * as ProductValidator from "../validators/ccProductValidator";
+import ApplicationConfig from "../applicationConfig";
+import errorExtractor from "../helpers/errorExtractor";
 // LandingValidator import removed because related tests were deleted
 
 const Joi = require('joi');
@@ -483,6 +485,47 @@ describe("exporter-payload routes", () => {
       expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
+    it("should return 200 for a request payload containing dateLanded at minimum boundary date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '2000-01-01',
+          startDate: '2000-01-01'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it.each([
+      { title: "dateLanded is before minimum boundary date", dateLanded: '1999-12-31' },
+      { title: "dateLanded has malformed historical year", dateLanded: '0226-06-11' }
+    ])("should return 400 when $title", async ({ dateLanded }) => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded,
+          startDate: '2000-01-01'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.dateLanded).toBe('error.dateLanded.date.base');
+    });
+
     it("should return 400 for a request payload containing a non-existent start date", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
       mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
@@ -511,6 +554,44 @@ describe("exporter-payload routes", () => {
         payload: {
           ...request.payload,
           startDate: '-5-'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
+    });
+
+    it("should return 200 for a request payload containing startDate at minimum boundary date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '2000-01-01',
+          startDate: '2000-01-01'
+        }
+      }
+
+      const response = await server.inject(_request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it("should return 400 for a request payload containing startDate before minimum boundary date", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '2000-01-01',
+          startDate: '1999-12-31'
         }
       }
 
@@ -1771,6 +1852,8 @@ describe("exporter-payload routes", () => {
     let mockValidateDocumentOwnership: jest.SpyInstance;
     let mockUpsertExportPayloadProductLanding: jest.SpyInstance;
     let mockUpsertLanding: jest.SpyInstance;
+    let mockValidateCountriesName: jest.SpyInstance;
+    let landingPayloadSchema: any;
 
     beforeEach(() => {
       mockValidateDocumentOwnership = jest.spyOn(
@@ -1785,6 +1868,32 @@ describe("exporter-payload routes", () => {
         ExportPayloadService,
         "upsertLanding"
       );
+      mockValidateCountriesName = jest.spyOn(
+        CountriesValidator,
+        "validateCountriesName"
+      );
+      mockValidateCountriesName.mockResolvedValue({
+        isError: false,
+      });
+
+      jest.spyOn(SessionManager, 'getCurrentSessionData')
+        .mockResolvedValue({
+          documentNumber: "DOCUMENT123",
+          currentUri: "test/test.html",
+          nextUri: "testNext/testNext.html"
+        });
+
+      jest.spyOn(CatchCertService, 'getExportPayload')
+        .mockResolvedValue({
+          items: []
+        });
+
+      jest.spyOn(ExportPayloadService, 'get')
+        .mockResolvedValue({
+          items: [],
+          error: undefined,
+          errors: undefined
+        } as any);
 
       request = {
         method: "POST",
@@ -1823,6 +1932,15 @@ describe("exporter-payload routes", () => {
           ],
         },
       };
+
+      const landingRoute = server
+        .table()
+        .find(
+          route =>
+            route.method === 'post' &&
+            route.path === '/v1/export-certificates/export-payload/product/{productId}/landing'
+        );
+      landingPayloadSchema = landingRoute?.settings?.validate?.payload;
     });
 
     afterEach(() => {
@@ -1904,6 +2022,248 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(400);
       expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+    });
+
+    it("should accept dateLanded as 2000-01-01", async () => {
+      const payload = {
+        ...request.payload,
+        dateLanded: '2000-01-01',
+        startDate: '2000-01-01'
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+
+      expect(error).toBeUndefined();
+    });
+
+    it("should return error.dateLanded.date.base when dateLanded is before 2000-01-01", async () => {
+      const payload = {
+        ...request.payload,
+        dateLanded: '1999-12-31',
+        startDate: '1999-12-31'
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+      const extracted: any = errorExtractor(error as any);
+
+      expect(extracted.dateLanded).toBe('error.dateLanded.date.base');
+    });
+
+    it("should return error.dateLanded.date.base when dateLanded has malformed/unrealistic year (0226)", async () => {
+      const payload = {
+        ...request.payload,
+        dateLanded: '0226-06-11',
+        startDate: '0226-06-11'
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+      const extracted: any = errorExtractor(error as any);
+
+      expect(extracted.dateLanded).toBe('error.dateLanded.date.base');
+    });
+
+    it("should return 400 and error.dateLanded.date.base when dateLanded is before 2000-01-01 via server.inject", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items: [],
+        error: "invalid",
+        errors: {
+          dateLanded: "error.dateLanded.date.base"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '1999-12-31',
+          startDate: '1999-12-31'
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      const expected = {
+        items: [],
+        error: "invalid",
+        errors: {
+          dateLanded: "error.dateLanded.date.base"
+        }
+      };
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 and error.dateLanded.date.base when dateLanded has malformed/unrealistic year (0226) via server.inject", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items: [],
+        error: "invalid",
+        errors: {
+          dateLanded: "error.dateLanded.date.base"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '0226-06-11',
+          startDate: '0226-06-11'
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      const expected = {
+        items: [],
+        error: "invalid",
+        errors: {
+          dateLanded: "error.dateLanded.date.base"
+        }
+      };
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should accept startDate as 2000-01-01 when dateLanded is on or after it", async () => {
+      const payload = {
+        ...request.payload,
+        dateLanded: '2000-01-02',
+        startDate: '2000-01-01'
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+
+      expect(error).toBeUndefined();
+    });
+
+    it("should return error.startDate.date.base when startDate is before 2000-01-01", async () => {
+      const payload = {
+        ...request.payload,
+        dateLanded: '2000-01-01',
+        startDate: '1999-12-31'
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+      const extracted: any = errorExtractor(error as any);
+
+      expect(extracted.startDate).toBe('error.startDate.date.base');
+    });
+
+    it("should return error.startDate.date.base when startDate has malformed/unrealistic year (0226)", async () => {
+      const payload = {
+        ...request.payload,
+        dateLanded: '2000-01-01',
+        startDate: '0226-06-11'
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+      const extracted: any = errorExtractor(error as any);
+
+      expect(extracted.startDate).toBe('error.startDate.date.base');
+    });
+
+    it("should return 400 and error.startDate.date.base when startDate is before 2000-01-01 via server.inject", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items: [],
+        error: "invalid",
+        errors: {
+          startDate: "error.startDate.date.base"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '2000-01-01',
+          startDate: '1999-12-31'
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      const expected = {
+        items: [],
+        error: "invalid",
+        errors: {
+          startDate: "error.startDate.date.base"
+        }
+      };
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should return 400 and error.startDate.date.base when startDate has malformed/unrealistic year (0226) via server.inject", async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockUpsertLanding.mockResolvedValue({
+        items: [],
+        error: "invalid",
+        errors: {
+          startDate: "error.startDate.date.base"
+        }
+      });
+
+      const _request = {
+        ...request,
+        payload: {
+          ...request.payload,
+          dateLanded: '2000-01-01',
+          startDate: '0226-06-11'
+        }
+      };
+
+      const response = await server.inject(_request);
+
+      const expected = {
+        items: [],
+        error: "invalid",
+        errors: {
+          startDate: "error.startDate.date.base"
+        }
+      };
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+      expect(response.payload).toStrictEqual(JSON.stringify(expected));
+    });
+
+    it("should still return error.dateLanded.date.max for dateLanded beyond configured future limit", async () => {
+      const originalLandingLimit = ApplicationConfig._landingLimitDaysInTheFuture;
+      ApplicationConfig._landingLimitDaysInTheFuture = 1;
+
+      const payload = {
+        ...request.payload,
+        dateLanded: moment().add(2, 'days').format('YYYY-MM-DD'),
+        startDate: moment().format('YYYY-MM-DD')
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+      const extracted: any = errorExtractor(error as any);
+      ApplicationConfig._landingLimitDaysInTheFuture = originalLandingLimit;
+
+      expect(extracted.dateLanded).toBe('error.dateLanded.date.max');
+    });
+
+    it("should still return error.startDate.date.max when startDate is after dateLanded", async () => {
+      const payload = {
+        ...request.payload,
+        dateLanded: '2001-01-01',
+        startDate: '2001-01-02'
+      };
+
+      const { error } = landingPayloadSchema.validate(payload, { abortEarly: false });
+      const extracted: any = errorExtractor(error as any);
+
+      expect(extracted.startDate).toBe('error.startDate.date.max');
     });
 
     it("should return 403 user is not valid", async () => {
@@ -2056,13 +2416,13 @@ describe("exporter-payload routes", () => {
 
     it("should return 200 user is valid", async () => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockCreateExportCertificate.mockResolvedValue({ 
-        documentNumber: "DOCUMENT123", 
+      mockCreateExportCertificate.mockResolvedValue({
+        documentNumber: "DOCUMENT123",
         uri: "some-uri",
         report: [],
         isBlockingEnabled: false
       });
-      
+
       const response = await server.inject(request);
 
       expect(response.statusCode).toBe(200);
