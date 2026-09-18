@@ -6,6 +6,7 @@ import { decimalPlacesValidator } from '../../helpers/customValidators';
 import { getFAOAreaList } from '../../helpers/utils/utils';
 
 const extendedJoi = Joi.extend(require('@joi/date'));
+const minimumLandingDate = moment('2000-01-01', 'YYYY-MM-DD', true);
 
 const manualLandingsSchema = Joi.object({
   product: Joi.string().trim().required(),
@@ -22,6 +23,8 @@ const manualLandingsSchema = Joi.object({
       const day = parts[2].padStart(2, '0');
       const isoDate = `${year}-${month}-${day}`;
       if (!moment(isoDate, 'YYYY-MM-DD', true).isValid()) {
+        return helpers.error('date.base');
+      } else if (moment(isoDate, 'YYYY-MM-DD', true).isBefore(minimumLandingDate, 'day')) {
         return helpers.error('date.base');
       }
       const maxDate = moment().add(
@@ -46,6 +49,8 @@ const manualLandingsSchema = Joi.object({
       const dateLanded = moment(helpers.state.ancestors[0].dateLanded);
 
       if (!startDate.isValid()) {
+        return helpers.error('date.base');
+      } else if (startDate.isBefore(minimumLandingDate, 'day')) {
         return helpers.error('date.base');
       }
 

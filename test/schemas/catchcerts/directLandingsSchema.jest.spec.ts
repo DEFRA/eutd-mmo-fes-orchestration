@@ -95,6 +95,24 @@ describe('directLandingsSchema - dateLanded validation', () => {
 		expect(dateErr.type).toBe(expectedType);
 	});
 
+	it('passes validation when dateLanded equals minimum boundary date (2000-01-01)', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '2000-01-01' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeUndefined();
+	});
+
+	it.each([
+		{ title: 'returns directLanding.date.invalid when dateLanded is before minimum boundary date', dateLanded: '1999-12-31' },
+		{ title: 'returns directLanding.date.invalid when dateLanded has malformed historical year', dateLanded: '0226-06-11' },
+	])('$title', ({ dateLanded }) => {
+		const payload = { ...basePayload, dateLanded, startDate: '2000-01-01' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		const dateErr = error.details.find((d: any) => d.path.join('.') === 'dateLanded');
+		expect(dateErr).toBeDefined();
+		expect(dateErr.type).toBe('directLanding.date.invalid');
+	});
+
 	it('returns date.max error when dateLanded exceeds future limit', () => {
 		if (Number.isNaN(ApplicationConfig._landingLimitDaysInTheFuture) || ApplicationConfig._landingLimitDaysInTheFuture === 0) {
 			return;
@@ -173,6 +191,30 @@ describe('directLandingsSchema - startDate validation', () => {
 		const payload = { ...basePayload, dateLanded: '2026-02-15', startDate: '2026-02-10' };
 		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
 		expect(error).toBeUndefined();
+	});
+
+	it('passes validation when startDate equals minimum boundary date (2000-01-01)', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '2000-01-01' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeUndefined();
+	});
+
+	it('returns date.base error when startDate is before minimum boundary date', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '1999-12-31' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		const startErr = error.details.find((d: any) => d.path.join('.') === 'startDate');
+		expect(startErr).toBeDefined();
+		expect(startErr.type).toBe('date.base');
+	});
+
+	it('returns date.base error when startDate has malformed historical year', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '0226-06-11' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		const startErr = error.details.find((d: any) => d.path.join('.') === 'startDate');
+		expect(startErr).toBeDefined();
+		expect(startErr.type).toBe('date.base');
 	});
 
 	it('does not return date.max on startDate when dateLanded is an invalid partial string (e.g. "--3-")', () => {
@@ -780,6 +822,30 @@ describe('directLandingsSchema - nonJS error mode', () => {
 		const errors = validateNonJs(payload);
 		expect(errors).toBeDefined();
 		expect(errors.dateLanded).toContain('directLanding.date.invalid');
+	});
+
+	it.each([
+		{ title: 'returns correct error key for dateLanded before minimum boundary date', dateLanded: '1999-12-31' },
+		{ title: 'returns correct error key for malformed historical year dateLanded', dateLanded: '0226-06-11' },
+	])('$title', ({ dateLanded }) => {
+		const payload = { ...basePayload, dateLanded, startDate: '2000-01-01' };
+		const errors = validateNonJs(payload);
+		expect(errors).toBeDefined();
+		expect(errors.dateLanded).toContain('directLanding.date.invalid');
+	});
+
+	it('returns correct error key for startDate before minimum boundary date', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '1999-12-31' };
+		const errors = validateNonJs(payload);
+		expect(errors).toBeDefined();
+		expect(errors.startDate).toBe('error.startDate.date.base');
+	});
+
+	it('returns correct error key for startDate with malformed historical year', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '0226-06-11' };
+		const errors = validateNonJs(payload);
+		expect(errors).toBeDefined();
+		expect(errors.startDate).toBe('error.startDate.date.base');
 	});
 
 	it('returns correct error key for startDate after dateLanded', () => {
