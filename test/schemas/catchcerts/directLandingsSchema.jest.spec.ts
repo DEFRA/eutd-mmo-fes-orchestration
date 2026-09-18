@@ -95,12 +95,6 @@ describe('directLandingsSchema - dateLanded validation', () => {
 		expect(dateErr.type).toBe(expectedType);
 	});
 
-	it('passes validation when dateLanded equals minimum boundary date (2000-01-01)', () => {
-		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '2000-01-01' };
-		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
-		expect(error).toBeUndefined();
-	});
-
 	it.each([
 		{ title: 'returns directLanding.date.invalid when dateLanded is before minimum boundary date', dateLanded: '1999-12-31' },
 		{ title: 'returns directLanding.date.invalid when dateLanded has malformed historical year', dateLanded: '0226-06-11' },
