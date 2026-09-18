@@ -95,6 +95,12 @@ describe('directLandingsSchema - dateLanded validation', () => {
 		expect(dateErr.type).toBe(expectedType);
 	});
 
+	it('passes validation when dateLanded equals minimum boundary date (2000-01-01)', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '2000-01-01' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeUndefined();
+	});
+
 	it.each([
 		{ title: 'returns directLanding.date.invalid when dateLanded is before minimum boundary date', dateLanded: '1999-12-31' },
 		{ title: 'returns directLanding.date.invalid when dateLanded has malformed historical year', dateLanded: '0226-06-11' },
@@ -216,6 +222,30 @@ describe('directLandingsSchema - startDate validation', () => {
 		expect(error).toBeUndefined();
 	});
 
+
+	it('passes validation when startDate equals minimum boundary date (2000-01-01)', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '2000-01-01' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeUndefined();
+	});
+
+	it('returns date.base error when startDate is before minimum boundary date', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '1999-12-31' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		const startErr = error.details.find((d: any) => d.path.join('.') === 'startDate');
+		expect(startErr).toBeDefined();
+		expect(startErr.type).toBe('date.base');
+	});
+
+	it('returns date.base error when startDate has malformed historical year', () => {
+		const payload = { ...basePayload, dateLanded: '2000-01-01', startDate: '0226-06-11' };
+		const { error } = directLandingsSchema.validate(payload, { abortEarly: false });
+		expect(error).toBeDefined();
+		const startErr = error.details.find((d: any) => d.path.join('.') === 'startDate');
+		expect(startErr).toBeDefined();
+		expect(startErr.type).toBe('date.base');
+	});
 
 	it('does not return date.max on startDate when dateLanded is an invalid partial string (e.g. "--3-")', () => {
 		// "--3-" is leniently parsed by moment without strict mode, producing a valid-ish date.
