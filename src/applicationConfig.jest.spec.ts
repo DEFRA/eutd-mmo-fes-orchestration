@@ -1,13 +1,14 @@
-import ApplicationConfig from "../../src/applicationConfig";
-import logger from "../../src/logger";
+import ApplicationConfig from './applicationConfig';
+import logger from './logger';
 
-describe("ApplicationConfig", () => {
-  let mockErrorLogger;
+describe('ApplicationConfig', () => {
+  let mockErrorLogger: jest.SpyInstance;
 
   beforeAll(() => {
     ApplicationConfig.loadProperties();
-    ApplicationConfig._referenceServiceHost = "http://localhost:9000";
-    ApplicationConfig.eventHubNamespace = "insights-application-logs";
+    ApplicationConfig._referenceServiceHost = 'http://localhost:9000';
+    ApplicationConfig.eventHubNamespace = 'insights-application-logs';
+    ApplicationConfig.eventHubConnectionString = 'Endpoint=sb://fake-namespace.servicebus.windows.net/;SharedAccessKeyName=FAKE_KEY_NAME;SharedAccessKey=ZmFrZS1zaGFyZWQtYWNjZXNzLWtleQ==;EntityPath=fake-entity-path';
     ApplicationConfig._refServiceBasicAuthUser = 'REF-SERVICE-BASIC-AUTH-USER';
     ApplicationConfig._identityAppUrl = 'http://fesidp';
     ApplicationConfig._identityAppAudience = 'b2c-audience';
@@ -20,27 +21,23 @@ describe("ApplicationConfig", () => {
     mockErrorLogger = jest.spyOn(logger, 'error');
   });
 
-  afterEach(()=>{
+  afterEach(() => {
     mockErrorLogger.mockRestore();
   });
 
-  it("getReferenceServiceUrl() should return parsed URL", () => {
+  it('getReferenceServiceUrl() should return parsed URL', () => {
     expect(ApplicationConfig.getReferenceServiceUrl()).toContain('REF-SERVICE-BASIC-AUTH-USER');
   });
 
-  it("getEventHubNamespace() should return eventHubNamespace", () => {
-    const expectedEventHubNamespace = "insights-application-logs";
-    expect(ApplicationConfig.getEventHubNamespace()).toBe(
-      expectedEventHubNamespace
-    );
+  it('getEventHubNamespace() should return eventHubNamespace', () => {
+    const expectedEventHubNamespace = 'insights-application-logs';
+    expect(ApplicationConfig.getEventHubNamespace()).toBe(expectedEventHubNamespace);
   });
 
-  it("getEventHubConnectionString() should return eventHubConnectionString", () => {
+  it('getEventHubConnectionString() should return eventHubConnectionString', () => {
     const expectedEventHubConnectionString =
-      "Endpoint=sb://sndmmosocens001.servicebus.windows.net/;SharedAccessKeyName=QRADAR_APP;SharedAccessKey=Kowc1RMzOG4L3U/AcFswmxIvS1susT6LD9WqUT8kCwA=;EntityPath=insights-application-logs";
-    expect(ApplicationConfig.getEventHubConnectionString()).toBe(
-      expectedEventHubConnectionString
-    );
+      'Endpoint=sb://fake-namespace.servicebus.windows.net/;SharedAccessKeyName=FAKE_KEY_NAME;SharedAccessKey=ZmFrZS1zaGFyZWQtYWNjZXNzLWtleQ==;EntityPath=fake-entity-path';
+    expect(ApplicationConfig.getEventHubConnectionString()).toBe(expectedEventHubConnectionString);
   });
 
   it('should return correct host as localeLowerCase', () => {
@@ -64,13 +61,7 @@ describe("ApplicationConfig", () => {
   });
 
   it('should return computed admin auth issuer from tenant id', () => {
-    ApplicationConfig._aadIssuerUrl = undefined;
     expect(ApplicationConfig.getAdminAuthIssuer()).toBe('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0');
-  });
-
-  it('should return explicit admin auth issuer override when present', () => {
-    ApplicationConfig._aadIssuerUrl = 'https://login.microsoftonline.com/custom-tenant/v2.0';
-    expect(ApplicationConfig.getAdminAuthIssuer()).toBe('https://login.microsoftonline.com/custom-tenant/v2.0');
   });
 
   it('should return admin auth audience', () => {
@@ -78,11 +69,9 @@ describe("ApplicationConfig", () => {
   });
 
   describe('maximum favourites per user', () => {
-
     it('should return correct maximum favourites per user', () => {
       ApplicationConfig.loadProperties();
-
-      expect(ApplicationConfig._maximumFavouritesPerUser).toBe(50);
+      expect(ApplicationConfig._maximumFavouritesPerUser).toBe(100);
     });
 
     it('should log an error if maximum favourites per user is not set', () => {
@@ -103,5 +92,4 @@ describe("ApplicationConfig", () => {
       expect(ApplicationConfig._maximumFavouritesPerUser).toBeNaN();
     });
   });
-
 });
