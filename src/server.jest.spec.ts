@@ -1,19 +1,17 @@
-import Server from '../src/server';
+import Server from './server';
 import * as appInsights from 'applicationinsights';
-import applicationConfig from '../src/applicationConfig';
+import applicationConfig from './applicationConfig';
 import * as dotEnv from 'dotenv';
-import { SessionStoreFactory } from '../src/session_store/factory'
-import { MongoConnection } from '../src/persistence/mongo';
-import Router from '../src/router';
+import { SessionStoreFactory } from './session_store/factory';
+import { MongoConnection } from './persistence/mongo';
+import Router from './router';
 import * as Jwt from 'jsonwebtoken';
 import * as jwksRsa from 'jwks-rsa';
-import logger from '../src/logger';
-import { getJwksUriForIssuer } from '../src/helpers/oidcDiscovery';
+import logger from './logger';
+import { getJwksUriForIssuer } from './helpers/oidcDiscovery';
 import { generateKeyPairSync } from 'crypto';
 
-// mock dotenv
 jest.mock('dotenv');
-// mock app insights
 jest.mock('applicationinsights', () => ({
   defaultClient: {
     context: {
@@ -31,15 +29,17 @@ jest.mock('applicationinsights', () => ({
   setUseDiskRetryCaching: jest.fn().mockReturnThis(),
   start: jest.fn()
 }));
+
 jest.mock('jwks-rsa', () => ({
   hapiJwt2KeyAsync: jest.fn(),
 }));
-jest.mock('../src/helpers/oidcDiscovery', () => ({
+
+jest.mock('./helpers/oidcDiscovery', () => ({
   getJwksUriForIssuer: jest.fn(),
 }));
-// mock mongoose to avoid DB connection attempts
+
 jest.mock('./persistence/mongo');
-// mock app config
+
 jest.mock('./applicationConfig', () => ({
   default: {
     _redisHostName: 'http://127.0.0.1',
@@ -60,12 +60,12 @@ jest.mock('./applicationConfig', () => ({
     getAdminAuthAudience: jest.fn().mockReturnValue('0c050745-281a-49d6-b184-8e44fb38a9c1'),
   }
 }));
-// mock session factory
-jest.mock('./session_store/factory')
-// mock router to avoid loading real routes
+
+jest.mock('./session_store/factory');
+
 jest.mock('./router', () => ({
   default: class {
-    static loadRoutes = jest.fn()
+    static loadRoutes = jest.fn();
   }
 }));
 
@@ -105,7 +105,7 @@ const createRs256Token = (
     issuer,
     audience,
     expiresIn: '1h',
-    header: { kid },
+    header: { kid, alg: 'RS256' },
     ...options,
   },
 );
@@ -127,14 +127,13 @@ const createNoneToken = (issuer: string, audience: string): string => {
 };
 
 describe('Server', () => {
-
   describe('start()', () => {
     afterEach(async () => {
       await Server.stop();
-    })
+    });
 
     it('should start app insights telemetry when an instrumentation key is present', async () => {
-      applicationConfig._instrumentationKey = 'abcde'
+      applicationConfig._instrumentationKey = 'abcde';
       await Server.start();
       expect(appInsights.start).toHaveBeenCalledTimes(1);
       applicationConfig._instrumentationKey = '';
@@ -159,7 +158,7 @@ describe('Server', () => {
         tls: {
           host: 'https://127.0.0.1',
         }
-      })
+      });
     });
 
     it('should connect to MongoDB instance using config', async () => {
@@ -168,7 +167,7 @@ describe('Server', () => {
         'localhost/mongodb',
         'fesdb',
         'mongopool',
-      )
+      );
     });
 
     it('should load routes', async () => {
@@ -178,22 +177,21 @@ describe('Server', () => {
   });
 
   describe('inject()', () => {
-
-    const createRoute = (path: string = '/', withAuth: boolean = true): any => ({
+    const createRoute = (path = '/', withAuth = true): any => ({
       method: 'GET',
       path,
       options: {
         auth: withAuth ? { strategies: ['fesApi', 'jwt'] } : false,
         handler: () => 'success'
       }
-    })
+    });
 
     beforeEach(async () => {
       await Server.start();
       Server.instance().route([
-        createRoute('/private'), // protected endpoint
-        createRoute('/public', false) // public endpoint
-      ])
+        createRoute('/private'),
+        createRoute('/public', false)
+      ]);
     });
 
     afterEach(async () => {
@@ -202,7 +200,6 @@ describe('Server', () => {
     });
 
     describe('Basic auth', () => {
-
       it('should complete the request if valid Authorization header is present for a protected API', async () => {
         const res = await Server.inject({
           url: '/private',
@@ -222,7 +219,7 @@ describe('Server', () => {
             Authorization: 'Basic blah',
           }
         });
-        expect(res.statusCode).toBe(400); // should probably be a 401
+        expect(res.statusCode).toBe(400);
         expect(res.statusMessage).toBe('Bad Request');
       });
 
@@ -405,7 +402,7 @@ describe('Server', () => {
             issuer: b2cIssuer,
             audience: b2cAudience,
             expiresIn: '1h',
-            header: { kid: 'b2c-kid' },
+            header: { kid: 'b2c-kid', alg: 'HS256' },
           },
         );
         const res = await Server.inject({
@@ -422,7 +419,13 @@ describe('Server', () => {
       it('should reject a JWT with tampered signature', async () => {
         const jwtAuthToken = createRs256Token(b2cIssuer, b2cAudience, b2cPrivateKey, 'b2c-kid');
         const [header, payload, signature] = jwtAuthToken.split('.');
-        const tamperedToken = `${header}.${payload}.${signature.substring(0, signature.length - 1)}x`;
+        // Flip an interior char (full 6 significant bits) rather than the last
+        // char, whose base64url group only encodes 2 bits and can leave the
+        // decoded signature bytes unchanged, making the tamper a flaky no-op.
+        const midIndex = Math.floor(signature.length / 2);
+        const flippedChar = signature.charAt(midIndex) === 'A' ? 'B' : 'A';
+        const tamperedSignature = `${signature.slice(0, midIndex)}${flippedChar}${signature.slice(midIndex + 1)}`;
+        const tamperedToken = `${header}.${payload}.${tamperedSignature}`;
 
         const res = await Server.inject({
           url: '/private',
@@ -451,6 +454,6 @@ describe('Server', () => {
         expect(res.statusMessage).toBe('Unauthorized');
         expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('[JWT-AUTH][KEY-PROVIDER-ERROR]'));
       });
-    })
+    });
   });
 });
