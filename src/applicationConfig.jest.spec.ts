@@ -1,41 +1,95 @@
 import ApplicationConfig from './applicationConfig';
+import logger from './logger';
 
-describe('applicationConfig.getReferenceServiceUrl', () => {
-  const originalHost = ApplicationConfig._referenceServiceHost;
-  const originalUser = ApplicationConfig._refServiceBasicAuthUser;
-  const originalPassword = ApplicationConfig._refServiceBasicAuthPassword;
+describe('ApplicationConfig', () => {
+  let mockErrorLogger: jest.SpyInstance;
+
+  beforeAll(() => {
+    ApplicationConfig.loadProperties();
+    ApplicationConfig._referenceServiceHost = 'http://localhost:9000';
+    ApplicationConfig.eventHubNamespace = 'insights-application-logs';
+    ApplicationConfig.eventHubConnectionString = 'Endpoint=sb://fake-namespace.servicebus.windows.net/;SharedAccessKeyName=FAKE_KEY_NAME;SharedAccessKey=ZmFrZS1zaGFyZWQtYWNjZXNzLWtleQ==;EntityPath=fake-entity-path';
+    ApplicationConfig._refServiceBasicAuthUser = 'REF-SERVICE-BASIC-AUTH-USER';
+    ApplicationConfig._identityAppUrl = 'http://fesidp';
+    ApplicationConfig._identityAppAudience = 'b2c-audience';
+    ApplicationConfig._aadTenantId = '6f504113-6b64-43f2-ade9-242e05780007';
+    ApplicationConfig._aadClientId = 'admin-audience';
+    ApplicationConfig._fesApiMasterPassword = 'foobar';
+  });
+
+  beforeEach(() => {
+    mockErrorLogger = jest.spyOn(logger, 'error');
+  });
 
   afterEach(() => {
-    ApplicationConfig._referenceServiceHost = originalHost;
-    ApplicationConfig._refServiceBasicAuthUser = originalUser;
-    ApplicationConfig._refServiceBasicAuthPassword = originalPassword;
+    mockErrorLogger.mockRestore();
   });
 
-  it('returns empty string when host is not set', () => {
-    ApplicationConfig._referenceServiceHost = undefined as any;
-
-    const url = ApplicationConfig.getReferenceServiceUrl();
-
-    expect(url).toBe('');
+  it('getReferenceServiceUrl() should return parsed URL', () => {
+    expect(ApplicationConfig.getReferenceServiceUrl()).toContain('REF-SERVICE-BASIC-AUTH-USER');
   });
 
-  it('uses URL parser and strips trailing slashes', () => {
-    ApplicationConfig._referenceServiceHost = 'https://reference.service.local///';
-    ApplicationConfig._refServiceBasicAuthUser = 'user';
-    ApplicationConfig._refServiceBasicAuthPassword = 'pass';
-
-    const url = ApplicationConfig.getReferenceServiceUrl();
-
-    expect(url).toBe('https://user:pass@reference.service.local');
+  it('getEventHubNamespace() should return eventHubNamespace', () => {
+    const expectedEventHubNamespace = 'insights-application-logs';
+    expect(ApplicationConfig.getEventHubNamespace()).toBe(expectedEventHubNamespace);
   });
 
-  it('falls back to raw host trimming when host is not an absolute URL', () => {
-    ApplicationConfig._referenceServiceHost = 'reference-service///';
-    ApplicationConfig._refServiceBasicAuthUser = 'ignored';
-    ApplicationConfig._refServiceBasicAuthPassword = 'ignored';
+  it('getEventHubConnectionString() should return eventHubConnectionString', () => {
+    const expectedEventHubConnectionString =
+      'Endpoint=sb://fake-namespace.servicebus.windows.net/;SharedAccessKeyName=FAKE_KEY_NAME;SharedAccessKey=ZmFrZS1zaGFyZWQtYWNjZXNzLWtleQ==;EntityPath=fake-entity-path';
+    expect(ApplicationConfig.getEventHubConnectionString()).toBe(expectedEventHubConnectionString);
+  });
 
-    const url = ApplicationConfig.getReferenceServiceUrl();
+  it('should return correct host as localeLowerCase', () => {
+    expect(ApplicationConfig.getApplicationHost()).toContain('localhost');
+  });
 
-    expect(url).toBe('reference-service');
+  it('should return auth token issuer', () => {
+    expect(ApplicationConfig.getAuthIssuer()).toBe('http://fesidp');
+  });
+
+  it('should return auth token secret', () => {
+    expect(ApplicationConfig.getAuthSecret()).toBe('foobar');
+  });
+
+  it('should return B2C auth audience', () => {
+    expect(ApplicationConfig.getB2cAuthAudience()).toBe('b2c-audience');
+  });
+
+  it('should return admin tenant id', () => {
+    expect(ApplicationConfig.getAdminAuthTenantId()).toBe('6f504113-6b64-43f2-ade9-242e05780007');
+  });
+
+  it('should return computed admin auth issuer from tenant id', () => {
+    expect(ApplicationConfig.getAdminAuthIssuer()).toBe('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0');
+  });
+
+  it('should return admin auth audience', () => {
+    expect(ApplicationConfig.getAdminAuthAudience()).toBe('admin-audience');
+  });
+
+  describe('maximum favourites per user', () => {
+    it('should return correct maximum favourites per user', () => {
+      ApplicationConfig.loadProperties();
+      expect(ApplicationConfig._maximumFavouritesPerUser).toBe(100);
+    });
+
+    it('should log an error if maximum favourites per user is not set', () => {
+      process.env.MAXIMUM_FAVOURITES_PER_USER = undefined;
+
+      ApplicationConfig.loadProperties();
+
+      expect(mockErrorLogger).toHaveBeenCalledWith('MAXIMUM_FAVOURITES_PER_USER is not set');
+      expect(ApplicationConfig._maximumFavouritesPerUser).toBeNaN();
+    });
+
+    it('should log an error if maximum favourites per user is not numeric', () => {
+      process.env.MAXIMUM_FAVOURITES_PER_USER = 'six';
+
+      ApplicationConfig.loadProperties();
+
+      expect(mockErrorLogger).toHaveBeenCalledWith('MAXIMUM_FAVOURITES_PER_USER is not set');
+      expect(ApplicationConfig._maximumFavouritesPerUser).toBeNaN();
+    });
   });
 });

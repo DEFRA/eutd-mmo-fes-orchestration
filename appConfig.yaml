@@ -75,6 +75,18 @@ appSettings:
     value: '#{{ ORCH_IDENTITY_APP_URL }}'
     type: config
 
+  - key: IDENTITY_APP_AUDIENCE
+    value: 'IDM-CLIENTID'
+    type: secret
+
+  - key: AAD_TENANTID
+    value: '#{{ aadTenantId }}'
+    type: config
+
+  - key: AAD_CLIENTID
+    value: 'AAD-CLIENTID'
+    type: secret
+
   - key: IDENTITY_DEFAULT_POLICY
     value: '#{{ IDENTITY_DEFAULT_POLICY }}'
     type: config
