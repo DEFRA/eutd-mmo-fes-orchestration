@@ -8,7 +8,7 @@ import Router from './router';
 import * as Jwt from 'jsonwebtoken';
 import * as jwksRsa from 'jwks-rsa';
 import logger from './logger';
-import { clearOidcDiscoveryCache, getJwksUriForIssuer } from './helpers/oidcDiscovery';
+import { getJwksUriForIssuer } from './helpers/oidcDiscovery';
 import { generateKeyPairSync } from 'crypto';
 
 jest.mock('dotenv');
@@ -35,7 +35,6 @@ jest.mock('jwks-rsa', () => ({
 }));
 
 jest.mock('./helpers/oidcDiscovery', () => ({
-  clearOidcDiscoveryCache: jest.fn(),
   getJwksUriForIssuer: jest.fn(),
 }));
 
@@ -57,9 +56,7 @@ jest.mock('./applicationConfig', () => ({
     getAuthSecret: jest.fn().mockReturnValue('one-two-three-four-five-six-seven'),
     getAuthIssuer: jest.fn().mockReturnValue('https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/v2.0/'),
     getB2cAuthAudience: jest.fn().mockReturnValue('00c16cdb-1b7a-4d94-a915-21f30370e584'),
-    getIdentityDefaultPolicy: jest.fn().mockReturnValue('B2C_1A_test_policy'),
-    getAdminAuthIssuer: jest.fn().mockReturnValue('https://sts.windows.net/6f504113-6b64-43f2-ade9-242e05780007/'),
-    getAdminAuthDiscoveryIssuer: jest.fn().mockReturnValue('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007'),
+    getAdminAuthIssuer: jest.fn().mockReturnValue('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0'),
     getAdminAuthAudience: jest.fn().mockReturnValue('0c050745-281a-49d6-b184-8e44fb38a9c1'),
   }
 }));
@@ -75,10 +72,8 @@ jest.mock('./router', () => ({
 const basicAuthPwd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.DbIiSTokTcEin2zVtyl9amBEVur4sf0LeJgHsXbUlNc';
 
 const b2cIssuer = 'https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/v2.0/';
-const b2cPolicyQualifiedIssuer = 'https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/B2C_1A_test_policy/v2.0';
 const b2cAudience = '00c16cdb-1b7a-4d94-a915-21f30370e584';
-const adminIssuer = 'https://sts.windows.net/6f504113-6b64-43f2-ade9-242e05780007/';
-const adminDiscoveryIssuer = 'https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007';
+const adminIssuer = 'https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0';
 const adminAudience = '0c050745-281a-49d6-b184-8e44fb38a9c1';
 const b2cJwksUri = 'https://dcidmtest.b2clogin.com/keys';
 const adminJwksUri = 'https://login.microsoftonline.com/tenant/keys';
@@ -268,10 +263,10 @@ describe('Server', () => {
     describe('JWT auth', () => {
       beforeEach(() => {
         (getJwksUriForIssuer as jest.Mock).mockImplementation(async (issuer: string) => {
-          if (issuer === b2cPolicyQualifiedIssuer) {
+          if (issuer === b2cIssuer) {
             return b2cJwksUri;
           }
-          if (issuer === adminDiscoveryIssuer) {
+          if (issuer === adminIssuer) {
             return adminJwksUri;
           }
           throw new Error('Unknown issuer');
@@ -311,7 +306,6 @@ describe('Server', () => {
         expect(res.statusCode).toBe(200);
         expect(res.statusMessage).toBe('OK');
         expect(res.result).toBe('success');
-        expect(getJwksUriForIssuer).toHaveBeenCalledWith(b2cPolicyQualifiedIssuer);
       });
 
       it('should complete the request for a valid admin-tenant JWT', async () => {
@@ -326,7 +320,6 @@ describe('Server', () => {
         expect(res.statusCode).toBe(200);
         expect(res.statusMessage).toBe('OK');
         expect(res.result).toBe('success');
-        expect(getJwksUriForIssuer).toHaveBeenCalledWith(adminDiscoveryIssuer);
       });
 
       it('should reject a JWT when issuer and audience pairing is invalid', async () => {
@@ -448,36 +441,10 @@ describe('Server', () => {
       it('should fail closed when OIDC discovery fails and should log an error', async () => {
         const jwtAuthToken = createRs256Token(b2cIssuer, b2cAudience, b2cPrivateKey, 'b2c-kid');
         (getJwksUriForIssuer as jest.Mock).mockRejectedValueOnce(new Error('OIDC discovery fetch failed'));
-        (clearOidcDiscoveryCache as jest.Mock).mockClear();
         const loggerSpy = jest.spyOn(logger, 'error');
 
         const res = await Server.inject({
           url: '/private',
-          headers: {
-            Authorization: `Bearer ${jwtAuthToken}`,
-          },
-        });
-
-        expect(res.statusCode).toBe(401);
-        expect(res.statusMessage).toBe('Unauthorized');
-        expect(clearOidcDiscoveryCache).toHaveBeenCalledTimes(1);
-        expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('[JWT-AUTH][KEY-PROVIDER-ERROR]'));
-      });
-
-      it('should fail closed for B2C JWT when identity default policy is missing', async () => {
-        const mockedConfig = applicationConfig as jest.Mocked<typeof applicationConfig>;
-        mockedConfig.getIdentityDefaultPolicy.mockReturnValueOnce(undefined);
-
-        await Server.stop();
-        await Server.start();
-        Server.instance().route([
-          createRoute('/private-restart'),
-        ]);
-
-        const jwtAuthToken = createRs256Token(b2cIssuer, b2cAudience, b2cPrivateKey, 'b2c-kid');
-        const loggerSpy = jest.spyOn(logger, 'error');
-        const res = await Server.inject({
-          url: '/private-restart',
           headers: {
             Authorization: `Bearer ${jwtAuthToken}`,
           },

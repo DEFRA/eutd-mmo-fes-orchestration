@@ -43,7 +43,10 @@ class ApplicationConfig {
   _consolidationServicUrl: string;
   _identityAppUrl: string;
   _identityAppAudience: string;
+<<<<<<< HEAD
   _identityDefaultPolicy: string;
+=======
+>>>>>>> 7760b64 (feat(oidc): implement OIDC discovery for JWKS URI retrieval)
   _aadTenantId: string;
   _aadClientId: string;
   _enableNmdPsEuCatch: boolean;
@@ -79,7 +82,6 @@ class ApplicationConfig {
     this._consolidationServicUrl = process.env.MMO_CC_LANDINGS_CONSOLIDATION_SVC_URL;
     this._identityAppUrl = process.env.IDENTITY_APP_URL;
     this._identityAppAudience = process.env.IDENTITY_APP_AUDIENCE;
-    this._identityDefaultPolicy = process.env.IDENTITY_DEFAULT_POLICY;
     this._aadTenantId = process.env.AAD_TENANTID;
     this._aadClientId = process.env.AAD_CLIENTID;
 
@@ -88,9 +90,6 @@ class ApplicationConfig {
     }
     if (!this._disableAuth && !this._identityAppAudience) {
       logger.error('IDENTITY_APP_AUDIENCE is not set');
-    }
-    if (!this._disableAuth && !this._identityDefaultPolicy) {
-      logger.error('IDENTITY_DEFAULT_POLICY is not set');
     }
     if (!this._disableAuth && !this._aadTenantId ) {
       logger.error('AAD_TENANTID must be set');
@@ -173,20 +172,12 @@ class ApplicationConfig {
     return this._identityAppAudience;
   }
 
-  getIdentityDefaultPolicy() {
-    return this._identityDefaultPolicy;
-  }
-
   getAdminAuthTenantId() {
     return this._aadTenantId;
   }
 
   getAdminAuthIssuer() {
-    return `https://sts.windows.net/${this._aadTenantId}/`;
-  }
-
-  getAdminAuthDiscoveryIssuer() {
-    return `https://login.microsoftonline.com/${this._aadTenantId}`;
+    return `https://login.microsoftonline.com/${this._aadTenantId}/v2.0`;
   }
 
   getAdminAuthAudience() {
