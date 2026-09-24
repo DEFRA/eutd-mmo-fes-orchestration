@@ -264,8 +264,35 @@ export default class Server {
 
       const b2cIssuer = ApplicationConfig.getAuthIssuer();
       const b2cAudience = ApplicationConfig.getB2cAuthAudience();
+      const b2cDefaultPolicy = ApplicationConfig.getIdentityDefaultPolicy();
       const adminIssuer = ApplicationConfig.getAdminAuthIssuer();
       const adminAudience = ApplicationConfig.getAdminAuthAudience();
+      const buildPolicyQualifiedB2cDiscoveryIssuer = (issuer: string, policy: string): string => {
+        let normalizedIssuer = issuer;
+        while (normalizedIssuer.length > 0 && normalizedIssuer.charAt(normalizedIssuer.length - 1) === '/') {
+          normalizedIssuer = normalizedIssuer.slice(0, -1);
+        }
+
+        let normalizedPolicy = policy || '';
+        while (normalizedPolicy.length > 0 && normalizedPolicy.charAt(normalizedPolicy.length - 1) === '/') {
+          normalizedPolicy = normalizedPolicy.slice(0, -1);
+        }
+        while (normalizedPolicy.length > 0 && normalizedPolicy.charAt(0) === '/') {
+          normalizedPolicy = normalizedPolicy.slice(1);
+        }
+
+        if (!normalizedPolicy) {
+          throw new Error('IDENTITY_DEFAULT_POLICY is missing or empty');
+        }
+
+        const versionSegment = '/v2.0';
+        if (!normalizedIssuer.endsWith(versionSegment)) {
+          throw new Error(`B2C issuer must end with ${versionSegment}: ${normalizedIssuer}`);
+        }
+
+        const issuerWithoutVersion = normalizedIssuer.slice(0, normalizedIssuer.length - versionSegment.length);
+        return `${issuerWithoutVersion}/${normalizedPolicy}${versionSegment}`;
+      };
       const applicationConfigWithOptionalTenantId = ApplicationConfig as typeof ApplicationConfig & {
         getAdminAuthTenantId?: () => string;
       };
@@ -289,7 +316,10 @@ export default class Server {
           }
 
           try {
-            const jwksUri = await getJwksUriForIssuer(tokenIssuer);
+            const discoveryIssuer = tokenIssuer === b2cIssuer
+              ? buildPolicyQualifiedB2cDiscoveryIssuer(b2cIssuer, b2cDefaultPolicy)
+              : tokenIssuer;
+            const jwksUri = await getJwksUriForIssuer(discoveryIssuer);
             const keyProvider = jwksRsa.hapiJwt2KeyAsync({
               jwksUri,
               cache: true,
