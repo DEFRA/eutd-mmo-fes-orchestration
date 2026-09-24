@@ -12,6 +12,7 @@ describe('ApplicationConfig', () => {
     ApplicationConfig._refServiceBasicAuthUser = 'REF-SERVICE-BASIC-AUTH-USER';
     ApplicationConfig._identityAppUrl = 'http://fesidp';
     ApplicationConfig._identityAppAudience = 'b2c-audience';
+    ApplicationConfig._identityDefaultPolicy = 'B2C_1A_test_policy';
     ApplicationConfig._aadTenantId = '6f504113-6b64-43f2-ade9-242e05780007';
     ApplicationConfig._aadClientId = 'admin-audience';
     ApplicationConfig._fesApiMasterPassword = 'foobar';
@@ -56,6 +57,17 @@ describe('ApplicationConfig', () => {
     expect(ApplicationConfig.getB2cAuthAudience()).toBe('b2c-audience');
   });
 
+  it('should return identity default policy', () => {
+    process.env.IDENTITY_APP_URL = 'http://fesidp';
+    process.env.IDENTITY_APP_AUDIENCE = 'b2c-audience';
+    process.env.IDENTITY_DEFAULT_POLICY = 'B2C_1A_test_policy';
+    process.env.AAD_TENANTID = '6f504113-6b64-43f2-ade9-242e05780007';
+    process.env.AAD_CLIENTID = 'admin-audience';
+    ApplicationConfig.loadProperties();
+
+    expect(ApplicationConfig.getIdentityDefaultPolicy()).toBe('B2C_1A_test_policy');
+  });
+
   it('should return admin tenant id', () => {
     expect(ApplicationConfig.getAdminAuthTenantId()).toBe('6f504113-6b64-43f2-ade9-242e05780007');
   });
@@ -91,5 +103,18 @@ describe('ApplicationConfig', () => {
       expect(mockErrorLogger).toHaveBeenCalledWith('MAXIMUM_FAVOURITES_PER_USER is not set');
       expect(ApplicationConfig._maximumFavouritesPerUser).toBeNaN();
     });
+  });
+
+  it('should log an error if IDENTITY_DEFAULT_POLICY is not set and auth is enabled', () => {
+    process.env.DISABLE_AUTH = 'false';
+    process.env.IDENTITY_APP_URL = 'http://fesidp';
+    process.env.IDENTITY_APP_AUDIENCE = 'b2c-audience';
+    process.env.AAD_TENANTID = '6f504113-6b64-43f2-ade9-242e05780007';
+    process.env.AAD_CLIENTID = 'admin-audience';
+    delete process.env.IDENTITY_DEFAULT_POLICY;
+
+    ApplicationConfig.loadProperties();
+
+    expect(mockErrorLogger).toHaveBeenCalledWith('IDENTITY_DEFAULT_POLICY is not set');
   });
 });
