@@ -17,7 +17,7 @@ import * as Boom from '@hapi/boom';
 import * as jwksRsa from 'jwks-rsa';
 import { verify as jwtVerify, JwtPayload } from 'jsonwebtoken';
 import { isRequestByAdmin } from './helpers/auth';
-import { getJwksUriForIssuer } from './helpers/oidcDiscovery';
+import { clearOidcDiscoveryCache, getJwksUriForIssuer } from './helpers/oidcDiscovery';
 
 export default class Server {
   private static _instance: Hapi.Server<Hapi.ServerApplicationState>;
@@ -332,6 +332,7 @@ export default class Server {
 
             return await keyProvider(decodedToken);
           } catch (error) {
+            clearOidcDiscoveryCache();
             logger.error(`[JWT-AUTH][KEY-PROVIDER-ERROR][${error}]`);
             throw Boom.unauthorized('Invalid token');
           }
