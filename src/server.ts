@@ -307,6 +307,8 @@ export default class Server {
         complete: true,
         key: async (decodedToken) => {
           const decodedPayload = decodedToken?.payload as JwtPayload | undefined;
+          // TEMP-DEBUG: verify JWT claims reaching verifyOptions checks, remove after diagnosing JWT-AUTH 401
+          logger.info(`[TEMP-DEBUG][JWT-CLAIMS][iss:${decodedPayload?.iss}][aud:${JSON.stringify(decodedPayload?.aud)}][kid:${decodedToken?.header?.kid}][exp:${decodedPayload?.exp}]`);
           const tokenIssuer = decodedPayload?.iss;
           const allowedIssuers = [b2cIssuer, adminIssuer].filter(Boolean);
 
@@ -330,7 +332,10 @@ export default class Server {
               timeout: 5000,
             });
 
-            return await keyProvider(decodedToken);
+            const resolvedKey = await keyProvider(decodedToken);
+            // TEMP-DEBUG: confirm jwks-rsa key resolution succeeded before hapi-auth-jwt2 internal verify, remove after diagnosing JWT-AUTH 401
+            logger.info(`[TEMP-DEBUG][JWT-KEY-RESOLVED][jwksUri:${jwksUri}]`);
+            return resolvedKey;
           } catch (error) {
             clearOidcDiscoveryCache();
             logger.error(`[JWT-AUTH][KEY-PROVIDER-ERROR][${error}]`);
