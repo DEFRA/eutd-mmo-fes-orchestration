@@ -8,7 +8,7 @@ import Router from './router';
 import * as Jwt from 'jsonwebtoken';
 import * as jwksRsa from 'jwks-rsa';
 import logger from './logger';
-import { getJwksUriForIssuer } from './helpers/oidcDiscovery';
+import { clearOidcDiscoveryCache, getJwksUriForIssuer } from './helpers/oidcDiscovery';
 import { generateKeyPairSync } from 'crypto';
 
 jest.mock('dotenv');
@@ -35,6 +35,7 @@ jest.mock('jwks-rsa', () => ({
 }));
 
 jest.mock('./helpers/oidcDiscovery', () => ({
+  clearOidcDiscoveryCache: jest.fn(),
   getJwksUriForIssuer: jest.fn(),
 }));
 
@@ -445,6 +446,7 @@ describe('Server', () => {
       it('should fail closed when OIDC discovery fails and should log an error', async () => {
         const jwtAuthToken = createRs256Token(b2cIssuer, b2cAudience, b2cPrivateKey, 'b2c-kid');
         (getJwksUriForIssuer as jest.Mock).mockRejectedValueOnce(new Error('OIDC discovery fetch failed'));
+        (clearOidcDiscoveryCache as jest.Mock).mockClear();
         const loggerSpy = jest.spyOn(logger, 'error');
 
         const res = await Server.inject({
@@ -456,6 +458,7 @@ describe('Server', () => {
 
         expect(res.statusCode).toBe(401);
         expect(res.statusMessage).toBe('Unauthorized');
+        expect(clearOidcDiscoveryCache).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('[JWT-AUTH][KEY-PROVIDER-ERROR]'));
       });
 
