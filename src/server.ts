@@ -266,6 +266,15 @@ export default class Server {
       const b2cAudience = ApplicationConfig.getB2cAuthAudience();
       const adminIssuer = ApplicationConfig.getAdminAuthIssuer();
       const adminAudience = ApplicationConfig.getAdminAuthAudience();
+      const applicationConfigWithOptionalTenantId = ApplicationConfig as typeof ApplicationConfig & {
+        getAdminAuthTenantId?: () => string;
+      };
+      const aadTenantId =
+        typeof applicationConfigWithOptionalTenantId.getAdminAuthTenantId === 'function'
+          ? applicationConfigWithOptionalTenantId.getAdminAuthTenantId()
+          : 'UNAVAILABLE';
+      // TEMP-DEBUG: verify SND auth config values, remove after diagnosing JWT-AUTH 404
+      logger.info(`[TEMP-DEBUG][AUTH-CONFIG][b2cIssuer:${b2cIssuer}][b2cAudience:${b2cAudience}][adminIssuer:${adminIssuer}][adminAudience:${adminAudience}][aadTenantId:${aadTenantId}]`);
 
       Server._instance.auth.strategy('jwt', 'jwt', {
         complete: true,

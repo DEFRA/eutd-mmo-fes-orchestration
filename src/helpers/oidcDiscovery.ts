@@ -1,4 +1,5 @@
 import axios from 'axios';
+import logger from '../logger';
 
 interface OpenIdConfiguration {
   jwks_uri: string;
@@ -36,10 +37,14 @@ export const getJwksUriForIssuer = async (
   const cachedValue = discoveryCache.get(normalizedIssuer);
 
   if (cachedValue && cachedValue.expiresAtMs > Date.now()) {
+    // TEMP-DEBUG: verify OIDC cached JWKS uri usage, remove after diagnosing JWT-AUTH 404
+    logger.info(`[TEMP-DEBUG][OIDC-DISCOVERY-CACHE-HIT][issuer:${normalizedIssuer}][jwksUri:${cachedValue.jwksUri}]`);
     return cachedValue.jwksUri;
   }
 
   const configUrl = getOpenIdConfigurationUrl(normalizedIssuer);
+  // TEMP-DEBUG: verify OIDC discovery endpoint URL, remove after diagnosing JWT-AUTH 404
+  logger.info(`[TEMP-DEBUG][OIDC-DISCOVERY-REQUEST][configUrl:${configUrl}]`);
   const response = await axios.get<OpenIdConfiguration>(configUrl, { timeout: 5000 });
   const jwksUri = response?.data?.jwks_uri;
 
@@ -51,6 +56,9 @@ export const getJwksUriForIssuer = async (
     jwksUri,
     expiresAtMs: Date.now() + cacheTtlMs,
   });
+
+  // TEMP-DEBUG: verify discovered JWKS uri value, remove after diagnosing JWT-AUTH 404
+  logger.info(`[TEMP-DEBUG][OIDC-DISCOVERY-RESULT][issuer:${normalizedIssuer}][jwksUri:${jwksUri}]`);
 
   return jwksUri;
 };
