@@ -58,7 +58,8 @@ jest.mock('./applicationConfig', () => ({
     getAuthIssuer: jest.fn().mockReturnValue('https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/v2.0/'),
     getB2cAuthAudience: jest.fn().mockReturnValue('00c16cdb-1b7a-4d94-a915-21f30370e584'),
     getIdentityDefaultPolicy: jest.fn().mockReturnValue('B2C_1A_test_policy'),
-    getAdminAuthIssuer: jest.fn().mockReturnValue('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0'),
+    getAdminAuthIssuer: jest.fn().mockReturnValue('https://sts.windows.net/6f504113-6b64-43f2-ade9-242e05780007/'),
+    getAdminAuthDiscoveryIssuer: jest.fn().mockReturnValue('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007'),
     getAdminAuthAudience: jest.fn().mockReturnValue('0c050745-281a-49d6-b184-8e44fb38a9c1'),
   }
 }));
@@ -76,7 +77,8 @@ const basicAuthPwd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.DbIiSTokTcEin2zVt
 const b2cIssuer = 'https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/v2.0/';
 const b2cPolicyQualifiedIssuer = 'https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/B2C_1A_test_policy/v2.0';
 const b2cAudience = '00c16cdb-1b7a-4d94-a915-21f30370e584';
-const adminIssuer = 'https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0';
+const adminIssuer = 'https://sts.windows.net/6f504113-6b64-43f2-ade9-242e05780007/';
+const adminDiscoveryIssuer = 'https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007';
 const adminAudience = '0c050745-281a-49d6-b184-8e44fb38a9c1';
 const b2cJwksUri = 'https://dcidmtest.b2clogin.com/keys';
 const adminJwksUri = 'https://login.microsoftonline.com/tenant/keys';
@@ -269,7 +271,7 @@ describe('Server', () => {
           if (issuer === b2cPolicyQualifiedIssuer) {
             return b2cJwksUri;
           }
-          if (issuer === adminIssuer) {
+          if (issuer === adminDiscoveryIssuer) {
             return adminJwksUri;
           }
           throw new Error('Unknown issuer');
@@ -324,7 +326,7 @@ describe('Server', () => {
         expect(res.statusCode).toBe(200);
         expect(res.statusMessage).toBe('OK');
         expect(res.result).toBe('success');
-        expect(getJwksUriForIssuer).toHaveBeenCalledWith(adminIssuer);
+        expect(getJwksUriForIssuer).toHaveBeenCalledWith(adminDiscoveryIssuer);
       });
 
       it('should reject a JWT when issuer and audience pairing is invalid', async () => {

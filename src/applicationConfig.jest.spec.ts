@@ -73,7 +73,11 @@ describe('ApplicationConfig', () => {
   });
 
   it('should return computed admin auth issuer from tenant id', () => {
-    expect(ApplicationConfig.getAdminAuthIssuer()).toBe('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0');
+    expect(ApplicationConfig.getAdminAuthIssuer()).toBe('https://sts.windows.net/6f504113-6b64-43f2-ade9-242e05780007/');
+  });
+
+  it('should return computed admin auth discovery issuer from tenant id', () => {
+    expect(ApplicationConfig.getAdminAuthDiscoveryIssuer()).toBe('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007');
   });
 
   it('should return admin auth audience', () => {

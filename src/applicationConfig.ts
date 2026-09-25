@@ -182,7 +182,11 @@ class ApplicationConfig {
   }
 
   getAdminAuthIssuer() {
-    return `https://login.microsoftonline.com/${this._aadTenantId}/v2.0`;
+    return `https://sts.windows.net/${this._aadTenantId}/`;
+  }
+
+  getAdminAuthDiscoveryIssuer() {
+    return `https://login.microsoftonline.com/${this._aadTenantId}`;
   }
 
   getAdminAuthAudience() {

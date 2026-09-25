@@ -266,6 +266,7 @@ export default class Server {
       const b2cAudience = ApplicationConfig.getB2cAuthAudience();
       const b2cDefaultPolicy = ApplicationConfig.getIdentityDefaultPolicy();
       const adminIssuer = ApplicationConfig.getAdminAuthIssuer();
+      const adminDiscoveryIssuer = ApplicationConfig.getAdminAuthDiscoveryIssuer();
       const adminAudience = ApplicationConfig.getAdminAuthAudience();
       const buildPolicyQualifiedB2cDiscoveryIssuer = (issuer: string, policy: string): string => {
         let normalizedIssuer = issuer;
@@ -301,7 +302,7 @@ export default class Server {
           ? applicationConfigWithOptionalTenantId.getAdminAuthTenantId()
           : 'UNAVAILABLE';
       // TEMP-DEBUG: verify SND auth config values, remove after diagnosing JWT-AUTH 404
-      logger.info(`[TEMP-DEBUG][AUTH-CONFIG][b2cIssuer:${b2cIssuer}][b2cAudience:${b2cAudience}][adminIssuer:${adminIssuer}][adminAudience:${adminAudience}][aadTenantId:${aadTenantId}]`);
+      logger.info(`[TEMP-DEBUG][AUTH-CONFIG][b2cIssuer:${b2cIssuer}][b2cAudience:${b2cAudience}][adminIssuer:${adminIssuer}][adminDiscoveryIssuer:${adminDiscoveryIssuer}][adminAudience:${adminAudience}][aadTenantId:${aadTenantId}]`);
 
       Server._instance.auth.strategy('jwt', 'jwt', {
         complete: true,
@@ -320,7 +321,7 @@ export default class Server {
           try {
             const discoveryIssuer = tokenIssuer === b2cIssuer
               ? buildPolicyQualifiedB2cDiscoveryIssuer(b2cIssuer, b2cDefaultPolicy)
-              : tokenIssuer;
+              : adminDiscoveryIssuer;
             const jwksUri = await getJwksUriForIssuer(discoveryIssuer);
             const keyProvider = jwksRsa.hapiJwt2KeyAsync({
               jwksUri,
