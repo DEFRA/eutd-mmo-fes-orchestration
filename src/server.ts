@@ -13,8 +13,11 @@ import { HapiRequestApplicationStateExtended } from './types';
 
 import ApplicationConfig from './applicationConfig';
 import acceptsHtml from "./helpers/acceptsHtml";
-import { verify as jwtVerify, Jwt, JwtPayload } from 'jsonwebtoken';
+import * as Boom from '@hapi/boom';
+import * as jwksRsa from 'jwks-rsa';
+import { verify as jwtVerify, JwtPayload } from 'jsonwebtoken';
 import { isRequestByAdmin } from './helpers/auth';
+import { clearOidcDiscoveryCache, getJwksUriForIssuer } from './helpers/oidcDiscovery';
 
 export default class Server {
   private static _instance: Hapi.Server<Hapi.ServerApplicationState>;
@@ -205,9 +208,11 @@ export default class Server {
       const permissions =
         'accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), layout-animations=(), legacy-image-formats=*, magnetometer=(), microphone=(), midi=(), oversized-images=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), sync-xhr=*, usb=(), vr=(), screen-wake-lock=(), web-share=(), xr-spatial-tracking=()';
 
-      response.isBoom
-        ? (response.output.headers['Permissions-Policy'] = permissions)
-        : response.header('Permissions-Policy', permissions);
+      if (response.isBoom) {
+        response.output.headers['Permissions-Policy'] = permissions;
+      } else {
+        response.header('Permissions-Policy', permissions);
+      }
 
       if (response.isBoom && acceptsHtml(request.headers))
         return h.redirect('/there-is-a-problem-with-the-service');
@@ -257,27 +262,123 @@ export default class Server {
         validate: fesApiValidate,
       });
 
+      const b2cIssuer = ApplicationConfig.getAuthIssuer();
+      const b2cAudience = ApplicationConfig.getB2cAuthAudience();
+      const b2cDefaultPolicy = ApplicationConfig.getIdentityDefaultPolicy();
+      const adminIssuer = ApplicationConfig.getAdminAuthIssuer();
+      const adminDiscoveryIssuer = ApplicationConfig.getAdminAuthDiscoveryIssuer();
+      const adminAudience = ApplicationConfig.getAdminAuthAudience();
+      const buildPolicyQualifiedB2cDiscoveryIssuer = (issuer: string, policy: string): string => {
+        let normalizedIssuer = issuer;
+        while (normalizedIssuer.length > 0 && normalizedIssuer.charAt(normalizedIssuer.length - 1) === '/') {
+          normalizedIssuer = normalizedIssuer.slice(0, -1);
+        }
+
+        let normalizedPolicy = policy || '';
+        while (normalizedPolicy.length > 0 && normalizedPolicy.charAt(normalizedPolicy.length - 1) === '/') {
+          normalizedPolicy = normalizedPolicy.slice(0, -1);
+        }
+        while (normalizedPolicy.length > 0 && normalizedPolicy.charAt(0) === '/') {
+          normalizedPolicy = normalizedPolicy.slice(1);
+        }
+
+        if (!normalizedPolicy) {
+          throw new Error('IDENTITY_DEFAULT_POLICY is missing or empty');
+        }
+
+        const versionSegment = '/v2.0';
+        if (!normalizedIssuer.endsWith(versionSegment)) {
+          throw new Error(`B2C issuer must end with ${versionSegment}: ${normalizedIssuer}`);
+        }
+
+        const issuerWithoutVersion = normalizedIssuer.slice(0, normalizedIssuer.length - versionSegment.length);
+        return `${issuerWithoutVersion}/${normalizedPolicy}${versionSegment}`;
+      };
+      const applicationConfigWithOptionalTenantId = ApplicationConfig as typeof ApplicationConfig & {
+        getAdminAuthTenantId?: () => string;
+      };
+      const aadTenantId =
+        typeof applicationConfigWithOptionalTenantId.getAdminAuthTenantId === 'function'
+          ? applicationConfigWithOptionalTenantId.getAdminAuthTenantId()
+          : 'UNAVAILABLE';
+      // TEMP-DEBUG: verify SND auth config values, remove after diagnosing JWT-AUTH 404
+      logger.info(`[TEMP-DEBUG][AUTH-CONFIG][b2cIssuer:${b2cIssuer}][b2cAudience:${b2cAudience}][adminIssuer:${adminIssuer}][adminDiscoveryIssuer:${adminDiscoveryIssuer}][adminAudience:${adminAudience}][aadTenantId:${aadTenantId}]`);
+
       Server._instance.auth.strategy('jwt', 'jwt', {
         complete: true,
-        verify: (decoded: Jwt, req) => {
-          logger.info('Validating token');
+        key: async (decodedToken) => {
+          const decodedPayload = decodedToken?.payload as JwtPayload | undefined;
+          // TEMP-DEBUG: verify JWT claims reaching verifyOptions checks, remove after diagnosing JWT-AUTH 401
+          logger.info(`[TEMP-DEBUG][JWT-CLAIMS][iss:${decodedPayload?.iss}][aud:${JSON.stringify(decodedPayload?.aud)}][kid:${decodedToken?.header?.kid}][exp:${decodedPayload?.exp}]`);
+          const tokenIssuer = decodedPayload?.iss;
+          const allowedIssuers = [b2cIssuer, adminIssuer].filter(Boolean);
 
-          const { iss, roles } = decoded.payload as JwtPayload;
-          const isAdminRole = Array.isArray(roles) && isRequestByAdmin(roles);
-          const authIssuer = ApplicationConfig.getAuthIssuer();
-          const isKnownIssuer = authIssuer && authIssuer === iss;
-
-          const isValidToken = isAdminRole || isKnownIssuer;
-          if (!isValidToken) {
-            logger.warn('Invalid auth issuer');
-            return { isValid: false, credentials: decoded }
+          if (!tokenIssuer || !allowedIssuers.includes(tokenIssuer)) {
+            logger.error(`[JWT-AUTH][KEY-PROVIDER-ERROR][JWT token issuer is invalid][issuer:${tokenIssuer || 'missing'}]`);
+            throw Boom.unauthorized('Invalid token');
           }
 
-          req.app.claims = decoded.payload;
+          try {
+            const discoveryIssuer = tokenIssuer === b2cIssuer
+              ? buildPolicyQualifiedB2cDiscoveryIssuer(b2cIssuer, b2cDefaultPolicy)
+              : adminDiscoveryIssuer;
+            const jwksUri = await getJwksUriForIssuer(discoveryIssuer);
+            const keyProvider = jwksRsa.hapiJwt2KeyAsync({
+              jwksUri,
+              cache: true,
+              cacheMaxEntries: 10,
+              cacheMaxAge: 10 * 60 * 1000,
+              rateLimit: true,
+              jwksRequestsPerMinute: 10,
+              timeout: 5000,
+            });
 
-          logger.info('Validated token');
+            const resolvedKey = await keyProvider(decodedToken);
+            // TEMP-DEBUG: confirm jwks-rsa key resolution succeeded before hapi-auth-jwt2 internal verify, remove after diagnosing JWT-AUTH 401
+            logger.info(`[TEMP-DEBUG][JWT-KEY-RESOLVED][jwksUri:${jwksUri}]`);
+            return resolvedKey;
+          } catch (error) {
+            clearOidcDiscoveryCache();
+            logger.error(`[JWT-AUTH][KEY-PROVIDER-ERROR][${error}]`);
+            throw Boom.unauthorized('Invalid token');
+          }
+        },
+        verifyOptions: {
+          algorithms: ['RS256'],
+          issuer: [b2cIssuer, adminIssuer].filter(Boolean),
+          audience: [b2cAudience, adminAudience].filter(Boolean),
+          clockTolerance: 60,
+        },
+        validate: async (decoded: JwtPayload, request) => {
+          const tokenIssuer = decoded.iss;
+          const tokenAudience = decoded.aud;
+
+              let audienceValues: string[] = [];
+              if (typeof tokenAudience === 'string') {
+                audienceValues = [tokenAudience];
+              } else if (Array.isArray(tokenAudience)) {
+                audienceValues = tokenAudience;
+              }
+
+          const hasAudience = (expectedAudience?: string) =>
+            Boolean(expectedAudience && audienceValues.includes(expectedAudience));
+
+          const isB2cPair = tokenIssuer === b2cIssuer && hasAudience(b2cAudience);
+          const isAdminPair = tokenIssuer === adminIssuer && hasAudience(adminAudience);
+
+          if (!isB2cPair && !isAdminPair) {
+            logger.warn('[JWT-AUTH][INVALID-ISSUER-AUDIENCE-PAIR]');
+            return { isValid: false };
+          }
+
+          const roles = decoded.roles;
+          if (Array.isArray(roles) && isRequestByAdmin(roles)) {
+            logger.info('[JWT-AUTH][ADMIN-ROLE-VERIFIED]');
+          }
+
+          request.app.claims = decoded;
           return { isValid: true, credentials: decoded };
-        }
+        },
       });
       logger.info('strategy has been set');
 

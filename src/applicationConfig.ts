@@ -1,4 +1,3 @@
-import * as urlParser from 'url-parse';
 import * as dotenv from 'dotenv';
 import logger from "./logger";
 
@@ -43,6 +42,10 @@ class ApplicationConfig {
   _maxAuthRetries: number;
   _consolidationServicUrl: string;
   _identityAppUrl: string;
+  _identityAppAudience: string;
+  _identityDefaultPolicy: string;
+  _aadTenantId: string;
+  _aadClientId: string;
   _enableNmdPsEuCatch: boolean;
 
   loadProperties() {
@@ -75,8 +78,25 @@ class ApplicationConfig {
     this._fesNotifyApiKey = process.env.FES_NOTIFY_API_KEY;
     this._consolidationServicUrl = process.env.MMO_CC_LANDINGS_CONSOLIDATION_SVC_URL;
     this._identityAppUrl = process.env.IDENTITY_APP_URL;
-    if (!this._identityAppUrl) {
+    this._identityAppAudience = process.env.IDENTITY_APP_AUDIENCE;
+    this._identityDefaultPolicy = process.env.IDENTITY_DEFAULT_POLICY;
+    this._aadTenantId = process.env.AAD_TENANTID;
+    this._aadClientId = process.env.AAD_CLIENTID;
+
+    if (!this._disableAuth && !this._identityAppUrl) {
       logger.error('IDENTITY_APP_URL is not set');
+    }
+    if (!this._disableAuth && !this._identityAppAudience) {
+      logger.error('IDENTITY_APP_AUDIENCE is not set');
+    }
+    if (!this._disableAuth && !this._identityDefaultPolicy) {
+      logger.error('IDENTITY_DEFAULT_POLICY is not set');
+    }
+    if (!this._disableAuth && !this._aadTenantId ) {
+      logger.error('AAD_TENANTID must be set');
+    }
+    if (!this._disableAuth && !this._aadClientId) {
+      logger.error('AAD_CLIENTID is not set');
     }
 
 
@@ -108,10 +128,21 @@ class ApplicationConfig {
   }
 
   getReferenceServiceUrl(): string {
-    const parsed = urlParser(this._referenceServiceHost);
-    parsed.set('username', this._refServiceBasicAuthUser);
-    parsed.set('password', this._refServiceBasicAuthPassword);
-    return parsed.toString().replace(/(\/)+$/, '');
+    let parsed: URL;
+    try {
+      parsed = new URL(this._referenceServiceHost);
+    } catch {
+      logger.warn('[APPLICATION-CONFIG][GET-REFERENCE-SERVICE-URL][INVALID-HOST]');
+      return '';
+    }
+    parsed.username = this._refServiceBasicAuthUser;
+    parsed.password = this._refServiceBasicAuthPassword;
+    const url = parsed.toString();
+    let end = url.length;
+    while (end > 0 && url.charAt(end - 1) === '/') {
+      end -= 1;
+    }
+    return url.slice(0, end);
   }
 
   getEventHubNamespace(): string {
@@ -136,6 +167,30 @@ class ApplicationConfig {
 
   getAuthIssuer() {
     return this._identityAppUrl;
+  }
+
+  getB2cAuthAudience() {
+    return this._identityAppAudience;
+  }
+
+  getIdentityDefaultPolicy() {
+    return this._identityDefaultPolicy;
+  }
+
+  getAdminAuthTenantId() {
+    return this._aadTenantId;
+  }
+
+  getAdminAuthIssuer() {
+    return `https://sts.windows.net/${this._aadTenantId}/`;
+  }
+
+  getAdminAuthDiscoveryIssuer() {
+    return `https://login.microsoftonline.com/${this._aadTenantId}`;
+  }
+
+  getAdminAuthAudience() {
+    return this._aadClientId;
   }
 
   getAuthSecret() {

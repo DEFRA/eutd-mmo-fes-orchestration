@@ -10,6 +10,9 @@ describe("ApplicationConfig", () => {
     ApplicationConfig.eventHubNamespace = "insights-application-logs";
     ApplicationConfig._refServiceBasicAuthUser = 'REF-SERVICE-BASIC-AUTH-USER';
     ApplicationConfig._identityAppUrl = 'http://fesidp';
+    ApplicationConfig._identityAppAudience = 'b2c-audience';
+    ApplicationConfig._aadTenantId = '6f504113-6b64-43f2-ade9-242e05780007';
+    ApplicationConfig._aadClientId = 'admin-audience';
     ApplicationConfig._fesApiMasterPassword = 'foobar';
   });
 
@@ -50,6 +53,28 @@ describe("ApplicationConfig", () => {
 
   it('should return auth token secret', () => {
     expect(ApplicationConfig.getAuthSecret()).toBe('foobar');
+  });
+
+  it('should return B2C auth audience', () => {
+    expect(ApplicationConfig.getB2cAuthAudience()).toBe('b2c-audience');
+  });
+
+  it('should return admin tenant id', () => {
+    expect(ApplicationConfig.getAdminAuthTenantId()).toBe('6f504113-6b64-43f2-ade9-242e05780007');
+  });
+
+  it('should return computed admin auth issuer from tenant id', () => {
+    ApplicationConfig._aadIssuerUrl = undefined;
+    expect(ApplicationConfig.getAdminAuthIssuer()).toBe('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0');
+  });
+
+  it('should return explicit admin auth issuer override when present', () => {
+    ApplicationConfig._aadIssuerUrl = 'https://login.microsoftonline.com/custom-tenant/v2.0';
+    expect(ApplicationConfig.getAdminAuthIssuer()).toBe('https://login.microsoftonline.com/custom-tenant/v2.0');
+  });
+
+  it('should return admin auth audience', () => {
+    expect(ApplicationConfig.getAdminAuthAudience()).toBe('admin-audience');
   });
 
   describe('maximum favourites per user', () => {
