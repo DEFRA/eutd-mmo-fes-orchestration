@@ -294,22 +294,11 @@ export default class Server {
         const issuerWithoutVersion = normalizedIssuer.slice(0, normalizedIssuer.length - versionSegment.length);
         return `${issuerWithoutVersion}/${normalizedPolicy}${versionSegment}`;
       };
-      const applicationConfigWithOptionalTenantId = ApplicationConfig as typeof ApplicationConfig & {
-        getAdminAuthTenantId?: () => string;
-      };
-      const aadTenantId =
-        typeof applicationConfigWithOptionalTenantId.getAdminAuthTenantId === 'function'
-          ? applicationConfigWithOptionalTenantId.getAdminAuthTenantId()
-          : 'UNAVAILABLE';
-      // TEMP-DEBUG: verify SND auth config values, remove after diagnosing JWT-AUTH 404
-      logger.info(`[TEMP-DEBUG][AUTH-CONFIG][b2cIssuer:${b2cIssuer}][b2cAudience:${b2cAudience}][adminIssuer:${adminIssuer}][adminDiscoveryIssuer:${adminDiscoveryIssuer}][adminAudience:${adminAudience}][aadTenantId:${aadTenantId}]`);
 
       Server._instance.auth.strategy('jwt', 'jwt', {
         complete: true,
         key: async (decodedToken) => {
           const decodedPayload = decodedToken?.payload as JwtPayload | undefined;
-          // TEMP-DEBUG: verify JWT claims reaching verifyOptions checks, remove after diagnosing JWT-AUTH 401
-          logger.info(`[TEMP-DEBUG][JWT-CLAIMS][iss:${decodedPayload?.iss}][aud:${JSON.stringify(decodedPayload?.aud)}][kid:${decodedToken?.header?.kid}][exp:${decodedPayload?.exp}]`);
           const tokenIssuer = decodedPayload?.iss;
           const allowedIssuers = [b2cIssuer, adminIssuer].filter(Boolean);
 
@@ -334,8 +323,6 @@ export default class Server {
             });
 
             const resolvedKey = await keyProvider(decodedToken);
-            // TEMP-DEBUG: confirm jwks-rsa key resolution succeeded before hapi-auth-jwt2 internal verify, remove after diagnosing JWT-AUTH 401
-            logger.info(`[TEMP-DEBUG][JWT-KEY-RESOLVED][jwksUri:${jwksUri}]`);
             return resolvedKey;
           } catch (error) {
             clearOidcDiscoveryCache();
