@@ -54,7 +54,7 @@ export default {
     return getOrderedErrorListForProductConsignmentPage(entryErrors, index)
   },
 
-  "/create-non-manipulation-document/:documentNumber/departure-product-summary": async ({ data, errors }) => {
+  "/create-non-manipulation-document/:documentNumber/departure-product-summary": ({ data, errors }) => {
     for (const [index, ctch] of data.catches.entries()) {
       checkEitherNetWeightProductDepartureAndNetWeightFisheryProductDepartureIsPresent(ctch, index, errors);
       checkNetWeightProductDepartureIsZeroPositive(ctch, index, errors);
@@ -72,9 +72,8 @@ export default {
   },
 
   "/create-non-manipulation-document/:documentNumber/you-have-added-a-product": async ({ data, _nextUrl, currentUrl, errors }) => {
-    for (const [index, ctch] of data.catches.entries()) {
-      await validateProduct(ctch, index, errors);
-    }
+    // Errors are keyed per-index by validateProduct, so concurrent writes are safe
+    await Promise.all(data.catches.map((ctch, index) => validateProduct(ctch, index, errors)));
 
     const addAnotherProduct = data.addAnotherProduct;
     if (!addAnotherProduct || addAnotherProduct === "" || addAnotherProduct === "notset") {

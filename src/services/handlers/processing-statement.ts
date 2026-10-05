@@ -11,6 +11,7 @@ import { validateCountriesName } from "../../validators/countries.validator";
 import { validateSpeciesName, validateSpeciesWithSuggestions } from "../../validators/fish.validator";
 import { ICountry } from "../../persistence/schema/common";
 import { validateCommodityCode } from "../../validators/pssdCommodityCode.validator";
+import { validateProcessingPlant } from "../../validators/processingPlant.validator";
 import { SpeciesSuggestionError } from "../../validators/validationErrors";
 import {
   cleanDate,
@@ -40,14 +41,14 @@ export const initialState = {
 
 export default {
 
-  "/create-processing-statement/:documentNumber/add-consignment-details": async ({ data, errors }) => {
+  "/create-processing-statement/:documentNumber/add-consignment-details": ({ data, errors }) => {
     if (!validateProductDescriptions(data.products, data.consignmentDescription)) {
       errors.consignmentDescription = "psConsignmentEnterConsignmentDescription";
     }
     return { errors };
   },
 
-  "/create-processing-statement/:documentNumber/progress": async ({ data, errors }) => {
+  "/create-processing-statement/:documentNumber/progress": ({ data, errors }) => {
     // Validate that all products have catches (not just description)
     const products = Array.isArray(data.products) ? data.products : [];
     const catches = Array.isArray(data.catches) ? data.catches : [];
@@ -93,7 +94,7 @@ export default {
     return validateCatchType(ctch, index, speciesValidation.errors);
   },
 
-  "/create-processing-statement/:documentNumber/add-catch-details/:productId": async ({ data, errors, params }) => {
+  "/create-processing-statement/:documentNumber/add-catch-details/:productId": ({ data, errors, params }) => {
     const index = 0;
     const productId = params.productId;
 
@@ -116,7 +117,7 @@ export default {
     return validateCatchWeights(ctch, index, catchDetails.errors);
   },
 
-  "/create-processing-statement/:documentNumber/add-catch-weights": async ({ data, errors }) => {
+  "/create-processing-statement/:documentNumber/add-catch-weights": ({ data, errors }) => {
     const index = 0;
     const ctch = data.catches[index];
     return validateCatchWeights(ctch, index, errors);
@@ -128,7 +129,7 @@ export default {
     return validateCatchWeights(ctch, index, errors);
   },
 
-  "/create-processing-statement/:documentNumber/add-health-certificate": async ({ data, errors }) => {
+  "/create-processing-statement/:documentNumber/add-health-certificate": ({ data, errors }) => {
     if (!data.healthCertificateNumber || validateWhitespace(data.healthCertificateNumber)) {
       errors.healthCertificateNumber = "psAddHealthCertificateErrorNullHealthCertificateNumber";
     }
@@ -149,7 +150,7 @@ export default {
     return { errors };
   },
 
-  "/create-processing-statement/:documentNumber/catch-added": async ({ data, currentUrl, errors }) => {
+  "/create-processing-statement/:documentNumber/catch-added": ({ data, currentUrl, errors }) => {
     const addAnotherCatch = data.addAnotherCatch;
     if (!addAnotherCatch || addAnotherCatch === "" || addAnotherCatch === "notset") {
       errors.addAnotherCatch = 'ccLandingTypeSelectOption';
@@ -160,6 +161,16 @@ export default {
       return { errors, next: `/create-processing-statement/add-catch-details/${data.catches.length}` };
     }
     return { errors, next: `/create-processing-statement/add-processing-plant-details` };
+  },
+
+  "/create-processing-statement/:documentNumber/add-processing-plant": ({ data, errors }) => {
+    const validation = validateProcessingPlant(data.plantName, data.plantApprovalNumber, 'plantName');
+
+    if (validation.isError) {
+      errors.plantName = validation.error.message;
+    }
+
+    return { errors };
   },
 
   "/create-processing-statement/:documentNumber/add-processing-plant-details": ({ data, errors }) => {

@@ -380,10 +380,11 @@ export default class ProgressService {
 
     const ctchDetailsErrors = {};
 
-    for (const ctch in catches) {
-      await validateCatchDetails(catches[ctch], Number.parseInt(ctch), ctchDetailsErrors, documentNumber, userPrincipal, contactId);
-      validateCatchWeights(catches[ctch], Number.parseInt(ctch), ctchDetailsErrors);
-    }
+    // Errors are keyed per-index by the validators, so concurrent writes are safe
+    await Promise.all(catches.map(async (singleCatch, index) => {
+      await validateCatchDetails(singleCatch, index, ctchDetailsErrors, documentNumber, userPrincipal, contactId);
+      validateCatchWeights(singleCatch, index, ctchDetailsErrors);
+    }));
 
     return Object.keys(ctchDetailsErrors).length <= 0 ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE;
   }

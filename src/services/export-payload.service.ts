@@ -94,6 +94,9 @@ export default class ExportPayloadService {
             landing: sessionLanding
           };
 
+          // Sequential by necessity: withUserSessionDataStored does a read-modify-write on the
+          // same Redis key, so concurrent calls would race and lose updates
+          // eslint-disable-next-line no-await-in-loop
           await withUserSessionDataStored(userId, sessionData, contactId);
         }
       }
@@ -348,7 +351,7 @@ export default class ExportPayloadService {
           .catch(e => logger.error(`[LANDING-CONSOLIDATION][${documentNumber}][ERROR][${e}]`));
 
         // FI0-11132: reuse exportedFrom from gatherExportInfo instead of redundant getExportLocation() call
-        ExportPayloadService.submitToCatchIfEu(documentNumber, exportedFrom);
+        void ExportPayloadService.submitToCatchIfEu(documentNumber, exportedFrom);
         result.documentNumber = documentNumber;
         result.uri = storageInfo.uri;
 
@@ -395,7 +398,7 @@ export default class ExportPayloadService {
   }
 
   // FI0-11243: All landing entry types (DirectLanding, ManualEntry, UploadEntry) are submitted to EU CATCH
-  public static readonly catchSubmissionForCC = async (documentNumber: string): Promise<void> => {
+  public static readonly catchSubmissionForCC = (documentNumber: string): void => {
     CatchCertService.setCatchSubmissionInProgress(documentNumber)
       .catch(e => logger.error(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}][ERROR][${e}]`));
     submitToCatchSystem(documentNumber, 'submit')
@@ -413,8 +416,7 @@ export default class ExportPayloadService {
       const isEuCountry = await EuCountriesService.isEuCountry(isoCodeAlpha2);
       logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);
       if (isEuCountry) {
-        ExportPayloadService.catchSubmissionForCC(documentNumber)
-          .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
+        ExportPayloadService.catchSubmissionForCC(documentNumber);
       }
     } catch (e) {
       logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][CHECK-EU-ERROR][${e}]`);
@@ -512,6 +514,8 @@ export default class ExportPayloadService {
 
     for (const landing of landingsToRefresh) {
       logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][REFRESHING-LANDING-SERIAL][PLN: ${landing.pln}, DATE: ${landing.dateLanded}, IS-LEGALLY-DUE: ${landing.isLegallyDue}]`);
+      // Intentionally serial (see performParallelRefresh for the concurrent counterpart used elsewhere)
+      // eslint-disable-next-line no-await-in-loop
       await VesselLandingsRefresher.refresh(landing);
     }
   }
