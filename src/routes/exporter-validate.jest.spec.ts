@@ -220,6 +220,102 @@ describe('exporter validate routes', () => {
       expect(response.result).toEqual(expectedResponse);
     });
 
+    it('should return 200 for processingPlant addressType when country is UK (mixed case)', async () => {
+      const response = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          addressType: 'processingPlant',
+          country: 'England'
+        }
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+    });
+
+    it('should return 400 with processing plant UK-only token when processingPlant country is non-UK', async () => {
+      const response = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          addressType: 'processingPlant',
+          country: 'France'
+        }
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toContain('psAddProcessingPlantAddressErrorCountryNotUk');
+      expect(mockValidateCountriesName).not.toHaveBeenCalled();
+    });
+
+    it('should return 200 for storageFacility addressType when country is UK', async () => {
+      const response = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          addressType: 'storageFacility',
+          country: 'Scotland'
+        }
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+    });
+
+    it('should return 400 with storage facility UK-only token when storageFacility country is non-UK', async () => {
+      const response = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          addressType: 'storageFacility',
+          country: 'Germany'
+        }
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toContain('sdAddStorageFacilityAddressErrorCountryNotUk');
+      expect(mockValidateCountriesName).not.toHaveBeenCalled();
+    });
+
+    it('should not apply UK-only rule when addressType is absent and should validate non-UK exporter country via reference service', async () => {
+      const response = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          country: 'France'
+        }
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockValidateCountriesName).toHaveBeenCalledWith({ officialCountryName: 'France' }, '', 'country');
+      expect(mockAddExporterDetails).toHaveBeenCalled();
+    });
+
+    it('should treat processingPlant country validation as case-insensitive for United Kingdom of Great Britain and Northern Ireland', async () => {
+      const upperCaseResponse = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          addressType: 'processingPlant',
+          country: 'UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND'
+        }
+      });
+
+      const mixedCaseResponse = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          addressType: 'processingPlant',
+          country: 'united kingdom of great britain and northern ireland'
+        }
+      });
+
+      expect(upperCaseResponse.statusCode).toBe(200);
+      expect(mixedCaseResponse.statusCode).toBe(200);
+      expect(mockAddExporterDetails).toHaveBeenCalledTimes(2);
+    });
+
     it('should return the correct payload with the addressOne created', async () => {
       const response = await server.inject({
         method: "POST",

@@ -49,12 +49,12 @@ import { safeClone } from "../helpers/utils/safeClone";
 export const catchCerts: string = "catchCertificate";
 export const storageNote: string = "storageNotes";
 export const processingStatement: string = "processingStatement";
-import { SSL_OP_LEGACY_SERVER_CONNECT } from "constants";
+import { SSL_OP_LEGACY_SERVER_CONNECT } from "node:constants";
 
 const { unflatten } = require("flat");
 const flatten = require("flat");
 const _ = require("lodash");
-const https = require('https');
+import * as https from "node:https";
 
 export default class OrchestrationService {
   public static async get(req: Hapi.Request, h: Hapi.ResponseToolkit<Hapi.ReqRefDefaults>, userPrincipal: string, documentNumber: string, contactId: string) {
@@ -552,6 +552,8 @@ export default class OrchestrationService {
         });
       }
 
+      // Sequential by necessity: draftCacheRef must load the shared draft at most once per request
+      // eslint-disable-next-line no-await-in-loop
       if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef))) {
         data.validationErrors.push({
           message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
@@ -559,6 +561,7 @@ export default class OrchestrationService {
           certificateNumber: documentCertificateNumber,
           product: species
         });
+        // eslint-disable-next-line no-await-in-loop
       } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef)) {
         data.validationErrors.push({
           message: 'sdAddUKEntryDocumentSpeciesDoesNotExistError',
@@ -576,6 +579,8 @@ export default class OrchestrationService {
       const documentCertificateNumber = data.catches[ctch].catchCertificateNumber;
       const species = data.catches[ctch].species;
       const speciesCode = data.catches[ctch].speciesCode;
+      // Sequential by necessity: draftCacheRef must load the shared draft at most once per request
+      // eslint-disable-next-line no-await-in-loop
       if (data.catches[ctch].catchCertificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef) || !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef))) {
         data.validationErrors.push({
           message: 'psAddCatchDetailsErrorUKCCInValid',
