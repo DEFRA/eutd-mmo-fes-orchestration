@@ -12,6 +12,18 @@ import ApplicationConfig from '../applicationConfig';
 import { ICountry } from '../persistence/schema/common';
 import { COUNTRY } from '../services/constants';
 import { defineAuthStrategies } from '../helpers/auth';
+
+const UK_ONLY_ADDRESS_TYPES = new Set(['processingPlant', 'storageFacility']);
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+
+const UK_COUNTRY_REGEX = new RegExp(`^(?:${COUNTRY.map(escapeRegExp).join('|')})$`, 'i');
+
+const COUNTRY_NOT_UK_TOKEN_BY_ADDRESS_TYPE: Record<string, string> = {
+  processingPlant: 'psAddProcessingPlantAddressErrorCountryNotUk',
+  storageFacility: 'sdAddStorageFacilityAddressErrorCountryNotUk',
+};
+
 export default class ExporterValidateRoutes {
 
   private formatAddressFirstPart(address: any): string {
@@ -98,6 +110,7 @@ export default class ExporterValidateRoutes {
 
       const validationErrors = errors.error ? errors.error.details : [];
       this.validateAddressFirstPart(value, validationErrors);
+      this.validateUkOnlyAddress(value, validationErrors);
 
       if (validationErrors.length > 0) {
         throw new Joi.ValidationError('ValidationError', validationErrors, value);
@@ -110,6 +123,22 @@ export default class ExporterValidateRoutes {
       await this.validateCountryWithReference(value);
       return value;
     }
+
+  private validateUkOnlyAddress(value: any, validationErrors: any[]): void {
+    if (!value || !UK_ONLY_ADDRESS_TYPES.has(value.addressType)) return;
+
+    const country = typeof value.country === 'string' ? value.country.trim() : '';
+    if (country && UK_COUNTRY_REGEX.test(country)) return;
+    if (!country) return;
+
+    const token = COUNTRY_NOT_UK_TOKEN_BY_ADDRESS_TYPE[value.addressType];
+    validationErrors.push({
+      message: token,
+      path: ['country'],
+      type: 'any.invalid',
+      context: { key: 'country', label: 'Country' }
+    });
+  }
 
   private validateAddressFirstPart(value: any, validationErrors: any[]): void {
     if (!value) return;
