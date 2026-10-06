@@ -72,7 +72,7 @@ appSettings:
     type: config
 
   - key: IDENTITY_APP_URL
-    value: '#{{ ORCH_IDENTITY_APP_URL }}'
+    value: '#{{ IDENTITY_APP_URL }}'
     type: config
 
   - key: IDENTITY_APP_AUDIENCE
@@ -86,10 +86,6 @@ appSettings:
   - key: AAD_CLIENTID
     value: 'AAD-CLIENTID'
     type: secret
-
-  - key: IDENTITY_DEFAULT_POLICY
-    value: '#{{ IDENTITY_DEFAULT_POLICY }}'
-    type: config
 
   - key: INSTRUMENTATION_CLOUD_ROLE
     value: '#{{ repoName5 }}'
