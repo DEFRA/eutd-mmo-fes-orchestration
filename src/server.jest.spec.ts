@@ -8,7 +8,7 @@ import Router from './router';
 import * as Jwt from 'jsonwebtoken';
 import * as jwksRsa from 'jwks-rsa';
 import logger from './logger';
-import { clearOidcDiscoveryCache, getJwksUriForIssuer } from './helpers/oidcDiscovery';
+import { clearOidcDiscoveryCache, getJwksUriForIssuer, getOidcIssuerMetadata } from './helpers/oidcDiscovery';
 import { generateKeyPairSync } from 'crypto';
 
 jest.mock('dotenv');
@@ -37,6 +37,10 @@ jest.mock('jwks-rsa', () => ({
 jest.mock('./helpers/oidcDiscovery', () => ({
   clearOidcDiscoveryCache: jest.fn(),
   getJwksUriForIssuer: jest.fn(),
+  getOidcIssuerMetadata: jest.fn().mockResolvedValue({
+    issuer: 'https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/v2.0/',
+    jwksUri: 'https://dcidmtest.b2clogin.com/keys',
+  }),
 }));
 
 jest.mock('./persistence/mongo');
@@ -55,7 +59,7 @@ jest.mock('./applicationConfig', () => ({
     _disableAuth: false,
     _maxLimitLandings: 5,
     getAuthSecret: jest.fn().mockReturnValue('one-two-three-four-five-six-seven'),
-    getAuthIssuer: jest.fn().mockReturnValue('https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/v2.0/'),
+    getAuthIssuer: jest.fn().mockReturnValue('https://your-account.cpdev.cui.defra.gov.uk/idphub/b2c/b2c_1a_cui_cpdev_signupsignin'),
     getB2cAuthAudience: jest.fn().mockReturnValue('00c16cdb-1b7a-4d94-a915-21f30370e584'),
     getAdminAuthIssuer: jest.fn().mockReturnValue('https://sts.windows.net/6f504113-6b64-43f2-ade9-242e05780007/'),
     getAdminAuthDiscoveryIssuer: jest.fn().mockReturnValue('https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007'),
@@ -73,6 +77,7 @@ jest.mock('./router', () => ({
 
 const basicAuthPwd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.DbIiSTokTcEin2zVtyl9amBEVur4sf0LeJgHsXbUlNc';
 
+const b2cDiscoveryBase = 'https://your-account.cpdev.cui.defra.gov.uk/idphub/b2c/b2c_1a_cui_cpdev_signupsignin';
 const b2cIssuer = 'https://dcidmtest.b2clogin.com/131a35fb-0000-0000-0000-000000000000/v2.0/';
 const b2cAudience = '00c16cdb-1b7a-4d94-a915-21f30370e584';
 const adminIssuer = 'https://sts.windows.net/6f504113-6b64-43f2-ade9-242e05780007/';
@@ -266,7 +271,7 @@ describe('Server', () => {
     describe('JWT auth', () => {
       beforeEach(() => {
         (getJwksUriForIssuer as jest.Mock).mockImplementation(async (issuer: string) => {
-          if (issuer === b2cIssuer) {
+          if (issuer === b2cDiscoveryBase) {
             return b2cJwksUri;
           }
           if (issuer === adminDiscoveryIssuer) {
@@ -309,7 +314,8 @@ describe('Server', () => {
         expect(res.statusCode).toBe(200);
         expect(res.statusMessage).toBe('OK');
         expect(res.result).toBe('success');
-        expect(getJwksUriForIssuer).toHaveBeenCalledWith(b2cIssuer);
+        expect(getOidcIssuerMetadata).toHaveBeenCalledWith(b2cDiscoveryBase);
+        expect(getJwksUriForIssuer).toHaveBeenCalledWith(b2cDiscoveryBase);
       });
 
       it('should complete the request for a valid admin-tenant JWT', async () => {
