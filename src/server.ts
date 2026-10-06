@@ -17,7 +17,7 @@ import * as Boom from '@hapi/boom';
 import * as jwksRsa from 'jwks-rsa';
 import { verify as jwtVerify, JwtPayload } from 'jsonwebtoken';
 import { isRequestByAdmin } from './helpers/auth';
-import { clearOidcDiscoveryCache, getJwksUriForIssuer } from './helpers/oidcDiscovery';
+import { clearOidcDiscoveryCache, getJwksUriForIssuer, getOidcIssuerMetadata } from './helpers/oidcDiscovery';
 
 export default class Server {
   private static _instance: Hapi.Server<Hapi.ServerApplicationState>;
@@ -262,11 +262,12 @@ export default class Server {
         validate: fesApiValidate,
       });
 
-      const b2cIssuer = ApplicationConfig.getAuthIssuer();
+      const b2cDiscoveryBase = ApplicationConfig.getAuthIssuer();
       const b2cAudience = ApplicationConfig.getB2cAuthAudience();
       const adminIssuer = ApplicationConfig.getAdminAuthIssuer();
       const adminDiscoveryIssuer = ApplicationConfig.getAdminAuthDiscoveryIssuer();
       const adminAudience = ApplicationConfig.getAdminAuthAudience();
+      const { issuer: b2cIssuer } = await getOidcIssuerMetadata(b2cDiscoveryBase);
 
       Server._instance.auth.strategy('jwt', 'jwt', {
         complete: true,
@@ -281,7 +282,7 @@ export default class Server {
           }
 
           try {
-            const discoveryIssuer = tokenIssuer === b2cIssuer ? b2cIssuer : adminDiscoveryIssuer;
+            const discoveryIssuer = tokenIssuer === b2cIssuer ? b2cDiscoveryBase : adminDiscoveryIssuer;
             const jwksUri = await getJwksUriForIssuer(discoveryIssuer);
             const keyProvider = jwksRsa.hapiJwt2KeyAsync({
               jwksUri,
