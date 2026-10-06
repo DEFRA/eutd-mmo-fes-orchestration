@@ -360,7 +360,7 @@ export default class ExportPayloadService {
         await ExportPayloadService.updateCertificateStatus(userPrincipal, documentNumber, contactId, DocumentStatuses.Draft)
           .then(() => {
             logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATED-STATUS][${DocumentStatuses.Draft}]`);
-            SummaryErrorsService.saveErrors(documentNumber, toFrontEndValidationFailure(result))
+            void SummaryErrorsService.saveErrors(documentNumber, toFrontEndValidationFailure(result))
               .catch((e) => { logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SAVE-ERRORS], ${e}`) });
           })
           .catch((e) => { logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATE-STATUS][${DocumentStatuses.Draft}][ERROR], ${e}`) });
