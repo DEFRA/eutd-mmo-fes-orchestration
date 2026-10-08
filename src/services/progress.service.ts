@@ -622,14 +622,11 @@ export default class ProgressService {
 
     const processingPlant = data?.exportData?.plantName?.trim() &&
       data?.exportData?.plantApprovalNumber?.trim() &&
-      data.exportData.personResponsibleForConsignment?.trim()
+      data.exportData.personResponsibleForConsignment?.trim() &&
+      data?.exportData?.plantPostcode?.trim() &&
+      data.exportData.plantAddressOne?.trim()
       ? ProgressStatus.COMPLETED
       : ProgressStatus.INCOMPLETE;
-    const processingPlantAddress =
-      data?.exportData?.plantPostcode &&
-        data.exportData.plantAddressOne
-        ? ProgressStatus.COMPLETED
-        : ProgressStatus.INCOMPLETE;
     const exportHealthCertificate =
       hasValidHealthCertificate(data?.exportData?.healthCertificateNumber) &&
         hasValidHeathCertificateDate(data?.exportData?.healthCertificateDate)
@@ -645,7 +642,6 @@ export default class ProgressService {
       exporter: ProgressService.getExporterDetails(data?.exportData?.exporterDetails, data?.requestByAdmin),
       processedProductDetails: hasCompletedAllProducts && hasCompletedAllCatches && allProductsHaveCatches ? ProgressStatus.COMPLETED : ProgressStatus.INCOMPLETE,
       processingPlant,
-      processingPlantAddress,
       exportHealthCertificate,
       exportDestination: ProgressService.getExportDestinationStatus(data?.exportData?.exportedTo, data?.exportData?.pointOfDestination, ServiceNames.PS),
     };

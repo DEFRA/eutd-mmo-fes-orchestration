@@ -536,6 +536,77 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
       processingPlant: 'psAddProcessingPlantErrorSelectPlant'
     });
   });
+
+  it('with non-JS and both fields present validates as OK', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: 'Plant Alpha',
+        plantApprovalNumber: 'UK/ABC/001'
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({});
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
+
+  it('with non-JS and whitespace plantName returns plantName error only', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: '   ',
+        plantApprovalNumber: 'UK/ABC/001'
+      },
+      errors: {}
+    });
+
+    expect(errors.plantName).toBe('psAddProcessingPlantAddressErrorNullPlantName');
+    expect(errors.plantApprovalNumber).toBeUndefined();
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
+
+  it('with non-JS and whitespace plantApprovalNumber returns plantApprovalNumber error only', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: 'Plant Alpha',
+        plantApprovalNumber: '   '
+      },
+      errors: {}
+    });
+
+    expect(errors.plantApprovalNumber).toBe('psAddProcessingPDErrorPlantApprovalNumber');
+    expect(errors.plantName).toBeUndefined();
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
+
+  it('with non-JS and both fields empty returns both errors', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: '',
+        plantApprovalNumber: ''
+      },
+      errors: {}
+    });
+
+    expect(errors.plantName).toBe('psAddProcessingPlantAddressErrorNullPlantName');
+    expect(errors.plantApprovalNumber).toBe('psAddProcessingPDErrorPlantApprovalNumber');
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-details', () => {
