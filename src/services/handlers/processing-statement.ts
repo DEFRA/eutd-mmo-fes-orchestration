@@ -164,6 +164,16 @@ export default {
   },
 
   "/create-processing-statement/:documentNumber/add-processing-plant": ({ data, errors }) => {
+    if (data.isNonJs) {
+      if (!data.plantName || validateWhitespace(data.plantName)) {
+        errors.plantName = "psAddProcessingPlantAddressErrorNullPlantName";
+      }
+      if (!data.plantApprovalNumber || validateWhitespace(data.plantApprovalNumber)) {
+        errors.plantApprovalNumber = "psAddProcessingPDErrorPlantApprovalNumber";
+      }
+      return { errors };
+    }
+
     const validation = validateProcessingPlant(data.plantName, data.plantApprovalNumber, 'plantName');
 
     if (validation.isError) {
