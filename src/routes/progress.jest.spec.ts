@@ -457,7 +457,6 @@ describe("Progress routes", () => {
       consignmentDescription: 'error.consignmentDescription.incomplete',
       catches: 'error.catches.incomplete',
       processingPlant: 'error.processingPlant.incomplete',
-      processingPlantAddress:  'error.processingPlantAddress.incomplete',
       exportHealthCertificate: 'error.exportHealthCertificate.incomplete',
       exportDestination: 'error.exportDestination.incomplete',
     };
@@ -469,12 +468,11 @@ describe("Progress routes", () => {
         consignmentDescription: ProgressStatus.COMPLETED,
         catches: ProgressStatus.COMPLETED,
         processingPlant: ProgressStatus.COMPLETED,
-        processingPlantAddress: ProgressStatus.COMPLETED,
         exportHealthCertificate: ProgressStatus.COMPLETED,
         exportDestination: ProgressStatus.COMPLETED,
       },
-      completedSections: 7,
-      requiredSections: 7,
+      completedSections: 6,
+      requiredSections: 6,
     };
 
     let mockGetProgress;
@@ -488,7 +486,7 @@ describe("Progress routes", () => {
       mockLogError = jest.spyOn(logger, "error");
       mockValidateDocumentOwnership = jest.spyOn(DocumentOwnershipValidator, "validateDocumentOwnership");
       mockValidateDocumentOwnership.mockResolvedValue(true);
-      
+
       // Mock getDraft to return valid products with catches
       mockGetDraft = jest.spyOn(ProcessingStatementService, "getDraft");
       mockGetDraft.mockResolvedValue({
@@ -522,12 +520,11 @@ describe("Progress routes", () => {
           consignmentDescription: ProgressStatus.INCOMPLETE,
           catches: ProgressStatus.INCOMPLETE,
           processingPlant: ProgressStatus.INCOMPLETE,
-          processingPlantAddress: ProgressStatus.INCOMPLETE,
           exportHealthCertificate: ProgressStatus.INCOMPLETE,
           exportDestination: ProgressStatus.INCOMPLETE,
         },
         completedSections: 0,
-        requiredSections: 7,
+        requiredSections: 6,
       };
 
       mockGetProgress.mockResolvedValue(incompleteData);
@@ -572,7 +569,7 @@ describe("Progress routes", () => {
       expect(response.statusCode).toBe(400);
       expect(mockGetProgress).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
       expect(mockGetDraft).toHaveBeenCalledWith('Bob', 'DOCUMENT123', 'contactBob');
-      
+
       const responsePayload = JSON.parse(response.payload);
       expect(responsePayload.processedProductDetails).toBe('error.processedProductDetails.incomplete');
     });
@@ -585,12 +582,11 @@ describe("Progress routes", () => {
           consignmentDescription: ProgressStatus.COMPLETED,
           catches: ProgressStatus.COMPLETED,
           processingPlant: ProgressStatus.INCOMPLETE,
-          processingPlantAddress: ProgressStatus.COMPLETED,
           exportHealthCertificate: ProgressStatus.COMPLETED,
           exportDestination: ProgressStatus.COMPLETED,
         },
-        completedSections: 5,
-        requiredSections: 7,
+        completedSections: 4,
+        requiredSections: 6,
       };
 
       mockGetProgress.mockResolvedValue(incompleteData);
@@ -605,7 +601,7 @@ describe("Progress routes", () => {
 
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      
+
       const responsePayload = JSON.parse(response.payload);
       expect(responsePayload.exporter).toBe('error.exporter.incomplete');
       expect(responsePayload.processingPlant).toBe('error.processingPlant.incomplete');
@@ -644,7 +640,7 @@ describe("Progress routes", () => {
 
       const response = await server.inject(request);
       expect(response.statusCode).toBe(400);
-      
+
       const responsePayload = JSON.parse(response.payload);
       expect(responsePayload.processedProductDetails).toBe('error.processedProductDetails.incomplete');
     });

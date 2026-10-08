@@ -2690,12 +2690,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -2724,12 +2723,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -2758,12 +2756,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -2810,12 +2807,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -2861,12 +2857,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -2913,12 +2908,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -2963,12 +2957,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3001,12 +2994,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3042,12 +3034,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3083,12 +3074,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3124,12 +3114,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3164,12 +3153,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3204,12 +3192,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3254,12 +3241,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3317,12 +3303,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3358,12 +3343,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3417,12 +3401,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3489,12 +3472,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3561,12 +3543,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3621,12 +3602,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3680,12 +3660,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3736,12 +3715,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3808,12 +3786,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3827,7 +3804,7 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
-  it('will return COMPLETED processing plant info if there is all plantName, plantApprovalNumber and plantResponsibleForConsignment', async () => {
+  it('will return INCOMPLETE processing plant info if plant address fields are missing', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
         personResponsibleForConsignment: 'DILLIP',
@@ -3847,13 +3824,12 @@ describe('getProcessingStatementProgress', () => {
         exporter: ProgressStatus.INCOMPLETE,
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
-        processingPlant: ProgressStatus.COMPLETED,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 1,
-      requiredSections: 6,
+      completedSections: 0,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3886,12 +3862,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3920,12 +3895,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -3964,12 +3938,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.COMPLETED,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4006,12 +3979,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4049,12 +4021,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4093,12 +4064,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4132,12 +4102,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.COMPLETED,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 1,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4170,12 +4139,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4209,12 +4177,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4240,12 +4207,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4271,18 +4237,17 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
   });
 
-  it('will return COMPLETE processingPlantAddress if any of plantName, plantAddressOne and plantPostcode is missing in exportData', async () => {
+  it('will return INCOMPLETE processingPlant when only address fields exist in exportData', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
         plantAddressOne: 'London',
@@ -4302,12 +4267,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.COMPLETED,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 1,
-      requiredSections: 6,
+      completedSections: 0,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4321,7 +4285,7 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
-  it('will return COMPLETED processingPlantAddress if all plantAddressOne and plantPostcode exist in exportData', async () => {
+  it('will return INCOMPLETE processingPlant when only plantAddressOne and plantPostcode exist in exportData', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
         plantAddressOne: 'London',
@@ -4341,12 +4305,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.COMPLETED,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 1,
-      requiredSections: 6,
+      completedSections: 0,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4360,7 +4323,7 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
-  it('will return INCOMPLETE processingPlantAddress if data and exportData is undefined', async () => {
+  it('will return INCOMPLETE processingPlant if data and exportData is undefined', async () => {
     mockProcessingStatementDraft.mockResolvedValue(undefined);
 
     const result = await ProgressService.getProcessingStatementProgress(
@@ -4375,12 +4338,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4394,7 +4356,7 @@ describe('getProcessingStatementProgress', () => {
     );
   });
 
-  it('will return COMPLETE processingPlantAddress if there is any of plantAddressOne and plantPostcode has empty value in exportData', async () => {
+  it('will return INCOMPLETE processingPlant if plantAddressOne is whitespace in exportData', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
         plantAddressOne: '   ',
@@ -4414,12 +4376,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.COMPLETED,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
-      completedSections: 1,
-      requiredSections: 6,
+      completedSections: 0,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4525,12 +4486,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.COMPLETED,
         processedProductDetails: ProgressStatus.COMPLETED,
         processingPlant: ProgressStatus.COMPLETED,
-        processingPlantAddress: ProgressStatus.COMPLETED,
         exportHealthCertificate: ProgressStatus.COMPLETED,
         exportDestination: ProgressStatus.COMPLETED,
       },
-      requiredSections: 6,
-      completedSections: 6,
+      requiredSections: 5,
+      completedSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -4577,12 +4537,11 @@ describe('getProcessingStatementProgress', () => {
         reference: ProgressStatus.OPTIONAL,
         processedProductDetails: ProgressStatus.INCOMPLETE,
         processingPlant: ProgressStatus.INCOMPLETE,
-        processingPlantAddress: ProgressStatus.INCOMPLETE,
         exportHealthCertificate: ProgressStatus.INCOMPLETE,
         exportDestination: ProgressStatus.INCOMPLETE,
       },
       completedSections: 0,
-      requiredSections: 6,
+      requiredSections: 5,
     };
 
     expect(result).toStrictEqual(expected);
@@ -7123,6 +7082,22 @@ describe('Processing Statement Progress - processingPlant COMPLETED branch', () 
     const result = await ProgressService.getProcessingStatementProgress('user123', 'DOC-PS-123', 'contact123');
 
     expect(result.progress['processingPlant']).toBe(ProgressStatus.COMPLETED);
+  });
+
+  it('should mark processingPlant as INCOMPLETE when plantPostcode is whitespace only', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        plantName: 'Test Plant',
+        plantApprovalNumber: 'AP12345',
+        personResponsibleForConsignment: 'John Doe',
+        plantPostcode: '   ',
+        plantAddressOne: '123 Test Street',
+      }
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress('user123', 'DOC-PS-123', 'contact123');
+
+    expect(result.progress['processingPlant']).toBe(ProgressStatus.INCOMPLETE);
   });
 
   it('should mark exportHealthCertificate as COMPLETED when certificate number and date are valid', async () => {
