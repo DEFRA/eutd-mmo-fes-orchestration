@@ -511,7 +511,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     });
 
     expect(errors).toEqual({
-      plantName: 'psAddProcessingPlantErrorSelectPlant'
+      processingPlant: 'psAddProcessingPlantErrorSelectPlant'
     });
   });
 
@@ -533,7 +533,7 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     });
 
     expect(errors).toEqual({
-      plantName: 'psAddProcessingPlantErrorSelectPlant'
+      processingPlant: 'psAddProcessingPlantErrorSelectPlant'
     });
   });
 });
