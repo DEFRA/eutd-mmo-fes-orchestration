@@ -167,7 +167,7 @@ export default {
     const validation = validateProcessingPlant(data.plantName, data.plantApprovalNumber, 'plantName');
 
     if (validation.isError) {
-      errors.plantName = validation.error.message;
+      errors.processingPlant = validation.error.message;
     }
 
     return { errors };
