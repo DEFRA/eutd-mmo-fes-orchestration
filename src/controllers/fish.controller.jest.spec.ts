@@ -298,6 +298,50 @@ describe("FishController", () => {
     });
   });
 
+  describe('non-JavaScript fish payload sync', () => {
+    it('creates and saves an export payload when one does not exist', async () => {
+      const product = { id: 'product-1', commodity_code: '0302' } as Product;
+      const updatedPayload = { items: [{ product }] };
+      mockReq.headers.accept = 'text/html';
+      mockExportPayloadServiceGet.mockResolvedValue(undefined);
+      mockAugmentProductDetails.mockResolvedValue(product);
+      mockAddPayloadProduct.mockReturnValue(updatedPayload);
+
+      await FishController.addFishNonJsAdd(
+        mockReq,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        CONTACT_ID,
+        product,
+        product
+      );
+
+      expect(mockExportPayloadServiceGet).toHaveBeenCalledWith(USER_ID, DOCUMENT_NUMBER, CONTACT_ID);
+      expect(mockAddPayloadProduct).toHaveBeenCalledWith({ items: [] }, product);
+      expect(mockExportPayloadServiceSave).toHaveBeenCalledWith(
+        updatedPayload,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        CONTACT_ID
+      );
+    });
+  });
+
+  describe('addFishGetLabel()', () => {
+    it('fills missing presentation and state labels from reference data', async () => {
+      const product: any = { presentation: 'WHO', state: 'FRE' };
+      mockAugmentProductDetails.mockResolvedValue({
+        presentation: { label: 'Whole' },
+        state: { label: 'Fresh' }
+      });
+
+      await FishController.addFishGetLabel(product);
+
+      expect(product.presentationLabel).toBe('Whole');
+      expect(product.stateLabel).toBe('Fresh');
+    });
+  });
+
   describe("editFish()", () => {
     const productsArray = [{
       user_id: "Bob",

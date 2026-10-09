@@ -10,7 +10,7 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
     this.store = {};
   }
 
-  async initialize() {
+  initialize(): void {
      logger.info('Memory storage is initialized as session store');
   }
 
@@ -67,14 +67,14 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
     }
   }
 
-  async writeFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T, _ttlSeconds?: number): Promise<void> {
+  writeFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T, _ttlSeconds?: number): Promise<void> {
     const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
     this.store[fullKey] = data;
+    return Promise.resolve();
   }
 
-  async writeAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T[], _ttlSeconds?: number): Promise<void> {
-    const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
-    this.store[fullKey] = data;
+  writeAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T[], _ttlSeconds?: number): Promise<void> {
+    return this.writeFor(userPrincipal, contactId, key, data as unknown as IStoreable, _ttlSeconds);
   }
 
   async tagByDocumentNumber(userPrincipal: string, documentNumber: string, _journey: string): Promise<void> {
