@@ -1642,6 +1642,112 @@ describe('getLandingStatus', () => {
 
     expect(result).toBe(ProgressStatus.COMPLETED);
   });
+
+  it('will fall back to an empty products list when products is undefined while session has a landing error', async () => {
+    mockGetCurrentSessionData.mockResolvedValue({
+      documentNumber,
+      landings: [
+        { landingId: 'landing-1', error: 'invalid', errors: {}, model: {} as any }
+      ]
+    });
+
+    const result = await ProgressService.getLandingsStatus(
+      userPrincipal,
+      documentNumber,
+      undefined,
+      contactId
+    );
+
+    // currentLandingIds stays empty (products || []), so the session error never matches
+    expect(result).toBe(ProgressStatus.CANNOT_START);
+  });
+
+  it('will fall back to an empty caughtBy list when a product has no caughtBy while session has a landing error', async () => {
+    mockHasLandingData.mockReturnValue(true);
+    const productsWithoutCaughtBy = [{ id: '1' }] as any[];
+    mockGetCurrentSessionData.mockResolvedValue({
+      documentNumber,
+      landings: [
+        { landingId: 'landing-1', error: 'invalid', errors: {}, model: {} as any }
+      ]
+    });
+
+    const result = await ProgressService.getLandingsStatus(
+      userPrincipal,
+      documentNumber,
+      productsWithoutCaughtBy,
+      contactId
+    );
+
+    // currentLandingIds stays empty (caughtBy || []), so the session error never matches
+    expect(result).toBe(ProgressStatus.COMPLETED);
+  });
+});
+
+describe('allProductsHaveCatchDetails', () => {
+  it('will return false when products is not an array', () => {
+    expect(
+      ProgressService.allProductsHaveCatchDetails({ products: undefined } as any)
+    ).toBe(false);
+  });
+
+  it('will return false when products array is empty', () => {
+    expect(
+      ProgressService.allProductsHaveCatchDetails({ products: [] } as any)
+    ).toBe(false);
+  });
+
+  it('will return false when catches is not an array but products is valid', () => {
+    expect(
+      ProgressService.allProductsHaveCatchDetails({
+        products: [{ id: '1' }],
+        catches: undefined,
+      } as any)
+    ).toBe(false);
+  });
+
+  it('will return false when catches array is empty but products is valid', () => {
+    expect(
+      ProgressService.allProductsHaveCatchDetails({
+        products: [{ id: '1' }],
+        catches: [],
+      } as any)
+    ).toBe(false);
+  });
+
+  it('will return true when every product has at least one matching catch', () => {
+    expect(
+      ProgressService.allProductsHaveCatchDetails({
+        products: [{ id: '1' }, { id: '2' }],
+        catches: [{ productId: '1' }, { productId: '2' }],
+      } as any)
+    ).toBe(true);
+  });
+
+  it('will return false when a product has no matching catch', () => {
+    expect(
+      ProgressService.allProductsHaveCatchDetails({
+        products: [{ id: '1' }, { id: '2' }],
+        catches: [{ productId: '1' }],
+      } as any)
+    ).toBe(false);
+  });
+});
+
+describe('getCatchCertificateTransportDetails - containerNumbers optional chain', () => {
+  it('will mark as INCOMPLETE when a plane transportation has no container number set at all', async () => {
+    const result = await ProgressService.getCatchCertificateTransportDetails([
+      {
+        id: 0,
+        vehicle: 'plane',
+        flightNumber: '1234',
+        departurePlace: 'London',
+        freightBillNumber: 'FB123',
+      } as any,
+    ]);
+
+    expect(result).toBe(ProgressStatus.INCOMPLETE);
+  });
 });
 
 describe('filterErrors', () => {
@@ -4247,6 +4353,25 @@ describe('getProcessingStatementProgress', () => {
     expect(result).toStrictEqual(expected);
   });
 
+  it('will return INCOMPLETE processingPlant when plantAddressOne is missing but all other plant fields are present', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        plantName: 'Plant Name',
+        plantApprovalNumber: '12345',
+        personResponsibleForConsignment: 'DILLIP',
+        plantPostcode: 'SE37 6YH',
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    expect(result.progress['processingPlant']).toBe(ProgressStatus.INCOMPLETE);
+  });
+
   it('will return INCOMPLETE processingPlant when only address fields exist in exportData', async () => {
     mockProcessingStatementDraft.mockResolvedValue({
       exportData: {
@@ -4354,6 +4479,64 @@ describe('getProcessingStatementProgress', () => {
       documentNumber,
       contactId
     );
+  });
+
+  it('will return INCOMPLETE processingPlant and exportHealthCertificate if data is defined but exportData is undefined', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({});
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        processedProductDetails: ProgressStatus.INCOMPLETE,
+        processingPlant: ProgressStatus.INCOMPLETE,
+        exportHealthCertificate: ProgressStatus.INCOMPLETE,
+        exportDestination: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 5,
+    };
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('will return INCOMPLETE processingPlant when plantApprovalNumber is missing but plantName is present', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        plantName: 'Plant Name',
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    expect(result.progress['processingPlant']).toBe(ProgressStatus.INCOMPLETE);
+  });
+
+  it('will return INCOMPLETE processingPlant when personResponsibleForConsignment is missing but plantName and plantApprovalNumber are present', async () => {
+    mockProcessingStatementDraft.mockResolvedValue({
+      exportData: {
+        plantName: 'Plant Name',
+        plantApprovalNumber: '12345',
+      },
+    });
+
+    const result = await ProgressService.getProcessingStatementProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    expect(result.progress['processingPlant']).toBe(ProgressStatus.INCOMPLETE);
   });
 
   it('will return INCOMPLETE processingPlant if plantAddressOne is whitespace in exportData', async () => {
@@ -4605,6 +4788,31 @@ describe('getStorageDocumentProgress', () => {
       documentNumber,
       contactId
     );
+  });
+
+  it('will return INCOMPLETE for all sections when data is defined but exportData is undefined', async () => {
+    mockStorageDocumentDraft.mockResolvedValue({});
+
+    const result = await ProgressService.getStorageDocumentProgress(
+      userPrincipal,
+      documentNumber,
+      contactId
+    );
+
+    const expected: Progress = {
+      progress: {
+        exporter: ProgressStatus.INCOMPLETE,
+        reference: ProgressStatus.OPTIONAL,
+        catches: ProgressStatus.INCOMPLETE,
+        storageFacilities: ProgressStatus.INCOMPLETE,
+        transportDetails: ProgressStatus.INCOMPLETE,
+        arrivalTransportationDetails: ProgressStatus.INCOMPLETE,
+      },
+      completedSections: 0,
+      requiredSections: 5
+    };
+
+    expect(result).toStrictEqual(expected);
   });
 
   it('will return COMPLETED exporter if there is an exporter with addressOne, exporterCompanyName and postcode properties', async () => {
