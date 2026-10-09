@@ -74,7 +74,9 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
   }
 
   writeAllFor<T extends IStoreable>(userPrincipal: string, contactId: string, key: string, data: T[], _ttlSeconds?: number): Promise<void> {
-    return this.writeFor(userPrincipal, contactId, key, data as unknown as IStoreable, _ttlSeconds);
+    const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
+    this.store[fullKey] = data;
+    return Promise.resolve();
   }
 
   async tagByDocumentNumber(userPrincipal: string, documentNumber: string, _journey: string): Promise<void> {
