@@ -43,6 +43,14 @@ describe('getDocument', () => {
     expect(result).toBeNull();
   });
 
+  it('will return null when the document belongs to another user', async () => {
+    await createDocument('Bob', 'COMPLETE', 'doc-owned-by-bob');
+
+    const result = await StorageDocumentService.getDocument('doc-owned-by-bob', 'OtherUser', 'other-contact');
+
+    expect(result).toBeNull();
+  });
+
 });
 
 describe('getDraft', () => {
@@ -1147,6 +1155,22 @@ describe('getTransportDetails', () => {
     expect(res).toBeNull();
   });
 
+  it('includes the facility arrival date on mapped transport details', async () => {
+    const draft = {
+      exportData: {
+        transportation: { vehicle: 'truck' },
+        facilityArrivalDate: '2025-06-10'
+      }
+    };
+    const mappedTransport = { vehicle: 'truck' };
+    mockGetDraft.mockResolvedValue(draft);
+    mockToFrontEndTransport.mockReturnValue(mappedTransport as any);
+
+    const result = await StorageDocumentService.getTransportDetails('Bob', 'doc-1', defaultContact);
+
+    expect(result).toEqual({ vehicle: 'truck', facilityArrivalDate: '2025-06-10' });
+  });
+
 });
 
 describe('upsertUserReference', () => {
@@ -1501,6 +1525,64 @@ describe('getDraftDocumentHeaders — lean + sort', () => {
     const oldIdx = indices.indexOf('SD-SORT-OLD');
     const newIdx = indices.indexOf('SD-SORT-NEW');
     expect(newIdx).toBeLessThan(oldIdx);
+  });
+});
+
+describe('countCompletedDocuments', () => {
+  it('counts completed documents for the requested user', async () => {
+    await createDocument('Bob', 'COMPLETE', 'SD-COUNT-001');
+    await createDocument('Bob', 'DRAFT', 'SD-COUNT-002');
+    await createDocument('OtherUser', 'COMPLETE', 'SD-COUNT-003');
+
+    const count = await StorageDocumentService.countCompletedDocuments(defaultUser, defaultContact);
+
+    expect(count).toBe(1);
+  });
+});
+
+describe('saveStorageDoc', () => {
+  const transientDocument = () => ({
+    catches: [],
+    exporter: {},
+    documentNumber: 'SD-SAVE-001',
+    status: 'DRAFT',
+    user: { principal: 'Bob', email: 'bob@example.com' },
+    transport: {},
+    documentUri: '/storage-document',
+    requestByAdmin: false
+  });
+
+  it('maps and saves the completed storage document', async () => {
+    const data = transientDocument();
+
+    await StorageDocumentService.saveStorageDoc(data);
+
+    const saved = await StorageDocumentModel.findOne({ documentNumber: data.documentNumber }).lean();
+    expect(data.status).toBe('COMPLETE');
+    expect(saved.createdBy).toBe('Bob');
+  });
+
+  it('logs persistence failures without rethrowing', async () => {
+    const save = jest.spyOn(StorageDocumentModel.prototype, 'save').mockRejectedValue(new Error('database unavailable'));
+    const error = jest.spyOn(require('../../logger').default, 'error');
+
+    await expect(StorageDocumentService.saveStorageDoc(transientDocument())).resolves.toBeUndefined();
+
+    expect(error).toHaveBeenCalledTimes(2);
+    save.mockRestore();
+    error.mockRestore();
+  });
+});
+
+describe('getDraftDocumentHeaders cache', () => {
+  it('returns cached draft headers without querying Mongo', async () => {
+    const cachedHeaders = [{ documentNumber: 'SD-CACHED-001', status: 'DRAFT' }];
+    const getDraftCache = jest.spyOn(CatchCertService, 'getDraftCache').mockResolvedValue(cachedHeaders as any);
+
+    const result = await StorageDocumentService.getDraftDocumentHeaders(defaultUser, defaultContact);
+
+    expect(result).toBe(cachedHeaders);
+    getDraftCache.mockRestore();
   });
 });
 

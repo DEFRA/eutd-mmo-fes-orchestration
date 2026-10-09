@@ -62,7 +62,7 @@ export default class ExportPayloadRoutes {
                 const errors = manualLandingsSchema.validate(value, { abortEarly: false, allowUnknown: true });
                 // Pass existingLandingWeight to validation for correct aggregate weight calculation when editing
                 const existingWeight = value.existingLandingWeight ? Number(value.existingLandingWeight) : undefined;
-                const exportWeightError = await validateAggregateExportWeight(value, existingWeight);
+                const exportWeightError = validateAggregateExportWeight(value, existingWeight);
                 logger.info('Export weight validation errors: %o', exportWeightError);
                 // Validate each exclusiveEconomicZone country
                 const eezValidationErrors = await validateExclusiveEconomicZones(value);
@@ -244,9 +244,8 @@ export default class ExportPayloadRoutes {
                     const month = parts[1].padStart(2, '0');
                     const day = parts[2].padStart(2, '0');
                     const isoDate = `${year}-${month}-${day}`;
-                    if (!moment(isoDate, "YYYY-MM-DD", true).isValid()) {
-                      return helpers.error('date.base');
-                    } else if (moment(isoDate, "YYYY-MM-DD", true).isBefore(minimumLandingDate, 'day')) {
+                    const landedDate = moment(isoDate, "YYYY-MM-DD", true);
+                    if (!landedDate.isValid() || landedDate.isBefore(minimumLandingDate, 'day')) {
                       return helpers.error('date.base');
                     }
                     const maxDate = moment().add(ApplicationConfig._landingLimitDaysInTheFuture, 'days');
@@ -259,9 +258,7 @@ export default class ExportPayloadRoutes {
                 startDate: extendedJoi.date().custom((value: string, helpers: any) => {
                   const startDate = moment(helpers.original, ["YYYY-M-D", "YYYY-MM-DD"], true);
                   const dateLanded = moment(helpers.state.ancestors[0].dateLanded, moment.ISO_8601, true);
-                  if (!startDate.isValid()) {
-                    return helpers.error('date.base');
-                  } else if (startDate.isBefore(minimumLandingDate, 'day')) {
+                  if (!startDate.isValid() || startDate.isBefore(minimumLandingDate, 'day')) {
                     return helpers.error('date.base');
                   }
                   if (dateLanded.isBefore(startDate, 'day')) {

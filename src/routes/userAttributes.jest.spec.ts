@@ -64,111 +64,46 @@ describe('user attribute routes', () => {
       expect(response.result).toHaveLength(0);
     });
 
-    it('will return privacy accepted if date is after Last updated date', async () => {
+    it.each([
+      { name: 'privacy_statement', value: true, modifiedAt: '2019-02-26T23:54:00Z', policyDate: '2018-12-20', expectedCount: 1 },
+      { name: 'accepts_cookies', value: 'yes', modifiedAt: '2025-06-10T13:00:00Z', policyDate: '2025-06-10T12:00:00Z', expectedCount: 1 },
+      { name: 'accepts_cookies', value: 'no', modifiedAt: '2025-06-10T11:00:00Z', policyDate: '2025-06-10T12:00:00Z', expectedCount: 0 },
+      { name: 'accepts_cookies', value: 'yes', modifiedAt: '2025-06-10T13:00:00Z', policyDate: '', expectedCount: 1 }
+    ])('filters $name against its policy update date', async ({ name, value, modifiedAt, policyDate, expectedCount }) => {
       const data = {
         userPrincipal: 'Bob',
-        attributes: [{
-        name: 'privacy_statement',
-        value: true,
-        modifiedAt: '2019-02-26T23:54:00Z'
-      }],
-        favourites: {
-          products: []
-        }
-      }
+        attributes: [{ name, value, modifiedAt }],
+        favourites: { products: [] }
+      };
 
-      ApplicationConfig._lastUpdatedPrivacyStatement = '2018-12-20';
+      if (name === 'privacy_statement') {
+        ApplicationConfig._lastUpdatedPrivacyStatement = policyDate;
+      } else {
+        ApplicationConfig._lastUpdatedCookiePolicy = policyDate;
+      }
 
       mockFindUserAttributes.mockResolvedValue(data);
 
       const response = await server.inject(request);
 
-      expect(response.result).toHaveLength(1)
+      expect(response.result).toHaveLength(expectedCount);
     });
 
-    it('will return cookies accepted if date is after Last updated date', async () => {
-      const data = {
+    it.each([
+      { modifiedAt: '2019-02-26T23:54:00Z', policyDate: '2018-12-20', expectedCount: 1 },
+      { modifiedAt: '2018-11-20T20:15:00Z', policyDate: '2018-11-20T20:14:00Z', expectedCount: 1 },
+      { modifiedAt: '2017-02-26T21:14:00Z', policyDate: '2018-12-20T13:24:00Z', expectedCount: 0 }
+    ])('filters privacy_statement against its cutoff date', async ({ modifiedAt, policyDate, expectedCount }) => {
+      ApplicationConfig._lastUpdatedPrivacyStatement = policyDate;
+      mockFindUserAttributes.mockResolvedValue({
         userPrincipal: 'Bob',
-        attributes: [{
-          name: 'accepts_cookies',
-          value: 'yes',
-          modifiedAt: '2025-06-10T13:00:00Z'
-        }],
-        favourites: {
-          products: []
-        }
-      }
-
-      ApplicationConfig._lastUpdatedCookiePolicy = '2025-06-10T12:00:00Z';
-
-      mockFindUserAttributes.mockResolvedValue(data);
+        attributes: [{ name: 'privacy_statement', value: true, modifiedAt }],
+        favourites: { products: [] }
+      });
 
       const response = await server.inject(request);
 
-      expect(response.result).toHaveLength(1)
-    });
-
-    it('will return cookies not accepted if date is before Last updated date', async () => {
-      const data = {
-        userPrincipal: 'Bob',
-        attributes: [{
-          name: 'accepts_cookies',
-          value: 'no',
-          modifiedAt: '2025-06-10T11:00:00Z'
-        }],
-        favourites: {
-          products: []
-        }
-      }
-
-      ApplicationConfig._lastUpdatedCookiePolicy = '2025-06-10T12:00:00Z';
-
-      mockFindUserAttributes.mockResolvedValue(data);
-
-      const response = await server.inject(request);
-
-      expect(response.result).toHaveLength(0)
-    });
-
-    it('will return cookies accepted if _lastUpdatedCookiePolicy is empty', async () => {
-      const data = {
-        userPrincipal: 'Bob',
-        attributes: [{
-          name: 'accepts_cookies',
-          value: 'yes',
-          modifiedAt: '2025-06-10T13:00:00Z'
-        }],
-        favourites: {
-          products: []
-        }
-      }
-
-      ApplicationConfig._lastUpdatedCookiePolicy = '';
-
-      mockFindUserAttributes.mockResolvedValue(data);
-
-      const response = await server.inject(request);
-
-      expect(response.result).toHaveLength(1)
-    });
-
-    it('will not return privacy accepted if date is before Last updated date', async () => {
-      const data = {
-        userPrincipal: 'Bob',
-        attributes: [{
-        name: 'privacy_statement',
-        value: true,
-        modifiedAt: '2017-02-26T23:54:00Z'
-      }],
-        favourites: {
-          products: []
-        }
-      }
-
-      ApplicationConfig._lastUpdatedPrivacyStatement = '2018-12-20';
-      mockFindUserAttributes.mockResolvedValue(data);
-      const response = await server.inject(request);
-      expect(response.result).toHaveLength(0)
+      expect(response.result).toHaveLength(expectedCount);
     });
 
     it('will return language object even if privacy statement is before last updated date', async () => {
@@ -195,46 +130,6 @@ describe('user attribute routes', () => {
       expect(response.result?.[0].name).toEqual("language");
     });
 
-    it('will return privacy accepted if date and time is after Last updated date', async () => {
-      const data = {
-        userPrincipal: 'Bob',
-        attributes: [{
-        name: 'privacy_statement',
-        value: true,
-        modifiedAt: '2018-11-20T20:15:00Z'
-      }],
-        favourites: {
-          products: []
-        }
-      }
-
-      ApplicationConfig._lastUpdatedPrivacyStatement = '2018-11-20T20:14:00Z';
-
-      mockFindUserAttributes.mockResolvedValue(data);
-
-      const response = await server.inject(request);
-
-      expect(response.result).toHaveLength(1)
-    });
-
-    it('will not return privacy accepted if date and time is before Last updated date', async () => {
-      const data = {
-        userPrincipal: 'Bob',
-        attributes: [{
-        name: 'privacy_statement',
-        value: true,
-        modifiedAt: '2017-02-26T21:14:00Z'
-      }],
-        favourites: {
-          products: []
-        }
-      }
-
-      ApplicationConfig._lastUpdatedPrivacyStatement = '2018-12-20T13:24:00Z';
-      mockFindUserAttributes.mockResolvedValue(data);
-      const response = await server.inject(request);
-      expect(response.result).toHaveLength(0)
-    });
 
     it('will return language object even if privacy statement is before last updated date and time', async () => {
       const data = {
@@ -265,6 +160,57 @@ describe('user attribute routes', () => {
       mockFindUserAttributes.mockRejectedValue(e);
       const response = await server.inject(request);
       expect(response.statusCode).toBe(500);
+    });
+  });
+
+  describe('POST /v1/userAttributes', () => {
+    const request: any = {
+      method: 'POST',
+      url: '/v1/userAttributes',
+      app: { claims: { sub: 'Bob' } },
+      payload: { key: 'language', value: 'cy_UK' }
+    };
+    let mockSaveOrUpdate;
+
+    beforeEach(() => {
+      mockSaveOrUpdate = jest.spyOn(UserAttributeService, 'saveOrUpdate').mockResolvedValue({
+        userPrincipal: 'Bob',
+        attributes: [{ name: 'language', value: 'cy_UK' }],
+        favourites: { products: [] }
+      } as any);
+    });
+
+    afterEach(() => {
+      mockSaveOrUpdate.mockRestore();
+    });
+
+    it('saves attributes and returns them to API clients', async () => {
+      const response = await server.inject(request);
+
+      expect(response.statusCode).toBe(200);
+      expect(mockSaveOrUpdate).toHaveBeenCalledWith('Bob', 'language', 'cy_UK');
+      expect((response.result as any).attributes[0]).toEqual({ name: 'language', value: 'cy_UK' });
+    });
+
+    it('redirects HTML clients after saving attributes', async () => {
+      const response = await server.inject({
+        ...request,
+        headers: { accept: 'text/html' },
+        payload: { ...request.payload, nextUri: '/profile' }
+      });
+
+      expect(response.statusCode).toBe(302);
+      expect(response.headers.location).toBe('/profile');
+    });
+
+    it('returns validation errors for an unsupported language', async () => {
+      const response = await server.inject({
+        ...request,
+        payload: { key: 'language', value: 'fr_FR' }
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(mockSaveOrUpdate).not.toHaveBeenCalled();
     });
   });
 });

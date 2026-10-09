@@ -357,13 +357,14 @@ export default class ExportPayloadService {
 
         logger.info(`[EXPORT-PAYLOAD-SERVICE][CREATE-EXPORT-CERTIFICATE] Returning ${JSON.stringify(result)}`);
       } else if (offlineValidation) {
-        await ExportPayloadService.updateCertificateStatus(userPrincipal, documentNumber, contactId, DocumentStatuses.Draft)
-          .then(() => {
-            logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATED-STATUS][${DocumentStatuses.Draft}]`);
-            void SummaryErrorsService.saveErrors(documentNumber, toFrontEndValidationFailure(result))
-              .catch((e) => { logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SAVE-ERRORS], ${e}`) });
-          })
-          .catch((e) => { logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATE-STATUS][${DocumentStatuses.Draft}][ERROR], ${e}`) });
+        try {
+          await ExportPayloadService.updateCertificateStatus(userPrincipal, documentNumber, contactId, DocumentStatuses.Draft);
+          logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATED-STATUS][${DocumentStatuses.Draft}]`);
+          void SummaryErrorsService.saveErrors(documentNumber, toFrontEndValidationFailure(result))
+            .catch((e) => { logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SAVE-ERRORS], ${e}`) });
+        } catch (e) {
+          logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][UPDATE-STATUS][${DocumentStatuses.Draft}][ERROR], ${e}`);
+        }
       }
 
       // FI0-11132: fire-and-forget reportDocumentSubmitted (non-critical reporting)
