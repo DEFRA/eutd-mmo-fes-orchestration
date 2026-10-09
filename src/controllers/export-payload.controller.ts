@@ -735,7 +735,11 @@ export default class ExportPayloadController {
             model: landing.model
           }
         };
-        await withUserSessionDataStored(userPrincipal, sessionData, contactId);
+
+        // Sequential by necessity: withUserSessionDataStored does a read-modify-write on the
+        // same Redis key, so concurrent calls would race and lose updates
+        // eslint-disable-next-line no-await-in-loop
+        await withUserSessionDataStored(userPrincipal, sessionData, contactId); // NOSONAR - session writes share a Redis key
       }
     }
   }

@@ -51,14 +51,14 @@ export default class ExporterRoutes {
             tags: ['api', 'exporter'],
             validate: {
               options: { abortEarly: false },
-              failAction: async function(req, h, error) {
+              failAction: function(req, h, error) {
                 const errorObject = errorExtractor(error);
                 if (acceptsHtml(req.headers)) {
                     return h.redirect(`${(req.payload as any).currentUri}?error=` + JSON.stringify(errorObject)).takeover();
                 }
                 return h.response(errorObject).code(400).takeover();
               },
-              payload: async (value, options) => {
+              payload: (value, options) => {
                 let schema;
                 // options.context === req
                 if (options.context.params.journey === 'catchCertificate') {
@@ -161,7 +161,7 @@ export default class ExporterRoutes {
                   });
                 }
 
-                const errors = schema.validate(value);
+                const errors = schema.validate(value, { abortEarly: false });
 
                 if (errors.error) {
                   throw errors.error;

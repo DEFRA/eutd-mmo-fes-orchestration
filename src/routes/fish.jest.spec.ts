@@ -407,6 +407,26 @@ describe('fish routes', () => {
       expect(mockRemoveInvalidFavourite).toHaveBeenCalledWith('test', 'some-id');
       expect(JSON.parse(response.payload)).toEqual({ product: 'error.favourite.any.invalid' });
     });
+
+    it.each([
+      ['cancel', { cancel: 'cancel', redirect: '/return' }],
+      ['add-new', { add_new: 'add', redirect: '/return' }]
+    ])('accepts the %s form action without product fields', async (_action, payload) => {
+      const response = await server.inject({ ...mockReq, payload });
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('redirects HTML clients when species validation fails', async () => {
+      const response = await server.inject({
+        ...mockReq,
+        headers: { ...mockReq.headers, accept: 'text/html' },
+        payload: { ...mockReq.payload, species: '' }
+      });
+
+      expect(response.statusCode).toBe(302);
+      expect(response.headers.location).toContain('/redirect-url/');
+    });
   });
 
   describe("PUT /fish/add/{productId}", () => {
@@ -567,6 +587,78 @@ describe('fish routes', () => {
       expect(response.statusCode).toBe(200);
     });
 
+    it('redirects HTML clients when species validation fails', async () => {
+      const response = await server.inject({
+        ...mockReq,
+        headers: { ...mockReq.headers, accept: 'text/html' },
+        payload: { ...mockReq.payload, species: '' }
+      });
+
+      expect(response.statusCode).toBe(302);
+      expect(response.headers.location).toContain('/redirect-url/');
+      expect(mockValidateSpeciesName).not.toHaveBeenCalled();
+      expect(mockFishValidator).not.toHaveBeenCalled();
+    });
+
+    it('returns 500 when editing fish fails', async () => {
+      mockEditFish.mockRejectedValue(new Error('edit failed'));
+      const response = await server.inject(mockReq);
+
+      expect(response.statusCode).toBe(500);
+    });
+
+  });
+
+  describe('/v1/fish/added', () => {
+    const request: any = {
+      headers: {
+        documentnumber: DOCUMENT_NUMBER,
+        Authorization: 'Basic dGVzdDp0ZXN0'
+      },
+      app: { claims: { sub: 'test', email: 'test@test.com' } }
+    };
+    let mockAddedFish;
+    let mockValidate;
+
+    beforeEach(() => {
+      jest.spyOn(DocumentOwnershipValidator, 'validateDocumentOwnership')
+        .mockResolvedValue({ documentNumber: 'GBR-2021-CC-3434343434' } as any);
+      mockAddedFish = jest.spyOn(FishController, 'addedFish').mockResolvedValue({ species: [], partiallyFilledProductRemoved: false });
+      mockValidate = jest.spyOn(FishController, 'validate').mockResolvedValue({} as any);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('returns added fish when document ownership is valid', async () => {
+      const response = await server.inject({ ...request, method: 'GET', url: '/v1/fish/added' });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.result).toEqual({ species: [], partiallyFilledProductRemoved: false });
+      expect(mockAddedFish).toHaveBeenCalled();
+    });
+
+    it('returns 500 when getting added fish fails', async () => {
+      mockAddedFish.mockRejectedValue(new Error('get failed'));
+      const response = await server.inject({ ...request, method: 'GET', url: '/v1/fish/added' });
+
+      expect(response.statusCode).toBe(500);
+    });
+
+    it('validates added fish for a valid document', async () => {
+      const response = await server.inject({ ...request, method: 'POST', url: '/v1/fish/added' });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockValidate).toHaveBeenCalled();
+    });
+
+    it('returns 500 when validating added fish fails', async () => {
+      mockValidate.mockRejectedValue(new Error('validation failed'));
+      const response = await server.inject({ ...request, method: 'POST', url: '/v1/fish/added' });
+
+      expect(response.statusCode).toBe(500);
+    });
   });
 
 });

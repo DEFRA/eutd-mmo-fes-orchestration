@@ -51,7 +51,7 @@ export const createExportPayloadForValidation = (product, landing) => {
   }];
 }
 
-export const validateAggregateExportWeight = async (input: any, existingLandingWeight?: number) => {
+export const validateAggregateExportWeight = (input: any, existingLandingWeight?: number): Joi.ValidationError[] => {
   const createAggregateError = (): Joi.ValidationError => {
     return new Joi.ValidationError('ccAddLandingTotalExportWeightLessThan', [
       {
