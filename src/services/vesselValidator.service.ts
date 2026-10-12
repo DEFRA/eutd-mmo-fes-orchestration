@@ -2,7 +2,59 @@ import * as moment from 'moment';
 import { ProductLanded, LandingStatus, ValidationFailure } from '../persistence/schema/frontEndModels/payload';
 import * as Reference from './reference-data.service';
 
+type LandingDateField = 'dateLanded' | 'startDate';
+
+export class VesselLicenseValidationError extends Error {
+  public readonly field?: LandingDateField;
+  public readonly fields?: LandingDateField[];
+
+  constructor(message: string, options: { field?: LandingDateField; fields?: LandingDateField[]; cause?: unknown } = {}) {
+    super(message);
+    this.name = 'VesselLicenseValidationError';
+    this.field = options.field;
+    this.fields = options.fields;
+    if (options.cause !== undefined) {
+      (this as Error & { cause?: unknown }).cause = options.cause;
+    }
+  }
+}
+
 export default class VesselValidator {
+
+  private static async validateVesselLicenseForDate(landing: LandingStatus, field: LandingDateField) {
+    const date = landing.model[field];
+
+    if (!date || !moment(date).isValid()) {
+      return;
+    }
+
+    try {
+      await Reference.checkVesselLicense(landing.model.vessel, date);
+    } catch (error) {
+      throw new VesselLicenseValidationError(`Invalid vessel license for ${field}`, { field, cause: error });
+    }
+  }
+
+  private static async validateVesselLicenseForLanding(landing: LandingStatus) {
+    const candidateFields: LandingDateField[] = ['dateLanded', 'startDate'];
+    const validationResults = await Promise.allSettled(
+      candidateFields.map((field) => VesselValidator.validateVesselLicenseForDate(landing, field))
+    );
+
+    const failedFields = validationResults
+      .map((result, index) => ({ result, field: candidateFields[index] }))
+      .filter(({ result }) => result.status === 'rejected')
+      .map(({ field }) => field);
+
+    const firstFailure = validationResults.find((result) => result.status === 'rejected');
+
+    if (failedFields.length > 0) {
+      throw new VesselLicenseValidationError('Invalid vessel license for landing dates', {
+        fields: failedFields,
+        cause: firstFailure?.status === 'rejected' ? firstFailure.reason : undefined
+      });
+    }
+  }
 
   public static async checkVesselWithDate(exportedData: ProductLanded[]) {
 
@@ -33,13 +85,7 @@ export default class VesselValidator {
 
         }
 
-        const check = await Reference.checkVesselLicense(landing.model.vessel, landing.model.dateLanded);
-
-        if (check.response?.status === 404) {
-
-          return false;
-
-      }
+        await VesselValidator.validateVesselLicenseForLanding(landing);
 
       return true;
 
