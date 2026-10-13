@@ -20,8 +20,8 @@ const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\
 const UK_COUNTRY_REGEX = new RegExp(`^(?:${COUNTRY.map(escapeRegExp).join('|')})$`, 'i');
 
 const COUNTRY_NOT_UK_TOKEN_BY_ADDRESS_TYPE: Record<string, string> = {
-  processingPlant: 'psAddProcessingPlantAddressErrorCountryNotUk',
-  storageFacility: 'sdAddStorageFacilityAddressErrorCountryNotUk',
+  processingPlant: 'plantAddress',
+  storageFacility: 'storageFacility',
 };
 
 export default class ExporterValidateRoutes {
@@ -133,9 +133,9 @@ export default class ExporterValidateRoutes {
 
     const token = COUNTRY_NOT_UK_TOKEN_BY_ADDRESS_TYPE[value.addressType];
     validationErrors.push({
-      message: token,
+      message: `${value.addressType} is not in the UK`,
       path: ['country'],
-      type: 'any.invalid',
+      type: `${token}.nonUK`,
       context: { key: 'country', label: 'Country' }
     });
   }
