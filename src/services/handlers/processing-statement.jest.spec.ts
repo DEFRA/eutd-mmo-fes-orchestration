@@ -2498,7 +2498,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
       ],
       personResponsibleForConsignment: 'Personal Responsible',
       plantApprovalNumber: 'plant approval number',
-      plantName: 'Hw99zXbw0YqZ9RY8SaIxpVs4xm1t30zj6vC LxKmH3fcKJjiSnWJKax'
+      plantName: 'how many characters in Liverpool Meat and Fish Market - Stanley (Wholesale) Fish Market'
     };
 
     const { errors } = await handler({
