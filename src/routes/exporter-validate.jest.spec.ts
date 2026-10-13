@@ -245,7 +245,7 @@ describe('exporter validate routes', () => {
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.result).toContain('psAddProcessingPlantAddressErrorCountryNotUk');
+      expect(response.result).toContain("error.country.plantAddress.nonUK");
       expect(mockValidateCountriesName).not.toHaveBeenCalled();
     });
 
@@ -274,7 +274,7 @@ describe('exporter validate routes', () => {
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.result).toContain('sdAddStorageFacilityAddressErrorCountryNotUk');
+      expect(response.result).toContain("error.country.storageFacility.nonUK");
       expect(mockValidateCountriesName).not.toHaveBeenCalled();
     });
 
