@@ -89,10 +89,7 @@ export default {
 
   "/create-non-manipulation-document/:documentNumber/add-storage-facility-details": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
     const departureDate = data.arrivalTransport?.departureDate;
-    return validateStorageFacility(data, departureDate, errors)
-  },
-
-  "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval": ({ data, _nextUrl, _currentUrl, errors, _params }) => {
+    validateStorageFacility(data, departureDate, errors);
     return validateStorageApproval(data, errors)
   },
 };
@@ -218,12 +215,7 @@ function checkFacilityArrivalDateError(exportData: any, departureDate: string, e
 
 export function validateStorageFacility(exportData: any, departureDate: string, errors, isStorageFacilitiesPage: boolean = false) {
   checkFacilityArrivalDateError(exportData, departureDate, errors);
-
-  if (!exportData.facilityName || validateWhitespace(exportData.facilityName)) {
-    errors[`storageFacilities-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
-  } else if (containsEmoji(exportData.facilityName)) {
-    errors[`storageFacilities-facilityName`] = `emojiCharactersNotPermitted`;
-  }
+  checkStorageFacilityNameError(exportData, errors);
 
   if (!exportData.facilityAddressOne && !exportData.facilityTownCity && !exportData.facilityPostcode) {
     errors[`storageFacilities-facilityAddressOne`] = getFacilityAddressOneError(isStorageFacilitiesPage)
@@ -246,7 +238,17 @@ export function validateStorageFacility(exportData: any, departureDate: string, 
   return { errors };
 }
 
+function checkStorageFacilityNameError(exportData: any, errors) {
+  if (!exportData.facilityName || validateWhitespace(exportData.facilityName)) {
+    errors[`storageFacilities-facilityName`] = `sdAddStorageFacilityDetailsErrorEnterTheFacilityName`;
+  } else if (containsEmoji(exportData.facilityName)) {
+    errors[`storageFacilities-facilityName`] = `emojiCharactersNotPermitted`;
+  }
+}
+
 export function validateStorageApproval(exportData: any, errors) {
+  checkStorageFacilityNameError(exportData, errors);
+
   if (exportData.facilityApprovalNumber && isInvalidLength(exportData.facilityApprovalNumber, 0, 50)) {
     errors[`storageFacilities-facilityApproval`] = 'sdAddStorageFacilityApprovalCharacterError';
   }
