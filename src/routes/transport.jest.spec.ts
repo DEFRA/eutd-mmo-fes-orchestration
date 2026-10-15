@@ -896,5 +896,25 @@ describe("transport routes", () => {
                 departureDate: "error.departureDate.date.format"
             });
         });
+
+        it.each([
+            { url: '/v1/transport/truck/details', vehicle: 'truck' },
+            { url: '/v1/transport/plane/details', vehicle: 'plane' },
+            { url: '/v1/transport/train/details', vehicle: 'train' },
+            { url: '/v1/transport/containerVessel/details', vehicle: 'containerVessel' }
+        ])('redirects HTML validation failures for $vehicle details', async ({ url, vehicle }) => {
+            const body = {
+                journey: 'storageNotes',
+                vehicle,
+                arrival: true,
+                departureDate: moment().add(1, 'day').format('DD/MM/YYYY'),
+                facilityArrivalDate: moment().format('DD/MM/YYYY'),
+                currentUri: '/transport/details'
+            };
+            const response = await server.inject(createRequestObj(url, body, 'POST', true));
+
+            expect(response.statusCode).toBe(302);
+            expect(response.headers.location).toContain('/transport/details?error=');
+        });
     });
 });

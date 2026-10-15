@@ -66,7 +66,7 @@ export default class FishRoutes {
 
                 if (acceptsHtml(req.headers)) {
                   const url = buildRedirectUrlWithErrorStringInQueryParam(errorDetailsObj, (req.payload as any).redirect);
-                  return h.redirect(url);
+                  return h.redirect(url).takeover();
                 }
                 return h.response(errorDetailsObj).code(400).takeover();
               },
@@ -165,7 +165,7 @@ export default class FishRoutes {
                 const errorDetailsObj = errorExtractor(error);
                 if (acceptsHtml(req.headers)) {
                   const url = buildRedirectUrlWithErrorStringInQueryParam(errorDetailsObj, (req.payload as any).redirect);
-                  return h.redirect(url);
+                  return h.redirect(url).takeover();
                 }
                 return h.response(errorDetailsObj).code(400).takeover();
               },

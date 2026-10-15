@@ -812,6 +812,20 @@ describe("validate()", () => {
     expect(result).toEqual(expectedResult);
   });
 
+  it('records a support error when vessel-date validation throws', async () => {
+    items[0].landings[0].error = 'valid';
+    mockCheckVesselWithDate.mockRejectedValue(new Error('reference service unavailable'));
+
+    await SUT.validate(req, h, false, USER_ID, DOCUMENT_NUMBER, contactId);
+
+    expect(mockSaveExportPayload).toHaveBeenCalledWith(
+      expect.objectContaining({ errors: { vessel_license: 'Please contact support.' } }),
+      USER_ID,
+      DOCUMENT_NUMBER,
+      contactId
+    );
+  });
+
   it("should redirect to payload.nextUri when acceptsHtml returns true", async () => {
     mockAcceptsHtml = jest.spyOn(AcceptsHTML, "default");
     mockAcceptsHtml.mockReturnValue(true);
@@ -1082,6 +1096,49 @@ describe("methods", () => {
     });
   });
 
+  describe('editExportPayloadCheckLanding()', () => {
+    it('removes a newly added landing when editing is cancelled', () => {
+      const landing = { addMode: true, editMode: false, model: { id: 'landing-1' } };
+      const product: any = { landings: [landing] };
+
+      SUT.editExportPayloadCheckLanding(landing as any, product, 'landing-1');
+
+      expect(product.landings).toEqual([]);
+    });
+
+    it('copies the original model when editing starts', () => {
+      const model = { id: 'landing-1', exportWeight: 10 };
+      const landing: any = { addMode: false, editMode: false, model };
+
+      SUT.editExportPayloadCheckLanding(landing, { landings: [landing] } as any, 'landing-1');
+
+      expect(landing.editMode).toBe(true);
+      expect(landing.modelCopy).toEqual(model);
+      expect(landing.modelCopy).not.toBe(model);
+    });
+
+    it('restores the original model and clears errors when editing is cancelled', () => {
+      const modelCopy = { id: 'landing-1', exportWeight: 10 };
+      const landing: any = {
+        addMode: false,
+        editMode: true,
+        modelCopy,
+        model: { id: 'landing-1', exportWeight: 20 },
+        error: 'invalid',
+        errors: { exportWeight: 'invalid' }
+      };
+
+      SUT.editExportPayloadCheckLanding(landing, { landings: [landing] } as any, 'landing-1');
+
+      expect(landing.editMode).toBe(false);
+      expect(landing.model).toEqual(modelCopy);
+      expect(landing.model).not.toBe(modelCopy);
+      expect(landing.modelCopy).toBeUndefined();
+      expect(landing.error).toBeUndefined();
+      expect(landing.errors).toBeUndefined();
+    });
+  });
+
   describe("editExportPayloadProductLandingNonjs()", () => {
     it("should call ExportPayloadService.get() with the right params", async () => {
       await SUT.editExportPayloadProductLandingNonjs(
@@ -1165,6 +1222,54 @@ describe("methods", () => {
         contactId
       );
       expect(mockRedirect).toHaveBeenCalledWith(mockReq.payload.currentUri);
+    });
+
+    it('removes a landing using the legacy payload field and clears summary errors', async () => {
+      const exportPayload: any = {
+        items: [{
+          product: { id: 'product-id' },
+          landings: [
+            { model: { id: 'landing-id' } },
+            { model: { id: 'landing-id-2' } }
+          ]
+        }]
+      };
+      mockReq.params.landingId = undefined;
+      mockReq.payload.remove = 'landing-id';
+      mockReq.headers.accept = 'application/json';
+      mockExportPayloadServiceGet.mockResolvedValue(exportPayload);
+      const clearErrors = jest.spyOn(SummaryErrorsService, 'clearErrors').mockResolvedValue(undefined);
+
+      const result = await SUT.removeExportPayloadProductLanding(
+        mockReq,
+        h,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(exportPayload.items[0].landings).toHaveLength(1);
+      expect(mockExportPayloadServiceSave).toHaveBeenCalledWith(exportPayload, USER_ID, DOCUMENT_NUMBER, contactId);
+      expect(clearErrors).toHaveBeenCalledWith(DOCUMENT_NUMBER);
+      expect(result).toBeNull();
+      clearErrors.mockRestore();
+    });
+
+    it('returns the payload unchanged when the product is not present', async () => {
+      const exportPayload = { items: [] };
+      mockReq.headers.accept = 'application/json';
+      mockExportPayloadServiceGet.mockResolvedValue(exportPayload);
+
+      const result = await SUT.removeExportPayloadProductLanding(
+        mockReq,
+        h,
+        USER_ID,
+        DOCUMENT_NUMBER,
+        contactId
+      );
+
+      expect(result).toBe(exportPayload);
+      expect(mockExportPayloadServiceSave).not.toHaveBeenCalled();
     });
   });
 

@@ -3,6 +3,8 @@ import * as DocumentOwnershipValidator from '../validators/documentOwnershipVali
 import ExporterRoutes from './exporter';
 import ExporterController from '../controllers/exporter.controller';
 
+const testAuthorization = `Basic ${Buffer.from('test:test').toString('base64')}`;
+
 const createServerInstance = async () => {
   const server = Hapi.server();
   await server.register(require("@hapi/basic"));
@@ -80,7 +82,7 @@ describe('exporter routes', () => {
       },
       headers: {
         documentNumber: 'DOCUMENT123',
-        Authorization: "Basic ZmVzOmwyZmQyMGF0enl4MWE1anF3bW13bXBvODZuOWZjeHA0OHF4bXEwbW5ybWF6c25vdmcxaDd4dWFldXk1bTUxNHp4OGd3MGoycmp4a3MzOGtyNTFoaWg5Z3liaDNpbDMzdW1lYzBlNDJlbDgzeGZvZHZtOXF6ZmJ3YTVkNHN4aTkz",
+            Authorization: testAuthorization,
       }
     };
 
@@ -101,7 +103,7 @@ describe('exporter routes', () => {
 
       const response = await server.inject(request);
       expect(response.statusCode).toBe(500);
-      expect(response.result).toEqual(null);
+      expect(response.result).toBeNull();
     });
 
   })
@@ -144,15 +146,11 @@ describe('exporter routes', () => {
       }
     };
 
-    it('will return 200 if the required fields are included', async () => {
-      const payload = {
-        exporterFullName: 'Bob',
-        exporterCompanyName: 'Bob Co.',
-        townCity: 'Town',
-        postcode: 'Bob123'
-      };
-
-      const response = await server.inject({...request, payload});
+    it.each([
+      ['catchCertificate', { exporterFullName: 'Bob', exporterCompanyName: 'Bob Co.', townCity: 'Town', postcode: 'Bob123' }],
+      ['processingStatement', { exporterCompanyName: 'Bob Co.', townCity: 'Town', postcode: 'Bob123' }]
+    ])('will return 200 for valid %s exporter details', async (journey, payload) => {
+      const response = await server.inject({ ...request, url: `/v1/exporter/${journey}`, payload });
 
       expect(response.statusCode).toBe(200);
     });
@@ -320,18 +318,6 @@ describe('exporter routes', () => {
       payload: {},
     };
 
-    it("will return 200 if the required fields are included", async () => {
-      const payload = {
-        exporterCompanyName: "Bob Co.",
-        townCity: "Town",
-        postcode: "Bob123",
-      };
-
-      const response = await server.inject({ ...request, payload });
-
-      expect(response.statusCode).toBe(200);
-    });
-
     it("will return 400 if the required fields are missing", async () => {
       const response = await server.inject({ ...request });
 
@@ -396,4 +382,78 @@ describe('exporter routes', () => {
     });
   });
 
+  describe('POST /v1/exporter/{journey}/saveAsDraftLink', () => {
+    let mockValidateDocumentOwnership;
+    let mockAddExporterDetailsAndDraftLink;
+
+    beforeAll(() => {
+      mockValidateDocumentOwnership = jest.spyOn(DocumentOwnershipValidator, 'validateDocumentOwnership');
+      mockAddExporterDetailsAndDraftLink = jest.spyOn(ExporterController, 'addExporterDetailsAndDraftLink');
+    });
+
+    beforeEach(() => {
+      mockValidateDocumentOwnership.mockResolvedValue({ documentNumber: 'GBR-2021-CC-3434343434' });
+      mockAddExporterDetailsAndDraftLink.mockResolvedValue('success');
+    });
+
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
+    const request: any = {
+      method: 'POST',
+      url: '/v1/exporter/catchCertificate/saveAsDraftLink',
+      app: { claims: { sub: 'Bob' } },
+      headers: {
+        documentNumber: 'DOCUMENT123',
+        Authorization: 'Basic dGVzdDp0ZXN0'
+      }
+    };
+
+    it.each([
+      ['catchCertificate', { exporterFullName: 'Bob', exporterCompanyName: 'Bob Co.', addressOne: '1 High Street', townCity: 'Town' }],
+      ['processingStatement', { exporterCompanyName: 'Bob Co.', addressOne: '1 High Street', townCity: 'Town' }]
+    ])('accepts valid %s draft details', async (journey, payload) => {
+      const response = await server.inject({ ...request, url: `/v1/exporter/${journey}/saveAsDraftLink`, payload });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockAddExporterDetailsAndDraftLink).toHaveBeenCalledWith(
+        expect.any(Object), expect.any(Object), 'Bob', 'DOCUMENT123', undefined
+      );
+    });
+
+    it('returns validation errors for an incomplete draft payload', async () => {
+      const response = await server.inject({ ...request, payload: {} });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.result).toEqual({
+        exporterFullName: 'error.exporterFullName.any.required',
+        exporterCompanyName: 'error.exporterCompanyName.any.required',
+        addressOne: 'error.addressOne.any.required',
+        townCity: 'error.townCity.any.required'
+      });
+    });
+
+    it('redirects HTML clients when draft validation fails', async () => {
+      const response = await server.inject({
+        ...request,
+        headers: { ...request.headers, accept: 'text/html' },
+        payload: { currentUri: '/exporter' }
+      });
+
+      expect(response.statusCode).toBe(302);
+      expect(response.headers.location).toContain('/exporter?error=');
+    });
+
+    it('returns 500 when saving draft details fails', async () => {
+      mockAddExporterDetailsAndDraftLink.mockRejectedValue(new Error('save failed'));
+      const response = await server.inject({
+        ...request,
+        payload: { exporterFullName: 'Bob', exporterCompanyName: 'Bob Co.', addressOne: '1 High Street', townCity: 'Town' }
+      });
+
+      expect(response.statusCode).toBe(500);
+      expect(response.result).toBeNull();
+    });
+  });
 });

@@ -466,19 +466,16 @@ describe("exporter-payload routes", () => {
       expect(response.payload).toStrictEqual(JSON.stringify(expected));
     });
 
-    it("should return 400 for a request payload containing an invalid start date", async () => {
+    it.each([
+      { title: 'malformed', startDate: 'an-invalid-date' },
+      { title: 'non-existent', startDate: '2025-02-31' },
+      { title: 'incomplete', startDate: '-5-' }
+    ])('returns 400 for a $title start date', async ({ startDate }) => {
       mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-
-      const _request = {
+      const response = await server.inject({
         ...request,
-        payload: {
-          ...request.payload,
-          startDate: 'an-invalid-date'
-        }
-      }
-
-      const response = await server.inject(_request);
+        payload: { ...request.payload, startDate }
+      });
 
       expect(response.statusCode).toBe(400);
       expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
@@ -524,44 +521,6 @@ describe("exporter-payload routes", () => {
       expect(response.statusCode).toBe(400);
       expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
       expect(JSON.parse(response.payload).errors.dateLanded).toBe('error.dateLanded.date.base');
-    });
-
-    it("should return 400 for a request payload containing a non-existent start date", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          startDate: '2025-02-31'
-        }
-      }
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(400);
-      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
-      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
-    });
-
-    it("should return 400 for a request payload containing an incomplete start date", async () => {
-      mockValidateDocumentOwnership.mockResolvedValue(true);
-      mockUpsertExportPayloadProductLanding.mockResolvedValue({ some: "data" });
-
-      const _request = {
-        ...request,
-        payload: {
-          ...request.payload,
-          startDate: '-5-'
-        }
-      }
-
-      const response = await server.inject(_request);
-
-      expect(response.statusCode).toBe(400);
-      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
-      expect(JSON.parse(response.payload).errors.startDate).toBe('error.startDate.date.base');
     });
 
     it("should return 200 for a request payload containing startDate at minimum boundary date", async () => {
@@ -635,6 +594,46 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.result).toStrictEqual({ some: "data" });
+    });
+
+    it('rejects landings that exceed the aggregate export-weight limit', async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      const response = await server.inject({
+        ...request,
+        payload: {
+          ...request.payload,
+          totalCombinedExportWeight: 10000000,
+          exportWeight: 2
+        }
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(JSON.parse(response.payload).errors.exportWeight).toBeDefined();
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid manual landing EEZ countries', async () => {
+      mockValidateDocumentOwnership.mockResolvedValue(true);
+      mockValidateCountriesName.mockResolvedValue({
+        isError: true,
+        error: new Joi.ValidationError('invalid country', [
+          {
+            message: 'error.eez.0.any.invalid',
+            path: ['exclusiveEconomicZones', 0],
+            type: 'any.invalid',
+            context: { key: 'officialCountryName' }
+          }
+        ], null)
+      });
+
+      const response = await server.inject({
+        ...request,
+        payload: { ...request.payload, highSeasArea: 'No' }
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(JSON.parse(response.payload).errors['exclusiveEconomicZones.0']).toBe('error.exclusiveEconomicZones.0.any.invalid');
+      expect(mockUpsertExportPayloadProductLanding).not.toHaveBeenCalled();
     });
 
     it("should return 200 for a request payload containing a start date equal to the dateLanded", async () => {
@@ -925,6 +924,16 @@ describe("exporter-payload routes", () => {
 
       expect(response.statusCode).toBe(200);
       expect(mockUpsertExportPayloadProductLanding).toHaveBeenCalled();
+    });
+
+    it('returns 500 when ownership validation fails while handling invalid landing input', async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(new Error('ownership lookup failed'));
+      const response = await server.inject({
+        ...request,
+        payload: { ...request.payload, faoArea: 'invalid' }
+      });
+
+      expect(response.statusCode).toBe(500);
     });
   });
 
@@ -1417,6 +1426,16 @@ describe("exporter-payload routes", () => {
       expect(mockUpsertExportPayloadProductDirectLanding).not.toHaveBeenCalled();
       expect(JSON.parse(response.payload).errors).toStrictEqual({"gearCategory":"error.gearCategory.string.empty"});
     });
+
+    it('returns 500 when ownership validation fails while handling invalid direct landing input', async () => {
+      mockValidateDocumentOwnership.mockRejectedValue(new Error('ownership lookup failed'));
+      const response = await server.inject({
+        ...request,
+        payload: { ...request.payload, faoArea: 'invalid' }
+      });
+
+      expect(response.statusCode).toBe(500);
+    });
   });
 
   describe("POST /v1/export-certificates/export-payload/product", () => {
@@ -1718,6 +1737,17 @@ describe("exporter-payload routes", () => {
       expect(response.statusCode).toBe(200);
       expect(response.result).toStrictEqual({ some: "data" });
     });
+
+    it('redirects HTML clients when save-as-draft validation fails', async () => {
+      const response = await server.inject({
+        ...request,
+        headers: { ...request.headers, accept: 'text/html' },
+        payload: { currentUri: '/draft', journey: '' }
+      });
+
+      expect(response.statusCode).toBe(302);
+      expect(response.headers.location).toContain('/draft?error=');
+    });
   });
 
   describe("POST /v1/export-certificates/confirm-change-landings-type", () => {
@@ -1795,6 +1825,26 @@ describe("exporter-payload routes", () => {
 
       const response = await server.inject(mockReq);
       expect(response.statusCode).toBe(302);
+    });
+
+    it('redirects HTML clients when the confirmation payload is invalid', async () => {
+      const response = await server.inject({
+        ...request,
+        headers: { ...request.headers, accept: 'text/html' },
+        payload: { ...request.payload, landingsEntryOption: '' }
+      });
+
+      expect(response.statusCode).toBe(302);
+      expect(response.headers.location).toContain('?error=');
+    });
+
+    it('returns validation errors to API clients when the confirmation payload is invalid', async () => {
+      const response = await server.inject({
+        ...request,
+        payload: { ...request.payload, landingsEntryOption: '' }
+      });
+
+      expect(response.statusCode).toBe(400);
     });
 
     it("should return 200 for a valid landings entry option confirmation but not save", async () => {

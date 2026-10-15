@@ -552,14 +552,17 @@ export default class OrchestrationService {
         });
       }
 
-      if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef))) {
+      // Sequential by necessity: draftCacheRef must load the shared draft at most once per request
+      // eslint-disable-next-line no-await-in-loop
+      if (data.catches[ctch].certificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef))) { // NOSONAR - draftCacheRef is shared across catches
         data.validationErrors.push({
           message: 'sdAddCatchDetailsErrorUKDocumentInvalid',
           key: `catches-${ctch}-certificateNumber`,
           certificateNumber: documentCertificateNumber,
           product: species
         });
-      } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef)) {
+        // eslint-disable-next-line no-await-in-loop
+      } else if (data.catches[ctch].certificateType === 'uk' && !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef)) { // NOSONAR - keep shared draft-cache validation sequential
         data.validationErrors.push({
           message: 'sdAddUKEntryDocumentSpeciesDoesNotExistError',
           key: `catches-${ctch}-certificateNumber`,
@@ -576,7 +579,9 @@ export default class OrchestrationService {
       const documentCertificateNumber = data.catches[ctch].catchCertificateNumber;
       const species = data.catches[ctch].species;
       const speciesCode = data.catches[ctch].speciesCode;
-      if (data.catches[ctch].catchCertificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef) || !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef))) {
+      // Sequential by necessity: draftCacheRef must load the shared draft at most once per request
+      // eslint-disable-next-line no-await-in-loop
+      if (data.catches[ctch].catchCertificateType === 'uk' && (!await validateCompletedDocument(documentCertificateNumber, userPrincipal, contactId, documentNumber, draftCacheRef) || !await validateSpecies(documentCertificateNumber, species, speciesCode, userPrincipal, contactId, documentNumber, draftCacheRef))) { // NOSONAR - draftCacheRef is shared across catches
         data.validationErrors.push({
           message: 'psAddCatchDetailsErrorUKCCInValid',
           key: `catches-${ctch}-catchCertificateNumber`
