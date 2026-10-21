@@ -45,7 +45,9 @@ export default class UserAttributesRoutes {
               },
               payload: Joi.object({
                 key: Joi.string().required(),
-                value: Joi.any().when('key', { not: 'language', then: Joi.any(), otherwise: Joi.string().valid('en_UK','cy_UK').required() })
+                value: Joi.any().when('key', { not: 'language', then: Joi.any(), otherwise: Joi.string().valid('en_UK','cy_UK').required() }),
+                currentUri: Joi.string().optional(),
+                nextUri: Joi.string().optional()
               })
             }
           }
