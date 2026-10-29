@@ -47,8 +47,10 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
         documentNumber
       };
 
-      for(const key of redisKeys) {
-        const json = await this.connection.get(key);
+      const jsonValues = await Promise.all(redisKeys.map((key: string) => this.connection.get(key)));
+
+      for(const [index, key] of redisKeys.entries()) {
+        const json = jsonValues[index];
         const keyParts = key.split(DELIMITER);
         if (keyParts.length < 2) {
           logger.warn('Key does not have required parts to amend document', key);
@@ -204,7 +206,7 @@ export class RedisStorage<T extends IStoreable> implements IStorage<T> {
       ]
     };
     const keys = Object.hasOwn(journeyKeys, journey) ? journeyKeys[journey] : [];
-    this.connection.sadd(documentNumber, ...keys);
+    await this.connection.sadd(documentNumber, ...keys);
   }
 
   async removeTag(documentNumber: string): Promise<void> {

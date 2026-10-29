@@ -311,5 +311,32 @@ describe('MongoConnection', () => {
         { $set: { status: 'VOID' } }
       );
     });
+
+    it('should return the result of updateOne', async () => {
+      const updateResult = { modifiedCount: 1 };
+      (MongoConnection as any).mongo = {
+        connection: {
+          db: {
+            collection: jest.fn().mockReturnValue({ updateOne: jest.fn().mockResolvedValue(updateResult) })
+          }
+        }
+      };
+
+      await expect(MongoConnection.updateStatusAsVoid('testCollection', { _id: '123' })).resolves.toBe(updateResult);
+    });
+
+    it('should log and swallow an asynchronous updateOne failure', async () => {
+      const error = new Error('update failed');
+      (MongoConnection as any).mongo = {
+        connection: {
+          db: {
+            collection: jest.fn().mockReturnValue({ updateOne: jest.fn().mockRejectedValue(error) })
+          }
+        }
+      };
+
+      await expect(MongoConnection.updateStatusAsVoid('testCollection', { _id: '123' })).resolves.toBeUndefined();
+      expect(mockLoggerError).toHaveBeenCalledWith(error);
+    });
   });
 });

@@ -97,7 +97,7 @@ export default class ExportPayloadService {
           // Sequential by necessity: withUserSessionDataStored does a read-modify-write on the
           // same Redis key, so concurrent calls would race and lose updates
           // eslint-disable-next-line no-await-in-loop
-          await withUserSessionDataStored(userId, sessionData, contactId);
+          await withUserSessionDataStored(userId, sessionData, contactId); // NOSONAR
         }
       }
     }
@@ -517,7 +517,7 @@ export default class ExportPayloadService {
       logger.info(`[CREATE-EXPORT-CERTIFICATE][${documentNumber}][SERVICE][REFRESHING-LANDING-SERIAL][PLN: ${landing.pln}, DATE: ${landing.dateLanded}, IS-LEGALLY-DUE: ${landing.isLegallyDue}]`);
       // Intentionally serial (see performParallelRefresh for the concurrent counterpart used elsewhere)
       // eslint-disable-next-line no-await-in-loop
-      await VesselLandingsRefresher.refresh(landing);
+      await VesselLandingsRefresher.refresh(landing); // NOSONAR - intentionally serial
     }
   }
 
