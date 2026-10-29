@@ -60,7 +60,7 @@ export default class DocumentController {
     logger.info({ userPrincipal: app.claims.sub }, 'Received a request to get a document');
     const userPrincipal = app.claims.sub;
     const contactId = app.claims.contactId;
-    const documentKey = req.query.service + '/' + DOCUMENT_NUMBER_KEY;
+    const documentKey = (req.query.service as string) + '/' + DOCUMENT_NUMBER_KEY;
 
     return await DocumentNumberService.getDraftDocuments(userPrincipal, documentKey, contactId);
   }
@@ -86,7 +86,7 @@ export default class DocumentController {
 
   public static async getAllDocuments(req: Hapi.Request): Promise<AllDocuments> {
     try {
-      const monthAndYear = `${req.params.month}-${req.params.year}`;
+      const monthAndYear = `${req.params.month as string}-${req.params.year as string}`;
       let inProgress: DocumentsInProgress;
       let completed: DocumentsCompleted;
       const app = req.app as HapiRequestApplicationStateExtended;
