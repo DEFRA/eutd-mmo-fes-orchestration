@@ -213,6 +213,26 @@ describe("RedisStorage", () => {
       );
     });
 
+    it('should wait for sadd to complete', async () => {
+      let resolveSadd: () => void;
+      (mockRedis as any).sadd = jest.fn().mockReturnValue(new Promise<void>(resolve => { resolveSadd = resolve; }));
+      let settled = false;
+
+      const promise = storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', CATCH_CERTIFICATE_KEY).then(() => { settled = true; });
+      await Promise.resolve();
+      expect(settled).toBe(false);
+
+      resolveSadd();
+      await promise;
+      expect(settled).toBe(true);
+    });
+
+    it('should propagate a failure from sadd', async () => {
+      (mockRedis as any).sadd = jest.fn().mockRejectedValue(new Error('sadd failed'));
+
+      await expect(storage.tagByDocumentNumber('BOB', CONTACT_ID, 'DOC-999', CATCH_CERTIFICATE_KEY)).rejects.toThrow('sadd failed');
+    });
+
     it('should call sadd with no keys for unknown journey', () => {
       (mockRedis as any).sadd = jest.fn();
 
@@ -280,6 +300,32 @@ describe("RedisStorage", () => {
         documentNumber: "GBR-2020-CC-0E42C2DA5",
         userPrincipal: "BOB",
       });
+    });
+
+    it('should combine every key of the document using the value stored against each key', async () => {
+      mockRedis.smembers.mockResolvedValueOnce(["BOB:species", "BOB:catches", "BOBINVALIDKEY", "BOB:conservation"]);
+      mockRedis.get
+        .mockResolvedValueOnce('[{"id":"s1"}]')
+        .mockResolvedValueOnce('[{"id":"c1"}]')
+        .mockResolvedValueOnce('{"ignored":true}')
+        .mockResolvedValueOnce(null as any);
+
+      const doc = await storage.getDocument('GBR-2020-CC-0E42C2DA5');
+
+      expect(mockRedis.get).toHaveBeenCalledTimes(4);
+      expect(doc).toEqual({
+        documentNumber: 'GBR-2020-CC-0E42C2DA5',
+        species: [{ id: 's1' }],
+        catches: [{ id: 'c1' }],
+        userPrincipal: 'BOB',
+      });
+    });
+
+    it('should reject when reading a key fails', async () => {
+      mockRedis.smembers.mockResolvedValueOnce(["BOB:species"]);
+      mockRedis.get.mockRejectedValueOnce(new Error('get failed'));
+
+      await expect(storage.getDocument('GBR-2020-CC-0E42C2DA5')).rejects.toThrow('get failed');
     });
 
     it('should return null from Redis when key does not exist', async () => {

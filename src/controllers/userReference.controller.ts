@@ -17,8 +17,8 @@ export default class UserReferenceController {
     }
   }
 
-  static readonly getUserReference = async (document: CatchCertificate | ProcessingStatement | StorageDocument): Promise<string> =>
-    document ? document.userReference : null;
+  static readonly getUserReference = (document: CatchCertificate | ProcessingStatement | StorageDocument): Promise<string> =>
+    Promise.resolve(document ? document.userReference : null);
 
   static readonly addUserReference = async (userPrincipal: string, documentNumber: string, userReference: string, contactId: string): Promise<void> => {
     const serviceName = DocumentNumberService.getServiceNameFromDocumentNumber(documentNumber);
