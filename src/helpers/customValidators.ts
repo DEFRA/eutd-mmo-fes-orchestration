@@ -34,19 +34,13 @@ const createEmptyZoneError = (index: number): Joi.ValidationError => {
   ], null);
 };
 
-const handleEmptyZoneWhenHighSeasNo = (index: number, validationErrors: any[]): void => {
-  validationErrors.push(createEmptyZoneError(index));
-};
-
 const handleEmptyZoneWhenHighSeasYes = (index: number, indicesToRemove: number[]): void => {
   indicesToRemove.push(index);
 };
 
-const handleNonEmptyZone = async (zone: any, refUrl: string, index: number, validationErrors: any[]): Promise<void> => {
+const validateNonEmptyZone = async (zone: any, refUrl: string, index: number): Promise<any> => {
   const anyError = await validateCountriesName(zone, refUrl, `eez.${index}`);
-  if (anyError.isError) {
-    validationErrors.push(anyError.error);
-  }
+  return anyError.isError ? anyError.error : undefined;
 };
 
 const removeEmptyRecords = (zones: any[], indicesToRemove: number[]): void => {
@@ -67,20 +61,22 @@ export const validateExclusiveEconomicZones = async (value: any): Promise<any[]>
   const isHighSeasYes = value.highSeasArea === 'Yes';
   const indicesToRemove: number[] = [];
 
-  for (let i = 0; i < value.exclusiveEconomicZones.length; i++) {
-    const zone = value.exclusiveEconomicZones[i];
-    const isEmpty = isZoneEmpty(zone);
-
-    if (isEmpty) {
-      if (isHighSeasNo) {
-        handleEmptyZoneWhenHighSeasNo(i, validationErrors);
-      } else {
-        handleEmptyZoneWhenHighSeasYes(i, indicesToRemove);
-      }
-    } else {
-      await handleNonEmptyZone(zone, refUrl, i, validationErrors);
+  const zoneChecks: Promise<any>[] = value.exclusiveEconomicZones.map((zone: any, i: number) => {
+    if (!isZoneEmpty(zone)) {
+      return validateNonEmptyZone(zone, refUrl, i);
     }
-  }
+
+    if (isHighSeasNo) {
+      return createEmptyZoneError(i);
+    }
+
+    handleEmptyZoneWhenHighSeasYes(i, indicesToRemove);
+    return undefined;
+  });
+
+  // Promise.all keeps the errors in zone order
+  const zoneErrors = await Promise.all(zoneChecks);
+  validationErrors.push(...zoneErrors.filter(Boolean));
 
   if (isHighSeasYes && indicesToRemove.length > 0) {
     removeEmptyRecords(value.exclusiveEconomicZones, indicesToRemove);

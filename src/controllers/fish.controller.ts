@@ -215,36 +215,31 @@ export default class FishController {
 
       if (unmatchedExportPayloadItems.length > 0) {
         refreshRequired = true;
-        const ln = unmatchedExportPayloadItems.length;
-        for (let idx = 0; idx < ln; idx++) {
-          await Services.addFish({
+        await Promise.all(unmatchedExportPayloadItems.map(item => Services.addFish({
             user_id: userId,
-            id: unmatchedExportPayloadItems[idx].product.id,
-            state: unmatchedExportPayloadItems[idx].product.state.code,
-            stateLabel: unmatchedExportPayloadItems[idx].product.state.label,
-            stateAdmin: unmatchedExportPayloadItems[idx].product.state.admin,
-            presentation: unmatchedExportPayloadItems[idx].product.presentation.code,
-            presentationLabel: unmatchedExportPayloadItems[idx].product.presentation.label,
-            presentationAdmin: unmatchedExportPayloadItems[idx].product.presentation.admin,
-            species: unmatchedExportPayloadItems[idx].product.species.label,
-            speciesAdmin: unmatchedExportPayloadItems[idx].product.species.admin,
-            speciesCode: unmatchedExportPayloadItems[idx].product.species.code,
-            commodity_code: unmatchedExportPayloadItems[idx].product.commodityCode,
-            commodity_code_admin: unmatchedExportPayloadItems[idx].product.commodityCodeAdmin
-          }, documentNumber, contactId);
-        }
+            id: item.product.id,
+            state: item.product.state.code,
+            stateLabel: item.product.state.label,
+            stateAdmin: item.product.state.admin,
+            presentation: item.product.presentation.code,
+            presentationLabel: item.product.presentation.label,
+            presentationAdmin: item.product.presentation.admin,
+            species: item.product.species.label,
+            speciesAdmin: item.product.species.admin,
+            speciesCode: item.product.species.code,
+            commodity_code: item.product.commodityCode,
+            commodity_code_admin: item.product.commodityCodeAdmin
+          }, documentNumber, contactId)));
       }
     }
     return refreshRequired;
   }
 
   static readonly removeFish = async (userId: string, unmatchedSpecies: Product[], documentNumber: string, contactId: string, unmatchedSpeciesLength: number) => {
-    for (let idx = 0; idx < unmatchedSpeciesLength; idx++) {
-      await Services.removeFish({
-        user_id: userId,
-        cancel: unmatchedSpecies[idx].id
-      }, documentNumber, contactId);
-    }
+    await Promise.all(unmatchedSpecies.slice(0, unmatchedSpeciesLength).map(product => Services.removeFish({
+      user_id: userId,
+      cancel: product.id
+    }, documentNumber, contactId)));
   }
 
   public static async removeInCompleteSpecies(userId: string, documentNumber: string, species: Product[], contactId: string): Promise<boolean | void> {

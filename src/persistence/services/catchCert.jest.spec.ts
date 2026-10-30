@@ -1232,7 +1232,8 @@ describe('catchCert - db related', () => {
       mockInvalidateDraftCache.mockResolvedValue(Promise.resolve());
       mockSaveDraftCache.mockResolvedValue(Promise.resolve());
 
-      const returnedDoc = { document: "GBR-2020-CC-0E42C2DA5" };
+      // A schema field is required: an unknown field is stripped, leaving an empty update that MongoDB < 5 cannot upsert with a multi-branch $or filter
+      const returnedDoc = { $set: { 'exportData.transportation.exportedFrom': 'New York' } };
       mockGet.mockResolvedValue({ documentNumber: "GBR-2020-CC-0E42C2DA5" });
       await CatchCertService.upsertDraftData(
         "BOB",
