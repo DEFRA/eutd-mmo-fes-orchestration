@@ -44,7 +44,7 @@ export default class ExporterController {
 
     if (req.payload) {
       newExporter.model = req.payload;
-      await ExporterService.save(newExporter, userPrincipal,documentNumber, req.params.journey + '/' + EXPORTER_KEY, contactId);
+      await ExporterService.save(newExporter, userPrincipal,documentNumber, (req.params.journey as string) + '/' + EXPORTER_KEY, contactId);
     }
     if (acceptsHtml(req.headers)) {
       const payload = req.payload as any;

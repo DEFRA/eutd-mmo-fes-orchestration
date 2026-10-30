@@ -122,6 +122,31 @@ describe("MemoryStorage", () => {
     });
   });
 
+  describe("promise based API", () => {
+    it("should return promises from every data access method", async () => {
+      const results = [
+        memoryStorage.readAll("key"),
+        memoryStorage.read("key"),
+        memoryStorage.readFor(USER_ID, "key"),
+        memoryStorage.readAllFor(USER_ID, "key"),
+        memoryStorage.writeAll("key", []),
+        memoryStorage.deleteFor(USER_ID, "key"),
+        memoryStorage.tagByDocumentNumber(USER_ID, "DOC-1", "journey"),
+        memoryStorage.getKeysForTag("DOC-1"),
+        memoryStorage.removeTag("DOC-1"),
+        memoryStorage.getDocument("DOC-1"),
+      ];
+
+      results.forEach(result => expect(result).toBeInstanceOf(Promise));
+      await Promise.all(results);
+    });
+
+    it("should resolve writeAll and deleteFor with undefined", async () => {
+      await expect(memoryStorage.writeAll("key", [])).resolves.toBeUndefined();
+      await expect(memoryStorage.deleteFor(USER_ID, "key")).resolves.toBeUndefined();
+    });
+  });
+
   describe("deleteFor", () => {
     test("should return blank after delete", async () => {
       const mockData = [

@@ -14,33 +14,35 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
      logger.info('Memory storage is initialized as session store');
   }
 
-  async readAll<T extends IStoreable>(key: string): Promise<T[]> {
+  readAll<T extends IStoreable>(key: string): Promise<T[]> {
     if( Object.hasOwn(this.store, key) ) {
       const data = this.store[key];
-      return <T[]>data;
+      return Promise.resolve(<T[]>data);
 
     } else {
-      return [];
+      return Promise.resolve([]);
     }
   }
 
-  async read<T extends IStoreable>(key: string): Promise<T> {
+  read<T extends IStoreable>(key: string): Promise<T> {
     if( Object.hasOwn(this.store, key) ) {
       const data = this.store[key];
-      return <T>data;
+      return Promise.resolve(<T>data);
 
     } else {
-      return null;
+      return Promise.resolve(null);
     }
   }
 
-  async deleteFor(userPrincipal: string, key: string): Promise<void> {
+  deleteFor(userPrincipal: string, key: string): Promise<void> {
     const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
     delete this.store[fullKey];
+    return Promise.resolve();
   }
 
-  async writeAll<T extends IStoreable>(key: string, data: T[]): Promise<void> {
+  writeAll<T extends IStoreable>(key: string, data: T[]): Promise<void> {
     this.store[key] = data;
+    return Promise.resolve();
   }
 
   cleanUp(): void {
@@ -48,22 +50,23 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
     logger.info('Session store cleared');
   }
 
-  async readFor<T extends IStoreable>(userPrincipal: string, key: string): Promise<T> {
+  readFor<T extends IStoreable>(userPrincipal: string, key: string): Promise<T> {
     const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
     if(Object.hasOwn(this.store, fullKey) ) {
       const data = this.store[fullKey];
-      return <T>(data);
+      return Promise.resolve(<T>(data));
     }
+    return Promise.resolve(undefined);
   }
 
-  async readAllFor<T extends IStoreable>(userPrincipal: string, key: string): Promise<T[]> {
+  readAllFor<T extends IStoreable>(userPrincipal: string, key: string): Promise<T[]> {
     const fullKey = MemoryStorage._buildKeyForUser(userPrincipal, key);
     if( Object.hasOwn(this.store, fullKey)) {
       const data = this.store[fullKey];
-      return <T[]>(data);
+      return Promise.resolve(<T[]>(data));
 
     } else {
-      return [];
+      return Promise.resolve([]);
     }
   }
 
@@ -77,20 +80,22 @@ export class MemoryStorage<T extends IStoreable> implements IStorage<T> {
     return this.writeFor(userPrincipal, contactId, key, data as unknown as IStoreable, _ttlSeconds);
   }
 
-  async tagByDocumentNumber(userPrincipal: string, documentNumber: string, _journey: string): Promise<void> {
+  tagByDocumentNumber(userPrincipal: string, documentNumber: string, _journey: string): Promise<void> {
     this.store[documentNumber] = [];
+    return Promise.resolve();
   }
 
-  async removeTag(documentNumber: string): Promise<void> {
+  removeTag(documentNumber: string): Promise<void> {
     delete this.store[documentNumber];
+    return Promise.resolve();
   }
 
-  async getKeysForTag(documentNumber: string): Promise<string[]> {
-    return this.store[documentNumber];
+  getKeysForTag(documentNumber: string): Promise<string[]> {
+    return Promise.resolve(this.store[documentNumber]);
   }
 
-  async getDocument(_documentNumber: string) {
-    return null;
+  getDocument(_documentNumber: string) {
+    return Promise.resolve(null);
   }
 
   static _buildKeyForUser(userPrincipal: string, key: string): string {

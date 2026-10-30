@@ -6,6 +6,7 @@ import * as FishValidator from "../..//validators/fish.validator";
 import * as DocumentValidator from "../../validators/documentValidator"
 import * as CommodityCodes from "../../validators/pssdCommodityCode.validator";
 import * as CountriesValidator from "../../validators/countries.validator";
+import * as ProcessingPlantValidator from "../../validators/processingPlant.validator";
 import { ProcessingStatement } from "../../persistence/schema/frontEndModels/processingStatement";
 
 describe('calling handler for /create-processing-statement/:documentNumber/add-consignment-details', () => {
@@ -462,6 +463,150 @@ it('calling handler for /create-processing-statement/:documentNumber/catch-added
 
   expect(result.errors).toEqual({});
   expect(result.next).toBe('/create-processing-statement/add-processing-plant-details');
+});
+
+describe('calling handler for /create-processing-statement/:documentNumber/add-processing-plant', () => {
+  let mockValidateProcessingPlant: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockValidateProcessingPlant = jest.spyOn(ProcessingPlantValidator, 'validateProcessingPlant');
+  });
+
+  afterEach(() => {
+    mockValidateProcessingPlant.mockRestore();
+  });
+
+  it('with plant name and approval number present validates as OK', async () => {
+    mockValidateProcessingPlant.mockReturnValue({ isError: false, error: null });
+
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        plantName: 'Plant Alpha',
+        plantApprovalNumber: 'UK/ABC/001'
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({});
+  });
+
+  it('with invalid plant selection returns plantName error', async () => {
+    mockValidateProcessingPlant.mockReturnValue({
+      isError: true,
+      error: new Error('psAddProcessingPlantErrorSelectPlant')
+    });
+
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        plantName: 'Unknown Plant',
+        plantApprovalNumber: 'UNKNOWN-123'
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({
+      processingPlant: 'psAddProcessingPlantErrorSelectPlant'
+    });
+  });
+
+  it('with empty input returns plantName error', async () => {
+    mockValidateProcessingPlant.mockReturnValue({
+      isError: true,
+      error: new Error('psAddProcessingPlantErrorSelectPlant')
+    });
+
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        plantName: '',
+        plantApprovalNumber: ''
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({
+      processingPlant: 'psAddProcessingPlantErrorSelectPlant'
+    });
+  });
+
+  it('with non-JS and both fields present validates as OK', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: 'Plant Alpha',
+        plantApprovalNumber: 'UK/ABC/001'
+      },
+      errors: {}
+    });
+
+    expect(errors).toEqual({});
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
+
+  it('with non-JS and whitespace plantName returns plantName error only', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: '   ',
+        plantApprovalNumber: 'UK/ABC/001'
+      },
+      errors: {}
+    });
+
+    expect(errors.plantName).toBe('psAddProcessingPlantAddressErrorNullPlantName');
+    expect(errors.plantApprovalNumber).toBeUndefined();
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
+
+  it('with non-JS and whitespace plantApprovalNumber returns plantApprovalNumber error only', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: 'Plant Alpha',
+        plantApprovalNumber: '   '
+      },
+      errors: {}
+    });
+
+    expect(errors.plantApprovalNumber).toBe('psAddProcessingPDErrorPlantApprovalNumber');
+    expect(errors.plantName).toBeUndefined();
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
+
+  it('with non-JS and both fields empty returns both errors', async () => {
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const { errors } = await handler({
+      data: {
+        isNonJs: true,
+        plantName: '',
+        plantApprovalNumber: ''
+      },
+      errors: {}
+    });
+
+    expect(errors.plantName).toBe('psAddProcessingPlantAddressErrorNullPlantName');
+    expect(errors.plantApprovalNumber).toBe('psAddProcessingPDErrorPlantApprovalNumber');
+    expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
+  });
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-details', () => {
@@ -2353,7 +2498,7 @@ describe('handler for /create-processing-statement/:documentNumber/add-processin
       ],
       personResponsibleForConsignment: 'Personal Responsible',
       plantApprovalNumber: 'plant approval number',
-      plantName: 'Hw99zXbw0YqZ9RY8SaIxpVs4xm1t30zj6vC LxKmH3fcKJjiSnWJKax'
+      plantName: 'how many characters in Liverpool Meat and Fish Market - Stanley (Wholesale) Fish Market'
     };
 
     const { errors } = await handler({

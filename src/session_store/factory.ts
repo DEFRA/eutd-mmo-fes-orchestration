@@ -6,7 +6,7 @@ import logger from '../logger';
 export class SessionStoreFactory {
   private static sessionStore: IStorage<IStoreable>;
 
-  public static async getSessionStore(options: object)
+  public static getSessionStore(options: object)
     : Promise<IStorage<IStoreable>> {
 
     if (!SessionStoreFactory.sessionStore) {
@@ -22,7 +22,7 @@ export class SessionStoreFactory {
     }
 
     logger.info('Session store initialized');
-    return SessionStoreFactory.sessionStore;
+    return Promise.resolve(SessionStoreFactory.sessionStore);
   }
 
 }
