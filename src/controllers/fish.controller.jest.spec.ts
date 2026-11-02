@@ -601,6 +601,37 @@ describe("FishController", () => {
 
       expect(result).toBeTruthy();
     });
+
+    it("should remove species which are missing from the export payload on behalf of the user", async () => {
+      await FishController.syncSpeciesAndLandings(USER_ID, mockSpecies, mockPayload, DOCUMENT_NUMBER, CONTACT_ID);
+
+      expect(mockRemoveFish).toHaveBeenCalledTimes(1);
+      expect(mockRemoveFish).toHaveBeenCalledWith({ user_id: USER_ID, cancel: 'some-id' }, DOCUMENT_NUMBER, CONTACT_ID);
+    });
+
+    it("should add every export payload item which is missing from the species", async () => {
+      const secondItem = { product: { ...mockPayload.items[0].product, id: "2" } };
+
+      await FishController.syncSpeciesAndLandings(USER_ID, mockSpecies, { items: [...mockPayload.items, secondItem] } as any, DOCUMENT_NUMBER, CONTACT_ID);
+
+      expect(mockAddFish).toHaveBeenCalledTimes(2);
+      expect(mockAddFish).toHaveBeenCalledWith(expect.objectContaining({ user_id: USER_ID, id: "1", speciesCode: "COD" }), DOCUMENT_NUMBER, CONTACT_ID);
+      expect(mockAddFish).toHaveBeenCalledWith(expect.objectContaining({ user_id: USER_ID, id: "2", speciesCode: "COD" }), DOCUMENT_NUMBER, CONTACT_ID);
+    });
+
+    it("should not add or remove anything when species and export payload are in sync", async () => {
+      const result = await FishController.syncSpeciesAndLandings(
+        USER_ID,
+        [{ ...mockSpecies[0], id: "1" }],
+        mockPayload,
+        DOCUMENT_NUMBER,
+        CONTACT_ID
+      );
+
+      expect(result).toBe(false);
+      expect(mockAddFish).not.toHaveBeenCalled();
+      expect(mockRemoveFish).not.toHaveBeenCalled();
+    });
   });
 
   describe("removeInCompleteSpecies", () => {
@@ -1002,6 +1033,34 @@ describe("FishController", () => {
       );
 
       expect(mockRedirect).toHaveBeenCalledWith('/test-url/{documentNumber}/test?error=["ccWhatExportingFromAtleastOneProductError"]');
+    });
+  });
+
+  describe('removeFish()', () => {
+    it('should remove each species on behalf of the user', async () => {
+      const species = [{ id: 'species-1' }, { id: 'species-2' }] as Product[];
+
+      await FishController.removeFish(USER_ID, species, DOCUMENT_NUMBER, CONTACT_ID, species.length);
+
+      expect(mockRemoveFish).toHaveBeenCalledTimes(2);
+      expect(mockRemoveFish).toHaveBeenCalledWith({ user_id: USER_ID, cancel: 'species-1' }, DOCUMENT_NUMBER, CONTACT_ID);
+      expect(mockRemoveFish).toHaveBeenCalledWith({ user_id: USER_ID, cancel: 'species-2' }, DOCUMENT_NUMBER, CONTACT_ID);
+    });
+
+    it('should only remove the requested number of species', async () => {
+      const species = [{ id: 'species-1' }, { id: 'species-2' }] as Product[];
+
+      await FishController.removeFish(USER_ID, species, DOCUMENT_NUMBER, CONTACT_ID, 1);
+
+      expect(mockRemoveFish).toHaveBeenCalledTimes(1);
+      expect(mockRemoveFish).toHaveBeenCalledWith({ user_id: USER_ID, cancel: 'species-1' }, DOCUMENT_NUMBER, CONTACT_ID);
+    });
+
+    it('should reject if any species removal fails', async () => {
+      mockRemoveFish.mockRejectedValue(new Error('remove failed'));
+
+      await expect(FishController.removeFish(USER_ID, [{ id: 'species-1' }] as Product[], DOCUMENT_NUMBER, CONTACT_ID, 1))
+        .rejects.toThrow('remove failed');
     });
   });
 });

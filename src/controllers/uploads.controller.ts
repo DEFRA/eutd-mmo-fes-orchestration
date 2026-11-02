@@ -86,7 +86,7 @@ export default class UploadsController {
     const validatedLandings: IUploadedLanding[] = await UploadsService.parseAndValidateData(payload)
     validatedLandings.forEach(landing => {
       if (landing.errors.includes('error.product.any.invalid')) {
-        FavouritesController.removeInvalidFavouriteProduct(userPrincipal, landing.productId);
+        void FavouritesController.removeInvalidFavouriteProduct(userPrincipal, landing.productId);
       }
     });
 

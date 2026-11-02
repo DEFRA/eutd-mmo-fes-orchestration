@@ -142,6 +142,64 @@ describe('validateExclusiveEconomicZones()', () => {
     });
   });
 
+  describe('ordering and concurrency', () => {
+    it('should keep errors in zone order even when later zones validate first', async () => {
+      const buildError = (index: number) => ({ message: `error.eez.${index}.invalid`, details: [] }) as any;
+
+      mockValidateCountriesName
+        .mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ isError: true, error: buildError(0) }), 20)))
+        .mockImplementationOnce(() => Promise.resolve({ isError: true, error: buildError(2) }));
+
+      const errors = await validateExclusiveEconomicZones({
+        highSeasArea: 'No',
+        exclusiveEconomicZones: [
+          { officialCountryName: 'Slow' },
+          { officialCountryName: '' },
+          { officialCountryName: 'Fast' }
+        ]
+      });
+
+      expect(errors.map(e => e.message)).toEqual([
+        'error.eez.0.invalid',
+        'error.eez.1.any.required',
+        'error.eez.2.invalid'
+      ]);
+    });
+
+    it('should start validating every non-empty zone before any validation completes', async () => {
+      let pending = 0;
+      let maxPending = 0;
+      mockValidateCountriesName.mockImplementation(async () => {
+        pending++;
+        maxPending = Math.max(maxPending, pending);
+        await new Promise(resolve => setTimeout(resolve, 5));
+        pending--;
+        return { isError: false } as any;
+      });
+
+      const errors = await validateExclusiveEconomicZones({
+        highSeasArea: 'Yes',
+        exclusiveEconomicZones: [
+          { officialCountryName: 'A' },
+          { officialCountryName: 'B' },
+          { officialCountryName: 'C' }
+        ]
+      });
+
+      expect(errors).toEqual([]);
+      expect(maxPending).toBe(3);
+    });
+
+    it('should reject when a zone validation fails unexpectedly', async () => {
+      mockValidateCountriesName.mockRejectedValue(new Error('reference service down'));
+
+      await expect(validateExclusiveEconomicZones({
+        highSeasArea: 'No',
+        exclusiveEconomicZones: [{ officialCountryName: 'A' }]
+      })).rejects.toThrow('reference service down');
+    });
+  });
+
   describe('when highSeasArea is "Yes"', () => {
     it('should remove empty EEZ records and return no errors', async () => {
       const value = {

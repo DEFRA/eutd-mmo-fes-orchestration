@@ -74,7 +74,7 @@ export class MongoConnection {
       try {
         const updatedDocu = MongoConnection.getDb().collection(collection);
 
-        return updatedDocu.updateOne(query, {$set : {"status":status}});
+        return await updatedDocu.updateOne(query, {$set : {"status":status}});
       } catch(e) {
       logger.error(e);
     }

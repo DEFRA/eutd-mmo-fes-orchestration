@@ -2921,6 +2921,7 @@ describe("/create-non-manipulation-document/:documentNumber/add-storage-facility
       "storageFacilities-facilityAddressOne": "sdAddStorageFacilityDetailsErrorEnterTheAddress",
       "storageFacilities-facilityArrivalDate": "sdArrivalDateValidationError",
       "storageFacilities-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+      "storageFacilities-facilityStorage": "sdAddStorageFacilityProductStoredNullError",
     };
 
     expect(errors).toEqual(expectedErrors);
@@ -3123,7 +3124,48 @@ describe("/create-non-manipulation-document/:documentNumber/add-storage-facility
   });
 });
 
-describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-approval", () => {
+describe("/create-non-manipulation-document/:documentNumber/add-storage-facility-details approval fields", () => {
+  const currentUrl = "/create-non-manipulation-document/:documentNumber/add-storage-facility-details";
+  const handler = StorageNotes[currentUrl];
+  const validFacilityDetails = {
+    facilityAddressOne: "MMO SUB, LANCASTER HOUSE, HAMPSHIRE COURT",
+    facilityTownCity: "NEWCASTLE UPON TYNE",
+    facilityPostcode: "NE4 7YH",
+    facilityArrivalDate: "09/10/2025",
+    facilityApprovalNumber: "TSF001",
+    facilityStorage: "Chilled",
+  };
+
+  it("requires a non-whitespace facility name", () => {
+    for (const facilityName of ["", "   "]) {
+      const { errors } = handler({
+        data: { ...validFacilityDetails, facilityName },
+        _currentUrl: currentUrl,
+        _nextUrl: "",
+        errors: {},
+        _params: {},
+      });
+
+      expect(errors).toEqual({
+        "storageFacilities-facilityName": "sdAddStorageFacilityDetailsErrorEnterTheFacilityName",
+      });
+    }
+  });
+
+  it("rejects emoji in the facility name", () => {
+    const { errors } = handler({
+      data: { ...validFacilityDetails, facilityName: "Facility 😀" },
+      _currentUrl: currentUrl,
+      _nextUrl: "",
+      errors: {},
+      _params: {},
+    });
+
+    expect(errors).toEqual({
+      "storageFacilities-facilityName": "emojiCharactersNotPermitted",
+    });
+  });
+
   it("with storage approval number validates as error", async () => {
     const data = {
       addAnotherProduct: "notset",
@@ -3139,14 +3181,11 @@ describe("/create-non-manipulation-document/:documentNumber/add-storage-facility
       facilityCountry: "ENGLAND",
       facilityApprovalNumber: "UK/ABC/001UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00UK/ABC/00",
       facilityStorage: "Chilled",
+      facilityArrivalDate: "09/10/2025",
     };
-    const _currentUrl =
-      "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval";
-    const handler = StorageNotes[_currentUrl];
-
     const { errors } = handler({
       data: data,
-      _currentUrl,
+      _currentUrl: currentUrl,
       _nextUrl: "",
       errors: {},
       _params: {},
@@ -3173,15 +3212,12 @@ describe("/create-non-manipulation-document/:documentNumber/add-storage-facility
       facilityCountry: "ENGLAND",
       facilityApprovalNumber: "@£$%^&*(@£",
       facilityStorage: "Chilled",
+      facilityArrivalDate: "09/10/2025",
       addAnotherProduct: "notset",
     };
-    const _currentUrl =
-      "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval";
-    const handler = StorageNotes[_currentUrl];
-
     const { errors } = handler({
       data: data,
-      _currentUrl,
+      _currentUrl: currentUrl,
       _nextUrl: "",
       errors: {},
       _params: {},
@@ -3208,15 +3244,12 @@ describe("/create-non-manipulation-document/:documentNumber/add-storage-facility
       facilityCountry: "ENGLAND",
       facilityApprovalNumber: "TSF001",
       facilityStorage: "",
+      facilityArrivalDate: "09/10/2025",
       addAnotherProduct: "notset",
     };
-    const _currentUrl =
-      "/create-non-manipulation-document/:documentNumber/add-storage-facility-approval";
-    const handler = StorageNotes[_currentUrl];
-
     const { errors } = handler({
       data: data,
-      _currentUrl,
+      _currentUrl: currentUrl,
       _nextUrl: "",
       errors: {},
       _params: {},

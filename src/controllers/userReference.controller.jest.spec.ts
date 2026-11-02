@@ -243,6 +243,13 @@ describe('get', () => {
     expect(result).toBe('PS-ref');
   });
 
+  it('should return a promise that resolves to null when there is no document', async () => {
+    const result = UserReferenceController.getUserReference(undefined);
+
+    expect(result).toBeInstanceOf(Promise);
+    await expect(result).resolves.toBeNull();
+  });
+
   it('should call nothing and return null if given any other document number', async () => {
     const document: CatchCertificate | ProcessingStatement | StorageDocument = undefined;
 

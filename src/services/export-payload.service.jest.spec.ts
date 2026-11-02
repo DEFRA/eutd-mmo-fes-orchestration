@@ -2164,7 +2164,7 @@ describe('createExportCerticate', () => {
     });
 
     const mockIsEu = jest.spyOn(EuCountriesService, 'isEuCountry').mockResolvedValue(true);
-    const mockCatchSubmit = jest.spyOn(ExportPayloadService, 'catchSubmissionForCC').mockResolvedValue(undefined as any);
+    const mockCatchSubmit = jest.spyOn(ExportPayloadService, 'catchSubmissionForCC').mockReturnValue(undefined as any);
 
     // Ensure blocking status allows submission path
     stubGetBlockingStatus.onCall(0).returns(false);
@@ -3553,8 +3553,9 @@ describe('catchSubmissionForCC', () => {
   it('should handle errors from submitToCatchSystem gracefully', async () => {
     mockSubmitToCatchSystem.mockRejectedValue(new Error('submission failed'));
 
-    // Should not throw - errors are caught and logged
-    await expect(ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER)).resolves.not.toThrow();
+    // catchSubmissionForCC is void/fire-and-forget - errors are caught and logged internally
+    expect(() => ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER)).not.toThrow();
+    await new Promise(process.nextTick);
 
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
@@ -3563,7 +3564,7 @@ describe('catchSubmissionForCC', () => {
   it('should still call submitToCatchSystem when setCatchSubmissionInProgress fails', async () => {
     mockSetCatchSubmissionInProgress.mockRejectedValue(new Error('set in progress failed'));
 
-    await expect(ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER)).resolves.not.toThrow();
+    expect(() => ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER)).not.toThrow();
     await Promise.resolve();
 
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);

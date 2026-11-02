@@ -25,7 +25,7 @@ export const downloadPdfBlob = async (documentNumber: string, uri: string): Prom
        throw new Error(`${uri} blob does not exists`);
      }
 
-     uploaded = await blockBlobClient.exists();
+     uploaded = await blockBlobClient.exists(); // NOSONAR - retries are intentionally sequential
    }
 
   return await blockBlobClient.download();

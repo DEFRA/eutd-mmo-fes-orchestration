@@ -885,7 +885,7 @@ export function validateNonUKCCNumberCharLimit(str: string) {
 }
 
 export const isPsPlantNameValid = (str: string) => {
-  const regex = /^[ A-Za-z0-9-'’.,/\\&]*$/;
+  const regex = /^[ A-Za-z0-9-'’.,/\\&()]*$/;
   return regex.test(str);
 };
 

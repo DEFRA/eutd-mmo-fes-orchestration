@@ -3287,6 +3287,23 @@ describe("UploadsController", () => {
       expect(mockRemoveInvalidFavouriteProduct).toHaveBeenCalledWith(userPrincipal, 'favourite-2');
     });
 
+    it('should not wait for the invalid favourite product removal to complete', async () => {
+      const response = [
+        {
+          productId: 'favourite-1',
+          errors: ['error.product.any.invalid']
+        }
+      ];
+
+      mockParseAndValidateLandings.mockResolvedValue(response);
+      mockRemoveInvalidFavouriteProduct.mockReturnValue(new Promise(() => undefined));
+
+      const result = await UploadsController.validateLandings(userPrincipal, landings);
+
+      expect(result).toStrictEqual(response);
+      expect(mockRemoveInvalidFavouriteProduct).toHaveBeenCalledWith(userPrincipal, 'favourite-1');
+    });
+
   });
 
   describe("getCacheUploadedRows", () => {
