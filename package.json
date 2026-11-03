@@ -4,13 +4,15 @@
   "version": "1.10.0",
   "private": true,
   "engines": {
-    "node": "24.19.0",
-    "npm": "12.0.2"
+    "node": "26.x",
+    "npm": "11.x || 12.x"
   },
   "allowScripts": {
+    "@muhammara/native@7.2.3": true,
     "dtrace-provider": true,
-    "muhammara": true,
-    "protobufjs": true
+    "protobufjs": true,
+    "@parcel/watcher@2.6.0": true,
+    "unrs-resolver@1.12.2": true
   },
   "overrides": {
     "chokidar": "4.0.3",
@@ -86,11 +88,10 @@
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "3.1.0",
     "lodash": "^4.18.1",
-    "mmo-ecc-pdf-svc": "2.4.36",
+    "mmo-ecc-pdf-svc": "2.4.38",
     "moment": "^2.30.1",
     "mongodb": "^7.5.0",
     "mongoose": "^9.8.0",
-    "muhammara": "^6.0.4",
     "notifications-node-client": "^8.3.2",
     "path-to-regexp": "^6.3.0",
     "qs": "^6.15.1",
