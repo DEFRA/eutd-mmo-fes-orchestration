@@ -233,7 +233,7 @@ export default class Server {
       await Server._instance.register(require('hapi-auth-jwt2'));
       logger.info('Registered hapi-auth-jwt2');
 
-      const fesApiValidate = async (
+      const fesApiValidate = (
         request: Hapi.Request,
         username: string,
         password: string
@@ -308,7 +308,7 @@ export default class Server {
           audience: [b2cAudience, adminAudience].filter(Boolean),
           clockTolerance: 60,
         },
-        validate: async (decoded: JwtPayload, request) => {
+        validate: (decoded: JwtPayload, request) => {
           const tokenIssuer = decoded.iss;
           const tokenAudience = decoded.aud;
 
