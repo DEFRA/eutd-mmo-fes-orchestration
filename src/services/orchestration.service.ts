@@ -483,7 +483,13 @@ export default class OrchestrationService {
     logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][IS-EU-COUNTRY][${isEuCountry}][ISO-CODE-ALPHA-2][${isoCodeAlpha2}]`);
     if (isEuCountry) {
       setCatchSubmissionInProgress(documentNumber)
-        .then(() => submitToCatchSystem(documentNumber, 'submit'))
+        .then((claimed) => {
+          if (claimed === false) {
+            logger.info(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][SKIPPED][ALREADY-CLAIMED]`);
+            return;
+          }
+          return submitToCatchSystem(documentNumber, 'submit');
+        })
         .catch((e) => logger.error(`[CATCH-SYSTEM-SUBMIT][${documentNumber}][ERROR][${e.message}]`));
     }
 

@@ -401,8 +401,17 @@ export default class ExportPayloadService {
   // FI0-11243: All landing entry types (DirectLanding, ManualEntry, UploadEntry) are submitted to EU CATCH
   public static readonly catchSubmissionForCC = (documentNumber: string): void => {
     CatchCertService.setCatchSubmissionInProgress(documentNumber)
-      .catch(e => logger.error(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}][ERROR][${e}]`));
-    submitToCatchSystem(documentNumber, 'submit')
+      .catch(e => {
+        logger.error(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}][ERROR][${e}]`);
+        return true;
+      })
+      .then(claimed => {
+        if (claimed === false) {
+          logger.info(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][SKIPPED][ALREADY-CLAIMED]`);
+          return;
+        }
+        return submitToCatchSystem(documentNumber, 'submit');
+      })
       .catch(e => logger.error(`[SUBMIT-TO-CATCH-SYSTEM][${documentNumber}][ERROR][${e}]`));
   }
 
