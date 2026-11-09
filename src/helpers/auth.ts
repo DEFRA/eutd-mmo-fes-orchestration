@@ -9,7 +9,7 @@ export const defineAuthStrategies = () => {
   };
 };
 
-export const isRequestByAdmin = (roles) =>  roles ?
+export const isRequestByAdmin = (roles: readonly string[] | undefined) => roles ?
   roles.includes('MMO-ECC-Service-Management')
   || roles.includes('MMO-ECC-Support-User')
   || roles.includes('MMO-ECC-IUU-Single-Liaison-Officer')
