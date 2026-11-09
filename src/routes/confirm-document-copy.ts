@@ -26,6 +26,7 @@ import logger from '../logger';
 import ServiceNames from '../validators/interfaces/service.name.enum';
 import { HapiRequestApplicationStateExtended } from '../types';
 import { userCanCreateDraft } from '../validators/draftCreationValidator';
+import { isRequestByAdmin } from '../helpers/auth';
 export default class ConfirmDocumentCopyRoutes {
   public async register(server: Hapi.Server): Promise<any> {
     return new Promise<void>(resolve => {
@@ -43,12 +44,8 @@ export default class ConfirmDocumentCopyRoutes {
                 async (userPrincipal, documentNumber, contactId) => {
                   logger.debug(`[COPY-CERTIFICATE][${documentNumber}][START]`);
 
-                  const roles: string[] = (request.app as HapiRequestApplicationStateExtended).claims.roles;
-                  const requestByAdmin: boolean = roles ?
-                    roles.includes('MMO-ECC-Service-Management')
-                    || roles.includes('MMO-ECC-Support-User')
-                    || roles.includes('MMO-ECC-IUU-Single-Liaison-Officer')
-                    || roles.includes('MMO-ECC-Regulatory-User') : false;
+                  const roles = (request.app as HapiRequestApplicationStateExtended).claims.roles;
+                  const requestByAdmin = isRequestByAdmin(roles);
 
                   logger.debug(`[COPY-CERTIFICATE][REQUESTED-BY-ADMIN][${requestByAdmin}]`);
 
