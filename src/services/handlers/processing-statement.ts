@@ -180,6 +180,8 @@ export default {
       errors.processingPlant = validation.error.message;
     }
 
+    data.dateOfAcceptance = today();
+
     return { errors };
   },
 
