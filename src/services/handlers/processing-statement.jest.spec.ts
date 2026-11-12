@@ -607,6 +607,26 @@ describe('calling handler for /create-processing-statement/:documentNumber/add-p
     expect(errors.plantApprovalNumber).toBe('psAddProcessingPDErrorPlantApprovalNumber');
     expect(mockValidateProcessingPlant).not.toHaveBeenCalled();
   });
+
+  it('with plant name and approval number a date of acceptance is set', async () => {
+    mockValidateProcessingPlant.mockReturnValue({ isError: false, error: null });
+
+    const currentUrl = '/create-processing-statement/:documentNumber/add-processing-plant';
+    const handler = SUT[currentUrl];
+
+    const data = {
+      dateOfAcceptance: undefined,
+      plantName: 'Plant Alpha',
+      plantApprovalNumber: 'UK/ABC/001'
+    };
+
+    handler({
+      data,
+      errors: {}
+    });
+
+    expect(data.dateOfAcceptance).toBeDefined();
+  });
 });
 
 describe('handler for /create-processing-statement/:documentNumber/add-catch-details', () => {
