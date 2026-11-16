@@ -338,6 +338,17 @@ describe('catchCert - db related', () => {
       expect((draft as any).catchSubmission).toBeUndefined();
     });
 
+    it('should only let the first caller claim the submission', async () => {
+      await new CatchCertModel(sampleDocument('GBR-2020-CC-INPROG4', 'COMPLETE', defaultUser, {}, 'My Reference')).save();
+
+      const results = await Promise.all([
+        CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG4'),
+        CatchCertService.setCatchSubmissionInProgress('GBR-2020-CC-INPROG4')
+      ]);
+
+      expect(results.filter(Boolean)).toHaveLength(1);
+    });
+
   });
 
   describe('getAllCatchCertsForUserByYearAndMonth', () => {

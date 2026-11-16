@@ -382,14 +382,17 @@ export const completeDraft = async (userPrincipal: string, documentNumber: strin
   void invalidateDraftCache(userPrincipal, `${CATCH_CERTIFICATE_KEY}/${DRAFT_HEADERS_KEY}`, contactId);
 };
 
-export const setCatchSubmissionInProgress = async (documentNumber: string): Promise<void> => {
-  await BaseModel.findOneAndUpdate(
+// Resolves true only for the caller that moved the document to IN_PROGRESS, so concurrent completions submit to CATCH once.
+export const setCatchSubmissionInProgress = async (documentNumber: string): Promise<boolean> => {
+  const claimed = await BaseModel.findOneAndUpdate(
     { documentNumber, status: DocumentStatuses.Complete, catchSubmission: { $exists: false } },
     { $set: { 'catchSubmission': { status: EuCatchStatus.Progress } } },
     { strict: false }
   );
 
   logger.info(`[SET-CATCH-SUBMISSION-IN-PROGRESS][${documentNumber}]`);
+
+  return claimed !== null;
 };
 
 export const updateCertificateStatus = async (userPrincipal: string, documentNumber: string, contactId: string, status: DocumentStatuses): Promise<void> => {

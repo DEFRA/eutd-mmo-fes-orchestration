@@ -3544,7 +3544,8 @@ describe('catchSubmissionForCC', () => {
 
   // FI0-11243: all landing entry types submit to EU CATCH — no filtering by entry type
   it('should call setCatchSubmissionInProgress and submitToCatchSystem', async () => {
-    await ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER);
+    ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER);
+    await new Promise(process.nextTick);
 
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
@@ -3565,10 +3566,19 @@ describe('catchSubmissionForCC', () => {
     mockSetCatchSubmissionInProgress.mockRejectedValue(new Error('set in progress failed'));
 
     expect(() => ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER)).not.toThrow();
-    await Promise.resolve();
+    await new Promise(process.nextTick);
 
     expect(mockSetCatchSubmissionInProgress).toHaveBeenCalledWith(DOCUMENT_NUMBER);
     expect(mockSubmitToCatchSystem).toHaveBeenCalledWith(DOCUMENT_NUMBER, 'submit');
+  });
+
+  it('should not submit again when another completion already claimed the submission', async () => {
+    mockSetCatchSubmissionInProgress.mockResolvedValue(false);
+
+    ExportPayloadService.catchSubmissionForCC(DOCUMENT_NUMBER);
+    await new Promise(process.nextTick);
+
+    expect(mockSubmitToCatchSystem).not.toHaveBeenCalled();
   });
 
   it('should log error when setCatchSubmissionInProgress rejects', async () => {
