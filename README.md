@@ -4,11 +4,28 @@
 
 ## Pre-requisites
 
-- node (12) & npm
+- Node.js 26 & npm 11 or 12
 - redis server (installed locally for dev and for prod Azure redis cache will be used)
 - mongodb (installed locally for dev and for prod cosmos db will be used)
 
 For local installation please refer to your OS documentation,
+
+### PDF native dependency release gate
+
+The unused direct `muhammara` v6 dependency and its install permission have
+been removed. However, published `mmo-ecc-pdf-svc` 2.4.37 still depends on
+`muhammara` 6.0.6, so the registry-backed lockfile still includes v6 and is
+**not Node.js 26 native-migration ready**. Removing the direct dependency
+alone does not fix that transitive dependency.
+
+The PDF repository prepares 2.4.38 with prebuilt-only `@muhammara/native`
+7.2.3. After that version is published through the normal release process,
+run `npm install --save-exact mmo-ecc-pdf-svc@2.4.38`, regenerate the lockfile,
+then verify `npm ci`, `npm run build`, the PDF-related tests and
+`npm ls mmo-ecc-pdf-svc @muhammara/native muhammara`. The final tree must have
+no unscoped `muhammara`. Until then, a local packed PDF artifact can validate
+the migration, but no file dependency or fabricated registry lock entry
+should be committed. Do not bypass native install scripts or compile v6.
 
 - MacOS: `brew install redis mongodb` (The default config should be fine for local development)
 - Windows: `??` (The default settings should work I think!)
